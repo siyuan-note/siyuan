@@ -1145,10 +1145,16 @@ export class Toolbar {
         this.range = getEditorRange(nodeElement);
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
-        let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
-        Constants.CODE_LANGUAGES.forEach((item) => {
-            html += `<div class="b3-list-item">${item}</div>`;
-        });
+
+        const languages = Array.from(new Set<string>([
+            ...Constants.EXTRA_CODE_LANGUAGES,
+            ...(window.hljs?.listLanguages() ?? []),
+        ])).sort();
+        const html = [
+            `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`,
+            ...languages.map(item => `<div class="b3-list-item">${item}</div>`),
+        ].join("\n");
+
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
@@ -1189,18 +1195,13 @@ export class Toolbar {
             }
         });
         inputElement.addEventListener("input", (event) => {
-            const matchLanguages: string[] = [];
-            Constants.CODE_LANGUAGES.forEach((item) => {
-                if (item.indexOf(inputElement.value.toLowerCase()) > -1) {
-                    matchLanguages.push(item);
-
-                }
-            });
+            const lowerCaseValue = inputElement.value.toLowerCase();
+            const matchLanguages = languages.filter(item => item.includes(lowerCaseValue));
             let html = "";
             // sort
             let matchInput = false;
             matchLanguages.sort((a, b) => {
-                if (a.startsWith(inputElement.value.toLowerCase()) && b.startsWith(inputElement.value.toLowerCase())) {
+                if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
                     if (a.length < b.length) {
                         return -1;
                     } else if (a.length === b.length) {
@@ -1208,9 +1209,9 @@ export class Toolbar {
                     } else {
                         return 1;
                     }
-                } else if (a.startsWith(inputElement.value.toLowerCase())) {
+                } else if (a.startsWith(lowerCaseValue)) {
                     return -1;
-                } else if (b.startsWith(inputElement.value.toLowerCase())) {
+                } else if (b.startsWith(lowerCaseValue)) {
                     return 1;
                 } else {
                     return 0;
@@ -1219,7 +1220,7 @@ export class Toolbar {
                 if (inputElement.value === item) {
                     matchInput = true;
                 }
-                html += `<div class="b3-list-item">${item.replace(inputElement.value.toLowerCase(), "<b>" + inputElement.value.toLowerCase() + "</b>")}</div>`;
+                html += `<div class="b3-list-item">${item.replace(lowerCaseValue, "<b>" + lowerCaseValue + "</b>")}</div>`;
             });
             if (inputElement.value.trim() && !matchInput) {
                 html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;

@@ -37,7 +37,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
                 renderElement.style.height = e.style.height;
-                echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
+                window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
                     width,
                 }).setOption({
                     series: [

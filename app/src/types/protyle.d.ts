@@ -1,15 +1,13 @@
-declare const echarts: {
-    init(element: HTMLElement, theme?: string, options?: { width: number }): IEChart;
-    dispose(element: Element): void;
-    getInstanceById(id: string): { resize: () => void };
-};
+interface IABCJS  {
+    renderAbc(element: Element, text: string, options: { responsive: string }): void;
+}
 
-declare const hljs: {
-    highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
-    getLanguage(text: string): { name: string };
-};
+interface IViz {
+    new(worker: { worker: Worker }): IViz;
+    renderSVGElement: (code: string) => Promise<any>;
+}
 
-interface IEChart {
+interface IEChartsInstance {
     setOption(option: any): void;
 
     getZr(): any;
@@ -19,6 +17,37 @@ interface IEChart {
     containPixel(name: string, position: number[]): any;
 
     resize(): void;
+}
+
+interface IECharts  {
+    init(element: HTMLElement, theme?: string, options?: { width: number }): IEChartsInstance;
+    dispose(element: Element): void;
+    getInstanceById(id: string): { resize: () => void };
+}
+
+interface IHLJS  {
+    highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
+    getLanguage(text: string): { name: string };
+    listLanguages(): string[];
+}
+
+interface IKaTeX  {
+    renderToString(math: string, option: {
+        displayMode: boolean;
+        output: string;
+        macros: IObject;
+        trust: boolean;
+        strict: (errorCode: string) => "ignore" | "warn";
+    }): string;
+}
+
+interface IMermaid  {
+    initialize(options: any): void;
+    init(options: any, element: Element): void;
+}
+
+interface IPlantumlEncoder {
+    encode(options: string): string;
 }
 
 interface ILuteNode {

@@ -2,12 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 
-declare class Viz {
-    public renderSVGElement: (code: string) => Promise<any>;
-
-    constructor(worker: { worker: Worker });
-}
-
 export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let graphvizElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "graphviz") {
@@ -34,7 +28,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 const url = window.URL || window.webkitURL;
                 const blobUrl = url.createObjectURL(blob);
                 const worker = new Worker(blobUrl);
-                new Viz({worker})
+                new window.Viz({worker})
                     .renderSVGElement(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))).then((result: HTMLElement) => {
                     renderElement.innerHTML = result.outerHTML;
                     renderElement.classList.remove("ft__error");

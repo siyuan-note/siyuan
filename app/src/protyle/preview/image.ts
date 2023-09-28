@@ -58,7 +58,7 @@ export const previewDocImage = (src: string, id: string) => {
             });
             imagesElement.innerHTML = html;
             // @ts-ignore
-            window.siyuan.viewer = new Viewer(imagesElement, {
+            window.siyuan.viewer = new window.Viewer(imagesElement, {
                 title: [1, (image: HTMLImageElement, imageData: IObject) => {
                     let name = image.alt;
                     if (!name) {

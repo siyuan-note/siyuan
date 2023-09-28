@@ -1579,10 +1579,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const insertElement = document.createElement("span");
                 let language = nodeElement.querySelector(".protyle-action__language").textContent;
-                if (!hljs.getLanguage(language)) {
+                if (!window.hljs.getLanguage(language)) {
                     language = "plaintext";
                 }
-                insertElement.innerHTML = hljs.highlight(text.substr(0, text.length - 1), {
+                insertElement.innerHTML = window.hljs.highlight(text.substr(0, text.length - 1), {
                     language,
                     ignoreIllegals: true
                 }).value;

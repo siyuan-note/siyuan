@@ -32,7 +32,7 @@ type Flashcard struct {
 
 	// Apply result optimized by FSRS optimizer https://github.com/siyuan-note/siyuan/issues/9309
 	RequestRetention float64 `json:"requestRetention"`
-	MaximumInterval  float64 `json:"maximumInterval"`
+	MaximumInterval  int     `json:"maximumInterval"`
 	Weights          string  `json:"weights"`
 }
 
@@ -54,7 +54,7 @@ func NewFlashcard() *Flashcard {
 		SuperBlock:       true,
 		Deck:             false,
 		RequestRetention: param.RequestRetention,
-		MaximumInterval:  param.MaximumInterval,
+		MaximumInterval:  int(param.MaximumInterval),
 		Weights:          weightsBuilder.String(),
 	}
 }

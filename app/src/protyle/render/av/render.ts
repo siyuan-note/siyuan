@@ -130,7 +130,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 });
                 const paddingLeft = e.parentElement.style.paddingLeft;
                 const paddingRight = e.parentElement.style.paddingRight;
-                e.style.width = e.parentElement.clientWidth + "px";
+                if (e.parentElement.clientWidth > 0) {
+                    e.style.width = e.parentElement.clientWidth + "px";
+                }
                 e.style.alignSelf = "center";
                 e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">

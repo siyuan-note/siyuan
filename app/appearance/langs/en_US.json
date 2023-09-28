@@ -298,7 +298,7 @@
   "defBlockChildren": "Define block and its children",
   "filter": "Filter",
   "headings1": "Headings and Bottom Blocks",
-  "tWithSubtitle": "Transformation with subtitles",
+  "tWithSubtitle": "Transformation with sub-headings",
   "clear": "Clear",
   "autoDownloadUpdatePkg": "Automatically download update installation package",
   "autoDownloadUpdatePkgTip": "After enabling, it will automatically check the version update every two hours. If there is an updated version, it will automatically download the installation package and prompt for installation",

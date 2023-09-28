@@ -886,17 +886,22 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := replaceAttributeViewBlock(operation)
+	err := replaceAttributeViewBlock(operation, tx)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
 	}
 	return
 }
 
-func replaceAttributeViewBlock(operation *Operation) (err error) {
+func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
+	}
+
+	var node *ast.Node
+	if !operation.IsDetached {
+		node, _, _ = getNodeByBlockID(tx, operation.NextID)
 	}
 
 	for _, keyValues := range attrView.KeyValues {
@@ -906,10 +911,13 @@ func replaceAttributeViewBlock(operation *Operation) (err error) {
 				if nil != value.Block {
 					value.Block.ID = operation.NextID
 					value.IsDetached = operation.IsDetached
+					if !operation.IsDetached {
+						value.Block.Content = getNodeRefText(node)
+					}
 				}
 
 				if !operation.IsDetached {
-					bindBlockAv(operation.AvID, operation.NextID)
+					bindBlockAv(tx, operation.AvID, operation.NextID)
 				}
 			}
 		}
@@ -939,11 +947,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	err = UpdateAttributeViewCell(operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
@@ -982,7 +990,7 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 
 	if oldIsDetached && !val.IsDetached {
 		// 将游离行绑定到新建的块上
-		bindBlockAv(avID, rowID)
+		bindBlockAv(tx, avID, rowID)
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {
@@ -991,16 +999,9 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 	return
 }
 
-func bindBlockAv(avID, blockID string) {
-	tree, loadErr := loadTreeByBlockID(blockID)
-	if nil != loadErr {
-		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, loadErr)
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		logging.LogWarnf("node [%s] not found in tree [%s]", blockID, tree.ID)
+func bindBlockAv(tx *Transaction, avID, blockID string) {
+	node, tree, err := getNodeByBlockID(tx, blockID)
+	if nil != err {
 		return
 	}
 
@@ -1018,8 +1019,32 @@ func bindBlockAv(avID, blockID string) {
 		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
 	}
 
-	if err := setNodeAttrs(node, tree, attrs); nil != err {
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
+	} else {
+		err = setNodeAttrs(node, tree, attrs)
+	}
+	if nil != err {
 		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		return
+	}
+	return
+}
+
+func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *parse.Tree, err error) {
+	if nil != tx {
+		tree, err = tx.loadTree(blockID)
+	} else {
+		tree, err = loadTreeByBlockID(blockID)
+	}
+	if nil != err {
+		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, err)
+		return
+	}
+	node = treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		logging.LogWarnf("node [%s] not found in tree [%s]", blockID, tree.ID)
+		return
 	}
 	return
 }

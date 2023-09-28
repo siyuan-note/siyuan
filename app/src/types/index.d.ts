@@ -621,6 +621,9 @@ interface IConfig {
         list: boolean
         superBlock: boolean
         deck: boolean
+        requestRetention: number
+        maximumInterval: number
+        weights: string
     }
     ai: {
         openAI: {

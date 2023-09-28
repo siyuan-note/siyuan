@@ -8,7 +8,7 @@ export const flashcard = {
         responsiveHTML = `<div class="b3-label">
     ${window.siyuan.languages.flashcardNewCardLimit}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__block" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.newCardLimit}"/>
     <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
 </div>
 <div class="b3-label">
@@ -24,7 +24,7 @@ export const flashcard = {
         <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.newCardLimit}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -67,7 +67,32 @@ export const flashcard = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="deck" type="checkbox"${window.siyuan.config.flashcard.deck ? " checked" : ""}/>
-</label>`;
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.flashcardFSRSParamRequestRetention}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamRequestRetentionTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="requestRetention" step="0.01" min="0" max="1" type="number" value="${window.siyuan.config.flashcard.requestRetention}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.flashcardFSRSParamMaximumInterval}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamMaximumIntervalTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="maximumInterval" step="1" min="365" max="36500" type="number" value="${window.siyuan.config.flashcard.maximumInterval}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.flashcardFSRSParamWeights}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamWeightsTip}</div>
+        <span class="fn__hr"></span>
+        <input class="b3-text-field fn__block" id="weights" value="${window.siyuan.config.flashcard.weights}"/>
+    </div>
+</label>
+`;
     },
     bindEvent: () => {
         flashcard.element.querySelectorAll("input").forEach((item) => {
@@ -79,6 +104,9 @@ export const flashcard = {
                     list: (flashcard.element.querySelector("#list") as HTMLInputElement).checked,
                     superBlock: (flashcard.element.querySelector("#superBlock") as HTMLInputElement).checked,
                     deck: (flashcard.element.querySelector("#deck") as HTMLInputElement).checked,
+                    requestRetention: parseFloat((flashcard.element.querySelector("#requestRetention") as HTMLInputElement).value),
+                    maximumInterval: parseInt((flashcard.element.querySelector("#maximumInterval") as HTMLInputElement).value),
+                    weights: (flashcard.element.querySelector("#weights") as HTMLInputElement).value,
                 }, response => {
                     window.siyuan.config.flashcard = response.data;
                 });

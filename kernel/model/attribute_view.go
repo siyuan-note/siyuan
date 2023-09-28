@@ -478,7 +478,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 				}
 			}
 		} else {
-			view.Table.RowIDs = append(view.Table.RowIDs, blockID)
+			view.Table.RowIDs = append([]string{blockID}, view.Table.RowIDs...)
 		}
 	}
 

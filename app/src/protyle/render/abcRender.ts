@@ -2,10 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 
-declare const ABCJS: {
-    renderAbc(element: Element, text: string, options: { responsive: string }): void;
-};
-
 export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let abcElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "abc") {
@@ -30,7 +26,7 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     e.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
                 }
                 const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
-                ABCJS.renderAbc(renderElement, Lute.UnEscapeHTMLStr(e.getAttribute("data-content")), {
+                window.ABCJS.renderAbc(renderElement, Lute.UnEscapeHTMLStr(e.getAttribute("data-content")), {
                     responsive: "resize"
                 });
                 renderElement.setAttribute("contenteditable", "false");

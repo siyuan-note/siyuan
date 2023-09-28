@@ -80,14 +80,14 @@ type TAVFilterOperator =
 declare module "blueimp-md5"
 
 interface Window {
-    ABCJS?: any
-    Viewer?: any
-    Viz?: any
-    echarts?: any
-    hljs?: any
-    katex?: any
-    mermaid?: any
-    plantumlEncoder?: any
+    ABCJS?: IABCJS
+    Viewer?: Function
+    Viz?: IViz
+    echarts?: IECharts
+    hljs?: IHLJS
+    katex?: IKaTeX
+    mermaid?: IMermaid
+    plantumlEncoder?: IPlantumlEncoder
 
     pdfjsLib: any
     dataLayer: any[]

@@ -885,6 +885,51 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
+	err := replaceAttributeViewBlock(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+	return
+}
+
+func replaceAttributeViewBlock(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID == operation.PreviousID {
+				value.BlockID = operation.NextID
+				if nil != value.Block {
+					value.Block.ID = operation.NextID
+					value.IsDetached = operation.IsDetached
+				}
+
+				if !operation.IsDetached {
+					bindBlockAv(operation.AvID, operation.NextID)
+				}
+			}
+		}
+	}
+
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
+			for i, rowID := range v.Table.RowIDs {
+				if rowID == operation.PreviousID {
+					v.Table.RowIDs[i] = operation.NextID
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewCell(operation, tx)
 	if nil != err {
@@ -937,34 +982,44 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 
 	if oldIsDetached && !val.IsDetached {
 		// 将游离行绑定到新建的块上
-		tree, loadErr := loadTreeByBlockID(rowID)
-		if nil != loadErr {
-			logging.LogWarnf("load tree by block id [%s] failed: %s", rowID, loadErr)
-		} else {
-			node := treenode.GetNodeInTree(tree, rowID)
-			if nil == node {
-				logging.LogWarnf("node [%s] not found in tree [%s]", rowID, tree.ID)
-			} else {
-				attrs := parse.IAL2Map(node.KramdownIAL)
-
-				if "" == attrs[NodeAttrNameAvs] {
-					attrs[NodeAttrNameAvs] = avID
-				} else {
-					avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
-					avIDs = append(avIDs, avID)
-					avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-					attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
-				}
-
-				if err = setNodeAttrs(node, tree, attrs); nil != err {
-					logging.LogWarnf("set node [%s] attrs failed: %s", rowID, err)
-				}
-			}
-		}
+		bindBlockAv(avID, rowID)
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
+	}
+	return
+}
+
+func bindBlockAv(avID, blockID string) {
+	tree, loadErr := loadTreeByBlockID(blockID)
+	if nil != loadErr {
+		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, loadErr)
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		logging.LogWarnf("node [%s] not found in tree [%s]", blockID, tree.ID)
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	if "" == attrs[NodeAttrNameAvs] {
+		attrs[NodeAttrNameAvs] = avID
+	} else {
+		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+		if gulu.Str.Contains(avID, avIDs) {
+			return
+		}
+
+		avIDs = append(avIDs, avID)
+		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+	}
+
+	if err := setNodeAttrs(node, tree, attrs); nil != err {
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
 	}
 	return
 }

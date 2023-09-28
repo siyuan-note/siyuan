@@ -1147,8 +1147,8 @@ export class Toolbar {
         let oldHtml = nodeElement.outerHTML;
 
         const languages = Array.from(new Set<string>([
-            ...Constants.CODE_LANGUAGES,
-            ...(window?.hljs.listLanguages() ?? []),
+            ...Constants.EXTRA_CODE_LANGUAGES,
+            ...(window.hljs?.listLanguages() ?? []),
         ])).sort();
         const html = [
             `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`,

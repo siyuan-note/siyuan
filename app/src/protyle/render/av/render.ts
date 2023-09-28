@@ -129,7 +129,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 </div>`;
                 });
 
-                e.firstElementChild.outerHTML = `<div>
+                e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}

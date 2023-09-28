@@ -27,6 +27,11 @@
     opacity: 1;
   }
 
+  &__container {
+    width: fit-content;
+    margin: auto;
+  }
+
   &__header {
     top: -43px;
     z-index: 2;

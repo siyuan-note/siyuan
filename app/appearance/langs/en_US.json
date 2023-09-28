@@ -1182,7 +1182,7 @@
     "109": "Remove reminder completed [%s]",
     "110": "Renaming...",
     "111": "Saving document [%s]...",
-    "112": "Do not include Markdown syntax marker",
+    "112": "Do not include Markdown syntax marker [%s]",
     "113": "Completing data writing...",
     "114": "Tag cannot be empty",
     "115": "Please configure [Settings - Export - Pandoc executable path] first",

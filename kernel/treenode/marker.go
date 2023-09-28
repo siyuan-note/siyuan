@@ -21,17 +21,17 @@ import (
 	"github.com/88250/lute/lex"
 )
 
-func ContainsMarker(str string) bool {
+func ContainsMarker(str string) (ret string) {
 	if !gulu.Str.IsASCII(str) {
-		return false
+		return
 	}
 
 	for _, token := range str {
 		if IsMarker(byte(token)) {
-			return true
+			return string(token)
 		}
 	}
-	return false
+	return
 }
 
 func IsMarker(token byte) bool {

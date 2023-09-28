@@ -1035,7 +1035,7 @@ export class Gutter {
                 submenu: turnIntoSubmenu
             }).element);
         }
-        if (!protyle.disabled) {
+        if (!protyle.disabled && !nodeElement.classList.contains("hr")) {
             AIActions([nodeElement], protyle);
         }
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{

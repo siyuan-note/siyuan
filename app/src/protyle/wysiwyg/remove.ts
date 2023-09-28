@@ -1,4 +1,10 @@
-import {focusBlock, focusByRange, focusByWbr, setLastNodeRange} from "../util/selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getSelectionOffset,
+    setLastNodeRange
+} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
@@ -15,6 +21,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
+import {isMobile} from "../../util/functions";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -386,6 +393,20 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     const parentElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
     const previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
+        transaction(protyle, [{
+            action: "delete",
+            id: previousLastElement.getAttribute("data-node-id"),
+        }], [{
+            action: "insert",
+            data: previousLastElement.outerHTML,
+            id: previousLastElement.getAttribute("data-node-id"),
+            previousID: previousLastElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: previousLastElement.parentElement.getAttribute("data-node-id")
+        }]);
+        previousLastElement.remove();
+        return;
+    }
     const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
     const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {

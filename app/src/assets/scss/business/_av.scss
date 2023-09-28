@@ -28,8 +28,9 @@
   }
 
   &__container {
-    width: fit-content;
     margin: auto;
+    width: fit-content;
+    max-width: 100%;
   }
 
   &__header {

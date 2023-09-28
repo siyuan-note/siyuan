@@ -9,13 +9,10 @@ import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
-import {hideElements} from "../../ui/hideElements";
 import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
-import {fetchPost} from "../../../util/fetch";
-import {pathPosix} from "../../../util/pathName";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);

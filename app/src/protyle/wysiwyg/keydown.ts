@@ -68,7 +68,6 @@ import {preventScroll} from "../scroll/preventScroll";
 import {getSavePath} from "../../util/newFile";
 import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
-import {quickMakeCard} from "../../card/makeCard";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
 

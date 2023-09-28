@@ -260,6 +260,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColCalc(op)
 		case "updateAttrViewColNumberFormat":
 			ret = tx.doUpdateAttrViewColNumberFormat(op)
+		case "replaceAttrViewBlock":
+			ret = tx.doReplaceAttrViewBlock(op)
 		}
 
 		if nil != ret {

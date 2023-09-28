@@ -885,6 +885,47 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
+	err := replaceAttributeViewBlock(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+	return
+}
+
+func replaceAttributeViewBlock(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID == operation.PreviousID {
+				value.BlockID = operation.NextID
+				if nil != value.Block {
+					value.Block.ID = operation.NextID
+					value.IsDetached = operation.IsDetached
+				}
+			}
+		}
+	}
+
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
+			for i, rowID := range v.Table.RowIDs {
+				if rowID == operation.PreviousID {
+					v.Table.RowIDs[i] = operation.NextID
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewCell(operation, tx)
 	if nil != err {

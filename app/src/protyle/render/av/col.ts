@@ -507,8 +507,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         menu.addSeparator();
     }
     menu.addItem({
-        label: `<div class="fn__flex" style="margin: 4px 0"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.style.whiteSpace === "nowrap" ? "" : " checked"}></div>`,
+        label: `<label class="fn__flex" style="margin: 4px 0"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.style.whiteSpace === "nowrap" ? "" : " checked"}></label>`,
         bind(element) {
             const inputElement = element.querySelector("input") as HTMLInputElement;
             inputElement.addEventListener("change", () => {

@@ -115,7 +115,7 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${data.columns[index].wrap ? "" : "white-space: nowrap;"}
+white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
 ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });

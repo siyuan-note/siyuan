@@ -33,7 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content, parentID string, hidden bool) (id string, existed bool, err error) {
+func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数仅在 parentID 不为空的情况下使用 */) (retID string, existed bool, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
 	pathBuilder := bytes.Buffer{}
 	pathBuilder.WriteString("/")
@@ -41,19 +41,24 @@ func createDocsByHPath(boxID, hPath, content, parentID string, hidden bool) (id 
 	hPathBuilder.WriteString("/")
 
 	if "" != parentID {
-		// The save path is incorrect when creating a sub-doc by ref in a doc with the same name https://github.com/siyuan-note/siyuan/issues/8138
+		retID = id
 
+		// The save path is incorrect when creating a sub-doc by ref in a doc with the same name https://github.com/siyuan-note/siyuan/issues/8138
 		// 在指定父文档 ID 的情况下优先查找父文档
 		parentHPath, name := path.Split(hPath)
 		parentHPath = strings.TrimSuffix(parentHPath, "/")
 		preferredParent := treenode.GetBlockTreeRootByHPathPreferredParentID(boxID, parentHPath, parentID)
 		if nil != preferredParent && preferredParent.ID == parentID {
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
-			id = ast.NewNodeID()
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
-			if _, err = createDoc(boxID, p, name, content, hidden); nil != err {
+			if _, err = createDoc(boxID, p, name, content); nil != err {
 				return
 			}
+		}
+	} else {
+		if "" == id {
+			id = ast.NewNodeID()
+			retID = id
 		}
 	}
 
@@ -64,15 +69,15 @@ func createDocsByHPath(boxID, hPath, content, parentID string, hidden bool) (id 
 		root := treenode.GetBlockTreeRootByHPath(boxID, hp)
 		isNotLast := i < len(parts)-1
 		if nil == root {
-			id = ast.NewNodeID()
-			pathBuilder.WriteString(id)
+			retID = ast.NewNodeID()
+			pathBuilder.WriteString(retID)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if _, err = createDoc(boxID, docP, part, "", hidden); nil != err {
+				if _, err = createDoc(boxID, docP, part, ""); nil != err {
 					return
 				}
 			} else {
-				if _, err = createDoc(boxID, docP, part, content, hidden); nil != err {
+				if _, err = createDoc(boxID, docP, part, content); nil != err {
 					return
 				}
 			}
@@ -85,7 +90,7 @@ func createDocsByHPath(boxID, hPath, content, parentID string, hidden bool) (id 
 				}
 			}
 		} else {
-			id = root.ID
+			retID = root.ID
 			pathBuilder.WriteString(root.ID)
 			if !isNotLast {
 				pathBuilder.WriteString(".sy")

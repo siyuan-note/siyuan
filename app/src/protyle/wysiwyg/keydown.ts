@@ -1033,19 +1033,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-            const selectElement: Element[] = [];
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                selectElement.push(item);
-            });
-            if (selectElement.length === 0) {
-                selectElement.push(nodeElement);
-            }
-            quickMakeCard(protyle, selectElement);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {
             const topElement = getTopAloneElement(nodeElement);
             if (selectText === "") {
@@ -1463,7 +1450,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (matchHotKey("⌘C", event)) {
+        if (matchHotKey("⌘C", event) && selectText === "") {
             let html = "";
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 html += removeEmbed(item);
@@ -1475,7 +1462,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (matchHotKey("⌘X", event)) {
+        if (matchHotKey("⌘X", event) && selectText === "") {
             let html = "";
             nodeElement.classList.add("protyle-wysiwyg--select");
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");

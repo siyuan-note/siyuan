@@ -160,6 +160,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		headingLevel = 6
 	}
 
+	srcTree.Root.RemoveIALAttr("scroll") // Remove `scroll` attribute when converting the document to a heading https://github.com/siyuan-note/siyuan/issues/9297
 	srcTree.Root.RemoveIALAttr("type")
 	tagIAL := srcTree.Root.IALAttr("tags")
 	tags := strings.Split(tagIAL, ",")

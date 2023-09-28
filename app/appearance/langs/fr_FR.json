@@ -1182,7 +1182,7 @@
     "109": "Supprimer le rappel terminé [%s]",
     "110": "Renommer...",
     "111": "Enregistrement du document [%s]...",
-    "112": "Ne pas inclure les balises de syntaxe Markdown",
+    "112": "Ne pas inclure les balises de syntaxe Markdown [%s]",
     "113": "Fin de l'écriture des données...",
     "114": "La balise ne peut pas être vide",
     "115": "Veuillez d'abord configurer [Paramètres - Exporter - Chemin de l'exécutable Pandoc]",

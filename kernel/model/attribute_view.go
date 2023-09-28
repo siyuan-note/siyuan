@@ -25,7 +25,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -172,8 +171,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	}
 
 	// 过滤掉不存在的行
-	notFound := []string{}
-	for blockID, _ := range rows {
+	var notFound []string
+	for blockID, v := range rows {
+		if v[0].IsDetached {
+			continue
+		}
+
 		if treenode.GetBlockTree(blockID) == nil {
 			notFound = append(notFound, blockID)
 		}
@@ -393,7 +396,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
 	for _, id := range operation.SrcIDs {
 		tree, err := tx.loadTree(id)
-		if nil != err {
+		if nil != err && !operation.IsDetached {
 			logging.LogErrorf("load tree [%s] failed: %s", id, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: err.Error()}
 		}
@@ -407,21 +410,20 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tree, tx *Transaction) (err error) {
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		err = ErrBlockNotFound
-		return
-	}
+	var node *ast.Node
+	if !operation.IsDetached {
+		node = treenode.GetNodeInTree(tree, blockID)
+		if nil == node {
+			err = ErrBlockNotFound
+			return
+		}
 
-	if ast.NodeAttributeView == node.Type {
-		// 不能将一个属性视图拖拽到另一个属性视图中
-		return
-	}
-
-	block := sql.BuildBlockFromNode(node, tree)
-	if nil == block {
-		err = ErrBlockNotFound
-		return
+		if ast.NodeAttributeView == node.Type {
+			// 不能将一个属性视图拖拽到另一个属性视图中
+			return
+		}
+	} else {
+		blockID = ast.NewNodeID()
 	}
 
 	attrView, err := av.ParseAttributeView(operation.AvID)
@@ -442,22 +444,28 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	var content string
+	if !operation.IsDetached {
+		content = getNodeRefText(node)
+	}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content}}
 	blockValues.Values = append(blockValues.Values, value)
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
+	if !operation.IsDetached {
+		attrs := parse.IAL2Map(node.KramdownIAL)
 
-	if "" == attrs[NodeAttrNameAvs] {
-		attrs[NodeAttrNameAvs] = operation.AvID
-	} else {
-		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
-		avIDs = append(avIDs, operation.AvID)
-		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
-	}
+		if "" == attrs[NodeAttrNameAvs] {
+			attrs[NodeAttrNameAvs] = operation.AvID
+		} else {
+			avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+			avIDs = append(avIDs, operation.AvID)
+			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+			attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+		}
 
-	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-		return
+		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+			return
+		}
 	}
 
 	switch view.LayoutType {
@@ -470,7 +478,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 				}
 			}
 		} else {
-			view.Table.RowIDs = append(view.Table.RowIDs, blockID)
+			view.Table.RowIDs = append([]string{blockID}, view.Table.RowIDs...)
 		}
 	}
 
@@ -519,8 +527,6 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 								delete(attrs, "custom-hidden")
 								node.RemoveIALAttr("custom-hidden")
 							}
-							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
-							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
 
 							if avs := attrs[NodeAttrNameAvs]; "" != avs {
 								avIDs := strings.Split(avs, ",")
@@ -879,6 +885,59 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
+	err := replaceAttributeViewBlock(operation, tx)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+	return
+}
+
+func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	var node *ast.Node
+	if !operation.IsDetached {
+		node, _, _ = getNodeByBlockID(tx, operation.NextID)
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID == operation.PreviousID {
+				value.BlockID = operation.NextID
+				if nil != value.Block {
+					value.Block.ID = operation.NextID
+					value.IsDetached = operation.IsDetached
+					if !operation.IsDetached {
+						value.Block.Content = getNodeRefText(node)
+					}
+				}
+
+				if !operation.IsDetached {
+					bindBlockAv(tx, operation.AvID, operation.NextID)
+				}
+			}
+		}
+	}
+
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
+			for i, rowID := range v.Table.RowIDs {
+				if rowID == operation.PreviousID {
+					v.Table.RowIDs[i] = operation.NextID
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewCell(operation, tx)
 	if nil != err {
@@ -888,11 +947,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	err = UpdateAttributeViewCell(operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
@@ -919,15 +978,7 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		break
 	}
 
-	tree, err := loadTreeByBlockID(val.BlockID)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, val.BlockID)
-	if nil == node {
-		return
-	}
+	oldIsDetached := val.IsDetached
 
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
@@ -937,14 +988,62 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		return
 	}
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvKey+avID+"-"+val.KeyID] = val.ToJSONString()
-
-	if err = setNodeAttrs(node, tree, attrs); nil != err {
-		return
+	if oldIsDetached && !val.IsDetached {
+		// 将游离行绑定到新建的块上
+		bindBlockAv(tx, avID, rowID)
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+	return
+}
+
+func bindBlockAv(tx *Transaction, avID, blockID string) {
+	node, tree, err := getNodeByBlockID(tx, blockID)
+	if nil != err {
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	if "" == attrs[NodeAttrNameAvs] {
+		attrs[NodeAttrNameAvs] = avID
+	} else {
+		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+		if gulu.Str.Contains(avID, avIDs) {
+			return
+		}
+
+		avIDs = append(avIDs, avID)
+		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+	}
+
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
+	} else {
+		err = setNodeAttrs(node, tree, attrs)
+	}
+	if nil != err {
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		return
+	}
+	return
+}
+
+func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *parse.Tree, err error) {
+	if nil != tx {
+		tree, err = tx.loadTree(blockID)
+	} else {
+		tree, err = loadTreeByBlockID(blockID)
+	}
+	if nil != err {
+		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, err)
+		return
+	}
+	node = treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		logging.LogWarnf("node [%s] not found in tree [%s]", blockID, tree.ID)
 		return
 	}
 	return
@@ -1095,6 +1194,5 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 }
 
 const (
-	NodeAttrNameAvs         = "custom-avs"     // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrNamePrefixAvKey = "custom-av-key-" // 用于标记列
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
 )

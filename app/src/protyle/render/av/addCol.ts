@@ -1,6 +1,6 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {addAttrViewColAnimation} from "./action";
+import {addAttrViewColAnimation} from "./col";
 
 export const addCol = (protyle: IProtyle, blockElement: Element) => {
     const menu = new Menu("av-header-add");

@@ -70,8 +70,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`;
-                            if (cell.value?.block.id) {
+                            text = `<span class="av__celltext">${cell.value.block.content || ""}</span>`;
+                            if (cell.value?.isDetached) {
+                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more" >${window.siyuan.languages.more}</span>`;
+                            } else {
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }
                         } else if (cell.valueType === "number") {
@@ -110,6 +112,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
+${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${data.columns[index].wrap ? "" : "white-space: nowrap;"}
@@ -125,6 +128,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <span class="item__text">${item.name}</span>
 </div>`;
                 });
+
                 e.firstElementChild.outerHTML = `<div>
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">

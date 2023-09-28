@@ -94,10 +94,11 @@ type KeySelectOption struct {
 }
 
 type Value struct {
-	ID      string  `json:"id,omitempty"`
-	KeyID   string  `json:"keyID,omitempty"`
-	BlockID string  `json:"blockID,omitempty"`
-	Type    KeyType `json:"type,omitempty"`
+	ID         string  `json:"id,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`
+	BlockID    string  `json:"blockID,omitempty"`
+	Type       KeyType `json:"type,omitempty"`
+	IsDetached bool    `json:"isDetached,omitempty"`
 
 	Block   *ValueBlock    `json:"block,omitempty"`
 	Text    *ValueText     `json:"text,omitempty"`

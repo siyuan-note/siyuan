@@ -277,10 +277,10 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
         this.element.style.width = Math.max(protyle.element.clientWidth / 2, 320) + "px";
         if (this.source === "av") {
-            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-            if (blockElement) {
-                const rowAddRect = blockElement.querySelector(".av__row--add").getBoundingClientRect();
-                setPosition(this.element, rowAddRect.left, rowAddRect.bottom, rowAddRect.height);
+            const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            if (cellElement) {
+                const cellRect = cellElement.getBoundingClientRect();
+                setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
             }
         } else {
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
@@ -411,9 +411,12 @@ ${genHintItemHTML(item)}
             return;
         }
         if (this.source === "av") {
+            const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            if (!cellElement) {
+                return;
+            }
+            const previousID = cellElement.dataset.blockId
             const avID = nodeElement.getAttribute("data-av-id");
-            const rowsElement = nodeElement.querySelectorAll(".av__row");
-            const previousID = rowsElement[rowsElement.length - 1].getAttribute("data-id");
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
@@ -422,38 +425,42 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                     fetchPost("/api/filetree/createDocWithMd", {
-                        hidden: false,
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, realFileName),
                         parentID: protyle.block.rootID,
                         markdown: ""
                     }, response => {
                         transaction(protyle, [{
-                            action: "insertAttrViewBlock",
+                            action: "replaceAttrViewBlock",
                             avID,
                             previousID,
-                            srcIDs: [response.data],
+                            nextID: response.data,
+                            isDetached: false,
                         }], [{
-                            action: "removeAttrViewBlock",
-                            srcIDs: [response.data],
+                            action: "replaceAttrViewBlock",
                             avID,
+                            previousID: response.data,
+                            nextID: previousID,
+                            isDetached: true,
                         }]);
                     });
                 });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
                 transaction(protyle, [{
-                    action: "insertAttrViewBlock",
+                    action: "replaceAttrViewBlock",
                     avID,
                     previousID,
-                    srcIDs: [sourceId],
+                    nextID: sourceId,
+                    isDetached: false,
                 }], [{
-                    action: "removeAttrViewBlock",
-                    srcIDs: [sourceId],
+                    action: "replaceAttrViewBlock",
                     avID,
+                    previousID: sourceId,
+                    nextID: previousID,
+                    isDetached: true,
                 }]);
             }
-            insertAttrViewBlockAnimation(nodeElement, 1, previousID);
             return;
         }
         this.enableExtend = false;
@@ -551,7 +558,7 @@ ${genHintItemHTML(item)}
                 emoji = unicode2Emoji(value) + " ";
             }
             insertHTML(protyle.lute.SpinBlockDOM(emoji), protyle);
-        } else if (["「「", "{{"].includes(this.splitChar) || this.splitChar === "#" || this.splitChar === ":") {
+        } else if (["「「", "「『", "『「", "『『", "{{"].includes(this.splitChar) || this.splitChar === "#" || this.splitChar === ":") {
             if (value === "") {
                 const editElement = getContenteditableElement(nodeElement);
                 if (editElement.textContent === "") {

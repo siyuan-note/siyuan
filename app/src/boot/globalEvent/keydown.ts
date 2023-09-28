@@ -59,6 +59,8 @@ import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {Protyle} from "../../protyle";
+import {transaction} from "../../protyle/wysiwyg/transaction";
+import {quickMakeCard} from "../../card/makeCard";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -252,6 +254,25 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+        if (protyle.title.editElement.contains(range.startContainer)) {
+            quickMakeCard(protyle, [protyle.title.element]);
+        } else {
+            const selectElement: Element[] = [];
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                selectElement.push(item);
+            });
+            if (selectElement.length === 0) {
+                const nodeElement = hasClosestBlock(range.startContainer);
+                if (nodeElement) {
+                    selectElement.push(nodeElement);
+                }
+            }
+            quickMakeCard(protyle, selectElement);
+        }
+        event.preventDefault();
+        return true;
+    }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
             openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent || "Untitled");
@@ -405,6 +426,29 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                 openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId));
             });
         }
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+        const blockIDs: string[] = []
+        liElements.forEach(item => {
+            const id = item.getAttribute("data-node-id")
+            if (id) {
+                blockIDs.push(id)
+            }
+        })
+        if (blockIDs.length > 0) {
+            transaction(undefined, [{
+                action: "addFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }], [{
+                action: "removeFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }]);
+        }
+        event.preventDefault();
+        return true;
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {

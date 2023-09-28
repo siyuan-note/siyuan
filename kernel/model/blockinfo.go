@@ -129,6 +129,10 @@ func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 }
 
 func getNodeRefText(node *ast.Node) string {
+	if nil == node {
+		return ""
+	}
+
 	if ret := node.IALAttr("name"); "" != ret {
 		ret = strings.TrimSpace(ret)
 		ret = util.EscapeHTML(ret)

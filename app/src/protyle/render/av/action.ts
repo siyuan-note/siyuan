@@ -33,6 +33,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (protyle.disabled) {
         return false;
     }
+
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
         const addMenu = addCol(protyle, blockElement);
@@ -151,31 +152,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const createDocElement = hasClosestByAttribute(event.target, "data-type", "createdoc");
-    if (createDocElement) {
-        fetchPost("/api/filetree/getHPathByPath", {
-            notebook: protyle.notebookId,
-            path: protyle.path,
-        }, (response) => {
-            fetchPost("/api/filetree/createDocWithMd", {
-                notebook: protyle.notebookId,
-                path: pathPosix().join(response.data, createDocElement.previousElementSibling.textContent.trim() || "Untitled"),
-                parentID: protyle.block.rootID,
-                markdown: "",
-                id: createDocElement.parentElement.dataset.blockId,
-            }, response => {
-                transaction(protyle, [{
-                    action: "updateAttrViewCell",
-                    id: createDocElement.parentElement.dataset.id,
-                    avID: blockElement.getAttribute("data-av-id"),
-                    keyID: createDocElement.parentElement.dataset.colId,
-                    rowID: createDocElement.parentElement.parentElement.dataset.id,
-                    data: {
-                        isDetached: false
-                    }
-                }]);
-            });
-        });
+    const blockMoreElement = hasClosestByAttribute(event.target, "data-type", "block-more");
+    if (blockMoreElement) {
+        protyle.toolbar.range = document.createRange();
+        protyle.toolbar.range.selectNodeContents(blockMoreElement);
+        focusByRange(protyle.toolbar.range);
+        hintRef(blockMoreElement.previousElementSibling.textContent.trim(), protyle, "av");
         event.preventDefault();
         event.stopPropagation();
         return true;

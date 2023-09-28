@@ -72,7 +72,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         } else if (cell.valueType === "block") {
                             text = `<span class="av__celltext">${cell.value.block.content || ""}</span>`;
                             if (cell.value?.isDetached) {
-                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="createdoc" >${window.siyuan.languages.new}</span>`;
+                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more" >${window.siyuan.languages.more}</span>`;
                             } else {
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }

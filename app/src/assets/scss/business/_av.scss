@@ -88,7 +88,7 @@
 
     &:hover {
       [data-type="block-ref"],
-      [data-type="createdoc"] {
+      [data-type="block-more"] {
         display: block;
       }
 
@@ -200,7 +200,7 @@
     transition: var(--b3-transition);
 
     [data-type="block-ref"],
-    [data-type="createdoc"] {
+    [data-type="block-more"] {
       display: none;
       position: absolute;
       right: 5px;

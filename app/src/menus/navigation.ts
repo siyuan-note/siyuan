@@ -50,13 +50,13 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }
     }).element);
 
-    const blockIDs: string[] = []
+    const blockIDs: string[] = [];
     selectItemElements.forEach(item => {
-        const id = item.getAttribute("data-node-id")
+        const id = item.getAttribute("data-node-id");
         if (id) {
-            blockIDs.push(id)
+            blockIDs.push(id);
         }
-    })
+    });
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }

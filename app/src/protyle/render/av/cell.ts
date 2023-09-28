@@ -400,7 +400,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (!document.contains(cellElements[0]) && cellElements.length === 1 && cellElements[0].dataset.detached === "true") {
         // 新增行后弹出的输入框进行修改后，原始 cell 已被更新
         const avid = cellElements[0].parentElement.dataset.avid;
-        cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]')
+        cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]');
     }
     if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !cellElements[0].parentElement.dataset.id) {
         return;

@@ -649,7 +649,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (type === "assetPrevious") {
                 if (!target.getAttribute("disabled")) {
-                    let currentPage = parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0])
+                    let currentPage = parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
                     if (currentPage > 1) {
                         currentPage--;
                         assetInputEvent(assetsElement, localSearch, currentPage);
@@ -660,7 +660,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (type === "assetNext") {
                 if (!target.getAttribute("disabled")) {
-                    let currentPage = parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0])
+                    let currentPage = parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
                     if (currentPage < parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
                         currentPage++;
                         assetInputEvent(assetsElement, localSearch, currentPage);

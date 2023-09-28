@@ -194,7 +194,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
         } else if (Constants.KEYCODELIST[event.keyCode] === "PageUp") {
             if (!element.querySelector('[data-type="assetPrevious"]').getAttribute("disabled")) {
-                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0])
+                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
                 if (currentPage > 1) {
                     currentPage--;
                     assetInputEvent(element, localSearch, currentPage);
@@ -203,7 +203,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             event.preventDefault();
         } else if (Constants.KEYCODELIST[event.keyCode] === "PageDown") {
             if (!element.querySelector('[data-type="assetNext"]').getAttribute("disabled")) {
-                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0])
+                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
                 if (currentPage < parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
                     currentPage++;
                     assetInputEvent(element, localSearch, currentPage);

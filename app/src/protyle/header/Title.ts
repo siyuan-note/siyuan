@@ -25,7 +25,6 @@ import {code160to32} from "../util/code160to32";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
-import {quickMakeCard} from "../../card/makeCard";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
 

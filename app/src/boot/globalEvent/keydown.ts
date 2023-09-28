@@ -429,13 +429,13 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-        const blockIDs: string[] = []
+        const blockIDs: string[] = [];
         liElements.forEach(item => {
-            const id = item.getAttribute("data-node-id")
+            const id = item.getAttribute("data-node-id");
             if (id) {
-                blockIDs.push(id)
+                blockIDs.push(id);
             }
-        })
+        });
         if (blockIDs.length > 0) {
             transaction(undefined, [{
                 action: "addFlashcards",

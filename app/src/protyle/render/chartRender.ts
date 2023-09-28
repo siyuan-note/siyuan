@@ -41,14 +41,14 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     try {
                         renderElement.style.height = e.style.height;
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
-                        echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
+                        window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                         e.setAttribute("data-render", "true");
                         renderElement.classList.remove("ft__error");
                         if (!renderElement.textContent.endsWith(Constants.ZWSP)) {
                             renderElement.firstElementChild.insertAdjacentText("beforeend", Constants.ZWSP);
                         }
                     } catch (error) {
-                        echarts.dispose(renderElement);
+                        window.echarts.dispose(renderElement);
                         renderElement.classList.add("ft__error");
                         renderElement.innerHTML = `echarts render error: <br>${error}`;
                     }

@@ -66,7 +66,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     // bazaar readme
                     language = block.className.replace("language-", "");
                 }
-                if (!hljs.getLanguage(language)) {
+                if (!window.hljs.getLanguage(language)) {
                     language = "plaintext";
                 }
                 block.classList.add("hljs");
@@ -110,7 +110,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                         matchElement.scrollIntoView();
                     }
                 }
-                block.innerHTML = hljs.highlight(
+                block.innerHTML = window.hljs.highlight(
                     block.textContent + (block.textContent.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
                     {
                         language,

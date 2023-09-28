@@ -28,6 +28,7 @@ interface IECharts  {
 interface IHLJS  {
     highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
     getLanguage(text: string): { name: string };
+    listLanguages(): string[];
 }
 
 interface IKaTeX  {

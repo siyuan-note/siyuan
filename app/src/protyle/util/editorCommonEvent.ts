@@ -1053,7 +1053,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");
-                } else {
+                } else if (!targetElement.classList.contains("av__row--header")) {
                     targetElement.classList.add("dragover__top", "protyle-wysiwyg--select");
                 }
                 return;
@@ -1085,7 +1085,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (fileTreeIds.indexOf("-") > -1) {
-            if (fileTreeIds.split(",").includes(protyle.block.rootID)) {
+            if (fileTreeIds.split(",").includes(protyle.block.rootID) && !targetElement.classList.contains("av__row")) {
                 dragoverElement = undefined;
             } else {
                 dragoverElement = targetElement;

@@ -1579,13 +1579,17 @@ export class Gutter {
                     id,
                     level
                 }, (response) => {
-                    response.data.doOperations.forEach((operation: IOperation) => {
+                    response.data.doOperations.forEach((operation: IOperation, index: number) => {
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             itemElement.outerHTML = operation.data;
                         });
+                        // 使用 outer 后元素需要重新查询
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             mathRender(itemElement);
                         });
+                        if (index === 0) {
+                            focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`), protyle.wysiwyg.element, true);
+                        }
                     });
                     transaction(protyle, response.data.doOperations, response.data.undoOperations);
                 });

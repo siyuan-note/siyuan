@@ -1028,7 +1028,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (err error) {
+func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1038,7 +1038,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (err error) {
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	_, _, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	retID, _, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	return
 }
 

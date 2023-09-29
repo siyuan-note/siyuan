@@ -503,7 +503,7 @@ func createDocWithMd(c *gin.Context) {
 		hPath = "/" + hPath
 	}
 
-	err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, id)
+	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

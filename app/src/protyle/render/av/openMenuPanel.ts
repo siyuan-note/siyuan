@@ -751,7 +751,6 @@ ${hideHTML}`;
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.attr}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
@@ -777,8 +776,7 @@ ${hideHTML}
 const getConfigHTML = (data: IAVTable) => {
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.config}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.config}</span>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="goProperties">

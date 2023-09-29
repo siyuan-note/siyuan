@@ -99,7 +99,6 @@ export const getEditHTML = (options: {
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item">

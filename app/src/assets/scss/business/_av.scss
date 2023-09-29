@@ -350,6 +350,10 @@
         opacity: 1;
       }
 
+      &__item[data-type="nobg"] .b3-menu__label {
+        cursor: auto;
+      }
+
       &__item:not([data-type="nobg"]):hover {
         background-color: var(--b3-list-hover);
       }

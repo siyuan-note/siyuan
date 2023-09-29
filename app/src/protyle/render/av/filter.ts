@@ -429,7 +429,6 @@ export const getFiltersHTML = (data: IAVTable) => {
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.filter}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 ${html}

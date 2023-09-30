@@ -33,7 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数仅在 parentID 不为空的情况下使用 */) (retID string, existed bool, err error) {
+func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数仅在 parentID 不为空的情况下使用 */) (retID string, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
 	pathBuilder := bytes.Buffer{}
 	pathBuilder.WriteString("/")
@@ -60,6 +60,12 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数�
 			id = ast.NewNodeID()
 			retID = id
 		}
+	}
+
+	root := treenode.GetBlockTreeRootByPath(boxID, hPath)
+	if nil != root {
+		retID = root.ID
+		return
 	}
 
 	parts := strings.Split(hPath, "/")[1:]

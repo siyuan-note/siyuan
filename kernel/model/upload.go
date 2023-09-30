@@ -148,13 +148,14 @@ func Upload(c *gin.Context) {
 	succMap := map[string]interface{}{}
 	files := form.File["file[]"]
 	for _, file := range files {
-		fName := file.Filename
+		baseName := file.Filename
+
+		fName := baseName
 		fName = util.FilterUploadFileName(fName)
 		ext := filepath.Ext(fName)
 		fName = strings.TrimSuffix(fName, ext)
 		ext = strings.ToLower(ext)
 		fName += ext
-		baseName := fName
 		f, openErr := file.Open()
 		if nil != openErr {
 			errFiles = append(errFiles, fName)

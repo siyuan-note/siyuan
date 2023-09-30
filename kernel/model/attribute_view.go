@@ -76,6 +76,19 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
+		// Attribute Panel - Database sort attributes by view column order https://github.com/siyuan-note/siyuan/issues/9319
+		view, _ := attrView.GetView()
+		if nil != view {
+			sorts := map[string]int{}
+			for i, col := range view.Table.Columns {
+				sorts[col.ID] = i
+			}
+
+			sort.Slice(keyValues, func(i, j int) bool {
+				return sorts[keyValues[i].Key.ID] < sorts[keyValues[j].Key.ID]
+			})
+		}
+
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:      avID,
 			AvName:    attrView.Name,

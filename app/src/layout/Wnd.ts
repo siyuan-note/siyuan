@@ -102,7 +102,10 @@ export class Wnd {
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
-                    newFile(app, undefined, undefined, undefined, true);
+                    newFile({
+                        app,
+                        useSavePath: true
+                    });
                     break;
                 } else if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(target);

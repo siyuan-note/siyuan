@@ -257,7 +257,12 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(options.app, notebookId, pathString);
+                                newFile({
+                                    app: options.app,
+                                    notebookId,
+                                    currentPath:pathString,
+                                    useSavePath: false
+                                });
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({
                                     x: event.clientX,

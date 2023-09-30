@@ -181,7 +181,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             return false;
         }
     } else if (!protyle) {
-        const models = getAllModels();
         if (!protyle && range) {
             window.siyuan.blockPanels.find(item => {
                 item.editors.find(editorItem => {
@@ -195,6 +194,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 }
             });
         }
+        const models = getAllModels();
         if (!protyle) {
             models.backlink.find(item => {
                 if (item.element.classList.contains("layout__tab--active")) {

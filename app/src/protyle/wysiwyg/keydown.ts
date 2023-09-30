@@ -71,6 +71,21 @@ import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
 
+
+const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
+    let html = "";
+    Array.from(range.cloneContents().childNodes).forEach((item: HTMLElement) => {
+        if (item.nodeType === 3) {
+            html += item.textContent
+        } else {
+            html += item.outerHTML
+        }
+    })
+    fetchPost("/api/block/getDOMText", {dom: html}, (response) => {
+        cb(response.data)
+    })
+}
+
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html") {
@@ -983,7 +998,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 用于标识复制文本 *
             if (selectText !== "") {
                 // 和复制块引用保持一致 https://github.com/siyuan-note/siyuan/issues/9093
-                writeText(`${Lute.EscapeHTMLStr(selectText)} ((${nodeElement.getAttribute("data-node-id")} "*"))`);
+                getContentByInlineHTML(range, (content) => {
+                    writeText(`${Lute.EscapeHTMLStr(content.trim())} ((${nodeElement.getAttribute("data-node-id")} "*"))`);
+                });
             } else {
                 nodeElement.setAttribute("data-reftext", "true");
                 focusByRange(getEditorRange(nodeElement));
@@ -1010,7 +1027,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             const actionElementId = actionElement.getAttribute("data-node-id");
             if (selectText !== "") {
-                writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(selectText)}"))`);
+                getContentByInlineHTML(range, (content) => {
+                    writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(content.trim())}"))`);
+                });
             } else {
                 fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {
                     writeText(`((${actionElementId} '${response.data}'))`);
@@ -1044,16 +1063,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 openAttr(actionElement, "bookmark", protyle);
             } else {
-                const oldHTML = topElement.outerHTML;
-                const name = Lute.EscapeHTMLStr(selectText);
-                const nameElement = topElement.lastElementChild.querySelector(".protyle-attr--name");
-                if (nameElement) {
-                    nameElement.innerHTML = `<svg><use xlink:href="#iconN"></use></svg>${name}`;
-                } else {
-                    topElement.lastElementChild.insertAdjacentHTML("afterbegin", `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${name}</div>`);
-                }
-                topElement.setAttribute("name", name);
-                updateTransaction(protyle, topElement.getAttribute("data-node-id"), topElement.outerHTML, oldHTML);
+                getContentByInlineHTML(range, (content) => {
+                    const oldHTML = topElement.outerHTML;
+                    const name = Lute.EscapeHTMLStr(content.trim());
+                    const nameElement = topElement.lastElementChild.querySelector(".protyle-attr--name");
+                    if (nameElement) {
+                        nameElement.innerHTML = `<svg><use xlink:href="#iconN"></use></svg>${name}`;
+                    } else {
+                        topElement.lastElementChild.insertAdjacentHTML("afterbegin", `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${name}</div>`);
+                    }
+                    topElement.setAttribute("name", name);
+                    updateTransaction(protyle, topElement.getAttribute("data-node-id"), topElement.outerHTML, oldHTML);
+                });
             }
             event.preventDefault();
             event.stopPropagation();

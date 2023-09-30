@@ -117,6 +117,13 @@ func GetBlockRefText(id string) string {
 	return getNodeRefText(node)
 }
 
+func GetDOMText(dom string) (ret string) {
+	luteEngine := NewLute()
+	tree := luteEngine.BlockDOM2Tree(dom)
+	ret = renderBlockText(tree.Root, nil)
+	return
+}
+
 func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {

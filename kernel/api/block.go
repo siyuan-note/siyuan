@@ -279,6 +279,19 @@ func getTreeStat(c *gin.Context) {
 	ret.Data = model.StatTree(id)
 }
 
+func getDOMText(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	dom := arg["dom"].(string)
+	ret.Data = model.GetDOMText(dom)
+}
+
 func getRefText(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -33,13 +33,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数仅在 parentID 不为空的情况下使用 */) (retID string, existed bool, err error) {
+func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数仅在 parentID 不为空的情况下使用 */) (retID string, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
-	pathBuilder := bytes.Buffer{}
-	pathBuilder.WriteString("/")
-	hPathBuilder := bytes.Buffer{}
-	hPathBuilder.WriteString("/")
-
 	if "" != parentID {
 		retID = id
 
@@ -62,11 +57,41 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数�
 		}
 	}
 
+	root := treenode.GetBlockTreeRootByPath(boxID, hPath)
+	if nil != root {
+		retID = root.ID
+		return
+	}
+
+	hPathBuilder := bytes.Buffer{}
+	hpathBtMap := map[string]*treenode.BlockTree{}
 	parts := strings.Split(hPath, "/")[1:]
+	// The subdoc creation path is unstable when a parent doc with the same name exists https://github.com/siyuan-note/siyuan/issues/9322
+	// 存在同名父文档时子文档创建路径不稳定，这里需要按照完整的 hpath 映射，不能在下面的循环中边构建 hpath 边构建 path，否则虽然 hpath 相同，但是会导致 path 组装错位
+	for i, part := range parts {
+		if i == len(parts)-1 {
+			break
+		}
+
+		hPathBuilder.WriteString("/")
+		hPathBuilder.WriteString(part)
+		hp := hPathBuilder.String()
+		root = treenode.GetBlockTreeRootByHPath(boxID, hp)
+		if nil == root {
+			break
+		}
+
+		hpathBtMap[hp] = root
+	}
+
+	pathBuilder := bytes.Buffer{}
+	pathBuilder.WriteString("/")
+	hPathBuilder = bytes.Buffer{}
+	hPathBuilder.WriteString("/")
 	for i, part := range parts {
 		hPathBuilder.WriteString(part)
 		hp := hPathBuilder.String()
-		root := treenode.GetBlockTreeRootByHPath(boxID, hp)
+		root = hpathBtMap[hp]
 		isNotLast := i < len(parts)-1
 		if nil == root {
 			retID = ast.NewNodeID()

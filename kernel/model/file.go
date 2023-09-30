@@ -1038,7 +1038,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	retID, _, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	return
 }
 
@@ -1442,7 +1442,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	id, existed, err := createDocsByHPath(box.ID, hPath, "", "", "")
+	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
 	if nil != err {
 		return
 	}

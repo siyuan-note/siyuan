@@ -120,7 +120,7 @@ func GetBlockRefText(id string) string {
 func GetDOMText(dom string) (ret string) {
 	luteEngine := NewLute()
 	tree := luteEngine.BlockDOM2Tree(dom)
-	ret = renderBlockText(tree.Root, nil)
+	ret = renderBlockText(tree.Root.FirstChild, nil)
 	return
 }
 

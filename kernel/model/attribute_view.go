@@ -237,7 +237,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					funcMap := sprig.TxtFuncMap()
 					goTpl := template.New("").Delims(".action{", "}")
 					tplContent := col.Template
-					tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_")
+					tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
 					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
 					if nil != tplErr {
 						logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
@@ -246,7 +246,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 					buf := &bytes.Buffer{}
 					ial := GetBlockAttrs(blockID)
-					dataModel := map[string]string{}
+					dataModel := map[string]string{} // 复制一份 IAL 以避免修改原始数据
 					for k, v := range ial {
 						dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
 					}

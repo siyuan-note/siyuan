@@ -17,12 +17,15 @@
 package model
 
 import (
+	"bytes"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -225,6 +228,27 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number {
 				tableCell.Value.Number.Format = col.NumberFormat
 				tableCell.Value.Number.FormatNumber()
+			}
+
+			// 渲染模板列
+			if av.KeyTypeTemplate == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Template {
+				render := func(blockID string) string {
+					funcMap := sprig.TxtFuncMap()
+					goTpl := template.New("").Delims(".action{", "}")
+					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tableCell.Value.Template.Content)
+					if nil != tplErr {
+						logging.LogWarnf("parse template [%s] failed: %s", tableCell.Value.Template.Content, err)
+					}
+
+					buf := &bytes.Buffer{}
+					ial := GetBlockAttrs(blockID)
+					if err = tpl.Execute(buf, ial); nil != err {
+						logging.LogWarnf("execute template [%s] failed: %s", tableCell.Value.Template.Content, err)
+					}
+					return buf.String()
+				}
+
+				tableCell.Value.Template.Render(tableCell.Value.BlockID, render)
 			}
 
 			tableRow.Cells = append(tableRow.Cells, tableCell)

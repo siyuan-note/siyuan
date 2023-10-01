@@ -236,16 +236,22 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				render := func(blockID string) string {
 					funcMap := sprig.TxtFuncMap()
 					goTpl := template.New("").Delims(".action{", "}")
-					tpl, tplErr := goTpl.Funcs(funcMap).Parse(col.Template)
+					tplContent := col.Template
+					tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_")
+					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
 					if nil != tplErr {
-						logging.LogWarnf("parse template [%s] failed: %s", col.Template, tplErr)
+						logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
 						return ""
 					}
 
 					buf := &bytes.Buffer{}
 					ial := GetBlockAttrs(blockID)
-					if err = tpl.Execute(buf, ial); nil != err {
-						logging.LogWarnf("execute template [%s] failed: %s", col.Template, err)
+					dataModel := map[string]string{}
+					for k, v := range ial {
+						dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
+					}
+					if err = tpl.Execute(buf, dataModel); nil != err {
+						logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
 					}
 					return buf.String()
 				}

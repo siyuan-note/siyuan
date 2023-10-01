@@ -235,16 +235,16 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				render := func(blockID string) string {
 					funcMap := sprig.TxtFuncMap()
 					goTpl := template.New("").Delims(".action{", "}")
-					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tableCell.Value.Template.Content)
+					tpl, tplErr := goTpl.Funcs(funcMap).Parse(col.Template)
 					if nil != tplErr {
-						logging.LogWarnf("parse template [%s] failed: %s", tableCell.Value.Template.Content, tplErr)
+						logging.LogWarnf("parse template [%s] failed: %s", col.Template, tplErr)
 						return ""
 					}
 
 					buf := &bytes.Buffer{}
 					ial := GetBlockAttrs(blockID)
 					if err = tpl.Execute(buf, ial); nil != err {
-						logging.LogWarnf("execute template [%s] failed: %s", tableCell.Value.Template.Content, err)
+						logging.LogWarnf("execute template [%s] failed: %s", col.Template, err)
 					}
 					return buf.String()
 				}
@@ -820,6 +820,35 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doUpdateAttrViewColTemplate(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColTemplate(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColTemplate(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	colType := av.KeyType(operation.Typ)
+	switch colType {
+	case av.KeyTypeTemplate:
+		for _, keyValues := range attrView.KeyValues {
+			if keyValues.Key.ID == operation.ID && av.KeyTypeTemplate == keyValues.Key.Type {
+				keyValues.Key.Template = operation.Data.(string)
+				break
+			}
 		}
 	}
 

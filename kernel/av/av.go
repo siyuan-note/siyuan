@@ -79,6 +79,7 @@ type Key struct {
 
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
+	Template     string             `json:"template"`          // 模板内容
 }
 
 func NewKey(id, name string, keyType KeyType) *Key {
@@ -350,7 +351,6 @@ type ValueAsset struct {
 }
 
 type ValueTemplate struct {
-	Content         string `json:"content"`
 	RenderedContent string `json:"renderedContent"`
 }
 

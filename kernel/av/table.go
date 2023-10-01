@@ -396,6 +396,7 @@ type TableColumn struct {
 
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
+	Template     string             `json:"template"`          // 模板内容
 }
 
 type TableRow struct {

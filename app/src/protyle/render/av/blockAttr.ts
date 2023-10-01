@@ -48,7 +48,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
         case "template":
-            html = `<input value="${value.template.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            html = `<div class="fn__flex-1">${value.template.content}</div>`;
             break;
         case "email":
             html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
@@ -120,7 +120,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "templat
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;
-                if (["url", "text", "email", "phone", "template"].includes(item.parentElement.dataset.type)) {
+                if (["url", "text", "email", "phone"].includes(item.parentElement.dataset.type)) {
                     value = {
                         [item.parentElement.dataset.type]: {
                             content: item.value

@@ -1075,7 +1075,6 @@ interface IAVCellValue {
     }
     template?: {
         content: string
-        renderedContent?:string
     }
     date?: IAVCellDateValue
 }

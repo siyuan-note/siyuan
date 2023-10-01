@@ -55,16 +55,17 @@ type KeyValues struct {
 type KeyType string
 
 const (
-	KeyTypeBlock   KeyType = "block"
-	KeyTypeText    KeyType = "text"
-	KeyTypeNumber  KeyType = "number"
-	KeyTypeDate    KeyType = "date"
-	KeyTypeSelect  KeyType = "select"
-	KeyTypeMSelect KeyType = "mSelect"
-	KeyTypeURL     KeyType = "url"
-	KeyTypeEmail   KeyType = "email"
-	KeyTypePhone   KeyType = "phone"
-	KeyTypeMAsset  KeyType = "mAsset"
+	KeyTypeBlock    KeyType = "block"
+	KeyTypeText     KeyType = "text"
+	KeyTypeNumber   KeyType = "number"
+	KeyTypeDate     KeyType = "date"
+	KeyTypeSelect   KeyType = "select"
+	KeyTypeMSelect  KeyType = "mSelect"
+	KeyTypeURL      KeyType = "url"
+	KeyTypeEmail    KeyType = "email"
+	KeyTypePhone    KeyType = "phone"
+	KeyTypeMAsset   KeyType = "mAsset"
+	KeyTypeTemplate KeyType = "template"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -100,15 +101,16 @@ type Value struct {
 	Type       KeyType `json:"type,omitempty"`
 	IsDetached bool    `json:"isDetached,omitempty"`
 
-	Block   *ValueBlock    `json:"block,omitempty"`
-	Text    *ValueText     `json:"text,omitempty"`
-	Number  *ValueNumber   `json:"number,omitempty"`
-	Date    *ValueDate     `json:"date,omitempty"`
-	MSelect []*ValueSelect `json:"mSelect,omitempty"`
-	URL     *ValueURL      `json:"url,omitempty"`
-	Email   *ValueEmail    `json:"email,omitempty"`
-	Phone   *ValuePhone    `json:"phone,omitempty"`
-	MAsset  []*ValueAsset  `json:"mAsset,omitempty"`
+	Block    *ValueBlock    `json:"block,omitempty"`
+	Text     *ValueText     `json:"text,omitempty"`
+	Number   *ValueNumber   `json:"number,omitempty"`
+	Date     *ValueDate     `json:"date,omitempty"`
+	MSelect  []*ValueSelect `json:"mSelect,omitempty"`
+	URL      *ValueURL      `json:"url,omitempty"`
+	Email    *ValueEmail    `json:"email,omitempty"`
+	Phone    *ValuePhone    `json:"phone,omitempty"`
+	MAsset   []*ValueAsset  `json:"mAsset,omitempty"`
+	Template *ValueTemplate `json:"template,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -139,6 +141,8 @@ func (value *Value) String() string {
 			ret = append(ret, v.Content)
 		}
 		return strings.Join(ret, " ")
+	case KeyTypeTemplate:
+		return value.Template.RenderedContent
 	default:
 		return ""
 	}
@@ -343,6 +347,11 @@ type ValueAsset struct {
 	Type    AssetType `json:"type"`
 	Name    string    `json:"name"`
 	Content string    `json:"content"`
+}
+
+type ValueTemplate struct {
+	Content         string `json:"content"`
+	RenderedContent string `json:"renderedContent"`
 }
 
 // View 描述了视图的结构。

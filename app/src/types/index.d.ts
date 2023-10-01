@@ -62,6 +62,7 @@ type TAVCol =
     | "email"
     | "phone"
     | "mAsset"
+    | "template"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -929,6 +930,7 @@ interface IModels {
 }
 
 interface IMenu {
+    iconClass?: string,
     label?: string,
     click?: (element: HTMLElement, event: MouseEvent) => boolean | void | Promise<boolean | void>
     type?: "separator" | "submenu" | "readonly",
@@ -1070,6 +1072,10 @@ interface IAVCellValue {
     }
     email?: {
         content: string
+    }
+    template?: {
+        content: string
+        renderedContent?:string
     }
     date?: IAVCellDateValue
 }

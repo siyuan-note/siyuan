@@ -431,6 +431,7 @@ export const exportMd = (id: string) => {
         icon: "iconUpload",
         submenu: [{
             label: window.siyuan.languages.template,
+            iconClass: "ft__error",
             icon: "iconMarkdown",
             click: async () => {
                 const result = await fetchSyncPost("/api/block/getRefText", {id: id});
@@ -536,6 +537,7 @@ export const exportMd = (id: string) => {
                 }
             }, {
                 label: "HTML (SiYuan)",
+                iconClass: "ft__error",
                 icon: "iconHTML5",
                 click: () => {
                     saveExport({type: "html", id});

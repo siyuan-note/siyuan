@@ -85,7 +85,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     }
                 };
             }
-        } else if (["text", "block", "url", "phone", "email"].includes(colType)) {
+        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {
@@ -353,7 +353,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const blockElement = hasClosestBlock(cellElements[0]);
     if (["text", "url", "email", "phone", "block"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
-    } else if (type === "number") {
+    } else if (type === "template") {
+        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-content")}</textarea>`;
+    }else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else if (["select", "mSelect"].includes(type) && blockElement) {
         openMenuPanel({protyle, blockElement, type: "select", cellElements});

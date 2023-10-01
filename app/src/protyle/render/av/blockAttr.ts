@@ -47,6 +47,9 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <span class="fn__space"></span>
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
+        case "template":
+            html = `<input value="${value.template.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            break;
         case "email":
             html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
 <span class="fn__space"></span>
@@ -83,7 +86,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "template"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;
@@ -117,7 +120,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;
-                if (["url", "text", "email", "phone"].includes(item.parentElement.dataset.type)) {
+                if (["url", "text", "email", "phone", "template"].includes(item.parentElement.dataset.type)) {
                     value = {
                         [item.parentElement.dataset.type]: {
                             content: item.value

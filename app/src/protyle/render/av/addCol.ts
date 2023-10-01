@@ -230,5 +230,30 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             });
         }
     });
+    menu.addItem({
+        icon: "iconMath",
+        label: window.siyuan.languages.template,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.template,
+                avID,
+                type: "template",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "template",
+                name: window.siyuan.languages.template,
+                id
+            });
+        }
+    });
     return menu;
 };

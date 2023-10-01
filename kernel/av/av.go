@@ -143,7 +143,7 @@ func (value *Value) String() string {
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:
-		return value.Template.content
+		return value.Template.Content
 	default:
 		return ""
 	}
@@ -351,11 +351,11 @@ type ValueAsset struct {
 }
 
 type ValueTemplate struct {
-	content string `json:"content"`
+	Content string `json:"content"`
 }
 
 func (t *ValueTemplate) Render(blockID string, r func(blockID string) string) {
-	t.content = r(blockID)
+	t.Content = r(blockID)
 }
 
 // View 描述了视图的结构。

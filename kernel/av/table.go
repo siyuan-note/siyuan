@@ -523,7 +523,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
 				countValues++
 			}
 		}
@@ -532,9 +532,9 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
-				if !uniqueValues[row.Cells[colIndex].Value.Template.content] {
-					uniqueValues[row.Cells[colIndex].Value.Template.content] = true
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Template.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Template.Content] = true
 					countUniqueValues++
 				}
 			}
@@ -543,7 +543,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.content {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.Content {
 				countEmpty++
 			}
 		}
@@ -551,7 +551,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
 				countNotEmpty++
 			}
 		}
@@ -559,7 +559,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.content {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.Content {
 				countEmpty++
 			}
 		}
@@ -569,7 +569,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
 				countNotEmpty++
 			}
 		}
@@ -969,16 +969,16 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 	case CalcOperatorMin:
-		min := math.MaxFloat64
+		minVal := math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
-				if row.Cells[colIndex].Value.Number.Content < min {
-					min = row.Cells[colIndex].Value.Number.Content
+				if row.Cells[colIndex].Value.Number.Content < minVal {
+					minVal = row.Cells[colIndex].Value.Number.Content
 				}
 			}
 		}
-		if math.MaxFloat64 != min {
-			col.Calc.Result = &Value{Number: NewFormattedValueNumber(min, col.NumberFormat)}
+		if math.MaxFloat64 != minVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(minVal, col.NumberFormat)}
 		}
 	case CalcOperatorMax:
 		maxVal := -math.MaxFloat64

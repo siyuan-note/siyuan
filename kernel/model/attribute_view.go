@@ -232,7 +232,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			}
 
 			// 渲染模板列
-			if av.KeyTypeTemplate == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Template {
+			if av.KeyTypeTemplate == tableCell.ValueType {
 				render := func(blockID string) string {
 					funcMap := sprig.TxtFuncMap()
 					goTpl := template.New("").Delims(".action{", "}")
@@ -250,6 +250,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					return buf.String()
 				}
 
+				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{}}
 				tableCell.Value.Template.Render(tableCell.Value.BlockID, render)
 			}
 

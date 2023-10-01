@@ -133,7 +133,7 @@ export const getEditHTML = (options: {
     } else if (colData.type === "template") {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
-    <textarea placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" cols="1" class="fn__block b3-text-field">${colData.template}</textarea>
+    <textarea placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     }
     return `<div class="b3-menu__items">

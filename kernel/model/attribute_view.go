@@ -171,6 +171,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Icon:         key.Icon,
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
+			Template:     key.Template,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,

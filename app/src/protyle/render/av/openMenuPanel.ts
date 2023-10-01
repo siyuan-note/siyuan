@@ -328,7 +328,7 @@ export const openMenuPanel = (options: {
                         avPanelElement.remove();
                     } else {
                         // 优先关闭资源文件搜索
-                        hideElements(["util"], options.protyle)
+                        hideElements(["util"], options.protyle);
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -680,7 +680,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetExist") {
-                    const rect = target.getBoundingClientRect()
+                    const rect = target.getBoundingClientRect();
                     options.protyle.toolbar.showAssets(options.protyle, {x: rect.right, y: rect.bottom, w: target.parentElement.clientWidth + 8, h: rect.height}, (url) => {
                         let value: IAVCellAssetValue;
                         if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
@@ -688,13 +688,13 @@ export const openMenuPanel = (options: {
                                 type: "image",
                                 content: url,
                                 name: ""
-                            }
+                            };
                         } else {
                             value = {
                                 type: "file",
                                 content: url,
                                 name: pathPosix().basename(url).substring(0, Constants.SIZE_LINK_TEXT_MAX)
-                            }
+                            };
                         }
                         updateAssetCell({
                             protyle: options.protyle,

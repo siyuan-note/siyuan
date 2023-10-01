@@ -1577,9 +1577,9 @@ export class Toolbar {
 
             if (event.key === "Enter") {
                 if (!isEmpty) {
-                    const currentURL = this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")
+                    const currentURL = this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value");
                     if (avCB) {
-                        avCB(currentURL)
+                        avCB(currentURL);
                     } else {
                         hintRenderAssets(currentURL, protyle);
                     }
@@ -1625,9 +1625,9 @@ export class Toolbar {
             const listItemElement = hasClosestByClassName(target, "b3-list-item");
             if (listItemElement) {
                 event.stopPropagation();
-                const currentURL = listItemElement.getAttribute("data-value")
+                const currentURL = listItemElement.getAttribute("data-value");
                 if (avCB) {
-                    avCB(currentURL)
+                    avCB(currentURL);
                 } else {
                     hintRenderAssets(currentURL, protyle);
                 }

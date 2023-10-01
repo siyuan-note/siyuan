@@ -16,16 +16,16 @@ export const getAllEditor = () => {
     const models = getAllModels();
     const editors: Protyle[] = [];
     models.editor.forEach(item => {
-        editors.push(item.editor)
-    })
+        editors.push(item.editor);
+    });
     models.search.forEach(item => {
-        editors.push(item.edit)
-    })
+        editors.push(item.edit);
+    });
     models.custom.forEach(item => {
         if (item.data?.editor instanceof Protyle) {
-            editors.push(item.data.editor)
+            editors.push(item.data.editor);
         }
-    })
+    });
     models.backlink.forEach(item => {
         item.editors.forEach(editorItem => {
             editors.push(editorItem);
@@ -33,12 +33,12 @@ export const getAllEditor = () => {
     });
     window.siyuan.dialogs.forEach(item => {
         if (item.editor) {
-            editors.push(item.editor)
+            editors.push(item.editor);
         }
     });
     window.siyuan.blockPanels.forEach(item => {
         item.editors.forEach(editorItem => {
-            editors.push(editorItem)
+            editors.push(editorItem);
         });
     });
     return editors;

@@ -38,6 +38,28 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
+func renderTemplateCol(blockID, tplContent string) string {
+	funcMap := sprig.TxtFuncMap()
+	goTpl := template.New("").Delims(".action{", "}")
+	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
+	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
+	if nil != tplErr {
+		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
+		return ""
+	}
+
+	buf := &bytes.Buffer{}
+	ial := GetBlockAttrs(blockID)
+	dataModel := map[string]string{} // 复制一份 IAL 以避免修改原始数据
+	for k, v := range ial {
+		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
+	}
+	if err := tpl.Execute(buf, dataModel); nil != err {
+		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
+	}
+	return buf.String()
+}
+
 func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
@@ -71,6 +93,14 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
 					kValues.Values = append(kValues.Values, v)
+				}
+			}
+
+			if av.KeyTypeTemplate == kValues.Key.Type {
+				// 渲染模板列
+				content := renderTemplateCol(blockID, kValues.Key.Template)
+				if "<no value>" != content {
+					kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: content}})
 				}
 			}
 
@@ -233,31 +263,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 			// 渲染模板列
 			if av.KeyTypeTemplate == tableCell.ValueType {
-				render := func(blockID string) string {
-					funcMap := sprig.TxtFuncMap()
-					goTpl := template.New("").Delims(".action{", "}")
-					tplContent := col.Template
-					tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
-					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
-					if nil != tplErr {
-						logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
-						return ""
-					}
-
-					buf := &bytes.Buffer{}
-					ial := GetBlockAttrs(blockID)
-					dataModel := map[string]string{} // 复制一份 IAL 以避免修改原始数据
-					for k, v := range ial {
-						dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
-					}
-					if err = tpl.Execute(buf, dataModel); nil != err {
-						logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
-					}
-					return buf.String()
-				}
-
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{}}
-				tableCell.Value.Template.Render(tableCell.Value.BlockID, render)
+				tableCell.Value.Template.Render(tableCell.Value.BlockID, col.Template, renderTemplateCol)
 			}
 
 			tableRow.Cells = append(tableRow.Cells, tableCell)

@@ -354,8 +354,8 @@ type ValueTemplate struct {
 	Content string `json:"content"`
 }
 
-func (t *ValueTemplate) Render(blockID string, r func(blockID string) string) {
-	t.Content = r(blockID)
+func (t *ValueTemplate) Render(blockID, tplContent string, r func(blockID, tplContent string) string) {
+	t.Content = r(blockID, tplContent)
 }
 
 // View 描述了视图的结构。

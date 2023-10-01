@@ -28,11 +28,7 @@ import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 
-export const openTitleMenu = (protyle: IProtyle, position: {
-    x: number
-    y: number
-    isLeft?: boolean
-}) => {
+export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "titleMenu") {

@@ -600,7 +600,9 @@ ${genHintItemHTML(item)}
             } else if (value === Constants.ZWSP + 2) {
                 range.deleteContents();
                 this.fixImageCursor(range);
-                protyle.toolbar.showAssets(protyle, nodeElement, range);
+                protyle.toolbar.range = range;
+                const rangePosition = getSelectionPosition(nodeElement, range);
+                protyle.toolbar.showAssets(protyle, {x: rangePosition.left, y: rangePosition.top + 26, w: 0, h: 26});
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 3) {

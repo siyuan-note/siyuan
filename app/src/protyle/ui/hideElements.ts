@@ -1,7 +1,7 @@
 /// #if MOBILE
 import {getCurrentEditor} from "../../mobile/editor";
 /// #else
-import {getAllModels} from "../../layout/getAll";
+import {getAllEditor} from "../../layout/getAll";
 /// #endif
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog"
@@ -67,11 +67,13 @@ export const hideAllElements = (types: string[]) => {
             editor.protyle.toolbar.subElementCloseCB = undefined;
         }
         /// #else
-        getAllModels().editor.forEach(item => {
-            item.editor.protyle.toolbar.subElement.classList.add("fn__none");
-            if (item.editor.protyle.toolbar.subElementCloseCB) {
-                item.editor.protyle.toolbar.subElementCloseCB();
-                item.editor.protyle.toolbar.subElementCloseCB = undefined;
+        getAllEditor().forEach(item => {
+            if (item.protyle.toolbar) {
+                item.protyle.toolbar.subElement.classList.add("fn__none");
+                if (item.protyle.toolbar.subElementCloseCB) {
+                    item.protyle.toolbar.subElementCloseCB();
+                    item.protyle.toolbar.subElementCloseCB = undefined;
+                }
             }
         });
         /// #endif

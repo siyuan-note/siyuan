@@ -125,7 +125,7 @@ export class Menu {
         this.element.lastElementChild.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number, w?: number }, isLeft = false) {
+    public popup(options: IPosition, isLeft = false) {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }

@@ -698,6 +698,7 @@ export class Gutter {
                 protyle.toolbar.subElement.style.width = "";
                 protyle.toolbar.subElement.style.padding = "";
                 protyle.toolbar.subElement.append(appearanceMenu(protyle, selectsElement));
+                protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
                 protyle.toolbar.subElement.classList.remove("fn__none");
                 protyle.toolbar.subElementCloseCB = undefined;
                 const position = selectsElement[0].getBoundingClientRect();
@@ -1497,6 +1498,7 @@ export class Gutter {
                     protyle.toolbar.subElement.style.width = "";
                     protyle.toolbar.subElement.style.padding = "";
                     protyle.toolbar.subElement.append(appearanceMenu(protyle, [nodeElement]));
+                    protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
                     protyle.toolbar.subElement.classList.remove("fn__none");
                     protyle.toolbar.subElementCloseCB = undefined;
                     const position = nodeElement.getBoundingClientRect();

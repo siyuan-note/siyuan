@@ -152,6 +152,14 @@ interface Window {
     openFileByURL(URL: string): boolean
 }
 
+interface IPosition {
+    x: number,
+    y: number,
+    w?: number,
+    h?: number,
+    isLeft?: boolean
+}
+
 interface ISaveLayout {
     name: string,
     layout: IObject

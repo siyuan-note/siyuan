@@ -41,7 +41,7 @@ export class Menu {
         this.menu.addSeparator(index);
     }
 
-    open(options: { x: number, y: number, h?: number, w?: number, isLeft?: boolean }) {
+    open(options:IPosition) {
         if (this.isOpen) {
             return;
         }

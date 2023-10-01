@@ -523,7 +523,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.RenderedContent {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
 				countValues++
 			}
 		}
@@ -532,9 +532,9 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.RenderedContent {
-				if !uniqueValues[row.Cells[colIndex].Value.Template.RenderedContent] {
-					uniqueValues[row.Cells[colIndex].Value.Template.RenderedContent] = true
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
+				if !uniqueValues[row.Cells[colIndex].Value.Template.content] {
+					uniqueValues[row.Cells[colIndex].Value.Template.content] = true
 					countUniqueValues++
 				}
 			}
@@ -543,7 +543,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.RenderedContent {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.content {
 				countEmpty++
 			}
 		}
@@ -551,7 +551,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.RenderedContent {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
 				countNotEmpty++
 			}
 		}
@@ -559,7 +559,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.RenderedContent {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Template || "" == row.Cells[colIndex].Value.Template.content {
 				countEmpty++
 			}
 		}
@@ -569,7 +569,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.RenderedContent {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.content {
 				countNotEmpty++
 			}
 		}

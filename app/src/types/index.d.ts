@@ -24,6 +24,7 @@ type TOperation =
     | "removeFlashcards"
     | "updateAttrViewCell"
     | "updateAttrViewCol"
+    | "updateAttrViewColTemplate"
     | "sortAttrViewRow"
     | "sortAttrViewCol"
     | "setAttrViewColHidden"
@@ -1022,6 +1023,7 @@ interface IAVColumn {
     hidden: boolean,
     type: TAVCol,
     numberFormat: string,
+    template: string,
     calc: {
         operator: string,
         result: IAVCellValue

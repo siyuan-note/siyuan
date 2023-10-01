@@ -109,7 +109,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label"><input data-type="addOption"  style="margin: 4px 0" class="b3-text-field" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label"><input data-type="addOption"  style="margin: 4px 0" class="b3-text-field fn__block" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
 </button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
@@ -129,6 +129,11 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.format}</span>
     <span class="b3-menu__accelerator">${getLabelByNumberFormat(colData.numberFormat)}</span>
+</button>`;
+    } else if (colData.type === "template") {
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item">
+    <textarea placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" cols="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     }
     return `<div class="b3-menu__items">
@@ -185,6 +190,42 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
             options.menuElement.parentElement.remove();
         }
     });
+
+    const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement
+    if (tplElement) {
+        tplElement.addEventListener("blur", () => {
+            const newValue = tplElement.value;
+            if (newValue === colData.template) {
+                return;
+            }
+            transaction(options.protyle, [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: newValue,
+                type: colData.type,
+            }], [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: colData.template,
+                type: colData.type,
+            }]);
+            colData.template = newValue;
+        });
+        tplElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
+                return;
+            }
+            if (event.key === "Escape") {
+                options.menuElement.parentElement.remove();
+            } else if (event.key === "Enter") {
+                tplElement.dispatchEvent(new CustomEvent("blur"));
+                options.menuElement.parentElement.remove();
+            }
+        });
+    }
+
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
     if (!addOptionElement) {
         return;

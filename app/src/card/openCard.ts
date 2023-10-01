@@ -143,7 +143,7 @@ export const bindCardEvent = (options: {
             onGet({
                 data: response,
                 protyle: editor.protyle,
-                action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
             });
         });
     }
@@ -485,7 +485,7 @@ const nextCard = (options: {
         onGet({
             data: response,
             protyle: options.editor.protyle,
-            action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
         });
     });
 };

@@ -237,7 +237,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					goTpl := template.New("").Delims(".action{", "}")
 					tpl, tplErr := goTpl.Funcs(funcMap).Parse(tableCell.Value.Template.Content)
 					if nil != tplErr {
-						logging.LogWarnf("parse template [%s] failed: %s", tableCell.Value.Template.Content, err)
+						logging.LogWarnf("parse template [%s] failed: %s", tableCell.Value.Template.Content, tplErr)
+						return ""
 					}
 
 					buf := &bytes.Buffer{}

@@ -65,7 +65,13 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
                         } else if (["url", "email", "phone"].includes(cell.valueType)) {
-                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
+                            const urlContent = cell.value ? cell.value[cell.valueType as "url"].content : "";
+                            // https://github.com/siyuan-note/siyuan/issues/9291
+                            let urlAttr = "";
+                            if (cell.valueType === "url") {
+                                urlAttr = ` data-href="${urlContent}"`;
+                            }
+                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}"${urlAttr}>${urlContent}</span>`;
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }

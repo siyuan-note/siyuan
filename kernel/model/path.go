@@ -47,8 +47,9 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数�
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
 			if _, err = createDoc(boxID, p, name, content); nil != err {
-				return
+				logging.LogErrorf("create doc [%s] failed: %s", p, err)
 			}
+			return
 		}
 	} else {
 		if "" == id {

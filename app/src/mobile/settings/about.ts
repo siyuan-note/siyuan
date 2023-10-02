@@ -9,6 +9,7 @@ import {exitSiYuan, processSync} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {openModel} from "../menu/model";
 import {setKey} from "../../sync/syncGuide";
+import {isBrowser} from "../../util/functions";
 
 export const initAbout = () => {
     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
@@ -39,7 +40,7 @@ export const initAbout = () => {
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
 </div>
-<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
+<div class="b3-label${(window.siyuan.config.readonly || isBrowser()) ? " fn__none" : ""}">
     ${window.siyuan.languages.about5}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="authCode">

@@ -266,7 +266,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					tableCell = &av.TableCell{
 						ID:        keyValues.Values[0].ID,
 						Value:     keyValues.Values[0],
-						ValueType: col.Type,
+						ValueType: keyValues.Values[0].Type,
 					}
 					break
 				}

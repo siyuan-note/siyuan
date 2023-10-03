@@ -191,7 +191,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
         }
     });
 
-    const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement
+    const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement;
     if (tplElement) {
         tplElement.addEventListener("blur", () => {
             const newValue = tplElement.value;

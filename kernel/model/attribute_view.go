@@ -54,6 +54,9 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 	for k, v := range ial {
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
 	}
+	for _, rowValue := range rowValues {
+		dataModel[rowValue.Key.Name] = rowValue.Values[0].String()
+	}
 	if err := tpl.Execute(buf, dataModel); nil != err {
 		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
 	}

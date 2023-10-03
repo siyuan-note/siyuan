@@ -5,7 +5,6 @@ go 1.18
 require (
 	code.sajari.com/docconv v1.3.7
 	github.com/88250/clipboard v0.1.5
-	github.com/88250/css v0.1.2
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346
 	github.com/88250/lute v1.7.6-0.20230926080700-f85353a11d9f
@@ -37,7 +36,7 @@ require (
 	github.com/imroc/req/v3 v3.42.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
-	github.com/klippa-app/go-pdfium v1.8.1
+	github.com/klippa-app/go-pdfium v1.8.2
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
@@ -46,8 +45,8 @@ require (
 	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/sashabaranov/go-openai v1.15.3
-	github.com/shirou/gopsutil/v3 v3.23.8
+	github.com/sashabaranov/go-openai v1.15.4
+	github.com/shirou/gopsutil/v3 v3.23.9
 	github.com/siyuan-note/dejavu v0.0.0-20230922010755-b258c02dca85
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
@@ -57,7 +56,7 @@ require (
 	github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
-	github.com/vmihailenco/msgpack/v5 v5.3.5
+	github.com/vmihailenco/msgpack/v5 v5.4.0
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	github.com/xuri/excelize/v2 v2.8.0
 	golang.org/x/image v0.12.0
@@ -76,8 +75,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.45.18 // indirect
-	github.com/bmharper/turbo v1.0.1 // indirect
+	github.com/aws/aws-sdk-go v1.45.20 // indirect
 	github.com/bytedance/sonic v1.10.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -91,8 +89,8 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.4 // indirect
-	github.com/go-resty/resty/v2 v2.8.0 // indirect
+	github.com/go-playground/validator/v10 v10.15.5 // indirect
+	github.com/go-resty/resty/v2 v2.9.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.1.2 // indirect
@@ -100,7 +98,6 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
-	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

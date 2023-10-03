@@ -55,7 +55,9 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
 	}
 	for _, rowValue := range rowValues {
-		dataModel[rowValue.Key.Name] = rowValue.Values[0].String()
+		if 0 < len(rowValue.Values) {
+			dataModel[rowValue.Key.Name] = rowValue.Values[0].String()
+		}
 	}
 	if err := tpl.Execute(buf, dataModel); nil != err {
 		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
@@ -111,8 +113,9 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		// 渲染模板列
 		for _, kv := range keyValues {
 			if av.KeyTypeTemplate == kv.Key.Type {
-				content := renderTemplateCol(blockID, kv.Key.Template, keyValues)
-				kv.Values[0].Template.Content = content
+				if 0 < len(kv.Values) {
+					kv.Values[0].Template.Content = renderTemplateCol(blockID, kv.Key.Template, keyValues)
+				}
 			}
 		}
 
@@ -222,7 +225,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		for _, val := range keyValues.Values {
 			values := rows[val.BlockID]
 			if nil == values {
-				values = []*av.KeyValues{&av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}}}
+				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
 			} else {
 				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
 			}
@@ -327,7 +330,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	for _, kv := range keyValues {
-		if av.KeyTypeBlock == kv.Key.Type {
+		if av.KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
 			ret = kv.Values[0]
 			break
 		}

@@ -38,7 +38,7 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
-func renderTemplateCol(blockID, tplContent string) string {
+func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) string {
 	funcMap := sprig.TxtFuncMap()
 	goTpl := template.New("").Delims(".action{", "}")
 	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
@@ -97,15 +97,19 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 
 			if av.KeyTypeTemplate == kValues.Key.Type {
-				// 渲染模板列
-				content := renderTemplateCol(blockID, kValues.Key.Template)
-				if "<no value>" != content {
-					kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: content}})
-				}
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
 			}
 
 			if 0 < len(kValues.Values) {
 				keyValues = append(keyValues, kValues)
+			}
+		}
+
+		// 渲染模板列
+		for _, kv := range keyValues {
+			if av.KeyTypeTemplate == kv.Key.Type {
+				content := renderTemplateCol(blockID, kv.Key.Template, keyValues)
+				kv.Values[0].Template.Content = content
 			}
 		}
 
@@ -210,17 +214,23 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	}
 
 	// 生成行
-	rows := map[string][]*av.Value{}
+	rows := map[string][]*av.KeyValues{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
-			rows[val.BlockID] = append(rows[val.BlockID], val)
+			values := rows[val.BlockID]
+			if nil == values {
+				values = []*av.KeyValues{&av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}}}
+			} else {
+				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
+			}
+			rows[val.BlockID] = values
 		}
 	}
 
 	// 过滤掉不存在的行
 	var notFound []string
-	for blockID, values := range rows {
-		blockValue := getBlockValue(values)
+	for blockID, keyValues := range rows {
+		blockValue := getRowBlockValue(keyValues)
 		if nil == blockValue {
 			notFound = append(notFound, blockID)
 			continue
@@ -248,11 +258,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {
 			var tableCell *av.TableCell
-			for _, val := range row {
-				if val.KeyID == col.ID {
+			for _, keyValues := range row {
+				if keyValues.Key.ID == col.ID {
 					tableCell = &av.TableCell{
-						ID:        val.ID,
-						Value:     val,
+						ID:        keyValues.Values[0].ID,
+						Value:     keyValues.Values[0],
 						ValueType: col.Type,
 					}
 					break
@@ -274,13 +284,23 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 			// 渲染模板列
 			if av.KeyTypeTemplate == tableCell.ValueType {
-				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{}}
-				tableCell.Value.Template.Render(tableCell.Value.BlockID, col.Template, renderTemplateCol)
+				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: col.Template}}
 			}
 
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)
+	}
+
+	// 渲染模板列
+	for _, row := range ret.Rows {
+		for _, cell := range row.Cells {
+			if av.KeyTypeTemplate == cell.ValueType {
+				keyValues := rows[row.ID]
+				content := renderTemplateCol(row.ID, cell.Value.Template.Content, keyValues)
+				cell.Value.Template.Content = content
+			}
+		}
 	}
 
 	// 自定义排序
@@ -302,10 +322,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	return
 }
 
-func getBlockValue(values []*av.Value) (ret *av.Value) {
-	for _, v := range values {
-		if av.KeyTypeBlock == v.Type {
-			ret = v
+func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
+	for _, kv := range keyValues {
+		if av.KeyTypeBlock == kv.Key.Type {
+			ret = kv.Values[0]
 			break
 		}
 	}

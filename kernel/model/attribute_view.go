@@ -219,8 +219,19 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 过滤掉不存在的行
 	var notFound []string
-	for blockID, v := range rows {
-		if v[0].IsDetached {
+	for blockID, values := range rows {
+		blockValue := getBlockValue(values)
+		if nil == blockValue {
+			notFound = append(notFound, blockID)
+			continue
+		}
+
+		if blockValue.IsDetached {
+			continue
+		}
+
+		if nil != blockValue.Block && "" == blockValue.Block.ID {
+			notFound = append(notFound, blockID)
 			continue
 		}
 
@@ -288,6 +299,16 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 		return iv < jv
 	})
+	return
+}
+
+func getBlockValue(values []*av.Value) (ret *av.Value) {
+	for _, v := range values {
+		if av.KeyTypeBlock == v.Type {
+			ret = v
+			break
+		}
+	}
 	return
 }
 

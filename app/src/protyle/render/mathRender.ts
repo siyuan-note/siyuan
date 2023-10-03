@@ -4,16 +4,6 @@ import {Constants} from "../../constants";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestBlock} from "../util/hasClosest";
 
-declare const katex: {
-    renderToString(math: string, option: {
-        displayMode: boolean;
-        output: string;
-        macros: IObject;
-        trust: boolean;
-        strict: (errorCode:string) =>  "ignore" | "warn";
-    }): string;
-};
-
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
     let mathElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "math") {
@@ -44,7 +34,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     console.warn("KaTex macros is not JSON", e);
                 }
                 try {
-                    renderElement.innerHTML = katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
+                    renderElement.innerHTML = window.katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: mathElement.tagName === "DIV",
                         output: "html",
                         macros,

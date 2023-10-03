@@ -181,7 +181,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             return false;
         }
     } else if (!protyle) {
-        const models = getAllModels();
         if (!protyle && range) {
             window.siyuan.blockPanels.find(item => {
                 item.editors.find(editorItem => {
@@ -195,6 +194,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 }
             });
         }
+        const models = getAllModels();
         if (!protyle) {
             models.backlink.find(item => {
                 if (item.element.classList.contains("layout__tab--active")) {
@@ -429,13 +429,13 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-        const blockIDs: string[] = []
+        const blockIDs: string[] = [];
         liElements.forEach(item => {
-            const id = item.getAttribute("data-node-id")
+            const id = item.getAttribute("data-node-id");
             if (id) {
-                blockIDs.push(id)
+                blockIDs.push(id);
             }
-        })
+        });
         if (blockIDs.length > 0) {
             transaction(undefined, [{
                 action: "addFlashcards",
@@ -1182,7 +1182,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
-        newFile(app, undefined, undefined, undefined, true);
+        newFile({
+            app,
+            useSavePath: true
+        });
         event.preventDefault();
         return;
     }

@@ -6,7 +6,6 @@ export const previewImage = (src: string) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.10.4`, "protyleViewerScript").then(() => {
             const imagesElement = document.createElement("ul");
             imagesElement.innerHTML = `<li><img src="${src}"></li>`;
-            // @ts-ignore
             window.siyuan.viewer = new Viewer(imagesElement, {
                 title: [1, (image: HTMLImageElement, imageData: IObject) => {
                     let name = image.alt;
@@ -57,7 +56,6 @@ export const previewDocImage = (src: string, id: string) => {
                 }
             });
             imagesElement.innerHTML = html;
-            // @ts-ignore
             window.siyuan.viewer = new Viewer(imagesElement, {
                 title: [1, (image: HTMLImageElement, imageData: IObject) => {
                     let name = image.alt;

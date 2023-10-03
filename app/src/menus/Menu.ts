@@ -125,7 +125,7 @@ export class Menu {
         this.element.lastElementChild.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number, w?: number }, isLeft = false) {
+    public popup(options: IPosition, isLeft = false) {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -206,7 +206,7 @@ export class MenuItem {
             if (typeof options.iconHTML === "string") {
                 html = options.iconHTML + html;
             } else {
-                html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+                html = `<svg class="b3-menu__icon ${options.iconClass || ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
             }
             if (options.accelerator) {
                 html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;

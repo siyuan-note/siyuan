@@ -717,7 +717,7 @@ func LoadFlashcards() {
 		name := entry.Name()
 		if strings.HasSuffix(name, ".deck") {
 			deckID := strings.TrimSuffix(name, ".deck")
-			deck, loadErr := riff.LoadDeck(riffSavePath, deckID)
+			deck, loadErr := riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
 			if nil != loadErr {
 				logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 				continue
@@ -794,7 +794,7 @@ func createDeck(name string) (deck *riff.Deck, err error) {
 
 func createDeck0(name string, deckID string) (deck *riff.Deck, err error) {
 	riffSavePath := getRiffDir()
-	deck, err = riff.LoadDeck(riffSavePath, deckID)
+	deck, err = riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
 	if nil != err {
 		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
 		return

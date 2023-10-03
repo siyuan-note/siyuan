@@ -1115,6 +1115,7 @@ export class Toolbar {
             }
             updateTransaction(protyle, id, newHTML, html);
         };
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
@@ -1145,10 +1146,13 @@ export class Toolbar {
         this.range = getEditorRange(nodeElement);
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
+
         let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
-        Constants.CODE_LANGUAGES.forEach((item) => {
+        const hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        hljsLanguages.forEach((item) => {
             html += `<div class="b3-list-item">${item}</div>`;
         });
+
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
@@ -1189,18 +1193,13 @@ export class Toolbar {
             }
         });
         inputElement.addEventListener("input", (event) => {
-            const matchLanguages: string[] = [];
-            Constants.CODE_LANGUAGES.forEach((item) => {
-                if (item.indexOf(inputElement.value.toLowerCase()) > -1) {
-                    matchLanguages.push(item);
-
-                }
-            });
+            const lowerCaseValue = inputElement.value.toLowerCase();
+            const matchLanguages = hljsLanguages.filter(item => item.includes(lowerCaseValue));
             let html = "";
             // sort
             let matchInput = false;
             matchLanguages.sort((a, b) => {
-                if (a.startsWith(inputElement.value.toLowerCase()) && b.startsWith(inputElement.value.toLowerCase())) {
+                if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
                     if (a.length < b.length) {
                         return -1;
                     } else if (a.length === b.length) {
@@ -1208,9 +1207,9 @@ export class Toolbar {
                     } else {
                         return 1;
                     }
-                } else if (a.startsWith(inputElement.value.toLowerCase())) {
+                } else if (a.startsWith(lowerCaseValue)) {
                     return -1;
-                } else if (b.startsWith(inputElement.value.toLowerCase())) {
+                } else if (b.startsWith(lowerCaseValue)) {
                     return 1;
                 } else {
                     return 0;
@@ -1219,7 +1218,7 @@ export class Toolbar {
                 if (inputElement.value === item) {
                     matchInput = true;
                 }
-                html += `<div class="b3-list-item">${item.replace(inputElement.value.toLowerCase(), "<b>" + inputElement.value.toLowerCase() + "</b>")}</div>`;
+                html += `<div class="b3-list-item">${item.replace(lowerCaseValue, "<b>" + lowerCaseValue + "</b>")}</div>`;
             });
             if (inputElement.value.trim() && !matchInput) {
                 html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
@@ -1257,6 +1256,7 @@ export class Toolbar {
                 focusByRange(this.range);
             }
         });
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
         /// #if !MOBILE
@@ -1412,6 +1412,7 @@ export class Toolbar {
                 event.stopPropagation();
             }
         });
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
@@ -1492,6 +1493,7 @@ export class Toolbar {
             }
             hintRenderWidget(listElement.textContent, protyle);
         });
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
@@ -1513,8 +1515,25 @@ export class Toolbar {
         });
     }
 
-    public showAssets(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
-        this.range = range;
+    private renderAssetList(listElement: Element, previewElement: Element, k: string, position: IPosition) {
+        fetchPost("/api/search/searchAsset", {
+            k,
+        }, (response) => {
+            let searchHTML = "";
+            response.data.forEach((item: { path: string, hName: string }, index: number) => {
+                searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
+            });
+            listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            if (response.data.length > 0) {
+                previewElement.innerHTML = renderAssetsPreview(response.data[0].path);
+            }
+            /// #if !MOBILE
+            setPosition(this.subElement, position.x, position.y, position.h, position.w);
+            /// #endif
+        });
+    }
+
+    public showAssets(protyle: IProtyle, position: IPosition, avCB?: (url: string) => void) {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = "";
@@ -1533,6 +1552,7 @@ export class Toolbar {
 <div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
+        const previewElement = this.subElement.firstElementChild.lastElementChild;
         listElement.addEventListener("mouseover", (event) => {
             const target = event.target as HTMLElement;
             const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
@@ -1541,15 +1561,13 @@ export class Toolbar {
             }
             previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
         });
-        const previewElement = this.subElement.firstElementChild.lastElementChild;
-        previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
         const inputElement = this.subElement.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
             if (event.isComposing) {
                 return;
             }
-            const isEmpty = !this.subElement.querySelector(".b3-list-item");
+            const isEmpty = this.subElement.querySelector(".b3-list--empty");
             if (!isEmpty) {
                 const currentElement = upDownHint(listElement, event);
                 if (currentElement) {
@@ -1559,8 +1577,13 @@ export class Toolbar {
 
             if (event.key === "Enter") {
                 if (!isEmpty) {
-                    hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
-                } else {
+                    const currentURL = this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value");
+                    if (avCB) {
+                        avCB(currentURL);
+                    } else {
+                        hintRenderAssets(currentURL, protyle);
+                    }
+                } else if (!avCB) {
                     focusByRange(this.range);
                 }
                 this.subElement.classList.add("fn__none");
@@ -1568,21 +1591,14 @@ export class Toolbar {
                 event.preventDefault();
             } else if (event.key === "Escape") {
                 this.subElement.classList.add("fn__none");
-                focusByRange(this.range);
+                if (!avCB) {
+                    focusByRange(this.range);
+                }
             }
         });
         inputElement.addEventListener("input", (event) => {
             event.stopPropagation();
-            fetchPost("/api/search/searchAsset", {
-                k: inputElement.value,
-            }, (response) => {
-                let searchHTML = "";
-                response.data.forEach((item: { path: string, hName: string }, index: number) => {
-                    searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
-                });
-                listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
-            });
+            this.renderAssetList(listElement, previewElement, inputElement.value, position);
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
@@ -1600,38 +1616,32 @@ export class Toolbar {
             }
             if (target.classList.contains("b3-list--empty")) {
                 this.subElement.classList.add("fn__none");
-                focusByRange(this.range);
+                if (!avCB) {
+                    focusByRange(this.range);
+                }
                 event.stopPropagation();
                 return;
             }
             const listItemElement = hasClosestByClassName(target, "b3-list-item");
             if (listItemElement) {
                 event.stopPropagation();
-                hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
+                const currentURL = listItemElement.getAttribute("data-value");
+                if (avCB) {
+                    avCB(currentURL);
+                } else {
+                    hintRenderAssets(currentURL, protyle);
+                }
             }
         });
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
-        /// #if !MOBILE
-        const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-        /// #else
+        /// #if MOBILE
         setPosition(this.subElement, 0, 0);
         /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
-        fetchPost("/api/search/searchAsset", {
-            k: "",
-        }, (response) => {
-            let html = "";
-            response.data.forEach((item: { hName: string, path: string }, index: number) => {
-                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
-            });
-            if (html === "") {
-                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-            }
-            this.subElement.querySelector(".b3-list--background").innerHTML = html;
-        });
+        this.renderAssetList(listElement, previewElement, "", position);
     }
 
     public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {
@@ -1723,6 +1733,7 @@ export class Toolbar {
                 setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, Constants.SIZE_TOOLBAR_HEIGHT);
             }
         });
+        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");

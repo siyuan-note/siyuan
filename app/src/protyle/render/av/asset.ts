@@ -84,6 +84,10 @@ ${contentHTML}
     }
     return `<div class="b3-menu__items">
     ${html}
+    <button data-type="addAssetExist" class="b3-menu__item">
+        <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg>
+        <span class="b3-menu__label">${window.siyuan.languages.assets}</span>
+    </button>
     <button class="b3-menu__item">
         <svg class="b3-menu__icon"><use xlink:href="#iconDownload"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.insertAsset}</span> 
@@ -314,8 +318,8 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.right,
-        y: rect.top,
-        w: rect.width,
+        y: rect.bottom,
+        w: target.parentElement.clientWidth + 8,
         h: rect.height,
     });
 };

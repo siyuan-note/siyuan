@@ -42,7 +42,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.10.7"
+	Ver       = "2.10.8"
 	IsInsider = false
 )
 
@@ -81,6 +81,11 @@ func Boot() {
 	Container = ContainerStd
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
+		if "" == AccessAuthCode {
+			// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
+			fmt.Printf("The access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker.")
+			os.Exit(1)
+		}
 	}
 	if ContainerStd != Container {
 		ServerPort = FixedPort

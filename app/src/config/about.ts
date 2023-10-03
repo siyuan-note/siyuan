@@ -56,7 +56,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
-<div class="b3-label">
+<div class="b3-label${(window.siyuan.config.readonly || isBrowser()) ? " fn__none" : ""}">
     <label class="fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about5}

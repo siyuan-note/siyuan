@@ -11,9 +11,9 @@ export const resize = (protyle: IProtyle) => {
     // 不能 clearTimeout，否则 split 时左侧无法 resize
     setTimeout(() => {
         if (abs.width > MIN_ABS || isNaN(abs.width)) {
-            if (typeof echarts !== "undefined") {
+            if (typeof window.echarts !== "undefined") {
                 protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
-                    const chartInstance = echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
+                    const chartInstance = window.echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
                     if (chartInstance) {
                         chartInstance.resize();
                     }

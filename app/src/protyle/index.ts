@@ -265,8 +265,9 @@ export class Protyle {
             } else {
                 this.getDoc(mergedOptions);
             }
+        } else {
+            this.protyle.contentElement.classList.add("protyle-content--transition");
         }
-        this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
     private getDoc(mergedOptions: IOptions) {
@@ -339,6 +340,7 @@ export class Protyle {
         if (mergedOptions.after) {
             mergedOptions.after(this);
         }
+        this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
     private init() {

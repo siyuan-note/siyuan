@@ -50,13 +50,13 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }
     }).element);
 
-    const blockIDs: string[] = []
+    const blockIDs: string[] = [];
     selectItemElements.forEach(item => {
-        const id = item.getAttribute("data-node-id")
+        const id = item.getAttribute("data-node-id");
         if (id) {
-            blockIDs.push(id)
+            blockIDs.push(id);
         }
-    })
+    });
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }
@@ -364,7 +364,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             paths.push(item.getAttribute("data-path"));
                         }
                     });
-                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
+                    newFile({
+                        app,
+                        notebookId,
+                        currentPath: pathPosix().dirname(pathString),
+                        paths,
+                        useSavePath: false
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -380,7 +386,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             }
                         }
                     });
-                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
+                    newFile({
+                        app,
+                        notebookId,
+                        currentPath: pathPosix().dirname(pathString),
+                        paths,
+                        useSavePath: false
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

@@ -1028,7 +1028,10 @@ export const newCenterEmptyTab = (app: App) => {
                         event.preventDefault();
                         break;
                     } else if (target.id === "editorEmptyFile") {
-                        newFile(app, undefined, undefined, undefined, true);
+                        newFile({
+                            app,
+                            useSavePath: true
+                        });
                         event.stopPropagation();
                         event.preventDefault();
                         break;

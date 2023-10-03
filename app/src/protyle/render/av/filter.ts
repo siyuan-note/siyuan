@@ -11,7 +11,7 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     if (type === "number" || type === "select") {
         return "=";
     }
-    if (["text", "mSelect", "url", "block", "email", "phone"].includes(type)) {
+    if (["text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
         return "Contains";
     }
 };
@@ -140,6 +140,7 @@ export const setFilter = (options: {
         case "text":
         case "url":
         case "phone":
+        case "template":
         case "email":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -214,7 +215,7 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "email", "phone"].includes(colData.type)) {
+    } else if (["text", "url", "block", "email", "phone", "template"].includes(colData.type)) {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value ? options.filter.value[colData.type as "text"].content : ""}" class="b3-text-field fn__size200">`
@@ -429,7 +430,6 @@ export const getFiltersHTML = (data: IAVTable) => {
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.filter}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 ${html}

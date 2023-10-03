@@ -2,10 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 
-declare const plantumlEncoder: {
-    encode(options: string): string,
-};
-
 export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let plantumlElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "plantuml") {
@@ -27,7 +23,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
-                renderElement.innerHTML = `<img src=${window.siyuan.config.editor.plantUMLServePath}${plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}">`;
+                renderElement.innerHTML = `<img src=${window.siyuan.config.editor.plantUMLServePath}${window.plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}">`;
                 renderElement.classList.remove("ft__error");
                 e.setAttribute("data-render", "true");
             } catch (error) {

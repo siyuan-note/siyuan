@@ -62,10 +62,16 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             return;
                         }
                         let text = "";
-                        if (cell.valueType === "text") {
-                            text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
+                        if (["text", "template"].includes(cell.valueType)) {
+                            text = `<span class="av__celltext">${cell.value ? (cell.value[cell.valueType as "text"].content || "") : ""}</span>`;
                         } else if (["url", "email", "phone"].includes(cell.valueType)) {
-                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
+                            const urlContent = cell.value ? cell.value[cell.valueType as "url"].content : "";
+                            // https://github.com/siyuan-note/siyuan/issues/9291
+                            let urlAttr = "";
+                            if (cell.valueType === "url") {
+                                urlAttr = ` data-href="${urlContent}"`;
+                            }
+                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}"${urlAttr}>${urlContent}</span>`;
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
@@ -115,7 +121,7 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${data.columns[index].wrap ? "" : "white-space: nowrap;"}
+white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
 ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });

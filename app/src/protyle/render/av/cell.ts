@@ -3,6 +3,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {Menu} from "../../../plugin/Menu";
 import {updateAttrViewCellAnimation} from "./action";
+import {isCtrl} from "../../util/compatibility";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -343,6 +344,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     }
+    if (type === "template") {
+        return;
+    }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
         return;
     }
@@ -380,7 +384,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (event.isComposing) {
                 return;
             }
-            if (event.key === "Escape" || event.key === "Enter") {
+            if (event.key === "Escape" ||
+                (event.key === "Enter" && !event.shiftKey && !isCtrl(event))) {
                 updateCellValue(protyle, type, cellElements);
                 event.preventDefault();
                 event.stopPropagation();
@@ -398,9 +403,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (!document.contains(cellElements[0]) && cellElements.length === 1 && cellElements[0].dataset.detached === "true") {
         // 新增行后弹出的输入框进行修改后，原始 cell 已被更新
         const avid = cellElements[0].parentElement.dataset.avid;
-        cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]')
+        cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]');
     }
-    if ( cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !cellElements[0].parentElement.dataset.id) {
+    if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !cellElements[0].parentElement.dataset.id) {
         return;
     }
     const blockElement = hasClosestBlock(cellElements[0]);

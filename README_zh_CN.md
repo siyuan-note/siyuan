@@ -133,7 +133,8 @@
 
 构建 Docker 镜像时设置了入口：`ENTRYPOINT [ "/opt/siyuan/kernel" ]`，使用 `docker run b3log/siyuan` 并带参即可启动：
 
-* `--workspace` 指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
+* `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
+* `--accessAuthCode`：指定访问授权码
 
 更多的参数可参考 `--help`。下面是一条启动命令示例：
 

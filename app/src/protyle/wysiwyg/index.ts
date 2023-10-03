@@ -80,9 +80,10 @@ import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
-
     public element: HTMLDivElement;
     public preventKeyup: boolean;
+
+    private shiftStartElement: HTMLElement;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -334,10 +335,15 @@ export class WYSIWYG {
             event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
             event.clipboardData.setData("text/siyuan", html);
         });
+
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             if (event.button === 2 || window.siyuan.ctrlIsPressed) {
                 // 右键
                 return;
+            }
+            // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
+            if (window.siyuan.shiftIsPressed && getSelection().rangeCount > 0) {
+                this.shiftStartElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer) as HTMLElement;
             }
             if (!window.siyuan.shiftIsPressed) {
                 // https://github.com/siyuan-note/siyuan/issues/3026
@@ -1597,7 +1603,6 @@ export class WYSIWYG {
             }
         });
 
-        let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             protyle.app.plugins.forEach(item => {
                 item.eventBus.emit("click-editorcontent", {
@@ -1633,7 +1638,7 @@ export class WYSIWYG {
             }
             /// #endif
             if (!event.shiftKey) {
-                shiftStartElement = undefined;
+                this.shiftStartElement = undefined;
             }
             this.setEmptyOutline(protyle, event.target);
             const tableElement = hasClosestByClassName(event.target, "table");
@@ -2092,27 +2097,19 @@ export class WYSIWYG {
                 event.preventDefault();
                 event.stopPropagation();
                 // shift 多选
-                let startElement = hasClosestBlock(range.startContainer);
+                let startElement = this.shiftStartElement;
                 let endElement = hasClosestBlock(event.target);
-                if (startElement && endElement && startElement.isSameNode(endElement)) {
-                    startElement = hasClosestBlock(range.endContainer);
-                }
-                if (startElement && endElement && (!startElement.isSameNode(endElement) || (shiftStartElement && shiftStartElement.isSameNode(startElement)))) {
+                if (this.shiftStartElement && endElement && !this.shiftStartElement.isSameNode(endElement)) {
                     let toDown = true;
                     range.collapse(true);
-                    if (shiftStartElement) {
-                        startElement = shiftStartElement;
-                    } else {
-                        shiftStartElement = startElement;
-                    }
                     const startRect = startElement.getBoundingClientRect();
                     const endRect = endElement.getBoundingClientRect();
                     let startTop = startRect.top;
                     let endTop = endRect.top;
                     if (startTop === endTop) {
                         // 横排 https://ld246.com/article/1663036247544
-                        startTop = startRect.right;
-                        endTop = endRect.right;
+                        startTop = startRect.left;
+                        endTop = endRect.left;
                     }
                     if (startTop > endTop) {
                         const tempElement = endElement;
@@ -2129,12 +2126,14 @@ export class WYSIWYG {
                     while (currentElement) {
                         if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                             const currentRect = currentElement.getBoundingClientRect();
-                            if (startRect.top === endRect.top ? (currentRect.right <= endTop) : (currentRect.top <= endTop)) {
+                            if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
                                 if (hasJump) {
                                     // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
                                     if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
                                         const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                        if (startRect.top === endRect.top ? (currentNextRect.right <= endTop) : (currentNextRect.top <= endTop)) {
+                                        if (startRect.top === endRect.top ?
+                                            (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
+                                            (currentNextRect.top <= endTop)) {
                                             selectElements = [currentElement];
                                             currentElement = currentElement.nextElementSibling as HTMLElement;
                                             hasJump = false;
@@ -2166,7 +2165,7 @@ export class WYSIWYG {
                     }
                     if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                         // 单个 p 不选中
-                        shiftStartElement = undefined;
+                        this.shiftStartElement = undefined;
                     } else {
                         const ids: string[] = [];
                         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&

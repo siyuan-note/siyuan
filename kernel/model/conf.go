@@ -199,7 +199,7 @@ func InitConf() {
 		Conf.Editor.Emoji = []string{}
 	}
 	if 1 > Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
-		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 64
+		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 192
 	}
 	if 5120 < Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
 		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 5120

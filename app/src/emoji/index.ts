@@ -8,6 +8,7 @@ import {getDockByType} from "../layout/util";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {setNoteBook} from "../util/pathName";
+import {Dialog} from "../dialog";
 
 export const getRandomEmoji = () => {
     const emojis = window.siyuan.emojis[getRandom(0, window.siyuan.emojis.length - 1)];
@@ -189,9 +190,12 @@ export const addEmoji = (unicode: string) => {
     fetchPost("/api/setting/setEmoji", {emoji: window.siyuan.config.editor.emoji});
 };
 
-export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = false) => {
-    window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.lastElementChild.innerHTML = `<div class="emojis" style="width: ${isMobile() ? "80vw" : "360px"}">
+export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition) => {
+    const dialog = new Dialog({
+        transparent: true,
+        width: isMobile() ? "80vw" : "360px",
+        height: "50vh",
+        content: `<div class="emojis" data-menu="true">
 <div class="fn__flex">
     <span class="fn__space"></span>
     <label class="b3-form__icon fn__flex-1">
@@ -217,12 +221,11 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
     <div data-type="8" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e")}</div>
     <div data-type="9" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</div>
 </div>
-</div>`;
-    window.siyuan.menus.menu.element.querySelector(".emojis__item").classList.add("emojis__item--current");
-    const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
-    const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
-    const emojisContentElement = window.siyuan.menus.menu.element.querySelector(".emojis__panel");
+</div>`
+    });
+    dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    const emojisContentElement = dialog.element.querySelector(".emojis__panel");
     inputElement.addEventListener("compositionend", () => {
         emojisContentElement.innerHTML = filterEmoji(inputElement.value);
         if (inputElement.value) {
@@ -231,11 +234,11 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             emojisContentElement.nextElementSibling.classList.remove("fn__none");
         }
         emojisContentElement.scrollTop = 0;
-        window.siyuan.menus.menu.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
         if (inputElement.value === "") {
-            lazyLoadEmoji(window.siyuan.menus.menu.element);
+            lazyLoadEmoji(dialog.element);
         }
-        lazyLoadEmojiImg(window.siyuan.menus.menu.element);
+        lazyLoadEmojiImg(dialog.element);
     });
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
@@ -248,11 +251,11 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             emojisContentElement.nextElementSibling.classList.remove("fn__none");
         }
         emojisContentElement.scrollTop = 0;
-        window.siyuan.menus.menu.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
         if (inputElement.value === "") {
-            lazyLoadEmoji(window.siyuan.menus.menu.element);
+            lazyLoadEmoji(dialog.element);
         }
-        lazyLoadEmojiImg(window.siyuan.menus.menu.element);
+        lazyLoadEmojiImg(dialog.element);
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -261,31 +264,33 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (event.key.indexOf("Arrow") === -1 && event.key !== "Enter") {
             return;
         }
-        const currentElement = window.siyuan.menus.menu.element.querySelector(".emojis__item--current");
+        const currentElement = dialog.element.querySelector(".emojis__item--current");
         if (!currentElement) {
             return;
         }
         if (event.key === "Enter") {
             const unicode = currentElement.getAttribute("data-unicode");
-            if (isNotebook) {
+            if (type === "notebook") {
                 fetchPost("/api/notebook/setNotebookIcon", {
                     notebook: id,
                     icon: unicode
                 }, () => {
-                    window.siyuan.menus.menu.remove();
+                    dialog.destroy();
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                 });
-            } else {
+            } else if (type === "doc") {
                 fetchPost("/api/attr/setBlockAttrs", {
                     id,
                     attrs: {"icon": unicode}
                 }, () => {
-                    window.siyuan.menus.menu.remove();
+                    dialog.destroy();
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
+            } else {
+
             }
             event.preventDefault();
             event.stopPropagation();
@@ -330,10 +335,10 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
     if (!isMobile()) {
         inputElement.focus();
     }
-    lazyLoadEmoji(window.siyuan.menus.menu.element);
-    lazyLoadEmojiImg(window.siyuan.menus.menu.element);
+    lazyLoadEmoji(dialog.element);
+    lazyLoadEmojiImg(dialog.element);
     // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
-    window.siyuan.menus.menu.element.lastElementChild.firstElementChild.addEventListener("click", (event) => {
+    dialog.element.addEventListener("click", (event) => {
         const eventTarget = event.target as HTMLElement;
         const typeElement = hasClosestByClassName(eventTarget, "emojis__type");
         if (typeElement) {
@@ -359,23 +364,25 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
         const iconElement = hasClosestByClassName(eventTarget, "block__icon");
         if (iconElement && iconElement.getAttribute("aria-label") === window.siyuan.languages.remove) {
-            if (isNotebook) {
+            if (type === "notebook") {
                 fetchPost("/api/notebook/setNotebookIcon", {
                     notebook: id,
                     icon: ""
                 }, () => {
-                    window.siyuan.menus.menu.remove();
+                    dialog.destroy();
                     updateFileTreeEmoji("", id, "iconFilesRoot");
                 });
-            } else {
+            } else if (type === "doc") {
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: id,
                     attrs: {"icon": ""}
                 }, () => {
-                    window.siyuan.menus.menu.remove();
+                    dialog.destroy();
                     updateFileTreeEmoji("", id);
                     updateOutlineEmoji("", id);
                 });
+            } else {
+
             }
             return;
         }
@@ -388,7 +395,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             } else {
                 unicode = getRandomEmoji();
             }
-            if (isNotebook) {
+            if (type === "notebook") {
                 fetchPost("/api/notebook/setNotebookIcon", {
                     notebook: id,
                     icon: unicode
@@ -396,7 +403,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                 });
-            } else {
+            } else if (type === "doc") {
                 fetchPost("/api/attr/setBlockAttrs", {
                     id,
                     attrs: {"icon": unicode}
@@ -405,6 +412,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     updateFileTreeEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
+            } else {
+
             }
             return;
         }

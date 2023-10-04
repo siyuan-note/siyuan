@@ -1210,9 +1210,15 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
-            window.siyuan.menus.menu.remove();
-            return;
+            if (window.siyuan.dialogs.length > 0 &&
+                window.siyuan.menus.menu.element.style.zIndex < (window.siyuan.dialogs[0].element.querySelector(".b3-dialog") as HTMLElement).style.zIndex) {
+                // 窗口高于菜单时，先关闭窗口，如 av 修改列 icon 时
+            } else {
+                window.siyuan.menus.menu.remove();
+                return;
+            }
         }
+
         if (window.siyuan.dialogs.length > 0) {
             hideElements(["dialog"]);
             return;

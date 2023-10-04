@@ -317,11 +317,12 @@
 .emojis {
   word-break: break-all;
   white-space: normal;
-  height: 50vh;
-  padding: 0;
   display: flex;
   flex-direction: column;
   max-height: 386px;
+  padding: 8px 0;
+  height: 100%;
+  box-sizing: border-box;
 
   &__item {
     font-size: 24px;

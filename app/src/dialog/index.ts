@@ -69,9 +69,12 @@ export class Dialog {
     }
 
     public destroy(options?: IObject) {
+        // av 修改列头emoji后点击关闭emoji图标
+        if ((this.element.querySelector(".b3-dialog") as HTMLElement).style.zIndex < window.siyuan.menus.menu.element.style.zIndex) {
+            // https://github.com/siyuan-note/siyuan/issues/6783
+            window.siyuan.menus.menu.remove();
+        }
         this.element.remove();
-        // https://github.com/siyuan-note/siyuan/issues/6783
-        window.siyuan.menus.menu.remove();
         if (this.destroyCallback) {
             this.destroyCallback(options);
         }

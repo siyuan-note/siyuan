@@ -387,7 +387,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         }]);
     });
     menu.addItem({
-        icon: getColIconByType(type),
+        iconHTML: `<span style="align-self: center;margin-right: 8px;" class="block__icon block__icon--show" data-type="update-icon"><svg><use xlink:href="#${getColIconByType(type)}"></use></svg></span>`,
+        type: "readonly",
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
         bind(element) {
             element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {

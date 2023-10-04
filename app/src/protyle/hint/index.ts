@@ -368,7 +368,7 @@ ${genHintItemHTML(item)}
             }
             lazyLoadEmojiImg(panelElement);
         } else {
-            this.element.innerHTML = `<div class="emojis">
+            this.element.innerHTML = `<div style="padding: 0" class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     <button data-type="0" class="emojis__type ariaLabel" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</button>

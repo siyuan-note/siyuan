@@ -7,6 +7,7 @@ import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation} from "./action";
+import {openEmojiPanel} from "../../../emoji";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,

@@ -125,7 +125,7 @@ export class Menu {
         this.element.lastElementChild.append(element);
     }
 
-    public popup(options: IPosition, isLeft = false) {
+    public popup(options: IPosition) {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
@@ -136,7 +136,7 @@ export class Menu {
         }
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
+        setPosition(this.element, options.x - (options.isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

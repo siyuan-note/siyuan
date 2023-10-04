@@ -45,7 +45,7 @@ export class Menu {
         if (this.isOpen) {
             return;
         }
-        this.menu.popup(options, options.isLeft);
+        this.menu.popup(options);
     }
 
     fullscreen(position: "bottom" | "all" = "all") {

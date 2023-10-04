@@ -235,7 +235,7 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         /// #if MOBILE
         window.siyuan.menus.menu.fullscreen();
         /// #else
-        window.siyuan.menus.menu.popup(position, position.isLeft);
+        window.siyuan.menus.menu.popup(position);
         /// #endif
     });
 };

@@ -166,7 +166,7 @@
   "flashcardSuperBlock": "超级块制卡",
   "flashcardSuperBlockTip": "启用后支持超级块制卡，超级块的第一个子块被识别为问题，其余子块识别为答案",
   "flashcardHeading": "标题块制卡",
-  "flashcardHeadingTip": "启用后支持标题块制卡，标题块被识别为问题，其余子块识别为答案",
+  "flashcardHeadingTip": "启用后支持标题块制卡，标题块被识别为问题，下方块识别为答案",
   "flashcardDeck": "卡包",
   "flashcardDeckTip": "启用后支持卡包分类。这是一个历史兼容选项，如无必要建议不要启用，推荐使用 <code class='fn__code'>快速制卡</code>",
   "flashcardFSRSParamRequestRetention": "FSRS Request Retention",

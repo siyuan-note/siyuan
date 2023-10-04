@@ -198,6 +198,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         window.siyuan.menus.menu.removeScrollEvent();
     }
     const dialog = new Dialog({
+        disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "360px",

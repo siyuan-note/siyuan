@@ -14,6 +14,7 @@ import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCe
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {pathPosix} from "../../../util/pathName";
+import {openEmojiPanel} from "../../../emoji";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -497,6 +498,17 @@ export const openMenuPanel = (options: {
                         y: tabRect.bottom,
                         h: tabRect.height,
                         isLeft: true
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "update-icon") {
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width
                     });
                     event.preventDefault();
                     event.stopPropagation();

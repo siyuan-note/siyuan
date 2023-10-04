@@ -32,8 +32,10 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 闪卡
         getLang(["riffCard", "flashcardNewCardLimit", "flashcardNewCardLimitTip", "flashcardReviewCardLimit",
             "flashcardNewCardLimit", "flashcardReviewCardLimitTip", "flashcardMark", "flashcardMarkTip", "flashcardList",
-            "flashcardSuperBlock", "flashcardDeck", "flashcardDeckTip", "flashcardFSRSParamRequestRetention", "flashcardFSRSParamRequestRetentionTip",
-            "flashcardFSRSParamMaximumInterval", "flashcardFSRSParamMaximumIntervalTip", "flashcardFSRSParamWeights", "flashcardFSRSParamWeightsTip"]),
+            "flashcardSuperBlock", "flashcardHeading", "flashcardDeck", "flashcardDeckTip",
+            "flashcardFSRSParamRequestRetention", "flashcardFSRSParamRequestRetentionTip",
+            "flashcardFSRSParamMaximumInterval", "flashcardFSRSParamMaximumIntervalTip", "flashcardFSRSParamWeights",
+            "flashcardFSRSParamWeightsTip"]),
 
         // AI
         ["AI"].concat(getLang(["ai", "apiTimeout", "apiTimeoutTip", "apiMaxTokens", "apiMaxTokensTip", "apiKey",

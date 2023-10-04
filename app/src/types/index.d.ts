@@ -654,6 +654,7 @@ interface IConfig {
         mark: boolean
         list: boolean
         superBlock: boolean
+        heading: boolean
         deck: boolean
         requestRetention: number
         maximumInterval: number

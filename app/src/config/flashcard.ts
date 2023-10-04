@@ -21,6 +21,14 @@ export const flashcard = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.flashcardHeading}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardHeadingTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="heading" type="checkbox"${window.siyuan.config.flashcard.heading ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.flashcardSuperBlock}
         <div class="b3-label__text">${window.siyuan.languages.flashcardSuperBlockTip}</div>
     </div>
@@ -119,6 +127,7 @@ export const flashcard = {
                     mark: (flashcard.element.querySelector("#mark") as HTMLInputElement).checked,
                     list: (flashcard.element.querySelector("#list") as HTMLInputElement).checked,
                     superBlock: (flashcard.element.querySelector("#superBlock") as HTMLInputElement).checked,
+                    heading: (flashcard.element.querySelector("#heading") as HTMLInputElement).checked,
                     deck: (flashcard.element.querySelector("#deck") as HTMLInputElement).checked,
                     requestRetention: parseFloat((flashcard.element.querySelector("#requestRetention") as HTMLInputElement).value),
                     maximumInterval: parseInt((flashcard.element.querySelector("#maximumInterval") as HTMLInputElement).value),

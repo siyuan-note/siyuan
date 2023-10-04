@@ -165,6 +165,8 @@
   "flashcardListTip": "Après l'activation, le premier élément d'une liste est reconnu comme une question, et le reste des éléments légers sont reconnus comme des réponses",
   "flashcardSuperBlock": "Carte Super Block",
   "flashcardSuperBlockTip": "Après l'activation, le premier bloc enfant d'un super bloc est reconnu comme une question, et les autres blocs enfants sont reconnus comme des réponses",
+  "flashcardHeading": "Carte de bloc d'en-tête",
+  "flashcardHeadingTip": "Après activation, le bloc d'en-tête est reconnu comme une question et le reste des blocs enfants sont reconnus comme des réponses",
   "flashcardDeck": "Deck",
   "flashcardDeckTip": "Après l'activation, la classification du jeu de cartes est prise en charge. Il s'agit d'une option de compatibilité historique, il n'est pas recommandé de l'activer sauf si nécessaire, et il est recommandé d'utiliser <code class='fn__code'>Quick make card</code>",
   "flashcardFSRSParamRequestRetention": "Rétention des requêtes FSRS",

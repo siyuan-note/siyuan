@@ -165,6 +165,8 @@
   "flashcardListTip": "After enabling, the first list item of a list is recognized as a question, and the rest of the lite items are recognized as answers",
   "flashcardSuperBlock": "Super Block Carding",
   "flashcardSuperBlockTip": "After enabling, the first child block of a super block is recognized as a question, and the rest of the child blocks are recognized as answers",
+  "flashcardHeading": "Heading Block Carding",
+  "flashcardHeadingTip": "After enabling, the heading block is recognized as a question, and the rest of the child blocks are recognized as answers",
   "flashcardDeck": "Deck",
   "flashcardDeckTip": "After enabling, the card deck classification is supported. This is a historical compatibility option, it is not recommended to enable it unless necessary, and it is recommended to use <code class='fn__code'>Quick make card</code>",
   "flashcardFSRSParamRequestRetention": "FSRS Request Retention",

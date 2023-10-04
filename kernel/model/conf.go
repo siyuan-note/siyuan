@@ -312,7 +312,7 @@ func InitConf() {
 		Conf.Editor.HistoryRetentionDays = 7
 	}
 	if 48 > Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = 192
+		Conf.Editor.DynamicLoadBlocks = 48
 	}
 	if 1024 < Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = 1024

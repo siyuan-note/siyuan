@@ -9,6 +9,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
+import {setPosition} from "../util/setPosition";
 
 export const getRandomEmoji = () => {
     const emojis = window.siyuan.emojis[getRandom(0, window.siyuan.emojis.length - 1)];
@@ -191,8 +192,14 @@ export const addEmoji = (unicode: string) => {
 };
 
 export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition) => {
+    if (type !== "av") {
+        window.siyuan.menus.menu.remove();
+    } else {
+        window.siyuan.menus.menu.removeScrollEvent();
+    }
     const dialog = new Dialog({
         transparent: true,
+        hideCloseIcon: true,
         width: isMobile() ? "80vw" : "360px",
         height: "50vh",
         content: `<div class="emojis" data-menu="true">
@@ -223,6 +230,9 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
 </div>
 </div>`
     });
+    (dialog.element.firstElementChild as HTMLElement).style.justifyContent = "inherit";
+    (dialog.element.firstElementChild as HTMLElement).style.alignItems = "inherit";
+    setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
     dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     const emojisContentElement = dialog.element.querySelector(".emojis__panel");
@@ -391,8 +401,11 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             let unicode = "";
             if (emojiElement) {
                 unicode = emojiElement.getAttribute("data-unicode");
-                window.siyuan.menus.menu.remove();
+                if (type !== "av") {
+                    dialog.destroy()
+                }
             } else {
+                // 随机
                 unicode = getRandomEmoji();
             }
             if (type === "notebook") {

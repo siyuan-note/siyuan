@@ -391,6 +391,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         type: "readonly",
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
         bind(element) {
+            const iconElement = element.querySelector(".block__icon") as HTMLElement
+            iconElement.addEventListener("click", (event) => {
+                const rect = iconElement.getBoundingClientRect();
+                openEmojiPanel("", "av", {
+                    x: rect.left,
+                    y: rect.bottom,
+                    h: rect.height,
+                    w: rect.width
+                });
+                event.preventDefault();
+                event.stopPropagation();
+            });
             element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;

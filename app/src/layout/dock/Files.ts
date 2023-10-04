@@ -125,7 +125,9 @@ export class Files extends Model {
                     const rect = target.getBoundingClientRect();
                     openEmojiPanel(target.parentElement.getAttribute("data-url"), "notebook", {
                         x: rect.left,
-                        y: rect.bottom
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width,
                     });
                     break;
                 } else if (type === "toggle") {
@@ -247,12 +249,16 @@ export class Files extends Model {
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
                             openEmojiPanel(target.parentElement.getAttribute("data-node-id"), "doc", {
                                 x: rect.left,
-                                y: rect.bottom
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
                             });
                         } else {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), "notebook", {
                                 x: rect.left,
-                                y: rect.bottom
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
                             });
                         }
                         break;

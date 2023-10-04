@@ -202,7 +202,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "360px",
         height: "50vh",
-        content: `<div class="emojis" data-menu="true">
+        content: `<div class="emojis">
 <div class="fn__flex">
     <span class="fn__space"></span>
     <label class="b3-form__icon fn__flex-1">
@@ -230,8 +230,10 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
 </div>
 </div>`
     });
-    (dialog.element.firstElementChild as HTMLElement).style.justifyContent = "inherit";
-    (dialog.element.firstElementChild as HTMLElement).style.alignItems = "inherit";
+    dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
+    const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement
+    dialogElement.style.justifyContent = "inherit";
+    dialogElement.style.alignItems = "inherit";
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
     dialog.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;

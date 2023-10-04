@@ -166,7 +166,7 @@
   "flashcardSuperBlock": "超級塊制卡",
   "flashcardSuperBlockTip": "啟用後支持超級塊制卡，超級塊的第一個子塊被識別為問題，其餘子塊識別為答案",
   "flashcardHeading": "標題塊製卡",
-  "flashcardHeadingTip": "啟用後支援標題區塊製卡，標題區塊被識別為問題，其餘子區塊識別為答案",
+  "flashcardHeadingTip": "啟用後支援標題塊製卡，標題塊被識別為問題，下方塊識別為答案",
   "flashcardDeck": "卡包",
   "flashcardDeckTip": "啟用後支持卡包分類。這是一個歷史兼容選項，如無必要建議不要啟用，推薦使用 <code class='fn__code'>快速制卡</code>",
   "flashcardFSRSParamRequestRetention": "FSRS Request Retention",

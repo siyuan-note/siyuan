@@ -145,6 +145,8 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			attrView, err := av.ParseAttributeView(node.AttributeViewID)
 			if nil == err {
 				buf := bytes.Buffer{}
+				buf.WriteString(attrView.Name)
+				buf.WriteString(" ")
 				for _, v := range attrView.Views {
 					buf.WriteString(v.Name)
 					buf.WriteString(" ")

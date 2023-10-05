@@ -1471,8 +1471,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey("⌘C", event) && selectText === "") {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                nodeElement.classList.add("protyle-wysiwyg--select");
+                selectElements.push(nodeElement);
+            }
             let html = "";
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+            selectElements.forEach(item => {
                 html += removeEmbed(item);
             });
             if (html !== "") {

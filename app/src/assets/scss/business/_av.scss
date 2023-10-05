@@ -67,10 +67,8 @@
   &__gutters {
     @extend .protyle-gutters;
     position: absolute;
-    top: 5px;
-    left: -26px;
+    left: -24px;
     opacity: 0;
-    padding-right: 4px;
   }
 
   &__mask {
@@ -88,6 +86,7 @@
 
   &__body {
     float: left;
+    margin-left: 22px;
   }
 
   &__row {

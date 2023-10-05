@@ -20,7 +20,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.math}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="mathBlock" type="checkbox"${config.types.mathBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="mathBlock" type="checkbox"${config.types.mathBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconTable"></use></svg>
@@ -29,7 +29,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.table}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="table" type="checkbox"${config.types.table ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="table" type="checkbox"${config.types.table ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconQuote"></use></svg>
@@ -38,7 +38,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.quote}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="blockquote" type="checkbox"${config.types.blockquote ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="blockquote" type="checkbox"${config.types.blockquote ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSuper"></use></svg>
@@ -47,7 +47,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.superBlock}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="superBlock" type="checkbox"${config.types.superBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="superBlock" type="checkbox"${config.types.superBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconParagraph"></use></svg>
@@ -56,7 +56,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.paragraph}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="paragraph" type="checkbox"${config.types.paragraph ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="paragraph" type="checkbox"${config.types.paragraph ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
@@ -65,7 +65,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.doc}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHeadings"></use></svg>
@@ -74,7 +74,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.headings}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="heading" type="checkbox"${config.types.heading ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="heading" type="checkbox"${config.types.heading ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconList"></use></svg>
@@ -83,7 +83,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.list1}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="list" type="checkbox"${config.types.list ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="list" type="checkbox"${config.types.list ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconListItem"></use></svg>
@@ -92,7 +92,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.listItem}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="listItem" type="checkbox"${config.types.listItem ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="listItem" type="checkbox"${config.types.listItem ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconCode"></use></svg>
@@ -101,7 +101,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.code}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="codeBlock" type="checkbox"${config.types.codeBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="codeBlock" type="checkbox"${config.types.codeBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHTML5"></use></svg>
@@ -110,7 +110,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             HTML
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSQL"></use></svg>
@@ -119,7 +119,16 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
             ${window.siyuan.languages.embedBlock}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="embedBlock" type="checkbox"${config.types.embedBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="embedBlock" type="checkbox"${config.types.embedBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconDatabase"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.database}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="databaseBlock" type="checkbox"${config.types.databaseBlock ? " checked" : ""}>
     </label>
 </div>
 <div class="b3-dialog__action">

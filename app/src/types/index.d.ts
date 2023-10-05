@@ -237,6 +237,7 @@ interface ISearchOption {
         codeBlock: boolean
         htmlBlock: boolean
         embedBlock: boolean
+        databaseBlock: boolean
     }
 }
 
@@ -751,6 +752,7 @@ interface IConfig {
         sort: number
     }
     search: {
+        databaseBlock: boolean
         embedBlock: boolean
         htmlBlock: boolean
         document: boolean

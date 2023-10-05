@@ -46,7 +46,7 @@ type TEventBus = "ws-main" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
-    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
+    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" |

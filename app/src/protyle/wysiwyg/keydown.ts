@@ -1483,18 +1483,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey("⌘X", event) && selectText === "") {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                nodeElement.classList.add("protyle-wysiwyg--select");
+                selectElements.push(nodeElement);
+            }
             let html = "";
-            nodeElement.classList.add("protyle-wysiwyg--select");
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             selectElements.forEach(item => {
                 html += removeEmbed(item);
             });
             writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-            const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
             removeBlock(protyle, nodeElement, range);
-            if (nextElement) {
-                focusBlock(nextElement);
-            }
             event.preventDefault();
             event.stopPropagation();
         }

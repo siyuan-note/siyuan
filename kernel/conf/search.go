@@ -25,18 +25,19 @@ import (
 )
 
 type Search struct {
-	Document   bool `json:"document"`
-	Heading    bool `json:"heading"`
-	List       bool `json:"list"`
-	ListItem   bool `json:"listItem"`
-	CodeBlock  bool `json:"codeBlock"`
-	MathBlock  bool `json:"mathBlock"`
-	Table      bool `json:"table"`
-	Blockquote bool `json:"blockquote"`
-	SuperBlock bool `json:"superBlock"`
-	Paragraph  bool `json:"paragraph"`
-	HTMLBlock  bool `json:"htmlBlock"`
-	EmbedBlock bool `json:"embedBlock"`
+	Document      bool `json:"document"`
+	Heading       bool `json:"heading"`
+	List          bool `json:"list"`
+	ListItem      bool `json:"listItem"`
+	CodeBlock     bool `json:"codeBlock"`
+	MathBlock     bool `json:"mathBlock"`
+	Table         bool `json:"table"`
+	Blockquote    bool `json:"blockquote"`
+	SuperBlock    bool `json:"superBlock"`
+	Paragraph     bool `json:"paragraph"`
+	HTMLBlock     bool `json:"htmlBlock"`
+	EmbedBlock    bool `json:"embedBlock"`
+	DatabaseBlock bool `json:"databaseBlock"`
 
 	Limit         int  `json:"limit"`
 	CaseSensitive bool `json:"caseSensitive"`
@@ -62,18 +63,19 @@ type Search struct {
 
 func NewSearch() *Search {
 	return &Search{
-		Document:   true,
-		Heading:    true,
-		List:       true,
-		ListItem:   true,
-		CodeBlock:  true,
-		MathBlock:  true,
-		Table:      true,
-		Blockquote: true,
-		SuperBlock: true,
-		Paragraph:  true,
-		HTMLBlock:  true,
-		EmbedBlock: false,
+		Document:      true,
+		Heading:       true,
+		List:          true,
+		ListItem:      true,
+		CodeBlock:     true,
+		MathBlock:     true,
+		Table:         true,
+		Blockquote:    true,
+		SuperBlock:    true,
+		Paragraph:     true,
+		HTMLBlock:     true,
+		EmbedBlock:    false,
+		DatabaseBlock: true,
 
 		Limit:         64,
 		CaseSensitive: false,

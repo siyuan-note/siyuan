@@ -145,8 +145,6 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			attrView, err := av.ParseAttributeView(node.AttributeViewID)
 			if nil == err {
 				buf := bytes.Buffer{}
-				buf.WriteString(attrView.Name)
-				buf.WriteString(" ")
 				for _, v := range attrView.Views {
 					buf.WriteString(v.Name)
 					buf.WriteString(" ")
@@ -393,6 +391,7 @@ var typeAbbrMap = map[string]string{
 	"NodeParagraph":        "p",
 	"NodeHTMLBlock":        "html",
 	"NodeBlockQueryEmbed":  "query_embed",
+	"NodeAttributeView":    "av",
 	"NodeKramdownBlockIAL": "ial",
 	"NodeIFrame":           "iframe",
 	"NodeWidget":           "widget",

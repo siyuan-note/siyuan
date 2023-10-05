@@ -18,7 +18,8 @@ import {App} from "../../index";
 import {
     assetFilterMenu,
     assetInputEvent,
-    assetMethodMenu, assetMoreMenu,
+    assetMethodMenu,
+    assetMoreMenu,
     renderNextAssetMark,
     renderPreview,
 } from "../../search/assets";
@@ -482,6 +483,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             superBlock: window.siyuan.config.search.superBlock,
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
+                            databaseBlock: window.siyuan.config.search.databaseBlock,
                         }
                     }, config);
                 });

@@ -18,6 +18,7 @@ package treenode
 
 import (
 	"bytes"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"strings"
 	"sync"
 
@@ -139,6 +140,19 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 
 	if ast.NodeDocument == node.Type {
 		return node.IALAttr("title")
+	} else if ast.NodeAttributeView == node.Type {
+		if "" != node.AttributeViewID {
+			attrView, err := av.ParseAttributeView(node.AttributeViewID)
+			if nil == err {
+				buf := bytes.Buffer{}
+				for _, v := range attrView.Views {
+					buf.WriteString(v.Name)
+					buf.WriteString(" ")
+				}
+				return strings.TrimSpace(buf.String())
+			}
+		}
+		return ""
 	}
 
 	buf := bytes.Buffer{}

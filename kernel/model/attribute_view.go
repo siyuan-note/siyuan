@@ -992,7 +992,6 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = operation.Name
-				keyValues.Key.Icon = operation.Data.(string)
 				keyValues.Key.Type = colType
 				break
 			}

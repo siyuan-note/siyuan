@@ -34,6 +34,7 @@ type TOperation =
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
     | "setAttrViewName"
+    | "setAttrViewColIcon"
     | "setAttrViewFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"

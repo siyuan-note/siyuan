@@ -191,7 +191,7 @@ export const addEmoji = (unicode: string) => {
     fetchPost("/api/setting/setEmoji", {emoji: window.siyuan.config.editor.emoji});
 };
 
-export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition) => {
+export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, avCB?: (emoji: string) => void) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
     } else {
@@ -303,7 +303,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                     updateOutlineEmoji(unicode, id);
                 });
             } else {
-
+                avCB(unicode);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -395,7 +395,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     updateOutlineEmoji("", id);
                 });
             } else {
-
+                avCB("");
             }
             return;
         }
@@ -429,7 +429,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     updateOutlineEmoji(unicode, id);
                 });
             } else {
-
+                avCB(unicode);
             }
             return;
         }

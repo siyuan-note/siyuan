@@ -3,6 +3,7 @@ import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
 import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
+import {unicode2Emoji} from "../../../emoji";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -32,11 +33,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-dtype="${column.type}"  
+                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}"  
 style="width: ${column.width || "200px"};
 ${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
-        <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
+        ${column.icon ? unicode2Emoji(column.icon) : `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
     </div>
     <div class="av__widthdrag"></div>

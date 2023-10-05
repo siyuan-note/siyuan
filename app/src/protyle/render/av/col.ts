@@ -399,6 +399,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     y: rect.bottom,
                     h: rect.height,
                     w: rect.width
+                }, (unicode) => {
+                    transaction(protyle, [{
+                        action: "setAttrViewColIcon",
+                        id: colId,
+                        avID,
+                        data: unicode,
+                    }], [{
+                        action: "setAttrViewColIcon",
+                        id: colId,
+                        avID,
+                        data: cellElement.dataset.icon,
+                    }]);
                 });
                 event.preventDefault();
                 event.stopPropagation();

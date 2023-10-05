@@ -225,13 +225,13 @@
     flex: 1;
     overflow: hidden;
 
-    & > svg,
-    & > img {
-      height: 12px;
-      width: 12px;
+    & > .av__cellicon {
+      height: 1em;
+      width: 1em;
       color: var(--b3-theme-on-surface);
-      margin-right: 5px;
+      margin: 0 5px 0 0;
       flex-shrink: 0;
+      line-height: 1em;
     }
   }
 

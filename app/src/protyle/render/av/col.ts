@@ -6,8 +6,8 @@ import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
-import {removeAttrViewColAnimation} from "./action";
-import {openEmojiPanel} from "../../../emoji";
+import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -103,7 +103,7 @@ export const getEditHTML = (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span style="padding: 5px;margin-right: 8px;" class="block__icon block__icon--show" data-type="update-icon"><svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg></span>
+    <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
     <span class="b3-menu__label"><input data-type="name" style="margin: 4px 0" class="b3-text-field" type="text" value="${colData.name}"></span>
 </button>`;
     if (colData.options && colData.options.length > 0) {
@@ -179,6 +179,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
             type: colData.type,
         }]);
         colData.name = newValue;
+        updateAttrViewCellAnimation(options.protyle.wysiwyg.element.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
     });
     nameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -367,9 +368,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
+    const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
-        if (newValue === cellElement.textContent.trim()) {
+        if (newValue === oldValue) {
             return;
         }
         transaction(protyle, [{
@@ -382,14 +384,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             action: "updateAttrViewCol",
             id: colId,
             avID,
-            name: cellElement.textContent.trim(),
+            name: oldValue,
             type,
         }]);
+        updateAttrViewCellAnimation(cellElement);
     });
     menu.addItem({
-        iconHTML: `<span style="align-self: center;margin-right: 8px;" class="block__icon block__icon--show"><svg><use xlink:href="#${getColIconByType(type)}"></use></svg></span>`,
+        iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
         type: "readonly",
-        label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
+        label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${oldValue}">`,
         bind(element) {
             const iconElement = element.querySelector(".block__icon") as HTMLElement
             iconElement.addEventListener("click", (event) => {
@@ -411,6 +414,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         avID,
                         data: cellElement.dataset.icon,
                     }]);
+                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`
+                    updateAttrViewCellAnimation(cellElement);
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -564,7 +569,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     avID,
                 }], [{
                     action: "addAttrViewCol",
-                    name: cellElement.textContent.trim(),
+                    name: oldValue,
                     avID,
                     type: type,
                     id: colId

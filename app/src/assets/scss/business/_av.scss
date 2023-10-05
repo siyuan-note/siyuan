@@ -225,7 +225,8 @@
     flex: 1;
     overflow: hidden;
 
-    & > svg {
+    & > svg,
+    & > img {
       height: 12px;
       width: 12px;
       color: var(--b3-theme-on-surface);

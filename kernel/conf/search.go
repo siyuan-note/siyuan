@@ -189,6 +189,13 @@ func (s *Search) TypeFilter() string {
 		buf.WriteByte('\'')
 		buf.WriteString(",")
 	}
+	if s.DatabaseBlock {
+		buf.WriteByte('\'')
+		buf.WriteString(treenode.TypeAbbr(ast.NodeAttributeView.String()))
+		buf.WriteByte('\'')
+		buf.WriteString(",")
+	}
+
 	// 无法搜索到 iframe 块、视频块和音频块 https://github.com/siyuan-note/siyuan/issues/3604
 	buf.WriteString("'iframe','video','audio',")
 	// 挂件块支持内置属性搜索 https://github.com/siyuan-note/siyuan/issues/4497

@@ -50,13 +50,18 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 
 	buf := &bytes.Buffer{}
 	ial := GetBlockAttrs(blockID)
-	dataModel := map[string]string{} // 复制一份 IAL 以避免修改原始数据
+	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
 	}
 	for _, rowValue := range rowValues {
 		if 0 < len(rowValue.Values) {
-			dataModel[rowValue.Key.Name] = rowValue.Values[0].String()
+			v := rowValue.Values[0]
+			if av.KeyTypeNumber == v.Type {
+				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else {
+				dataModel[rowValue.Key.Name] = v.String()
+			}
 		}
 	}
 	if err := tpl.Execute(buf, dataModel); nil != err {

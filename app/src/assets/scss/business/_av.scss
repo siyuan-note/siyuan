@@ -240,6 +240,18 @@
       right: 5px;
     }
 
+    &[data-wrap=true] {
+      white-space: pre-wrap;
+    }
+
+    &[data-wrap=false] {
+      white-space: nowrap;
+
+      img.av__cellassetimg {
+        max-height: 26px;
+      }
+    }
+
     &:hover .block__icon {
       opacity: 1;
       background-color: var(--b3-theme-background-light) !important;
@@ -265,6 +277,7 @@
   &__celltext {
     width: 100%;
     overflow: hidden;
+    line-height: normal;
 
     .b3-chip {
       margin: 1px 2px;
@@ -380,10 +393,4 @@
       background-color: transparent;
     }
   }
-}
-
-img.av__cellassetimg {
-  border-radius: var(--b3-border-radius);
-  margin: 1px 2px;
-  width: 100%;
 }

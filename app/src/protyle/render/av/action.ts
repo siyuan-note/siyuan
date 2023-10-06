@@ -163,7 +163,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
         cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
-            item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+            item.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconUncheck");
             item.classList.remove("av__row--select");
         });
         popTextCell(protyle, [cellElement]);
@@ -225,7 +225,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
         });
-        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
+        blockElement.querySelectorAll(".av__firstcol .icon__check use").forEach(item => {
             item.setAttribute("xlink:href", "#iconUncheck");
         });
     }
@@ -235,7 +235,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         return true;
     }
     rowElement.classList.add("av__row--select");
-    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+    rowElement.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconCheck");
     const rowIds: string[] = [];
     const blockIds: string[] = [];
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");

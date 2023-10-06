@@ -205,7 +205,7 @@ export const setFilter = (options: {
 </span>`,
                 bind(element) {
                     element.addEventListener("click", () => {
-                        const useElement = element.querySelector(".icon__check use");
+                        const useElement = element.querySelector("use");
                         if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                             useElement.setAttribute("xlink:href", "#iconCheck");
                         } else {

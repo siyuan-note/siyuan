@@ -67,8 +67,14 @@
   &__gutters {
     @extend .protyle-gutters;
     position: absolute;
-    left: -24px;
+    line-height: normal;
+    top: 0;
+    left: 0;
     opacity: 0;
+
+    button {
+      padding: 0;
+    }
   }
 
   &__mask {
@@ -86,7 +92,6 @@
 
   &__body {
     float: left;
-    margin-left: 22px;
   }
 
   &__row {
@@ -108,10 +113,6 @@
 
     &--select {
       background-color: var(--b3-theme-primary-lightest);
-
-      .av__firstcol svg {
-        opacity: 1;
-      }
     }
 
     &--header {
@@ -178,11 +179,16 @@
 
     &--add {
       color: var(--b3-theme-on-surface);
-      padding: 5px 5px 5px 7px;
       display: flex;
-      align-items: center;
       transition: background 20ms ease-in 0s;
       font-size: 87.5%;
+
+      .av__calc {
+        padding: 5px;
+        align-items: center;
+        position: sticky;
+        left: 49px;
+      }
 
       svg {
         height: 12px;
@@ -195,6 +201,28 @@
       &:hover {
         background-color: var(--b3-list-icon-hover);
       }
+    }
+  }
+
+  &__firstcol,
+  &__firstcol--padding {
+    display: flex;
+    flex-direction: row-reverse;
+
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 48px;
+    background-color: var(--b3-theme-background);
+    border-right: 1px solid var(--b3-theme-surface-lighter);
+
+    svg {
+      color: var(--b3-theme-on-surface);
+      height: 36px;
+      width: 24px;
+      padding: 5px;
+      box-sizing: border-box;
+      float: left;
     }
   }
 
@@ -266,22 +294,6 @@
         width: 10px;
         flex-shrink: 0;
       }
-    }
-  }
-
-  &__firstcol {
-    svg {
-      color: var(--b3-theme-on-surface);
-      height: 36px;
-      width: 24px;
-      opacity: 0;
-      padding: 5px;
-      box-sizing: border-box;
-      float: left;
-    }
-
-    &:hover svg {
-      opacity: 1;
     }
   }
 

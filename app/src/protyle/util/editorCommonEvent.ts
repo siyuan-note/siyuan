@@ -724,7 +724,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (!blockElement) {
                     return;
                 }
-                const rowElement = target.parentElement;
+                const rowElement = target.parentElement.parentElement;
                 const selectIds = [];
                 if (rowElement.classList.contains("av__row--select")) {
                     rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {

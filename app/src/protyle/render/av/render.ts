@@ -54,10 +54,12 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
-    <button><svg><use xlink:href="#iconDrag"></use></svg></button>
-</div>
-<div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
+<div class="av__firstcol">
+    <div class="av__gutters ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
+        <button><svg><use xlink:href="#iconDrag"></use></svg></button>
+    </div>
+    <svg class="icon__check"><use xlink:href="#iconUncheck"></use></svg>
+</div>`;
                     row.cells.forEach((cell, index) => {
                         if (data.columns[index].hidden) {
                             return;
@@ -161,10 +163,14 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-                ${window.siyuan.languages.addAttr}
+                <div class="av__firstcol--padding">
+                    <svg><use xlink:href="#iconAdd"></use></svg>
+                </div>
+                <div class="av__calc" style>
+                    ${window.siyuan.languages.addAttr}
+                </div>
             </div>
-            <div class="av__row--footer"><div style="width: 24px"></div>${calcHTML}</div>
+            <div class="av__row--footer"><div class="av__firstcol--padding"></div>${calcHTML}</div>
         </div>
     </div>
 </div>`;

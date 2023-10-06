@@ -53,29 +53,29 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const checkElement = hasClosestByClassName(event.target, "av__firstcol");
-    if (checkElement) {
+    const firstcolElement = hasClosestByClassName(event.target, "av__firstcol");
+    if (firstcolElement) {
         window.siyuan.menus.menu.remove();
-        const rowElement = checkElement.parentElement;
-        const useElement = checkElement.querySelector("use");
+        const rowElement = firstcolElement.parentElement;
+        const useElement = firstcolElement.querySelector(".icon__check use");
         if (rowElement.classList.contains("av__row--header")) {
             if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
                 rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                    item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
+                    item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconUncheck");
                     item.parentElement.classList.remove("av__row--select");
                 });
             } else {
                 rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                    item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
+                    item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconCheck");
                     item.parentElement.classList.add("av__row--select");
                 });
             }
         } else {
             if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
-                checkElement.parentElement.classList.add("av__row--select");
+                firstcolElement.parentElement.classList.add("av__row--select");
                 useElement.setAttribute("xlink:href", "#iconCheck");
             } else {
-                checkElement.parentElement.classList.remove("av__row--select");
+                firstcolElement.parentElement.classList.remove("av__row--select");
                 useElement.setAttribute("xlink:href", "#iconUncheck");
             }
         }

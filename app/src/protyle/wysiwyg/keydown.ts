@@ -1470,37 +1470,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (matchHotKey("⌘C", event) && selectText === "") {
-            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements.push(nodeElement);
+        // 支持非编辑块复制 https://ld246.com/article/1695353747104
+        if ((matchHotKey("⌘X", event) || matchHotKey("⌘C", event)) && selectText === "") {
+            if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length === 0) {
+                if (nodeElement.dataset.type !== "NodeHTMLBlock") {
+                    // html 块不需要选中 https://github.com/siyuan-note/siyuan/issues/8706
+                    nodeElement.classList.add("protyle-wysiwyg--select");
+                }
             }
-            let html = "";
-            selectElements.forEach(item => {
-                html += removeEmbed(item);
-            });
-            if (html !== "") {
-                // HTML 块选中部分内容时不写入剪切板 https://github.com/siyuan-note/siyuan/issues/5521
-                // 从下往上选中 HTML 块需可以复制  https://github.com/siyuan-note/siyuan/issues/8706
-                writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-            }
-        }
-
-        if (matchHotKey("⌘X", event) && selectText === "") {
-            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements.push(nodeElement);
-            }
-            let html = "";
-            selectElements.forEach(item => {
-                html += removeEmbed(item);
-            });
-            writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-            removeBlock(protyle, nodeElement, range);
-            event.preventDefault();
-            event.stopPropagation();
+            // 复制块不能单纯的 BlockDOM2StdMd，否则 https://github.com/siyuan-note/siyuan/issues/9362
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {

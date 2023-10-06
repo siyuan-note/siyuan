@@ -390,7 +390,8 @@
   &.protyle-wysiwyg--select,
   &.protyle-wysiwyg--hl {
     .av__row--header,
-    .av__row--footer {
+    .av__row--footer,
+    .av__firstcol {
       background-color: transparent;
     }
   }

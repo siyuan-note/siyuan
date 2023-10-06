@@ -190,22 +190,13 @@
         left: 49px;
       }
 
-      svg {
-        height: 12px;
-        width: 12px;
-        color: var(--b3-theme-on-surface);
-        margin-right: 5px;
-        flex-shrink: 0;
-      }
-
       &:hover {
         background-color: var(--b3-list-icon-hover);
       }
     }
   }
 
-  &__firstcol,
-  &__firstcol--padding {
+  &__firstcol {
     display: flex;
     flex-direction: row-reverse;
 

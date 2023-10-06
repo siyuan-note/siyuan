@@ -27,7 +27,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg class="icon__check"><use xlink:href="#iconUncheck"></use></svg></div>';
                 let calcHTML = "";
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
@@ -163,14 +163,14 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
-                <div class="av__firstcol--padding">
+                <div class="av__firstcol">
                     <svg><use xlink:href="#iconAdd"></use></svg>
                 </div>
                 <div class="av__calc" style>
                     ${window.siyuan.languages.addAttr}
                 </div>
             </div>
-            <div class="av__row--footer"><div class="av__firstcol--padding"></div>${calcHTML}</div>
+            <div class="av__row--footer"><div class="av__firstcol"></div>${calcHTML}</div>
         </div>
     </div>
 </div>`;

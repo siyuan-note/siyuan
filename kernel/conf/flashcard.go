@@ -28,6 +28,7 @@ type Flashcard struct {
 	Mark            bool `json:"mark"`            // 是否启用标记制卡 https://github.com/siyuan-note/siyuan/issues/7794
 	List            bool `json:"list"`            // 是否启用列表块制卡 https://github.com/siyuan-note/siyuan/issues/7701
 	SuperBlock      bool `json:"superBlock"`      // 是否启用超级块制卡 https://github.com/siyuan-note/siyuan/issues/7702
+	Heading         bool `json:"heading"`         // 是否启用标题块制卡 https://github.com/siyuan-note/siyuan/issues/9005
 	Deck            bool `json:"deck"`            // 是否启用卡包制卡 https://github.com/siyuan-note/siyuan/issues/7724
 
 	// Apply result optimized by FSRS optimizer https://github.com/siyuan-note/siyuan/issues/9309
@@ -52,6 +53,7 @@ func NewFlashcard() *Flashcard {
 		Mark:             true,
 		List:             true,
 		SuperBlock:       true,
+		Heading:          true,
 		Deck:             false,
 		RequestRetention: param.RequestRetention,
 		MaximumInterval:  int(param.MaximumInterval),

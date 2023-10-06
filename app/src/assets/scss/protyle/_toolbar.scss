@@ -55,7 +55,7 @@
     z-index: 5;
     overflow: auto;
     max-height: 402px;
-    box-sizing: border-box;
+    // 不能使用，否则 hint emoji 出现双滚动条 box-sizing: border-box;
     padding: 8px 0;
     display: flex;
     flex-direction: column;

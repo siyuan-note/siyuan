@@ -203,7 +203,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 action: "delete",
                 id,
             });
-            sideElement = getPreviousBlock(topElement) || getNextBlock(topElement) || topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
+            sideElement = getNextBlock(topElement) || getPreviousBlock(topElement) || topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
                 // https://github.com/siyuan-note/siyuan/issues/2188
                 setFold(protyle, topElement, undefined, true);
@@ -268,8 +268,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     sideElement = undefined;
                     focusByWbr(emptyElement, range);
                 }
-
-                focusBlock(sideElement, undefined, false);
+                // https://github.com/siyuan-note/siyuan/issues/5485
+                focusBlock(sideElement);
                 scrollCenter(protyle, sideElement);
                 if (listElement) {
                     inserts.push({

@@ -203,6 +203,8 @@ func getRefText(defBlockID string) string {
 		return block.Content
 	case "query_embed":
 		return "Query Embed Block " + block.Markdown
+	case "av":
+		return "Database " + block.Markdown
 	case "iframe":
 		return "IFrame " + block.Markdown
 	case "tb":

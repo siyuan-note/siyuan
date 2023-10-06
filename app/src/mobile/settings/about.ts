@@ -40,7 +40,7 @@ export const initAbout = () => {
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
 </div>
-<div class="b3-label${(window.siyuan.config.readonly || isBrowser()) ? " fn__none" : ""}">
+<div class="b3-label${((window.siyuan.config.readonly || isBrowser()) && !isInIOS() && !isInAndroid()) ? " fn__none" : ""}">
     ${window.siyuan.languages.about5}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="authCode">

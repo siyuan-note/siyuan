@@ -3,6 +3,7 @@ import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
 import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
+import {unicode2Emoji} from "../../../emoji";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -32,11 +33,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" 
+                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" 
 style="width: ${column.width || "200px"};
 ${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
-        <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
+        ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
     </div>
     <div class="av__widthdrag"></div>
@@ -85,7 +86,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }
                         } else if (cell.valueType === "number") {
-                            text = `<span class="av__celltext" data-content="${cell.value?.number.content || ""}">${cell.value?.number.formattedContent || ""}</span>`;
+                            text = `<span class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
                             cell.value?.mSelect?.forEach((item) => {
                                 text += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;

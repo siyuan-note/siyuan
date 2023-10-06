@@ -82,11 +82,12 @@ type Key struct {
 	Template     string             `json:"template"`          // 模板内容
 }
 
-func NewKey(id, name string, keyType KeyType) *Key {
+func NewKey(id, name, icon string, keyType KeyType) *Key {
 	return &Key{
 		ID:   id,
 		Name: name,
 		Type: keyType,
+		Icon: icon,
 	}
 }
 
@@ -397,7 +398,7 @@ type Viewable interface {
 
 func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
-	key := NewKey(ast.NewNodeID(), "Block", KeyTypeBlock)
+	key := NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
@@ -492,4 +493,8 @@ func GetAttributeViewDataPath(avID string) (ret string) {
 var (
 	ErrViewNotFound = errors.New("view not found")
 	ErrKeyNotFound  = errors.New("key not found")
+)
+
+const (
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
 )

@@ -368,7 +368,7 @@ ${genHintItemHTML(item)}
             }
             lazyLoadEmojiImg(panelElement);
         } else {
-            this.element.innerHTML = `<div class="emojis">
+            this.element.innerHTML = `<div style="padding: 0" class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     <button data-type="0" class="emojis__type ariaLabel" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</button>
@@ -767,8 +767,9 @@ ${genHintItemHTML(item)}
                     const rect = nodeElement.getBoundingClientRect();
                     window.siyuan.menus.menu.popup({
                         x: rect.left,
-                        y: rect.top
-                    }, true);
+                        y: rect.top,
+                        isLeft: true
+                    });
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]');
                     itemElement.classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));

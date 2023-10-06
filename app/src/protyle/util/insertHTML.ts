@@ -18,8 +18,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
     fixTableRange(range);
+    let tableInlineHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
-        html = protyle.lute.BlockDOM2InlineBlockDOM(html);
+        tableInlineHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;
     if (!blockElement) {
@@ -102,7 +103,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     const tempElement = document.createElement("template");
     // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
-    tempElement.innerHTML = protyle.lute.SpinBlockDOM(html) ||
+    tempElement.innerHTML = tableInlineHTML // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
+        || protyle.lute.SpinBlockDOM(html) ||
         html;   // 空格会被 Spin 不再，需要使用原文
     const editableElement = getContenteditableElement(blockElement);
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
@@ -154,7 +156,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             if (editWbrElement && editableElement && !trimStartText.endsWith("\n")) {
                 // 数学公式后无换行，后期渲染后添加导致 rang 错误，中文输入错误 https://github.com/siyuan-note/siyuan/issues/9054
                 const previousElement = hasPreviousSibling(editWbrElement) as HTMLElement;
-                if (previousElement && previousElement.nodeType !== 3 && previousElement.dataset.type.indexOf("inline-math") > -1 &&
+                if (previousElement && previousElement.nodeType !== 3 && (previousElement.dataset.type || "").indexOf("inline-math") > -1 &&
                     !hasNextSibling(editWbrElement)) {
                     editWbrElement.insertAdjacentText("afterend", "\n");
                 }

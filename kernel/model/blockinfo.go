@@ -114,6 +114,19 @@ func GetBlockRefText(id string) string {
 	if nil == node {
 		return ErrBlockNotFound.Error()
 	}
+
+	// Block ref anchor text no longer contains contents of inline-level memos https://github.com/siyuan-note/siyuan/issues/9363
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsTextMarkType("inline-memo") {
+			n.TextMarkInlineMemoContent = ""
+			return ast.WalkContinue
+		}
+		return ast.WalkContinue
+	})
 	return getNodeRefText(node)
 }
 

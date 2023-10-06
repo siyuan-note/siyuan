@@ -4,6 +4,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {Menu} from "../../../plugin/Menu";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCtrl} from "../../util/compatibility";
+import {objEquals} from "../../../util/functions";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -438,6 +439,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             inputValue.content = parseFloat(inputValue.content as string);
             inputValue.isNotEmpty = !!inputValue.content;
         }
+        if (objEquals(inputValue, oldValue)) {
+            return;
+        }
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
@@ -460,7 +464,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         });
         updateAttrViewCellAnimation(item);
     });
-    transaction(protyle, doOperations, undoOperations);
+    if (doOperations.length > 0) {
+        transaction(protyle, doOperations, undoOperations);
+    }
     setTimeout(() => {
         avMaskElement.remove();
     });

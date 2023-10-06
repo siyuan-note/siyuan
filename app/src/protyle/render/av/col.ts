@@ -353,7 +353,7 @@ export const addAttrViewColAnimation = (options: {
         }
         let html = "";
         if (index === 0) {
-            html = `<div class="av__cell" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
+            html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
     <div draggable="true" class="av__cellheader">
         ${options.icon ? unicode2Emoji(options.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
         <span class="av__celltext">${options.name}</span>
@@ -400,7 +400,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${oldValue}">`,
         bind(element) {
             const iconElement = element.querySelector(".block__icon") as HTMLElement;
-            iconElement.setAttribute("data-icon", iconElement.dataset.icon);
+            iconElement.setAttribute("data-icon", cellElement.dataset.icon);
             iconElement.addEventListener("click", (event) => {
                 const rect = iconElement.getBoundingClientRect();
                 openEmojiPanel("", "av", {

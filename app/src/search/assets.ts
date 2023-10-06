@@ -409,7 +409,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
     /// #endif
 };
 
@@ -559,6 +559,6 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
     /// #endif
 };

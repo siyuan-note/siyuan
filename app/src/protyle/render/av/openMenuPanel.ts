@@ -9,11 +9,12 @@ import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
-import {removeAttrViewColAnimation} from "./action";
+import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {pathPosix} from "../../../util/pathName";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -501,6 +502,32 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "update-icon") {
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width
+                    }, (unicode) => {
+                        const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                        transaction(options.protyle, [{
+                            action: "setAttrViewColIcon",
+                            id: colId,
+                            avID,
+                            data: unicode,
+                        }], [{
+                            action: "setAttrViewColIcon",
+                            id: colId,
+                            avID,
+                            data: target.dataset.icon,
+                        }]);
+                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`
+                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`))
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "showAllCol") {
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
@@ -681,7 +708,12 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addAssetExist") {
                     const rect = target.getBoundingClientRect();
-                    options.protyle.toolbar.showAssets(options.protyle, {x: rect.right, y: rect.bottom, w: target.parentElement.clientWidth + 8, h: rect.height}, (url) => {
+                    options.protyle.toolbar.showAssets(options.protyle, {
+                        x: rect.right,
+                        y: rect.bottom,
+                        w: target.parentElement.clientWidth + 8,
+                        h: rect.height
+                    }, (url) => {
                         let value: IAVCellAssetValue;
                         if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
                             value = {

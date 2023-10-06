@@ -251,7 +251,7 @@
 #loadingBar {
   position: absolute;
   height: 4px;
-  background-color: var(--b3-theme-on-background);
+  background-color: var(--b3-theme-primary-lightest);
   transition-duration: 200ms;
   transition-timing-function: ease;
   z-index: 3;

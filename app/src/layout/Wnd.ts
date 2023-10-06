@@ -628,7 +628,8 @@ export class Wnd {
         window.siyuan.menus.menu.popup({
             x: rect.left + rect.width,
             y: rect.top + rect.height,
-        }, true);
+            isLeft: true
+        });
     }
 
     private removeOverCounter(oldFocusIndex?: number) {

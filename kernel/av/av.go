@@ -493,3 +493,7 @@ var (
 	ErrViewNotFound = errors.New("view not found")
 	ErrKeyNotFound  = errors.New("key not found")
 )
+
+const (
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
+)

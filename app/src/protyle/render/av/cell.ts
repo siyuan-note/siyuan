@@ -164,6 +164,7 @@ const calcItem = (options: {
         }
     });
 };
+
 export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     const blockElement = hasClosestBlock(calcElement);
     if (!blockElement) {

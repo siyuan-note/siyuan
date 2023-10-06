@@ -288,7 +288,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			tableRow.ID = rowID
 
 			// 格式化数字
-			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number {
+			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number && tableCell.Value.Number.IsNotEmpty {
 				tableCell.Value.Number.Format = col.NumberFormat
 				tableCell.Value.Number.FormatNumber()
 			}

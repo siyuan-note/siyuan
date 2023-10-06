@@ -34,7 +34,6 @@ type TOperation =
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
     | "setAttrViewName"
-    | "setAttrViewColIcon"
     | "setAttrViewFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"
@@ -46,7 +45,7 @@ type TEventBus = "ws-main" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
-    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
+    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" |
@@ -237,7 +236,6 @@ interface ISearchOption {
         codeBlock: boolean
         htmlBlock: boolean
         embedBlock: boolean
-        databaseBlock: boolean
     }
 }
 
@@ -656,7 +654,6 @@ interface IConfig {
         mark: boolean
         list: boolean
         superBlock: boolean
-        heading: boolean
         deck: boolean
         requestRetention: number
         maximumInterval: number
@@ -752,7 +749,6 @@ interface IConfig {
         sort: number
     }
     search: {
-        databaseBlock: boolean
         embedBlock: boolean
         htmlBlock: boolean
         document: boolean

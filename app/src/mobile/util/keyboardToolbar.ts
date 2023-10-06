@@ -635,8 +635,7 @@ export const initKeyboardToolbar = () => {
         } else if (type === "more") {
             protyle.breadcrumb.showMenu(protyle, {
                 x: 0,
-                y: 0,
-                isLeft: true
+                y: 0
             });
             activeBlur();
             hideKeyboardToolbar();

@@ -601,7 +601,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle.gutter.renderMultipleMenu(protyle, selectElements);
             }
             const rect = nodeElement.getBoundingClientRect();
-            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top, isLeft: true});
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
             return;
         }
 
@@ -1471,13 +1471,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey("⌘C", event) && selectText === "") {
-            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements.push(nodeElement);
-            }
             let html = "";
-            selectElements.forEach(item => {
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 html += removeEmbed(item);
             });
             if (html !== "") {
@@ -1488,17 +1483,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey("⌘X", event) && selectText === "") {
-            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements.push(nodeElement);
-            }
             let html = "";
+            nodeElement.classList.add("protyle-wysiwyg--select");
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             selectElements.forEach(item => {
                 html += removeEmbed(item);
             });
             writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
+            const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
             removeBlock(protyle, nodeElement, range);
+            if (nextElement) {
+                focusBlock(nextElement);
+            }
             event.preventDefault();
             event.stopPropagation();
         }

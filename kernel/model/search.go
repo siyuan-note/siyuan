@@ -604,7 +604,6 @@ func buildTypeFilter(types map[string]bool) string {
 		s.Paragraph = types["paragraph"]
 		s.HTMLBlock = types["htmlBlock"]
 		s.EmbedBlock = types["embedBlock"]
-		s.DatabaseBlock = types["databaseBlock"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -618,7 +617,6 @@ func buildTypeFilter(types map[string]bool) string {
 		s.Paragraph = Conf.Search.Paragraph
 		s.HTMLBlock = Conf.Search.HTMLBlock
 		s.EmbedBlock = Conf.Search.EmbedBlock
-		s.DatabaseBlock = Conf.Search.DatabaseBlock
 	}
 	return s.TypeFilter()
 }

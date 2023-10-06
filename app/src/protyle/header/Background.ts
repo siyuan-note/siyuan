@@ -177,13 +177,7 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "open-emoji") {
-                    const rect = this.iconElement.getBoundingClientRect();
-                    openEmojiPanel(protyle.block.rootID, "doc", {
-                        x: rect.left,
-                        y: rect.bottom,
-                        h: rect.height,
-                        w: rect.width
-                    });
+                    openEmojiPanel(protyle.block.rootID, this.iconElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

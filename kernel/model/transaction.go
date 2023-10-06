@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -64,6 +65,11 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
+var (
+	txQueue     []*Transaction
+	txQueueLock = sync.Mutex{}
+)
+
 func WaitForWritingFiles() {
 	var printLog bool
 	var lastPrintLog bool
@@ -80,34 +86,25 @@ func WaitForWritingFiles() {
 	}
 }
 
-var (
-	txQueue   = make(chan *Transaction, 7)
-	flushLock = sync.Mutex{}
-)
-
 func isWritingFiles() bool {
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	return 0 < len(txQueue) || util.IsMutexLocked(&flushLock)
+	return 0 < len(txQueue) || util.IsMutexLocked(&txQueueLock) || util.IsMutexLocked(&flushLock)
 }
 
-func init() {
-	go func() {
-		for {
-			select {
-			case tx := <-txQueue:
-				flushTx(tx)
-			}
-		}
-	}()
+func FlushTxJob() {
+	flushTx()
 }
 
-func flushTx(tx *Transaction) {
+var flushLock = sync.Mutex{}
+
+func flushTx() {
 	defer logging.Recover()
 	flushLock.Lock()
 	defer flushLock.Unlock()
 
+	currentTx := mergeTx()
 	start := time.Now()
-	if txErr := performTx(tx); nil != txErr {
+	if txErr := performTx(currentTx); nil != txErr {
 		switch txErr.code {
 		case TxErrCodeBlockNotFound:
 			util.PushTxErr("Transaction failed", txErr.code, nil)
@@ -119,17 +116,48 @@ func flushTx(tx *Transaction) {
 		}
 	}
 	elapsed := time.Now().Sub(start).Milliseconds()
-	if 0 < len(tx.DoOperations) {
+	if 0 < len(currentTx.DoOperations) {
 		if 2000 < elapsed {
 			logging.LogWarnf("op tx [%dms]", elapsed)
 		}
 	}
 }
 
-func PerformTransactions(transactions *[]*Transaction) {
-	for _, tx := range *transactions {
-		txQueue <- tx
+func mergeTx() (ret *Transaction) {
+	txQueueLock.Lock()
+	defer txQueueLock.Unlock()
+
+	ret = &Transaction{}
+	var doOps []*Operation
+	for _, tx := range txQueue {
+		for _, op := range tx.DoOperations {
+			if l := len(doOps); 0 < l {
+				lastOp := doOps[l-1]
+				if "update" == lastOp.Action && "update" == op.Action && lastOp.ID == op.ID { // 连续相同的更新操作
+					lastOp.discard = true
+				}
+			}
+			doOps = append(doOps, op)
+		}
 	}
+
+	for _, op := range doOps {
+		if !op.discard {
+			ret.DoOperations = append(ret.DoOperations, op)
+		}
+	}
+
+	txQueue = nil
+	return
+}
+
+func PerformTransactions(transactions *[]*Transaction) {
+	txQueueLock.Lock()
+	txQueue = append(txQueue, *transactions...)
+	sort.Slice(txQueue, func(i, j int) bool {
+		return txQueue[i].Timestamp < txQueue[j].Timestamp
+	})
+	txQueueLock.Unlock()
 	return
 }
 
@@ -206,8 +234,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColumnWrap(op)
 		case "setAttrViewColHidden":
 			ret = tx.doSetAttrViewColumnHidden(op)
-		case "setAttrViewColIcon":
-			ret = tx.doSetAttrViewColumnIcon(op)
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
@@ -714,7 +740,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
-	avs := node.IALAttr(av.NodeAttrNameAvs)
+	avs := node.IALAttr(NodeAttrNameAvs)
 	if "" == avs {
 		return
 	}
@@ -1233,7 +1259,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 	// 2. 更新属性视图主键内容
 	for _, updatedDefNode := range updatedDefNodes {
-		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
+		avs := updatedDefNode.IALAttr(NodeAttrNameAvs)
 		if "" == avs {
 			continue
 		}

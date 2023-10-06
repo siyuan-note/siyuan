@@ -1903,9 +1903,8 @@ export class WYSIWYG {
                 const rect = menuElement.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({
                     x: rect.left,
-                    y: rect.top,
-                    isLeft: true
-                });
+                    y: rect.top
+                }, true);
                 /// #endif
                 event.stopPropagation();
                 event.preventDefault();

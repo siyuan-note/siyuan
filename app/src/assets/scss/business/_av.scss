@@ -253,13 +253,12 @@
     flex: 1;
     overflow: hidden;
 
-    & > .av__cellicon {
-      height: 1em;
-      width: 1em;
+    & > svg {
+      height: 12px;
+      width: 12px;
       color: var(--b3-theme-on-surface);
-      margin: 0 5px 0 0;
+      margin-right: 5px;
       flex-shrink: 0;
-      line-height: 1em;
     }
   }
 

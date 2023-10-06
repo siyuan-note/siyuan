@@ -101,6 +101,7 @@ export class Breadcrumb {
                     this.showMenu(protyle, {
                         x: targetRect.right,
                         y: targetRect.bottom,
+                        isLeft: true,
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -541,7 +542,7 @@ export class Breadcrumb {
             /// #if MOBILE
             window.siyuan.menus.menu.fullscreen();
             /// #else
-            window.siyuan.menus.menu.popup(position, true);
+            window.siyuan.menus.menu.popup(position);
             /// #endif
         });
     }

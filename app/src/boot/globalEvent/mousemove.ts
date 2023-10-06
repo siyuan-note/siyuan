@@ -38,7 +38,7 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
     if (window.siyuan.hideBreadcrumb) {
         window.siyuan.hideBreadcrumb = false;
         getAllEditor().forEach(item => {
-            if (item.protyle.breadcrumb.element.classList.contains("protyle-breadcrumb__bar--hide")) {
+            if (item.protyle.breadcrumb?.element.classList.contains("protyle-breadcrumb__bar--hide")) {
                 item.protyle.breadcrumb.element.classList.remove("protyle-breadcrumb__bar--hide");
                 item.protyle.breadcrumb.render(item.protyle, true);
             }

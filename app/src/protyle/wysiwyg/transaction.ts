@@ -709,7 +709,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
         "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat",
-        "replaceAttrViewBlock", "updateAttrViewColTemplate"].includes(operation.action)) {
+        "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColIcon"].includes(operation.action)) {
         refreshAV(protyle, operation);
     }
 };

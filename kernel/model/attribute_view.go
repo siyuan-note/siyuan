@@ -50,13 +50,18 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 
 	buf := &bytes.Buffer{}
 	ial := GetBlockAttrs(blockID)
-	dataModel := map[string]string{} // 复制一份 IAL 以避免修改原始数据
+	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
 	}
 	for _, rowValue := range rowValues {
 		if 0 < len(rowValue.Values) {
-			dataModel[rowValue.Key.Name] = rowValue.Values[0].String()
+			v := rowValue.Values[0]
+			if av.KeyTypeNumber == v.Type {
+				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else {
+				dataModel[rowValue.Key.Name] = v.String()
+			}
 		}
 	}
 	if err := tpl.Execute(buf, dataModel); nil != err {
@@ -70,7 +75,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 	ret = []*BlockAttributeViewKeys{}
 	attrs := GetBlockAttrs(blockID)
-	avs := attrs[NodeAttrNameAvs]
+	avs := attrs[av.NodeAttrNameAvs]
 	if "" == avs {
 		return
 	}
@@ -283,7 +288,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			tableRow.ID = rowID
 
 			// 格式化数字
-			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number {
+			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number && tableCell.Value.Number.IsNotEmpty {
 				tableCell.Value.Number.Format = col.NumberFormat
 				tableCell.Value.Number.FormatNumber()
 			}
@@ -352,16 +357,13 @@ func setAttributeViewName(operation *Operation) (err error) {
 		return
 	}
 
-	attrView.Name = operation.Data.(string)
-
-	data, err := gulu.JSON.MarshalJSON(attrView)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
-		return
-	}
+	attrView.Name = operation.Data.(string)
+	view.Name = operation.Data.(string)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -554,13 +556,13 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	if !operation.IsDetached {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 
-		if "" == attrs[NodeAttrNameAvs] {
-			attrs[NodeAttrNameAvs] = operation.AvID
+		if "" == attrs[av.NodeAttrNameAvs] {
+			attrs[av.NodeAttrNameAvs] = operation.AvID
 		} else {
-			avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+			avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
 			avIDs = append(avIDs, operation.AvID)
 			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-			attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -628,15 +630,15 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 								node.RemoveIALAttr("custom-hidden")
 							}
 
-							if avs := attrs[NodeAttrNameAvs]; "" != avs {
+							if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
 								avIDs := strings.Split(avs, ",")
 								avIDs = gulu.Str.RemoveElem(avIDs, operation.AvID)
 								if 0 == len(avIDs) {
-									delete(attrs, NodeAttrNameAvs)
-									node.RemoveIALAttr(NodeAttrNameAvs)
+									delete(attrs, av.NodeAttrNameAvs)
+									node.RemoveIALAttr(av.NodeAttrNameAvs)
 								} else {
-									attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
-									node.SetIALAttr(NodeAttrNameAvs, strings.Join(avIDs, ","))
+									attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+									node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 								}
 							}
 
@@ -751,6 +753,31 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 				column.Hidden = operation.Data.(bool)
 				break
 			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnIcon(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColIcon(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColIcon(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == operation.ID {
+			keyValues.Key.Icon = operation.Data.(string)
+			break
 		}
 	}
 
@@ -876,7 +903,11 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 	keyType := av.KeyType(operation.Typ)
 	switch keyType {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate:
-		key := av.NewKey(operation.ID, operation.Name, keyType)
+		var icon string
+		if nil != operation.Data {
+			icon = operation.Data.(string)
+		}
+		key := av.NewKey(operation.ID, operation.Name, icon, keyType)
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
 		switch view.LayoutType {
@@ -1135,17 +1166,17 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 	}
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	if "" == attrs[NodeAttrNameAvs] {
-		attrs[NodeAttrNameAvs] = avID
+	if "" == attrs[av.NodeAttrNameAvs] {
+		attrs[av.NodeAttrNameAvs] = avID
 	} else {
-		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+		avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
 		if gulu.Str.Contains(avID, avIDs) {
 			return
 		}
 
 		avIDs = append(avIDs, avID)
 		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 	}
 
 	if nil != tx {
@@ -1321,7 +1352,3 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	err = av.SaveAttributeView(attrView)
 	return
 }
-
-const (
-	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
-)

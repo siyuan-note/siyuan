@@ -81,6 +81,10 @@
     &--hidesb .protyle-wysiwyg > .sb > div:nth-of-type(n+2):not(.protyle-attr) {
       display: none;
     }
+
+    &--hideh .protyle-wysiwyg > div[data-type="NodeHeading"] ~ div {
+      display: none;
+    }
   }
 }
 

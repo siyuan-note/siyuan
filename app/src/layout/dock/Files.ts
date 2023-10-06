@@ -122,7 +122,13 @@ export class Files extends Model {
                 if (target.classList.contains("b3-list-item__icon")) {
                     event.preventDefault();
                     event.stopPropagation();
-                    openEmojiPanel(target.parentElement.getAttribute("data-url"), target, true);
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel(target.parentElement.getAttribute("data-url"), "notebook", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width,
+                    });
                     break;
                 } else if (type === "toggle") {
                     if (this.closeElement.classList.contains("fn__flex-1")) {
@@ -239,10 +245,21 @@ export class Files extends Model {
                     if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
+                        const rect = target.getBoundingClientRect();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
-                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target);
+                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), "doc", {
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
+                            });
                         } else {
-                            openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
+                            openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), "notebook", {
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
+                            });
                         }
                         break;
                     } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__toggle")) {
@@ -260,7 +277,7 @@ export class Files extends Model {
                                 newFile({
                                     app: options.app,
                                     notebookId,
-                                    currentPath:pathString,
+                                    currentPath: pathString,
                                     useSavePath: false
                                 });
                             } else if (type === "more-root") {

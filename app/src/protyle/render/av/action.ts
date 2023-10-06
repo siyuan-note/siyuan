@@ -339,7 +339,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     });
 };
 
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?:string) => {
+export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = "";
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {

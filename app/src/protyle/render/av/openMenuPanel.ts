@@ -660,6 +660,7 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         avID,
                         colId,
+                        icon: colData.icon,
                         newValue: colData.name
                     });
                     avPanelElement.remove();

@@ -14,7 +14,8 @@ export const duplicateCol = (options: {
     type: TAVCol,
     avID: string,
     colId: string,
-    newValue: string
+    newValue: string,
+    icon: string
 }) => {
     const id = Lute.NewNodeID();
     const nameMatch = options.newValue.match(/^(.*) \((\d+)\)$/);
@@ -38,6 +39,7 @@ export const duplicateCol = (options: {
                 name: options.newValue,
                 avID: options.avID,
                 type: options.type,
+                data: options.icon,
                 id
             }, {
                 action: "sortAttrViewCol",
@@ -61,6 +63,7 @@ export const duplicateCol = (options: {
             name: options.newValue,
             avID: options.avID,
             type: options.type,
+            data: options.icon,
             id
         }, {
             action: "sortAttrViewCol",
@@ -78,6 +81,7 @@ export const duplicateCol = (options: {
         protyle: options.protyle,
         type: options.type,
         name: options.newValue,
+        icon: options.icon,
         previousId: options.colId,
         id
     });
@@ -334,7 +338,8 @@ export const addAttrViewColAnimation = (options: {
     type: TAVCol,
     name: string,
     previousId?: string,
-    id: string
+    id: string,
+    icon?: string
 }) => {
     if (!options.blockElement) {
         return;
@@ -350,7 +355,7 @@ export const addAttrViewColAnimation = (options: {
         if (index === 0) {
             html = `<div class="av__cell" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
     <div draggable="true" class="av__cellheader">
-        <svg><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
+        ${options.icon ? unicode2Emoji(options.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
         <span class="av__celltext">${options.name}</span>
     </div>
     <div class="av__widthdrag"></div>
@@ -394,7 +399,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         type: "readonly",
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${oldValue}">`,
         bind(element) {
-            const iconElement = element.querySelector(".block__icon") as HTMLElement
+            const iconElement = element.querySelector(".block__icon") as HTMLElement;
+            iconElement.setAttribute("data-icon", iconElement.dataset.icon);
             iconElement.addEventListener("click", (event) => {
                 const rect = iconElement.getBoundingClientRect();
                 openEmojiPanel("", "av", {
@@ -414,6 +420,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         avID,
                         data: cellElement.dataset.icon,
                     }]);
+                    iconElement.setAttribute("data-icon", unicode);
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`
                     updateAttrViewCellAnimation(cellElement);
                 });
@@ -555,6 +562,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     type,
                     avID,
                     colId,
+                    icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
                     newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
                 });
             }

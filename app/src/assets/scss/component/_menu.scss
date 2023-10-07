@@ -42,7 +42,7 @@
 
     .b3-menu {
       &__submenu {
-        top: 49.5px;
+        top: 48px;
         left: 0;
         bottom: 0;
         max-height: none;
@@ -317,15 +317,15 @@
 .emojis {
   word-break: break-all;
   white-space: normal;
-  height: 50vh;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  max-height: 386px;
+  padding: 8px 0;
+  height: 100%;
+  box-sizing: border-box;
 
   &__item {
     font-size: 24px;
-    line-height: 24px;
+    line-height: 28px;
     font-family: var(--b3-font-family-emoji);
     text-align: center;
     height: 28px;
@@ -335,7 +335,7 @@
     transition: var(--b3-transition);
     background-color: transparent;
     border: 0;
-    margin: 0;
+    margin: 1px;
     overflow: hidden;
 
     img, svg {

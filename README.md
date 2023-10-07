@@ -42,33 +42,32 @@
 
 ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
-## 🔮 特性
-
-大部分功能是免费的，即使是在商业环境下使用。
-
-* 内容块
-    * 块级引用和双向链接
-    * 自定义属性
-    * SQL 查询嵌入
-    * 协议 `siyuan://`
-* 编辑器
-    * Block 风格
-    * Markdown 所见即所得
-    * 列表大纲
-    * 块缩放聚焦
-    * 块横向排版
-    * 百万字大文档编辑
-    * 数学公式、图表、流程图、甘特图、时序图、五线谱等
-    * 网页剪藏
-    * PDF 标注双链
-* 导出
-    * 引用块和嵌入块
-    * 带 assets 文件夹的标准 Markdown
-    * PDF、Word 和 HTML
-    * 复制到微信公众号、知乎和语雀
-* 间隔重复
-* 模板片段
-* JavaScript/CSS 代码片段
+* Content block
+  * Block-level reference and two-way links
+  * Custom attributes
+  * SQL query embed
+  * Protocol `siyuan://`
+* Editor
+  * Block-style
+  * Markdown WYSIWYG
+  * List outline
+  * Block zoom-in
+  * Block horizontal layout
+  * Million-word large document editing
+  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+  * Web clipping
+  * PDF Annotation link
+* Export
+  * Block ref and embed
+  * Standard Markdown with assets
+  * PDF, Word and HTML
+  * Copy to WeChat MP, Zhihu and Yuque
+* Database
+  * Table view
+* Spaced repetition
+* Multi-tab, drag and drop to split screen
+* Template snippet
+* JavaScript/CSS snippet
 * Android/iOS APP
 * Docker 部署
 * [API](API_zh_CN.md)
@@ -136,17 +135,24 @@
 
 构建 Docker 镜像时设置了入口：`ENTRYPOINT [ "/opt/siyuan/kernel" ]`，使用 `docker run b3log/siyuan` 并带参即可启动：
 
-* `--workspace` 指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
+* `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
+* `--accessAuthCode`: Specifies the access authorization code
 
-更多的参数可参考 `--help`
-。下面是一条启动命令示例：`docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container`
+More parameters can refer to `--help`. The following is an example of a startup command:
 
-* `workspace_dir_host`：宿主机上的工作空间文件夹路径
-* `workspace_dir_container`：容器内工作空间文件夹路径，和后面 `--workspace` 指定成一样的
+```
+docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container --accessAuthCode=xxx
+```
 
-为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 `workspace_dir_host`
-和 `workspace_dir_container` 都配置为 `/siyuan/workspace`
-，对应的启动命令示例：`docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/`。
+* `workspace_dir_host`: The workspace folder path on the host
+* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified in `--workspace`
+* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your data
+
+To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is:
+
+```
+docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
+```
 
 #### 用户权限
 
@@ -237,9 +243,7 @@
   选项，这样思源会自动下载最新版安装包并提示安装
 * 如果是通过手动安装包安装的，请再次下载安装包安装
 
-可在 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>当前版本</kbd> 中 <kbd>检查更新</kbd>
-，也可以通过关注[官方网站](https://b3log.org/siyuan/)
-或者 [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) 来获取新版本。
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official website](https://b3log.org/siyuan/) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
 **注意**：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件
 

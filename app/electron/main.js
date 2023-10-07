@@ -326,7 +326,7 @@ const boot = () => {
             currentWindow.show();
             setTimeout(() => { // 等待界面js执行完毕
                 writeLog(siyuanOpenURL);
-                currentWindow.webContents.send("siyuan-openurl", siyuanOpenURL);
+                currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
             }, 2000);
         }
     });
@@ -656,6 +656,9 @@ app.whenReady().then(() => {
         resetTrayMenu(tray, lang, mainWindow);
     };
 
+    ipcMain.on("siyuan-open-folder", (event, filePath) => {
+        shell.showItemInFolder(filePath);
+    });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
@@ -692,7 +695,7 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-quit", (event, port) => {
         exitApp(port);
     });
-    ipcMain.on("siyuan-openwindow", (event, data) => {
+    ipcMain.on("siyuan-open-window", (event, data) => {
         const mainWindow = BrowserWindow.fromId(data.id);
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
@@ -723,6 +726,12 @@ app.whenReady().then(() => {
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(data.url);
+        win.on("close", (event) => {
+            if (win && !win.isDestroyed()) {
+                win.webContents.send("siyuan-save-close");
+            }
+            event.preventDefault();
+        });
         const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
         if (mainScreen.id !== targetScreen.id) {
             win.setBounds(targetScreen.workArea);
@@ -826,9 +835,9 @@ app.whenReady().then(() => {
             }
         });
     });
-    ipcMain.on("siyuan-send_windows", (event, data) => {
+    ipcMain.on("siyuan-send-windows", (event, data) => {
         BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-send_windows", data);
+            item.webContents.send("siyuan-send-windows", data);
         });
     });
     ipcMain.on("siyuan-auto-launch", (event, data) => {
@@ -901,7 +910,7 @@ app.on("open-url", (event, url) => { // for macOS
     if (url.startsWith("siyuan://")) {
         workspaces.forEach(item => {
             if (item.browserWindow && !item.browserWindow.isDestroyed()) {
-                item.browserWindow.webContents.send("siyuan-openurl", url);
+                item.browserWindow.webContents.send("siyuan-open-url", url);
             }
         });
     }
@@ -944,7 +953,7 @@ app.on("second-instance", (event, argv) => {
     const siyuanURL = argv.find((arg) => arg.startsWith("siyuan://"));
     workspaces.forEach(item => {
         if (item.browserWindow && !item.browserWindow.isDestroyed() && siyuanURL) {
-            item.browserWindow.webContents.send("siyuan-openurl", siyuanURL);
+            item.browserWindow.webContents.send("siyuan-open-url", siyuanURL);
         }
     });
 
@@ -1031,6 +1040,6 @@ powerMonitor.on("shutdown", () => {
 powerMonitor.on("lock-screen", () => {
     writeLog("system lock-screen");
     BrowserWindow.getAllWindows().forEach(item => {
-        item.webContents.send("siyuan-send_windows", {cmd: "lockscreenByMode"});
+        item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
     });
 });

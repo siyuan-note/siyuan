@@ -1,26 +1,3 @@
-declare const echarts: {
-    init(element: HTMLElement, theme?: string, options?: { width: number }): IEChart;
-    dispose(element: Element): void;
-    getInstanceById(id: string): { resize: () => void };
-};
-
-declare const hljs: {
-    highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
-    getLanguage(text: string): { name: string };
-};
-
-interface IEChart {
-    setOption(option: any): void;
-
-    getZr(): any;
-
-    on(name: string, event: (e: any) => void): any;
-
-    containPixel(name: string, position: number[]): any;
-
-    resize(): void;
-}
-
 interface ILuteNode {
     TokensStr: () => string;
     __internal_object__: {
@@ -118,6 +95,42 @@ interface ILuteOptions extends IMarkdownConfig {
     emojiSite: string;
     headingAnchor: boolean;
     lazyLoadImage?: string;
+}
+
+declare class Viz {
+    constructor(worker: { worker: Worker });
+
+    renderSVGElement: (code: string) => Promise<any>;
+}
+
+declare class Viewer {
+    public destroyed: boolean;
+
+    constructor(element: Element, options: {
+        title: [number, (image: HTMLImageElement, imageData: IObject) => string],
+        button: boolean,
+        initialViewIndex?: number,
+        transition: boolean,
+        hidden: () => void,
+        toolbar: {
+            zoomIn: boolean,
+            zoomOut: boolean,
+            oneToOne: boolean,
+            reset: boolean,
+            prev: boolean,
+            play: boolean,
+            next: boolean,
+            rotateLeft: boolean,
+            rotateRight: boolean,
+            flipHorizontal: boolean,
+            flipVertical: boolean,
+            close: () => void
+        }
+    })
+
+    public destroy(): void
+
+    public show(): void
 }
 
 declare class Lute {

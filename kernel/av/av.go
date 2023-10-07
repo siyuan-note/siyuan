@@ -40,7 +40,6 @@ import (
 type AttributeView struct {
 	Spec      int          `json:"spec"`      // 格式版本
 	ID        string       `json:"id"`        // 属性视图 ID
-	NodeID    string       `json:"nodeID"`    // 属性视图所在节点 ID
 	Name      string       `json:"name"`      // 属性视图名称
 	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性列值
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
@@ -56,15 +55,17 @@ type KeyValues struct {
 type KeyType string
 
 const (
-	KeyTypeBlock   KeyType = "block"
-	KeyTypeText    KeyType = "text"
-	KeyTypeNumber  KeyType = "number"
-	KeyTypeDate    KeyType = "date"
-	KeyTypeSelect  KeyType = "select"
-	KeyTypeMSelect KeyType = "mSelect"
-	KeyTypeURL     KeyType = "url"
-	KeyTypeEmail   KeyType = "email"
-	KeyTypePhone   KeyType = "phone"
+	KeyTypeBlock    KeyType = "block"
+	KeyTypeText     KeyType = "text"
+	KeyTypeNumber   KeyType = "number"
+	KeyTypeDate     KeyType = "date"
+	KeyTypeSelect   KeyType = "select"
+	KeyTypeMSelect  KeyType = "mSelect"
+	KeyTypeURL      KeyType = "url"
+	KeyTypeEmail    KeyType = "email"
+	KeyTypePhone    KeyType = "phone"
+	KeyTypeMAsset   KeyType = "mAsset"
+	KeyTypeTemplate KeyType = "template"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -78,13 +79,15 @@ type Key struct {
 
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
+	Template     string             `json:"template"`          // 模板内容
 }
 
-func NewKey(id, name string, keyType KeyType) *Key {
+func NewKey(id, name, icon string, keyType KeyType) *Key {
 	return &Key{
 		ID:   id,
 		Name: name,
 		Type: keyType,
+		Icon: icon,
 	}
 }
 
@@ -94,19 +97,22 @@ type KeySelectOption struct {
 }
 
 type Value struct {
-	ID      string  `json:"id,omitempty"`
-	KeyID   string  `json:"keyID,omitempty"`
-	BlockID string  `json:"blockID,omitempty"`
-	Type    KeyType `json:"type,omitempty"`
+	ID         string  `json:"id,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`
+	BlockID    string  `json:"blockID,omitempty"`
+	Type       KeyType `json:"type,omitempty"`
+	IsDetached bool    `json:"isDetached,omitempty"`
 
-	Block   *ValueBlock    `json:"block,omitempty"`
-	Text    *ValueText     `json:"text,omitempty"`
-	Number  *ValueNumber   `json:"number,omitempty"`
-	Date    *ValueDate     `json:"date,omitempty"`
-	MSelect []*ValueSelect `json:"mSelect,omitempty"`
-	URL     *ValueURL      `json:"url,omitempty"`
-	Email   *ValueEmail    `json:"email,omitempty"`
-	Phone   *ValuePhone    `json:"phone,omitempty"`
+	Block    *ValueBlock    `json:"block,omitempty"`
+	Text     *ValueText     `json:"text,omitempty"`
+	Number   *ValueNumber   `json:"number,omitempty"`
+	Date     *ValueDate     `json:"date,omitempty"`
+	MSelect  []*ValueSelect `json:"mSelect,omitempty"`
+	URL      *ValueURL      `json:"url,omitempty"`
+	Email    *ValueEmail    `json:"email,omitempty"`
+	Phone    *ValuePhone    `json:"phone,omitempty"`
+	MAsset   []*ValueAsset  `json:"mAsset,omitempty"`
+	Template *ValueTemplate `json:"template,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -131,6 +137,14 @@ func (value *Value) String() string {
 		return value.Email.Content
 	case KeyTypePhone:
 		return value.Phone.Content
+	case KeyTypeMAsset:
+		var ret []string
+		for _, v := range value.MAsset {
+			ret = append(ret, v.Content)
+		}
+		return strings.Join(ret, " ")
+	case KeyTypeTemplate:
+		return value.Template.Content
 	default:
 		return ""
 	}
@@ -324,6 +338,23 @@ type ValuePhone struct {
 	Content string `json:"content"`
 }
 
+type AssetType string
+
+const (
+	AssetTypeFile  = "file"
+	AssetTypeImage = "image"
+)
+
+type ValueAsset struct {
+	Type    AssetType `json:"type"`
+	Name    string    `json:"name"`
+	Content string    `json:"content"`
+}
+
+type ValueTemplate struct {
+	Content string `json:"content"`
+}
+
 // View 描述了视图的结构。
 type View struct {
 	ID   string `json:"id"`   // 视图 ID
@@ -365,16 +396,15 @@ type Viewable interface {
 	GetID() string
 }
 
-func NewAttributeView(id, nodeID string) (ret *AttributeView) {
+func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
-	key := NewKey(ast.NewNodeID(), "Block", KeyTypeBlock)
+	key := NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
 		KeyValues: []*KeyValues{{Key: key}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
-		NodeID:    nodeID,
 	}
 	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
 	return
@@ -463,4 +493,8 @@ func GetAttributeViewDataPath(avID string) (ret string) {
 var (
 	ErrViewNotFound = errors.New("view not found")
 	ErrKeyNotFound  = errors.New("key not found")
+)
+
+const (
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
 )

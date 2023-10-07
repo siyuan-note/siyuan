@@ -6,6 +6,19 @@ import {isCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 
+const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
+    if (nodeElement.getAttribute("custom-pinthead") === "true") {
+        const tableElement = nodeElement.querySelector("table");
+        if (tableElement.clientHeight + tableElement.scrollTop < rowElement.offsetTop + rowElement.clientHeight) {
+            tableElement.scrollTop = rowElement.offsetTop - tableElement.clientHeight + rowElement.clientHeight + 1;
+        } else if (tableElement.scrollTop > rowElement.offsetTop - rowElement.clientHeight) {
+            tableElement.scrollTop = rowElement.offsetTop - rowElement.clientHeight + 1;
+        }
+    } else {
+        scrollCenter(protyle, rowElement);
+    }
+};
+
 export const getColIndex = (cellElement: HTMLElement) => {
     let previousElement = cellElement.previousElementSibling;
     let index = 0;
@@ -96,7 +109,7 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    scrollCenter(protyle, newRowElememt);
+    scrollToView(nodeElement, newRowElememt, protyle);
 };
 
 export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
@@ -148,7 +161,7 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    scrollCenter(protyle, newRowElememt);
+    scrollToView(nodeElement, newRowElememt, protyle);
 };
 
 export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLElement, type: InsertPosition, range: Range) => {
@@ -198,7 +211,7 @@ export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
         range.selectNodeContents(previousTrElement.cells[index]);
         range.collapse(true);
         focusByRange(range);
-        scrollCenter(protyle, previousTrElement);
+        scrollToView(nodeElement, previousTrElement, protyle);
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     }
 };

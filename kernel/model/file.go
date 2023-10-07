@@ -681,6 +681,19 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			if 1 > len(nodes) {
 				// 按 mode 加载兜底
 				nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+			} else {
+				// 文档块没有指定 index 时需要计算 index，否则初次打开文档时 node-index 会为 0，导致首次 Ctrl+Home 无法回到顶部
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering {
+						return ast.WalkContinue
+					}
+
+					index++
+					if nodes[0].ID == n.ID {
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
 			}
 		} else {
 			nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
@@ -1006,7 +1019,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc(box.ID, p, title, dom, true)
+	tree, err = createDoc(box.ID, p, title, dom)
 	if nil != err {
 		return
 	}
@@ -1015,7 +1028,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID string, hidden bool) (id string, err error) {
+func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1025,7 +1038,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID string, hidden bool) (id stri
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	id, _, err = createDocsByHPath(box.ID, hPath, dom, parentID, hidden)
+	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	return
 }
 
@@ -1111,14 +1124,21 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 		}
 	}
 
+	// A progress layer appears when moving more than 16 documents at once https://github.com/siyuan-note/siyuan/issues/9356
 	needShowProgress := 16 < len(fromPaths)
 	if needShowProgress {
-		util.PushEndlessProgress(Conf.Language(116))
+		defer util.PushClearProgress()
 	}
 
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
+	count := 0
 	for fromPath, fromBox := range pathsBoxes {
+		count++
+		if needShowProgress {
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", count, len(fromPaths))))
+		}
+
 		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback)
 		if nil != err {
 			return
@@ -1126,12 +1146,6 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 	}
 	cache.ClearDocsIAL()
 	IncSync()
-
-	if needShowProgress {
-		util.PushEndlessProgress(Conf.Language(113))
-		sql.WaitForWritingDatabase()
-		util.ReloadUI()
-	}
 	return
 }
 
@@ -1429,7 +1443,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	id, existed, err := createDocsByHPath(box.ID, hPath, "", "", true)
+	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
 	if nil != err {
 		return
 	}
@@ -1474,7 +1488,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	return
 }
 
-func createDoc(boxID, p, title, dom string, hidden bool) (tree *parse.Tree, err error) {
+func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = gulu.Str.RemoveInvisible(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -1544,10 +1558,6 @@ func createDoc(boxID, p, title, dom string, hidden bool) (tree *parse.Tree, err 
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
-	}
-
-	if !hidden {
-		tree.Root.SetIALAttr("custom-hidden", "true")
 	}
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}

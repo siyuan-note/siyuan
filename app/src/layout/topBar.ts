@@ -19,6 +19,7 @@ import {fetchPost} from "../util/fetch";
 import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
 import {commandPanel} from "../plugin/commandPanel";
+import {exportLayout} from "./util";
 
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
@@ -99,7 +100,7 @@ export const initBar = (app: App) => {
                     window.siyuan.menus.menu.append(new MenuItem(menuOptions).element);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
                 event.stopPropagation();
                 break;
             } else if (targetId === "barForward") {
@@ -115,7 +116,12 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {
-                exitSiYuan();
+                exportLayout({
+                    reload: false,
+                    onlyData: false,
+                    errorExit: true,
+                    cb: exitSiYuan
+                });
                 event.stopPropagation();
                 break;
             } else if (targetId === "barMode") {
@@ -154,7 +160,7 @@ export const initBar = (app: App) => {
                 if (rect.width === 0) {
                     rect = toolbarElement.querySelector("#barMore").getBoundingClientRect();
                 }
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
                 event.stopPropagation();
                 break;
             } else if (targetId === "toolbarVIP") {
@@ -210,7 +216,7 @@ export const initBar = (app: App) => {
                 if (rect.width === 0) {
                     rect = toolbarElement.querySelector("#barMore").getBoundingClientRect();
                 }
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
                 event.stopPropagation();
                 break;
             }

@@ -356,7 +356,7 @@ export const focusByOffset = (container: Element, start: number, end: number) =>
     const editElement = getContenteditableElement(container);
     if (editElement) {
         container = editElement;
-    } else if (isNotEditBlock(container)) {
+    } else if (isNotEditBlock(container) || container.classList.contains("av")) {
         return focusBlock(container);
     }
     let startNode;
@@ -533,6 +533,17 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             focusSideBlock(element);
             return false;
         }
+    } else if (element.classList.contains("av")) {
+        const avTitleElement = element.querySelector(".av__title")
+        if (avTitleElement) {
+            const range = document.createRange();
+            range.selectNodeContents(avTitleElement);
+            range.collapse();
+            focusByRange(range);
+            return range;
+        } else {
+            return false;
+        }
     }
     let cursorElement;
     if (toStart) {
@@ -560,8 +571,23 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));
             range.collapse(true);
         } else {
+            let focusHljs = false;
             // 定位到末尾 https://github.com/siyuan-note/siyuan/issues/5982
-            range = setLastNodeRange(cursorElement, getEditorRange(cursorElement));
+            if (cursorElement.classList.contains("hljs")) {
+                // 代码块末尾定位需在 /n 之前 https://github.com/siyuan-note/siyuan/issues/9141，https://github.com/siyuan-note/siyuan/issues/9189
+                let lastNode = cursorElement.lastChild;
+                if (lastNode.textContent === "" && lastNode.nodeType === 3) {
+                    lastNode = hasPreviousSibling(cursorElement.lastChild) as HTMLElement;
+                }
+                if (lastNode && lastNode.textContent.endsWith("\n")) {
+                    range = getEditorRange(cursorElement);
+                    range.setStart(lastNode, lastNode.textContent.length - 1);
+                    focusHljs = true;
+                }
+            }
+            if (!focusHljs) {
+                range = setLastNodeRange(cursorElement, getEditorRange(cursorElement));
+            }
             range.collapse(false);
         }
         focusByRange(range);

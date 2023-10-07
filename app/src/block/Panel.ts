@@ -156,7 +156,7 @@ export class BlockPanel {
             if (response.data.rootID !== this.nodeIds[index]) {
                 action.push(Constants.CB_GET_ALL);
             } else {
-                action.push(Constants.CB_GET_SCROLL);
+                action.push(Constants.CB_GET_CONTEXT);
                 action.push(Constants.CB_GET_HL);
             }
 

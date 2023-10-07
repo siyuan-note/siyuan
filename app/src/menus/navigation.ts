@@ -26,8 +26,11 @@ import {viewCards} from "../card/viewCards";
 import {App} from "../index";
 import {openDocHistory} from "../history/doc";
 import {openEditorTab} from "./util";
+import {makeCard} from "../card/makeCard";
+import {transaction} from "../protyle/wysiwyg/transaction";
+import {emitOpenMenu} from "../plugin/EventBus";
 
-const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
+const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
         if (item.getAttribute("data-type") === "navigation-file") {
             return true;
@@ -47,6 +50,73 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
             deleteFiles(Array.from(selectItemElements));
         }
     }).element);
+
+    const blockIDs: string[] = [];
+    selectItemElements.forEach(item => {
+        const id = item.getAttribute("data-node-id");
+        if (id) {
+            blockIDs.push(id);
+        }
+    });
+    if (blockIDs.length === 0) {
+        return window.siyuan.menus.menu;
+    }
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    const riffCardMenu = [{
+        iconHTML: Constants.ZWSP,
+        accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+        label: window.siyuan.languages.quickMakeCard,
+        click: () => {
+            transaction(undefined, [{
+                action: "addFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }], [{
+                action: "removeFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }]);
+        }
+    }, {
+        iconHTML: Constants.ZWSP,
+        label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
+        click: () => {
+            transaction(undefined, [{
+                action: "removeFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }], [{
+                action: "addFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }]);
+        }
+    }];
+    if (window.siyuan.config.flashcard.deck) {
+        riffCardMenu.push({
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.addToDeck,
+            click: () => {
+                makeCard(app, blockIDs);
+            }
+        });
+    }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.riffCard,
+        icon: "iconRiffCard",
+        submenu: riffCardMenu,
+    }).element);
+    if (app.plugins) {
+        emitOpenMenu({
+            plugins: app.plugins,
+            type: "open-menu-doctree",
+            detail: {
+                elements: selectItemElements,
+                type: "docs"
+            },
+            separatorPosition: "top",
+        });
+    }
     return window.siyuan.menus.menu;
 };
 
@@ -66,7 +136,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus");
     if (selectItemElements.length > 1) {
-        return initMultiMenu(selectItemElements);
+        return initMultiMenu(selectItemElements, app);
     }
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
@@ -267,6 +337,17 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }]
     }).element);
+    if (app.plugins) {
+        emitOpenMenu({
+            plugins: app.plugins,
+            type: "open-menu-doctree",
+            detail: {
+                elements: selectItemElements,
+                type: "notebook"
+            },
+            separatorPosition: "top",
+        });
+    }
     return window.siyuan.menus.menu;
 };
 
@@ -286,7 +367,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }
     const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus");
     if (selectItemElements.length > 1) {
-        return initMultiMenu(selectItemElements);
+        return initMultiMenu(selectItemElements, app);
     }
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
@@ -306,7 +387,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             paths.push(item.getAttribute("data-path"));
                         }
                     });
-                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
+                    newFile({
+                        app,
+                        notebookId,
+                        currentPath: pathPosix().dirname(pathString),
+                        paths,
+                        useSavePath: false
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -322,7 +409,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             }
                         }
                     });
-                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
+                    newFile({
+                        app,
+                        notebookId,
+                        currentPath: pathPosix().dirname(pathString),
+                        paths,
+                        useSavePath: false
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -370,36 +463,75 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 });
             }
         }).element);
+        const riffCardMenu = [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.spaceRepetition,
+            accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
+            click: () => {
+                fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
+                    openCardByData(app, response.data, "doc", id, name);
+                });
+                /// #if MOBILE
+                closePanel();
+                /// #endif
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.manage,
+            click: () => {
+                fetchPost("/api/filetree/getHPathByID", {
+                    id
+                }, (response) => {
+                    viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
+                });
+                /// #if MOBILE
+                closePanel();
+                /// #endif
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+            label: window.siyuan.languages.quickMakeCard,
+            click: () => {
+                transaction(undefined, [{
+                    action: "addFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs: [id]
+                }], [{
+                    action: "removeFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs: [id]
+                }]);
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
+            click: () => {
+                transaction(undefined, [{
+                    action: "removeFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs: [id]
+                }], [{
+                    action: "addFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs: [id]
+                }]);
+            }
+        }];
+        if (window.siyuan.config.flashcard.deck) {
+            riffCardMenu.push({
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.addToDeck,
+                click: () => {
+                    makeCard(app, [id]);
+                }
+            });
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.riffCard,
             type: "submenu",
             icon: "iconRiffCard",
-            submenu: [{
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.spaceRepetition,
-                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
-                click: () => {
-                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(app, response.data, "doc", id, name);
-                    });
-                    /// #if MOBILE
-                    closePanel();
-                    /// #endif
-                }
-            }, {
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.manage,
-                click: () => {
-                    fetchPost("/api/filetree/getHPathByID", {
-                        id
-                    }, (response) => {
-                        viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
-                    });
-                    /// #if MOBILE
-                    closePanel();
-                    /// #endif
-                }
-            }],
+            submenu: riffCardMenu,
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.search,
@@ -485,10 +617,21 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
+    if (app.plugins) {
+        emitOpenMenu({
+            plugins: app.plugins,
+            type: "open-menu-doctree",
+            detail: {
+                elements: selectItemElements,
+                type: "doc"
+            },
+            separatorPosition: "top",
+        });
+    }
     return window.siyuan.menus.menu;
 };
 
-const genImportMenu = (notebookId: string, pathString: string) => {
+export const genImportMenu = (notebookId: string, pathString: string) => {
     if (!window.siyuan.config.readonly) {
         /// #if !BROWSER
         const importstdmd = (label: string, isDoc?: boolean) => {

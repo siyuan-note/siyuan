@@ -1,5 +1,7 @@
 import {transaction} from "../../wysiwyg/transaction";
 import * as dayjs from "dayjs";
+import {updateAttrViewCellAnimation} from "./action";
+import {genAVValueHTML} from "./blockAttr";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
@@ -103,7 +105,7 @@ export const setDateValue = (options: {
     protyle: IProtyle,
     value: IAVCellDateValue
 }) => {
-    let cellIndex = 0;
+    let cellIndex: number;
     Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === options.cellElements[0].dataset.id) {
             cellIndex = index;
@@ -119,11 +121,19 @@ export const setDateValue = (options: {
         const rowID = item.parentElement.dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
-                cellData = row.cells[cellIndex];
-                // 为空时 cellId 每次请求都不一致
-                cellData.id = item.dataset.id;
-                if (!cellData.value) {
-                    cellData.value = {};
+                if (typeof cellIndex === "number") {
+                    cellData = row.cells[cellIndex];
+                    // 为空时 cellId 每次请求都不一致
+                    cellData.id = item.dataset.id;
+                    if (!cellData.value) {
+                        cellData.value = {};
+                    }
+                } else {
+                    cellData = row.cells.find(cellItem => {
+                        if (item.dataset.id === cellItem.id) {
+                            return true;
+                        }
+                    });
                 }
                 oldValue = Object.assign({}, cellData.value.date);
                 cellData.value.date = Object.assign(cellData.value.date || {
@@ -152,6 +162,11 @@ export const setDateValue = (options: {
                 date: oldValue
             }
         });
+        if (item.classList.contains("custom-attr__avvalue")) {
+            item.innerHTML = genAVValueHTML(cellData.value);
+        } else {
+            updateAttrViewCellAnimation(item);
+        }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
 };

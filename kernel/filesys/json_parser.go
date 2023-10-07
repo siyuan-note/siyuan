@@ -89,7 +89,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 	}
 
 	if needMigrate2Spec1 {
-		parse.NestedInlines2FlattedSpans(ret)
+		parse.NestedInlines2FlattedSpans(ret, false)
 		needFix = true
 	}
 	return
@@ -170,6 +170,15 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 			// 剔除块尾多余的软换行 https://github.com/siyuan-note/siyuan/issues/6191
 			node.Children = node.Children[:len(node.Children)-1]
 			*needFix = true
+		}
+
+		for _, kv := range node.KramdownIAL {
+			if strings.Contains(kv[0], "custom-av-key-") {
+				// TODO: 数据库正式上线以后移除这里的修复
+				// 删除数据库属性键值对 https://github.com/siyuan-note/siyuan/issues/9293
+				node.RemoveIALAttr(kv[0])
+				*needFix = true
+			}
 		}
 	}
 	if "" != node.ID {

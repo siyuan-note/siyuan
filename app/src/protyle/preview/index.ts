@@ -2,7 +2,7 @@ import {openByMobile, writeText} from "../util/compatibility";
 import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
-import {previewImage} from "./image";
+import {previewDocImage} from "./image";
 import {needSubscribe} from "../../util/needSubscribe";
 import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
@@ -117,7 +117,7 @@ export class Preview {
                     }
                     break;
                 } else if (target.tagName === "IMG") {
-                    previewImage((event.target as HTMLImageElement).src, protyle.block.rootID);
+                    previewDocImage((event.target as HTMLImageElement).src, protyle.block.rootID);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -155,7 +155,13 @@ export class Preview {
         if (this.element.style.display === "none") {
             return;
         }
-
+        let loadingElement = this.element.querySelector(".fn__loading");
+        if (!loadingElement) {
+            this.element.insertAdjacentHTML("beforeend", `<div style="flex-direction: column;" class="fn__loading">
+    <img width="48px" src="/stage/loading-pure.svg">
+</div>`);
+            loadingElement = this.element.querySelector(".fn__loading");
+        }
         this.mdTimeoutId = window.setTimeout(() => {
             fetchPost("/api/export/preview", {
                 id: protyle.block.parentID || protyle.options.blockId,
@@ -183,6 +189,7 @@ export class Preview {
                     }
                 });
                 /// #endif
+                loadingElement.remove();
             });
         }, protyle.options.preview.delay);
     }

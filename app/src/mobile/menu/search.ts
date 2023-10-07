@@ -18,7 +18,8 @@ import {App} from "../../index";
 import {
     assetFilterMenu,
     assetInputEvent,
-    assetMethodMenu, assetMoreMenu,
+    assetMethodMenu,
+    assetMoreMenu,
     renderNextAssetMark,
     renderPreview,
 } from "../../search/assets";
@@ -482,6 +483,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             superBlock: window.siyuan.config.search.superBlock,
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
+                            databaseBlock: window.siyuan.config.search.databaseBlock,
                         }
                     }, config);
                 });
@@ -560,7 +562,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
                         fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                         closePanel();
                     } else {

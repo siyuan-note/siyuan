@@ -38,7 +38,8 @@
   }
 
   &__util {
-    z-index: 2;
+    z-index: 4;
+    padding: 8px;
 
     &--hide .pdf__util__hide {
       display: none;
@@ -139,7 +140,7 @@
   bottom: 0;
   width: var(--b3-pdf-sidebar-width);
   visibility: hidden;
-  z-index: 1;
+  z-index: 3;
   transition-duration: 200ms;
   transition-timing-function: ease;
   transition-property: left;
@@ -250,10 +251,10 @@
 #loadingBar {
   position: absolute;
   height: 4px;
-  background-color: var(--b3-theme-on-background);
+  background-color: var(--b3-theme-primary-lightest);
   transition-duration: 200ms;
   transition-timing-function: ease;
-  z-index: 1;
+  z-index: 3;
 }
 
 #loadingBar {
@@ -323,7 +324,7 @@
   align-items: center;
   flex-wrap: wrap;
   overflow: initial;
-  z-index: 1;
+  z-index: 3;
 
   #findInput {
     width: 120px;
@@ -340,7 +341,7 @@
   top: 36px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  z-index: 1;
+  z-index: 3;
 
   .b3-menu__items {
     max-height: 60vh;

@@ -165,12 +165,21 @@ func CheckAuth(c *gin.Context) {
 			u, parseErr := url.Parse(origin)
 			if nil != parseErr {
 				logging.LogWarnf("parse origin [%s] failed: %s", origin, parseErr)
-			} else {
-				if !strings.HasPrefix(u.Host, util.LocalHost) && !strings.HasPrefix(u.Host, "[::1]") {
-					c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
-					c.Abort()
-					return
-				}
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed: parse req header [Origin] failed"})
+				c.Abort()
+				return
+
+			}
+
+			if "chrome-extension" == strings.ToLower(u.Scheme) {
+				c.Next()
+				return
+			}
+
+			if !strings.HasPrefix(u.Host, util.LocalHost) && !strings.HasPrefix(u.Host, "[::1]") {
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
+				c.Abort()
+				return
 			}
 		}
 

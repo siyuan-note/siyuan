@@ -3,10 +3,13 @@ import {Menu as SiyuanMenu} from "../menus/Menu";
 export class Menu {
     private menu: SiyuanMenu;
     public isOpen: boolean;
+    public element: HTMLElement;
 
     constructor(id?: string, closeCB?: () => void) {
         this.menu = window.siyuan.menus.menu;
         this.isOpen = false;
+        this.element = this.menu.element;
+
         if (id) {
             const dataName = this.menu.element.getAttribute("data-name");
             if (dataName && dataName === id) {
@@ -38,11 +41,11 @@ export class Menu {
         this.menu.addSeparator(index);
     }
 
-    open(options: { x: number, y: number, h?: number, w?: number, isLeft?: boolean }) {
+    open(options:IPosition) {
         if (this.isOpen) {
             return;
         }
-        this.menu.popup(options, options.isLeft);
+        this.menu.popup(options);
     }
 
     fullscreen(position: "bottom" | "all" = "all") {

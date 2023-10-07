@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -123,6 +124,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
+	avBlockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}
 
 	// 重新生成块 ID
@@ -140,15 +142,22 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return
 		}
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
+			if !entering || "" == n.ID {
 				return ast.WalkContinue
 			}
-			if "" != n.ID {
-				newNodeID := ast.NewNodeID()
-				blockIDs[n.ID] = newNodeID
-				n.ID = newNodeID
-				n.SetIALAttr("id", newNodeID)
 
+			newNodeID := ast.NewNodeID()
+			blockIDs[n.ID] = newNodeID
+			oldNodeID := n.ID
+			n.ID = newNodeID
+			n.SetIALAttr("id", newNodeID)
+
+			// 重新指向数据库属性值
+			ial := parse.IAL2Map(n.KramdownIAL)
+			for k, _ := range ial {
+				if strings.HasPrefix(k, av.NodeAttrNameAvs) {
+					avBlockIDs[oldNodeID] = newNodeID
+				}
 			}
 			return ast.WalkContinue
 		})
@@ -187,11 +196,97 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		})
 	}
 
+	// 将关联的数据库文件移动到 data/storage/av/ 下
+	storage := filepath.Join(unzipRootPath, "storage")
+	storageAvDir := filepath.Join(storage, "av")
+	avIDs := map[string]string{}
+	renameAvPaths := map[string]string{}
+	if gulu.File.IsExist(storageAvDir) {
+		// 重新生成数据库数据
+		filepath.Walk(storageAvDir, func(path string, info fs.FileInfo, err error) error {
+			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(info.Name(), ".json")) {
+				return nil
+			}
+
+			// 重命名数据库
+			newAvID := ast.NewNodeID()
+			oldAvID := strings.TrimSuffix(info.Name(), ".json")
+			newPath := filepath.Join(filepath.Dir(path), newAvID+".json")
+			renameAvPaths[path] = newPath
+			avIDs[oldAvID] = newAvID
+
+			// 将数据库文件中的块 ID 替换为新的块 ID
+			data, readErr := os.ReadFile(path)
+			if nil != readErr {
+				logging.LogErrorf("read av file [%s] failed: %s", path, readErr)
+				return nil
+			}
+			var newData []byte
+			newData = data
+			for oldID, newID := range avBlockIDs {
+				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
+			}
+			newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+			if !bytes.Equal(data, newData) {
+				if writeErr := os.WriteFile(path, newData, 0644); nil != writeErr {
+					logging.LogErrorf("write av file [%s] failed: %s", path, writeErr)
+					return nil
+				}
+			}
+			return nil
+		})
+
+		// 重命名数据库文件
+		for oldPath, newPath := range renameAvPaths {
+			if err = os.Rename(oldPath, newPath); nil != err {
+				logging.LogErrorf("rename av file from [%s] to [%s] failed: %s", oldPath, newPath, err)
+				return
+			}
+		}
+
+		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
+		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		}
+
+		// 重新指向数据库属性值
+		for _, tree := range trees {
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || "" == n.ID {
+					return ast.WalkContinue
+				}
+
+				ial := parse.IAL2Map(n.KramdownIAL)
+				for k, v := range ial {
+					if strings.HasPrefix(k, av.NodeAttrNameAvs) {
+						newKey, newVal := k, v
+						for oldAvID, newAvID := range avIDs {
+							newKey = strings.ReplaceAll(newKey, oldAvID, newAvID)
+							newVal = strings.ReplaceAll(newVal, oldAvID, newAvID)
+						}
+						n.RemoveIALAttr(k)
+						n.SetIALAttr(newKey, newVal)
+					}
+				}
+
+				if ast.NodeAttributeView == n.Type {
+					n.AttributeViewID = avIDs[n.AttributeViewID]
+				}
+				return ast.WalkContinue
+			})
+		}
+	}
+
+	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面被拷贝到导入目录下 targetDir
+	if removeErr := os.RemoveAll(storage); nil != removeErr {
+		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
+	}
+
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
 		if "" == tree.Root.Spec {
-			parse.NestedInlines2FlattedSpans(tree)
+			parse.NestedInlines2FlattedSpans(tree, false)
 			tree.Root.Spec = "1"
 		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
@@ -751,7 +846,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	}
 	genTreeID(ret)
 	imgHtmlBlock2InlineImg(ret)
-	parse.NestedInlines2FlattedSpansHybrid(ret)
+	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }
 
@@ -1070,7 +1165,7 @@ func buildBlockRefInText() {
 			}
 
 			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
-			parse.NestedInlines2FlattedSpans(t)
+			parse.NestedInlines2FlattedSpans(t, false)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
 				children = append(children, c)

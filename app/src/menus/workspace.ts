@@ -1,10 +1,10 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
-import {ipcRenderer, shell} from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
-import {getOpenNotebookCount, originalPath, pathPosix} from "../util/pathName";
+import {getOpenNotebookCount, originalPath, pathPosix, showFileInFolder} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
@@ -449,7 +449,7 @@ const workspaceItem = (item: IWorkspace) => {
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.showInFolder,
             click() {
-                shell.showItemInFolder(item.path);
+                showFileInFolder(item.path);
             }
         }, {
             iconHTML: Constants.ZWSP,

@@ -27,10 +27,15 @@
     }
   }
 
+  .block__icons {
+    min-height: auto;
+    padding: 4px 8px;
+  }
+
   .b3-text-field--text {
     cursor: pointer;
     transition: var(--b3-transition);
-    height: 34px;
+    min-height: 34px;
     background-color: transparent;
 
     &:hover {

@@ -1,4 +1,10 @@
-import {focusBlock, focusByRange, focusByWbr, setLastNodeRange} from "../util/selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getSelectionOffset,
+    setLastNodeRange
+} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
@@ -15,6 +21,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
+import {isMobile} from "../../util/functions";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -196,7 +203,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 action: "delete",
                 id,
             });
-            sideElement = getPreviousBlock(topElement) || getNextBlock(topElement) || topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
+            sideElement = getNextBlock(topElement) || getPreviousBlock(topElement) || topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
                 // https://github.com/siyuan-note/siyuan/issues/2188
                 setFold(protyle, topElement, undefined, true);
@@ -261,8 +268,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     sideElement = undefined;
                     focusByWbr(emptyElement, range);
                 }
-
-                focusBlock(sideElement, undefined, false);
+                // https://github.com/siyuan-note/siyuan/issues/5485
+                focusBlock(sideElement);
                 scrollCenter(protyle, sideElement);
                 if (listElement) {
                     inserts.push({
@@ -385,7 +392,21 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
 
     const parentElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
-    let previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    const previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
+        transaction(protyle, [{
+            action: "delete",
+            id: previousLastElement.getAttribute("data-node-id"),
+        }], [{
+            action: "insert",
+            data: previousLastElement.outerHTML,
+            id: previousLastElement.getAttribute("data-node-id"),
+            previousID: previousLastElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: previousLastElement.parentElement.getAttribute("data-node-id")
+        }]);
+        previousLastElement.remove();
+        return;
+    }
     const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
     const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {
@@ -411,9 +432,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 } else {
                     transaction(protyle, doOperations, undoOperations);
                 }
-                // toStart 参数不能为 false， 否则 https://github.com/siyuan-note/siyuan/issues/9141
-                previousLastElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`);
-                focusBlock(previousLastElement, undefined, getContenteditableElement(previousLastElement).textContent === "\n");
+                focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`), undefined, false);
             } else {
                 focusBlock(previousLastElement, undefined, false);
             }

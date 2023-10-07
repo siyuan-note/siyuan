@@ -27,10 +27,7 @@ openWindow = () => {
 };
 /// #else
 openWindow = (options: {
-    position?: {
-        x: number,
-        y: number,
-    },
+    position?: IPosition,
     height?: number,
     width?: number,
     tab?: Tab,

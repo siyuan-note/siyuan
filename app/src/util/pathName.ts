@@ -6,7 +6,16 @@ import {getSearch, isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import {showMessage} from "../dialog/message";
+
+export const showFileInFolder = (filePath: string) => {
+    /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_OPEN_FOLDER, filePath);
+    /// #endif
+};
 
 export const getIdZoomInByPath = () => {
     const searchParams = new URLSearchParams(window.location.search);

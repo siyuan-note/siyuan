@@ -26,6 +26,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -481,10 +482,10 @@ func createDocWithMd(c *gin.Context) {
 		parentID = parentIDArg.(string)
 	}
 
-	hidden := true
-	hiddenArg := arg["hidden"]
-	if nil != hiddenArg {
-		hidden = hiddenArg.(bool)
+	id := ast.NewNodeID()
+	idArg := arg["id"]
+	if nil != idArg {
+		id = idArg.(string)
 	}
 
 	hPath := arg["path"].(string)
@@ -502,17 +503,13 @@ func createDocWithMd(c *gin.Context) {
 		hPath = "/" + hPath
 	}
 
-	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, hidden)
+	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = id
-
-	if !hidden {
-		return
-	}
 
 	box := model.Conf.Box(notebook)
 	b, _ := model.GetBlock(id, nil)

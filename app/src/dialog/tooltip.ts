@@ -1,4 +1,3 @@
-import {setPosition} from "../util/setPosition";
 import {isMobile} from "../util/functions";
 
 export const showTooltip = (message: string, target: Element, error = false) => {
@@ -29,7 +28,7 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     }
     let left = targetRect.left;
     let top = targetRect.bottom;
-    const position = target.getAttribute("data-position")
+    const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
     if (position === "right") {
         // block icon
@@ -48,7 +47,11 @@ export const showTooltip = (message: string, target: Element, error = false) => 
         messageElement.style.top = top + "px";
     }
     if (left + messageElement.clientWidth > window.innerWidth) {
-        messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+        if (position === "parentE") {
+            messageElement.style.left = (parentRect.left - 8 - messageElement.clientWidth) + "px";
+        } else {
+            messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+        }
     } else {
         messageElement.style.left = Math.max(0, left) + "px";
     }

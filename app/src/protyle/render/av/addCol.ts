@@ -1,7 +1,8 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {addAttrViewColAnimation} from "./col";
 
-export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
+export const addCol = (protyle: IProtyle, blockElement: Element) => {
     const menu = new Menu("av-header-add");
     const avID = blockElement.getAttribute("data-av-id");
     menu.addItem({
@@ -11,7 +12,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: window.siyuan.languages.text,
                 avID,
                 type: "text",
                 id
@@ -20,6 +21,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "text",
+                name: window.siyuan.languages.text,
+                id
+            });
         }
     });
     menu.addItem({
@@ -29,7 +37,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Number",
+                name: window.siyuan.languages.number,
                 avID,
                 type: "number",
                 id
@@ -38,6 +46,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "number",
+                name: window.siyuan.languages.number,
+                id
+            });
         }
     });
     menu.addItem({
@@ -47,7 +62,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Select",
+                name: window.siyuan.languages.select,
                 avID,
                 type: "select",
                 id
@@ -56,6 +71,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "select",
+                name: window.siyuan.languages.select,
+                id
+            });
         }
     });
     menu.addItem({
@@ -65,7 +87,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Multi-select",
+                name: window.siyuan.languages.multiSelect,
                 avID,
                 type: "mSelect",
                 id
@@ -74,6 +96,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "mSelect",
+                name: window.siyuan.languages.multiSelect,
+                id
+            });
         }
     });
     menu.addItem({
@@ -83,7 +112,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Date",
+                name: window.siyuan.languages.date,
                 avID,
                 type: "date",
                 id
@@ -92,6 +121,38 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "date",
+                name: window.siyuan.languages.date,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconImage",
+        label: window.siyuan.languages.assets,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.assets,
+                avID,
+                type: "mAsset",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "mAsset",
+                name: window.siyuan.languages.assets,
+                id
+            });
         }
     });
     menu.addItem({
@@ -101,7 +162,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "URL",
+                name: window.siyuan.languages.link,
                 avID,
                 type: "url",
                 id
@@ -110,6 +171,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "url",
+                name: window.siyuan.languages.link,
+                id
+            });
         }
     });
     menu.addItem({
@@ -119,7 +187,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Email",
+                name: window.siyuan.languages.email,
                 avID,
                 type: "email",
                 id
@@ -128,6 +196,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "email",
+                name: window.siyuan.languages.email,
+                id
+            });
         }
     });
     menu.addItem({
@@ -137,7 +212,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Phone",
+                name: window.siyuan.languages.phone,
                 avID,
                 type: "phone",
                 id
@@ -146,6 +221,38 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "phone",
+                name: window.siyuan.languages.phone,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconMath",
+        label: window.siyuan.languages.template,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.template,
+                avID,
+                type: "template",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "template",
+                name: window.siyuan.languages.template,
+                id
+            });
         }
     });
     return menu;

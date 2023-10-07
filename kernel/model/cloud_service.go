@@ -323,28 +323,29 @@ func refreshAnnouncement() {
 	}
 }
 
-func RefreshUser(token string) error {
+func RefreshUser(token string) {
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
 	if "" == token {
 		if "" != Conf.UserData {
 			Conf.User = loadUserFromConf()
 		}
 		if nil == Conf.User {
-			return errors.New(Conf.Language(19))
+			return
 		}
 
 		var tokenExpireTime int64
 		tokenExpireTime, err := strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
 			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
-			return errors.New(Conf.Language(19))
+			util.PushErrMsg(Conf.Language(19), 5000)
+			return
 		}
 
 		if threeDaysAfter > tokenExpireTime {
 			token = Conf.User.UserToken
 			goto Net
 		}
-		return nil
+		return
 	}
 
 Net:
@@ -352,20 +353,23 @@ Net:
 	user, err := getUser(token)
 	if err != nil {
 		if nil == Conf.User || errInvalidUser == err {
-			return errors.New(Conf.Language(19))
+			util.PushErrMsg(Conf.Language(19), 5000)
+			return
 		}
 
 		var tokenExpireTime int64
 		tokenExpireTime, err = strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
 			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
-			return errors.New(Conf.Language(19))
+			util.PushErrMsg(Conf.Language(19), 5000)
+			return
 		}
 
 		if threeDaysAfter > tokenExpireTime {
-			return errors.New(Conf.Language(19))
+			util.PushErrMsg(Conf.Language(19), 5000)
+			return
 		}
-		return nil
+		return
 	}
 
 	Conf.User = user
@@ -376,7 +380,7 @@ Net:
 	if elapsed := time.Now().Sub(start).Milliseconds(); 3000 < elapsed {
 		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
 	}
-	return nil
+	return
 }
 
 func loadUserFromConf() *conf.User {

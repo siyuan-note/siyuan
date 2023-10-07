@@ -9,11 +9,17 @@ import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
+import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
+import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
+import {Constants} from "../../../constants";
+import {hideElements} from "../../ui/hideElements";
+import {pathPosix} from "../../../util/pathName";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
-    blockElement: HTMLElement,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date",
+    blockElement: Element,
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset",
     colId?: string, // for edit
     cellElements?: HTMLElement[]    // for select & date
 }) => {
@@ -24,10 +30,8 @@ export const openMenuPanel = (options: {
     }
     window.siyuan.menus.menu.remove();
     const avID = options.blockElement.getAttribute("data-av-id");
-    const nodeID = options.blockElement.getAttribute("data-node-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
-        nodeID
     }, (response) => {
         const data = response.data as IAV;
         let html;
@@ -41,6 +45,8 @@ export const openMenuPanel = (options: {
             html = getFiltersHTML(data.view);
         } else if (options.type === "select") {
             html = getSelectHTML(data.view, options.cellElements);
+        } else if (options.type === "asset") {
+            html = getAssetHTML(data.view, options.cellElements);
         } else if (options.type === "edit") {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {
@@ -53,21 +59,25 @@ export const openMenuPanel = (options: {
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
-        const tabRect = options.blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
-        if (options.type === "select") {
+        const tabRect = options.blockElement.querySelector(".layout-tab-bar")?.getBoundingClientRect();
+        if (["select", "date", "asset"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
-            const inputElement = menuElement.querySelector("input");
-            inputElement.select();
-            inputElement.focus();
-        } else if (options.type === "date") {
-            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
-            const inputElement = menuElement.querySelector("input");
-            inputElement.select();
-            inputElement.focus();
+            if (options.type === "select") {
+                bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+            } else if (options.type === "date") {
+                bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+            } else if (options.type === "asset") {
+                bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                setTimeout(() => {
+                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+                }, Constants.TIMEOUT_LOAD);  // 等待图片加载
+            }
+            if (["select", "date"].includes(options.type)) {
+                const inputElement = menuElement.querySelector("input");
+                inputElement.select();
+                inputElement.focus();
+                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+            }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
             if (options.type === "sorts") {
@@ -85,7 +95,12 @@ export const openMenuPanel = (options: {
             window.siyuan.dragElement.style.opacity = "";
             const sourceElement = window.siyuan.dragElement;
             window.siyuan.dragElement = undefined;
-            if (options.protyle.disabled) {
+            if (options.protyle && options.protyle.disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!options.protyle && window.siyuan.config.readonly) {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -102,6 +117,8 @@ export const openMenuPanel = (options: {
                 type = "sorts";
             } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
                 type = "filters";
+            } else if (targetElement.querySelector('[data-type="editAssetItem"]')) {
+                type = "assets";
             } else if (targetElement.querySelector('[data-type="setColOption"]')) {
                 const colId = options.cellElements ? options.cellElements[0].dataset.colId : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
                 const changeData = data.view.columns.find((column) => column.id === colId).options;
@@ -216,6 +233,31 @@ export const openMenuPanel = (options: {
                 menuElement.innerHTML = getFiltersHTML(data.view);
                 return;
             }
+            if (type === "assets") {
+                if (isTop) {
+                    targetElement.before(sourceElement);
+                } else {
+                    targetElement.after(sourceElement);
+                }
+                const replaceValue: IAVCellAssetValue[] = [];
+                Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
+                    if (item.dataset.content) {
+                        replaceValue.push({
+                            content: item.dataset.content,
+                            name: item.dataset.name,
+                            type: item.dataset.type as "image" | "file",
+                        });
+                    }
+                });
+                updateAssetCell({
+                    protyle: options.protyle,
+                    data,
+                    cellElements: options.cellElements,
+                    type: "replace",
+                    replaceValue
+                });
+                return;
+            }
             transaction(options.protyle, [{
                 action: "sortAttrViewCol",
                 avID,
@@ -283,7 +325,12 @@ export const openMenuPanel = (options: {
             while (target && !target.isSameNode(avPanelElement)) {
                 const type = target.dataset.type;
                 if (type === "close") {
-                    avPanelElement.remove();
+                    if (options.protyle.toolbar.subElement.className.includes("fn__none")) {
+                        avPanelElement.remove();
+                    } else {
+                        // 优先关闭资源文件搜索
+                        hideElements(["util"], options.protyle);
+                    }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -455,6 +502,32 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "update-icon") {
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width
+                    }, (unicode) => {
+                        const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                        transaction(options.protyle, [{
+                            action: "setAttrViewColIcon",
+                            id: colId,
+                            avID,
+                            data: unicode,
+                        }], [{
+                            action: "setAttrViewColIcon",
+                            id: colId,
+                            avID,
+                            data: target.dataset.icon,
+                        }]);
+                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`
+                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`))
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "showAllCol") {
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
@@ -587,7 +660,7 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         avID,
                         colId,
-                        nodeID,
+                        icon: colData.icon,
                         newValue: colData.name
                     });
                     avPanelElement.remove();
@@ -608,6 +681,7 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         id: colId
                     }]);
+                    removeAttrViewColAnimation(options.blockElement, colId);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -625,6 +699,50 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCellOption") {
                     removeCellOption(options.protyle, data, options.cellElements, target.parentElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addAssetLink") {
+                    addAssetLink(options.protyle, data, options.cellElements, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addAssetExist") {
+                    const rect = target.getBoundingClientRect();
+                    options.protyle.toolbar.showAssets(options.protyle, {
+                        x: rect.right,
+                        y: rect.bottom,
+                        w: target.parentElement.clientWidth + 8,
+                        h: rect.height
+                    }, (url) => {
+                        let value: IAVCellAssetValue;
+                        if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
+                            value = {
+                                type: "image",
+                                content: url,
+                                name: ""
+                            };
+                        } else {
+                            value = {
+                                type: "file",
+                                content: url,
+                                name: pathPosix().basename(url).substring(0, Constants.SIZE_LINK_TEXT_MAX)
+                            };
+                        }
+                        updateAssetCell({
+                            protyle: options.protyle,
+                            data,
+                            cellElements: options.cellElements,
+                            type: "addUpdate",
+                            addUpdateValue: [value]
+                        });
+                        hideElements(["util"], options.protyle);
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "editAssetItem") {
+                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -702,7 +820,6 @@ ${hideHTML}`;
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.attr}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
@@ -728,8 +845,7 @@ ${hideHTML}
 const getConfigHTML = (data: IAVTable) => {
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.config}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.config}</span>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="goProperties">

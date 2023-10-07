@@ -1,6 +1,5 @@
 /// #if !BROWSER
 import {escapeHtml} from "../../util/escape";
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -12,6 +11,7 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile, setStorageVal} from "../util/compatibility";
+import {showFileInFolder} from "../../util/pathName";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -19,7 +19,7 @@ export const afterExport = (exportPath: string, msgId: string) => {
 <div class="fn__space"></div>
 <button class="b3-button b3-button--white">${window.siyuan.languages.showInFolder}</button>`, 6000, "info", msgId);
     document.querySelector(`#message [data-id="${msgId}"] button`).addEventListener("click", () => {
-        shell.showItemInFolder(path.join(exportPath));
+        showFileInFolder(path.join(exportPath));
         hideMessage(msgId);
     });
     /// #endif

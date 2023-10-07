@@ -112,7 +112,18 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxDirPath := filepath.Join(util.DataDir, dir.Name())
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
+			// Automatically move corrupted notebook folders to the corrupted folder https://github.com/siyuan-note/siyuan/issues/9202
 			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), dir.Name())
+			if copyErr := filelock.Copy(boxDirPath, to); nil != copyErr {
+				logging.LogErrorf("copy corrupted notebook dir [%s] failed: %s", boxDirPath, copyErr)
+				continue
+			}
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted data file [%s] failed: %s", boxDirPath, removeErr)
+				continue
+			}
+			util.ReloadUI()
 			continue
 		}
 

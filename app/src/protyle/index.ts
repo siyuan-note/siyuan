@@ -14,7 +14,7 @@ import {WYSIWYG} from "./wysiwyg";
 import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {Breadcrumb} from "./breadcrumb";
-import {onTransaction} from "./wysiwyg/transaction";
+import {onTransaction, transaction} from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Title} from "./header/Title";
@@ -113,7 +113,11 @@ export class Protyle {
                             break;
                         case "transactions":
                             data.data[0].doOperations.forEach((item: IOperation) => {
-                                onTransaction(this.protyle, item, false);
+                                if (!this.protyle.preview.element.classList.contains("fn__none")) {
+                                    this.protyle.preview.render(this.protyle);
+                                } else {
+                                    onTransaction(this.protyle, item, false);
+                                }
                             });
                             break;
                         case "readonly":
@@ -216,55 +220,54 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            if (options.scrollAttr ||
-                mergedOptions.action.includes(Constants.CB_GET_CONTEXT) ||
-                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) && this.protyle.options.mode !== "preview")) {
-                if (!options.scrollAttr) {
-                    fetchPost("/api/block/getDocInfo", {
-                        id: options.blockId
-                    }, (response) => {
-                        if (response.data.rootID !== options.blockId && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) {
-                            // 搜索打开文档等情况需保持上一次历史 https://github.com/siyuan-note/siyuan/issues/9082
-                            this.getDoc(mergedOptions);
-                            return;
+            if (options.scrollAttr) {
+                getDocByScroll({
+                    protyle: this.protyle,
+                    scrollAttr: options.scrollAttr,
+                    mergedOptions,
+                    cb: () => {
+                        this.afterOnGet(mergedOptions);
+                    }
+                });
+            } else if (this.protyle.options.mode !== "preview" &&
+                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) || mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL))) {
+                fetchPost("/api/block/getDocInfo", {
+                    id: options.blockId
+                }, (response) => {
+                    if (!mergedOptions.action.includes(Constants.CB_GET_SCROLL) &&
+                        response.data.rootID !== options.blockId && mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL)) {
+                        // 打开根文档保持上一次历史，否则按照原有 action 执行 https://github.com/siyuan-note/siyuan/issues/9082
+                        this.getDoc(mergedOptions);
+                        return;
+                    }
+                    let scrollObj;
+                    if (response.data.ial.scroll) {
+                        try {
+                            scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
+                        } catch (e) {
+                            scrollObj = undefined;
                         }
-                        let scrollObj;
-                        if (response.data.ial.scroll) {
-                            try {
-                                scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
-                            } catch (e) {
-                                scrollObj = undefined;
+                    }
+                    if (scrollObj) {
+                        scrollObj.rootId = response.data.rootID;
+                        getDocByScroll({
+                            protyle: this.protyle,
+                            scrollAttr: scrollObj,
+                            mergedOptions,
+                            cb: () => {
+                                this.afterOnGet(mergedOptions);
                             }
-                        }
-                        if (scrollObj) {
-                            scrollObj.rootId = response.data.rootID;
-                            getDocByScroll({
-                                protyle: this.protyle,
-                                scrollAttr: scrollObj,
-                                mergedOptions,
-                                cb: () => {
-                                    this.afterOnGet(mergedOptions);
-                                }
-                            });
-                        } else {
-                            this.getDoc(mergedOptions);
-                        }
-                    });
-                } else {
-                    getDocByScroll({
-                        protyle: this.protyle,
-                        scrollAttr: options.scrollAttr,
-                        mergedOptions,
-                        cb: () => {
-                            this.afterOnGet(mergedOptions);
-                        }
-                    });
-                }
+                        });
+                    } else {
+                        this.getDoc(mergedOptions);
+                    }
+                });
             } else {
                 this.getDoc(mergedOptions);
             }
+        } else {
+            this.protyle.contentElement.classList.add("protyle-content--transition");
         }
-        this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
     private getDoc(mergedOptions: IOptions) {
@@ -337,6 +340,7 @@ export class Protyle {
         if (mergedOptions.after) {
             mergedOptions.after(this);
         }
+        this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
     private init() {
@@ -384,5 +388,9 @@ export class Protyle {
 
     public insert(html: string, isBlock = false, useProtyleRange = false) {
         insertHTML(html, this.protyle, isBlock, useProtyleRange);
+    }
+
+    public transaction( doOperations: IOperation[], undoOperations?: IOperation[]) {
+        transaction(this.protyle,  doOperations, undoOperations);
     }
 }

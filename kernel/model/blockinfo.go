@@ -114,7 +114,27 @@ func GetBlockRefText(id string) string {
 	if nil == node {
 		return ErrBlockNotFound.Error()
 	}
+
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsTextMarkType("inline-memo") {
+			// Block ref anchor text no longer contains contents of inline-level memos https://github.com/siyuan-note/siyuan/issues/9363
+			n.TextMarkInlineMemoContent = ""
+			return ast.WalkContinue
+		}
+		return ast.WalkContinue
+	})
 	return getNodeRefText(node)
+}
+
+func GetDOMText(dom string) (ret string) {
+	luteEngine := NewLute()
+	tree := luteEngine.BlockDOM2Tree(dom)
+	ret = renderBlockText(tree.Root.FirstChild, nil)
+	return
 }
 
 func getBlockRefText(id string, tree *parse.Tree) (ret string) {
@@ -129,6 +149,10 @@ func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 }
 
 func getNodeRefText(node *ast.Node) string {
+	if nil == node {
+		return ""
+	}
+
 	if ret := node.IALAttr("name"); "" != ret {
 		ret = strings.TrimSpace(ret)
 		ret = util.EscapeHTML(ret)

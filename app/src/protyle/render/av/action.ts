@@ -9,10 +9,10 @@ import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
-import {hideElements} from "../../ui/hideElements";
 import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
+import {previewImage} from "../../preview/image";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -30,6 +30,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (protyle.disabled) {
         return false;
     }
+
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
         const addMenu = addCol(protyle, blockElement);
@@ -118,13 +119,23 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
     if (linkElement) {
-        let prefix = "";
+        let linkAddress = linkElement.textContent.trim();
         if (linkElement.dataset.type === "phone") {
-            prefix = "tel:";
+            linkAddress = "tel:" + linkAddress;
         } else if (linkElement.dataset.type === "email") {
-            prefix = "mailto:";
+            linkAddress = "mailto:" + linkAddress;
+        } else if (linkElement.classList.contains("b3-chip")) {
+            linkAddress = linkElement.dataset.url;
         }
-        window.open(prefix + linkElement.textContent.trim());
+        window.open(linkAddress);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg") as HTMLImageElement;
+    if (imgElement) {
+        previewImage(imgElement.src);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -133,6 +144,17 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const cellHeaderElement = hasClosestByClassName(event.target, "av__cellheader");
     if (cellHeaderElement) {
         showColMenu(protyle, blockElement, cellHeaderElement.parentElement);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const blockMoreElement = hasClosestByAttribute(event.target, "data-type", "block-more");
+    if (blockMoreElement) {
+        protyle.toolbar.range = document.createRange();
+        protyle.toolbar.range.selectNodeContents(blockMoreElement);
+        focusByRange(protyle.toolbar.range);
+        hintRef(blockMoreElement.previousElementSibling.textContent.trim(), protyle, "av");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -160,18 +182,27 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const addRowElement = hasClosestByClassName(event.target, "av__row--add");
     if (addRowElement) {
-        if (protyle.hint.element.classList.contains("fn__none")) {
-            protyle.toolbar.range = document.createRange();
-            protyle.toolbar.range.selectNodeContents(blockElement.querySelector(".av__title"));
-            focusByRange(protyle.toolbar.range);
-            hintRef("", protyle, "av");
-        } else {
-            hideElements(["hint"], protyle);
-        }
+        const avID = blockElement.getAttribute("data-av-id");
+        const srcIDs = [Lute.NewNodeID()];
+        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
+        transaction(protyle, [{
+            action: "insertAttrViewBlock",
+            avID,
+            previousID,
+            srcIDs,
+            isDetached: true,
+        }], [{
+            action: "removeAttrViewBlock",
+            srcIDs,
+            avID,
+        }]);
+        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
         event.preventDefault();
         event.stopPropagation();
         return true;
     }
+
     return false;
 };
 
@@ -295,4 +326,32 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         name: nameElement.dataset.title,
     }]);
     nameElement.dataset.title = nameElement.textContent.trim();
+};
+
+export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
+    cellElement.style.opacity = "0.38";
+    cellElement.style.backgroundColor = "var(--b3-theme-surface-light)";
+};
+
+export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
+    blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
+        item.remove();
+    });
+};
+
+export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
+    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+    let colHTML = "";
+    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
+        colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${item.getAttribute("data-block-id") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
+    });
+
+    let html = "";
+    new Array(size).fill(1).forEach(() => {
+        html += `<div class="av__row" data-avid="${avId}">
+    <div style="width: 24px"></div>
+    ${colHTML}
+</div>`;
+    });
+    previousElement.insertAdjacentHTML("afterend", html);
 };

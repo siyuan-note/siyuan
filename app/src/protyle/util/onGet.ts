@@ -92,8 +92,10 @@ export const onGet = (options: {
         if (options.protyle.options.render.title) {
             // 页签没有打开
             options.protyle.title.render(options.protyle, response);
-        } else if (options.protyle.options.render.background) {
-            options.protyle.background.render(response.data.ial, options.protyle.block.rootID);
+        } else {
+            if (options.protyle.options.render.background) {
+                options.protyle.background.render(response.data.ial, options.protyle.block.rootID);
+            }
             options.protyle.wysiwyg.renderCustom(response.data.ial);
         }
 
@@ -148,17 +150,26 @@ const setHTML = (options: {
         }
         protyle.wysiwyg.element.insertAdjacentHTML("beforeend", options.content);
     } else if (options.action.includes(Constants.CB_GET_BEFORE)) {
-        const lastElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
-        const lastTop = lastElement.getBoundingClientRect().top;
+        const firstElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+        const lastTop = firstElement.getBoundingClientRect().top;
         protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", options.content);
-        protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (lastElement.getBoundingClientRect().top - lastTop);
+        protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (firstElement.getBoundingClientRect().top - lastTop);
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
-            while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
-            protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().top > window.innerHeight) {
-                protyle.wysiwyg.element.lastElementChild.remove();
+            const removeElements: Element[] = [];
+            let childCount = protyle.wysiwyg.element.childElementCount;
+            let scrollHeight = protyle.contentElement.scrollHeight;
+            let lastElement = protyle.wysiwyg.element.lastElementChild;
+            while (childCount > 2 && scrollHeight > REMOVED_OVER_HEIGHT && lastElement.getBoundingClientRect().top > window.innerHeight) {
+                removeElements.push(lastElement);
+                lastElement = lastElement.previousElementSibling;
+                childCount--;
+                scrollHeight -= lastElement.clientHeight + 8;   // 大部分元素的 margin
             }
+            removeElements.forEach((item) => {
+                item.remove();
+            });
             hideElements(["toolbar"], protyle);
         }
     } else {
@@ -259,6 +270,7 @@ const setHTML = (options: {
     }
     // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&
+        !protyle.element.classList.contains("block__edit") &&   // 不能为浮窗，否则悬浮为根文档无法打开整个文档 https://github.com/siyuan-note/siyuan/issues/9082
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
         protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
         !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291

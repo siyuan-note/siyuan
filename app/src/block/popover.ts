@@ -44,8 +44,13 @@ export const initBlockPopover = (app: App) => {
                 event.stopPropagation();
                 return;
             }
-        } else if (!aElement && !hasClosestByAttribute(event.target, "id", "tooltip", true)) {
-            hideTooltip();
+        } else if (!aElement) {
+            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
+            if (!tipElement || (
+                tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
+            )) {
+                hideTooltip();
+            }
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
             clearTimeout(timeoutHide);

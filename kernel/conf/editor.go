@@ -71,7 +71,7 @@ func NewEditor() *Editor {
 		EmbedBlockBreadcrumb:            false,
 		ListLogicalOutdent:              false,
 		FloatWindowMode:                 0,
-		DynamicLoadBlocks:               128,
+		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,
 		BacklinkExpandCount:             8,

@@ -4,7 +4,7 @@ import {Wnd} from "../layout/Wnd";
 import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../layout/util";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, pathPosix} from "../util/pathName";
+import {getDisplayName, pathPosix, showFileInFolder} from "../util/pathName";
 import {Constants} from "../constants";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
@@ -668,7 +668,7 @@ export const openBy = (url: string, type: "folder" | "app") => {
             if (type === "app") {
                 shell.openPath(response.data);
             } else if (type === "folder") {
-                shell.showItemInFolder(response.data);
+                showFileInFolder(response.data);
             }
         });
         return;
@@ -691,7 +691,7 @@ export const openBy = (url: string, type: "folder" | "app") => {
                 address = address.replace(/\\\\/g, "\\");
             }
         }
-        shell.showItemInFolder(address);
+        showFileInFolder(address);
     }
     /// #endif
 };

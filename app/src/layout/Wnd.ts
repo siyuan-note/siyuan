@@ -36,6 +36,7 @@ import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import {App} from "../index";
 import {unicode2Emoji} from "../emoji";
+import {closeWindow} from "../window/closeWin";
 
 export class Wnd {
     private app: App;
@@ -101,7 +102,10 @@ export class Wnd {
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
-                    newFile(app, undefined, undefined, undefined, true);
+                    newFile({
+                        app,
+                        useSavePath: true
+                    });
                     break;
                 } else if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(target);
@@ -473,7 +477,7 @@ export class Wnd {
                     openFileById({
                         app: this.app,
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");
@@ -624,7 +628,8 @@ export class Wnd {
         window.siyuan.menus.menu.popup({
             x: rect.left + rect.width,
             y: rect.top + rect.height,
-        }, true);
+            isLeft: true
+        });
     }
 
     private removeOverCounter(oldFocusIndex?: number) {
@@ -775,7 +780,7 @@ export class Wnd {
             if (!wnd) {
                 /// #if !BROWSER
                 if (isWindow()) {
-                    getCurrentWindow().destroy();
+                    closeWindow(this.app);
                     return;
                 }
                 /// #endif

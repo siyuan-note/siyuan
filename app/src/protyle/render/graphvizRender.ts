@@ -2,12 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 
-declare class Viz {
-    public renderSVGElement: (code: string) => Promise<any>;
-
-    constructor(worker: { worker: Worker });
-}
-
 export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let graphvizElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "graphviz") {

@@ -21,6 +21,7 @@ export const initWindowEvent = (app: App) => {
             window.siyuan.layout.rightDock.hideDock();
             window.siyuan.layout.bottomDock.hideDock();
         }
+        hideTooltip();
     });
     let mouseIsEnter = false;
     document.body.addEventListener("mouseenter", () => {

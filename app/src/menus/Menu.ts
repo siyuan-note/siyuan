@@ -92,17 +92,16 @@ export class Menu {
         return menuItem.element;
     }
 
+    public removeScrollEvent() {
+        window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
+    }
+
     public remove() {
         if (window.siyuan.menus.menu.removeCB) {
             window.siyuan.menus.menu.removeCB();
             window.siyuan.menus.menu.removeCB = undefined;
         }
-        if (isMobile()) {
-            window.removeEventListener("touchmove", this.preventDefault, false);
-        } else {
-            window.removeEventListener(this.wheelEvent, this.preventDefault, false);
-        }
-
+        this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
         this.element.lastElementChild.innerHTML = "";
         this.element.classList.add("fn__none");
@@ -125,18 +124,14 @@ export class Menu {
         this.element.lastElementChild.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number, w?: number }, isLeft = false) {
+    public popup(options: IPosition) {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
-        if (isMobile()) {
-            window.addEventListener("touchmove", this.preventDefault, {passive: false});
-        } else {
-            window.addEventListener(this.wheelEvent, this.preventDefault, {passive: false});
-        }
+        window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
+        setPosition(this.element, options.x - (options.isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
@@ -206,7 +201,7 @@ export class MenuItem {
             if (typeof options.iconHTML === "string") {
                 html = options.iconHTML + html;
             } else {
-                html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+                html = `<svg class="b3-menu__icon ${options.iconClass || ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
             }
             if (options.accelerator) {
                 html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;

@@ -530,6 +530,7 @@ func corsMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Private-Network", "true")
 
 		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Max-Age", "600")
 			c.AbortWithStatus(204)
 			return
 		}

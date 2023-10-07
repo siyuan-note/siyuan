@@ -45,8 +45,22 @@ export class Files extends Model {
                             this.onMount(data);
                             break;
                         case "createnotebook":
-                            setNoteBook();
-                            this.element.insertAdjacentHTML("beforeend", this.genNotebook(data.data.box));
+                            setNoteBook((notebooks) => {
+                                let previousId: string;
+                                notebooks.find(item => {
+                                    if (!item.closed) {
+                                        if (item.id === data.data.box.id) {
+                                            if (previousId) {
+                                                this.element.querySelector(`.b3-list[data-url="${previousId}"]`).insertAdjacentHTML("afterend", this.genNotebook(data.data.box));
+                                            } else {
+                                                this.element.insertAdjacentHTML("afterbegin", this.genNotebook(data.data.box));
+                                            }
+                                            return true;
+                                        }
+                                        previousId = item.id;
+                                    }
+                                });
+                            });
                             break;
                         case "unmount":
                         case "removeDoc":
@@ -108,7 +122,13 @@ export class Files extends Model {
                 if (target.classList.contains("b3-list-item__icon")) {
                     event.preventDefault();
                     event.stopPropagation();
-                    openEmojiPanel(target.parentElement.getAttribute("data-url"), target, true);
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel(target.parentElement.getAttribute("data-url"), "notebook", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width,
+                    });
                     break;
                 } else if (type === "toggle") {
                     if (this.closeElement.classList.contains("fn__flex-1")) {
@@ -225,10 +245,21 @@ export class Files extends Model {
                     if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
+                        const rect = target.getBoundingClientRect();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
-                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target);
+                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), "doc", {
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
+                            });
                         } else {
-                            openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
+                            openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), "notebook", {
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
+                                w: rect.width,
+                            });
                         }
                         break;
                     } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__toggle")) {
@@ -243,7 +274,12 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(options.app, notebookId, pathString);
+                                newFile({
+                                    app: options.app,
+                                    notebookId,
+                                    currentPath: pathString,
+                                    useSavePath: false
+                                });
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({
                                     x: event.clientX,

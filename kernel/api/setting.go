@@ -442,11 +442,7 @@ func getCloudUser(c *gin.Context) {
 	if nil != t {
 		token = t.(string)
 	}
-	if err := model.RefreshUser(token); nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
+	model.RefreshUser(token)
 	ret.Data = model.Conf.User
 }
 

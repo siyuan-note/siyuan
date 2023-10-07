@@ -190,7 +190,7 @@ window.openFileByURL = (openURL) => {
         openFileById({
             app: siyuanApp,
             id: getIdFromSYProtocol(openURL),
-            action: isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+            action: isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
             zoomIn: isZoomIn
         });
         return true;

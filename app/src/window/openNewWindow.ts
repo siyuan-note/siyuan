@@ -21,12 +21,13 @@ export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
     const json = {};
     layoutToJSON(tab, json);
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+    ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
         position: options.position,
         width: options.width,
         height: options.height,
         id: getCurrentWindow().id,
-        url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+        // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
+        url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
     });
     /// #endif
     tab.parent.removeTab(tab.id);
@@ -61,12 +62,12 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
                     json.children.scrollAttr.rootId = response.data.rootID;
                 }
                 /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                     position: options.position,
                     width: options.width,
                     height: options.height,
                     id: getCurrentWindow().id,
-                    url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+                    url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
                 });
                 /// #endif
             });
@@ -76,12 +77,12 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
                 zoomInId: id,
             };
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                 position: options.position,
                 width: options.width,
                 height: options.height,
                 id: getCurrentWindow().id,
-                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
             });
             /// #endif
         }

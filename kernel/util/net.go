@@ -55,6 +55,7 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 	if skipTlsVerify {
 		c.EnableInsecureSkipVerify()
 	}
+	c.SetUserAgent(UserAgent)
 
 	for i := 0; i < 3; i++ {
 		resp, err := c.R().Get(checkURL)
@@ -66,6 +67,7 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 		case *url.Error:
 			if err.(*url.Error).URL != checkURL {
 				// DNS 重定向
+				logging.LogWarnf("network is online [DNS redirect, checkURL=%s, retURL=%s]", checkURL, err.(*url.Error).URL)
 				return true
 			}
 		}
@@ -74,6 +76,9 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 		if ret {
 			break
 		}
+
+		time.Sleep(1 * time.Second)
+		logging.LogWarnf("check url [%s] is online failed: %s", checkURL, err)
 	}
 	return
 }

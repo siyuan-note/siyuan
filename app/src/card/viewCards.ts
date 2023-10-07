@@ -253,7 +253,9 @@ const getArticle = (edit: Protyle, id: string) => {
         size: Constants.SIZE_GET_MAX,
     }, getResponse => {
         onGet({
-            data: getResponse, protyle: edit.protyle, action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML]
+            data: getResponse,
+            protyle: edit.protyle,
+            action: getResponse.data.rootID === getResponse.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
         });
     });
 };

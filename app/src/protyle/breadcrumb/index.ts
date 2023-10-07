@@ -3,7 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {fullscreen, netImg2LocalAssets} from "./action";
-import {exportMd, openFileAttr} from "../../menus/commonMenuItem";
+import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -24,7 +24,6 @@ import {onGet} from "../util/onGet";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
-import {deleteFile} from "../../editor/deleteFile";
 import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
@@ -88,7 +87,7 @@ export class Breadcrumb {
                         fetchPost("/api/block/getDocInfo", {
                             id: protyle.block.rootID
                         }, (response) => {
-                            openFileAttr(response.data.ial);
+                            openFileAttr(response.data.ial, "bookmark", protyle);
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();
@@ -102,6 +101,7 @@ export class Breadcrumb {
                     this.showMenu(protyle, {
                         x: targetRect.right,
                         y: targetRect.bottom,
+                        isLeft: true,
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -241,7 +241,7 @@ export class Breadcrumb {
         }
     }
 
-    public showMenu(protyle: IProtyle, position: { x: number, y: number }) {
+    public showMenu(protyle: IProtyle, position:IPosition) {
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === "breadcrumbMore") {
             window.siyuan.menus.menu.remove();
@@ -415,6 +415,13 @@ export class Breadcrumb {
                 accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
                 click: () => {
                     setEditMode(protyle, "wysiwyg");
+                    protyle.scroll.lastScrollTop = 0;
+                    fetchPost("/api/filetree/getDoc", {
+                        id: protyle.block.parentID,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
+                    }, getResponse => {
+                        onGet({data: getResponse, protyle});
+                    });
                 }
             }];
             editSubmenu.push({
@@ -511,14 +518,6 @@ export class Breadcrumb {
                 }).element);
             }
             /// #endif
-            window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
-                click: () => {
-                    deleteFile(protyle.notebookId, protyle.path);
-                }
-            }).element);
             if (protyle?.app?.plugins) {
                 emitOpenMenu({
                     plugins: protyle.app.plugins,
@@ -530,7 +529,6 @@ export class Breadcrumb {
                     separatorPosition: "top",
                 });
             }
-
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,
@@ -544,7 +542,7 @@ export class Breadcrumb {
             /// #if MOBILE
             window.siyuan.menus.menu.fullscreen();
             /// #else
-            window.siyuan.menus.menu.popup(position, true);
+            window.siyuan.menus.menu.popup(position);
             /// #endif
         });
     }

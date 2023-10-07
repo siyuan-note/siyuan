@@ -114,6 +114,15 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch" id="embedBlock" type="checkbox"${window.siyuan.config.search.embedBlock ? " checked" : ""}/>
         </label>
+        <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconDatabase"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.database}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="databaseBlock" type="checkbox"${window.siyuan.config.search.databaseBlock ? " checked" : ""}/>
+        </label>        
     </div>
 </div>
 <div class="b3-label">
@@ -269,6 +278,7 @@ export const query = {
                     codeBlock: (query.element.querySelector("#codeBlock") as HTMLInputElement).checked,
                     htmlBlock: (query.element.querySelector("#htmlBlock") as HTMLInputElement).checked,
                     embedBlock: (query.element.querySelector("#embedBlock") as HTMLInputElement).checked,
+                    databaseBlock: (query.element.querySelector("#databaseBlock") as HTMLInputElement).checked,
                     mathBlock: (query.element.querySelector("#mathBlock") as HTMLInputElement).checked,
                     table: (query.element.querySelector("#table") as HTMLInputElement).checked,
                     blockquote: (query.element.querySelector("#blockquote") as HTMLInputElement).checked,

@@ -350,6 +350,15 @@ func InitConf() {
 	if 0 > Conf.Flashcard.ReviewCardLimit {
 		Conf.Flashcard.ReviewCardLimit = 200
 	}
+	if 0 >= Conf.Flashcard.RequestRetention || 1 <= Conf.Flashcard.RequestRetention {
+		Conf.Flashcard.RequestRetention = conf.NewFlashcard().RequestRetention
+	}
+	if 0 >= Conf.Flashcard.MaximumInterval || 36500 <= Conf.Flashcard.MaximumInterval {
+		Conf.Flashcard.MaximumInterval = conf.NewFlashcard().MaximumInterval
+	}
+	if "" == Conf.Flashcard.Weights || 17 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
+	}
 
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
@@ -519,11 +528,11 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		// 这里多等待一段时间，等待安装程序启动
 		time.Sleep(4 * time.Second)
 	}
-	logging.LogInfof("exited kernel")
 	closeSyncWebSocket()
-	util.WebSocketServer.Close()
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		logging.LogInfof("exited kernel")
+		util.WebSocketServer.Close()
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return
@@ -714,13 +723,12 @@ func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
 }
 
-// TODO 判断用户是否订阅
-func IsOneTimePaid() bool {
-	//if IsSubscriber() {
-	//	return true
-	//}
-	//return nil != Conf.User // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
-	// TODO https://github.com/siyuan-note/siyuan/issues/8780
+func IsPaidUser() bool {
+	// if IsSubscriber() {
+	// 	return true
+	// }
+	// return nil != Conf.User // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
+	// TODO S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
 	// return nil != Conf.User && 1 == Conf.User.UserSiYuanOneTimePayStatus
 	return true
 }

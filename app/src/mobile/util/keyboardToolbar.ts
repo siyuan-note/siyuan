@@ -21,10 +21,10 @@ const getSlashItem = (value: string, icon: string, text: string, focus = "false"
     } else {
         iconHTML = icon;
     }
-    return `<div class="keyboard__slash-item" data-focus="${focus}" data-value="${encodeURIComponent(value)}">
+    return `<button class="keyboard__slash-item" data-focus="${focus}" data-value="${encodeURIComponent(value)}">
     ${iconHTML}
     <span class="keyboard__slash-text">${text}</span>
-</div>`;
+</button>`;
 };
 
 export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
@@ -47,6 +47,15 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     <span class="keyboard__slash-icon" style="background-color:${item}">A</span>
     <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${index + 1}</span>
 </button>`;
+    });
+
+    const nodeElements = getFontNodeElements(protyle);
+    let disableFont = false;
+    nodeElements?.find((item: HTMLElement) => {
+        if (item.classList.contains("list") || item.classList.contains("li")) {
+            disableFont = true;
+            return true;
+        }
     });
 
     let lastColorHTML = "";
@@ -82,9 +91,11 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </button>`;
                     break;
                 case "fontSize":
-                    lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
+                    if (!disableFont) {
+                        lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-text">${lastFontStatus[1]}</span>
 </button>`;
+                    }
                     break;
                 case "style1":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
@@ -103,7 +114,6 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     }
     let textElement: HTMLElement;
     let fontSize = "16px";
-    const nodeElements = getFontNodeElements(protyle);
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
     } else {
@@ -157,8 +167,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-text">${window.siyuan.languages.clearFontStyle}</span>
     </button>
 </div>
-<div class="keyboard__slash-title">${window.siyuan.languages.fontSize}</div>
-<div class="keyboard__slash-block">
+<div class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
+<div class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
     <select class="b3-select fn__block" style="width: calc(50% - 8px);margin: 4px 0 8px 0;">
         <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
         <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
@@ -490,9 +500,9 @@ export const initKeyboardToolbar = () => {
 </div>
 <div class="keyboard__util"></div>`;
     toolbarElement.addEventListener("click", (event) => {
+        const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
-        const protyle = getCurrentEditor()?.protyle;
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
@@ -625,7 +635,8 @@ export const initKeyboardToolbar = () => {
         } else if (type === "more") {
             protyle.breadcrumb.showMenu(protyle, {
                 x: 0,
-                y: 0
+                y: 0,
+                isLeft: true
             });
             activeBlur();
             hideKeyboardToolbar();

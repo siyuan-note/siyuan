@@ -1,4 +1,4 @@
-import {getAllModels} from "../../layout/getAll";
+import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
@@ -36,12 +36,12 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
     coordinates.screenY = event.screenY;
 
     if (window.siyuan.hideBreadcrumb) {
-        document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
-            item.classList.remove("protyle-breadcrumb__bar--hide");
-        });
         window.siyuan.hideBreadcrumb = false;
-        getAllModels().editor.forEach(item => {
-            item.editor.protyle.breadcrumb.render(item.editor.protyle, true);
+        getAllEditor().forEach(item => {
+            if (item.protyle.breadcrumb?.element.classList.contains("protyle-breadcrumb__bar--hide")) {
+                item.protyle.breadcrumb.element.classList.remove("protyle-breadcrumb__bar--hide");
+                item.protyle.breadcrumb.render(item.protyle, true);
+            }
         });
     }
     if (!mouseIsEnter &&

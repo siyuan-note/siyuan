@@ -2,11 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute} from "../util/hasClosest";
 
-declare const mermaid: {
-    initialize(options: any): void,
-    init(options: any, element: Element): void
-};
-
 export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let mermaidElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "mermaid") {
@@ -43,7 +38,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
         if (window.siyuan.config.appearance.mode === 1) {
             config.theme = "dark";
         }
-        mermaid.initialize(config);
+        window.mermaid.initialize(config);
         if (mermaidElements[0].firstElementChild.clientWidth === 0) {
             const hideElement = hasClosestByAttribute(mermaidElements[0], "fold", "1");
             if (!hideElement) {
@@ -75,7 +70,7 @@ const initMermaid = (mermaidElements: Element[]) => {
         renderElement.removeAttribute("data-processed");
         renderElement.textContent = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         setTimeout(() => {
-            mermaid.init(undefined, renderElement);
+            window.mermaid.init(undefined, renderElement);
         }, Constants.TIMEOUT_LOAD * index);
         item.setAttribute("data-render", "true");
         renderElement.setAttribute("contenteditable", "false");

@@ -1339,6 +1339,8 @@ func nSort(n *ast.Node) int {
 		return 20
 	case ast.NodeSuperBlock:
 		return 30
+	case ast.NodeAttributeView:
+		return 30
 	case ast.NodeText, ast.NodeTextMark:
 		if n.IsTextMarkType("tag") {
 			return 205

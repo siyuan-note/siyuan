@@ -1,5 +1,4 @@
 /// #if !BROWSER
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
@@ -12,6 +11,7 @@ import {getQueryTip} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
+import {showFileInFolder} from "../util/pathName";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -63,7 +63,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     <span class="fn__space"></span>
     <span data-type="assetNext" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
     <span class="fn__space"></span>
-    <span id="searchAssetResult"></span>
+    <span id="searchAssetResult" class="ft__selectnone"></span>
     <span class="fn__space"></span>
     <span class="fn__flex-1"></span>
 </div>
@@ -73,7 +73,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px"></div>
 </div>
 <div class="search__tip${isStick ? " fn__none" : ""}">
-    <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
+    <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
     ${enterTip}
     <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
@@ -135,7 +135,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             if (!isHistory) {
                 if (currentList) {
                     /// #if !BROWSER
-                    shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
+                    showFileInFolder(path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
                     /// #endif
                 }
             } else {
@@ -178,9 +178,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             }
             event.preventDefault();
             renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
-            return;
-        }
-        if (event.key === "ArrowUp") {
+        } else if (event.key === "ArrowUp") {
             currentList.classList.remove("b3-list-item--focus");
             if (!currentList.previousElementSibling) {
                 searchPanelElement.lastElementChild.classList.add("b3-list-item--focus");
@@ -194,6 +192,24 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             }
             event.preventDefault();
             renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
+        } else if (Constants.KEYCODELIST[event.keyCode] === "PageUp") {
+            if (!element.querySelector('[data-type="assetPrevious"]').getAttribute("disabled")) {
+                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
+                if (currentPage > 1) {
+                    currentPage--;
+                    assetInputEvent(element, localSearch, currentPage);
+                }
+            }
+            event.preventDefault();
+        } else if (Constants.KEYCODELIST[event.keyCode] === "PageDown") {
+            if (!element.querySelector('[data-type="assetNext"]').getAttribute("disabled")) {
+                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
+                if (currentPage < parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
+                    currentPage++;
+                    assetInputEvent(element, localSearch, currentPage);
+                }
+            }
+            event.preventDefault();
         }
     });
     assetInputEvent(element, localSearch);
@@ -236,7 +252,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 };
 
 let inputTimeout: number;
-export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOption, page = 1,) => {
+export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOption, page = 1) => {
     element.nextElementSibling.classList.remove("fn__none");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
@@ -393,7 +409,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
     /// #endif
 };
 
@@ -543,6 +559,6 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
     /// #endif
 };

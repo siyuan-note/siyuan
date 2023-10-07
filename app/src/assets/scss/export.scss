@@ -31,39 +31,25 @@ svg {
   display: none;
 }
 
-.b3-typography table, .protyle-wysiwyg table {
-  display: table;
+.b3-typography,
+.protyle-wysiwyg .table[data-node-id] {
+  table {
+    display: table;
+  }
 }
 
 @media print {
+  // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {
-    // 尽量避免音频块内分页
     &[data-type=NodeAudio],
-      // 尽量避免图表块内分页
-    &[data-type=NodeCodeBlock][data-subtype=abc],
-    &[data-type=NodeCodeBlock][data-subtype=echarts],
-    &[data-type=NodeCodeBlock][data-subtype=flowchart],
-    &[data-type=NodeCodeBlock][data-subtype=graphviz],
-    &[data-type=NodeCodeBlock][data-subtype=mermaid],
-    &[data-type=NodeCodeBlock][data-subtype=mindmap],
-    &[data-type=NodeCodeBlock][data-subtype=plantuml],
-      // 尽量避免标题块内分页
+    &.render-node[data-type=NodeCodeBlock],
     &[data-type=NodeHeading],
-      // 尽量避免 Iframe 块内分页
     &[data-type=NodeIFrame],
-      // 尽量避免公式块内分页
     &[data-type=NodeMathBlock],
-      // 尽量避免段落块内分页
     &[data-type=NodeParagraph],
-      // 尽量避免分割线内分页
     &[data-type=NodeThematicBreak],
-      // 尽量避免视频块内分页
     &[data-type=NodeVideo],
-      // 尽量避免挂件块内分页
     &[data-type=NodeWidget],
-      // 尽量避免表格块行内分页
-    tr,
-      // 尽量避免图片内分页
     .img {
       break-inside: avoid;
     }

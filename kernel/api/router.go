@@ -159,6 +159,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getRefIDsByFileAnnotationID", model.CheckAuth, getRefIDsByFileAnnotationID)
 	ginServer.Handle("POST", "/api/block/getBlockDefIDsByRefText", model.CheckAuth, getBlockDefIDsByRefText)
 	ginServer.Handle("POST", "/api/block/getRefText", model.CheckAuth, getRefText)
+	ginServer.Handle("POST", "/api/block/getDOMText", model.CheckAuth, getDOMText)
 	ginServer.Handle("POST", "/api/block/getTreeStat", model.CheckAuth, getTreeStat)
 	ginServer.Handle("POST", "/api/block/getBlocksWordCount", model.CheckAuth, getBlocksWordCount)
 	ginServer.Handle("POST", "/api/block/getContentWordCount", model.CheckAuth, getContentWordCount)

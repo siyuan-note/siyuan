@@ -6,11 +6,16 @@ settings:
 
 dependencies:
   '@electron/remote':
+<<<<<<< HEAD
     specifier: ^2.0.9
     version: 2.0.9(electron@26.2.0)
   electron:
     specifier: ^26.2.0
     version: 26.2.0
+=======
+    specifier: ^2.0.11
+    version: 2.0.11(electron@26.3.0)
+>>>>>>> develop
 
 devDependencies:
   '@types/node':
@@ -37,6 +42,12 @@ devDependencies:
   dayjs:
     specifier: ^1.11.5
     version: 1.11.5
+<<<<<<< HEAD
+=======
+  electron:
+    specifier: 26.3.0
+    version: 26.3.0
+>>>>>>> develop
   electron-builder:
     specifier: ^24.6.3
     version: 24.6.3
@@ -164,12 +175,21 @@ packages:
       - supports-color
     dev: true
 
+<<<<<<< HEAD
   /@electron/remote@2.0.9(electron@26.2.0):
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
       electron: 26.2.0
+=======
+  /@electron/remote@2.0.11(electron@26.3.0):
+    resolution: {integrity: sha512-PYEs7W3GrQNuhgiMHjFEvL5MbAL6C7m1AwSAHGqC+xc33IdP7rcGtJSdTP2eg1ssyB3oI00KwTsiSlsQbAoXpA==}
+    peerDependencies:
+      electron: '>= 13.0.0'
+    dependencies:
+      electron: 26.3.0
+>>>>>>> develop
     dev: false
 
   /@electron/universal@1.3.4:
@@ -712,7 +732,7 @@ packages:
       debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.3.8
+      semver: 7.5.4
       tsutils: 3.21.0(typescript@4.7.4)
       typescript: 4.7.4
     transitivePeerDependencies:
@@ -1025,7 +1045,7 @@ packages:
       minimatch: 5.1.6
       read-config-file: 6.3.2
       sanitize-filename: 1.6.3
-      semver: 7.3.8
+      semver: 7.5.4
       tar: 6.1.13
       temp-file: 3.4.0
     transitivePeerDependencies:
@@ -1124,7 +1144,10 @@ packages:
   /boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /brace-expansion@1.1.11:
@@ -1447,12 +1470,12 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.14)
-      postcss: 8.4.14
-      postcss-modules-extract-imports: 3.0.0(postcss@8.4.14)
-      postcss-modules-local-by-default: 4.0.0(postcss@8.4.14)
-      postcss-modules-scope: 3.0.0(postcss@8.4.14)
-      postcss-modules-values: 4.0.0(postcss@8.4.14)
+      icss-utils: 5.1.0(postcss@8.4.31)
+      postcss: 8.4.31
+      postcss-modules-extract-imports: 3.0.0(postcss@8.4.31)
+      postcss-modules-local-by-default: 4.0.0(postcss@8.4.31)
+      postcss-modules-scope: 3.0.0(postcss@8.4.31)
+      postcss-modules-values: 4.0.0(postcss@8.4.31)
       postcss-value-parser: 4.2.0
       semver: 7.3.8
       webpack: 5.76.0(webpack-cli@4.10.0)
@@ -1541,7 +1564,10 @@ packages:
   /detect-node@2.1.0:
     resolution: {integrity: sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /dir-compare@3.3.0:
@@ -1697,8 +1723,13 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
+<<<<<<< HEAD
   /electron@26.2.0:
     resolution: {integrity: sha512-H6Z0sYTtLcybHCQT1yti/8BK+vN5/ZfoekKcdrfZMh5mVf2Z7psFVs6nBhXPzIOyRE/gdb6NcOppnUsGc3NJVQ==}
+=======
+  /electron@26.3.0:
+    resolution: {integrity: sha512-7ZpvSHu+jmqialSvywTZnOQZZGLqlyj+yV5HGDrEzFnMiFaXBRpbByHgoUhaExJ/8t/0xKQjKlMRAY65w+zNZQ==}
+>>>>>>> develop
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -1762,7 +1793,10 @@ packages:
   /es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /esbuild-loader@3.0.1(webpack@5.76.0):
@@ -2108,6 +2142,7 @@ packages:
 
   /function-bind@1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
+    requiresBuild: true
 
   /functional-red-black-tree@1.0.1:
     resolution: {integrity: sha512-dsKNQNdj6xA3T+QlADDA7mOSlX0qiMINjn0cgr+eGHGsbSHzTabcIogz2+p/iqP1Xs6EP/sS2SbqH+brGTbq0g==}
@@ -2265,7 +2300,10 @@ packages:
     resolution: {integrity: sha512-l3LCuF6MgDNwTDKkdYGEihYjt5pRPbEg46rtlmnSPlUbgmB8LOIrKJbYYFBSbnPaJexMKtiPO8hmeRjRz2Td+A==}
     engines: {node: '>= 0.4'}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /has@1.0.3:
@@ -2399,13 +2437,13 @@ packages:
       safer-buffer: 2.1.2
     dev: true
 
-  /icss-utils@5.1.0(postcss@8.4.14):
+  /icss-utils@5.1.0(postcss@8.4.31):
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.14
+      postcss: 8.4.31
     dev: true
 
   /ieee754@1.2.1:
@@ -2605,7 +2643,10 @@ packages:
   /json-stringify-safe@5.0.1:
     resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /json5@1.0.2:
@@ -2833,8 +2874,8 @@ packages:
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
-  /nanoid@3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
+  /nanoid@3.3.6:
+    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
@@ -2889,7 +2930,10 @@ packages:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /once@1.4.0:
@@ -3050,45 +3094,45 @@ packages:
       xmlbuilder: 15.1.1
     dev: true
 
-  /postcss-modules-extract-imports@3.0.0(postcss@8.4.14):
+  /postcss-modules-extract-imports@3.0.0(postcss@8.4.31):
     resolution: {integrity: sha512-bdHleFnP3kZ4NYDhuGlVK+CMrQ/pqUm8bx/oGL93K6gVwiclvX5x0n76fYMKuIGKzlABOy13zsvqjb0f92TEXw==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.14
+      postcss: 8.4.31
     dev: true
 
-  /postcss-modules-local-by-default@4.0.0(postcss@8.4.14):
+  /postcss-modules-local-by-default@4.0.0(postcss@8.4.31):
     resolution: {integrity: sha512-sT7ihtmGSF9yhm6ggikHdV0hlziDTX7oFoXtuVWeDd3hHObNkcHRo9V3yg7vCAY7cONyxJC/XXCmmiHHcvX7bQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.14)
-      postcss: 8.4.14
+      icss-utils: 5.1.0(postcss@8.4.31)
+      postcss: 8.4.31
       postcss-selector-parser: 6.0.10
       postcss-value-parser: 4.2.0
     dev: true
 
-  /postcss-modules-scope@3.0.0(postcss@8.4.14):
+  /postcss-modules-scope@3.0.0(postcss@8.4.31):
     resolution: {integrity: sha512-hncihwFA2yPath8oZ15PZqvWGkWf+XUfQgUGamS4LqoP1anQLOsOJw0vr7J7IwLpoY9fatA2qiGUGmuZL0Iqlg==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      postcss: 8.4.14
+      postcss: 8.4.31
       postcss-selector-parser: 6.0.10
     dev: true
 
-  /postcss-modules-values@4.0.0(postcss@8.4.14):
+  /postcss-modules-values@4.0.0(postcss@8.4.31):
     resolution: {integrity: sha512-RDxHkAiEGI78gS2ofyvCsu7iycRv7oqw5xMWn9iMoR0N/7mf9D50ecQqUo5BZ9Zh2vH4bCUR/ktCqbB9m8vJjQ==}
     engines: {node: ^10 || ^12 || >= 14}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.14)
-      postcss: 8.4.14
+      icss-utils: 5.1.0(postcss@8.4.31)
+      postcss: 8.4.31
     dev: true
 
   /postcss-selector-parser@6.0.10:
@@ -3103,11 +3147,11 @@ packages:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
     dev: true
 
-  /postcss@8.4.14:
-    resolution: {integrity: sha512-E398TUmfAYFPBSdzgeieK2Y1+1cpdxJx8yXbK/m57nRhKSmk1GB2tO4lbLBtlkfPQTDKfe4Xqv1ASWPpayPEig==}
+  /postcss@8.4.31:
+    resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
-      nanoid: 3.3.4
+      nanoid: 3.3.6
       picocolors: 1.0.0
       source-map-js: 1.0.2
     dev: true
@@ -3362,7 +3406,10 @@ packages:
   /semver-compare@1.0.0:
     resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /semver@6.3.1:
@@ -3482,7 +3529,10 @@ packages:
   /sprintf-js@1.1.2:
     resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /stat-mode@1.0.0:
@@ -3673,7 +3723,10 @@ packages:
     resolution: {integrity: sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==}
     engines: {node: '>=10'}
     requiresBuild: true
+<<<<<<< HEAD
     dev: false
+=======
+>>>>>>> develop
     optional: true
 
   /type-fest@0.20.2:

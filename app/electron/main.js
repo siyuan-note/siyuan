@@ -705,17 +705,26 @@ app.whenReady().then(() => {
         let webContentsId = event.sender.id
         if (typeof data !== "string") {
             cmd = data.cmd;
-            webContentsId = data.webContentsId
+            if (data.webContentsId) {
+                webContentsId = data.webContentsId
+            }
         }
+        const currentWindow = getWindowByContentId(webContentsId);
         switch (cmd) {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;
             case "show":
-                showWindow(getWindowByContentId(webContentsId));
+                showWindow(currentWindow);
                 break;
             case "hide":
-                getWindowByContentId(webContentsId).hide();
+                currentWindow.hide();
+                break;
+            case "focus":
+                currentWindow.focus();
+                break;
+            case "clearCache":
+                event.sender.session.clearCache();
                 break;
             case "redo":
                 event.sender.redo();
@@ -724,7 +733,14 @@ app.whenReady().then(() => {
                 event.sender.undo();
                 break;
             case "destroy":
-                getWindowByContentId(webContentsId).destroy();
+                currentWindow.destroy();
+                break;
+            case "setProxy":
+                event.sender.session.closeAllConnections().then(() => {
+                    event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
+                        console.log("network proxy [" + data.proxyURL + "]");
+                    });
+                });
                 break;
         }
     });

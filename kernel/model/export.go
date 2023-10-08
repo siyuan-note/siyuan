@@ -1385,22 +1385,21 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
 	exportStorageRiffDir := filepath.Join(exportFolder, "storage", "riff")
-	deckID := ast.NewNodeID()
-	deck, loadErr := riff.LoadDeck(exportStorageRiffDir, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
-	for _, tree := range trees {
-		cards := getTreeFlashcards(tree.ID)
-		if nil != loadErr {
-			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
-			continue
-		}
+	deck, loadErr := riff.LoadDeck(exportStorageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+	if nil != loadErr {
+		logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
+	} else {
+		for _, tree := range trees {
+			cards := getTreeFlashcards(tree.ID)
 
-		for _, card := range cards {
-			deck.AddCard(card.ID(), card.BlockID())
+			for _, card := range cards {
+				deck.AddCard(card.ID(), card.BlockID())
+			}
 		}
-	}
-	if 0 < deck.CountCards() {
-		if saveErr := deck.Save(); nil != saveErr {
-			logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+		if 0 < deck.CountCards() {
+			if saveErr := deck.Save(); nil != saveErr {
+				logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+			}
 		}
 	}
 

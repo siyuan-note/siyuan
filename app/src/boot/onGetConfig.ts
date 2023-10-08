@@ -1,7 +1,6 @@
 import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
 import * as path from "path";
@@ -153,34 +152,29 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     addGA();
 };
 
-export const initWindow = (app: App) => {
+const winOnMaxRestore = async () => {
     /// #if !BROWSER
-    const winOnFocus = () => {
-        if (getSelection().rangeCount > 0) {
-            const range = getSelection().getRangeAt(0);
-            const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
-            if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
-                startNode.focus();
-            } else {
-                focusByRange(getSelection().getRangeAt(0));
-            }
-        }
-        exportLayout({
-            reload: false,
-            onlyData: false,
-            errorExit: false
-        });
-        window.siyuan.altIsPressed = false;
-        window.siyuan.ctrlIsPressed = false;
-        window.siyuan.shiftIsPressed = false;
-        document.body.classList.remove("body--blur");
-    };
+    const maxBtnElement = document.getElementById("maxWindow");
+    const restoreBtnElement = document.getElementById("restoreWindow");
+    const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isFullScreen",
+    });
+    const isMaximized = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isMaximized",
+    });
+    if (isMaximized || isFullScreen) {
+        restoreBtnElement.style.display = "flex";
+        maxBtnElement.style.display = "none";
+    } else {
+        restoreBtnElement.style.display = "none";
+        maxBtnElement.style.display = "flex";
+    }
+    /// #endif
+};
 
-    const winOnBlur = () => {
-        document.body.classList.add("body--blur");
-    };
-
-    const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
+export const initWindow = async (app: App) => {
+    /// #if !BROWSER
+    const winOnClose = (close = false) => {
         exportLayout({
             reload: false,
             cb() {
@@ -191,12 +185,7 @@ export const initWindow = (app: App) => {
                             languages: window.siyuan.languages["_trayMenu"],
                         });
                     } else {
-                        if (currentWindow.isFullScreen()) {
-                            currentWindow.once("leave-full-screen", () => currentWindow.hide());
-                            currentWindow.setFullScreen(false);
-                        } else {
-                            currentWindow.hide();
-                        }
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "closeButtonBehavior");
                     }
                 } else {
                     exitSiYuan();
@@ -207,38 +196,55 @@ export const initWindow = (app: App) => {
         });
     };
 
-    const winOnMaxRestore = () => {
-        const currentWindow = getCurrentWindow();
-        const maxBtnElement = document.getElementById("maxWindow");
-        const restoreBtnElement = document.getElementById("restoreWindow");
-        if (currentWindow.isMaximized() || currentWindow.isFullScreen()) {
-            restoreBtnElement.style.display = "flex";
-            maxBtnElement.style.display = "none";
-        } else {
-            restoreBtnElement.style.display = "none";
-            maxBtnElement.style.display = "flex";
+    ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent")
+    ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
+        if (cmd === "focus") {
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
+                if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
+                    startNode.focus();
+                } else {
+                    focusByRange(getSelection().getRangeAt(0));
+                }
+            }
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false
+            });
+            window.siyuan.altIsPressed = false;
+            window.siyuan.ctrlIsPressed = false;
+            window.siyuan.shiftIsPressed = false;
+            document.body.classList.remove("body--blur");
+        } else if (cmd === "blur") {
+            document.body.classList.add("body--blur");
+        } else if (cmd === "enter-full-screen") {
+            if ("darwin" === window.siyuan.config.system.os) {
+                if (isWindow()) {
+                    setTabPosition();
+                } else {
+                    document.getElementById("toolbar").style.paddingLeft = "0";
+                }
+            } else {
+                winOnMaxRestore()
+            }
+        } else if (cmd === "leave-full-screen") {
+            if ("darwin" === window.siyuan.config.system.os) {
+                if (isWindow()) {
+                    setTabPosition();
+                } else {
+                    document.getElementById("toolbar").setAttribute("style", "");
+                }
+            } else {
+                winOnMaxRestore();
+            }
+        } else if (cmd === "maximize") {
+            winOnMaxRestore();
+        } else if (cmd === "unmaximize") {
+            winOnMaxRestore();
         }
-    };
-
-    const winOnEnterFullscreen = () => {
-        if (isWindow()) {
-            setTabPosition();
-        } else {
-            document.getElementById("toolbar").style.paddingLeft = "0";
-        }
-    };
-
-    const winOnLeaveFullscreen = () => {
-        if (isWindow()) {
-            setTabPosition();
-        } else {
-            document.getElementById("toolbar").setAttribute("style", "");
-        }
-    };
-
-    const currentWindow = getCurrentWindow();
-    currentWindow.on("focus", winOnFocus);
-    currentWindow.on("blur", winOnBlur);
+    });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
             if (url.startsWith("siyuan://plugins/")) {
@@ -304,7 +310,7 @@ export const initWindow = (app: App) => {
         if (isWindow()) {
             closeWindow(app);
         } else {
-            winOnClose(currentWindow, close);
+            winOnClose(close);
         }
     });
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
@@ -403,20 +409,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "hide", webContentsId: ipcData.webContentsId});
     });
 
-    window.addEventListener("beforeunload", () => {
-        currentWindow.off("focus", winOnFocus);
-        currentWindow.off("blur", winOnBlur);
-        if ("darwin" === window.siyuan.config.system.os) {
-            currentWindow.off("enter-full-screen", winOnEnterFullscreen);
-            currentWindow.off("leave-full-screen", winOnLeaveFullscreen);
-        } else {
-            currentWindow.off("enter-full-screen", winOnMaxRestore);
-            currentWindow.off("leave-full-screen", winOnMaxRestore);
-            currentWindow.off("maximize", winOnMaxRestore);
-            currentWindow.off("unmaximize", winOnMaxRestore);
-        }
-    }, false);
-
     if (isWindow()) {
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
 <div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.pin}" id="pinWindow">
@@ -429,34 +421,18 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             pinElement.classList.toggle("toolbar__item--active");
             if (pinElement.classList.contains("toolbar__item--active")) {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-                currentWindow.setAlwaysOnTop(true, "pop-up-menu");
+                ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopTrue");
             } else {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.pin);
-                currentWindow.setAlwaysOnTop(false);
+                ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopFalse");
             }
         });
     }
-    if ("darwin" === window.siyuan.config.system.os) {
-        document.getElementById("drag")?.addEventListener("dblclick", () => {
-            if (currentWindow.isMaximized()) {
-                currentWindow.unmaximize();
-            } else {
-                currentWindow.maximize();
-            }
-        });
-        const toolbarElement = document.getElementById("toolbar");
-        currentWindow.on("enter-full-screen", winOnEnterFullscreen);
-        currentWindow.on("leave-full-screen", winOnLeaveFullscreen);
-        if (currentWindow.isFullScreen() && !isWindow()) {
-            toolbarElement.style.paddingLeft = "0";
-        }
-        return;
-    }
+    if ("darwin" !== window.siyuan.config.system.os) {
+        document.body.classList.add("body--win32");
 
-    document.body.classList.add("body--win32");
-
-    // 添加窗口控件
-    const controlsHTML = `<div class="toolbar__item ariaLabel toolbar__item--win" aria-label="${window.siyuan.languages.min}" id="minWindow">
+        // 添加窗口控件
+        const controlsHTML = `<div class="toolbar__item ariaLabel toolbar__item--win" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>
     </svg>
@@ -476,45 +452,46 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         <use xlink:href="#iconClose"></use>
     </svg>
 </div>`;
-    if (isWindow()) {
-        document.querySelector(".toolbar__window").insertAdjacentHTML("beforeend", controlsHTML);
-    } else {
-        document.getElementById("windowControls").innerHTML = controlsHTML;
-    }
-    const maxBtnElement = document.getElementById("maxWindow");
-    const restoreBtnElement = document.getElementById("restoreWindow");
-
-    restoreBtnElement.addEventListener("click", () => {
-        if (currentWindow.isFullScreen()) {
-            currentWindow.setFullScreen(false);
-        } else {
-            currentWindow.unmaximize();
-        }
-    });
-    maxBtnElement.addEventListener("click", () => {
-        currentWindow.maximize();
-    });
-
-    winOnMaxRestore();
-    currentWindow.on("maximize", winOnMaxRestore);
-    currentWindow.on("unmaximize", winOnMaxRestore);
-    currentWindow.on("enter-full-screen", winOnMaxRestore);
-    currentWindow.on("leave-full-screen", winOnMaxRestore);
-    const minBtnElement = document.getElementById("minWindow");
-    const closeBtnElement = document.getElementById("closeWindow");
-    minBtnElement.addEventListener("click", () => {
-        if (minBtnElement.classList.contains("window-controls__item--disabled")) {
-            return;
-        }
-        currentWindow.minimize();
-    });
-    closeBtnElement.addEventListener("click", () => {
         if (isWindow()) {
-            closeWindow(app);
+            document.querySelector(".toolbar__window").insertAdjacentHTML("beforeend", controlsHTML);
         } else {
-            winOnClose(currentWindow);
+            document.getElementById("windowControls").innerHTML = controlsHTML;
         }
-    });
+        const maxBtnElement = document.getElementById("maxWindow");
+        const restoreBtnElement = document.getElementById("restoreWindow");
+
+        restoreBtnElement.addEventListener("click", () => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, "restore");
+        });
+        maxBtnElement.addEventListener("click", () => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, "maximize");
+        });
+
+        winOnMaxRestore();
+        const minBtnElement = document.getElementById("minWindow");
+        const closeBtnElement = document.getElementById("closeWindow");
+        minBtnElement.addEventListener("click", () => {
+            if (minBtnElement.classList.contains("window-controls__item--disabled")) {
+                return;
+            }
+            ipcRenderer.send(Constants.SIYUAN_CMD, "minimize");
+        });
+        closeBtnElement.addEventListener("click", () => {
+            if (isWindow()) {
+                closeWindow(app);
+            } else {
+                winOnClose();
+            }
+        });
+    } else {
+        const toolbarElement = document.getElementById("toolbar");
+        const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "isFullScreen",
+        });
+        if (isFullScreen && !isWindow()) {
+            toolbarElement.style.paddingLeft = "0";
+        }
+    }
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");

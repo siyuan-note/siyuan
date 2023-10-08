@@ -31,7 +31,6 @@ let firstOpen = false;
 let workspaces = []; // workspaceDir, id, browserWindow, tray
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
-require("@electron/remote/main").initialize();
 
 if (!app.requestSingleInstanceLock()) {
     app.quit();
@@ -160,7 +159,6 @@ const showErrorWindow = (title, content) => {
             nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
         },
     });
-    require("@electron/remote/main").enable(errWindow.webContents);
     errWindow.loadFile(errorHTMLPath, {
         query: {
             home: app.getPath("home"),
@@ -281,7 +279,6 @@ const boot = () => {
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
     windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
-    require("@electron/remote/main").enable(currentWindow.webContents);
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     currentWindow.webContents.session.setSpellCheckerLanguages(["en-US"]);
@@ -674,6 +671,9 @@ app.whenReady().then(() => {
         if (data.cmd === "isFullScreen") {
             return getWindowByContentId(event.sender.id).isFullScreen();
         }
+        if (data.cmd === "isMaximized") {
+            return getWindowByContentId(event.sender.id).isMaximized();
+        }
         if (data.cmd === "getMicrophone") {
             return systemPreferences.getMediaAccessStatus("microphone");
         }
@@ -700,6 +700,29 @@ app.whenReady().then(() => {
             return hasMatch
         }
     });
+    ipcMain.once("siyuan-event", (event) => {
+        const currentWindow = getWindowByContentId(event.sender.id);
+        currentWindow.on("focus", () => {
+            event.sender.send("siyuan-event", "focus");
+        });
+        currentWindow.on("blur", () => {
+            event.sender.send("siyuan-event", "blur");
+        });
+        if ("darwin" !== process.platform) {
+            currentWindow.on("maximize", () => {
+                event.sender.send("siyuan-event", "maximize");
+            });
+            currentWindow.on("unmaximize", () => {
+                event.sender.send("siyuan-event", "unmaximize");
+            });
+        }
+        currentWindow.on("enter-full-screen", () => {
+            event.sender.send("siyuan-event", "enter-full-screen");
+        });
+        currentWindow.on("leave-full-screen", () => {
+            event.sender.send("siyuan-event", "leave-full-screen");
+        });
+    })
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;
         let webContentsId = event.sender.id
@@ -720,8 +743,27 @@ app.whenReady().then(() => {
             case "hide":
                 currentWindow.hide();
                 break;
+            case "minimize":
+                currentWindow.minimize();
+                break;
+            case "maximize":
+                currentWindow.maximize();
+                break;
+            case "restore":
+                if (currentWindow.isFullScreen()) {
+                    currentWindow.setFullScreen(false);
+                } else {
+                    currentWindow.unmaximize();
+                }
+                break;
             case "focus":
                 currentWindow.focus();
+                break;
+            case "setAlwaysOnTopFalse":
+                currentWindow.setAlwaysOnTop(false);
+                break;
+            case "setAlwaysOnTopTrue":
+                currentWindow.setAlwaysOnTop(true, "pop-up-menu");
                 break;
             case "clearCache":
                 event.sender.session.clearCache();
@@ -734,6 +776,16 @@ app.whenReady().then(() => {
                 break;
             case "destroy":
                 currentWindow.destroy();
+                break;
+            case "closeButtonBehavior":
+                if (currentWindow.isFullScreen()) {
+                    currentWindow.once("leave-full-screen", () => {
+                        currentWindow.hide();
+                    });
+                    currentWindow.setFullScreen(false);
+                } else {
+                    currentWindow.hide();
+                }
                 break;
             case "setProxy":
                 event.sender.session.closeAllConnections().then(() => {
@@ -842,7 +894,6 @@ app.whenReady().then(() => {
         if (mainScreen.id !== targetScreen.id) {
             win.setBounds(targetScreen.workArea);
         }
-        require("@electron/remote/main").enable(win.webContents);
     });
     ipcMain.on("siyuan-open-workspace", (event, data) => {
         const foundWorkspace = workspaces.find((item) => {
@@ -960,7 +1011,6 @@ app.whenReady().then(() => {
                 nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
             },
         });
-        require("@electron/remote/main").enable(firstOpenWindow.webContents);
         let initHTMLPath = path.join(appDir, "app", "electron", "init.html");
         if (isDevEnv) {
             initHTMLPath = path.join(appDir, "electron", "init.html");

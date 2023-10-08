@@ -187,7 +187,7 @@ export const exportConfig = {
             });
             /// #else
             const filePaths = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
-                cmd: "showOpenDialogSync",
+                cmd: "showOpenDialog",
                 title: window.siyuan.languages.export + " " + "Data",
                 properties: ["createDirectory", "openDirectory"],
             });

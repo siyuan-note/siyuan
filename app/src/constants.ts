@@ -26,6 +26,7 @@ export abstract class Constants {
     // 渲染进程调主进程
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
     public static readonly SIYUAN_GET: string = "siyuan-get";
+    public static readonly SIYUAN_EVENT: string = "siyuan-event";
 
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";

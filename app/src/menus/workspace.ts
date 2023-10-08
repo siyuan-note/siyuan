@@ -1,6 +1,5 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
@@ -407,7 +406,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             label: window.siyuan.languages.debug,
             icon: "iconBug",
             click: () => {
-                getCurrentWindow().webContents.openDevTools({mode: "bottom"});
+                ipcRenderer.send(Constants.SIYUAN_CMD, "openDevTools");
             }
         }).element);
         /// #endif

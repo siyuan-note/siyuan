@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"image"
 	"image/jpeg"
@@ -274,6 +275,36 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				}
 				return ast.WalkContinue
 			})
+		}
+	}
+
+	// 将关联的闪卡数据合并到默认卡包 data/storage/riff/20230218211946-2kw8jgx 中
+	storageRiffDir := filepath.Join(storage, "riff")
+	if gulu.File.IsExist(storageRiffDir) {
+		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+		if nil != loadErr {
+			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
+		} else {
+			deck := Decks[builtinDeckID]
+			if nil == deck {
+				var createErr error
+				deck, createErr = createDeck0("Built-in Deck", builtinDeckID)
+				if nil == createErr {
+					Decks[deck.ID] = deck
+				}
+			}
+
+			bIDs := deckToImport.GetBlockIDs()
+			cards := deckToImport.GetCardsByBlockIDs(bIDs)
+			for _, card := range cards {
+				deck.AddCard(card.ID(), blockIDs[card.BlockID()])
+			}
+
+			if 0 < len(cards) {
+				if saveErr := deck.Save(); nil != saveErr {
+					logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+				}
+			}
 		}
 	}
 

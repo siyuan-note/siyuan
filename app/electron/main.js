@@ -789,6 +789,13 @@ app.whenReady().then(() => {
                 break;
             case "setProxy":
                 event.sender.session.closeAllConnections().then(() => {
+                    if (data.proxyURL.startsWith("://")) {
+                        event.sender.session.setProxy({mode: "system"}).then(() => {
+                            console.log("network proxy [system]");
+                        });
+                        return;
+                    }
+
                     event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
                         console.log("network proxy [" + data.proxyURL + "]");
                     });

@@ -328,7 +328,7 @@ ${renewHTML}
         let token: string;
         let needCaptcha: string;
         captchaImgElement.addEventListener("click", () => {
-            captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
+            captchaImgElement.setAttribute("src", getCloudURL("captcha") + `/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
         });
 
         const cloudRegionElement = element.querySelector("#cloudRegion") as HTMLSelectElement;
@@ -354,7 +354,7 @@ ${renewHTML}
                         needCaptcha = data.data.needCaptcha;
                         captchaElement.parentElement.classList.remove("fn__none");
                         captchaElement.previousElementSibling.setAttribute("src",
-                            `https://ld246.com/captcha/login?needCaptcha=${data.data.needCaptcha}`);
+                            getCloudURL("captcha") + `/login?needCaptcha=${data.data.needCaptcha}`);
                         captchaElement.value = "";
                         return;
                     }

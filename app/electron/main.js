@@ -667,8 +667,19 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-show", (event) => {
         showWindow(getWindowByContentId(event.sender.id));
     });
-    ipcMain.on("siyuan-hide", (event) => {
-        getWindowByContentId(event.sender.id).hide();
+    ipcMain.on("siyuan-cmd", (event, cmd) => {
+        console.log(cmd)
+        switch (cmd) {
+            case "hide":
+                getWindowByContentId(event.sender.id).hide();
+                break;
+            case "redo":
+                event.sender.redo();
+                break;
+            case "undo":
+                event.sender.undo();
+                break;
+        }
     });
     ipcMain.on("siyuan-config-tray", (event, data) => {
         workspaces.find(item => {

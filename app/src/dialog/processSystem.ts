@@ -199,7 +199,7 @@ export const exitSiYuan = () => {
                     // 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
                     // 这里先将主界面隐藏
                     setTimeout(() => {
-                        ipcRenderer.send(Constants.SIYUAN_HIDE);
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "hide");
                     }, 2000);
                     // 然后等待一段时间后再退出，避免界面主进程退出以后内核子进程被杀死
                     setTimeout(() => {

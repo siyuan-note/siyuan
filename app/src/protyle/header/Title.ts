@@ -10,7 +10,7 @@ import {
     openFileAttr,
 } from "../../menus/commonMenuItem";
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
+import { ipcRenderer } from "electron";
 /// #endif
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
@@ -99,13 +99,13 @@ export class Title {
             }
             /// #if !BROWSER
             if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-                getCurrentWindow().webContents.undo();
+                ipcRenderer.send(Constants.SIYUAN_CMD, "undo");
                 event.preventDefault();
                 event.stopPropagation();
                 return;
             }
             if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-                getCurrentWindow().webContents.redo();
+                ipcRenderer.send(Constants.SIYUAN_CMD, "redo");
                 event.preventDefault();
                 event.stopPropagation();
                 return;

@@ -61,7 +61,7 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 			createdStr = createdStr[:len("20060102150405")]
 		}
 		created, parseErr := time.Parse("20060102150405", createdStr)
-		if nil != parseErr {
+		if nil == parseErr {
 			dataModel["created"] = created
 		} else {
 			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
@@ -69,7 +69,7 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 		}
 		updatedStr := ial["updated"]
 		updated, parseErr := time.Parse("20060102150405", updatedStr)
-		if nil != parseErr {
+		if nil == parseErr {
 			dataModel["updated"] = updated
 		} else {
 			logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)

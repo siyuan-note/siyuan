@@ -39,6 +39,7 @@ export abstract class Constants {
     public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
     public static readonly SIYUAN_OPEN_WINDOW: string = "siyuan-open-window";
     public static readonly SIYUAN_OPEN_FOLDER: string = "siyuan-open-folder";
+    public static readonly SIYUAN_OPEN_FILE: string = "siyuan-open-file";
 
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_NEWWINDOW: string = "siyuan-export-newwindow";

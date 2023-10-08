@@ -297,6 +297,9 @@ export const initWindow = (app: App) => {
             }
         });
     }
+    ipcRenderer.on(Constants.SIYUAN_OPEN_FILE, (event, data) => {
+        openFile(data);
+    });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         if (isWindow()) {
             closeWindow(app);

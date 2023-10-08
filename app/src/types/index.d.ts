@@ -138,10 +138,6 @@ interface Window {
         getBlockURL(): string
     }
 
-    newWindow: {
-        openFile(options: IOpenFileOptions): void
-    }
-
     Protyle: import("../protyle/method").default
 
     goBack(): void

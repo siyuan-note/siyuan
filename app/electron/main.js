@@ -683,6 +683,22 @@ app.whenReady().then(() => {
         if (data.cmd === "printToPDF") {
             return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
         }
+        if (data.cmd === "siyuan-open-file") {
+            let hasMatch = false;
+            BrowserWindow.getAllWindows().find(item => {
+                if (item.webContents.id === event.sender.id) {
+                    return;
+                }
+                const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split("\u200b");
+                if (ids.includes(data.options.rootID) || ids.includes(data.options.assetPath)) {
+                    item.focus();
+                    item.webContents.send("siyuan-open-file", data.options);
+                    hasMatch = true;
+                    return true;
+                }
+            });
+            return hasMatch
+        }
     });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;

@@ -327,7 +327,6 @@ interface ISiyuan {
     storage?: {
         [key: string]: any
     },
-    printWin?: import("electron").BrowserWindow
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],

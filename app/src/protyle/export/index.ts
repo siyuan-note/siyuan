@@ -2,7 +2,6 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import {app, BrowserWindow, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -463,7 +462,7 @@ const renderPDF = (id: string) => {
         });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
-            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
+            ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
         });
         actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
@@ -499,28 +498,8 @@ const renderPDF = (id: string) => {
         renderPreview(response.data.content);
     });
 </script></body></html>`;
-    window.siyuan.printWin = new BrowserWindow({
-        parent: getCurrentWindow(),
-        modal: true,
-        show: true,
-        width: 1032,
-        height: 650,
-        resizable: false,
-        frame: "darwin" === window.siyuan.config.system.os,
-        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
-        titleBarStyle: "hidden",
-        webPreferences: {
-            contextIsolation: false,
-            nodeIntegration: true,
-            webviewTag: true,
-            webSecurity: false,
-            autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
-        },
-    });
-    ipcRenderer.send(Constants.SIYUAN_EXPORT_PREVENT, window.siyuan.printWin.id);
-    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
-        window.siyuan.printWin.loadURL(response.data.url);
+        ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
 };
 

@@ -680,23 +680,35 @@ app.whenReady().then(() => {
         if (data.cmd === "askMicrophone") {
             return systemPreferences.askForMediaAccess("microphone");
         }
+        if (data.cmd === "printToPDF") {
+            return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
+        }
     });
-    ipcMain.on("siyuan-cmd", (event, cmd) => {
+    ipcMain.on("siyuan-cmd", (event, data) => {
+        let cmd = data;
+        let webContentsId = event.sender.id
+        if (typeof data !== "string") {
+            cmd = data.cmd;
+            webContentsId = data.webContentsId
+        }
         switch (cmd) {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;
             case "show":
-                showWindow(getWindowByContentId(event.sender.id));
+                showWindow(getWindowByContentId(webContentsId));
                 break;
             case "hide":
-                getWindowByContentId(event.sender.id).hide();
+                getWindowByContentId(webContentsId).hide();
                 break;
             case "redo":
                 event.sender.redo();
                 break;
             case "undo":
                 event.sender.undo();
+                break;
+            case "destroy":
+                getWindowByContentId(webContentsId).destroy();
                 break;
         }
     });
@@ -721,20 +733,37 @@ app.whenReady().then(() => {
                 return;
             }
             data.filePaths = result.filePaths;
+            data.webContentsId = event.sender.id;
             getWindowByContentId(event.sender.id).getParentWindow().send("siyuan-export-pdf", data);
         });
     });
-    ipcMain.on("siyuan-export-close", (event) => {
-        event.sender.destroy();
-    });
-    ipcMain.on("siyuan-export-prevent", (event, id) => {
-        BrowserWindow.fromId(id).webContents.on("will-navigate", (event) => {
-            const url = event.url;
-            event.preventDefault();
-            if (url.startsWith(localServer)) {
+    ipcMain.on("siyuan-export-newwindow", (event, data) => {
+        const printWin = new BrowserWindow({
+            parent: getWindowByContentId(event.sender.id),
+            modal: true,
+            show: true,
+            width: 1032,
+            height: 650,
+            resizable: false,
+            frame: "darwin" === process.platform,
+            icon: path.join(appDir, "stage", "icon-large.png"),
+            titleBarStyle: "hidden",
+            webPreferences: {
+                contextIsolation: false,
+                nodeIntegration: true,
+                webviewTag: true,
+                webSecurity: false,
+                autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
+            },
+        });
+        printWin.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + printWin.webContents.userAgent;
+        printWin.loadURL(data);
+        printWin.webContents.on("will-navigate", (nEvent) => {
+            nEvent.preventDefault();
+            if (nEvent.url.startsWith(localServer)) {
                 return;
             }
-            shell.openExternal(url);
+            shell.openExternal(nEvent.url);
         });
     });
     ipcMain.on("siyuan-quit", (event, port) => {

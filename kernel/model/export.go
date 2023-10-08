@@ -46,6 +46,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -1380,6 +1381,27 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 			return ast.WalkContinue
 		})
+	}
+
+	// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
+	exportStorageRiffDir := filepath.Join(exportFolder, "storage", "riff")
+	deckID := ast.NewNodeID()
+	deck, loadErr := riff.LoadDeck(exportStorageRiffDir, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+	for _, tree := range trees {
+		cards := getTreeFlashcards(tree.ID)
+		if nil != loadErr {
+			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
+			continue
+		}
+
+		for _, card := range cards {
+			deck.AddCard(card.ID(), card.BlockID())
+		}
+	}
+	if 0 < deck.CountCards() {
+		if saveErr := deck.Save(); nil != saveErr {
+			logging.LogErrorf("save deck [%s] failed: %s", name, saveErr)
+		}
 	}
 
 	// 导出自定义排序

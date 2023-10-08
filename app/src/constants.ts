@@ -24,7 +24,6 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程
-    public static readonly SIYUAN_SHOW: string = "siyuan-show";
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
 
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";

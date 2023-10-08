@@ -282,7 +282,7 @@ export const initWindow = (app: App) => {
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: focus,
                         });
-                        ipcRenderer.send(Constants.SIYUAN_SHOW);
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                     }
                     app.plugins.forEach(plugin => {
                         plugin.eventBus.emit("open-siyuan-url-block", {

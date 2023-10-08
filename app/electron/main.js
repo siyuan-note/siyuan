@@ -664,12 +664,15 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
-    ipcMain.on("siyuan-show", (event) => {
-        showWindow(getWindowByContentId(event.sender.id));
-    });
     ipcMain.on("siyuan-cmd", (event, cmd) => {
         console.log(cmd)
         switch (cmd) {
+            case "openDevTools":
+                event.sender.openDevTools({mode: "bottom"});
+                break;
+            case "show":
+                showWindow(getWindowByContentId(event.sender.id));
+                break;
             case "hide":
                 getWindowByContentId(event.sender.id).hide();
                 break;

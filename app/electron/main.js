@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray,
+    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -390,7 +390,7 @@ const boot = () => {
         event.preventDefault();
     });
     workspaces.push({
-        browserWindow: currentWindow, id: currentWindow.id,
+        browserWindow: currentWindow,
     });
 };
 
@@ -667,7 +667,7 @@ app.whenReady().then(() => {
     });
     ipcMain.on("siyuan-config-tray", (event, data) => {
         workspaces.find(item => {
-            if (item.id === data.id) {
+            if (item.browserWindow.webContents.id === event.sender.id) {
                 hideWindow(item.browserWindow);
                 if ("win32" === process.platform || "linux" === process.platform) {
                     resetTrayMenu(item.tray, data.languages, item.browserWindow);
@@ -677,10 +677,20 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-export-pdf", (event, data) => {
-        BrowserWindow.fromId(data.id).webContents.send("siyuan-export-pdf", data);
+        dialog.showOpenDialog({
+            title: data.title,
+            properties: ["createDirectory", "openDirectory"],
+        }).then((result) => {
+            if (result.canceled) {
+                event.sender.destroy();
+                return;
+            }
+            data.filePaths = result.filePaths;
+            BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === event.sender.id).id).getParentWindow().send("siyuan-export-pdf", data);
+        });
     });
-    ipcMain.on("siyuan-export-close", (event, id) => {
-        BrowserWindow.fromId(id).webContents.send("siyuan-export-close", id);
+    ipcMain.on("siyuan-export-close", (event) => {
+        event.sender.destroy();
     });
     ipcMain.on("siyuan-export-prevent", (event, id) => {
         BrowserWindow.fromId(id).webContents.on("will-navigate", (event) => {

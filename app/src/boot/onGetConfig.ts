@@ -188,7 +188,6 @@ export const initWindow = (app: App) => {
                     // 最小化
                     if ("windows" === window.siyuan.config.system.os) {
                         ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
-                            id: getCurrentWindow().id,
                             languages: window.siyuan.languages["_trayMenu"],
                         });
                     } else {
@@ -308,9 +307,6 @@ export const initWindow = (app: App) => {
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
         onWindowsMsg(ipcData);
     });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        window.siyuan.printWin.destroy();
-    });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
         let matchCommand = false;
         app.plugins.find(item => {
@@ -326,91 +322,82 @@ export const initWindow = (app: App) => {
             }
         });
     });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
-        dialog.showOpenDialog({
-            title: window.siyuan.languages.export + " PDF",
-            properties: ["createDirectory", "openDirectory"],
-        }).then(async (result: OpenDialogReturnValue) => {
-            if (result.canceled) {
-                window.siyuan.printWin.destroy();
-                return;
-            }
-            const msgId = showMessage(window.siyuan.languages.exporting, -1);
-            window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
-                removeAssets: ipcData.removeAssets,
-                keepFold: ipcData.keepFold,
-                mergeSubdocs: ipcData.mergeSubdocs,
-                landscape: ipcData.pdfOptions.landscape,
-                marginType: ipcData.pdfOptions.marginType,
-                pageSize: ipcData.pdfOptions.pageSize,
-                scale: ipcData.pdfOptions.scale,
-                marginTop: ipcData.pdfOptions.margins.top,
-                marginRight: ipcData.pdfOptions.margins.right,
-                marginBottom: ipcData.pdfOptions.margins.bottom,
-                marginLeft: ipcData.pdfOptions.margins.left,
-            };
-            setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
-            try {
-                if (window.siyuan.config.export.pdfFooter.trim()) {
-                    const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
-                    ipcData.pdfOptions.displayHeaderFooter = true;
-                    ipcData.pdfOptions.headerTemplate = "<span></span>";
-                    ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
+    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
+        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+        window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
+            removeAssets: ipcData.removeAssets,
+            keepFold: ipcData.keepFold,
+            mergeSubdocs: ipcData.mergeSubdocs,
+            landscape: ipcData.pdfOptions.landscape,
+            marginType: ipcData.pdfOptions.marginType,
+            pageSize: ipcData.pdfOptions.pageSize,
+            scale: ipcData.pdfOptions.scale,
+            marginTop: ipcData.pdfOptions.margins.top,
+            marginRight: ipcData.pdfOptions.margins.right,
+            marginBottom: ipcData.pdfOptions.margins.bottom,
+            marginLeft: ipcData.pdfOptions.margins.left,
+        };
+        setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
+        try {
+            if (window.siyuan.config.export.pdfFooter.trim()) {
+                const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
+                ipcData.pdfOptions.displayHeaderFooter = true;
+                ipcData.pdfOptions.headerTemplate = "<span></span>";
+                ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
 ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%page", "<span class=pageNumber></span>")}
 </div>`;
-                }
-                window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
-                    fetchPost("/api/export/exportHTML", {
-                        id: ipcData.rootId,
-                        pdf: true,
-                        removeAssets: ipcData.removeAssets,
-                        merge: ipcData.mergeSubdocs,
-                        savePath: result.filePaths[0]
-                    }, () => {
-                        const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
-                        fs.writeFileSync(pdfFilePath, pdfData);
-                        window.siyuan.printWin.destroy();
-                        fetchPost("/api/export/processPDF", {
-                            id: ipcData.rootId,
-                            merge: ipcData.mergeSubdocs,
-                            path: pdfFilePath,
-                            removeAssets: ipcData.removeAssets,
-                        }, () => {
-                            afterExport(pdfFilePath, msgId);
-                            if (ipcData.removeAssets) {
-                                const removePromise = (dir: string) => {
-                                    return new Promise(function (resolve) {
-                                        //先读文件夹
-                                        fs.stat(dir, function (err, stat) {
-                                            if (stat) {
-                                                if (stat.isDirectory()) {
-                                                    fs.readdir(dir, function (err, files) {
-                                                        files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                        Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                            fs.rmdir(dir, resolve);
-                                                        });
-                                                    });
-                                                } else {
-                                                    fs.unlink(dir, resolve);
-                                                }
-                                            }
-                                        });
-                                    });
-                                };
-                                removePromise(path.join(result.filePaths[0], "assets"));
-                            }
-                        });
-                    });
-                }).catch((error: string) => {
-                    showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    window.siyuan.printWin.destroy();
-                });
-            } catch (e) {
-                showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                window.siyuan.printWin.destroy();
             }
-            window.siyuan.printWin.hide();
-        });
+            window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
+                fetchPost("/api/export/exportHTML", {
+                    id: ipcData.rootId,
+                    pdf: true,
+                    removeAssets: ipcData.removeAssets,
+                    merge: ipcData.mergeSubdocs,
+                    savePath: ipcData.filePaths[0]
+                }, () => {
+                    const pdfFilePath = path.join(ipcData.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
+                    fs.writeFileSync(pdfFilePath, pdfData);
+                    window.siyuan.printWin.destroy();
+                    fetchPost("/api/export/processPDF", {
+                        id: ipcData.rootId,
+                        merge: ipcData.mergeSubdocs,
+                        path: pdfFilePath,
+                        removeAssets: ipcData.removeAssets,
+                    }, () => {
+                        afterExport(pdfFilePath, msgId);
+                        if (ipcData.removeAssets) {
+                            const removePromise = (dir: string) => {
+                                return new Promise(function (resolve) {
+                                    //先读文件夹
+                                    fs.stat(dir, function (err, stat) {
+                                        if (stat) {
+                                            if (stat.isDirectory()) {
+                                                fs.readdir(dir, function (err, files) {
+                                                    files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                                    Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                        fs.rmdir(dir, resolve);
+                                                    });
+                                                });
+                                            } else {
+                                                fs.unlink(dir, resolve);
+                                            }
+                                        }
+                                    });
+                                });
+                            };
+                            removePromise(path.join(ipcData.filePaths[0], "assets"));
+                        }
+                    });
+                });
+            }).catch((error: string) => {
+                showMessage("Export PDF error:" + error, 0, "error", msgId);
+                window.siyuan.printWin.destroy();
+            });
+        } catch (e) {
+            showMessage("Export PDF failed: " + e, 0, "error", msgId);
+            window.siyuan.printWin.destroy();
+        }
+        window.siyuan.printWin.hide();
     });
 
     window.addEventListener("beforeunload", () => {

@@ -545,8 +545,8 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 break;
         }
 
-        const result = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG, {
-            type: "showOpenDialog",
+        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "showOpenDialog",
             title: window.siyuan.languages.export + " " + exportType,
             properties: ["createDirectory", "openDirectory"],
         });

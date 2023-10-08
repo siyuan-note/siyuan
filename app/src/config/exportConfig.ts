@@ -186,8 +186,8 @@ export const exportConfig = {
                 window.location.href = response.data.zip;
             });
             /// #else
-            const filePaths = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG,{
-                type: "showOpenDialogSync",
+            const filePaths = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showOpenDialogSync",
                 title: window.siyuan.languages.export + " " + "Data",
                 properties: ["createDirectory", "openDirectory"],
             });
@@ -211,8 +211,8 @@ export const exportConfig = {
         });
         const pandocBinElement = exportConfig.element.querySelector("#pandocBin") as HTMLInputElement;
         pandocBinElement.addEventListener("click", async () => {
-            const localPath = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG,{
-                type: "showOpenDialog",
+            const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showOpenDialog",
                 defaultPath: window.siyuan.config.system.homeDir,
                 properties: ["openFile"],
             });

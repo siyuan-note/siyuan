@@ -17,8 +17,8 @@ export const exportAsset = (src: string) => {
         label: window.siyuan.languages.export,
         icon: "iconUpload",
         async click() {
-            const result = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG,{
-                type: "showSaveDialog",
+            const result = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showSaveDialog",
                 defaultPath: getAssetName(src) + pathPosix().extname(src),
                 properties: ["showOverwriteConfirmation"],
             });

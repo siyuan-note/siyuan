@@ -664,8 +664,16 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
-    ipcMain.handle("siyuan-dialog", (event, data) => {
-        return dialog[data.type || "showOpenDialog"](data);
+    ipcMain.handle("siyuan-get", (event, data) => {
+        if (data.cmd === "showOpenDialog") {
+            return dialog.showOpenDialog(data);
+        }
+        if (data.cmd === "showSaveDialog") {
+            return dialog.showSaveDialog(data);
+        }
+        if (data.cmd === "isFullScreen") {
+            return getWindowByContentId(event.sender.id).isFullScreen();
+        }
     });
     ipcMain.on("siyuan-cmd", (event, cmd) => {
         switch (cmd) {

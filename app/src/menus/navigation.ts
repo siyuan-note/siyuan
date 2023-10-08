@@ -643,6 +643,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
                         filters = [{name: "Markdown", extensions: ["md", "markdown"]}];
                     }
                     const localPath = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG, {
+                        type: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         filters,
                         properties: [isDoc ? "openFile" : "openDirectory"],

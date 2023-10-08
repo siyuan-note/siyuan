@@ -1,6 +1,6 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
-import {dialog, getCurrentWindow} from "@electron/remote";
+import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
@@ -85,7 +85,8 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
                 iconHTML: "",
                 click: async () => {
-                    const localPath = await dialog.showOpenDialog({
+                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG,{
+                        type: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         properties: ["openDirectory", "createDirectory"],
                     });

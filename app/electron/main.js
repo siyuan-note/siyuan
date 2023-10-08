@@ -665,7 +665,7 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-dialog", (event, data) => {
-        return dialog.showOpenDialog(data);
+        return dialog[data.type || "showOpenDialog"](data);
     });
     ipcMain.on("siyuan-cmd", (event, cmd) => {
         switch (cmd) {

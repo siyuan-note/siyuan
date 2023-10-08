@@ -1,8 +1,8 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {ipcRenderer, OpenDialogReturnValue} from "electron";
-import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
+import {app, BrowserWindow, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -527,7 +527,7 @@ const renderPDF = (id: string) => {
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
-    }, (response) => {
+    }, async (response) => {
         if (response.code === 3) {
             showMessage(response.msg);
             return;
@@ -545,43 +545,43 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 break;
         }
 
-        dialog.showOpenDialog({
+        const result = await ipcRenderer.invoke(Constants.SIYUAN_DIALOG, {
+            type: "showOpenDialog",
             title: window.siyuan.languages.export + " " + exportType,
             properties: ["createDirectory", "openDirectory"],
-        }).then((result: OpenDialogReturnValue) => {
-            if (!result.canceled) {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                let url = "/api/export/exportHTML";
-                if (option.type === "htmlmd") {
-                    url = "/api/export/exportMdHTML";
-                } else if (option.type === "word") {
-                    url = "/api/export/exportDocx";
-                }
-                let savePath = result.filePaths[0];
-                if (option.type !== "word" && !savePath.endsWith(response.data.rootTitle)) {
-                    savePath = path.join(savePath, replaceLocalPath(response.data.rootTitle));
-                }
-                savePath = savePath.trim();
-                fetchPost(url, {
-                    id: option.id,
-                    pdf: option.type === "pdf",
-                    removeAssets: removeAssets,
-                    merge: mergeSubdocs,
-                    savePath
-                }, exportResponse => {
-                    if (option.type === "word") {
-                        if (exportResponse.code === 1) {
-                            showMessage(exportResponse.msg, undefined, "error");
-                            hideMessage(msgId);
-                            return;
-                        }
-                        afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
-                    } else {
-                        onExport(exportResponse, savePath, option.type, removeAssets, msgId);
-                    }
-                });
-            }
         });
+        if (!result.canceled) {
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            let url = "/api/export/exportHTML";
+            if (option.type === "htmlmd") {
+                url = "/api/export/exportMdHTML";
+            } else if (option.type === "word") {
+                url = "/api/export/exportDocx";
+            }
+            let savePath = result.filePaths[0];
+            if (option.type !== "word" && !savePath.endsWith(response.data.rootTitle)) {
+                savePath = path.join(savePath, replaceLocalPath(response.data.rootTitle));
+            }
+            savePath = savePath.trim();
+            fetchPost(url, {
+                id: option.id,
+                pdf: option.type === "pdf",
+                removeAssets: removeAssets,
+                merge: mergeSubdocs,
+                savePath
+            }, exportResponse => {
+                if (option.type === "word") {
+                    if (exportResponse.code === 1) {
+                        showMessage(exportResponse.msg, undefined, "error");
+                        hideMessage(msgId);
+                        return;
+                    }
+                    afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
+                } else {
+                    onExport(exportResponse, savePath, option.type, removeAssets, msgId);
+                }
+            });
+        }
     });
 };
 

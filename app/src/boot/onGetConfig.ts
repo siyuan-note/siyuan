@@ -1,8 +1,8 @@
 import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
-import {dialog, getCurrentWindow} from "@electron/remote";
-import {ipcRenderer, OpenDialogReturnValue, webFrame} from "electron";
+import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
@@ -282,7 +282,7 @@ export const initWindow = (app: App) => {
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: focus,
                         });
-                        ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+                        ipcRenderer.send(Constants.SIYUAN_SHOW);
                     }
                     app.plugins.forEach(plugin => {
                         plugin.eventBus.emit("open-siyuan-url-block", {

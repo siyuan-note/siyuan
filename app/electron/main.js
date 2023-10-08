@@ -655,15 +655,20 @@ app.whenReady().then(() => {
 
         resetTrayMenu(tray, lang, mainWindow);
     };
-
+    const getWindowByContentId = (id) => {
+        return BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === id).id)
+    };
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
         shell.showItemInFolder(filePath);
     });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
-    ipcMain.on("siyuan-show", (event, id) => {
-        showWindow(BrowserWindow.fromId(id));
+    ipcMain.on("siyuan-show", (event) => {
+        showWindow(getWindowByContentId(event.sender.id));
+    });
+    ipcMain.on("siyuan-hide", (event) => {
+        getWindowByContentId(event.sender.id).hide();
     });
     ipcMain.on("siyuan-config-tray", (event, data) => {
         workspaces.find(item => {
@@ -686,7 +691,7 @@ app.whenReady().then(() => {
                 return;
             }
             data.filePaths = result.filePaths;
-            BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === event.sender.id).id).getParentWindow().send("siyuan-export-pdf", data);
+            getWindowByContentId(event.sender.id).getParentWindow().send("siyuan-export-pdf", data);
         });
     });
     ipcMain.on("siyuan-export-close", (event) => {
@@ -781,7 +786,7 @@ app.whenReady().then(() => {
             // 系统托盘
             tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
             tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-            const mainWindow = BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === event.sender.id).id);
+            const mainWindow = getWindowByContentId(event.sender.id)
             resetTrayMenu(tray, data.languages, mainWindow);
             tray.on("click", () => {
                 showHideWindow(tray, data.languages, mainWindow);

@@ -18,7 +18,7 @@ import {openFileById} from "../../editor/util";
 import {setPanelFocus} from "../../layout/util";
 /// #endif
 /// #if !BROWSER
-import {getCurrentWindow, systemPreferences} from "@electron/remote";
+import {systemPreferences} from "@electron/remote";
 /// #endif
 import {onGet} from "../util/onGet";
 import {hideElements} from "../ui/hideElements";
@@ -165,20 +165,6 @@ export class Breadcrumb {
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             this.element.scrollLeft = this.element.scrollLeft + event.deltaY;
         }, {passive: true});
-        /// #endif
-        /// #if !BROWSER
-        if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
-            const currentWindow = getCurrentWindow();
-            element.querySelector(".protyle-breadcrumb__space").addEventListener("dblclick", (event) => {
-                if (hasClosestByClassName(event.target as HTMLElement, "fullscreen")) {
-                    if (currentWindow.isMaximized()) {
-                        currentWindow.unmaximize();
-                    } else {
-                        currentWindow.maximize();
-                    }
-                }
-            });
-        }
         /// #endif
     }
 

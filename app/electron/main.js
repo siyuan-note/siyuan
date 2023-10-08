@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog
+    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog, systemPreferences
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -673,6 +673,12 @@ app.whenReady().then(() => {
         }
         if (data.cmd === "isFullScreen") {
             return getWindowByContentId(event.sender.id).isFullScreen();
+        }
+        if (data.cmd === "getMicrophone") {
+            return systemPreferences.getMediaAccessStatus("microphone");
+        }
+        if (data.cmd === "askMicrophone") {
+            return systemPreferences.askForMediaAccess("microphone");
         }
     });
     ipcMain.on("siyuan-cmd", (event, cmd) => {

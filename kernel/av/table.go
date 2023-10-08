@@ -512,6 +512,10 @@ func (table *Table) CalcCols() {
 			table.calcColMAsset(col, i)
 		case KeyTypeTemplate:
 			table.calcColTemplate(col, i)
+		case KeyTypeCreated:
+			table.calcColCreated(col, i)
+		case KeyTypeUpdated:
+			table.calcColUpdated(col, i)
 		}
 	}
 }
@@ -1322,6 +1326,212 @@ func (table *Table) calcColBlock(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	}
+}
+
+func (table *Table) calcColCreated(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[int64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.Created.Content]; !ok {
+					countUniqueValues++
+					uniqueValues[row.Cells[colIndex].Value.Created.Content] = true
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Created {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Created {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorEarliest:
+		earliest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				if 0 == earliest || earliest > row.Cells[colIndex].Value.Created.Content {
+					earliest = row.Cells[colIndex].Value.Created.Content
+				}
+			}
+		}
+		if 0 != earliest {
+			col.Calc.Result = &Value{Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone)}
+		}
+	case CalcOperatorLatest:
+		latest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				if 0 == latest || latest < row.Cells[colIndex].Value.Created.Content {
+					latest = row.Cells[colIndex].Value.Created.Content
+				}
+			}
+		}
+		if 0 != latest {
+			col.Calc.Result = &Value{Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone)}
+		}
+	case CalcOperatorRange:
+		earliest := int64(0)
+		latest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				if 0 == earliest || earliest > row.Cells[colIndex].Value.Created.Content {
+					earliest = row.Cells[colIndex].Value.Created.Content
+				}
+				if 0 == latest || latest < row.Cells[colIndex].Value.Created.Content {
+					latest = row.Cells[colIndex].Value.Created.Content
+				}
+			}
+		}
+		if 0 != earliest && 0 != latest {
+			col.Calc.Result = &Value{Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}
+		}
+	}
+}
+
+func (table *Table) calcColUpdated(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[int64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.Updated.Content]; !ok {
+					countUniqueValues++
+					uniqueValues[row.Cells[colIndex].Value.Updated.Content] = true
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Updated || !row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Updated || !row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorEarliest:
+		earliest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				if 0 == earliest || earliest > row.Cells[colIndex].Value.Updated.Content {
+					earliest = row.Cells[colIndex].Value.Updated.Content
+				}
+			}
+		}
+		if 0 != earliest {
+			col.Calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone)}
+		}
+	case CalcOperatorLatest:
+		latest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				if 0 == latest || latest < row.Cells[colIndex].Value.Updated.Content {
+					latest = row.Cells[colIndex].Value.Updated.Content
+				}
+			}
+		}
+		if 0 != latest {
+			col.Calc.Result = &Value{Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone)}
+		}
+	case CalcOperatorRange:
+		earliest := int64(0)
+		latest := int64(0)
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				if 0 == earliest || earliest > row.Cells[colIndex].Value.Updated.Content {
+					earliest = row.Cells[colIndex].Value.Updated.Content
+				}
+				if 0 == latest || latest < row.Cells[colIndex].Value.Updated.Content {
+					latest = row.Cells[colIndex].Value.Updated.Content
+				}
+			}
+		}
+		if 0 != earliest && 0 != latest {
+			col.Calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}
 		}
 	}
 }

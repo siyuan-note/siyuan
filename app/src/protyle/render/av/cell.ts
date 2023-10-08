@@ -354,7 +354,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`;
+    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 100)}px;height: ${cellRect.height}px"`;
     const blockElement = hasClosestBlock(cellElements[0]);
     if (["text", "url", "email", "phone", "block"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;

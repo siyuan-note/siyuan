@@ -66,6 +66,8 @@ const (
 	KeyTypePhone    KeyType = "phone"
 	KeyTypeMAsset   KeyType = "mAsset"
 	KeyTypeTemplate KeyType = "template"
+	KeyTypeCreated  KeyType = "created"
+	KeyTypeUpdated  KeyType = "updated"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -113,6 +115,8 @@ type Value struct {
 	Phone    *ValuePhone    `json:"phone,omitempty"`
 	MAsset   []*ValueAsset  `json:"mAsset,omitempty"`
 	Template *ValueTemplate `json:"template,omitempty"`
+	Created  *ValueCreated  `json:"created,omitempty"`
+	Updated  *ValueUpdated  `json:"updated,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -145,6 +149,10 @@ func (value *Value) String() string {
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:
 		return value.Template.Content
+	case KeyTypeCreated:
+		return value.Created.FormattedContent
+	case KeyTypeUpdated:
+		return value.Created.FormattedContent
 	default:
 		return ""
 	}
@@ -353,6 +361,76 @@ type ValueAsset struct {
 
 type ValueTemplate struct {
 	Content string `json:"content"`
+}
+
+type ValueCreated struct {
+	Content          int64  `json:"content"`
+	IsNotEmpty       bool   `json:"isNotEmpty"`
+	Content2         int64  `json:"content2"`
+	IsNotEmpty2      bool   `json:"isNotEmpty2"`
+	FormattedContent string `json:"formattedContent"`
+}
+
+type CreatedFormat string
+
+const (
+	CreatedFormatNone     CreatedFormat = "" // 2006-01-02 15:04
+	CreatedFormatDuration CreatedFormat = "duration"
+)
+
+func NewFormattedValueCreated(content, content2 int64, format CreatedFormat) (ret *ValueCreated) {
+	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+	if 0 < content2 {
+		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
+	}
+	switch format {
+	case CreatedFormatNone:
+	case CreatedFormatDuration:
+		t1 := time.UnixMilli(content)
+		t2 := time.UnixMilli(content2)
+		formatted = util.HumanizeRelTime(t1, t2, util.Lang)
+	}
+	ret = &ValueCreated{
+		Content:          content,
+		Content2:         content2,
+		FormattedContent: formatted,
+	}
+	return
+}
+
+type ValueUpdated struct {
+	Content          int64  `json:"content"`
+	IsNotEmpty       bool   `json:"isNotEmpty"`
+	Content2         int64  `json:"content2"`
+	IsNotEmpty2      bool   `json:"isNotEmpty2"`
+	FormattedContent string `json:"formattedContent"`
+}
+
+type UpdatedFormat string
+
+const (
+	UpdatedFormatNone     UpdatedFormat = "" // 2006-01-02 15:04
+	UpdatedFormatDuration UpdatedFormat = "duration"
+)
+
+func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (ret *ValueUpdated) {
+	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+	if 0 < content2 {
+		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
+	}
+	switch format {
+	case UpdatedFormatNone:
+	case UpdatedFormatDuration:
+		t1 := time.UnixMilli(content)
+		t2 := time.UnixMilli(content2)
+		formatted = util.HumanizeRelTime(t1, t2, util.Lang)
+	}
+	ret = &ValueUpdated{
+		Content:          content,
+		Content2:         content2,
+		FormattedContent: formatted,
+	}
+	return
 }
 
 // View 描述了视图的结构。

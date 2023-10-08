@@ -1909,8 +1909,18 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 				mdTableRow.AppendChild(mdTableCell)
 				var val string
 				if nil != cell.Value {
-					if av.KeyTypeDate == cell.Value.Type && nil != cell.Value.Date {
-						cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone)
+					if av.KeyTypeDate == cell.Value.Type {
+						if nil != cell.Value.Date {
+							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone)
+						}
+					} else if av.KeyTypeCreated == cell.Value.Type {
+						if nil != cell.Value.Created {
+							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Date.Content, av.CreatedFormatNone)
+						}
+					} else if av.KeyTypeUpdated == cell.Value.Type {
+						if nil != cell.Value.Updated {
+							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Date.Content, av.UpdatedFormatNone)
+						}
 					}
 
 					val = cell.Value.String()

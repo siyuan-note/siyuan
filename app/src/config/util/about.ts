@@ -8,10 +8,6 @@ import {Constants} from "../../constants";
 
 export const setProxy = () => {
     /// #if !BROWSER
-    if ("" === window.siyuan.config.system.networkProxy.scheme) {
-        console.log("network proxy [system]");
-        return;
-    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setProxy",
         proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`

@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -53,6 +54,27 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
+
+		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
+		createdStr := ial["id"]
+		if "" != createdStr {
+			createdStr = createdStr[:len("20060102150405")]
+		}
+		created, parseErr := time.Parse("20060102150405", createdStr)
+		if nil == parseErr {
+			dataModel["created"] = created
+		} else {
+			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+			dataModel["created"] = time.Now()
+		}
+		updatedStr := ial["updated"]
+		updated, parseErr := time.Parse("20060102150405", updatedStr)
+		if nil == parseErr {
+			dataModel["updated"] = updated
+		} else {
+			logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+			dataModel["updated"] = time.Now()
+		}
 	}
 	for _, rowValue := range rowValues {
 		if 0 < len(rowValue.Values) {

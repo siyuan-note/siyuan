@@ -696,7 +696,7 @@ app.whenReady().then(() => {
         exitApp(port);
     });
     ipcMain.on("siyuan-open-window", (event, data) => {
-        const mainWindow = BrowserWindow.fromId(data.id);
+        const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
         const win = new BrowserWindow({
@@ -753,9 +753,9 @@ app.whenReady().then(() => {
             });
         }
     });
-    ipcMain.on("siyuan-init", async (event, data) => {
+    ipcMain.handle("siyuan-init", async (event, data) => {
         const exitWS = workspaces.find(item => {
-            if (data.id === item.id && item.workspaceDir) {
+            if (event.sender.id === item.browserWindow.webContents.id && item.workspaceDir) {
                 if (item.tray && "win32" === process.platform || "linux" === process.platform) {
                     // Tray menu text does not change with the appearance language https://github.com/siyuan-note/siyuan/issues/7935
                     resetTrayMenu(item.tray, data.languages, item.browserWindow);
@@ -771,14 +771,14 @@ app.whenReady().then(() => {
             // 系统托盘
             tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
             tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-            const mainWindow = BrowserWindow.fromId(data.id);
+            const mainWindow = BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === event.sender.id).id);
             resetTrayMenu(tray, data.languages, mainWindow);
             tray.on("click", () => {
                 showHideWindow(tray, data.languages, mainWindow);
             });
         }
         workspaces.find(item => {
-            if (data.id === item.id) {
+            if (!item.workspaceDir) {
                 item.workspaceDir = data.workspaceDir;
                 item.tray = tray;
                 return true;

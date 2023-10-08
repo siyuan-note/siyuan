@@ -111,10 +111,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         });
     }
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_INIT, {
+    ipcRenderer.invoke(Constants.SIYUAN_INIT, {
         languages: window.siyuan.languages["_trayMenu"],
         workspaceDir: window.siyuan.config.system.workspaceDir,
-        id: getCurrentWindow().id,
         port: location.port
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);

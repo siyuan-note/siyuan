@@ -74,7 +74,7 @@ ${renewHTML}
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }
             } else {
-                if (window.siyuan.user.userSiYuanOneTimePayStatus === 0) {
+                if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
                     subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
 <div class="fn__hr--b"></div>${payHTML}`;
                 } else {

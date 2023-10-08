@@ -664,8 +664,10 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
+    ipcMain.handle("siyuan-dialog", (event, data) => {
+        return dialog.showOpenDialog(data);
+    });
     ipcMain.on("siyuan-cmd", (event, cmd) => {
-        console.log(cmd)
         switch (cmd) {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});

@@ -111,6 +111,24 @@ func (value *Value) Compare(other *Value) int {
 			return 0
 		}
 	}
+	if nil != value.Created && nil != other.Created {
+		if value.Created.Content > other.Created.Content {
+			return 1
+		} else if value.Created.Content < other.Created.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
+	if nil != value.Updated && nil != other.Updated {
+		if value.Updated.Content > other.Updated.Content {
+			return 1
+		} else if value.Updated.Content < other.Updated.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
 
 	if nil != value.MSelect && nil != other.MSelect {
 		var v1 string
@@ -239,6 +257,62 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return !value.Date.IsNotEmpty
 		case FilterOperatorIsNotEmpty:
 			return value.Date.IsNotEmpty
+		case FilterOperatorIsRelativeToToday:
+			// TODO: date filter (relative to today)
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
+		}
+	}
+
+	if nil != value.Created && nil != other.Created {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Created.Content == other.Created.Content
+		case FilterOperatorIsNotEqual:
+			return value.Created.Content != other.Created.Content
+		case FilterOperatorIsGreater:
+			return value.Created.Content > other.Created.Content
+		case FilterOperatorIsGreaterOrEqual:
+			return value.Created.Content >= other.Created.Content
+		case FilterOperatorIsLess:
+			return value.Created.Content < other.Created.Content
+		case FilterOperatorIsLessOrEqual:
+			return value.Created.Content <= other.Created.Content
+		case FilterOperatorIsBetween:
+			start := value.Created.Content >= other.Created.Content
+			end := value.Created.Content <= other.Created.Content2
+			return start && end
+		case FilterOperatorIsEmpty:
+			return !value.Created.IsNotEmpty
+		case FilterOperatorIsNotEmpty:
+			return value.Created.IsNotEmpty
+		case FilterOperatorIsRelativeToToday:
+			// TODO: date filter (relative to today)
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
+		}
+	}
+
+	if nil != value.Updated && nil != other.Updated {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Updated.Content == other.Updated.Content
+		case FilterOperatorIsNotEqual:
+			return value.Updated.Content != other.Updated.Content
+		case FilterOperatorIsGreater:
+			return value.Updated.Content > other.Updated.Content
+		case FilterOperatorIsGreaterOrEqual:
+			return value.Updated.Content >= other.Updated.Content
+		case FilterOperatorIsLess:
+			return value.Updated.Content < other.Updated.Content
+		case FilterOperatorIsLessOrEqual:
+			return value.Updated.Content <= other.Updated.Content
+		case FilterOperatorIsBetween:
+			start := value.Updated.Content >= other.Updated.Content
+			end := value.Updated.Content <= other.Updated.Content2
+			return start && end
+		case FilterOperatorIsEmpty:
+			return !value.Updated.IsNotEmpty
+		case FilterOperatorIsNotEmpty:
+			return value.Updated.IsNotEmpty
 		case FilterOperatorIsRelativeToToday:
 			// TODO: date filter (relative to today)
 			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2

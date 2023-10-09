@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog, systemPreferences
+    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog, systemPreferences, powerMonitor
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -633,13 +633,11 @@ app.whenReady().then(() => {
         const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
         tray.setContextMenu(contextMenu);
     };
-
     const hideWindow = (wnd) => {
         // 通过 `Alt+M` 最小化后焦点回到先前的窗口 https://github.com/siyuan-note/siyuan/issues/7275
         wnd.minimize();
         wnd.hide();
     };
-
     const showHideWindow = (tray, lang, mainWindow) => {
         if (!mainWindow.isVisible()) {
             if (mainWindow.isMinimized()) {
@@ -655,6 +653,7 @@ app.whenReady().then(() => {
     const getWindowByContentId = (id) => {
         return BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === id).id)
     };
+
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
         shell.showItemInFolder(filePath);
     });
@@ -1066,6 +1065,54 @@ app.whenReady().then(() => {
             }
         });
     }
+
+    // 电源相关事件必须放在 whenReady 里面，否则会导致 Linux 端无法正常启动 Trace/breakpoint trap (core dumped) https://github.com/siyuan-note/siyuan/issues/9347
+    powerMonitor.on("suspend", () => {
+        writeLog("system suspend");
+    });
+    powerMonitor.on("resume", async () => {
+        // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
+        writeLog("system resume");
+
+        const isOnline = async () => {
+            return net.isOnline();
+        };
+        let online = false;
+        for (let i = 0; i < 7; i++) {
+            if (await isOnline()) {
+                online = true;
+                break;
+            }
+
+            writeLog("network is offline");
+            await sleep(1000);
+        }
+
+        if (!online) {
+            writeLog("network is offline, do not sync after system resume");
+            return;
+        }
+
+        workspaces.forEach(item => {
+            const currentURL = new URL(item.browserWindow.getURL());
+            const server = getServer(currentURL.port);
+            writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
+            net.fetch(server + "/api/sync/performSync", {method: "POST"});
+        });
+    });
+    powerMonitor.on("shutdown", () => {
+        writeLog("system shutdown");
+        workspaces.forEach(item => {
+            const currentURL = new URL(item.browserWindow.getURL());
+            net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
+        });
+    });
+    powerMonitor.on("lock-screen", () => {
+        writeLog("system lock-screen");
+        BrowserWindow.getAllWindows().forEach(item => {
+            item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
+        });
+    });
 });
 
 app.on("open-url", (event, url) => { // for macOS
@@ -1150,58 +1197,5 @@ app.on("before-quit", (event) => {
             event.preventDefault();
             item.browserWindow.webContents.send("siyuan-save-close", true);
         }
-    });
-});
-
-const {powerMonitor} = require("electron");
-
-powerMonitor.on("suspend", () => {
-    writeLog("system suspend");
-});
-
-powerMonitor.on("resume", async () => {
-    // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
-    writeLog("system resume");
-
-    const isOnline = async () => {
-        return net.isOnline();
-    };
-    let online = false;
-    for (let i = 0; i < 7; i++) {
-        if (await isOnline()) {
-            online = true;
-            break;
-        }
-
-        writeLog("network is offline");
-        await sleep(1000);
-    }
-
-    if (!online) {
-        writeLog("network is offline, do not sync after system resume");
-        return;
-    }
-
-    workspaces.forEach(item => {
-        const currentURL = new URL(item.browserWindow.getURL());
-        const server = getServer(currentURL.port);
-        writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-        net.fetch(server + "/api/sync/performSync", {method: "POST"});
-    });
-});
-
-powerMonitor.on("shutdown", () => {
-    writeLog("system shutdown");
-    workspaces.forEach(item => {
-        const currentURL = new URL(item.browserWindow.getURL());
-        net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
-    });
-});
-
-
-powerMonitor.on("lock-screen", () => {
-    writeLog("system lock-screen");
-    BrowserWindow.getAllWindows().forEach(item => {
-        item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
     });
 });

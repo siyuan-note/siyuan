@@ -30,11 +30,13 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            if (value.date.isNotEmpty) {
-                html = `<span data-content="${value.date.content}">${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}</span>`;
+        case "created":
+        case "updated":
+            if (value[value.type].isNotEmpty || "date" !== value.type) {
+                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
             }
-            if (value.date.hasEndDate && value.date.isNotEmpty2 && value.date.isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value.date.content2}">${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
+            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
+                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             break;
         case "url":

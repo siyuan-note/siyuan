@@ -127,8 +127,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				}
 			}
 
-			if av.KeyTypeTemplate == kValues.Key.Type {
+			switch kValues.Key.Type {
+			case av.KeyTypeTemplate:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
+			case av.KeyTypeCreated:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeCreated})
+			case av.KeyTypeUpdated:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeUpdated})
 			}
 
 			if 0 < len(kValues.Values) {
@@ -136,12 +141,32 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 渲染模板列
+		// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
 		for _, kv := range keyValues {
-			if av.KeyTypeTemplate == kv.Key.Type {
+			switch kv.Key.Type {
+			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
 					ial := GetBlockAttrs(blockID)
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
+				}
+			case av.KeyTypeCreated:
+				createdStr := blockID[:len("20060102150405")]
+				created, parseErr := time.Parse("20060102150405", createdStr)
+				if nil == parseErr {
+					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+				} else {
+					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+				}
+			case av.KeyTypeUpdated:
+				ial := GetBlockAttrs(blockID)
+				updatedStr := ial["updated"]
+				updated, parseErr := time.Parse("20060102150405", updatedStr)
+				if nil == parseErr {
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+				} else {
+					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
 				}
 			}
 		}

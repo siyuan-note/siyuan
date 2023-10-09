@@ -229,6 +229,23 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
+		// 列删除以后需要删除设置的过滤和排序
+		tmpFilters := []*av.ViewFilter{}
+		for _, f := range view.Table.Filters {
+			if k, _ := attrView.GetKey(f.Column); nil != k {
+				tmpFilters = append(tmpFilters, f)
+			}
+		}
+		view.Table.Filters = tmpFilters
+
+		tmpSorts := []*av.ViewSort{}
+		for _, s := range view.Table.Sorts {
+			if k, _ := attrView.GetKey(s.Column); nil != k {
+				tmpSorts = append(tmpSorts, s)
+			}
+		}
+		view.Table.Sorts = tmpSorts
+
 		viewable, err = renderAttributeViewTable(attrView, view)
 	}
 

@@ -65,6 +65,8 @@ type TAVCol =
     | "phone"
     | "mAsset"
     | "template"
+    | "created"
+    | "updated"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -1078,6 +1080,8 @@ interface IAVCellValue {
         content: string
     }
     date?: IAVCellDateValue
+    created?: IAVCellDateValue
+    updated?: IAVCellDateValue
 }
 
 interface IAVCellDateValue {

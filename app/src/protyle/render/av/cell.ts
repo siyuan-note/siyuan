@@ -12,8 +12,8 @@ export const getCalcValue = (column: IAVColumn) => {
     }
     let resultCalc: any = column.calc.result.number;
     if (column.calc.operator === "Earliest" || column.calc.operator === "Latest" ||
-        (column.calc.operator === "Range" && column.type === "date")) {
-        resultCalc = column.calc.result.date;
+        (column.calc.operator === "Range" && ["date", "created", "updated"].includes(column.type))) {
+        resultCalc = column.calc.result[column.type as "date"];
     }
     let value = "";
     switch (column.calc.operator) {
@@ -101,10 +101,10 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     color: ""
                 }]
             };
-        } else if (colType === "date" && value === "") {
+        } else if (["date", "created", "updated"].includes(colType) && value === "") {
             cellValue = {
                 type: colType,
-                date: {
+                [colType]: {
                     content: null,
                     isNotEmpty: false,
                     content2: null,
@@ -119,10 +119,10 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 mSelect: value as IAVCellSelectValue[]
             };
-        } else if (colType === "date") {
+        } else if (["date", "created", "updated"].includes(colType)) {
             cellValue = {
                 type: colType,
-                date: value as IAVCellDateValue
+                [colType]: value as IAVCellDateValue
             };
         } else if (colType === "mAsset") {
             cellValue = {
@@ -309,7 +309,7 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
             operator: "Range",
             label: window.siyuan.languages.calcOperatorRange
         });
-    } else if (type === "date") {
+    } else if (["date", "created", "updated"].includes(type)) {
         calcItem({
             menu,
             protyle,
@@ -346,7 +346,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     }
-    if (type === "template") {
+    if (type === "template" || type === "updated" || type === "created") {
         return;
     }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {

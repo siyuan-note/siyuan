@@ -41,7 +41,9 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
 
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
-        writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
+        let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd()
+        text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+        writeText(text);
         showMessage(window.siyuan.languages.copied, 2000);
         event.preventDefault();
         return;

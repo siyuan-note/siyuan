@@ -257,12 +257,12 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
     });
     menu.addItem({
         icon: "iconClock",
-        label: window.siyuan.languages.creationDate,
+        label: window.siyuan.languages.createdTime,
         click() {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: window.siyuan.languages.creationDate,
+                name: window.siyuan.languages.createdTime,
                 avID,
                 type: "created",
                 id
@@ -275,19 +275,19 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "created",
-                name: window.siyuan.languages.creationDate,
+                name: window.siyuan.languages.createdTime,
                 id
             });
         }
     });
     menu.addItem({
         icon: "iconClock",
-        label: window.siyuan.languages.modificationDate,
+        label: window.siyuan.languages.updatedTime,
         click() {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: window.siyuan.languages.modificationDate,
+                name: window.siyuan.languages.updatedTime,
                 avID,
                 type: "updated",
                 id
@@ -300,7 +300,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "updated",
-                name: window.siyuan.languages.modificationDate,
+                name: window.siyuan.languages.updatedTime,
                 id
             });
         }

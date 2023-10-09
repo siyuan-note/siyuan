@@ -358,7 +358,7 @@
             }
 
             const {ipcRenderer} = require('electron')
-            const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            const result = await ipcRenderer.invoke("siyuan-get", {
                 cmd: "showOpenDialog",
                 defaultPath: defaultWorkspace,
                 properties: ['openDirectory', 'createDirectory'],

@@ -1,12 +1,13 @@
 import {fetchPost} from "../util/fetch";
 /// #if !BROWSER
-import {dialog} from "@electron/remote";
 import {afterExport} from "../protyle/export/util";
+import { ipcRenderer } from "electron";
 import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {showFileInFolder} from "../util/pathName";
+import {Constants} from "../constants";
 
 export const exportConfig = {
     element: undefined as Element,
@@ -179,13 +180,14 @@ export const exportConfig = {
                 });
             }
         });
-        exportConfig.element.querySelector("#exportData").addEventListener("click", () => {
+        exportConfig.element.querySelector("#exportData").addEventListener("click", async  () => {
             /// #if BROWSER
             fetchPost("/api/export/exportData", {}, response => {
                 window.location.href = response.data.zip;
             });
             /// #else
-            const filePaths = dialog.showOpenDialogSync({
+            const filePaths = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showOpenDialog",
                 title: window.siyuan.languages.export + " " + "Data",
                 properties: ["createDirectory", "openDirectory"],
             });
@@ -209,7 +211,8 @@ export const exportConfig = {
         });
         const pandocBinElement = exportConfig.element.querySelector("#pandocBin") as HTMLInputElement;
         pandocBinElement.addEventListener("click", async () => {
-            const localPath = await dialog.showOpenDialog({
+            const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showOpenDialog",
                 defaultPath: window.siyuan.config.system.homeDir,
                 properties: ["openFile"],
             });

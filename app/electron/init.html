@@ -343,13 +343,12 @@
         ipcRenderer.send('siyuan-first-quit')
     })
     document.getElementById('min').addEventListener('click', () => {
-        const {getCurrentWindow} = require('@electron/remote')
-        getCurrentWindow().minimize()
+        const {ipcRenderer} = require('electron')
+        ipcRenderer.send("siyuan-cmd", "minimize");
     })
 
     document.querySelectorAll('.choosePath').forEach((item) => {
-        item.addEventListener('click', () => {
-            const {dialog} = require('@electron/remote')
+        item.addEventListener('click', async () => {
             const path = require('path')
             const fs = require('fs')
 
@@ -358,50 +357,48 @@
                 fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
             }
 
-            dialog.showOpenDialog({
+            const {ipcRenderer} = require('electron')
+            const result = await ipcRenderer.invoke("siyuan-get", {
+                cmd: "showOpenDialog",
                 defaultPath: defaultWorkspace,
                 properties: ['openDirectory', 'createDirectory'],
-            }).then((result) => {
-                if (result.canceled) {
-                    return
-                }
+            });
 
-                const {ipcRenderer} = require('electron')
-                const initPath = result.filePaths[0]
+            if (result.canceled) {
+                return
+            }
+            const initPath = result.filePaths[0]
 
-                if (isICloudPath(initPath)) {
-                    let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
-                    if (isChinese(currentLang)) {
-                        msg = '⚠️ 该文件夹位于 iCloud 同步路径下，请更换其他路径'
-                    }
-                    alert(msg)
-                    return
-                }
-
-                if (isCloudDrivePath(initPath)) {
-                    let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud and 坚果云, please change another path'
-                    if (isChinese(currentLang)) {
-                        msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud 和 坚果云，请更换其他路径'
-                    }
-                    alert(msg)
-                    return
-                }
-
-                let msg = '⚠️ Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
+            if (isICloudPath(initPath)) {
+                let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
                 if (isChinese(currentLang)) {
-                    msg = '⚠️ 请勿将工作空间设置在第三方同步盘路径下，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
+                    msg = '⚠️ 该文件夹位于 iCloud 同步路径下，请更换其他路径'
                 }
-                if (!confirm(msg)) {
-                    return
-                }
+                alert(msg)
+                return
+            }
 
-                if (!fs.existsSync(initPath)) {
-                    fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
+            if (isCloudDrivePath(initPath)) {
+                let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud and 坚果云, please change another path'
+                if (isChinese(currentLang)) {
+                    msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud 和 坚果云，请更换其他路径'
                 }
-                ipcRenderer.send('siyuan-first-init', {
-                    workspace: initPath,
-                    lang: document.querySelector('.lang').value
-                })
+                alert(msg)
+                return
+            }
+            let msg = '⚠️ Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
+            if (isChinese(currentLang)) {
+                msg = '⚠️ 请勿将工作空间设置在第三方同步盘路径下，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
+            }
+            if (!confirm(msg)) {
+                return
+            }
+            if (!fs.existsSync(initPath)) {
+                fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
+            }
+            ipcRenderer.send('siyuan-first-init', {
+                workspace: initPath,
+                lang: document.querySelector('.lang').value
             })
         })
     })

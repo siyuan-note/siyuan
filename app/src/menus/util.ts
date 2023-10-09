@@ -1,6 +1,5 @@
 /// #if !BROWSER
-import {dialog} from "@electron/remote";
-import {SaveDialogReturnValue} from "electron";
+import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {fetchPost} from "../util/fetch";
@@ -17,15 +16,15 @@ export const exportAsset = (src: string) => {
     return {
         label: window.siyuan.languages.export,
         icon: "iconUpload",
-        click() {
-            dialog.showSaveDialog({
+        async click() {
+            const result = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                cmd: "showSaveDialog",
                 defaultPath: getAssetName(src) + pathPosix().extname(src),
                 properties: ["showOverwriteConfirmation"],
-            }).then((result: SaveDialogReturnValue) => {
-                if (!result.canceled) {
-                    fetchPost("/api/file/copyFile", {src, dest: result.filePath});
-                }
             });
+            if (!result.canceled) {
+                fetchPost("/api/file/copyFile", {src, dest: result.filePath});
+            }
         }
     };
     /// #endif

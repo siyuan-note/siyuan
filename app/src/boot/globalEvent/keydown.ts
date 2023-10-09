@@ -41,7 +41,6 @@ import {hintMoveBlock} from "../../protyle/hint/extend";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
-import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../../history/history";
@@ -1419,7 +1418,6 @@ export const sendGlobalShortcut = (app: App) => {
     });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],
-        id: getCurrentWindow().id,
         hotkeys
     });
     /// #endif

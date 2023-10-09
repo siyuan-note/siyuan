@@ -49,9 +49,11 @@ export const account = {
    <button id="activationCode" class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.confirm}</button>
 </div>`;
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
+                // 终身会员
                 activeSubscriptionHTML = "";
                 subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
+                // 订阅中
                 const renewHTML = `<div class="fn__hr--b"></div>
 <div class="ft__on-surface ft__smaller">
     ${window.siyuan.languages.account6} 
@@ -64,6 +66,7 @@ export const account = {
 <div class="fn__hr--b"></div>`;
                 }
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+                    // 订阅试用
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}
 <div class="fn__hr--b"></div>`;
@@ -71,7 +74,12 @@ ${renewHTML}
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }
             } else {
-                subscriptionHTML = payHTML;
+                if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+                    subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
+<div class="fn__hr--b"></div>${payHTML}`;
+                } else {
+                    subscriptionHTML = payHTML;
+                }
             }
             return `<div class="fn__flex config-account">
 <div class="config-account__center">
@@ -320,7 +328,7 @@ ${renewHTML}
         let token: string;
         let needCaptcha: string;
         captchaImgElement.addEventListener("click", () => {
-            captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
+            captchaImgElement.setAttribute("src", getCloudURL("captcha") + `/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
         });
 
         const cloudRegionElement = element.querySelector("#cloudRegion") as HTMLSelectElement;
@@ -346,7 +354,7 @@ ${renewHTML}
                         needCaptcha = data.data.needCaptcha;
                         captchaElement.parentElement.classList.remove("fn__none");
                         captchaElement.previousElementSibling.setAttribute("src",
-                            `https://ld246.com/captcha/login?needCaptcha=${data.data.needCaptcha}`);
+                            getCloudURL("captcha") + `/login?needCaptcha=${data.data.needCaptcha}`);
                         captchaElement.value = "";
                         return;
                     }

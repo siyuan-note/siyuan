@@ -1,8 +1,7 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {ipcRenderer, OpenDialogReturnValue} from "electron";
-import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -461,15 +460,14 @@ const renderPDF = (id: string) => {
         actionElement.querySelector("#landscape").addEventListener('change', () => {
             setPadding();
         });
-        const currentWindowId = ${getCurrentWindow().id};
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
-            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}", currentWindowId)
+            ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
         });
         actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
-              id: currentWindowId,
+              title: "${window.siyuan.languages.export} PDF",
               pdfOptions:{
                 printBackground: true,
                 landscape: actionElement.querySelector("#landscape").checked,
@@ -500,35 +498,15 @@ const renderPDF = (id: string) => {
         renderPreview(response.data.content);
     });
 </script></body></html>`;
-    window.siyuan.printWin = new BrowserWindow({
-        parent: getCurrentWindow(),
-        modal: true,
-        show: true,
-        width: 1032,
-        height: 650,
-        resizable: false,
-        frame: "darwin" === window.siyuan.config.system.os,
-        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
-        titleBarStyle: "hidden",
-        webPreferences: {
-            contextIsolation: false,
-            nodeIntegration: true,
-            webviewTag: true,
-            webSecurity: false,
-            autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
-        },
-    });
-    ipcRenderer.send(Constants.SIYUAN_EXPORT_PREVENT, window.siyuan.printWin.id);
-    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
-        window.siyuan.printWin.loadURL(response.data.url);
+        ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
-    }, (response) => {
+    }, async (response) => {
         if (response.code === 3) {
             showMessage(response.msg);
             return;
@@ -546,43 +524,43 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 break;
         }
 
-        dialog.showOpenDialog({
+        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "showOpenDialog",
             title: window.siyuan.languages.export + " " + exportType,
             properties: ["createDirectory", "openDirectory"],
-        }).then((result: OpenDialogReturnValue) => {
-            if (!result.canceled) {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                let url = "/api/export/exportHTML";
-                if (option.type === "htmlmd") {
-                    url = "/api/export/exportMdHTML";
-                } else if (option.type === "word") {
-                    url = "/api/export/exportDocx";
-                }
-                let savePath = result.filePaths[0];
-                if (option.type !== "word" && !savePath.endsWith(response.data.rootTitle)) {
-                    savePath = path.join(savePath, replaceLocalPath(response.data.rootTitle));
-                }
-                savePath = savePath.trim();
-                fetchPost(url, {
-                    id: option.id,
-                    pdf: option.type === "pdf",
-                    removeAssets: removeAssets,
-                    merge: mergeSubdocs,
-                    savePath
-                }, exportResponse => {
-                    if (option.type === "word") {
-                        if (exportResponse.code === 1) {
-                            showMessage(exportResponse.msg, undefined, "error");
-                            hideMessage(msgId);
-                            return;
-                        }
-                        afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
-                    } else {
-                        onExport(exportResponse, savePath, option.type, removeAssets, msgId);
-                    }
-                });
-            }
         });
+        if (!result.canceled) {
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            let url = "/api/export/exportHTML";
+            if (option.type === "htmlmd") {
+                url = "/api/export/exportMdHTML";
+            } else if (option.type === "word") {
+                url = "/api/export/exportDocx";
+            }
+            let savePath = result.filePaths[0];
+            if (option.type !== "word" && !savePath.endsWith(response.data.rootTitle)) {
+                savePath = path.join(savePath, replaceLocalPath(response.data.rootTitle));
+            }
+            savePath = savePath.trim();
+            fetchPost(url, {
+                id: option.id,
+                pdf: option.type === "pdf",
+                removeAssets: removeAssets,
+                merge: mergeSubdocs,
+                savePath
+            }, exportResponse => {
+                if (option.type === "word") {
+                    if (exportResponse.code === 1) {
+                        showMessage(exportResponse.msg, undefined, "error");
+                        hideMessage(msgId);
+                        return;
+                    }
+                    afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
+                } else {
+                    onExport(exportResponse, savePath, option.type, removeAssets, msgId);
+                }
+            });
+        }
     });
 };
 

@@ -1,8 +1,7 @@
 import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
-import {dialog, getCurrentWindow} from "@electron/remote";
-import {ipcRenderer, OpenDialogReturnValue, webFrame} from "electron";
+import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
@@ -111,10 +110,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         });
     }
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_INIT, {
+    ipcRenderer.invoke(Constants.SIYUAN_INIT, {
         languages: window.siyuan.languages["_trayMenu"],
         workspaceDir: window.siyuan.config.system.workspaceDir,
-        id: getCurrentWindow().id,
         port: location.port
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -154,34 +152,29 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     addGA();
 };
 
-export const initWindow = (app: App) => {
+const winOnMaxRestore = async () => {
     /// #if !BROWSER
-    const winOnFocus = () => {
-        if (getSelection().rangeCount > 0) {
-            const range = getSelection().getRangeAt(0);
-            const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
-            if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
-                startNode.focus();
-            } else {
-                focusByRange(getSelection().getRangeAt(0));
-            }
-        }
-        exportLayout({
-            reload: false,
-            onlyData: false,
-            errorExit: false
-        });
-        window.siyuan.altIsPressed = false;
-        window.siyuan.ctrlIsPressed = false;
-        window.siyuan.shiftIsPressed = false;
-        document.body.classList.remove("body--blur");
-    };
+    const maxBtnElement = document.getElementById("maxWindow");
+    const restoreBtnElement = document.getElementById("restoreWindow");
+    const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isFullScreen",
+    });
+    const isMaximized = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isMaximized",
+    });
+    if (isMaximized || isFullScreen) {
+        restoreBtnElement.style.display = "flex";
+        maxBtnElement.style.display = "none";
+    } else {
+        restoreBtnElement.style.display = "none";
+        maxBtnElement.style.display = "flex";
+    }
+    /// #endif
+};
 
-    const winOnBlur = () => {
-        document.body.classList.add("body--blur");
-    };
-
-    const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
+export const initWindow = async (app: App) => {
+    /// #if !BROWSER
+    const winOnClose = (close = false) => {
         exportLayout({
             reload: false,
             cb() {
@@ -189,16 +182,10 @@ export const initWindow = (app: App) => {
                     // 最小化
                     if ("windows" === window.siyuan.config.system.os) {
                         ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
-                            id: getCurrentWindow().id,
                             languages: window.siyuan.languages["_trayMenu"],
                         });
                     } else {
-                        if (currentWindow.isFullScreen()) {
-                            currentWindow.once("leave-full-screen", () => currentWindow.hide());
-                            currentWindow.setFullScreen(false);
-                        } else {
-                            currentWindow.hide();
-                        }
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "closeButtonBehavior");
                     }
                 } else {
                     exitSiYuan();
@@ -209,38 +196,55 @@ export const initWindow = (app: App) => {
         });
     };
 
-    const winOnMaxRestore = () => {
-        const currentWindow = getCurrentWindow();
-        const maxBtnElement = document.getElementById("maxWindow");
-        const restoreBtnElement = document.getElementById("restoreWindow");
-        if (currentWindow.isMaximized() || currentWindow.isFullScreen()) {
-            restoreBtnElement.style.display = "flex";
-            maxBtnElement.style.display = "none";
-        } else {
-            restoreBtnElement.style.display = "none";
-            maxBtnElement.style.display = "flex";
+    ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent")
+    ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
+        if (cmd === "focus") {
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
+                if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
+                    startNode.focus();
+                } else {
+                    focusByRange(getSelection().getRangeAt(0));
+                }
+            }
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false
+            });
+            window.siyuan.altIsPressed = false;
+            window.siyuan.ctrlIsPressed = false;
+            window.siyuan.shiftIsPressed = false;
+            document.body.classList.remove("body--blur");
+        } else if (cmd === "blur") {
+            document.body.classList.add("body--blur");
+        } else if (cmd === "enter-full-screen") {
+            if ("darwin" === window.siyuan.config.system.os) {
+                if (isWindow()) {
+                    setTabPosition();
+                } else {
+                    document.getElementById("toolbar").style.paddingLeft = "0";
+                }
+            } else {
+                winOnMaxRestore()
+            }
+        } else if (cmd === "leave-full-screen") {
+            if ("darwin" === window.siyuan.config.system.os) {
+                if (isWindow()) {
+                    setTabPosition();
+                } else {
+                    document.getElementById("toolbar").setAttribute("style", "");
+                }
+            } else {
+                winOnMaxRestore();
+            }
+        } else if (cmd === "maximize") {
+            winOnMaxRestore();
+        } else if (cmd === "unmaximize") {
+            winOnMaxRestore();
         }
-    };
-
-    const winOnEnterFullscreen = () => {
-        if (isWindow()) {
-            setTabPosition();
-        } else {
-            document.getElementById("toolbar").style.paddingLeft = "0";
-        }
-    };
-
-    const winOnLeaveFullscreen = () => {
-        if (isWindow()) {
-            setTabPosition();
-        } else {
-            document.getElementById("toolbar").setAttribute("style", "");
-        }
-    };
-
-    const currentWindow = getCurrentWindow();
-    currentWindow.on("focus", winOnFocus);
-    currentWindow.on("blur", winOnBlur);
+    });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
             if (url.startsWith("siyuan://plugins/")) {
@@ -284,7 +288,7 @@ export const initWindow = (app: App) => {
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: focus,
                         });
-                        ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                     }
                     app.plugins.forEach(plugin => {
                         plugin.eventBus.emit("open-siyuan-url-block", {
@@ -299,18 +303,18 @@ export const initWindow = (app: App) => {
             }
         });
     }
+    ipcRenderer.on(Constants.SIYUAN_OPEN_FILE, (event, data) => {
+        openFile(data);
+    });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         if (isWindow()) {
             closeWindow(app);
         } else {
-            winOnClose(currentWindow, close);
+            winOnClose(close);
         }
     });
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
         onWindowsMsg(ipcData);
-    });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        window.siyuan.printWin.destroy();
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
         let matchCommand = false;
@@ -327,106 +331,83 @@ export const initWindow = (app: App) => {
             }
         });
     });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
-        dialog.showOpenDialog({
-            title: window.siyuan.languages.export + " PDF",
-            properties: ["createDirectory", "openDirectory"],
-        }).then(async (result: OpenDialogReturnValue) => {
-            if (result.canceled) {
-                window.siyuan.printWin.destroy();
-                return;
-            }
-            const msgId = showMessage(window.siyuan.languages.exporting, -1);
-            window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
-                removeAssets: ipcData.removeAssets,
-                keepFold: ipcData.keepFold,
-                mergeSubdocs: ipcData.mergeSubdocs,
-                landscape: ipcData.pdfOptions.landscape,
-                marginType: ipcData.pdfOptions.marginType,
-                pageSize: ipcData.pdfOptions.pageSize,
-                scale: ipcData.pdfOptions.scale,
-                marginTop: ipcData.pdfOptions.margins.top,
-                marginRight: ipcData.pdfOptions.margins.right,
-                marginBottom: ipcData.pdfOptions.margins.bottom,
-                marginLeft: ipcData.pdfOptions.margins.left,
-            };
-            setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
-            try {
-                if (window.siyuan.config.export.pdfFooter.trim()) {
-                    const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
-                    ipcData.pdfOptions.displayHeaderFooter = true;
-                    ipcData.pdfOptions.headerTemplate = "<span></span>";
-                    ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
+    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
+        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+        window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
+            removeAssets: ipcData.removeAssets,
+            keepFold: ipcData.keepFold,
+            mergeSubdocs: ipcData.mergeSubdocs,
+            landscape: ipcData.pdfOptions.landscape,
+            marginType: ipcData.pdfOptions.marginType,
+            pageSize: ipcData.pdfOptions.pageSize,
+            scale: ipcData.pdfOptions.scale,
+            marginTop: ipcData.pdfOptions.margins.top,
+            marginRight: ipcData.pdfOptions.margins.right,
+            marginBottom: ipcData.pdfOptions.margins.bottom,
+            marginLeft: ipcData.pdfOptions.margins.left,
+        };
+        setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
+        try {
+            if (window.siyuan.config.export.pdfFooter.trim()) {
+                const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
+                ipcData.pdfOptions.displayHeaderFooter = true;
+                ipcData.pdfOptions.headerTemplate = "<span></span>";
+                ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
 ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%page", "<span class=pageNumber></span>")}
 </div>`;
-                }
-                window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
-                    fetchPost("/api/export/exportHTML", {
-                        id: ipcData.rootId,
-                        pdf: true,
-                        removeAssets: ipcData.removeAssets,
-                        merge: ipcData.mergeSubdocs,
-                        savePath: result.filePaths[0]
-                    }, () => {
-                        const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
-                        fs.writeFileSync(pdfFilePath, pdfData);
-                        window.siyuan.printWin.destroy();
-                        fetchPost("/api/export/processPDF", {
-                            id: ipcData.rootId,
-                            merge: ipcData.mergeSubdocs,
-                            path: pdfFilePath,
-                            removeAssets: ipcData.removeAssets,
-                        }, () => {
-                            afterExport(pdfFilePath, msgId);
-                            if (ipcData.removeAssets) {
-                                const removePromise = (dir: string) => {
-                                    return new Promise(function (resolve) {
-                                        //先读文件夹
-                                        fs.stat(dir, function (err, stat) {
-                                            if (stat) {
-                                                if (stat.isDirectory()) {
-                                                    fs.readdir(dir, function (err, files) {
-                                                        files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                        Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                            fs.rmdir(dir, resolve);
-                                                        });
-                                                    });
-                                                } else {
-                                                    fs.unlink(dir, resolve);
-                                                }
-                                            }
-                                        });
-                                    });
-                                };
-                                removePromise(path.join(result.filePaths[0], "assets"));
-                            }
-                        });
-                    });
-                }).catch((error: string) => {
-                    showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    window.siyuan.printWin.destroy();
-                });
-            } catch (e) {
-                showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                window.siyuan.printWin.destroy();
             }
-            window.siyuan.printWin.hide();
-        });
-    });
-
-    window.addEventListener("beforeunload", () => {
-        currentWindow.off("focus", winOnFocus);
-        currentWindow.off("blur", winOnBlur);
-        if ("darwin" === window.siyuan.config.system.os) {
-            currentWindow.off("enter-full-screen", winOnEnterFullscreen);
-            currentWindow.off("leave-full-screen", winOnLeaveFullscreen);
-        } else {
-            currentWindow.off("enter-full-screen", winOnMaxRestore);
-            currentWindow.off("leave-full-screen", winOnMaxRestore);
-            currentWindow.off("maximize", winOnMaxRestore);
-            currentWindow.off("unmaximize", winOnMaxRestore);
+            const pdfData = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "printToPDF",
+                pdfOptions: ipcData.pdfOptions,
+                webContentsId: ipcData.webContentsId
+            });
+            fetchPost("/api/export/exportHTML", {
+                id: ipcData.rootId,
+                pdf: true,
+                removeAssets: ipcData.removeAssets,
+                merge: ipcData.mergeSubdocs,
+                savePath: ipcData.filePaths[0]
+            }, () => {
+                const pdfFilePath = path.join(ipcData.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
+                fs.writeFileSync(pdfFilePath, pdfData);
+                ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
+                fetchPost("/api/export/processPDF", {
+                    id: ipcData.rootId,
+                    merge: ipcData.mergeSubdocs,
+                    path: pdfFilePath,
+                    removeAssets: ipcData.removeAssets,
+                }, () => {
+                    afterExport(pdfFilePath, msgId);
+                    if (ipcData.removeAssets) {
+                        const removePromise = (dir: string) => {
+                            return new Promise(function (resolve) {
+                                //先读文件夹
+                                fs.stat(dir, function (err, stat) {
+                                    if (stat) {
+                                        if (stat.isDirectory()) {
+                                            fs.readdir(dir, function (err, files) {
+                                                files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                                Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                    fs.rmdir(dir, resolve);
+                                                });
+                                            });
+                                        } else {
+                                            fs.unlink(dir, resolve);
+                                        }
+                                    }
+                                });
+                            });
+                        };
+                        removePromise(path.join(ipcData.filePaths[0], "assets"));
+                    }
+                });
+            });
+        } catch (e) {
+            showMessage("Export PDF failed: " + e, 0, "error", msgId);
+            ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
         }
-    }, false);
+        ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "hide", webContentsId: ipcData.webContentsId});
+    });
 
     if (isWindow()) {
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
@@ -440,34 +421,18 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             pinElement.classList.toggle("toolbar__item--active");
             if (pinElement.classList.contains("toolbar__item--active")) {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-                currentWindow.setAlwaysOnTop(true, "pop-up-menu");
+                ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopTrue");
             } else {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.pin);
-                currentWindow.setAlwaysOnTop(false);
+                ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopFalse");
             }
         });
     }
-    if ("darwin" === window.siyuan.config.system.os) {
-        document.getElementById("drag")?.addEventListener("dblclick", () => {
-            if (currentWindow.isMaximized()) {
-                currentWindow.unmaximize();
-            } else {
-                currentWindow.maximize();
-            }
-        });
-        const toolbarElement = document.getElementById("toolbar");
-        currentWindow.on("enter-full-screen", winOnEnterFullscreen);
-        currentWindow.on("leave-full-screen", winOnLeaveFullscreen);
-        if (currentWindow.isFullScreen() && !isWindow()) {
-            toolbarElement.style.paddingLeft = "0";
-        }
-        return;
-    }
+    if ("darwin" !== window.siyuan.config.system.os) {
+        document.body.classList.add("body--win32");
 
-    document.body.classList.add("body--win32");
-
-    // 添加窗口控件
-    const controlsHTML = `<div class="toolbar__item ariaLabel toolbar__item--win" aria-label="${window.siyuan.languages.min}" id="minWindow">
+        // 添加窗口控件
+        const controlsHTML = `<div class="toolbar__item ariaLabel toolbar__item--win" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>
     </svg>
@@ -487,45 +452,46 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         <use xlink:href="#iconClose"></use>
     </svg>
 </div>`;
-    if (isWindow()) {
-        document.querySelector(".toolbar__window").insertAdjacentHTML("beforeend", controlsHTML);
-    } else {
-        document.getElementById("windowControls").innerHTML = controlsHTML;
-    }
-    const maxBtnElement = document.getElementById("maxWindow");
-    const restoreBtnElement = document.getElementById("restoreWindow");
-
-    restoreBtnElement.addEventListener("click", () => {
-        if (currentWindow.isFullScreen()) {
-            currentWindow.setFullScreen(false);
-        } else {
-            currentWindow.unmaximize();
-        }
-    });
-    maxBtnElement.addEventListener("click", () => {
-        currentWindow.maximize();
-    });
-
-    winOnMaxRestore();
-    currentWindow.on("maximize", winOnMaxRestore);
-    currentWindow.on("unmaximize", winOnMaxRestore);
-    currentWindow.on("enter-full-screen", winOnMaxRestore);
-    currentWindow.on("leave-full-screen", winOnMaxRestore);
-    const minBtnElement = document.getElementById("minWindow");
-    const closeBtnElement = document.getElementById("closeWindow");
-    minBtnElement.addEventListener("click", () => {
-        if (minBtnElement.classList.contains("window-controls__item--disabled")) {
-            return;
-        }
-        currentWindow.minimize();
-    });
-    closeBtnElement.addEventListener("click", () => {
         if (isWindow()) {
-            closeWindow(app);
+            document.querySelector(".toolbar__window").insertAdjacentHTML("beforeend", controlsHTML);
         } else {
-            winOnClose(currentWindow);
+            document.getElementById("windowControls").innerHTML = controlsHTML;
         }
-    });
+        const maxBtnElement = document.getElementById("maxWindow");
+        const restoreBtnElement = document.getElementById("restoreWindow");
+
+        restoreBtnElement.addEventListener("click", () => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, "restore");
+        });
+        maxBtnElement.addEventListener("click", () => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, "maximize");
+        });
+
+        winOnMaxRestore();
+        const minBtnElement = document.getElementById("minWindow");
+        const closeBtnElement = document.getElementById("closeWindow");
+        minBtnElement.addEventListener("click", () => {
+            if (minBtnElement.classList.contains("window-controls__item--disabled")) {
+                return;
+            }
+            ipcRenderer.send(Constants.SIYUAN_CMD, "minimize");
+        });
+        closeBtnElement.addEventListener("click", () => {
+            if (isWindow()) {
+                closeWindow(app);
+            } else {
+                winOnClose();
+            }
+        });
+    } else {
+        const toolbarElement = document.getElementById("toolbar");
+        const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "isFullScreen",
+        });
+        if (isFullScreen && !isWindow()) {
+            toolbarElement.style.paddingLeft = "0";
+        }
+    }
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");

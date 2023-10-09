@@ -1,7 +1,6 @@
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
-import {FileFilter, shell} from "electron";
-import {dialog as remoteDialog} from "@electron/remote";
+import {FileFilter, ipcRenderer, shell} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
@@ -643,7 +642,8 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
                     if (isDoc) {
                         filters = [{name: "Markdown", extensions: ["md", "markdown"]}];
                     }
-                    const localPath = await remoteDialog.showOpenDialog({
+                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                        cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         filters,
                         properties: [isDoc ? "openFile" : "openDirectory"],

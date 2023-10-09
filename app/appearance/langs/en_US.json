@@ -1,4 +1,6 @@
 {
+  "createdTime": "Created time",
+  "updatedTime": "Updated time",
   "removeBookmark": "Remove bookmark from ${x}?",
   "defaultMargin": "Default",
   "noneMargin": "None",

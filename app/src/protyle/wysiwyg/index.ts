@@ -46,8 +46,7 @@ import {
 import {transaction, updateTransaction} from "./transaction";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
-import {shell} from "electron";
-import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer, shell} from "electron";
 /// #endif
 import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
@@ -1502,7 +1501,7 @@ export class WYSIWYG {
             }
             if (event.inputType === "historyUndo") {
                 /// #if !BROWSER
-                getCurrentWindow().webContents.redo();
+                ipcRenderer.send(Constants.SIYUAN_CMD, "redo");
                 /// #endif
                 window.siyuan.menus.menu.remove();
                 return;

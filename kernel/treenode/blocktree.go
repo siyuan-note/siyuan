@@ -226,6 +226,21 @@ func GetBlockTreesByPathPrefix(pathPrefix string) (ret []*BlockTree) {
 	return
 }
 
+func GetBlockTreesByRootID(rootID string) (ret []*BlockTree) {
+	blockTrees.Range(func(key, value interface{}) bool {
+		slice := value.(*btSlice)
+		slice.m.Lock()
+		for _, b := range slice.data {
+			if b.RootID == rootID {
+				ret = append(ret, b)
+			}
+		}
+		slice.m.Unlock()
+		return true
+	})
+	return
+}
+
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	var ids []string
 	blockTrees.Range(func(key, value interface{}) bool {

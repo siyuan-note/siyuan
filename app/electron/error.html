@@ -182,12 +182,12 @@
     })
 
     document.getElementById('close').addEventListener('click', () => {
-        const {getCurrentWindow} = require('@electron/remote')
-        getCurrentWindow().destroy()
+        const {ipcRenderer} = require('electron')
+        ipcRenderer.send("siyuan-cmd", "destroy");
     })
     document.getElementById('min').addEventListener('click', () => {
-        const {getCurrentWindow} = require('@electron/remote')
-        getCurrentWindow().minimize()
+        const {ipcRenderer} = require('electron')
+        ipcRenderer.send("siyuan-cmd", "minimize");
     })
 </script>
 </body>

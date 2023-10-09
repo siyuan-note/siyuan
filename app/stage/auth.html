@@ -437,7 +437,6 @@
   const exitApp = () => {
     try {
       const {ipcRenderer} = require('electron')
-      const {getCurrentWindow} = require('@electron/remote')
       ipcRenderer.send('siyuan-quit', window.location.port)
     } catch (e) {
       if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {

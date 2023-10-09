@@ -16,7 +16,7 @@ import {setKey} from "../sync/syncGuide";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        return `<label class="fn__flex b3-label${isBrowser() || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
+        return `<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoLaunch}
         <div class="b3-label__text">${window.siyuan.languages.autoLaunchTip}</div>

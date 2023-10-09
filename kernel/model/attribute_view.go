@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -38,7 +39,7 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
-func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) string {
+func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
 	funcMap := sprig.TxtFuncMap()
 	goTpl := template.New("").Delims(".action{", "}")
 	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
@@ -49,10 +50,30 @@ func renderTemplateCol(blockID, tplContent string, rowValues []*av.KeyValues) st
 	}
 
 	buf := &bytes.Buffer{}
-	ial := GetBlockAttrs(blockID)
 	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
+
+		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
+		createdStr := ial["id"]
+		if "" != createdStr {
+			createdStr = createdStr[:len("20060102150405")]
+		}
+		created, parseErr := time.Parse("20060102150405", createdStr)
+		if nil == parseErr {
+			dataModel["created"] = created
+		} else {
+			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+			dataModel["created"] = time.Now()
+		}
+		updatedStr := ial["updated"]
+		updated, parseErr := time.Parse("20060102150405", updatedStr)
+		if nil == parseErr {
+			dataModel["updated"] = updated
+		} else {
+			logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+			dataModel["updated"] = time.Now()
+		}
 	}
 	for _, rowValue := range rowValues {
 		if 0 < len(rowValue.Values) {
@@ -106,8 +127,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				}
 			}
 
-			if av.KeyTypeTemplate == kValues.Key.Type {
+			switch kValues.Key.Type {
+			case av.KeyTypeTemplate:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
+			case av.KeyTypeCreated:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeCreated})
+			case av.KeyTypeUpdated:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeUpdated})
 			}
 
 			if 0 < len(kValues.Values) {
@@ -115,11 +141,32 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 渲染模板列
+		// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
 		for _, kv := range keyValues {
-			if av.KeyTypeTemplate == kv.Key.Type {
+			switch kv.Key.Type {
+			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
-					kv.Values[0].Template.Content = renderTemplateCol(blockID, kv.Key.Template, keyValues)
+					ial := GetBlockAttrs(blockID)
+					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
+				}
+			case av.KeyTypeCreated:
+				createdStr := blockID[:len("20060102150405")]
+				created, parseErr := time.Parse("20060102150405", createdStr)
+				if nil == parseErr {
+					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+				} else {
+					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+				}
+			case av.KeyTypeUpdated:
+				ial := GetBlockAttrs(blockID)
+				updatedStr := ial["updated"]
+				updated, parseErr := time.Parse("20060102150405", updatedStr)
+				if nil == parseErr {
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+				} else {
+					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
 				}
 			}
 		}
@@ -287,15 +334,18 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			}
 			tableRow.ID = rowID
 
-			// 格式化数字
-			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number && tableCell.Value.Number.IsNotEmpty {
-				tableCell.Value.Number.Format = col.NumberFormat
-				tableCell.Value.Number.FormatNumber()
-			}
-
-			// 渲染模板列
-			if av.KeyTypeTemplate == tableCell.ValueType {
+			switch tableCell.ValueType {
+			case av.KeyTypeNumber: // 格式化数字
+				if nil != tableCell.Value && nil != tableCell.Value.Number && tableCell.Value.Number.IsNotEmpty {
+					tableCell.Value.Number.Format = col.NumberFormat
+					tableCell.Value.Number.FormatNumber()
+				}
+			case av.KeyTypeTemplate: // 渲染模板列
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: col.Template}}
+			case av.KeyTypeCreated: // 填充创建时间列值，后面再渲染
+				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeCreated}
+			case av.KeyTypeUpdated: // 填充更新时间列值，后面再渲染
+				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
 			}
 
 			tableRow.Cells = append(tableRow.Cells, tableCell)
@@ -303,13 +353,34 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
-	// 渲染模板列
+	// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
-			if av.KeyTypeTemplate == cell.ValueType {
+			switch cell.ValueType {
+			case av.KeyTypeTemplate: // 渲染模板列
 				keyValues := rows[row.ID]
-				content := renderTemplateCol(row.ID, cell.Value.Template.Content, keyValues)
+				ial := GetBlockAttrs(row.ID)
+				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
+			case av.KeyTypeCreated: // 渲染创建时间
+				createdStr := row.ID[:len("20060102150405")]
+				created, parseErr := time.Parse("20060102150405", createdStr)
+				if nil == parseErr {
+					cell.Value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+				} else {
+					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+				}
+			case av.KeyTypeUpdated: // 渲染更新时间
+				ial := GetBlockAttrs(row.ID)
+				updatedStr := ial["updated"]
+				updated, parseErr := time.Parse("20060102150405", updatedStr)
+				if nil == parseErr {
+					cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+				} else {
+					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+					cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+				}
 			}
 		}
 	}
@@ -902,7 +973,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 
 	keyType := av.KeyType(operation.Typ)
 	switch keyType {
-	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate:
+	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated:
 		var icon string
 		if nil != operation.Data {
 			icon = operation.Data.(string)
@@ -994,7 +1065,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 
 	colType := av.KeyType(operation.Typ)
 	switch colType {
-	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate:
+	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = operation.Name

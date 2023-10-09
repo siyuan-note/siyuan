@@ -290,6 +290,9 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconList";
         case "date":
             return "iconCalendar";
+        case "updated":
+        case "created":
+            return "iconClock";
         case "url":
             return "iconLink";
         case "mAsset":

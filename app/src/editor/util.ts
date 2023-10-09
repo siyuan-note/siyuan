@@ -12,8 +12,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
-import {shell} from "electron";
-import {BrowserWindow, getCurrentWindow} from "@electron/remote";
+import {ipcRenderer, shell} from "electron";
 import {newCardModel} from "../card/newCardTab";
 /// #endif
 import {pushBack} from "../util/backForward";
@@ -75,7 +74,7 @@ export const openAsset = (app: App, assetPath: string, page: number | string, po
     });
 };
 
-export const openFile = (options: IOpenFileOptions) => {
+export const openFile = async (options: IOpenFileOptions) => {
     if (typeof options.removeCurrentTab === "undefined") {
         options.removeCurrentTab = true;
     }
@@ -172,24 +171,18 @@ export const openFile = (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    const currentWindowId = getCurrentWindow().id;
-    const hasMatch = BrowserWindow.getAllWindows().find(item => {
-        if (item.id === currentWindowId) {
-            return;
-        }
-        const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split(Constants.ZWSP);
-        if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
-            item.focus();
-            const optionsClone = Object.assign({}, options);
-            delete optionsClone.app;
-            item.webContents.executeJavaScript(`window.newWindow.openFile(${JSON.stringify(optionsClone)});`);
-            if (options.afterOpen) {
-                options.afterOpen();
-            }
-            return true;
-        }
-    });
+    let hasMatch = false;
+    const optionsClone = Object.assign({}, options);
+    delete optionsClone.app;
+    delete optionsClone.afterOpen;
+    hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: Constants.SIYUAN_OPEN_FILE,
+        options: optionsClone,
+    })
     if (hasMatch) {
+        if (options.afterOpen) {
+            options.afterOpen();
+        }
         return;
     }
     /// #endif
@@ -366,9 +359,9 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });
     } else {
-        if (options.action.includes(Constants.CB_GET_HL)) {
+        if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, true);
-        } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
+        } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
                 const newRange = focusBlock(nodeElement);
                 if (newRange) {

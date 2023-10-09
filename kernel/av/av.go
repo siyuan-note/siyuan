@@ -152,7 +152,7 @@ func (value *Value) String() string {
 	case KeyTypeCreated:
 		return value.Created.FormattedContent
 	case KeyTypeUpdated:
-		return value.Created.FormattedContent
+		return value.Updated.FormattedContent
 	default:
 		return ""
 	}

@@ -6,6 +6,7 @@ import {setPosition} from "../../../util/setPosition";
 import {objEquals} from "../../../util/functions";
 import {genCellValue} from "./cell";
 import * as dayjs from "dayjs";
+import {unicode2Emoji} from "../../../emoji";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (type === "number" || type === "select") {
@@ -22,7 +23,7 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
         menuElement.querySelectorAll("input, .b3-chip").forEach((inputElement, index) => {
             const menuItemElement = hasClosestByClassName(inputElement, "b3-menu__item");
             if (menuItemElement) {
-                if (type === "date") {
+                if (["date", "updated", "created"].includes(type)) {
                     if (operator === "Is between") {
                         menuItemElement.classList.remove("fn__none");
                     } else if (operator === "Is empty" || operator === "Is not empty") {
@@ -62,7 +63,7 @@ export const setFilter = (options: {
         let hasMatch = false;
         let cellValue: IAVCellValue;
         if (textElements.length > 0) {
-            if (colData.type === "date") {
+            if (["date", "updated", "created"].includes(colData.type)) {
                 cellValue = genCellValue(colData.type, {
                     isNotEmpty2: textElements[1].value !== "",
                     isNotEmpty: textElements[0].value !== "",
@@ -152,6 +153,8 @@ export const setFilter = (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
         case "date":
+        case "created":
+        case "updated":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${">" === options.filter.operator ? "selected" : ""} value=">">${window.siyuan.languages.filterOperatorIsAfter}</option>
 <option ${"<" === options.filter.operator ? "selected" : ""} value="<">${window.siyuan.languages.filterOperatorIsBefore}</option>
@@ -225,14 +228,15 @@ export const setFilter = (options: {
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value?.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
         });
-    } else if (colData.type === "date") {
+    } else if (["date", "updated", "created"].includes(colData.type)) {
+        const dateValue = options.filter.value ? options.filter.value[colData.type as "date"] : null;
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value?.date.isNotEmpty ? dayjs(options.filter.value.date.content).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value?.date.isNotEmpty2 ? dayjs(options.filter.value.date.content2).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({
@@ -305,7 +309,7 @@ export const addFilter = (options: {
         if (!hasFilter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
-                icon: getColIconByType(column.type),
+                iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${column.icon ? unicode2Emoji(column.icon) : `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}</span>`,
                 click: () => {
                     const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = genCellValue(column.type, "");
@@ -408,7 +412,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
-    <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+    ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
     <span class="fn__ellipsis">${item.name}${filterValue}</span>
 </span>`;
                 return true;

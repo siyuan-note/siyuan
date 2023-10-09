@@ -76,7 +76,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
             avID: string
             avName: string
         }) => {
-            html += `<div class="block__logo custom-attr__avheader">
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView"><div class="block__logo custom-attr__avheader">
     <svg><use xlink:href="#iconDatabase"></use></svg>
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
@@ -93,6 +93,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "templat
     </div>
 </div>`;
             });
+            html += "</div>";
         });
         element.innerHTML = html;
         element.addEventListener("click", (event) => {

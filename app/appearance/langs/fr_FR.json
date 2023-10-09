@@ -1,4 +1,6 @@
 {
+  "createdTime": "Heure de création",
+  "updatedTime": "Heure mise à jour",
   "removeBookmark": "Supprimer le signet de ${x} ?",
   "lockEdit": "Rendre le document en lecture seule",
   "unlockEdit": "Rendre le document accessible en écriture",

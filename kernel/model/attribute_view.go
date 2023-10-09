@@ -351,10 +351,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				updatedStr := ial["updated"]
 				updated, parseErr := time.Parse("20060102150405", updatedStr)
 				if nil == parseErr {
-					cell.Value.Created = av.NewFormattedValueCreated(updated.UnixMilli(), 0, av.CreatedFormatNone)
+					cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.CreatedFormatNone)
 				} else {
 					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
-					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+					cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			}
 		}

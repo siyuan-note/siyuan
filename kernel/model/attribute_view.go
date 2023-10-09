@@ -59,7 +59,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 		if "" != createdStr {
 			createdStr = createdStr[:len("20060102150405")]
 		}
-		created, parseErr := time.Parse("20060102150405", createdStr)
+		created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 		if nil == parseErr {
 			dataModel["created"] = created
 		} else {
@@ -67,7 +67,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 			dataModel["created"] = time.Now()
 		}
 		updatedStr := ial["updated"]
-		updated, parseErr := time.Parse("20060102150405", updatedStr)
+		updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 		if nil == parseErr {
 			dataModel["updated"] = updated
 		} else {
@@ -151,7 +151,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				}
 			case av.KeyTypeCreated:
 				createdStr := blockID[:len("20060102150405")]
-				created, parseErr := time.Parse("20060102150405", createdStr)
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
 				} else {
@@ -161,7 +161,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			case av.KeyTypeUpdated:
 				ial := GetBlockAttrs(blockID)
 				updatedStr := ial["updated"]
-				updated, parseErr := time.Parse("20060102150405", updatedStr)
+				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
 				} else {
@@ -364,7 +364,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				cell.Value.Template.Content = content
 			case av.KeyTypeCreated: // 渲染创建时间
 				createdStr := row.ID[:len("20060102150405")]
-				created, parseErr := time.Parse("20060102150405", createdStr)
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					cell.Value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
 				} else {
@@ -374,7 +374,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := GetBlockAttrs(row.ID)
 				updatedStr := ial["updated"]
-				updated, parseErr := time.Parse("20060102150405", updatedStr)
+				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
 					cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
 				} else {

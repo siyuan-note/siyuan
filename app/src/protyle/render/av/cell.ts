@@ -86,7 +86,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     }
                 };
             }
-        } else if (["text", "block", "url", "phone", "email"].includes(colType)) {
+        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {

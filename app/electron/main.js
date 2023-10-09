@@ -795,7 +795,6 @@ app.whenReady().then(() => {
                         });
                         return;
                     }
-
                     event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
                         console.log("network proxy [" + data.proxyURL + "]");
                     });

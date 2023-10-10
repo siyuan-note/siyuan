@@ -394,6 +394,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         }
     }, {
         label: window.siyuan.languages.copyProtocolInMd,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
         click: () => {
             fetchPost("/api/block/getRefText", {id}, (response) => {
                 writeText(`[${response.data}](siyuan://blocks/${id})`);

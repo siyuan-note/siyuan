@@ -21,7 +21,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 
-export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
+export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     const target = event.target as HTMLElement;
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
@@ -54,6 +54,15 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
         // 阻止输入 https://ld246.com/article/1679618995926
         event.preventDefault();
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
+        const id = nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.rootID;
+        fetchPost("/api/block/getRefText", {id}, (response) => {
+            writeText(`[${response.data}](siyuan://blocks/${id})`);
+        });
+        event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     /// #if !MOBILE

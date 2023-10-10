@@ -804,8 +804,10 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 		uniqueValues := map[string]bool{}
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
-				uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content] = true
-				countUniqueValues++
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content]; !ok {
+					uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content] = true
+					countUniqueValues++
+				}
 			}
 		}
 		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}

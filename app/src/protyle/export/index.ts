@@ -394,7 +394,9 @@ const renderPDF = (id: string) => {
                         return;
                     }
                 } else if (target.classList.contains("protyle-action__copy")) {
-                    navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd());
+                    let text = target.parentElement.nextElementSibling.textContent.trimEnd();
+                    text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                    navigator.clipboard.writeText(text);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -626,7 +628,9 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     Protyle.plantumlRender(previewElement, "stage/protyle");
     document.querySelectorAll(".protyle-action__copy").forEach((item) => {
       item.addEventListener("click", (event) => {
-            navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
+            let text = item.parentElement.nextElementSibling.textContent.trimEnd();
+            text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying
+            navigator.clipboard.writeText(text);
             event.preventDefault();
             event.stopPropagation();
       })

@@ -225,7 +225,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             </label>
             ${notifyHTML}
         </div>
-        <div data-type="NodeAttributeView" class="fn__none custom-attr" data-av-id="${attrs["custom-avs"]}" data-node-id="${attrs.id}"></div>
+        <div data-type="NodeAttributeView" class="fn__none custom-attr"></div>
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">

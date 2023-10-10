@@ -20,6 +20,8 @@ const {
 const path = require("path");
 const fs = require("fs");
 const gNet = require("net");
+const remote = require('@electron/remote/main');
+
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
 const isDevEnv = process.env.NODE_ENV === "development";
@@ -31,6 +33,8 @@ let firstOpen = false;
 let workspaces = []; // workspaceDir, id, browserWindow, tray
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
+
+remote.initialize();
 
 if (!app.requestSingleInstanceLock()) {
     app.quit();
@@ -278,6 +282,8 @@ const boot = () => {
         titleBarStyle: "hidden",
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
+    remote.enable(currentWindow.webContents);
+
     windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
@@ -881,6 +887,8 @@ app.whenReady().then(() => {
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
+        remote.enable(win.webContents);
+
         if (data.position) {
             win.setPosition(data.position.x, data.position.y);
         } else {

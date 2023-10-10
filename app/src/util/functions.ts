@@ -90,3 +90,11 @@ export const objEquals = (a: any, b: any): boolean => {
     if (keys.length !== Object.keys(b).length) return false;
     return keys.every(k => objEquals(a[k], b[k]));
 };
+
+export const trimPrefix = (str: string, prefix: string) => {
+    return str.startsWith(prefix) ? str.slice(prefix.length) : str;
+}
+
+export const trimSuffix = (str: string, suffix: string) => {
+    return str.endsWith(suffix) ? str.slice(0, -suffix.length) : str;
+}

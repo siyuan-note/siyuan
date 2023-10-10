@@ -1936,11 +1936,11 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {
-							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Date.Content, 0, av.CreatedFormatNone)
+							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone)
 						}
 					} else if av.KeyTypeUpdated == cell.Value.Type {
 						if nil != cell.Value.Updated {
-							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Date.Content, 0, av.UpdatedFormatNone)
+							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
 						}
 					}
 

@@ -15,7 +15,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {openFile, openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
-import {getSearch, isWindow, trimPrefix} from "../util/functions";
+import {isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
@@ -247,27 +247,27 @@ export const initWindow = async (app: App) => {
     });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
+            let urlObj: URL;
             try {
-                var urlObj = new URL(url);
+                urlObj = new URL(url);
                 if (urlObj.protocol !== "siyuan:") {
                     return;
                 }
             } catch (error) {
                 return;
             }
-            if (urlObj.pathname.startsWith("//plugins/")) {
-                const pluginPathname = trimPrefix(urlObj.pathname, "//plugins/");
-                if (!pluginPathname) {
+            if (urlObj && urlObj.pathname.startsWith("//plugins/")) {
+                const pluginNameType = urlObj.pathname.replace("//plugins/", "");
+                if (!pluginNameType) {
                     return;
                 }
-                const pluginId = pluginPathname.split("/")[0];
-                app.plugins.forEach(plugin => {
-                    if (pluginPathname.startsWith(plugin.name)) {
+                app.plugins.find(plugin => {
+                    if (pluginNameType.startsWith(plugin.name)) {
                         // siyuan://plugins/plugin-name/foo?bar=baz
                         plugin.eventBus.emit("open-siyuan-url-plugin", {url});
 
                         // https://github.com/siyuan-note/siyuan/pull/9256
-                        if (pluginId !== plugin.name) {
+                        if (pluginNameType.split("/")[0] !== plugin.name) {
                             // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
                             let data = urlObj.searchParams.get("data");
                             try {
@@ -281,15 +281,16 @@ export const initWindow = async (app: App) => {
                                     title: urlObj.searchParams.get("title"),
                                     icon: urlObj.searchParams.get("icon"),
                                     data,
-                                    id: pluginPathname
+                                    id: pluginNameType
                                 },
                             });
                         }
+                        return true;
                     }
                 });
                 return;
             }
-            if (isSYProtocol(url)) {
+            if (urlObj && isSYProtocol(url)) {
                 const id = getIdFromSYProtocol(url);
                 const focus = urlObj.searchParams.get("focus") === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {

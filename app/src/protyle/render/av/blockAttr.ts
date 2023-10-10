@@ -32,7 +32,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "date":
         case "created":
         case "updated":
-            if (value[value.type].isNotEmpty || "date" !== value.type) {
+            if (value[value.type].isNotEmpty) {
                 html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {

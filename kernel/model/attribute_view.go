@@ -154,6 +154,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					kv.Values[0].Created.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
 					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
@@ -164,6 +165,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+					kv.Values[0].Updated.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
 					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
@@ -384,8 +386,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					cell.Value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					cell.Value.Created.IsNotEmpty = true
 				} else {
-					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated: // 渲染更新时间
@@ -394,8 +396,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
 					cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+					cell.Value.Updated.IsNotEmpty = true
 				} else {
-					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
 					cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
 				}
 			}

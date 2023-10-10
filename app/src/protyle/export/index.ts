@@ -147,6 +147,9 @@ const renderPDF = (id: string) => {
         }
         ${setInlineStyle(false)}
     </style>
+    <style>
+        ${document.getElementById("pluginsStyle").innerHTML}
+    </style>
 </head>
 <body>
 <div id="action">

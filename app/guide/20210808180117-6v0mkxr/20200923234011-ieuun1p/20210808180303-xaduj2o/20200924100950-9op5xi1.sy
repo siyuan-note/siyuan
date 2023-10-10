@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20230828105320"
+		"updated": "20231010212112"
 	},
 	"Children": [
 		{
@@ -2270,7 +2270,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-yozlufs",
-				"updated": "20230717104357"
+				"updated": "20231010212112"
 			},
 			"Children": [
 				{
@@ -5917,6 +5917,51 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Copy block hyperlink (Markdown)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings - Shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ to configure"
 								}
 							]
 						}

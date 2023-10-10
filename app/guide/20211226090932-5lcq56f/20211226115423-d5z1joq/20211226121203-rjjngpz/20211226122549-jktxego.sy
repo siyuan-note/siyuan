@@ -6,7 +6,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20230828105305"
+		"updated": "20231010212202"
 	},
 	"Children": [
 		{
@@ -2344,7 +2344,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-pb50zx4",
-				"updated": "20230717104502"
+				"updated": "20231010212202"
 			},
 			"Children": [
 				{
@@ -6077,6 +6077,51 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製塊超連結（Markdown）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ 中配置"
 								}
 							]
 						}

@@ -271,12 +271,12 @@ export class Breadcrumb {
                         click: async () => {
                             /// #if !BROWSER
                             if (window.siyuan.config.system.os === "darwin") {
-                                const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"})
+                                const status = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "getMicrophone"});
                                 if (["denied", "restricted", "unknown"].includes(status)) {
                                     showMessage(window.siyuan.languages.microphoneDenied);
                                     return;
                                 } else if (status === "not-determined") {
-                                    const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"})
+                                    const isAccess = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "askMicrophone"});
                                     if (!isAccess) {
                                         showMessage(window.siyuan.languages.microphoneNotAccess);
                                         return;

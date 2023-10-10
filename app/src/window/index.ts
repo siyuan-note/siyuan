@@ -7,7 +7,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {addBaseURL, setNoteBook} from "../util/pathName";
-import {openFile, openFileById} from "../editor/util";
+import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,

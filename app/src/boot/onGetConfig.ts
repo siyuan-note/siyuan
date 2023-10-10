@@ -196,7 +196,7 @@ export const initWindow = async (app: App) => {
         });
     };
 
-    ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent")
+    ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent");
     ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
         if (cmd === "focus") {
             if (getSelection().rangeCount > 0) {
@@ -227,7 +227,7 @@ export const initWindow = async (app: App) => {
                     document.getElementById("toolbar").style.paddingLeft = "0";
                 }
             } else {
-                winOnMaxRestore()
+                winOnMaxRestore();
             }
         } else if (cmd === "leave-full-screen") {
             if ("darwin" === window.siyuan.config.system.os) {

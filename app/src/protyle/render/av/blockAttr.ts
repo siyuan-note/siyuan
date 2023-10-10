@@ -9,7 +9,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "text":
-            html = `<textarea rows="${value.text.content.split('\n').length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
             html = `<input value="${value.number.content}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;

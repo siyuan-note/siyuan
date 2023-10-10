@@ -424,7 +424,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         data: cellElement.dataset.icon,
                     }]);
                     iconElement.setAttribute("data-icon", unicode);
-                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`
+                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(cellElement);
                 });
                 event.preventDefault();

@@ -107,7 +107,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         } else if (["created", "updated"].includes(cell.valueType)) {
                             text = '<span class="av__celltext av__celltext--date">';
                             const dataValue = cell.value ? cell.value[cell.valueType as "date"] : null;
-                            if (dataValue && dataValue.content) {
+                            if (dataValue && dataValue.isNotEmpty) {
                                 text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
                             }
                             text += "</span>";

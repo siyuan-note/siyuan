@@ -1738,6 +1738,6 @@ export class Toolbar {
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
         const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, Constants.SIZE_TOOLBAR_HEIGHT);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, Constants.SIZE_TOOLBAR_HEIGHT);
     }
 }

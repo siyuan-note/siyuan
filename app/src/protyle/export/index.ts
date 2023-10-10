@@ -83,7 +83,7 @@ const renderPDF = (id: string) => {
         if (item.id.startsWith("snippet")) {
             snippetCSS += item.innerHTML;
         }
-    })
+    });
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>

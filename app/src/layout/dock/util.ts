@@ -35,12 +35,12 @@ export const openBacklink = async (options: {
     const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
-        options.rootId = response.data.rootID
-        options.useBlockId = response.data.rootID !== response.data.id
-        options.title = response.data.name || "Untitled"
+        options.rootId = response.data.rootID;
+        options.useBlockId = response.data.rootID !== response.data.id;
+        options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
-        options.title = response.data.name || "Untitled"
+        options.title = response.data.name || "Untitled";
     }
     newWnd.addTab(new Tab({
         icon: "iconLink",
@@ -85,12 +85,12 @@ export const openGraph = async (options: {
     const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
-        options.rootId = response.data.rootID
-        options.useBlockId = response.data.rootID !== response.data.id
-        options.title = response.data.name || "Untitled"
+        options.rootId = response.data.rootID;
+        options.useBlockId = response.data.rootID !== response.data.id;
+        options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
-        options.title = response.data.name || "Untitled"
+        options.title = response.data.name || "Untitled";
     }
     newWnd.addTab(new Tab({
         icon: "iconGraph",
@@ -126,12 +126,12 @@ export const openOutline = async (protyle: IProtyle) => {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     const newWnd = wnd.split("lr");
-    let title = ""
+    let title = "";
     if (!protyle.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: protyle.block.rootID});
-        title = response.data.name || "Untitled"
+        title = response.data.name || "Untitled";
     } else {
-        title = protyle.title.editElement.textContent || "Untitled"
+        title = protyle.title.editElement.textContent || "Untitled";
     }
     newWnd.addTab(new Tab({
         icon: "iconAlignCenter",

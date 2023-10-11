@@ -246,7 +246,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {
-            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]')
+            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]');
         }
         while (!target.isSameNode(dialog.element)) {
             const type = target.dataset.action;

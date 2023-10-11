@@ -35,7 +35,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
             }
         }
         currentHintElement = listElement.querySelector("." + classActiveName);
-        const overTop = listElement.scrollTop > currentHintElement.offsetTop - (currentHintElement.previousElementSibling?.clientHeight || 0)
+        const overTop = listElement.scrollTop > currentHintElement.offsetTop - (currentHintElement.previousElementSibling?.clientHeight || 0);
         if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight || overTop) {
             currentHintElement.scrollIntoView(overTop);
         }

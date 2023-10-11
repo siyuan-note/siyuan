@@ -578,6 +578,10 @@ func (table *Table) FilterRows() {
 				case FilterOperatorIsNotEmpty:
 					pass = false
 				}
+
+				if KeyTypeText != row.Cells[index].ValueType {
+					pass = false
+				}
 				break
 			}
 

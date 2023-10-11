@@ -223,7 +223,7 @@ func prependNotebookNameInHPath(blocks []*Block) {
 	boxNames := Conf.BoxNames(boxIDs)
 	for _, b := range blocks {
 		name := boxNames[b.Box]
-		b.HPath = name + b.HPath
+		b.HPath = util.EscapeHTML(name) + b.HPath
 	}
 }
 

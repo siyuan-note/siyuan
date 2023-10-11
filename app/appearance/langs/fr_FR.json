@@ -1210,7 +1210,7 @@
     "127": "Il reste [%d] jours avant l'expiration de l'abonnement, après quoi les données cloud seront complètement supprimées. Veuillez visiter <a target='_blank' href='${url}'>ici</a> pour le renouvellement",
     "128": "L'abonnement a expiré. Après l'expiration, les données cloud seront complètement supprimées. Le rappel ne s'affichera plus deux jours après l'expiration de l'abonnement. Pour renouveler, veuillez visiter <a target='_blank' href='${url}'>ici</a>",
     "129": "Les données cloud ont été corrompues, veuillez réinitialiser le dépôt de données local et le répertoire de synchronisation cloud pour résoudre le problème",
-    "130": "Démarrage du programme d'installation de la nouvelle version...",
+    "130": "Le programme d'installation de la nouvelle version démarre. Étant donné que le système d'exploitation va effectuer une analyse de sécurité, le démarrage peut prendre un certain temps. Veuillez patienter...",
     "131": "Cette opération n'est pas prise en charge, veuillez vous rendre sur la console de gestion du fournisseur de stockage cloud pour opérer",
     "132": "La méthode de recherche actuelle ne prend pas en charge l'opération de remplacement, veuillez utiliser la méthode de recherche [Mot-clé] ou [Regex]",
     "133": "Téléchargement du package d'installation de la mise à jour [%s]",

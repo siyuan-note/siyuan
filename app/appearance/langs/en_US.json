@@ -1210,7 +1210,7 @@
     "127": "There are [%d] days left before the subscription expires, after which the cloud data will be completely deleted. To renew, please visit <a target='_blank' href='${url}'>here</a>",
     "128": "The subscription has expired. After the expiration, the cloud data will be completely deleted. The reminder will no longer pop up two days after the subscription expires. To renew, please visit <a target='_blank' href='${url}'>here</a>",
     "129": "Cloud data has been corrupted, please reset the local data repo and cloud sync dir to resolve the issue",
-    "130": "Starting new version installer...",
+    "130": "The new version installer is starting. Since the operating system will perform a security scan, it may take some time to start. Please wait...",
     "131": "This operation is not supported, please go to the cloud storage provider management console to operate",
     "132": "The current search method does not support the replace operation, please use the [Keyword] or [Regex] search method",
     "133": "Downloading update installation package [%s]",

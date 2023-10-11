@@ -1147,10 +1147,10 @@ export class Toolbar {
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
 
-        let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
+        let html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         const hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
-        hljsLanguages.forEach((item) => {
-            html += `<div class="b3-list-item">${item}</div>`;
+        hljsLanguages.forEach((item, index) => {
+            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
         });
 
         this.subElement.style.width = "";

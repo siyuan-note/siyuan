@@ -430,7 +430,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				ial := GetBlockAttrs(row.ID)
 				updatedStr := ial["updated"]
 				if "" == updatedStr {
-					block := getTableRowBlockValue(row)
+					block := row.GetBlockValue()
 					cell.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
 					cell.Value.Updated.IsNotEmpty = true
 				} else {
@@ -469,16 +469,6 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	for _, kv := range keyValues {
 		if av.KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
 			ret = kv.Values[0]
-			break
-		}
-	}
-	return
-}
-
-func getTableRowBlockValue(row *av.TableRow) (ret *av.Value) {
-	for _, cell := range row.Cells {
-		if av.KeyTypeBlock == cell.ValueType {
-			ret = cell.Value
 			break
 		}
 	}
@@ -693,7 +683,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		content = getNodeRefText(node)
 	}
 	now := time.Now().UnixMilli()
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, value)
 
 	if !operation.IsDetached {
@@ -1301,6 +1291,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			for _, v := range kv.Values {
 				if rowID == v.Block.ID {
 					v.Block.Updated = time.Now().UnixMilli()
+					v.IsInitialized = true
 					break
 				}
 			}

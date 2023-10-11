@@ -13,6 +13,10 @@ import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
+import {isLocalPath, pathPosix} from "../../../util/pathName";
+import {Constants} from "../../../constants";
+import {openAsset} from "../../../editor/util";
+import {getSearch, isMobile} from "../../../util/functions";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -127,7 +131,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (linkElement.classList.contains("b3-chip")) {
             linkAddress = linkElement.dataset.url;
         }
-        window.open(linkAddress);
+        const suffix = pathPosix().extname(linkAddress);
+        if (isLocalPath(linkAddress) && !isMobile() && (
+            [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
+                suffix !== ".pdf" || (suffix === ".pdf" && !linkAddress.startsWith("file://"))
+            )
+        )) {
+            openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
+        } else {
+            window.open(linkAddress);
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;

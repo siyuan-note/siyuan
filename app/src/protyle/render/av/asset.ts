@@ -68,11 +68,11 @@ export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
             }
             let contentHTML;
             if (item.type === "image") {
-                contentHTML = `<span class="fn__flex-1">
+                contentHTML = `<span data-type="openAssetItem" class="fn__flex-1">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
             } else {
-                contentHTML = `<span class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
+                contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
             }
 
             html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">

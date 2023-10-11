@@ -158,6 +158,6 @@ const genSnippet = (options: ISnippet) => {
         </span>
     </div>
     <div class="fn__hr"></div>
-    <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical" spellcheck="false"></textarea>
+    <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical;font-family:var(--b3-font-family-code)" spellcheck="false"></textarea>
 </div><div class="fn__hr--b"></div>`;
 };

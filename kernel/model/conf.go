@@ -507,6 +507,9 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 				return
 			} else if 2 == execInstallPkg { // 执行新版本安装
 				waitSecondForExecInstallPkg = true
+				if gulu.OS.IsWindows() {
+					util.PushMsg(Conf.Language(130), 1000*30)
+				}
 				go execNewVerInstallPkg(newVerInstallPkgPath)
 			}
 		}
@@ -523,10 +526,11 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 	time.Sleep(500 * time.Millisecond)
 	if waitSecondForExecInstallPkg {
-		util.PushMsg(Conf.Language(130), 1000*5)
 		// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
 		// 这里多等待一段时间，等待安装程序启动
-		time.Sleep(4 * time.Second)
+		if gulu.OS.IsWindows() {
+			time.Sleep(30 * time.Second)
+		}
 	}
 	closeSyncWebSocket()
 	go func() {

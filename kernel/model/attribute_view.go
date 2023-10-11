@@ -40,6 +40,15 @@ type BlockAttributeViewKeys struct {
 }
 
 func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
+	if "" == ial["id"] {
+		block := getRowBlockValue(rowValues)
+		ial["id"] = block.Block.ID
+	}
+	if "" == ial["updated"] {
+		block := getRowBlockValue(rowValues)
+		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
+	}
+
 	funcMap := sprig.TxtFuncMap()
 	goTpl := template.New("").Delims(".action{", "}")
 	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
@@ -71,7 +80,6 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 		if nil == parseErr {
 			dataModel["updated"] = updated
 		} else {
-			logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
 			dataModel["updated"] = time.Now()
 		}
 	}
@@ -142,18 +150,15 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+		// 先处理创建时间和更新时间
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
-			case av.KeyTypeTemplate:
-				if 0 < len(kv.Values) {
-					ial := GetBlockAttrs(blockID)
-					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
-				}
 			case av.KeyTypeCreated:
 				createdStr := blockID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					kv.Values[0].Created.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
 					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
@@ -164,9 +169,20 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
 					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+					kv.Values[0].Updated.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
 					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+				}
+			}
+		}
+		// 再处理模板列
+		for _, kv := range keyValues {
+			switch kv.Key.Type {
+			case av.KeyTypeTemplate:
+				if 0 < len(kv.Values) {
+					ial := GetBlockAttrs(blockID)
+					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
 			}
 		}
@@ -225,6 +241,28 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		}
 	} else {
 		view = attrView.Views[0]
+	}
+
+	// 做一些数据兼容处理，保存的时候也会做 av.SaveAttributeView()
+	now := util.CurrentTimeMillis()
+	for _, kv := range attrView.KeyValues {
+		switch kv.Key.Type {
+		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
+			for _, v := range kv.Values {
+				if 0 == v.Block.Created {
+					createdStr := v.Block.ID[:len("20060102150405")]
+					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+					if nil == parseErr {
+						v.Block.Created = created.UnixMilli()
+					} else {
+						v.Block.Created = now
+					}
+				}
+				if 0 == v.Block.Updated {
+					v.Block.Updated = now
+				}
+			}
+		}
 	}
 
 	switch view.LayoutType {
@@ -384,19 +422,25 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
 					cell.Value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					cell.Value.Created.IsNotEmpty = true
 				} else {
-					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := GetBlockAttrs(row.ID)
 				updatedStr := ial["updated"]
-				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
-				if nil == parseErr {
-					cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+				if "" == updatedStr {
+					block := row.GetBlockValue()
+					cell.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
+					cell.Value.Updated.IsNotEmpty = true
 				} else {
-					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
-					cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+					updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
+					if nil == parseErr {
+						cell.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+						cell.Value.Updated.IsNotEmpty = true
+					} else {
+						cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+					}
 				}
 			}
 		}
@@ -638,7 +682,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	if !operation.IsDetached {
 		content = getNodeRefText(node)
 	}
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content}}
+	now := time.Now().UnixMilli()
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, value)
 
 	if !operation.IsDetached {
@@ -1239,6 +1284,19 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if oldIsDetached && !val.IsDetached {
 		// 将游离行绑定到新建的块上
 		bindBlockAv(tx, avID, rowID)
+	}
+
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if rowID == v.Block.ID {
+					v.Block.Updated = time.Now().UnixMilli()
+					v.IsInitialized = true
+					break
+				}
+			}
+			break
+		}
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

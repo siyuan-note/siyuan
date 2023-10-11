@@ -6,6 +6,7 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
+import {showMessage} from "../dialog/message";
 
 export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
     getConfig(pdf);
@@ -696,6 +697,8 @@ const getConfig = (pdf: any) => {
         let config = {};
         if (response.code !== 1) {
             config = JSON.parse(response.data.data);
+        } else {
+            showMessage(window.siyuan.languages.emptyContent);
         }
         pdf.appConfig.config = config;
     });

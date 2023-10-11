@@ -12,7 +12,7 @@ import {netImg2LocalAssets} from "../breadcrumb/action";
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 /// #endif
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
-import {hasClosestByMatchTag} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
 import {scrollCenter} from "../../util/highlightById";
@@ -21,7 +21,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 
-export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
+export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement, range?: Range) => {
     const target = event.target as HTMLElement;
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
@@ -56,29 +56,68 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
+        const id = nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.rootID;
+        fetchPost("/api/block/getRefText", {id}, (response) => {
+            writeText(`[${response.data}](siyuan://blocks/${id})`);
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
     /// #if !MOBILE
-    if (protyle.model) {
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            openBacklink(protyle);
-            return true;
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (range) {
+            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
+            if (refElement) {
+                openBacklink({
+                    app: protyle.app,
+                    blockId: refElement.dataset.id,
+                });
+                return true;
+            }
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            openGraph(protyle);
-            return true;
+        openBacklink({
+            app: protyle.app,
+            blockId: protyle.block.id,
+            rootId: protyle.block.rootID,
+            useBlockId: protyle.block.showAll,
+            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+        });
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (range) {
+            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
+            if (refElement) {
+                openGraph({
+                    app: protyle.app,
+                    blockId: refElement.dataset.id,
+                });
+                return true;
+            }
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            const offset = getSelectionOffset(target);
-            openOutline(protyle);
-            // switchWnd 后，range会被清空，需要重新设置
-            focusByOffset(target, offset.start, offset.end);
-            return true;
-        }
+        openGraph({
+            app: protyle.app,
+            blockId: protyle.block.id,
+            rootId: protyle.block.rootID,
+            useBlockId: protyle.block.showAll,
+            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+        });
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const offset = getSelectionOffset(target);
+        openOutline(protyle);
+        // switchWnd 后，range会被清空，需要重新设置
+        focusByOffset(target, offset.start, offset.end);
+        return true;
     }
 
     let matchCommand = false;

@@ -30,6 +30,7 @@ export const loadPlugins = async (app: App) => {
         css += item.css || "" + "\n";
     });
     const styleElement = document.createElement("style");
+    styleElement.id = "pluginsStyle";
     styleElement.textContent = css;
     document.head.append(styleElement);
 };

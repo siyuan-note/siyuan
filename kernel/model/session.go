@@ -183,6 +183,15 @@ func CheckAuth(c *gin.Context) {
 			}
 		}
 
+		if !strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) && !strings.HasPrefix(c.Request.RemoteAddr, "[::1]") {
+			// Authenticate requests of assets other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9388
+			if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
+				c.Abort()
+				return
+			}
+		}
+
 		c.Next()
 		return
 	}
@@ -197,8 +206,7 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// 放过来自本机的某些请求
-	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) ||
-		strings.HasPrefix(c.Request.RemoteAddr, "[::1]") {
+	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) || strings.HasPrefix(c.Request.RemoteAddr, "[::1]") {
 		if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
 			c.Next()
 			return

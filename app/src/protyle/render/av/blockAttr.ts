@@ -9,7 +9,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "text":
-            html = `<textarea rows="${value.text.content.split('\n').length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
             html = `<input value="${value.number.content}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;
@@ -32,7 +32,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "date":
         case "created":
         case "updated":
-            if (value[value.type].isNotEmpty || "date" !== value.type) {
+            if (value[value.type].isNotEmpty) {
                 html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
@@ -88,7 +88,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "template"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;

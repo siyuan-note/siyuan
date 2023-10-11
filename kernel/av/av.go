@@ -99,11 +99,12 @@ type KeySelectOption struct {
 }
 
 type Value struct {
-	ID         string  `json:"id,omitempty"`
-	KeyID      string  `json:"keyID,omitempty"`
-	BlockID    string  `json:"blockID,omitempty"`
-	Type       KeyType `json:"type,omitempty"`
-	IsDetached bool    `json:"isDetached,omitempty"`
+	ID            string  `json:"id,omitempty"`
+	KeyID         string  `json:"keyID,omitempty"`
+	BlockID       string  `json:"blockID,omitempty"`
+	Type          KeyType `json:"type,omitempty"`
+	IsDetached    bool    `json:"isDetached,omitempty"`
+	IsInitialized bool    `json:"isInitialized,omitempty"`
 
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
@@ -169,6 +170,8 @@ func (value *Value) ToJSONString() string {
 type ValueBlock struct {
 	ID      string `json:"id"`
 	Content string `json:"content"`
+	Created int64  `json:"created"`
+	Updated int64  `json:"updated"`
 }
 
 type ValueText struct {
@@ -510,6 +513,28 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
+	// 做一些数据兼容处理
+	now := util.CurrentTimeMillis()
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			// 补全 block 的创建时间和更新时间
+			for _, v := range kv.Values {
+				if 0 == v.Block.Created {
+					createdStr := v.Block.ID[:len("20060102150405")]
+					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+					if nil == parseErr {
+						v.Block.Created = created.UnixMilli()
+					} else {
+						v.Block.Created = now
+					}
+				}
+				if 0 == v.Block.Updated {
+					v.Block.Updated = now
+				}
+			}
+		}
+	}
+
 	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t") // TODO: single-line for production
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)

@@ -20,7 +20,7 @@ const {
 const path = require("path");
 const fs = require("fs");
 const gNet = require("net");
-const remote = require('@electron/remote/main');
+const remote = require("@electron/remote/main");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -657,7 +657,7 @@ app.whenReady().then(() => {
         resetTrayMenu(tray, lang, mainWindow);
     };
     const getWindowByContentId = (id) => {
-        return BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === id).id)
+        return BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === id).id);
     };
 
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
@@ -702,7 +702,7 @@ app.whenReady().then(() => {
                     return true;
                 }
             });
-            return hasMatch
+            return hasMatch;
         }
     });
     ipcMain.once("siyuan-event", (event) => {
@@ -727,14 +727,14 @@ app.whenReady().then(() => {
         currentWindow.on("leave-full-screen", () => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
-    })
+    });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;
-        let webContentsId = event.sender.id
+        let webContentsId = event.sender.id;
         if (typeof data !== "string") {
             cmd = data.cmd;
             if (data.webContentsId) {
-                webContentsId = data.webContentsId
+                webContentsId = data.webContentsId;
             }
         }
         const currentWindow = getWindowByContentId(webContentsId);
@@ -941,7 +941,7 @@ app.whenReady().then(() => {
             // 系统托盘
             tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
             tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-            const mainWindow = getWindowByContentId(event.sender.id)
+            const mainWindow = getWindowByContentId(event.sender.id);
             resetTrayMenu(tray, data.languages, mainWindow);
             tray.on("click", () => {
                 showHideWindow(tray, data.languages, mainWindow);

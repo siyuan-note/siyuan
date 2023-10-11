@@ -1210,7 +1210,7 @@
     "127": "There are [%d] days left before the subscription expires, after which the cloud data will be completely deleted. Please visit <a target='_blank' href='${url}'>Aquí</a> para la renovación",
     "128": "La suscripción caducó. Después de la caducidad, los datos de la nube se eliminarán por completo. El recordatorio ya no aparecerá dos días después de que caduque la suscripción. Para renovar, visite <a target='_blank' href='${url}'>aquí</a>",
     "129": "Los datos de la nube se han dañado, reinicie el repositorio de datos local y el directorio de sincronización en la nube para resolver el problema",
-    "130": "Iniciando instalador de nueva versión...",
+    "130": "El instalador de la nueva versión se está iniciando. Dado que el sistema operativo realizará un análisis de seguridad, es posible que tarde algún tiempo en iniciarse. Espere...",
     "131": "Esta solicitud no es compatible, vaya a la consola de administración del proveedor de almacenamiento en la nube para operar",
     "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Palabra clave] o [Regex]",
     "133": "Descargando paquete de instalación de actualización [%s]",

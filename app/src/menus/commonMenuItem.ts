@@ -245,6 +245,9 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     (dialog.element.querySelector('.b3-text-field[data-name="alias"]') as HTMLInputElement).value = attrs.alias || "";
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
+        if (typeof event.detail === "string") {
+            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]');
+        }
         while (!target.isSameNode(dialog.element)) {
             const type = target.dataset.action;
             if (target.classList.contains("item--full")) {
@@ -342,11 +345,14 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         }
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        if (focusName === item.getAttribute("data-name")) {
+        if (focusName !== "av" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
+    if (focusName === "av") {
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "av"}));
+    }
 };
 
 export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?: IProtyle) => {
@@ -394,6 +400,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         }
     }, {
         label: window.siyuan.languages.copyProtocolInMd,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
         click: () => {
             fetchPost("/api/block/getRefText", {id}, (response) => {
                 writeText(`[${response.data}](siyuan://blocks/${id})`);

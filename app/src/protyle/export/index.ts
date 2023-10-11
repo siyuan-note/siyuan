@@ -78,6 +78,12 @@ const renderPDF = (id: string) => {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
+    let snippetCSS = "";
+    document.querySelectorAll("style").forEach((item) => {
+        if (item.id.startsWith("snippet")) {
+            snippetCSS += item.innerHTML;
+        }
+    });
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
@@ -146,6 +152,10 @@ const renderPDF = (id: string) => {
           margin-bottom: 12px;
         }
         ${setInlineStyle(false)}
+    </style>
+    <style>
+        ${document.getElementById("pluginsStyle").innerHTML}
+        ${snippetCSS}
     </style>
 </head>
 <body>

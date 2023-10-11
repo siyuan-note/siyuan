@@ -278,15 +278,15 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     menu.addSeparator();
     const editAttrSubmenu: IMenu[] = [];
     rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
-        let hideBlock = false
-        const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`))
+        let hideBlock = false;
+        const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
         if (cellElement.dataset.dtype === "block") {
             selectElements.find(item => {
                 if (!item.dataset.detached) {
                     hideBlock = true;
                     return true;
                 }
-            })
+            });
         }
         if (!hideBlock) {
             editAttrSubmenu.push({

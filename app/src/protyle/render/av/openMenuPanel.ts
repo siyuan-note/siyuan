@@ -522,8 +522,8 @@ export const openMenuPanel = (options: {
                             avID,
                             data: target.dataset.icon,
                         }]);
-                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`
-                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`))
+                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`;
+                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
                     });
                     event.preventDefault();
                     event.stopPropagation();

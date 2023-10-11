@@ -508,6 +508,16 @@ type TableRow struct {
 	Cells []*TableCell `json:"cells"`
 }
 
+func (row *TableRow) GetBlockValue() (ret *Value) {
+	for _, cell := range row.Cells {
+		if KeyTypeBlock == cell.ValueType {
+			ret = cell.Value
+			break
+		}
+	}
+	return
+}
+
 func (table *Table) GetType() LayoutType {
 	return LayoutTypeTable
 }
@@ -569,6 +579,12 @@ func (table *Table) FilterRows() {
 
 	rows := []*TableRow{}
 	for _, row := range table.Rows {
+		block := row.GetBlockValue()
+		if !block.IsInitialized && nil != block.Block && "" == block.Block.Content && block.IsDetached {
+			rows = append(rows, row)
+			continue
+		}
+
 		pass := true
 		for j, index := range colIndexes {
 			operator := table.Filters[j].Operator

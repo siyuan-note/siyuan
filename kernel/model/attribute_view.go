@@ -1296,8 +1296,16 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		bindBlockAv(tx, avID, rowID)
 	}
 
-	if nil != val.Block {
-		val.Block.Updated = time.Now().UnixMilli()
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if rowID == v.Block.ID {
+					v.Block.Updated = time.Now().UnixMilli()
+					break
+				}
+			}
+			break
+		}
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

@@ -165,8 +165,8 @@ func (value *Value) Compare(other *Value) int {
 }
 
 func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
-	if nil == value || nil == other {
-		return false
+	if nil == other {
+		return true
 	}
 
 	if nil != value.Block && nil != other.Block {
@@ -193,16 +193,34 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	if nil != value.Text && nil != other.Text {
 		switch operator {
 		case FilterOperatorIsEqual:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return value.Text.Content == other.Text.Content
 		case FilterOperatorIsNotEqual:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return value.Text.Content != other.Text.Content
 		case FilterOperatorContains:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return strings.Contains(value.Text.Content, other.Text.Content)
 		case FilterOperatorDoesNotContain:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return !strings.Contains(value.Text.Content, other.Text.Content)
 		case FilterOperatorStartsWith:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return strings.HasPrefix(value.Text.Content, other.Text.Content)
 		case FilterOperatorEndsWith:
+			if "" == strings.TrimSpace(other.Text.Content) {
+				return true
+			}
 			return strings.HasSuffix(value.Text.Content, other.Text.Content)
 		case FilterOperatorIsEmpty:
 			return "" == strings.TrimSpace(value.Text.Content)
@@ -214,8 +232,14 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	if nil != value.Number && nil != other.Number {
 		switch operator {
 		case FilterOperatorIsEqual:
+			if !other.Number.IsNotEmpty {
+				return true
+			}
 			return value.Number.Content == other.Number.Content
 		case FilterOperatorIsNotEqual:
+			if !other.Number.IsNotEmpty {
+				return true
+			}
 			return value.Number.Content != other.Number.Content
 		case FilterOperatorIsGreater:
 			return value.Number.Content > other.Number.Content
@@ -235,8 +259,14 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	if nil != value.Date && nil != other.Date {
 		switch operator {
 		case FilterOperatorIsEqual:
+			if !other.Date.IsNotEmpty {
+				return true
+			}
 			return value.Date.Content == other.Date.Content
 		case FilterOperatorIsNotEqual:
+			if !other.Date.IsNotEmpty {
+				return true
+			}
 			return value.Date.Content != other.Date.Content
 		case FilterOperatorIsGreater:
 			return value.Date.Content > other.Date.Content
@@ -541,7 +571,17 @@ func (table *Table) FilterRows() {
 	for _, row := range table.Rows {
 		pass := true
 		for j, index := range colIndexes {
-			if !row.Cells[index].Value.CompareOperator(table.Filters[j].Value, table.Filters[j].Operator) {
+			operator := table.Filters[j].Operator
+
+			if nil == row.Cells[index].Value {
+				switch operator {
+				case FilterOperatorIsNotEmpty:
+					pass = false
+				}
+				break
+			}
+
+			if !row.Cells[index].Value.CompareOperator(table.Filters[j].Value, operator) {
 				pass = false
 				break
 			}

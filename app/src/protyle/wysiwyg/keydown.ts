@@ -983,7 +983,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         /// #if !MOBILE
-        if (commonHotkey(protyle, event, nodeElement)) {
+        if (commonHotkey(protyle, event, nodeElement, range)) {
             return true;
         }
         /// #endif

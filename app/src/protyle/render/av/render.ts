@@ -21,9 +21,12 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
+            let time: number
             if (e.firstElementChild.innerHTML === "") {
+                e.style.width = e.parentElement.clientWidth - 40 + "px";
+                time = new Date().getTime();
                 let html = "";
-                [1, 2, 3].forEach(item => {
+                [1, 2, 3].forEach(() => {
                     html += `<div class="av__row">
     <div style="width: 24px"></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
@@ -166,7 +169,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     e.style.width = e.parentElement.clientWidth + "px";
                 }
                 e.style.alignSelf = "center";
-                e.firstElementChild.outerHTML = `<div>
+                setTimeout(() => {
+                    e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
@@ -198,19 +202,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         </div>
     </div>
 </div>`;
-                e.setAttribute("data-render", "true");
-                if (left) {
-                    e.querySelector(".av__scroll").scrollLeft = left;
-                }
-                if (headerTransform) {
-                    (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                }
-                if (footerTransform) {
-                    (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
-                }
-                if (cb) {
-                    cb();
-                }
+                    e.setAttribute("data-render", "true");
+                    if (left) {
+                        e.querySelector(".av__scroll").scrollLeft = left;
+                    }
+                    if (headerTransform) {
+                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
+                    }
+                    if (footerTransform) {
+                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                    }
+                    if (cb) {
+                        cb();
+                    }
+                }, time ? 256 - (new Date().getTime() - time) : 0); // 为了让动画更好看，需延时到 256ms
             });
         });
     }

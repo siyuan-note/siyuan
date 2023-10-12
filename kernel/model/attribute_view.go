@@ -51,7 +51,6 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 
 	funcMap := sprig.TxtFuncMap()
 	goTpl := template.New("").Delims(".action{", "}")
-	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
 	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
@@ -61,7 +60,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	buf := &bytes.Buffer{}
 	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
-		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
+		dataModel[k] = v
 
 		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
 		createdStr := ial["id"]

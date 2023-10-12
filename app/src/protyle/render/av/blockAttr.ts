@@ -8,6 +8,9 @@ import {popTextCell} from "./cell";
 export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
+        case "block":
+            html = `<div class="fn__flex-1">${value.block.content}</div>`;
+            break;
         case "text":
             html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;

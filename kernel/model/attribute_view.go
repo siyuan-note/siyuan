@@ -123,10 +123,6 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
-			if av.KeyTypeBlock == kv.Key.Type {
-				continue
-			}
-
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
@@ -180,7 +176,11 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
-					ial := GetBlockAttrs(blockID)
+					ial := map[string]string{}
+					block := getRowBlockValue(keyValues)
+					if !block.IsDetached {
+						ial = GetBlockAttrs(blockID)
+					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
 			}

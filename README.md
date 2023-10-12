@@ -30,7 +30,6 @@
 ## 更新
 
 - 去除更新提示、去除用户相关内容，可以云端同步。
-    - 下载地址(支持mac、windows) http://wp.start6.cn/s/vmIj?password=516gor
 
 ## 💡 简介
 
@@ -43,27 +42,27 @@
 ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
 * Content block
-  * Block-level reference and two-way links
-  * Custom attributes
-  * SQL query embed
-  * Protocol `siyuan://`
+    * Block-level reference and two-way links
+    * Custom attributes
+    * SQL query embed
+    * Protocol `siyuan://`
 * Editor
-  * Block-style
-  * Markdown WYSIWYG
-  * List outline
-  * Block zoom-in
-  * Block horizontal layout
-  * Million-word large document editing
-  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Web clipping
-  * PDF Annotation link
+    * Block-style
+    * Markdown WYSIWYG
+    * List outline
+    * Block zoom-in
+    * Block horizontal layout
+    * Million-word large document editing
+    * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+    * Web clipping
+    * PDF Annotation link
 * Export
-  * Block ref and embed
-  * Standard Markdown with assets
-  * PDF, Word and HTML
-  * Copy to WeChat MP, Zhihu and Yuque
+    * Block ref and embed
+    * Standard Markdown with assets
+    * PDF, Word and HTML
+    * Copy to WeChat MP, Zhihu and Yuque
 * Database
-  * Table view
+    * Table view
 * Spaced repetition
 * Multi-tab, drag and drop to split screen
 * Template snippet
@@ -145,10 +144,14 @@ docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyu
 ```
 
 * `workspace_dir_host`: The workspace folder path on the host
-* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified in `--workspace`
-* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your data
+* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified
+  in `--workspace`
+* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your
+  data
 
-To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is:
+To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such
+as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup
+commands is:
 
 ```
 docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
@@ -243,7 +246,9 @@ docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3lo
   选项，这样思源会自动下载最新版安装包并提示安装
 * 如果是通过手动安装包安装的，请再次下载安装包安装
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official website](https://b3log.org/siyuan/) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention
+to [Official website](https://b3log.org/siyuan/) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to
+get the new version.
 
 **注意**：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件
 

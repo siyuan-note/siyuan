@@ -380,8 +380,7 @@ func initMime() {
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".html", "text/html")
 
-	// 某些系统上下载资源文件后打开是 zip
-	// https://github.com/siyuan-note/siyuan/issues/6347
+	// 某些系统上下载资源文件后打开是 zip https://github.com/siyuan-note/siyuan/issues/6347
 	mime.AddExtensionType(".doc", "application/msword")
 	mime.AddExtensionType(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 	mime.AddExtensionType(".xls", "application/vnd.ms-excel")
@@ -390,6 +389,9 @@ func initMime() {
 	mime.AddExtensionType(".dxf", "image/x-dxf")
 	mime.AddExtensionType(".dwf", "drawing/x-dwf")
 	mime.AddExtensionType(".pdf", "application/pdf")
+
+	// 某些系统上无法显示 SVG 图片 SVG images cannot be displayed on some systems https://github.com/siyuan-note/siyuan/issues/9413
+	mime.AddExtensionType(".svg", "image/svg+xml")
 
 	// 文档数据文件
 	mime.AddExtensionType(".sy", "application/json")

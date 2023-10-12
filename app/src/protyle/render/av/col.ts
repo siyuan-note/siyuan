@@ -281,7 +281,7 @@ export const getColIconByType = (type: TAVCol) => {
         case "text":
             return "iconAlignLeft";
         case "block":
-            return "iconParagraph";
+            return "iconKey";
         case "number":
             return "iconNumber";
         case "select":

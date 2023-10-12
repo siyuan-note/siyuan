@@ -21,6 +21,19 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
+            if (e.firstElementChild.innerHTML === "") {
+                let html = "";
+                [1, 2, 3].forEach(item => {
+                    html += `<div class="av__row">
+    <div style="width: 24px"></div>
+    <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
+    <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
+    <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
+    <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
+</div>`;
+                })
+                e.firstElementChild.innerHTML = html
+            }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
             const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;

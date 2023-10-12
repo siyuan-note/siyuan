@@ -364,7 +364,7 @@ export const addAttrViewColAnimation = (options: {
     <div class="av__widthdrag"></div>
 </div>`;
         } else {
-            html = '<div class="av__cell" style="width: 200px"></div>';
+            html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';
         }
         previousElement.insertAdjacentHTML("afterend", html);
     });

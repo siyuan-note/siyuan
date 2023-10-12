@@ -290,6 +290,9 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconList";
         case "date":
             return "iconCalendar";
+        case "updated":
+        case "created":
+            return "iconClock";
         case "url":
             return "iconLink";
         case "mAsset":
@@ -421,7 +424,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         data: cellElement.dataset.icon,
                     }]);
                     iconElement.setAttribute("data-icon", unicode);
-                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`
+                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(cellElement);
                 });
                 event.preventDefault();

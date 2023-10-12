@@ -41,7 +41,6 @@ import {hintMoveBlock} from "../../protyle/hint/extend";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
-import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../../history/history";
@@ -161,10 +160,17 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
+    const activePanelElement = document.querySelector(".layout__tab--active");
+    let isFileFocus = false;
+    if (activePanelElement && activePanelElement.classList.contains("sy__file")) {
+        isFileFocus = true;
+    }
     if (range) {
         window.siyuan.dialogs.find(item => {
             if (item.editor && item.editor.protyle.element.contains(range.startContainer)) {
                 protyle = item.editor.protyle;
+                // https://github.com/siyuan-note/siyuan/issues/9384
+                isFileFocus = false;
                 return true;
             }
         });
@@ -225,11 +231,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             return false;
         }
     }
-    const activePanelElement = document.querySelector(".layout__tab--active");
-    let isFileFocus = false;
-    if (activePanelElement && activePanelElement.classList.contains("sy__file")) {
-        isFileFocus = true;
-    }
     let searchKey = "";
     if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
         searchKey = window.siyuan.config.keymap.general.replace.custom;
@@ -255,7 +256,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-        if (protyle.title.editElement.contains(range.startContainer)) {
+        if (protyle.title?.editElement.contains(range.startContainer)) {
             quickMakeCard(protyle, [protyle.title.element]);
         } else {
             const selectElement: Element[] = [];
@@ -1419,7 +1420,6 @@ export const sendGlobalShortcut = (app: App) => {
     });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],
-        id: getCurrentWindow().id,
         hotkeys
     });
     /// #endif

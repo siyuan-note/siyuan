@@ -325,7 +325,7 @@
 
   &__item {
     font-size: 24px;
-    line-height: 28px;
+    line-height: 0.9em; // windows 需要这样设置
     font-family: var(--b3-font-family-emoji);
     text-align: center;
     height: 28px;

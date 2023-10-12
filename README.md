@@ -246,9 +246,7 @@ docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3lo
   选项，这样思源会自动下载最新版安装包并提示安装
 * 如果是通过手动安装包安装的，请再次下载安装包安装
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention
-to [Official website](https://b3log.org/siyuan/) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to
-get the new version.
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official Download](https://b3log.org/siyuan/en/download.html) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
 **注意**：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件
 

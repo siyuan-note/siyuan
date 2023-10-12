@@ -96,11 +96,19 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             }
                         } else if (cell.valueType === "date") {
                             text = '<span class="av__celltext av__celltext--date">';
-                            if (cell.value?.date.isNotEmpty) {
-                                text += dayjs(cell.value.date.content).format("YYYY-MM-DD HH:mm");
+                            const dataValue = cell.value ? cell.value.date : null;
+                            if (dataValue && dataValue.isNotEmpty) {
+                                text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
                             }
-                            if (cell.value?.date.hasEndDate && cell.value?.date.isNotEmpty && cell.value?.date.isNotEmpty2) {
-                                text += `<svg><use xlink:href="#iconForward"></use></svg>${dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm")}`;
+                            if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+                                text += `<svg><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format("YYYY-MM-DD HH:mm")}`;
+                            }
+                            text += "</span>";
+                        } else if (["created", "updated"].includes(cell.valueType)) {
+                            text = '<span class="av__celltext av__celltext--date">';
+                            const dataValue = cell.value ? cell.value[cell.valueType as "date"] : null;
+                            if (dataValue && dataValue.isNotEmpty) {
+                                text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
                             }
                             text += "</span>";
                         } else if (cell.valueType === "mAsset") {

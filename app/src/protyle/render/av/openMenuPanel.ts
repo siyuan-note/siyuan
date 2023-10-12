@@ -522,8 +522,8 @@ export const openMenuPanel = (options: {
                             avID,
                             data: target.dataset.icon,
                         }]);
-                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`
-                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`))
+                        target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`;
+                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -779,7 +779,7 @@ const getPropertiesHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
-            <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+            ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>
@@ -791,7 +791,7 @@ const getPropertiesHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
-            <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+            ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>

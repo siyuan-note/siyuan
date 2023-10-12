@@ -9,7 +9,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "text":
-            html = `<textarea rows="${value.text.content.split('\n').length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
             html = `<input value="${value.number.content}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;
@@ -30,11 +30,13 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            if (value.date.isNotEmpty) {
-                html = `<span data-content="${value.date.content}">${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}</span>`;
+        case "created":
+        case "updated":
+            if (value[value.type].isNotEmpty) {
+                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
             }
-            if (value.date.hasEndDate && value.date.isNotEmpty2 && value.date.isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value.date.content2}">${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
+            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
+                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             break;
         case "url":
@@ -74,7 +76,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
             avID: string
             avName: string
         }) => {
-            html += `<div class="block__logo custom-attr__avheader">
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView"><div class="block__logo custom-attr__avheader">
     <svg><use xlink:href="#iconDatabase"></use></svg>
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
@@ -86,11 +88,12 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "template"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;
             });
+            html += "</div>";
         });
         element.innerHTML = html;
         element.addEventListener("click", (event) => {

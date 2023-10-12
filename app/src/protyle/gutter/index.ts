@@ -1885,7 +1885,7 @@ export class Gutter {
         if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
             const iconElement = nodeElement.querySelector(".item__graphic");
             if (iconElement) {
-                this.element.style.top = `${iconElement.getBoundingClientRect().top - (window.siyuan.config.editor.fontSize * 1.625 - 14) / 2}px`;
+                this.element.style.top = `${Math.max(iconElement.getBoundingClientRect().top - (window.siyuan.config.editor.fontSize * 1.625 - 14) / 2, wysiwyg.parentElement.getBoundingClientRect().top)}px`;
             } else {
                 this.element.style.top = `${Math.max(rect.top, wysiwyg.parentElement.getBoundingClientRect().top) + 8}px`;
             }

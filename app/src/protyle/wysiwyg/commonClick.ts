@@ -43,6 +43,17 @@ export const commonClick = (event: MouseEvent & {
         return true;
     }
 
+    const avElement = hasClosestByClassName(event.target, "protyle-attr--av");
+    if (avElement) {
+        if (data) {
+            openFileAttr(data, "av", protyle);
+        } else {
+            openAttr(avElement.parentElement.parentElement, "av", protyle);
+        }
+        event.stopPropagation();
+        return true;
+    }
+
     const attrAliasElement = hasClosestByClassName(event.target, "protyle-attr--alias");
     if (attrAliasElement) {
         if (!isM && (event.ctrlKey || event.metaKey)) {

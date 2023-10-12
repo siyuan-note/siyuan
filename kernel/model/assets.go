@@ -512,6 +512,15 @@ func RenameAsset(oldPath, newName string) (err error) {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
+
+	if gulu.File.IsExist(filepath.Join(util.DataDir, oldPath+".sya")) {
+		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
+		if err = filelock.Copy(filepath.Join(util.DataDir, oldPath+".sya"), filepath.Join(util.DataDir, newPath+".sya")); nil != err {
+			logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
+			return
+		}
+	}
+
 	oldName := path.Base(oldPath)
 
 	notebooks, err := ListNotebooks()

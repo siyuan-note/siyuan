@@ -7,7 +7,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {addBaseURL, setNoteBook} from "../util/pathName";
-import {openFile, openFileById} from "../editor/util";
+import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
@@ -148,8 +148,3 @@ class App {
 }
 
 new App();
-
-// 再次点击新窗口已打开的 PDF 时，需进行定位
-window.newWindow = {
-    openFile: openFile,
-};

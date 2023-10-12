@@ -302,9 +302,11 @@
         padding-bottom: 4px;
         float: left;
 
-        svg {
+        .icon {
           width: 12px;
           flex-shrink: 0;
+          margin-right: 6px;
+          margin-left: -5px;
         }
       }
 

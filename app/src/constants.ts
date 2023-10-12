@@ -24,7 +24,10 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程
-    public static readonly SIYUAN_SHOW: string = "siyuan-show";
+    public static readonly SIYUAN_CMD: string = "siyuan-cmd";
+    public static readonly SIYUAN_GET: string = "siyuan-get";
+    public static readonly SIYUAN_EVENT: string = "siyuan-event";
+
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
@@ -37,10 +40,10 @@ export abstract class Constants {
     public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
     public static readonly SIYUAN_OPEN_WINDOW: string = "siyuan-open-window";
     public static readonly SIYUAN_OPEN_FOLDER: string = "siyuan-open-folder";
+    public static readonly SIYUAN_OPEN_FILE: string = "siyuan-open-file";
 
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
-    public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";
-    public static readonly SIYUAN_EXPORT_PREVENT: string = "siyuan-export-prevent";
+    public static readonly SIYUAN_EXPORT_NEWWINDOW: string = "siyuan-export-newwindow";
 
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
@@ -261,6 +264,7 @@ export abstract class Constants {
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
+                copyProtocolInMd: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
                 optimizeTypography: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},

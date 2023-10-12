@@ -65,6 +65,8 @@ type TAVCol =
     | "phone"
     | "mAsset"
     | "template"
+    | "created"
+    | "updated"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -136,10 +138,6 @@ interface Window {
         writeImageClipboard(uri: string): void
         readClipboard(): string
         getBlockURL(): string
-    }
-
-    newWindow: {
-        openFile(options: IOpenFileOptions): void
     }
 
     Protyle: import("../protyle/method").default
@@ -327,7 +325,6 @@ interface ISiyuan {
     storage?: {
         [key: string]: any
     },
-    printWin?: import("electron").BrowserWindow
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],
@@ -1083,6 +1080,8 @@ interface IAVCellValue {
         content: string
     }
     date?: IAVCellDateValue
+    created?: IAVCellDateValue
+    updated?: IAVCellDateValue
 }
 
 interface IAVCellDateValue {

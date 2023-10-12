@@ -1,23 +1,16 @@
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
 /// #endif
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
+import {Constants} from "../../constants";
 
 export const setProxy = () => {
     /// #if !BROWSER
-    if ("" === window.siyuan.config.system.networkProxy.scheme) {
-        console.log("network proxy [system]");
-        return;
-    }
-
-    const session = getCurrentWindow().webContents.session;
-    session.closeAllConnections().then(() => {
-        const proxyURL = `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`;
-        session.setProxy({proxyRules: proxyURL}).then(
-            () => console.log("network proxy [" + proxyURL + "]"),
-        );
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd: "setProxy",
+        proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`
     });
     /// #endif
 };

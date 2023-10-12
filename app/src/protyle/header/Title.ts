@@ -9,9 +9,6 @@ import {MenuItem} from "../../menus/Menu";
 import {
     openFileAttr,
 } from "../../menus/commonMenuItem";
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
-/// #endif
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
 import {readText, writeText} from "../util/compatibility";
@@ -27,6 +24,7 @@ import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
+import {electronUndo} from "../undo";
 
 export class Title {
     public element: HTMLElement;
@@ -97,20 +95,9 @@ export class Title {
                 event.stopPropagation();
                 return;
             }
-            /// #if !BROWSER
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-                getCurrentWindow().webContents.undo();
-                event.preventDefault();
-                event.stopPropagation();
+            if (electronUndo(event)) {
                 return;
             }
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-                getCurrentWindow().webContents.redo();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            /// #endif
             if (event.key === "ArrowDown") {
                 const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                 // https://github.com/siyuan-note/siyuan/issues/4923
@@ -311,6 +298,9 @@ export class Title {
         }
         if (response.data.ial.memo) {
             nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+        }
+        if (response.data.ial["custom-avs"]) {
+            nodeAttrHTML += '<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg></div>';
         }
         this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
         if (response.data.refCount !== 0) {

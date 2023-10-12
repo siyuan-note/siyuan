@@ -44,6 +44,7 @@ import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
+import {openBacklink, openGraph} from "../layout/dock/util";
 
 export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
     const nodeElement = hasClosestBlock(refElement);
@@ -255,6 +256,30 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         }
     }).element);
     /// #endif
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconLink",
+        label: window.siyuan.languages.backlinks,
+        accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
+        click: () => {
+            openBacklink({
+                app: protyle.app,
+                blockId: refBlockId,
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconGraph",
+        label: window.siyuan.languages.graphView,
+        accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
+        click: () => {
+            openGraph({
+                app: protyle.app,
+                blockId: refBlockId,
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     /// #endif
     let submenu: IMenu[] = [];
     if (element.getAttribute("data-subtype") === "s") {

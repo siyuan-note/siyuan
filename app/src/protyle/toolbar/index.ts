@@ -1147,25 +1147,27 @@ export class Toolbar {
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
 
-        let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
+        let html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         const hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
-        hljsLanguages.forEach((item) => {
-            html += `<div class="b3-list-item">${item}</div>`;
+        hljsLanguages.forEach((item, index) => {
+            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
         });
 
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
+    <input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>`;
 
+        const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
         const inputElement = this.subElement.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
             if (event.isComposing) {
                 return;
             }
-            upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+            upDownHint(listElement, event);
             if (event.key === "Enter") {
                 const activeText = this.subElement.querySelector(".b3-list-item--focus").textContent;
                 languageElement.textContent = activeText === window.siyuan.languages.clear ? "" : activeText;
@@ -1223,12 +1225,16 @@ export class Toolbar {
             if (inputElement.value.trim() && !matchInput) {
                 html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
             }
-            html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>` + html;
-            this.subElement.firstElementChild.lastElementChild.innerHTML = html;
-            this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");
+            html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
+            listElement.innerHTML = html;
+            if ( listElement.firstElementChild.nextElementSibling) {
+                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
+            } else {
+                listElement.firstElementChild.classList.add("b3-list-item--focus");
+            }
             event.stopPropagation();
         });
-        this.subElement.lastElementChild.lastElementChild.addEventListener("click", (event) => {
+        listElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             const listElement = hasClosestByClassName(target, "b3-list-item");
             if (!listElement) {
@@ -1453,17 +1459,18 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 0 8px 4px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
+    <input style="margin: 0 8px 4px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
 </div>`;
-
+        const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
         const inputElement = this.subElement.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
             if (event.isComposing) {
                 return;
             }
-            upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+            upDownHint(listElement, event);
             if (event.key === "Enter") {
                 hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").textContent, protyle);
                 this.subElement.classList.add("fn__none");
@@ -1482,7 +1489,7 @@ export class Toolbar {
                 response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                 });
-                this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+                listElement.innerHTML = searchHTML;
             });
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
@@ -1738,6 +1745,6 @@ export class Toolbar {
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
         const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, Constants.SIZE_TOOLBAR_HEIGHT);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, Constants.SIZE_TOOLBAR_HEIGHT);
     }
 }

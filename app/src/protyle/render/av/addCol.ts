@@ -255,5 +255,55 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             });
         }
     });
+    menu.addItem({
+        icon: "iconClock",
+        label: window.siyuan.languages.createdTime,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.createdTime,
+                avID,
+                type: "created",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "created",
+                name: window.siyuan.languages.createdTime,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconClock",
+        label: window.siyuan.languages.updatedTime,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.updatedTime,
+                avID,
+                type: "updated",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "updated",
+                name: window.siyuan.languages.updatedTime,
+                id
+            });
+        }
+    });
     return menu;
 };

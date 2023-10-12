@@ -53,7 +53,6 @@ import {
     upSelect
 } from "./commonHotkey";
 import {enterBack, fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
-import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -984,7 +983,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         /// #if !MOBILE
-        if (commonHotkey(protyle, event)) {
+        if (commonHotkey(protyle, event, nodeElement, range)) {
             return true;
         }
         /// #endif

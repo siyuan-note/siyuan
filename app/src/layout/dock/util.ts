@@ -2,12 +2,21 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {resizeTabs, switchWnd} from "../util";
+import {getInstanceById, getWndByLayout, resizeTabs, switchWnd} from "../util";
 import {Backlink} from "./Backlink";
+import {App} from "../../index";
+import {Wnd} from "../Wnd";
+import {fetchSyncPost} from "../../util/fetch";
 
-export const openBacklink = (protyle: IProtyle) => {
+export const openBacklink = async (options: {
+    app: App,
+    blockId: string,
+    rootId?: string,
+    title?: string,
+    useBlockId?: boolean,
+}) => {
     const backlink = getAllModels().backlink.find(item => {
-        if (item.blockId === protyle.block.id && item.type === "local") {
+        if (item.blockId === options.blockId && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
             return true;
         }
@@ -15,27 +24,49 @@ export const openBacklink = (protyle: IProtyle) => {
     if (backlink) {
         return;
     }
-    const newWnd = protyle.model.parent.parent.split("lr");
-    const tab = new Tab({
+    let wnd: Wnd = undefined;
+    const element = document.querySelector(".layout__wnd--active");
+    if (element) {
+        wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
+    }
+    if (!wnd) {
+        wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+    }
+    const newWnd = wnd.split("lr");
+    if (!options.rootId) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        options.rootId = response.data.rootID;
+        options.useBlockId = response.data.rootID !== response.data.id;
+        options.title = response.data.name || "Untitled";
+    } else if (!options.title) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        options.title = response.data.name || "Untitled";
+    }
+    newWnd.addTab(new Tab({
         icon: "iconLink",
-        title: protyle.title.editElement.textContent || "Untitled",
+        title: options.title,
         callback(tab: Tab) {
             tab.addModel(new Backlink({
-                app: protyle.app,
+                app: options.app,
                 type: "local",
                 tab,
                 // 通过搜索打开的包含上下文，但不是缩放，因此需要传 rootID https://ld246.com/article/1666786639708
-                blockId: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-                rootId: protyle.block.rootID,
+                blockId: options.useBlockId ? options.blockId : options.rootId,
+                rootId: options.rootId,
             }));
         }
-    });
-    newWnd.addTab(tab);
+    }));
 };
 
-export const openGraph = (protyle: IProtyle) => {
+export const openGraph = async (options: {
+    app: App,
+    blockId: string,
+    rootId?: string,
+    title?: string,
+    useBlockId?: boolean,
+}) => {
     const graph = getAllModels().graph.find(item => {
-        if (item.blockId === protyle.block.id && item.type === "local") {
+        if (item.blockId === options.blockId && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
             return true;
         }
@@ -43,24 +74,40 @@ export const openGraph = (protyle: IProtyle) => {
     if (graph) {
         return;
     }
-    const wnd = protyle.model.parent.parent.split("lr");
-    const tab = new Tab({
+    let wnd: Wnd = undefined;
+    const element = document.querySelector(".layout__wnd--active");
+    if (element) {
+        wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
+    }
+    if (!wnd) {
+        wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+    }
+    const newWnd = wnd.split("lr");
+    if (!options.rootId) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        options.rootId = response.data.rootID;
+        options.useBlockId = response.data.rootID !== response.data.id;
+        options.title = response.data.name || "Untitled";
+    } else if (!options.title) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        options.title = response.data.name || "Untitled";
+    }
+    newWnd.addTab(new Tab({
         icon: "iconGraph",
-        title: protyle.title.editElement.textContent || "Untitled",
+        title: options.title,
         callback(tab: Tab) {
             tab.addModel(new Graph({
-                app: protyle.app,
+                app: options.app,
                 type: "local",
                 tab,
-                blockId: protyle.block.id,
-                rootId: protyle.block.rootID,
+                blockId: options.blockId,
+                rootId: options.rootId,
             }));
         }
-    });
-    wnd.addTab(tab);
+    }));
 };
 
-export const openOutline = (protyle: IProtyle) => {
+export const openOutline = async (protyle: IProtyle) => {
     const outlinePanel = getAllModels().outline.find(item => {
         if (item.blockId === protyle.block.rootID && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
@@ -70,10 +117,25 @@ export const openOutline = (protyle: IProtyle) => {
     if (outlinePanel) {
         return;
     }
-    const newWnd = protyle.model.parent.parent.split("lr");
-    const tab = new Tab({
+    let wnd: Wnd = undefined;
+    const element = document.querySelector(".layout__wnd--active");
+    if (element) {
+        wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
+    }
+    if (!wnd) {
+        wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+    }
+    const newWnd = wnd.split("lr");
+    let title = "";
+    if (!protyle.title) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: protyle.block.rootID});
+        title = response.data.name || "Untitled";
+    } else {
+        title = protyle.title.editElement.textContent || "Untitled";
+    }
+    newWnd.addTab(new Tab({
         icon: "iconAlignCenter",
-        title: protyle.title.editElement.textContent || "Untitled",
+        title,
         callback(tab: Tab) {
             tab.addModel(new Outline({
                 app: protyle.app,
@@ -83,11 +145,10 @@ export const openOutline = (protyle: IProtyle) => {
                 isPreview: !protyle.preview.element.classList.contains("fn__none")
             }));
         }
-    });
-    newWnd.addTab(tab);
+    }));
     newWnd.element.classList.remove("fn__flex-1");
     newWnd.element.style.width = "200px";
-    switchWnd(newWnd, protyle.model.parent.parent);
+    switchWnd(newWnd, wnd);
 };
 
 export const resetFloatDockSize = () => {
@@ -102,7 +163,7 @@ export const resetFloatDockSize = () => {
     }
 };
 
-export const toggleDockBar = (useElement:Element)=> {
+export const toggleDockBar = (useElement: Element) => {
     const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
     if (dockIsShow) {
         useElement.setAttribute("xlink:href", "#iconDock");

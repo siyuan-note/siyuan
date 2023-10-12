@@ -232,7 +232,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
 </div>`
     });
     dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
-    const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement
+    const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement;
     dialogElement.style.justifyContent = "inherit";
     dialogElement.style.alignItems = "inherit";
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
@@ -405,7 +405,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             if (emojiElement) {
                 unicode = emojiElement.getAttribute("data-unicode");
                 if (type !== "av") {
-                    dialog.destroy()
+                    dialog.destroy();
                 }
             } else {
                 // 随机

@@ -6,16 +6,8 @@ settings:
 
 dependencies:
   '@electron/remote':
-<<<<<<< HEAD
-    specifier: ^2.0.9
-    version: 2.0.9(electron@26.2.0)
-  electron:
-    specifier: ^26.2.0
-    version: 26.2.0
-=======
-    specifier: ^2.0.11
-    version: 2.0.11(electron@26.3.0)
->>>>>>> develop
+    specifier: ^2.0.12
+    version: 2.0.12(electron@25.9.0)
 
 devDependencies:
   '@types/node':
@@ -45,9 +37,14 @@ devDependencies:
 <<<<<<< HEAD
 =======
   electron:
+<<<<<<< HEAD
     specifier: 26.3.0
     version: 26.3.0
 >>>>>>> develop
+=======
+    specifier: 25.9.0
+    version: 25.9.0
+>>>>>>> target/master
   electron-builder:
     specifier: ^24.6.3
     version: 24.6.3
@@ -176,6 +173,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@electron/remote@2.0.9(electron@26.2.0):
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
@@ -190,6 +188,14 @@ packages:
     dependencies:
       electron: 26.3.0
 >>>>>>> develop
+=======
+  /@electron/remote@2.0.12(electron@25.9.0):
+    resolution: {integrity: sha512-IJN6xLAxptq5MCvXNCU6+pdQyz0DjpPtX6g2TPJftu3Z9pU6BTdnos9ZMN8nK471LkASqiA6C+Hzjv5SS8PAQw==}
+    peerDependencies:
+      electron: '>= 13.0.0'
+    dependencies:
+      electron: 25.9.0
+>>>>>>> target/master
     dev: false
 
   /@electron/universal@1.3.4:
@@ -1724,12 +1730,17 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /electron@26.2.0:
     resolution: {integrity: sha512-H6Z0sYTtLcybHCQT1yti/8BK+vN5/ZfoekKcdrfZMh5mVf2Z7psFVs6nBhXPzIOyRE/gdb6NcOppnUsGc3NJVQ==}
 =======
   /electron@26.3.0:
     resolution: {integrity: sha512-7ZpvSHu+jmqialSvywTZnOQZZGLqlyj+yV5HGDrEzFnMiFaXBRpbByHgoUhaExJ/8t/0xKQjKlMRAY65w+zNZQ==}
 >>>>>>> develop
+=======
+  /electron@25.9.0:
+    resolution: {integrity: sha512-wgscxf2ORHL/8mAQfy7l9rVDG//wrG9RUQndG508kCCMHRq9deFyZ4psOMzySheBRSfGMcFoRFYSlkAeZr8cFg==}
+>>>>>>> target/master
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true

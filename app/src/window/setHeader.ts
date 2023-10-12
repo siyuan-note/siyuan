@@ -1,11 +1,11 @@
 import {isWindow} from "../util/functions";
 import {Wnd} from "../layout/Wnd";
-import {getCurrentWindow} from "@electron/remote";
 import {Layout} from "../layout";
 import {getAllTabs} from "../layout/getAll";
 import {Editor} from "../editor";
 import {Asset} from "../asset";
 import {Constants} from "../constants";
+import { ipcRenderer } from "electron";
 
 const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
     for (let i = 0; i < layout.children.length; i++) {
@@ -24,7 +24,7 @@ export const setTabPosition = () => {
     }
     const wndsTemp: Wnd[] = [];
     getAllWnds(window.siyuan.layout.layout, wndsTemp);
-    wndsTemp.forEach(item => {
+    wndsTemp.forEach(async item => {
         const headerElement = item.headersElement.parentElement;
         const rect = headerElement.getBoundingClientRect();
         const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
@@ -38,7 +38,10 @@ export const setTabPosition = () => {
         }
         const headersLastElement = headerElement.lastElementChild as HTMLElement;
         if ("darwin" === window.siyuan.config.system.os) {
-            if (rect.top <= 0 && rect.left <= 0 && !getCurrentWindow().isFullScreen()) {
+            const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "isFullScreen",
+            });
+            if (rect.top <= 0 && rect.left <= 0 && !isFullScreen) {
                 item.headersElement.style.marginLeft = "var(--b3-toolbar-left-mac)";
                 headersLastElement.style.paddingRight = "42px";
             } else {

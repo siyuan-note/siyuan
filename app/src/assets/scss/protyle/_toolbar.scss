@@ -1,7 +1,7 @@
 .protyle {
   &-toolbar {
     background-color: var(--b3-theme-background);
-    z-index: 3;
+    z-index: 4; // https://ld246.com/article/1697096086017
     position: fixed;
     box-shadow: var(--b3-point-shadow);
     border-radius: var(--b3-border-radius);

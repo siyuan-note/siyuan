@@ -435,9 +435,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         };
         if (type === "number") {
             oldValue.content = parseFloat(oldValue.content as string);
-            oldValue.isNotEmpty = !!oldValue.content;
+            oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
             inputValue.content = parseFloat(inputValue.content as string);
-            inputValue.isNotEmpty = !!inputValue.content;
+            inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
         }
         if (objEquals(inputValue, oldValue)) {
             return;

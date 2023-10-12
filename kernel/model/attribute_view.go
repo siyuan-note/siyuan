@@ -413,7 +413,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			switch cell.ValueType {
 			case av.KeyTypeTemplate: // 渲染模板列
 				keyValues := rows[row.ID]
-				ial := GetBlockAttrs(row.ID)
+				ial := map[string]string{}
+				block := row.GetBlockValue()
+				if !block.IsDetached {
+					ial = GetBlockAttrs(row.ID)
+				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
 			case av.KeyTypeCreated: // 渲染创建时间
@@ -426,7 +430,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated: // 渲染更新时间
-				ial := GetBlockAttrs(row.ID)
+				ial := map[string]string{}
+				block := row.GetBlockValue()
+				if !block.IsDetached {
+					ial = GetBlockAttrs(row.ID)
+				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr {
 					block := row.GetBlockValue()

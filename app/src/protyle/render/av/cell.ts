@@ -402,10 +402,19 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
 };
 
 const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
-    if (!document.contains(cellElements[0]) && cellElements.length === 1 && cellElements[0].dataset.detached === "true") {
-        // 新增行后弹出的输入框进行修改后，原始 cell 已被更新
+    if (!document.contains(cellElements[0]) && cellElements.length === 1) {
+        // 原始 cell 已被更新
         const avid = cellElements[0].parentElement.dataset.avid;
-        cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]');
+        if (avid) {
+            // 新增行后弹出的输入框
+            cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]');
+        } else {
+            // 修改单元格后立即修改其他单元格
+            cellElements[0] = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`);
+            if (!cellElements[0]) {
+                return;
+            }
+        }
     }
     if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !cellElements[0].parentElement.dataset.id) {
         return;

@@ -474,6 +474,65 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return 0 != len(value.MAsset) && !(1 == len(value.MAsset) && "" == value.MAsset[0].Content)
 		}
 	}
+
+	if nil != value.Template && nil != other.Template {
+		switch operator {
+		case FilterOperatorIsEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content == other.Template.Content
+		case FilterOperatorIsNotEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content != other.Template.Content
+		case FilterOperatorIsGreater:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content > other.Template.Content
+		case FilterOperatorIsGreaterOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content >= other.Template.Content
+		case FilterOperatorIsLess:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content < other.Template.Content
+		case FilterOperatorIsLessOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content <= other.Template.Content
+		case FilterOperatorContains:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorDoesNotContain:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return !strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorStartsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasPrefix(value.Template.Content, other.Template.Content)
+		case FilterOperatorEndsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasSuffix(value.Template.Content, other.Template.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Template.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Template.Content)
+		}
+	}
 	return true
 }
 

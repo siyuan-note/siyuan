@@ -196,7 +196,6 @@
     flex-shrink: 0;
     border-right: 1px solid var(--b3-theme-surface-lighter);
     display: flex;
-    align-items: center;
     transition: var(--b3-transition);
 
     [data-type="block-ref"],
@@ -205,11 +204,13 @@
       position: absolute;
       right: 5px;
       font-size: 85%;
+      top: 8px;
     }
 
     .block__icon {
       position: absolute;
       right: 5px;
+      top: 5px;
     }
 
     &:hover .block__icon {
@@ -240,29 +241,24 @@
 
     .b3-chip {
       margin: 1px 2px;
+      padding: 2px 6px;
     }
 
     &--url {
       text-decoration: underline var(--b3-border-color);
     }
 
-    &--date {
-      display: flex;
-      align-items: center;
-
-      svg {
-        margin: 0 5px;
-        height: 10px;
-        width: 10px;
-        flex-shrink: 0;
-      }
+    & > .av__cellicon {
+      margin: 0 5px;
+      height: 10px;
+      width: 10px;
     }
   }
 
   &__firstcol {
     svg {
       color: var(--b3-theme-on-surface);
-      height: 36px;
+      height: 33px;
       width: 24px;
       opacity: 0;
       padding: 5px;

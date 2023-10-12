@@ -746,7 +746,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "openAssetItem") {
                     const assetLink = target.parentElement.dataset.content;
-                    const suffix = pathPosix().extname(assetLink)
+                    const suffix = pathPosix().extname(assetLink);
                     if (isLocalPath(assetLink) && !isMobile() && (
                         [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
                             suffix !== ".pdf" || ( suffix === ".pdf" && !assetLink.startsWith("file://"))

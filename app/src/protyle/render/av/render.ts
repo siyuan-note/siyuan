@@ -21,7 +21,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
-            let time: number
+            let time: number;
             if (e.firstElementChild.innerHTML === "") {
                 e.style.width = e.parentElement.clientWidth - 40 + "px";
                 time = new Date().getTime();
@@ -34,8 +34,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
 </div>`;
-                })
-                e.firstElementChild.innerHTML = html
+                });
+                e.firstElementChild.innerHTML = html;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;

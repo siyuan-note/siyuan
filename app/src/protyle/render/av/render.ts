@@ -22,6 +22,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 return;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
+            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
+            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
             }, (response) => {
@@ -182,7 +184,15 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     </div>
 </div>`;
                 e.setAttribute("data-render", "true");
-                e.querySelector(".av__scroll").scrollLeft = left;
+                if (left) {
+                    e.querySelector(".av__scroll").scrollLeft = left;
+                }
+                if (headerTransform) {
+                    (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
+                }
+                if (footerTransform) {
+                    (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                }
                 if (cb) {
                     cb();
                 }

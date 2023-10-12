@@ -38,7 +38,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
                 if (footerElement) {
                     const footerBottom = headerTop + footerElement.parentElement.clientHeight;
-                    const scrollBottom = element.scrollTop + element.clientHeight;
+                    const scrollBottom = element.scrollTop + element.clientHeight + 5;
                     if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
                         footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
                     } else {

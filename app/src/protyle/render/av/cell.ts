@@ -254,7 +254,7 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
         operator: "Percent not empty",
         label: window.siyuan.languages.calcOperatorPercentNotEmpty
     });
-    if (type === "number") {
+    if (["number", "template"].includes(type)) {
         calcItem({
             menu,
             protyle,

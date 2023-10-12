@@ -209,6 +209,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 }
 
 func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	start := time.Now()
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !gulu.File.IsExist(avJSONPath) {
@@ -243,7 +244,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	// 做一些数据兼容处理，保存的时候也会做 av.SaveAttributeView()
-	now := util.CurrentTimeMillis()
+	currentTimeMillis := util.CurrentTimeMillis()
 	for _, kv := range attrView.KeyValues {
 		switch kv.Key.Type {
 		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
@@ -254,11 +255,11 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 					if nil == parseErr {
 						v.Block.Created = created.UnixMilli()
 					} else {
-						v.Block.Created = now
+						v.Block.Created = currentTimeMillis
 					}
 				}
 				if 0 == v.Block.Updated {
-					v.Block.Updated = now
+					v.Block.Updated = currentTimeMillis
 				}
 			}
 		}
@@ -289,6 +290,12 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	viewable.FilterRows()
 	viewable.SortRows()
 	viewable.CalcCols()
+
+	used := time.Since(start)
+	if minSleep := used.Milliseconds() - 256; 0 > minSleep {
+		// 补全加载时间到 256ms，避免前端动画闪烁干扰视觉
+		time.Sleep(time.Duration(-minSleep) * time.Millisecond)
+	}
 	return
 }
 

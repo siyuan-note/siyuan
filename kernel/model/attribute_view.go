@@ -123,10 +123,6 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
-			if av.KeyTypeBlock == kv.Key.Type {
-				continue
-			}
-
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
@@ -180,7 +176,11 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
-					ial := GetBlockAttrs(blockID)
+					ial := map[string]string{}
+					block := getRowBlockValue(keyValues)
+					if !block.IsDetached {
+						ial = GetBlockAttrs(blockID)
+					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
 			}
@@ -243,7 +243,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	// 做一些数据兼容处理，保存的时候也会做 av.SaveAttributeView()
-	now := util.CurrentTimeMillis()
+	currentTimeMillis := util.CurrentTimeMillis()
 	for _, kv := range attrView.KeyValues {
 		switch kv.Key.Type {
 		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
@@ -254,11 +254,11 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 					if nil == parseErr {
 						v.Block.Created = created.UnixMilli()
 					} else {
-						v.Block.Created = now
+						v.Block.Created = currentTimeMillis
 					}
 				}
 				if 0 == v.Block.Updated {
-					v.Block.Updated = now
+					v.Block.Updated = currentTimeMillis
 				}
 			}
 		}

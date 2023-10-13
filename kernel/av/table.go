@@ -162,6 +162,9 @@ func (value *Value) Compare(other *Value) int {
 		}
 		return strings.Compare(v1, v2)
 	}
+	if nil != value.Template && nil != other.Template {
+		return strings.Compare(value.Template.Content, other.Template.Content)
+	}
 	return 0
 }
 

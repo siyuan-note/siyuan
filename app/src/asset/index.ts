@@ -59,8 +59,6 @@ export class Asset extends Model {
                 } else {
                     this.pdfPage = undefined;
                 }
-            } else {
-                showMessage(window.siyuan.languages.emptyContent);
             }
             cb();
         });

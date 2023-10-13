@@ -159,7 +159,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         if (type === "updated" || type === "created" || (type === "block" && !cellElement.getAttribute("data-detached"))) {
             selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
         } else {
-            selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "unselect");
+            cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
+                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+                item.classList.remove("av__row--select");
+            });
+            updateHeader(cellElement.parentElement);
             popTextCell(protyle, [cellElement]);
         }
         event.preventDefault();

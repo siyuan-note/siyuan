@@ -6,6 +6,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
+import {focusBlock} from "../../util/selection";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -523,6 +524,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         transaction(protyle, doOperations, undoOperations);
     }
     cellElements[0].classList.add("av__cell--select");
+    if (blockElement) {
+        focusBlock(blockElement);
+    }
     setTimeout(() => {
         avMaskElement.remove();
     });

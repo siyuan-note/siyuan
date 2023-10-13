@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -1009,8 +1008,7 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
 	}
 
-	updated := int64(operation.Data.(float64))
-	node.SetIALAttr("updated", strconv.FormatInt(updated, 10))
+	node.SetIALAttr("updated", operation.Data.(string))
 	createdUpdated(node)
 	tx.nodes[node.ID] = node
 	if err = tx.writeTree(tree); nil != err {

@@ -119,7 +119,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (avKeydown(event, nodeElement)) {
+        if (avKeydown(event, nodeElement, protyle)) {
             return;
         }
 

@@ -4,6 +4,7 @@ import {Constants} from "../../../constants";
 import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
+import {focusBlock} from "../../util/selection";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -40,6 +41,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
             const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
+            let selectCellId = "";
+            const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
+            if (selectCellElement) {
+                selectCellId = selectCellElement.parentElement.dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
+            }
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
             }, (response) => {
@@ -211,6 +217,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     }
                     if (footerTransform) {
                         (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                    }
+                    if (selectCellId) {
+                        const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
+                        if (newCellElement) {
+                            newCellElement.classList.add("av__cell--select");
+                        }
+                        focusBlock(e)
                     }
                     if (cb) {
                         cb();

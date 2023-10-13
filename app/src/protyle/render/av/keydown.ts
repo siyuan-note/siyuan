@@ -1,8 +1,8 @@
 import {matchHotKey} from "../../util/hotKey";
 import {selectRow, updateHeader} from "./row";
-import {cellScrollIntoView} from "./cell";
+import {cellScrollIntoView, popTextCell} from "./cell";
 
-export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement) => {
+export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av")) {
         return false;
     }
@@ -15,7 +15,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement) => {
         event.preventDefault();
         return true;
     }
-    const selectCellElement = nodeElement.querySelector(".av__cell--select")
+    const selectCellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
     if (selectCellElement) {
         if (event.key === "Escape") {
             selectCellElement.classList.remove("av__cell--select");
@@ -24,29 +24,69 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement) => {
             return true;
         }
         if (event.key === "Enter") {
-            // TODO
+            popTextCell(protyle, [selectCellElement]);
             event.preventDefault();
             return true;
         }
-        let cellRect
+        let newCellElement
         if (event.key === "ArrowLeft") {
             const previousRowElement = selectCellElement.parentElement.previousElementSibling
             if (selectCellElement.previousElementSibling && selectCellElement.previousElementSibling.classList.contains("av__cell")) {
-                selectCellElement.classList.remove("av__cell--select");
-                selectCellElement.previousElementSibling.classList.add("av__cell--select");
-                cellRect = nodeElement.querySelector(".av__cell--select").getBoundingClientRect();
+                newCellElement = selectCellElement.previousElementSibling
             } else if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
-                selectCellElement.classList.remove("av__cell--select");
-                previousRowElement.lastElementChild.previousElementSibling.classList.add("av__cell--select");
-                cellRect = nodeElement.querySelector(".av__cell--select").getBoundingClientRect();
+                newCellElement = previousRowElement.lastElementChild.previousElementSibling
             }
-            if (cellRect) {
-                cellScrollIntoView(nodeElement, cellRect);
+            if (newCellElement) {
+                selectCellElement.classList.remove("av__cell--select");
+                newCellElement.classList.add("av__cell--select");
+                cellScrollIntoView(nodeElement, newCellElement.getBoundingClientRect());
+            }
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowRight") {
+            const nextRowElement = selectCellElement.parentElement.nextElementSibling
+            if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
+                newCellElement = selectCellElement.nextElementSibling
+            } else if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
+                newCellElement = nextRowElement.querySelector(".av__cell")
+            }
+            if (newCellElement) {
+                selectCellElement.classList.remove("av__cell--select");
+                newCellElement.classList.add("av__cell--select");
+                cellScrollIntoView(nodeElement, newCellElement.getBoundingClientRect());
+            }
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowUp") {
+            const previousRowElement = selectCellElement.parentElement.previousElementSibling
+            if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
+                newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`)
+            }
+            if (newCellElement) {
+                selectCellElement.classList.remove("av__cell--select");
+                newCellElement.classList.add("av__cell--select");
+                cellScrollIntoView(nodeElement, newCellElement.getBoundingClientRect());
+            }
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowDown") {
+            const nextRowElement = selectCellElement.parentElement.nextElementSibling
+            if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
+                newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`)
+            }
+            if (newCellElement) {
+                selectCellElement.classList.remove("av__cell--select");
+                newCellElement.classList.add("av__cell--select");
+                cellScrollIntoView(nodeElement, newCellElement.getBoundingClientRect());
             }
             event.preventDefault();
             return true;
         }
     }
+
     const selectRowElement = nodeElement.querySelector(".av__row--select:not(.av__row--header)") as HTMLElement;
     if (selectRowElement) {
         if (event.key === "Escape") {

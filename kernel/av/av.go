@@ -521,7 +521,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
 					if "" == v.Block.ID {
-						v.Block.ID = ast.NewNodeID()
+						v.Block.ID = v.BlockID
+						if "" == v.Block.ID {
+							v.Block.ID = ast.NewNodeID()
+							v.BlockID = v.Block.ID
+						}
 					}
 
 					createdStr := v.Block.ID[:len("20060102150405")]

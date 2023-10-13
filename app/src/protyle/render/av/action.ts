@@ -26,6 +26,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (!blockElement) {
         return false;
     }
+    if (event.shiftKey) {
+        const rowElement = hasClosestByClassName(event.target, "av__row");
+        if (rowElement && !rowElement.classList.contains("av__row--header")) {
+            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+            return true;
+        }
+    }
+
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
         writeText(copyElement.previousElementSibling.textContent.trim());

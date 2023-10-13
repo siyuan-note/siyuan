@@ -20,6 +20,7 @@ import {openAsset} from "../../../editor/util";
 import {getSearch, isMobile} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
+import * as dayjs from "dayjs";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -330,19 +331,30 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
 
 export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     const avId = blockElement.getAttribute("data-av-id");
+    const id = blockElement.getAttribute("data-node-id");
     const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
     const newData = nameElement.textContent.trim();
     if (newData === nameElement.dataset.title.trim()) {
         return;
     }
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss")
+    blockElement.setAttribute("updated", newUpdated);
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,
         data: newData,
+    }, {
+        action: "doUpdateUpdated",
+        id,
+        data: newUpdated,
     }], [{
         action: "setAttrViewName",
         id: avId,
         name: nameElement.dataset.title,
+    }, {
+        action: "doUpdateUpdated",
+        id,
+        data: blockElement.getAttribute("updated")
     }]);
     nameElement.dataset.title = newData;
 };

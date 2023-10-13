@@ -45,6 +45,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
 import {openBacklink, openGraph} from "../layout/dock/util";
+import {updateHeader} from "../protyle/render/av/col";
 
 export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
     const nodeElement = hasClosestBlock(refElement);
@@ -1663,8 +1664,11 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
                 focusBlock(nodeElement, undefined, false);
             }
         }
-        nodeElement.querySelectorAll(".img--select").forEach((item) => {
-            item.classList.remove("img--select");
+        nodeElement.querySelectorAll(".img--select, .av__cell--select, .av__row--select").forEach((item:HTMLElement) => {
+            if (item.classList.contains("av__row--select")) {
+                updateHeader(item);
+            }
+            item.classList.remove("img--select", "av__cell--select", "av__row--select");
         });
     }
     const id = nodeElement.getAttribute("data-node-id");

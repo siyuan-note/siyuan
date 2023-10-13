@@ -490,6 +490,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
     }
+    cellElements[0].classList.add("av__cell--select");
     setTimeout(() => {
         avMaskElement.remove();
     });

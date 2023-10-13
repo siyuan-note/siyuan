@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20230820185147"
+		"updated": "20231013103850"
 	},
 	"Children": [
 		{
@@ -87,7 +87,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219085658-xnrf7rf",
-				"updated": "20230219092140"
+				"updated": "20231013103850"
 			},
 			"Children": [
 				{
@@ -112,11 +112,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "内容块"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "中的 "
+									"Data": "内容块中的 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -182,6 +178,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "如果将列表或者列表项设置为闪卡，则非子列表会被视问题，子列表会被视作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231013103816-b0k440b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231013103816-b0k440b",
+						"updated": "20231013103850"
+					},
+					"Children": [
+						{
+							"ID": "20231013103816-sx34w1r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231013103816-sx34w1r",
+								"updated": "20231013103850"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果将标题块设置为上卡，则该标题块会被视作问题，其下方块会被视作答案"
 								}
 							]
 						}

@@ -39,65 +39,6 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
-func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
-	if "" == ial["id"] {
-		block := getRowBlockValue(rowValues)
-		ial["id"] = block.Block.ID
-	}
-	if "" == ial["updated"] {
-		block := getRowBlockValue(rowValues)
-		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
-	}
-
-	funcMap := sprig.TxtFuncMap()
-	goTpl := template.New("").Delims(".action{", "}")
-	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
-	if nil != tplErr {
-		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
-		return ""
-	}
-
-	buf := &bytes.Buffer{}
-	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
-	for k, v := range ial {
-		dataModel[k] = v
-
-		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
-		createdStr := ial["id"]
-		if "" != createdStr {
-			createdStr = createdStr[:len("20060102150405")]
-		}
-		created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-		if nil == parseErr {
-			dataModel["created"] = created
-		} else {
-			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
-			dataModel["created"] = time.Now()
-		}
-		updatedStr := ial["updated"]
-		updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
-		if nil == parseErr {
-			dataModel["updated"] = updated
-		} else {
-			dataModel["updated"] = time.Now()
-		}
-	}
-	for _, rowValue := range rowValues {
-		if 0 < len(rowValue.Values) {
-			v := rowValue.Values[0]
-			if av.KeyTypeNumber == v.Type {
-				dataModel[rowValue.Key.Name] = v.Number.Content
-			} else {
-				dataModel[rowValue.Key.Name] = v.String()
-			}
-		}
-	}
-	if err := tpl.Execute(buf, dataModel); nil != err {
-		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
-	}
-	return buf.String()
-}
-
 func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
@@ -290,6 +231,65 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	viewable.SortRows()
 	viewable.CalcCols()
 	return
+}
+
+func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
+	if "" == ial["id"] {
+		block := getRowBlockValue(rowValues)
+		ial["id"] = block.Block.ID
+	}
+	if "" == ial["updated"] {
+		block := getRowBlockValue(rowValues)
+		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
+	}
+
+	funcMap := sprig.TxtFuncMap()
+	goTpl := template.New("").Delims(".action{", "}")
+	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
+	if nil != tplErr {
+		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
+		return ""
+	}
+
+	buf := &bytes.Buffer{}
+	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
+	for k, v := range ial {
+		dataModel[k] = v
+
+		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
+		createdStr := ial["id"]
+		if "" != createdStr {
+			createdStr = createdStr[:len("20060102150405")]
+		}
+		created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+		if nil == parseErr {
+			dataModel["created"] = created
+		} else {
+			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+			dataModel["created"] = time.Now()
+		}
+		updatedStr := ial["updated"]
+		updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
+		if nil == parseErr {
+			dataModel["updated"] = updated
+		} else {
+			dataModel["updated"] = time.Now()
+		}
+	}
+	for _, rowValue := range rowValues {
+		if 0 < len(rowValue.Values) {
+			v := rowValue.Values[0]
+			if av.KeyTypeNumber == v.Type {
+				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else {
+				dataModel[rowValue.Key.Name] = v.String()
+			}
+		}
+	}
+	if err := tpl.Execute(buf, dataModel); nil != err {
+		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
+	}
+	return buf.String()
 }
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {

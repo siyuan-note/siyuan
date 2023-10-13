@@ -76,7 +76,7 @@ import {removeSearchMark} from "../toolbar/util";
 import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
-import {updateHeader} from "../render/av/col";
+import {updateHeader} from "../render/av/row";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -187,10 +187,12 @@ export class WYSIWYG {
     private setEmptyOutline(protyle: IProtyle, element: HTMLElement) {
         // 图片移除选择状态应放在前面，否则 https://github.com/siyuan-note/siyuan/issues/4173
         protyle.wysiwyg.element.querySelectorAll(".img--select, .av__cell--select, .av__row--select").forEach((item: HTMLElement) => {
-            if (item.classList.contains("av__row--select")) {
+            if (item.classList.contains("av__row--select") && !hasClosestByClassName(element, "av")) {
                 updateHeader(item);
+                item.classList.remove("av__row--select");
+
             }
-            item.classList.remove("img--select", "av__cell--select", "av__row--select");
+            item.classList.remove("img--select", "av__cell--select");
         });
 
         let nodeElement = element;

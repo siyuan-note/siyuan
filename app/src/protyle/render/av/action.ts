@@ -4,7 +4,8 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {openCalcMenu, popTextCell} from "./cell";
-import {getColIconByType, showColMenu, updateHeader} from "./col";
+import {getColIconByType, showColMenu} from "./col";
+import {insertAttrViewBlockAnimation, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
@@ -18,6 +19,7 @@ import {Constants} from "../../../constants";
 import {openAsset} from "../../../editor/util";
 import {getSearch, isMobile} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
+import {selectRow} from "./row";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -61,30 +63,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const checkElement = hasClosestByClassName(event.target, "av__firstcol");
     if (checkElement) {
         window.siyuan.menus.menu.remove();
-        const rowElement = checkElement.parentElement;
-        const useElement = checkElement.querySelector("use");
-        if (rowElement.classList.contains("av__row--header")) {
-            if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-                rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                    item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                    item.parentElement.classList.remove("av__row--select");
-                });
-            } else {
-                rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                    item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                    item.parentElement.classList.add("av__row--select");
-                });
-            }
-        } else {
-            if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
-                checkElement.parentElement.classList.add("av__row--select");
-                useElement.setAttribute("xlink:href", "#iconCheck");
-            } else {
-                checkElement.parentElement.classList.remove("av__row--select");
-                useElement.setAttribute("xlink:href", "#iconUncheck");
-            }
-        }
-        updateHeader(rowElement);
+        selectRow(checkElement, "toggle");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -176,11 +155,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
-        cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
-            item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
-            item.classList.remove("av__row--select");
-        });
-        popTextCell(protyle, [cellElement]);
+        const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+        if (type === "updated" || type === "created") {
+            selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
+        } else {
+            selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "unselect");
+            popTextCell(protyle, [cellElement]);
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -366,21 +347,4 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
         item.remove();
     });
-};
-
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
-    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
-    let colHTML = "";
-    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${item.getAttribute("data-block-id") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
-    });
-
-    let html = "";
-    new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row" data-avid="${avId}">
-    <div style="width: 24px"></div>
-    ${colHTML}
-</div>`;
-    });
-    previousElement.insertAdjacentHTML("afterend", html);
 };

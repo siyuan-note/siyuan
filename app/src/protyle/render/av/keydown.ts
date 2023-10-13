@@ -1,13 +1,13 @@
 import {matchHotKey} from "../../util/hotKey";
 import {selectRow} from "./row";
 import {cellScrollIntoView, popTextCell} from "./cell";
+import {avContextmenu} from "./action";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
-    if (!nodeElement.classList.contains("av")) {
+    if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         return false;
     }
     if (event.isComposing) {
-        event.stopPropagation();
         return true;
     }
     // 避免浏览器默认快捷键
@@ -89,7 +89,17 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
 
     const selectRowElements = nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     if (selectRowElements.length > 0) {
+        if (matchHotKey("⌘/", event)) {
+            event.stopPropagation();
+            event.preventDefault();
+            avContextmenu(protyle, selectRowElements[0] as HTMLElement, {
+                x: nodeElement.querySelector(".layout-tab-bar").getBoundingClientRect().left,
+                y: selectRowElements[0].getBoundingClientRect().bottom
+            });
+            return true;
+        }
         if (event.key === "Escape") {
+            event.preventDefault();
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             return true;
         }
@@ -99,30 +109,30 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        // event.shiftKey
+        // TODO event.shiftKey
         if (event.key === "ArrowUp") {
             const previousRowElement = selectRowElements[0].previousElementSibling
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
                 selectRow(previousRowElement.querySelector(".av__firstcol"), "select");
-                event.preventDefault();
-                return true;
+                cellScrollIntoView(nodeElement, previousRowElement.getBoundingClientRect(), true);
             } else {
                 nodeElement.classList.add("protyle-wysiwyg--select")
-                return false
             }
+            event.preventDefault();
+            return true;
         }
         if (event.key === "ArrowDown") {
             const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
                 selectRow(nextRowElement.querySelector(".av__firstcol"), "select");
-                event.preventDefault();
-                return true;
+                cellScrollIntoView(nodeElement, nextRowElement.getBoundingClientRect(), true);
             } else {
                 nodeElement.classList.add("protyle-wysiwyg--select")
-                return false
             }
+            event.preventDefault();
+            return true;
         }
     }
     return false;

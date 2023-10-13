@@ -54,7 +54,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const gutterElement = hasClosestByClassName(event.target, "av__gutters");
     if (gutterElement) {
-        avContextmenu(protyle, event, gutterElement);
+        const gutterRect = gutterElement.getBoundingClientRect()
+        avContextmenu(protyle, gutterElement.parentElement, {
+            x: gutterRect.left,
+            y: gutterRect.bottom,
+            w: gutterRect.width,
+            h: gutterRect.height
+        });
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -205,11 +211,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     return false;
 };
 
-export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: any }, target: HTMLElement) => {
-    const rowElement = hasClosestByClassName(target, "av__row");
-    if (!rowElement) {
-        return false;
-    }
+export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, position: IPosition) => {
     if (rowElement.classList.contains("av__row--header")) {
         return false;
     }
@@ -217,9 +219,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     if (!blockElement) {
         return false;
     }
-    event.preventDefault();
-    event.stopPropagation();
-
     if (!rowElement.classList.contains("av__row--select")) {
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
@@ -311,15 +310,13 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             type: "open-menu-av",
             detail: {
                 protyle,
-                element: hasClosestByClassName(target, "av__cell"),
+                element: blockElement,
+                selectRowElements: rowElements,
             },
             separatorPosition: "top",
         });
     }
-    menu.open({
-        x: event.clientX,
-        y: event.clientY,
-    });
+    menu.open(position);
     return true;
 };
 

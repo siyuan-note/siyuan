@@ -344,19 +344,29 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
 };
 
-export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect) => {
-    const avScrollElement = blockElement.querySelector(".av__scroll");
-    const avScrollRect = avScrollElement.getBoundingClientRect();
-    if (avScrollRect.left > cellRect.left) {
-        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
-    } else if (avScrollRect.right < cellRect.right) {
-        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect, onlyHeight = true) => {
+    if (!onlyHeight) {
+        const avScrollElement = blockElement.querySelector(".av__scroll");
+        const avScrollRect = avScrollElement.getBoundingClientRect();
+        if (avScrollRect.left > cellRect.left) {
+            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
+        } else if (avScrollRect.right < cellRect.right) {
+            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+        }
     }
     const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect()
     if (avHeaderRect.bottom > cellRect.top) {
-        const contentElement = hasClosestByClassName(blockElement, "protyle-content");
+        const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {
             contentElement.scrollTop = contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
+        }
+    } else {
+        const avFooterRect = blockElement.querySelector(".av__row--footer").getBoundingClientRect();
+        if (avFooterRect.top < cellRect.bottom) {
+            const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+            if (contentElement) {
+                contentElement.scrollTop = contentElement.scrollTop + cellRect.bottom - avFooterRect.top;
+            }
         }
     }
 }

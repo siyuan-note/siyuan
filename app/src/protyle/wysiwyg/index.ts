@@ -1341,7 +1341,14 @@ export class WYSIWYG {
             }
             const nodeElement = hasClosestBlock(target);
 
-            if (avContextmenu(protyle, event, target)) {
+            const avRowElement = hasClosestByClassName(target, "av__row")
+            if (avRowElement && avContextmenu(protyle, avRowElement, {
+                x: event.clientX,
+                y: avRowElement.getBoundingClientRect().bottom,
+                h: avRowElement.clientHeight
+            })) {
+                event.stopPropagation();
+                event.preventDefault();
                 return;
             }
             if (!nodeElement) {

@@ -1,9 +1,10 @@
 import {hasClosestBlock} from "../../util/hasClosest";
+import {focusBlock} from "../../util/selection";
 
-export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect") => {
+export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = checkElement.parentElement;
     const useElement = checkElement.querySelector("use");
-    if (rowElement.classList.contains("av__row--header")) {
+    if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
@@ -24,6 +25,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
             useElement.setAttribute("xlink:href", "#iconUncheck");
         }
     }
+    focusBlock(hasClosestBlock(rowElement) as HTMLElement);
     updateHeader(rowElement);
 }
 

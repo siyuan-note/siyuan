@@ -1,5 +1,5 @@
 import {matchHotKey} from "../../util/hotKey";
-import {selectRow, updateHeader} from "./row";
+import {selectRow} from "./row";
 import {cellScrollIntoView, popTextCell} from "./cell";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
@@ -87,17 +87,42 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
     }
 
-    const selectRowElement = nodeElement.querySelector(".av__row--select:not(.av__row--header)") as HTMLElement;
-    if (selectRowElement) {
+    const selectRowElements = nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    if (selectRowElements.length > 0) {
         if (event.key === "Escape") {
-            selectRowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
-            selectRowElement.classList.remove("av__row--select");
-            updateHeader(selectRowElement);
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
+            return true;
+        }
+        if (event.key === "Enter") {
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
+            popTextCell(protyle, [selectRowElements[0].querySelector(".av__cell")]);
+            event.preventDefault();
             return true;
         }
         // event.shiftKey
         if (event.key === "ArrowUp") {
-            return true;
+            const previousRowElement = selectRowElements[0].previousElementSibling
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
+            if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
+                selectRow(previousRowElement.querySelector(".av__firstcol"), "select");
+                event.preventDefault();
+                return true;
+            } else {
+                nodeElement.classList.add("protyle-wysiwyg--select")
+                return false
+            }
+        }
+        if (event.key === "ArrowDown") {
+            const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
+            if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
+                selectRow(nextRowElement.querySelector(".av__firstcol"), "select");
+                event.preventDefault();
+                return true;
+            } else {
+                nodeElement.classList.add("protyle-wysiwyg--select")
+                return false
+            }
         }
     }
     return false;

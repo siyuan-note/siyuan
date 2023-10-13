@@ -156,7 +156,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
         const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
-        if (type === "updated" || type === "created") {
+        if (type === "updated" || type === "created" || (type === "block" && !cellElement.getAttribute("data-detached"))) {
             selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
         } else {
             selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "unselect");

@@ -457,19 +457,21 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (type === "template") {
         const colId = cellElements[0].getAttribute("data-col-id");
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-        transaction(protyle, [{
-            action: "updateAttrViewColTemplate",
-            id: colId,
-            avID,
-            data: textElement.value,
-            type: "template",
-        }], [{
-            action: "updateAttrViewColTemplate",
-            id: colId,
-            avID,
-            data: textElement.dataset.template,
-            type: "template",
-        }]);
+        if (textElement.value !== textElement.dataset.template) {
+            transaction(protyle, [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: textElement.value,
+                type: "template",
+            }], [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: textElement.dataset.template,
+                type: "template",
+            }]);
+        }
     } else {
         cellElements.forEach((item) => {
             const rowElement = hasClosestByClassName(item, "av__row");

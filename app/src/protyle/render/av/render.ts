@@ -24,7 +24,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }
             let time: number;
             if (e.firstElementChild.innerHTML === "") {
-                e.style.width = e.parentElement.clientWidth - 40 + "px";
+                e.style.width = e.parentElement.clientWidth - parseInt(e.parentElement.style.paddingLeft || "0") - parseInt(e.parentElement.style.paddingRight || "0") + "px";
                 time = new Date().getTime();
                 let html = "";
                 [1, 2, 3].forEach(() => {

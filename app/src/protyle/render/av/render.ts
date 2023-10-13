@@ -261,6 +261,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
             titleElement.textContent = operation.data;
             titleElement.dataset.title = operation.data;
+            item.querySelector(".layout-tab-bar .item__text").textContent = operation.data;
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {

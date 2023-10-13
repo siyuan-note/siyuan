@@ -352,10 +352,24 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
         return;
     }
-    const cellRect = cellElements[0].getBoundingClientRect();
+    const blockElement = hasClosestBlock(cellElements[0]);
+    let cellRect = cellElements[0].getBoundingClientRect();
+    if (blockElement) {
+        const avScrollElement = blockElement.querySelector(".av__scroll");
+        const avScrollRect = avScrollElement.getBoundingClientRect();
+        if (avScrollRect.left > cellRect.left) {
+            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
+        } else if (avScrollRect.right < cellRect.right) {
+            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+        }
+        const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect()
+        if (avHeaderRect.bottom > cellRect.top) {
+            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
+        }
+    }
+    cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 100)}px;height: ${cellRect.height}px"`;
-    const blockElement = hasClosestBlock(cellElements[0]);
     if (["text", "url", "email", "phone", "block"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {

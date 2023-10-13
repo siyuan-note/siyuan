@@ -322,7 +322,7 @@ export const addFilter = (options: {
         if (!hasFilter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
-                iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${column.icon ? unicode2Emoji(column.icon) : `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}</span>`,
+                iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
                     const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = genCellValue(column.type, "");

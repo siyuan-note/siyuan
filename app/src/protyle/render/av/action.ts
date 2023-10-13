@@ -17,6 +17,7 @@ import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {Constants} from "../../../constants";
 import {openAsset} from "../../../editor/util";
 import {getSearch, isMobile} from "../../../util/functions";
+import {unicode2Emoji} from "../../../emoji";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -301,10 +302,12 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
                 }
             });
         }
-        if (!hideBlock) {
+        const type = cellElement.getAttribute("data-dtype") as TAVCol;
+        if (!hideBlock && !["updated", "created", "template"].includes(type)) {
+            const icon = cellElement.dataset.icon;
             editAttrSubmenu.push({
-                icon: getColIconByType(cellElement.getAttribute("data-dtype") as TAVCol),
-                label: cellElement.textContent.trim(),
+                iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
+                label: cellElement.querySelector(".av__celltext").textContent.trim(),
                 click() {
                     popTextCell(protyle, selectElements);
                 }
@@ -338,19 +341,20 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
 export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     const avId = blockElement.getAttribute("data-av-id");
     const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
-    if (nameElement.textContent.trim() === nameElement.dataset.title.trim()) {
+    const newData = nameElement.textContent.trim();
+    if (newData === nameElement.dataset.title.trim()) {
         return;
     }
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,
-        data: nameElement.textContent.trim(),
+        data: newData,
     }], [{
         action: "setAttrViewName",
         id: avId,
         name: nameElement.dataset.title,
     }]);
-    nameElement.dataset.title = nameElement.textContent.trim();
+    nameElement.dataset.title = newData;
 };
 
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {

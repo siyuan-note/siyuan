@@ -24,7 +24,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }
             let time: number;
             if (e.firstElementChild.innerHTML === "") {
-                e.style.width = e.parentElement.clientWidth - parseInt(e.parentElement.style.paddingLeft || "0") - parseInt(e.parentElement.style.paddingRight || "0") + "px";
+                e.style.alignSelf = "";
                 time = new Date().getTime();
                 let html = "";
                 [1, 2, 3].forEach(() => {
@@ -171,10 +171,6 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 });
                 const paddingLeft = e.parentElement.style.paddingLeft;
                 const paddingRight = e.parentElement.style.paddingRight;
-                if (e.parentElement.clientWidth > 0) {
-                    e.style.width = e.parentElement.clientWidth + "px";
-                }
-                e.style.alignSelf = "center";
                 setTimeout(() => {
                     e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
@@ -208,6 +204,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         </div>
     </div>
 </div>`;
+                    if (e.parentElement.clientWidth > 0) {
+                        e.style.width = e.parentElement.clientWidth + "px";
+                    }
+                    e.style.alignSelf = "center";
                     e.setAttribute("data-render", "true");
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;

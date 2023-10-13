@@ -213,7 +213,7 @@ export const exportConfig = {
             const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                 cmd: "showOpenDialog",
                 defaultPath: window.siyuan.config.system.homeDir,
-                properties: ["openFile"],
+                properties: ["openFile", "showHiddenFiles"],
             });
             if (localPath.filePaths.length === 0) {
                 pandocBinElement.value = window.siyuan.config.export.pandocBin;

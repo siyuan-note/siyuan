@@ -190,6 +190,10 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
+					if "" == v.Block.ID {
+						v.Block.ID = ast.NewNodeID()
+					}
+
 					createdStr := v.Block.ID[:len("20060102150405")]
 					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 					if nil == parseErr {

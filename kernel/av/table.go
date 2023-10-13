@@ -73,14 +73,6 @@ const (
 	CalcOperatorLatest            CalcOperator = "Latest"
 )
 
-type TableCell struct {
-	ID        string  `json:"id"`
-	Value     *Value  `json:"value"`
-	ValueType KeyType `json:"valueType"`
-	Color     string  `json:"color"`
-	BgColor   string  `json:"bgColor"`
-}
-
 func (value *Value) Compare(other *Value) int {
 	if nil == value {
 		return -1
@@ -564,6 +556,14 @@ type TableColumn struct {
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
 	Template     string             `json:"template"`          // 模板内容
+}
+
+type TableCell struct {
+	ID        string  `json:"id"`
+	Value     *Value  `json:"value"`
+	ValueType KeyType `json:"valueType"`
+	Color     string  `json:"color"`
+	BgColor   string  `json:"bgColor"`
 }
 
 type TableRow struct {

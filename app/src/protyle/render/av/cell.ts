@@ -344,6 +344,23 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
 };
 
+export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect) => {
+    const avScrollElement = blockElement.querySelector(".av__scroll");
+    const avScrollRect = avScrollElement.getBoundingClientRect();
+    if (avScrollRect.left > cellRect.left) {
+        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
+    } else if (avScrollRect.right < cellRect.right) {
+        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+    }
+    const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect()
+    if (avHeaderRect.bottom > cellRect.top) {
+        const contentElement = hasClosestByClassName(blockElement, "protyle-content");
+        if (contentElement) {
+            contentElement.scrollTop = contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
+        }
+    }
+}
+
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
     if (!type) {
         type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
@@ -357,17 +374,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const blockElement = hasClosestBlock(cellElements[0]);
     let cellRect = cellElements[0].getBoundingClientRect();
     if (blockElement) {
-        const avScrollElement = blockElement.querySelector(".av__scroll");
-        const avScrollRect = avScrollElement.getBoundingClientRect();
-        if (avScrollRect.left > cellRect.left) {
-            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
-        } else if (avScrollRect.right < cellRect.right) {
-            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
-        }
-        const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect()
-        if (avHeaderRect.bottom > cellRect.top) {
-            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
-        }
+        cellScrollIntoView(blockElement, cellRect)
     }
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";

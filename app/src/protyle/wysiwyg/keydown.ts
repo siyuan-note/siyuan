@@ -69,7 +69,7 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
-import {selectRow, updateHeader} from "../render/av/row";
+import {avKeydown} from "../render/av/keydown";
 
 
 const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
@@ -119,14 +119,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (nodeElement.classList.contains("av")) {
-            if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
-                event.preventDefault();
-            }
-            if (event.key !== "Escape") {
-                return;
-            }
+        if (avKeydown(event, nodeElement)) {
+            return;
         }
+
         if (nodeElement.classList.contains("protyle-wysiwyg--select") && !isCtrl(event) && !event.shiftKey && !event.altKey) {
             if (event.key.toLowerCase() === "a") {
                 event.stopPropagation();
@@ -1217,11 +1213,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // esc
         if (event.key === "Escape") {
-            const cellSelectElement = nodeElement.querySelector(".av__cell--select")
-            if (cellSelectElement) {
-                cellSelectElement.classList.remove("av__cell--select");
-                selectRow(cellSelectElement.parentElement.querySelector(".av__firstcol"), "select");
-            } else if (!protyle.toolbar.element.classList.contains("fn__none") ||
+            if (!protyle.toolbar.element.classList.contains("fn__none") ||
                 !protyle.hint.element.classList.contains("fn__none") ||
                 !protyle.toolbar.subElement.classList.contains("fn__none")) {
                 hideElements(["toolbar", "hint", "util"], protyle);
@@ -1237,12 +1229,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 range.collapse(false);
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);
-                const selectRowElement = nodeElement.querySelector(".av__row--select:not(.av__row--header)") as HTMLElement;
-                if (selectRowElement) {
-                    selectRowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
-                    selectRowElement.classList.remove("av__row--select");
-                    updateHeader(selectRowElement);
-                }
             }
             event.preventDefault();
             return;

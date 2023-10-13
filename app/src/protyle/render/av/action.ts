@@ -284,7 +284,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             });
         }
         const type = cellElement.getAttribute("data-dtype") as TAVCol;
-        if (!hideBlock && !["updated", "created", "template"].includes(type)) {
+        if (!hideBlock && !["updated", "created"].includes(type)) {
             const icon = cellElement.dataset.icon;
             editAttrSubmenu.push({
                 iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,

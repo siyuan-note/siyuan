@@ -5,6 +5,7 @@ import {Menu} from "../../../plugin/Menu";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
+import {fetchPost} from "../../../util/fetch";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -346,7 +347,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     }
-    if (type === "template" || type === "updated" || type === "created") {
+    if (type === "updated" || type === "created") {
         return;
     }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
@@ -370,7 +371,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 100)}px;height: ${cellRect.height}px"`;
-    if (["text", "url", "email", "phone", "block"].includes(type)) {
+    if (["text", "url", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
@@ -393,6 +394,17 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (inputElement) {
         inputElement.select();
         inputElement.focus();
+        if (blockElement && type === "template") {
+            fetchPost("/api/av/renderAttributeView", {id: blockElement.dataset.avId}, (response) => {
+                response.data.view.columns.find((item: IAVColumn) => {
+                    if (item.id === cellElements[0].dataset.colId) {
+                        inputElement.value = item.template;
+                        inputElement.dataset.template = item.template;
+                        return true;
+                    }
+                });
+            });
+        }
         inputElement.addEventListener("blur", () => {
             updateCellValue(protyle, type, cellElements);
         });
@@ -442,51 +454,69 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const avID = blockElement.getAttribute("data-av-id");
-    cellElements.forEach((item) => {
-        const rowElement = hasClosestByClassName(item, "av__row");
-        if (!rowElement) {
-            return;
-        }
-        const rowID = rowElement.getAttribute("data-id");
-        const cellId = item.getAttribute("data-id");
-        const colId = item.getAttribute("data-col-id");
-        const inputValue: { content: string | number, isNotEmpty?: boolean } = {
-            content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
-        };
-        const oldValue: { content: string | number, isNotEmpty?: boolean } = {
-            content: type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim()
-        };
-        if (type === "number") {
-            oldValue.content = parseFloat(oldValue.content as string);
-            oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
-            inputValue.content = parseFloat(inputValue.content as string);
-            inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
-        }
-        if (objEquals(inputValue, oldValue)) {
-            return;
-        }
-        doOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
+    if (type === "template") {
+        const colId = cellElements[0].getAttribute("data-col-id");
+        const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
+        transaction(protyle, [{
+            action: "updateAttrViewColTemplate",
+            id: colId,
             avID,
-            keyID: colId,
-            rowID,
-            data: {
-                [type]: inputValue
-            }
-        });
-        undoOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
+            data: textElement.value,
+            type: "template",
+        }], [{
+            action: "updateAttrViewColTemplate",
+            id: colId,
             avID,
-            keyID: colId,
-            rowID,
-            data: {
-                [type]: oldValue
+            data: textElement.dataset.template,
+            type: "template",
+        }]);
+    } else {
+        cellElements.forEach((item) => {
+            const rowElement = hasClosestByClassName(item, "av__row");
+            if (!rowElement) {
+                return;
             }
+            const rowID = rowElement.getAttribute("data-id");
+            const cellId = item.getAttribute("data-id");
+            const colId = item.getAttribute("data-col-id");
+            const inputValue: { content: string | number, isNotEmpty?: boolean } = {
+                content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
+            };
+            const oldValue: { content: string | number, isNotEmpty?: boolean } = {
+                content: type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim()
+            };
+            if (type === "number") {
+                oldValue.content = parseFloat(oldValue.content as string);
+                oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
+                inputValue.content = parseFloat(inputValue.content as string);
+                inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
+            }
+            if (objEquals(inputValue, oldValue)) {
+                return;
+            }
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: {
+                    [type]: inputValue
+                }
+            });
+            undoOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: {
+                    [type]: oldValue
+                }
+            });
+            updateAttrViewCellAnimation(item);
         });
-        updateAttrViewCellAnimation(item);
-    });
+    }
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
     }

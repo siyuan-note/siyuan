@@ -337,6 +337,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     if (newData === nameElement.dataset.title.trim()) {
         return;
     }
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss")
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,
@@ -344,7 +345,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     }, {
         action: "doUpdateUpdated",
         id,
-        data: dayjs().format("YYYYMMDDHHmmss"),
+        data: newUpdated,
     }], [{
         action: "setAttrViewName",
         id: avId,
@@ -354,6 +355,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         id,
         data: blockElement.getAttribute("updated")
     }]);
+    nameElement.setAttribute("updated", newUpdated);
     nameElement.dataset.title = newData;
     blockElement.querySelector(".layout-tab-bar .item__text").textContent = newData;
 };

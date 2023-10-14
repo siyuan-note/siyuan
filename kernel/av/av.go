@@ -130,6 +130,8 @@ func (value *Value) String() string {
 		return value.Number.FormattedContent
 	case KeyTypeDate:
 		return value.Date.FormattedContent
+	case KeyTypeSelect:
+		return value.MSelect[0].Content
 	case KeyTypeMSelect:
 		var ret []string
 		for _, v := range value.MSelect {

@@ -318,12 +318,12 @@ html {
     background-color: var(--b3-theme-primary-lightest);
 
     &__top {
-      background-color: var(--b3-theme-primary-lightest);
+      border-radius: 0;
       box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter);
     }
 
     &__bottom {
-      background-color: var(--b3-theme-primary-lightest);
+      border-radius: 0;
       box-shadow: 0 2px 0 var(--b3-theme-primary-lighter), inset 0px -2px 0 var(--b3-theme-primary-lighter);
     }
   }

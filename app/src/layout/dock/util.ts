@@ -32,16 +32,22 @@ export const openBacklink = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.rootId = response.data.rootID;
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.title = response.data.name || "Untitled";
     }
+    const newWnd = wnd.split("lr");
     newWnd.addTab(new Tab({
         icon: "iconLink",
         title: options.title,
@@ -82,16 +88,22 @@ export const openGraph = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.rootId = response.data.rootID;
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.title = response.data.name || "Untitled";
     }
+    const newWnd = wnd.split("lr");
     newWnd.addTab(new Tab({
         icon: "iconGraph",
         title: options.title,

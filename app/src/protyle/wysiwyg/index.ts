@@ -1302,7 +1302,7 @@ export class WYSIWYG {
                 if (types.length > 0) {
                     removeSearchMark(target);
                 }
-                if (types.includes("block-ref") && !protyle.disabled) {
+                if (types.includes("block-ref")) {
                     refMenu(protyle, target);
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");

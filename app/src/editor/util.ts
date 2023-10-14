@@ -40,6 +40,9 @@ export const openFileById = async (options: {
     afterOpen?: () => void
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
+    if (response.code === -1) {
+        return;
+    }
     if (response.code === 3) {
         showMessage(response.msg);
         return;

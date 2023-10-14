@@ -96,7 +96,7 @@
   "date": "Date",
   "select": "Sélectionner",
   "multiSelect": "Multi-sélection",
-  "commandEmpty": "Aucune commande pour le moment, cliquez pour aller sur le marché pour télécharger plus de plugins",
+  "commandEmpty": "Pas de commande pour l'instant, cliquez pour aller sur la Marketplace pour installer les plugins",
   "commandPanel": "Palette de commandes",
   "cloudRegionNorthAmerica": "LiuYun (Centre de données d'Amérique du Nord)",
   "cloudRegionChina": "LianDi (Centre de données de Chine continentale)",

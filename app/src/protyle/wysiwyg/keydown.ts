@@ -70,6 +70,7 @@ import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
 import {avKeydown} from "../render/av/keydown";
+import {resizeAV} from "../util/resize";
 
 
 const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
@@ -1174,7 +1175,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements = [nodeElement];
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                    e.style.textAlign = "left";
+                    if (e.classList.contains("av")) {
+                        e.style.margin = ""
+                        resizeAV(e);
+                    } else {
+                        e.style.textAlign = "left";
+                    }
                 });
             }
             event.stopPropagation();
@@ -1191,7 +1197,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements = [nodeElement];
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                    e.style.textAlign = "center";
+                    if (e.classList.contains("av")) {
+                        e.style.margin = "0 auto"
+                        resizeAV(e);
+                    } else {
+                        e.style.textAlign = "center";
+                    }
                 });
             }
             event.stopPropagation();
@@ -1204,7 +1215,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectElements = [nodeElement];
             }
             updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                e.style.textAlign = "right";
+                if (e.classList.contains("av")) {
+                    e.style.margin = "0 0 0 auto";
+                    resizeAV(e);
+                } else {
+                    e.style.textAlign = "right";
+                }
             });
             event.stopPropagation();
             event.preventDefault();

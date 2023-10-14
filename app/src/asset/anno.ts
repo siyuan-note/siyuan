@@ -697,8 +697,6 @@ const getConfig = (pdf: any) => {
         let config = {};
         if (response.code !== 1) {
             config = JSON.parse(response.data.data);
-        } else {
-            showMessage(window.siyuan.languages.emptyContent);
         }
         pdf.appConfig.config = config;
     });

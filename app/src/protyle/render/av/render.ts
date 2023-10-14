@@ -29,7 +29,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 let html = "";
                 [1, 2, 3].forEach(() => {
                     html += `<div class="av__row">
-    <div style="width: 24px"></div>
+    <div style="width: 24px;flex-shrink: 0"></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
@@ -169,8 +169,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <span class="item__text">${item.name}</span>
 </div>`;
                 });
-                const paddingLeft = e.parentElement.style.paddingLeft;
-                const paddingRight = e.parentElement.style.paddingRight;
+                const setWidth = e.style.width.endsWith("%");
+                const paddingLeft = setWidth ? "" : e.parentElement.style.paddingLeft;
+                const paddingRight = setWidth ? "" : e.parentElement.style.paddingRight;
                 setTimeout(() => {
                     e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
@@ -205,9 +206,14 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     </div>
 </div>`;
                     if (e.parentElement.clientWidth > 0) {
-                        e.style.width = e.parentElement.clientWidth + "px";
+                        e.style.maxWidth = e.parentElement.clientWidth + "px";
                     }
-                    e.style.alignSelf = "center";
+                    if (setWidth) {
+                        e.style.alignSelf = "";
+                    } else {
+                        e.style.width = "";
+                        e.style.alignSelf = "center";
+                    }
                     e.setAttribute("data-render", "true");
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;

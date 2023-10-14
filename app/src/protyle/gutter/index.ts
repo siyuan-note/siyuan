@@ -710,7 +710,12 @@ export class Gutter {
         if (!isMobile()) {
             appearanceElement.lastElementChild.classList.add("b3-menu__submenu--row");
         }
-        this.genAlign(selectsElement, protyle);
+        selectsElement.find((item) => {
+            if (!item.classList.contains("NodeAttributeView")) {
+                this.genAlign(selectsElement, protyle);
+                return true;
+            }
+        });
         this.genWidths(selectsElement, protyle);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1510,7 +1515,9 @@ export class Gutter {
             if (!isMobile()) {
                 appearanceElement.lastElementChild.classList.add("b3-menu__submenu--row");
             }
-            this.genAlign([nodeElement], protyle);
+            if (type !== "NodeAttributeView") {
+                this.genAlign([nodeElement], protyle);
+            }
             this.genWidths([nodeElement], protyle);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1614,7 +1621,9 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "left";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.textAlign = "left";
+                        }
                     });
                 }
             }, {
@@ -1623,7 +1632,9 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "center";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.textAlign = "center";
+                        }
                     });
                 }
             }, {
@@ -1632,7 +1643,9 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "right";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.textAlign = "right";
+                        }
                     });
                 }
             }, {
@@ -1640,7 +1653,9 @@ export class Gutter {
                 icon: "iconMenu",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "justify";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.textAlign = "justify";
+                        }
                     });
                 }
             }, {
@@ -1650,7 +1665,9 @@ export class Gutter {
                 icon: "iconLtr",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.direction = "ltr";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.direction = "ltr";
+                        }
                     });
                 }
             }, {
@@ -1658,7 +1675,9 @@ export class Gutter {
                 icon: "iconRtl",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.direction = "rtl";
+                        if (!e.classList.contains("NodeAttributeView")) {
+                            e.style.direction = "rtl";
+                        }
                     });
                 }
             }, {

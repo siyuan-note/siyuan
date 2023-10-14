@@ -44,8 +44,8 @@ export const resize = (protyle: IProtyle) => {
         }
         if (abs.padding > MIN_ABS || abs.width > MIN_ABS || isNaN(abs.padding)) {
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-                item.style.width = item.parentElement.clientWidth + "px";
-                if (item.getAttribute("data-render") === "true") {
+                item.style.maxWidth = item.parentElement.clientWidth + "px";
+                if (item.getAttribute("data-render") === "true" && !item.style.width.endsWith("%")) {
                     const paddingLeft = item.parentElement.style.paddingLeft;
                     const paddingRight = item.parentElement.style.paddingRight;
                     const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;

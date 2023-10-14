@@ -7,6 +7,7 @@ import {isCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
+import * as dayjs from "dayjs";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -472,6 +473,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const avID = blockElement.getAttribute("data-av-id");
+    const id = blockElement.getAttribute("data-node-id");
     if (type === "template") {
         const colId = cellElements[0].getAttribute("data-col-id");
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
@@ -523,6 +525,10 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 data: {
                     [type]: inputValue
                 }
+            }, {
+                action: "doUpdateUpdated",
+                id,
+                data: dayjs().format("YYYYMMDDHHmmss"),
             });
             undoOperations.push({
                 action: "updateAttrViewCell",
@@ -533,6 +539,10 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 data: {
                     [type]: oldValue
                 }
+            }, {
+                action: "doUpdateUpdated",
+                id,
+                data: blockElement.getAttribute("updated"),
             });
             updateAttrViewCellAnimation(item);
         });

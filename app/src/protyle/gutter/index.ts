@@ -38,6 +38,7 @@ import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
+import {resizeAV} from "../util/resize";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1614,7 +1615,12 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "left";
+                        if (e.classList.contains("av")) {
+                            e.style.margin = ""
+                            resizeAV(e);
+                        } else {
+                            e.style.textAlign = "left";
+                        }
                     });
                 }
             }, {
@@ -1623,7 +1629,12 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "center";
+                        if (e.classList.contains("av")) {
+                            e.style.margin = "0 auto";
+                            resizeAV(e);
+                        } else {
+                            e.style.textAlign = "center";
+                        }
                     });
                 }
             }, {
@@ -1632,7 +1643,12 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "right";
+                        if (e.classList.contains("av")) {
+                            e.style.margin = "0 0 0 auto";
+                            resizeAV(e);
+                        } else {
+                            e.style.textAlign = "right";
+                        }
                     });
                 }
             }, {
@@ -1658,7 +1674,9 @@ export class Gutter {
                 icon: "iconRtl",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.direction = "rtl";
+                        if (!e.classList.contains("av")) {
+                            e.style.direction = "rtl";
+                        }
                     });
                 }
             }, {
@@ -1668,8 +1686,13 @@ export class Gutter {
                 icon: "iconTrashcan",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "";
-                        e.style.direction = "";
+                        if (e.classList.contains("av")) {
+                            e.style.margin = "";
+                            resizeAV(e);
+                        } else {
+                            e.style.textAlign = "";
+                            e.style.direction = "";
+                        }
                     });
                 }
             }]
@@ -1685,6 +1708,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         e.style.width = item;
                         e.style.flex = "none";
+                        resizeAV(e);
                     });
                 }
             });
@@ -1724,12 +1748,13 @@ export class Gutter {
                         });
                     });
                     rangeElement.addEventListener("change", () => {
-                        nodeElements.forEach((e) => {
+                        nodeElements.forEach((e: HTMLElement) => {
                             operations.push({
                                 action: "update",
                                 id: e.getAttribute("data-node-id"),
                                 data: e.outerHTML
                             });
+                            resizeAV(e);
                         });
                         transaction(protyle, operations, undoOperations);
                         window.siyuan.menus.menu.remove();
@@ -1746,6 +1771,7 @@ export class Gutter {
                         if (e.style.width) {
                             e.style.width = "";
                             e.style.flex = "";
+                            resizeAV(e);
                         }
                     });
                 }

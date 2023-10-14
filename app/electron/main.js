@@ -695,9 +695,10 @@ app.whenReady().then(() => {
                     return;
                 }
                 const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split("\u200b");
-                if (ids.includes(data.options.rootID) || ids.includes(data.options.assetPath)) {
+                const options = JSON.parse(data.options);
+                if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
                     item.focus();
-                    item.webContents.send("siyuan-open-file", data.options);
+                    item.webContents.send("siyuan-open-file", options);
                     hasMatch = true;
                     return true;
                 }

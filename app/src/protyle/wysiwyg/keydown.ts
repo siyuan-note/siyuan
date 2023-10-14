@@ -69,6 +69,8 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
+import {avKeydown} from "../render/av/keydown";
+import {resizeAV} from "../util/resize";
 
 
 const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
@@ -118,12 +120,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (nodeElement.classList.contains("av")) {
-            if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
-                event.preventDefault();
-            }
+        if (avKeydown(event, nodeElement, protyle)) {
             return;
         }
+
         if (nodeElement.classList.contains("protyle-wysiwyg--select") && !isCtrl(event) && !event.shiftKey && !event.altKey) {
             if (event.key.toLowerCase() === "a") {
                 event.stopPropagation();
@@ -634,7 +634,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40) {
+                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
                         if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                             protyle.contentElement.scrollTop === 0)) {
                             protyle.title.editElement.focus();
@@ -1175,7 +1175,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements = [nodeElement];
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                    e.style.textAlign = "left";
+                    if (e.classList.contains("av")) {
+                        e.style.margin = ""
+                        resizeAV(e);
+                    } else {
+                        e.style.textAlign = "left";
+                    }
                 });
             }
             event.stopPropagation();
@@ -1192,7 +1197,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements = [nodeElement];
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                    e.style.textAlign = "center";
+                    if (e.classList.contains("av")) {
+                        e.style.margin = "0 auto"
+                        resizeAV(e);
+                    } else {
+                        e.style.textAlign = "center";
+                    }
                 });
             }
             event.stopPropagation();
@@ -1205,7 +1215,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectElements = [nodeElement];
             }
             updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                e.style.textAlign = "right";
+                if (e.classList.contains("av")) {
+                    e.style.margin = "0 0 0 auto";
+                    resizeAV(e);
+                } else {
+                    e.style.textAlign = "right";
+                }
             });
             event.stopPropagation();
             event.preventDefault();

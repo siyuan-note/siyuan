@@ -130,6 +130,8 @@ func (value *Value) String() string {
 		return value.Number.FormattedContent
 	case KeyTypeDate:
 		return value.Date.FormattedContent
+	case KeyTypeSelect:
+		return value.MSelect[0].Content
 	case KeyTypeMSelect:
 		var ret []string
 		for _, v := range value.MSelect {
@@ -520,6 +522,14 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			// 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
+					if "" == v.Block.ID {
+						v.Block.ID = v.BlockID
+						if "" == v.Block.ID {
+							v.Block.ID = ast.NewNodeID()
+							v.BlockID = v.Block.ID
+						}
+					}
+
 					createdStr := v.Block.ID[:len("20060102150405")]
 					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 					if nil == parseErr {

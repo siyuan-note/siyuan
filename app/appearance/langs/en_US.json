@@ -96,7 +96,7 @@
   "date": "Date",
   "select": "Select",
   "multiSelect": "Multi-select",
-  "commandEmpty": "No command yet, click to go to the market to download more plugins",
+  "commandEmpty": "No command yet, click to go to the marketplace to install plugins",
   "commandPanel": "Command Palette",
   "cloudRegionNorthAmerica": "LiuYun (North America data center)",
   "cloudRegionChina": "LianDi (Mainland China data center)",

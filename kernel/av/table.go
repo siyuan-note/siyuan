@@ -19,6 +19,7 @@ package av
 import (
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -71,14 +72,6 @@ const (
 	CalcOperatorEarliest          CalcOperator = "Earliest"
 	CalcOperatorLatest            CalcOperator = "Latest"
 )
-
-type TableCell struct {
-	ID        string  `json:"id"`
-	Value     *Value  `json:"value"`
-	ValueType KeyType `json:"valueType"`
-	Color     string  `json:"color"`
-	BgColor   string  `json:"bgColor"`
-}
 
 func (value *Value) Compare(other *Value) int {
 	if nil == value {
@@ -160,6 +153,9 @@ func (value *Value) Compare(other *Value) int {
 			v2 += v.Content
 		}
 		return strings.Compare(v1, v2)
+	}
+	if nil != value.Template && nil != other.Template {
+		return strings.Compare(value.Template.Content, other.Template.Content)
 	}
 	return 0
 }
@@ -473,6 +469,65 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return 0 != len(value.MAsset) && !(1 == len(value.MAsset) && "" == value.MAsset[0].Content)
 		}
 	}
+
+	if nil != value.Template && nil != other.Template {
+		switch operator {
+		case FilterOperatorIsEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content == other.Template.Content
+		case FilterOperatorIsNotEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content != other.Template.Content
+		case FilterOperatorIsGreater:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content > other.Template.Content
+		case FilterOperatorIsGreaterOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content >= other.Template.Content
+		case FilterOperatorIsLess:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content < other.Template.Content
+		case FilterOperatorIsLessOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content <= other.Template.Content
+		case FilterOperatorContains:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorDoesNotContain:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return !strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorStartsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasPrefix(value.Template.Content, other.Template.Content)
+		case FilterOperatorEndsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasSuffix(value.Template.Content, other.Template.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Template.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Template.Content)
+		}
+	}
 	return true
 }
 
@@ -501,6 +556,14 @@ type TableColumn struct {
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
 	Template     string             `json:"template"`          // 模板内容
+}
+
+type TableCell struct {
+	ID        string  `json:"id"`
+	Value     *Value  `json:"value"`
+	ValueType KeyType `json:"valueType"`
+	Color     string  `json:"color"`
+	BgColor   string  `json:"bgColor"`
 }
 
 type TableRow struct {
@@ -713,6 +776,87 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorSum:
+		sum := 0.0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				sum += val
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum, col.NumberFormat)}
+	case CalcOperatorAverage:
+		sum := 0.0
+		count := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				sum += val
+				count++
+			}
+		}
+		if 0 != count {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum/float64(count), col.NumberFormat)}
+		}
+	case CalcOperatorMedian:
+		values := []float64{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				values = append(values, val)
+			}
+		}
+		sort.Float64s(values)
+		if len(values) > 0 {
+			if len(values)%2 == 0 {
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber((values[len(values)/2-1]+values[len(values)/2])/2, col.NumberFormat)}
+			} else {
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber(values[len(values)/2], col.NumberFormat)}
+			}
+		}
+	case CalcOperatorMin:
+		minVal := math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val < minVal {
+					minVal = val
+				}
+			}
+		}
+		if math.MaxFloat64 != minVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(minVal, col.NumberFormat)}
+		}
+	case CalcOperatorMax:
+		maxVal := -math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val > maxVal {
+					maxVal = val
+				}
+			}
+		}
+		if -math.MaxFloat64 != maxVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(maxVal, col.NumberFormat)}
+		}
+	case CalcOperatorRange:
+		minVal := math.MaxFloat64
+		maxVal := -math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val < minVal {
+					minVal = val
+				}
+				if val > maxVal {
+					maxVal = val
+				}
+			}
+		}
+		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(maxVal-minVal, col.NumberFormat)}
 		}
 	}
 }

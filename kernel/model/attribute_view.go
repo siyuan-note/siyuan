@@ -39,66 +39,6 @@ type BlockAttributeViewKeys struct {
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
-func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
-	if "" == ial["id"] {
-		block := getRowBlockValue(rowValues)
-		ial["id"] = block.Block.ID
-	}
-	if "" == ial["updated"] {
-		block := getRowBlockValue(rowValues)
-		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
-	}
-
-	funcMap := sprig.TxtFuncMap()
-	goTpl := template.New("").Delims(".action{", "}")
-	tplContent = strings.ReplaceAll(tplContent, ".custom-", ".custom_") // 模板中的属性名不允许包含 - 字符，因此这里需要替换
-	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
-	if nil != tplErr {
-		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
-		return ""
-	}
-
-	buf := &bytes.Buffer{}
-	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
-	for k, v := range ial {
-		dataModel[strings.ReplaceAll(k, "custom-", "custom_")] = v
-
-		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
-		createdStr := ial["id"]
-		if "" != createdStr {
-			createdStr = createdStr[:len("20060102150405")]
-		}
-		created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-		if nil == parseErr {
-			dataModel["created"] = created
-		} else {
-			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
-			dataModel["created"] = time.Now()
-		}
-		updatedStr := ial["updated"]
-		updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
-		if nil == parseErr {
-			dataModel["updated"] = updated
-		} else {
-			dataModel["updated"] = time.Now()
-		}
-	}
-	for _, rowValue := range rowValues {
-		if 0 < len(rowValue.Values) {
-			v := rowValue.Values[0]
-			if av.KeyTypeNumber == v.Type {
-				dataModel[rowValue.Key.Name] = v.Number.Content
-			} else {
-				dataModel[rowValue.Key.Name] = v.String()
-			}
-		}
-	}
-	if err := tpl.Execute(buf, dataModel); nil != err {
-		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
-	}
-	return buf.String()
-}
-
 func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
@@ -124,10 +64,6 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
-			if av.KeyTypeBlock == kv.Key.Type {
-				continue
-			}
-
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
@@ -181,7 +117,11 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
-					ial := GetBlockAttrs(blockID)
+					ial := map[string]string{}
+					block := getRowBlockValue(keyValues)
+					if !block.IsDetached {
+						ial = GetBlockAttrs(blockID)
+					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
 			}
@@ -244,22 +184,30 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	// 做一些数据兼容处理，保存的时候也会做 av.SaveAttributeView()
-	now := util.CurrentTimeMillis()
+	currentTimeMillis := util.CurrentTimeMillis()
 	for _, kv := range attrView.KeyValues {
 		switch kv.Key.Type {
 		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
+					if "" == v.Block.ID {
+						v.Block.ID = v.BlockID
+						if "" == v.Block.ID {
+							v.Block.ID = ast.NewNodeID()
+							v.BlockID = v.Block.ID
+						}
+					}
+
 					createdStr := v.Block.ID[:len("20060102150405")]
 					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 					if nil == parseErr {
 						v.Block.Created = created.UnixMilli()
 					} else {
-						v.Block.Created = now
+						v.Block.Created = currentTimeMillis
 					}
 				}
 				if 0 == v.Block.Updated {
-					v.Block.Updated = now
+					v.Block.Updated = currentTimeMillis
 				}
 			}
 		}
@@ -291,6 +239,65 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	viewable.SortRows()
 	viewable.CalcCols()
 	return
+}
+
+func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
+	if "" == ial["id"] {
+		block := getRowBlockValue(rowValues)
+		ial["id"] = block.Block.ID
+	}
+	if "" == ial["updated"] {
+		block := getRowBlockValue(rowValues)
+		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
+	}
+
+	funcMap := sprig.TxtFuncMap()
+	goTpl := template.New("").Delims(".action{", "}")
+	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
+	if nil != tplErr {
+		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
+		return ""
+	}
+
+	buf := &bytes.Buffer{}
+	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
+	for k, v := range ial {
+		dataModel[k] = v
+
+		// Database template column supports `created` and `updated` built-in variables https://github.com/siyuan-note/siyuan/issues/9364
+		createdStr := ial["id"]
+		if "" != createdStr {
+			createdStr = createdStr[:len("20060102150405")]
+		}
+		created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+		if nil == parseErr {
+			dataModel["created"] = created
+		} else {
+			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+			dataModel["created"] = time.Now()
+		}
+		updatedStr := ial["updated"]
+		updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
+		if nil == parseErr {
+			dataModel["updated"] = updated
+		} else {
+			dataModel["updated"] = time.Now()
+		}
+	}
+	for _, rowValue := range rowValues {
+		if 0 < len(rowValue.Values) {
+			v := rowValue.Values[0]
+			if av.KeyTypeNumber == v.Type {
+				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else {
+				dataModel[rowValue.Key.Name] = v.String()
+			}
+		}
+	}
+	if err := tpl.Execute(buf, dataModel); nil != err {
+		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
+	}
+	return buf.String()
 }
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
@@ -414,7 +421,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			switch cell.ValueType {
 			case av.KeyTypeTemplate: // 渲染模板列
 				keyValues := rows[row.ID]
-				ial := GetBlockAttrs(row.ID)
+				ial := map[string]string{}
+				block := row.GetBlockValue()
+				if !block.IsDetached {
+					ial = GetBlockAttrs(row.ID)
+				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
 			case av.KeyTypeCreated: // 渲染创建时间
@@ -427,7 +438,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated: // 渲染更新时间
-				ial := GetBlockAttrs(row.ID)
+				ial := map[string]string{}
+				block := row.GetBlockValue()
+				if !block.IsDetached {
+					ial = GetBlockAttrs(row.ID)
+				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr {
 					block := row.GetBlockValue()

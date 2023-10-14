@@ -141,7 +141,6 @@ export const setFilter = (options: {
         case "text":
         case "url":
         case "phone":
-        case "template":
         case "email":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -151,6 +150,20 @@ export const setFilter = (options: {
 <option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
+            break;
+        case "template":
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
+<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+<option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
+<option ${"Starts with" === options.filter.operator ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
+<option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
+<option ${">" === options.filter.operator ? "selected" : ""} value=">">&gt;</option>
+<option ${"<" === options.filter.operator ? "selected" : ""} value="<">&lt;</option>
+<option ${">=" === options.filter.operator ? "selected" : ""} value=">=">&GreaterEqual;</option>
+<option ${"<=" === options.filter.operator ? "selected" : ""} value="<=">&le;</option>`;
             break;
         case "date":
         case "created":
@@ -309,7 +322,7 @@ export const addFilter = (options: {
         if (!hasFilter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
-                iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${column.icon ? unicode2Emoji(column.icon) : `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}</span>`,
+                iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
                     const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = genCellValue(column.type, "");

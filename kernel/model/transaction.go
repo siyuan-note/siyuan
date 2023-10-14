@@ -190,6 +190,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUnfoldHeading(op)
 		case "setAttrs":
 			ret = tx.doSetAttrs(op)
+		case "doUpdateUpdated":
+			ret = tx.doUpdateUpdated(op)
 		case "addFlashcards":
 			ret = tx.doAddFlashcards(op)
 		case "removeFlashcards":
@@ -981,6 +983,34 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	createdUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
+	if err = tx.writeTree(tree); nil != err {
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
+	}
+	return
+}
+
+func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
+	id := operation.ID
+	tree, err := tx.loadTree(id)
+	if nil != err {
+		if errors.Is(err, ErrBlockNotFound) {
+			logging.LogWarnf("not found block [%s]", id)
+			return
+		}
+
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
+		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
+	}
+
+	node.SetIALAttr("updated", operation.Data.(string))
+	createdUpdated(node)
+	tx.nodes[node.ID] = node
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}

@@ -97,7 +97,7 @@
   kbd,
   span[data-type~="kbd"] {
     padding: 2px 4px;
-    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     line-height: 1;
     color: var(--b3-theme-on-surface);
     vertical-align: middle;

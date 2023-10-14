@@ -6,7 +6,7 @@
 		"icon": "1f680",
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
-		"updated": "20230406155736"
+		"updated": "20231014100732"
 	},
 	"Children": [
 		{
@@ -393,7 +393,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-ba6rydi",
-				"updated": "20230405172238"
+				"updated": "20231014100732"
 			},
 			"Children": [
 				{
@@ -489,7 +489,7 @@
 					},
 					"Properties": {
 						"id": "20230405172238-2jjuvev",
-						"updated": "20230405172238"
+						"updated": "20231014100732"
 					},
 					"Children": [
 						{
@@ -497,12 +497,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405172238-qnz5kn9",
-								"updated": "20230405172238"
+								"updated": "20231014100732"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Pictures and charts: Pictures and charts mainly affect the performance of the editor. If the document contains a large number of pictures and charts, the editor may freeze"
+									"Data": "Formulas, images and charts: Formulas, images and charts mainly affect the performance of the editor. If the document contains a large number of formulas, images and charts, the editor may freeze"
 								}
 							]
 						}

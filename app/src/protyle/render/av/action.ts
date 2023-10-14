@@ -4,7 +4,8 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {openCalcMenu, popTextCell} from "./cell";
-import {getColIconByType, showColMenu, updateHeader} from "./col";
+import {getColIconByType, showColMenu} from "./col";
+import {insertAttrViewBlockAnimation, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
@@ -13,12 +14,27 @@ import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
+import {isLocalPath, pathPosix} from "../../../util/pathName";
+import {Constants} from "../../../constants";
+import {openAsset} from "../../../editor/util";
+import {getSearch, isMobile} from "../../../util/functions";
+import {unicode2Emoji} from "../../../emoji";
+import {selectRow} from "./row";
+import * as dayjs from "dayjs";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
         return false;
     }
+    if (event.shiftKey) {
+        const rowElement = hasClosestByClassName(event.target, "av__row");
+        if (rowElement && !rowElement.classList.contains("av__row--header")) {
+            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+            return true;
+        }
+    }
+
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
         writeText(copyElement.previousElementSibling.textContent.trim());
@@ -47,7 +63,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const gutterElement = hasClosestByClassName(event.target, "av__gutters");
     if (gutterElement) {
-        avContextmenu(protyle, event, gutterElement);
+        const gutterRect = gutterElement.getBoundingClientRect()
+        avContextmenu(protyle, gutterElement.parentElement, {
+            x: gutterRect.left,
+            y: gutterRect.bottom,
+            w: gutterRect.width,
+            h: gutterRect.height
+        });
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -56,30 +78,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const firstcolElement = hasClosestByClassName(event.target, "av__firstcol");
     if (firstcolElement) {
         window.siyuan.menus.menu.remove();
-        const rowElement = firstcolElement.parentElement;
-        const useElement = firstcolElement.querySelector(".icon__check use");
-        if (rowElement.classList.contains("av__row--header")) {
-            if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-                rowElement.parentElement.querySelectorAll(".av__row .av__firstcol").forEach(item => {
-                    item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconUncheck");
-                    item.parentElement.classList.remove("av__row--select");
-                });
-            } else {
-                rowElement.parentElement.querySelectorAll(".av__row .av__firstcol").forEach(item => {
-                    item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconCheck");
-                    item.parentElement.classList.add("av__row--select");
-                });
-            }
-        } else {
-            if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
-                firstcolElement.parentElement.classList.add("av__row--select");
-                useElement.setAttribute("xlink:href", "#iconCheck");
-            } else {
-                firstcolElement.parentElement.classList.remove("av__row--select");
-                useElement.setAttribute("xlink:href", "#iconUncheck");
-            }
-        }
-        updateHeader(rowElement);
+        selectRow(firstcolElement, "toggle");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -127,7 +126,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (linkElement.classList.contains("b3-chip")) {
             linkAddress = linkElement.dataset.url;
         }
-        window.open(linkAddress);
+        const suffix = pathPosix().extname(linkAddress);
+        if (isLocalPath(linkAddress) && !isMobile() && (
+            [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
+                suffix !== ".pdf" || (suffix === ".pdf" && !linkAddress.startsWith("file://"))
+            )
+        )) {
+            openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
+        } else {
+            window.open(linkAddress);
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -162,11 +170,17 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
-        cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
-            item.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconUncheck");
-            item.classList.remove("av__row--select");
-        });
-        popTextCell(protyle, [cellElement]);
+        const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+        if (type === "updated" || type === "created" || (type === "block" && !cellElement.getAttribute("data-detached"))) {
+            selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
+        } else {
+            cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
+                item.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconUncheck");
+                item.classList.remove("av__row--select");
+            });
+            updateHeader(cellElement.parentElement);
+            popTextCell(protyle, [cellElement]);
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -206,11 +220,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     return false;
 };
 
-export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: any }, target: HTMLElement) => {
-    const rowElement = hasClosestByClassName(target, "av__row");
-    if (!rowElement) {
-        return false;
-    }
+export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, position: IPosition) => {
     if (rowElement.classList.contains("av__row--header")) {
         return false;
     }
@@ -218,9 +228,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     if (!blockElement) {
         return false;
     }
-    event.preventDefault();
-    event.stopPropagation();
-
     if (!rowElement.classList.contains("av__row--select")) {
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
@@ -288,10 +295,12 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
                 }
             });
         }
-        if (!hideBlock) {
+        const type = cellElement.getAttribute("data-dtype") as TAVCol;
+        if (!hideBlock && !["updated", "created"].includes(type)) {
+            const icon = cellElement.dataset.icon;
             editAttrSubmenu.push({
-                icon: getColIconByType(cellElement.getAttribute("data-dtype") as TAVCol),
-                label: cellElement.textContent.trim(),
+                iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
+                label: cellElement.querySelector(".av__celltext").textContent.trim(),
                 click() {
                     popTextCell(protyle, selectElements);
                 }
@@ -310,34 +319,45 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             type: "open-menu-av",
             detail: {
                 protyle,
-                element: hasClosestByClassName(target, "av__cell"),
+                element: blockElement,
+                selectRowElements: rowElements,
             },
             separatorPosition: "top",
         });
     }
-    menu.open({
-        x: event.clientX,
-        y: event.clientY,
-    });
+    menu.open(position);
     return true;
 };
 
 export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     const avId = blockElement.getAttribute("data-av-id");
+    const id = blockElement.getAttribute("data-node-id");
     const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
-    if (nameElement.textContent.trim() === nameElement.dataset.title.trim()) {
+    const newData = nameElement.textContent.trim();
+    if (newData === nameElement.dataset.title.trim()) {
         return;
     }
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss")
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,
-        data: nameElement.textContent.trim(),
+        data: newData,
+    }, {
+        action: "doUpdateUpdated",
+        id,
+        data: newUpdated,
     }], [{
         action: "setAttrViewName",
         id: avId,
-        name: nameElement.dataset.title,
+        data: nameElement.dataset.title,
+    }, {
+        action: "doUpdateUpdated",
+        id,
+        data: blockElement.getAttribute("updated")
     }]);
-    nameElement.dataset.title = nameElement.textContent.trim();
+    blockElement.setAttribute("updated", newUpdated);
+    nameElement.dataset.title = newData;
+    blockElement.querySelector(".layout-tab-bar .item__text").textContent = newData;
 };
 
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
@@ -349,21 +369,4 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
         item.remove();
     });
-};
-
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
-    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
-    let colHTML = "";
-    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${item.getAttribute("data-block-id") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
-    });
-
-    let html = "";
-    new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row" data-avid="${avId}">
-    <div style="width: 24px"></div>
-    ${colHTML}
-</div>`;
-    });
-    previousElement.insertAdjacentHTML("afterend", html);
 };

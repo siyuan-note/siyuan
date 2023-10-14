@@ -108,13 +108,13 @@ export const getEditHTML = (options: {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
-    <span class="b3-menu__label"><input data-type="name" style="margin: 4px 0" class="b3-text-field" type="text" value="${colData.name}"></span>
+    <span class="b3-menu__label" style="padding: 4px"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
 </button>`;
     if (colData.options && colData.options.length > 0) {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label"><input data-type="addOption"  style="margin: 4px 0" class="b3-text-field fn__block" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label" style="padding: 4px"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
 </button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
@@ -138,7 +138,7 @@ export const getEditHTML = (options: {
     } else if (colData.type === "template") {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
-    <textarea placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
+    <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     }
     return `<div class="b3-menu__items">
@@ -225,7 +225,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
             }
             if (event.key === "Escape") {
                 options.menuElement.parentElement.remove();
-            } else if (event.key === "Enter") {
+            } else if (event.key === "Enter" && !event.shiftKey) {
                 tplElement.dispatchEvent(new CustomEvent("blur"));
                 options.menuElement.parentElement.remove();
             }
@@ -281,7 +281,7 @@ export const getColIconByType = (type: TAVCol) => {
         case "text":
             return "iconAlignLeft";
         case "block":
-            return "iconParagraph";
+            return "iconKey";
         case "number":
             return "iconNumber";
         case "select":
@@ -304,35 +304,6 @@ export const getColIconByType = (type: TAVCol) => {
         case "template":
             return "iconMath";
     }
-};
-
-export const updateHeader = (rowElement: HTMLElement) => {
-    const blockElement = hasClosestBlock(rowElement);
-    if (!blockElement) {
-        return;
-    }
-    const selectCount = rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
-    const diffCount = rowElement.parentElement.childElementCount - 3 - selectCount;
-    const headElement = rowElement.parentElement.firstElementChild;
-    const headUseElement = headElement.querySelector("use");
-    const counterElement = blockElement.querySelector(".av__counter");
-    const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
-    if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {
-        headElement.classList.add("av__row--select");
-        headUseElement.setAttribute("xlink:href", "#iconCheck");
-    } else if (diffCount === rowElement.parentElement.childElementCount - 3) {
-        headElement.classList.remove("av__row--select");
-        headUseElement.setAttribute("xlink:href", "#iconUncheck");
-        counterElement.classList.add("fn__none");
-        avHeadElement.style.position = "";
-        return;
-    } else if (diffCount > 0) {
-        headElement.classList.add("av__row--select");
-        headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
-    }
-    counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} selected`;
-    avHeadElement.style.position = "sticky";
 };
 
 export const addAttrViewColAnimation = (options: {
@@ -364,7 +335,7 @@ export const addAttrViewColAnimation = (options: {
     <div class="av__widthdrag"></div>
 </div>`;
         } else {
-            html = '<div class="av__cell" style="width: 200px"></div>';
+            html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';
         }
         previousElement.insertAdjacentHTML("afterend", html);
     });
@@ -400,7 +371,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     menu.addItem({
         iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
         type: "readonly",
-        label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${oldValue}">`,
+        label: `<input style="margin: 4px 0" class="b3-text-field fn__block fn__size200" type="text" value="${oldValue}">`,
         bind(element) {
             const iconElement = element.querySelector(".block__icon") as HTMLElement;
             iconElement.setAttribute("data-icon", cellElement.dataset.icon);

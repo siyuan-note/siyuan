@@ -19,7 +19,7 @@ import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
-import {insertAttrViewBlockAnimation} from "../render/av/action";
+import {insertAttrViewBlockAnimation} from "../render/av/row";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {

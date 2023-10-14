@@ -713,6 +713,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColIcon"].includes(operation.action)) {
         refreshAV(protyle, operation);
+    } else if (operation.action === "doUpdateUpdated") {
+        updateElements.forEach(item => {
+            item.setAttribute("updated", operation.data);
+        })
     }
 };
 

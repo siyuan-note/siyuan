@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20230820185212"
+		"updated": "20231013104052"
 	},
 	"Children": [
 		{
@@ -87,7 +87,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092911-8074ovh",
-				"updated": "20230219092911"
+				"updated": "20231013104052"
 			},
 			"Children": [
 				{
@@ -178,6 +178,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "如果將列表或者列表項設置為閃卡，則非子列表會被視問題，子列表會被視作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231013104042-7impulf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231013104042-7impulf",
+						"updated": "20231013104052"
+					},
+					"Children": [
+						{
+							"ID": "20231013104042-wzwhxmr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231013104042-wzwhxmr",
+								"updated": "20231013104052"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果將標題塊設為上卡，則該標題塊會被視為問題，其下方塊會被視為答案"
 								}
 							]
 						}

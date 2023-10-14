@@ -355,7 +355,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         id,
         data: blockElement.getAttribute("updated")
     }]);
-    nameElement.setAttribute("updated", newUpdated);
+    blockElement.setAttribute("updated", newUpdated);
     nameElement.dataset.title = newData;
     blockElement.querySelector(".layout-tab-bar .item__text").textContent = newData;
 };

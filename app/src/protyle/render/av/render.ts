@@ -252,7 +252,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     } else if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
-            if (!titleElement || titleElement.textContent.trim() === operation.data) {
+            if (!titleElement) {
                 return;
             }
             titleElement.textContent = operation.data;

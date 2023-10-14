@@ -233,6 +233,17 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 let lastParentID: string;
 let lastElement: HTMLElement;
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "setAttrViewName") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+            const titleElement = item.querySelector(".av__title") as HTMLElement;
+            if (!titleElement) {
+                return;
+            }
+            titleElement.textContent = operation.data;
+            titleElement.dataset.title = operation.data;
+            item.querySelector(".layout-tab-bar .item__text").textContent = operation.data;
+        });
+    }
     if (lastParentID === operation.parentID && protyle.contentElement.isSameNode(lastElement)) {
         return;
     }
@@ -248,16 +259,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             item.querySelectorAll(".av__row").forEach(rowItem => {
                 (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
             });
-        });
-    } else if (operation.action === "setAttrViewName") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
-            const titleElement = item.querySelector(".av__title") as HTMLElement;
-            if (!titleElement) {
-                return;
-            }
-            titleElement.textContent = operation.data;
-            titleElement.dataset.title = operation.data;
-            item.querySelector(".layout-tab-bar .item__text").textContent = operation.data;
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {

@@ -5,6 +5,7 @@ import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
+import {resizeAV} from "../../util/resize";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -169,12 +170,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <span class="item__text">${item.name}</span>
 </div>`;
                 });
-                const setWidth = e.style.width.endsWith("%");
-                const paddingLeft = setWidth ? "" : e.parentElement.style.paddingLeft;
-                const paddingRight = setWidth ? "" : e.parentElement.style.paddingRight;
                 setTimeout(() => {
                     e.firstElementChild.outerHTML = `<div>
-    <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
+    <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
             <div class="fn__flex-1"></div>
@@ -195,7 +193,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};float: left;">
+        <div style="float: left;">
             ${tableHTML}
             <div class="av__row--add">
                 <svg><use xlink:href="#iconAdd"></use></svg>
@@ -205,16 +203,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         </div>
     </div>
 </div>`;
-                    if (e.parentElement.clientWidth > 0) {
-                        e.style.maxWidth = e.parentElement.clientWidth + "px";
-                    }
-                    if (setWidth) {
-                        e.style.alignSelf = "";
-                    } else {
-                        e.style.width = "";
-                        e.style.alignSelf = "center";
-                    }
                     e.setAttribute("data-render", "true");
+                    resizeAV(e);
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }

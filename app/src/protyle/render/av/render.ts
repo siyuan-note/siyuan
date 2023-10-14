@@ -154,6 +154,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
+
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}" data-wrap="${data.columns[index].wrap}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 

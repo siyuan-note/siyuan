@@ -130,6 +130,15 @@ export class Outline extends Model {
                         });
                     });
                 }
+            },
+            ctrlClick(element: HTMLElement) {
+                const id = element.getAttribute("data-node-id");
+                openFileById({
+                    app: options.app,
+                    id,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                    zoomIn: true,
+                });
             }
         });
         // 为了快捷键的 dispatch

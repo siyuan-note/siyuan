@@ -15,8 +15,10 @@ import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getSearch, isMobile} from "../../../util/functions";
+import {getSearch} from "../../../util/functions";
+/// #if !MOBILE
 import {openAsset} from "../../../editor/util";
+/// #endif
 import {previewImage} from "../../preview/image";
 
 export const openMenuPanel = (options: {
@@ -747,7 +749,8 @@ export const openMenuPanel = (options: {
                 } else if (type === "openAssetItem") {
                     const assetLink = target.parentElement.dataset.content;
                     const suffix = pathPosix().extname(assetLink);
-                    if (isLocalPath(assetLink) && !isMobile() && (
+                    /// #if !MOBILE
+                    if (isLocalPath(assetLink) && (
                         [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
                             suffix !== ".pdf" || ( suffix === ".pdf" && !assetLink.startsWith("file://"))
                         )
@@ -758,6 +761,13 @@ export const openMenuPanel = (options: {
                     } else {
                         window.open(assetLink);
                     }
+                    /// #else
+                    if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
+                        previewImage(assetLink);
+                    } else {
+                        window.open(assetLink);
+                    }
+                    /// #endif
                     event.preventDefault();
                     event.stopPropagation();
                     break;

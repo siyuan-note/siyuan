@@ -49,31 +49,11 @@ export const resizeAV = (item: HTMLElement) => {
     if (!item.classList.contains("av") || item.getAttribute("data-render") !== "true") {
         return
     }
-    if (item.style.width.endsWith("%") || item.style.margin) {
-        const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
-        avHeaderElement.style.paddingLeft = "";
-        avHeaderElement.style.paddingRight = "";
-        const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
-        avBodyElement.style.paddingLeft = "";
-        avBodyElement.style.paddingRight = "";
-        item.style.alignSelf = "";
-        if (!item.style.width.endsWith("%")) {
-            item.style.width = ""
-            item.style.maxWidth = "100%";
-        }
+
+    const containerElement = item.querySelector<HTMLElement>(".av__container");
+    if (item.style.width.endsWith("%")) {
+        containerElement.style.width = "auto";
     } else {
-        const paddingLeft = item.parentElement.style.paddingLeft;
-        const paddingRight = item.parentElement.style.paddingRight;
-        const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
-        avHeaderElement.style.paddingLeft = paddingLeft;
-        avHeaderElement.style.paddingRight = paddingRight;
-        const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
-        avBodyElement.style.paddingLeft = paddingLeft;
-        avBodyElement.style.paddingRight = paddingRight;
-        item.style.alignSelf = "center";
-        if (item.parentElement.clientWidth > 0) {
-            item.style.width = item.parentElement.clientWidth + "px";
-            item.style.maxWidth = "";
-        }
+        containerElement.style.width = "";
     }
 }

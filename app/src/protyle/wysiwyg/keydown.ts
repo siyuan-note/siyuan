@@ -70,7 +70,6 @@ import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {copyPNG} from "../../menus/util";
 import {avKeydown} from "../render/av/keydown";
-import {resizeAV} from "../util/resize";
 
 
 const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
@@ -1176,8 +1175,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                     if (e.classList.contains("av")) {
-                        e.style.margin = ""
-                        resizeAV(e);
+                        e.style.alignItems = "flex-start";
                     } else {
                         e.style.textAlign = "left";
                     }
@@ -1198,8 +1196,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                     if (e.classList.contains("av")) {
-                        e.style.margin = "0 auto"
-                        resizeAV(e);
+                        e.style.alignItems = "center";
                     } else {
                         e.style.textAlign = "center";
                     }
@@ -1216,8 +1213,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                 if (e.classList.contains("av")) {
-                    e.style.margin = "0 0 0 auto";
-                    resizeAV(e);
+                    e.style.alignItems = "flex-end";
                 } else {
                     e.style.textAlign = "right";
                 }

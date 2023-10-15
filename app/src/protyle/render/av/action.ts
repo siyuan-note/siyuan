@@ -64,7 +64,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const gutterElement = hasClosestByClassName(event.target, "av__gutters");
     if (gutterElement) {
         const gutterRect = gutterElement.getBoundingClientRect()
-        avContextmenu(protyle, gutterElement.parentElement, {
+        avContextmenu(protyle, gutterElement.parentElement.parentElement, {
             x: gutterRect.left,
             y: gutterRect.bottom,
             w: gutterRect.width,

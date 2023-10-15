@@ -16,8 +16,10 @@ import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {Constants} from "../../../constants";
+/// #if !MOBILE
 import {openAsset} from "../../../editor/util";
-import {getSearch, isMobile} from "../../../util/functions";
+/// #endif
+import {getSearch} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";
@@ -126,8 +128,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (linkElement.classList.contains("b3-chip")) {
             linkAddress = linkElement.dataset.url;
         }
+        /// #if !MOBILE
         const suffix = pathPosix().extname(linkAddress);
-        if (isLocalPath(linkAddress) && !isMobile() && (
+        if (isLocalPath(linkAddress) && (
             [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
                 suffix !== ".pdf" || (suffix === ".pdf" && !linkAddress.startsWith("file://"))
             )
@@ -136,6 +139,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else {
             window.open(linkAddress);
         }
+        /// #else
+        window.open(linkAddress);
+        /// #endif
+
         event.preventDefault();
         event.stopPropagation();
         return true;

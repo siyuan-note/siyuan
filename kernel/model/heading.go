@@ -46,7 +46,7 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
-	children := treenode.HeadingChildren(heading)
+	children := treenode.HeadingChildren4Folding(heading)
 	for _, child := range children {
 		childrenIDs = append(childrenIDs, child.ID)
 		child.SetIALAttr("fold", "1")
@@ -80,7 +80,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
-	children := treenode.HeadingChildren(heading)
+	children := treenode.HeadingChildren4Folding(heading)
 	for _, child := range children {
 		child.RemoveIALAttr("heading-fold")
 		child.RemoveIALAttr("fold")
@@ -98,6 +98,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	}
 	sql.UpsertTreeQueue(tree)
 
+	children = treenode.HeadingChildren(heading)
 	luteEngine := NewLute()
 	operation.RetData = renderBlockDOMByNodes(children, luteEngine)
 	return

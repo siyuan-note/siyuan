@@ -1485,7 +1485,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 支持非编辑块复制 https://ld246.com/article/1695353747104
-        if ((matchHotKey("⌘X", event) || matchHotKey("⌘C", event)) && selectText === "") {
+        if ((matchHotKey("⌘X", event) || matchHotKey("⌘C", event)) &&
+            selectText === "" &&
+            !nodeElement.querySelector(".img--select")) {
             if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length === 0) {
                 if (nodeElement.dataset.type !== "NodeHTMLBlock") {
                     // html 块不需要选中 https://github.com/siyuan-note/siyuan/issues/8706

@@ -123,38 +123,77 @@ type Value struct {
 func (value *Value) String() string {
 	switch value.Type {
 	case KeyTypeBlock:
+		if nil == value.Block {
+			return ""
+		}
 		return value.Block.Content
 	case KeyTypeText:
+		if nil == value.Text {
+			return ""
+		}
 		return value.Text.Content
 	case KeyTypeNumber:
+		if nil == value.Number {
+			return ""
+		}
 		return value.Number.FormattedContent
 	case KeyTypeDate:
+		if nil == value.Date {
+			return ""
+		}
 		return value.Date.FormattedContent
 	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return ""
+		}
 		return value.MSelect[0].Content
 	case KeyTypeMSelect:
+		if 1 > len(value.MSelect) {
+			return ""
+		}
 		var ret []string
 		for _, v := range value.MSelect {
 			ret = append(ret, v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeURL:
+		if nil == value.URL {
+			return ""
+		}
 		return value.URL.Content
 	case KeyTypeEmail:
+		if nil == value.Email {
+			return ""
+		}
 		return value.Email.Content
 	case KeyTypePhone:
+		if nil == value.Phone {
+			return ""
+		}
 		return value.Phone.Content
 	case KeyTypeMAsset:
+		if 1 > len(value.MAsset) {
+			return ""
+		}
 		var ret []string
 		for _, v := range value.MAsset {
 			ret = append(ret, v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:
+		if nil == value.Template {
+			return ""
+		}
 		return value.Template.Content
 	case KeyTypeCreated:
+		if nil == value.Created {
+			return ""
+		}
 		return value.Created.FormattedContent
 	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return ""
+		}
 		return value.Updated.FormattedContent
 	default:
 		return ""

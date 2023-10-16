@@ -296,7 +296,7 @@
     font-size: 0.75rem;
     margin-left: 16px;
     color: var(--b3-theme-on-surface);
-    font-family: Consolas, Monaco, monospace;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
   }
 
   // for protyle hint

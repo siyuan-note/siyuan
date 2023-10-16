@@ -99,6 +99,39 @@ func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
 	return
 }
 
+// HeadingChildren4Folding 获取标题下方所属该标题层级的所有节点，如果遇到超级块的话则递归获取超级块下方的所有节点。
+// 折叠和取消折叠要用这个函数单独处理 https://github.com/siyuan-note/siyuan/issues/9435
+func HeadingChildren4Folding(heading *ast.Node) (ret []*ast.Node) {
+	start := heading.Next
+	if nil == start {
+		return
+	}
+	if ast.NodeKramdownBlockIAL == start.Type {
+		start = start.Next // 跳过 heading 的 IAL
+	}
+
+	currentLevel := heading.HeadingLevel
+	for n := start; nil != n; n = n.Next {
+		if ast.NodeHeading == n.Type {
+			if currentLevel >= n.HeadingLevel {
+				break
+			}
+		} else if ast.NodeSuperBlock == n.Type {
+			ast.Walk(n, func(child *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !child.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				ret = append(ret, child)
+				return ast.WalkContinue
+			})
+			continue
+		}
+		ret = append(ret, n)
+	}
+	return
+}
+
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 	start := heading.Next
 	if nil == start {

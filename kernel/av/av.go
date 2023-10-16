@@ -554,7 +554,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
-	// 做一些数据兼容处理
+	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {
 		if KeyTypeBlock == kv.Key.Type {
@@ -581,6 +581,13 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					v.Block.Updated = now
 				}
 			}
+		}
+	}
+
+	// 数据订正 - 行去重
+	for _, view := range av.Views {
+		if nil != view.Table {
+			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
 		}
 	}
 

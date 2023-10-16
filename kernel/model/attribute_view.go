@@ -183,7 +183,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		view = attrView.Views[0]
 	}
 
-	// 做一些数据兼容处理，保存的时候也会做 av.SaveAttributeView()
+	// 做一些数据兼容和订正处理，保存的时候也会做 av.SaveAttributeView()
 	currentTimeMillis := util.CurrentTimeMillis()
 	for _, kv := range attrView.KeyValues {
 		switch kv.Key.Type {
@@ -1234,6 +1234,12 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	for _, v := range attrView.Views {
 		switch v.LayoutType {
 		case av.LayoutTypeTable:
+			for _, rowID := range v.Table.RowIDs {
+				if rowID == operation.NextID {
+					return
+				}
+			}
+
 			for i, rowID := range v.Table.RowIDs {
 				if rowID == operation.PreviousID {
 					v.Table.RowIDs[i] = operation.NextID

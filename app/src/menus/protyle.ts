@@ -38,7 +38,7 @@ import {renameAsset} from "../editor/rename";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNG, exportAsset} from "./util";
-import {removeLink} from "../protyle/toolbar/Link";
+import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -58,9 +58,11 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     window.siyuan.menus.menu.remove();
     let anchorElement: HTMLInputElement;
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
         label: `<input style="margin: 4px 0" class="b3-text-field fn__block" value="${refElement.getAttribute("data-id") || ""}" readonly placeholder="ID">`,
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
         label: `<input style="margin: 4px 0" class="b3-text-field fn__block" data-type="anchor" placeholder="${window.siyuan.languages.anchor}">`,
         bind(menuItemElement) {
             anchorElement = menuItemElement.querySelector("input");
@@ -103,6 +105,15 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         label: window.siyuan.languages.remove,
         click() {
             refElement.outerHTML = refElement.textContent + "<wbr>";
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
+        icon: "iconRefresh",
+        click() {
+            const html = nodeElement.outerHTML;
+            removeInlineType(refElement, protyle.toolbar.range);
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
 
@@ -950,12 +961,12 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
             inputElement.value = anchor;
             inputElement.addEventListener("compositionend", () => {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "");
+                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "*");
             });
             inputElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (!event.isComposing) {
                     // https://github.com/siyuan-note/siyuan/issues/4511
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "";
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "*";
                 }
             });
             inputElement.addEventListener("keydown", (event) => {
@@ -1014,7 +1025,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
         icon: "iconRefresh",
         click() {
-            removeLink(linkElement, protyle.toolbar.range);
+            removeInlineType(linkElement, protyle.toolbar.range);
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
@@ -1088,7 +1099,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(textElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
         if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-            removeLink(linkElement, (currentRange && !protyle.element.contains(currentRange.startContainer)) ? protyle.toolbar.range : undefined);
+            removeInlineType(linkElement, (currentRange && !protyle.element.contains(currentRange.startContainer)) ? protyle.toolbar.range : undefined);
         } else if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
             protyle.toolbar.range.selectNodeContents(linkElement);
             protyle.toolbar.range.collapse(false);

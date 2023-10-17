@@ -1,4 +1,6 @@
 import {fetchPost} from "../../util/fetch";
+import {Constants} from "../../constants";
+import {focusByRange, focusByWbr} from "../util/selection";
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
     if (!pathString) {
@@ -58,5 +60,30 @@ export const removeSearchMark = (element: HTMLElement) => {
 
     if ((element.getAttribute("data-type") || "").includes("search-mark")) {
         element.setAttribute("data-type", element.getAttribute("data-type").replace("search-mark", "").trim());
+    }
+};
+
+export const removeInlineType = (linkElement: HTMLElement, range?: Range) => {
+    const types = linkElement.getAttribute("data-type").split(" ");
+    if (types.length === 1) {
+        const linkParentElement = linkElement.parentElement;
+        linkElement.outerHTML = linkElement.innerHTML.replace(Constants.ZWSP, "") + "<wbr>";
+        if (range) {
+            focusByWbr(linkParentElement, range);
+        }
+    } else {
+        types.find((itemType, index) => {
+            if ("a" === itemType) {
+                types.splice(index, 1);
+                return true;
+            }
+        });
+        linkElement.setAttribute("data-type", types.join(" "));
+        linkElement.removeAttribute("data-href");
+        if (range) {
+            range.selectNodeContents(linkElement);
+            range.collapse(false);
+            focusByRange(range);
+        }
     }
 };

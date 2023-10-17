@@ -20,7 +20,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     fixTableRange(range);
     let tableInlineHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
-        if (hasClosestByMatchTag(range.startContainer, "table")) {
+        if (hasClosestByMatchTag(range.startContainer, "TABLE")) {
             tableInlineHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
         } else {
             // https://github.com/siyuan-note/siyuan/issues/9411

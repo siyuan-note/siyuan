@@ -10,6 +10,7 @@ import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
+import {hideElements} from "../../protyle/ui/hideElements";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -592,6 +593,7 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo"].includes(type)) {
             if (!hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+                hideElements(["util"], protyle);
                 protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
             }
             return;

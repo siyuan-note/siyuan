@@ -191,7 +191,7 @@
   &-keymap {
     &__key {
       padding: 2px 4px;
-      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
       line-height: 1;
       color: var(--b3-theme-on-surface);
       vertical-align: middle;

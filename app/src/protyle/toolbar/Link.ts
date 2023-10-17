@@ -56,28 +56,3 @@ export class Link extends ToolbarItem {
         });
     }
 }
-
-export const removeLink = (linkElement: HTMLElement, range?: Range) => {
-    const types = linkElement.getAttribute("data-type").split(" ");
-    if (types.length === 1) {
-        const linkParentElement = linkElement.parentElement;
-        linkElement.outerHTML = linkElement.innerHTML.replace(Constants.ZWSP, "") + "<wbr>";
-        if (range) {
-            focusByWbr(linkParentElement, range);
-        }
-    } else {
-        types.find((itemType, index) => {
-            if ("a" === itemType) {
-                types.splice(index, 1);
-                return true;
-            }
-        });
-        linkElement.setAttribute("data-type", types.join(" "));
-        linkElement.removeAttribute("data-href");
-        if (range) {
-            range.selectNodeContents(linkElement);
-            range.collapse(false);
-            focusByRange(range);
-        }
-    }
-};

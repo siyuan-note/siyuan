@@ -331,7 +331,8 @@ func isInvalidWorkspacePath(absPath string) bool {
 	if !gulu.File.IsValidFilename(name) {
 		return true
 	}
-	if 16 < utf8.RuneCountInString(name) {
+	if 32 < utf8.RuneCountInString(name) {
+		// Adjust workspace name length limit to 32 runes https://github.com/siyuan-note/siyuan/issues/9440
 		return true
 	}
 	toLower := strings.ToLower(name)

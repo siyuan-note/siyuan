@@ -113,5 +113,5 @@ export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst = false) =>
             html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';
         }
     });
-    return `<div contenteditable="false" class="protyle-breadcrumb__bar protyle-breadcrumb__bar--nowrap">${html}</div>`;
+    return `<div contenteditable="false" style="margin-bottom: 8px" class="protyle-breadcrumb__bar protyle-breadcrumb__bar--nowrap">${html}</div>`;
 };

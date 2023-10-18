@@ -255,7 +255,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     rowElements.forEach(item => {
         rowIds.push(item.getAttribute("data-id"));
-        blockIds.push(item.querySelector(".av__cell").getAttribute("data-block-id"));
+        blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));
     });
     updateHeader(rowElement);
     menu.addItem({

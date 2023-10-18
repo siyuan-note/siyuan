@@ -645,6 +645,12 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
 	for _, id := range operation.SrcIDs {
 		tree, err := tx.loadTree(id)
+		if nil == tree {
+			operation.IsDetached = true
+		} else {
+			operation.IsDetached = false
+		}
+
 		if nil != err && !operation.IsDetached {
 			logging.LogErrorf("load tree [%s] failed: %s", id, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: err.Error()}

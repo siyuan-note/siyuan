@@ -262,21 +262,26 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            const previousElement = rowElements[0].previousElementSibling as HTMLElement;
+            const avID = blockElement.getAttribute("data-av-id")
+            const undoOperations: IOperation[] = [];
+            rowElements.forEach(item => {
+                undoOperations.push({
+                    action: "insertAttrViewBlock",
+                    avID,
+                    previousID: item.previousElementSibling?.getAttribute("data-id") || "",
+                    srcIDs: [item.getAttribute("data-id")],
+                    isDetached: item.querySelector('.av__cell[data-detached="true"]') ? true : false,
+                })
+            })
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
                 srcIDs: blockIds,
-                avID: blockElement.getAttribute("data-av-id"),
-            }], [{
-                action: "insertAttrViewBlock",
-                avID: blockElement.getAttribute("data-av-id"),
-                previousID: previousElement?.getAttribute("data-id") || "",
-                srcIDs: rowIds,
-            }]);
+                avID,
+            }], undoOperations);
             rowElements.forEach(item => {
                 item.remove();
             });
-            updateHeader(previousElement);
+            updateHeader(blockElement.querySelector(".av__row"));
         }
     });
     if (rowIds.length === 1) {

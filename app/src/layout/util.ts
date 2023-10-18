@@ -38,8 +38,12 @@ import {newCardModel} from "../card/newCardTab";
 import {openRecentDocs} from "../business/openRecentDocs";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
+import {setTitle} from "../dialog/processSystem";
 
 export const setPanelFocus = (element: Element) => {
+    if (element.getAttribute("data-type") === "wnd") {
+        setTitle(element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || window.siyuan.languages.siyuanNote);
+    }
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
         return;
     }

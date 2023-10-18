@@ -498,7 +498,6 @@ export const updatePanelByEditor = (options: {
     reload: boolean,
     resize: boolean
 }) => {
-    let title = window.siyuan.languages.siyuanNote;
     if (options.protyle && options.protyle.path) {
         // https://ld246.com/article/1637636106054/comment/1641485541929#comments
         if (options.protyle.element.classList.contains("fn__none") ||
@@ -507,9 +506,6 @@ export const updatePanelByEditor = (options: {
             )
         ) {
             return;
-        }
-        if (options.protyle.title) {
-            title = options.protyle.title.editElement.textContent;
         }
         if (options.resize) {
             resize(options.protyle);
@@ -543,7 +539,6 @@ export const updatePanelByEditor = (options: {
     const models = getAllModels();
     updateOutline(models, options.protyle, options.reload);
     updateBacklinkGraph(models, options.protyle);
-    setTitle(title);
 };
 
 export const isCurrentEditor = (blockId: string) => {

@@ -402,7 +402,6 @@ export class Wnd {
     }
 
     public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true) {
-        setPanelFocus(this.headersElement.parentElement.parentElement);
         let currentTab: Tab;
         this.children.forEach((item) => {
             if (target === item.headElement) {
@@ -424,6 +423,7 @@ export class Wnd {
                 }
             }
         });
+        setPanelFocus(this.headersElement.parentElement.parentElement);
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {

@@ -49,6 +49,7 @@ type TEventBus = "ws-main" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
+    "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" |
     "destroy-protyle"

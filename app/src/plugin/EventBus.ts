@@ -20,7 +20,7 @@ export class EventBus<DetailType = any> {
     }
 
     emit(type: TEventBus, detail?: DetailType) {
-        return this.eventTarget.dispatchEvent(new CustomEvent(type, {detail}));
+        return this.eventTarget.dispatchEvent(new CustomEvent(type, {detail, cancelable: true}));
     }
 }
 

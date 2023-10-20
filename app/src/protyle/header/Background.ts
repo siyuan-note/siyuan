@@ -359,17 +359,7 @@ export class Background {
                     break;
                 } else if (type === "remove-tag") {
                     target.parentElement.remove();
-                    const tags = this.getTags();
-                    fetchPost("/api/attr/setBlockAttrs", {
-                        id: protyle.block.rootID,
-                        attrs: {"tags": tags.toString()}
-                    });
-                    if (tags.length === 0) {
-                        delete this.ial.tags;
-                    } else {
-                        this.ial.tags = tags.toString();
-                    }
-                    this.render(this.ial, protyle.block.rootID);
+                    this.removeTag(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -377,6 +367,20 @@ export class Background {
                 target = target.parentElement;
             }
         });
+    }
+
+    private removeTag(protyle: IProtyle) {
+        const tags = this.getTags();
+        fetchPost("/api/attr/setBlockAttrs", {
+            id: protyle.block.rootID,
+            attrs: {"tags": tags.toString()}
+        });
+        if (tags.length === 0) {
+            delete this.ial.tags;
+        } else {
+            this.ial.tags = tags.toString();
+        }
+        this.render(this.ial, protyle.block.rootID);
     }
 
     public render(ial: IObject, rootId: string) {
@@ -502,18 +506,22 @@ export class Background {
         });
     }
 
-    private getTags() {
+    private getTags(removeTag?: string) {
         const tags: string[] = [];
         this.tagsElement.querySelectorAll(".b3-chip").forEach(item => {
-            tags.push(item.textContent.trim());
+            const tagText = item.textContent.trim();
+            if (removeTag && tagText === removeTag) {
+                item.remove();
+            }
+            tags.push(tagText);
         });
         return tags;
     }
 
     private addTags(tag: string, protyle: IProtyle) {
-        window.siyuan.menus.menu.remove();
-        const tags = this.getTags();
+        const tags = this.getTags(tag);
         if (tags.includes(tag)) {
+            this.removeTag(protyle);
             return;
         }
         tags.push(tag);

@@ -653,9 +653,11 @@ func (table *Table) FilterRows() {
 			operator := table.Filters[j].Operator
 
 			if nil == row.Cells[index].Value {
-				switch operator {
-				case FilterOperatorIsNotEmpty:
+				if FilterOperatorIsNotEmpty == operator {
 					pass = false
+				} else if FilterOperatorIsEmpty == operator {
+					pass = true
+					break
 				}
 
 				if KeyTypeText != row.Cells[index].ValueType {

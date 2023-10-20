@@ -1221,7 +1221,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
 
         if (window.siyuan.dialogs.length > 0) {
-            hideElements(["dialog"]);
+            window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
             return;
         }
 

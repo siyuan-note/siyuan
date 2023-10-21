@@ -94,6 +94,10 @@ export const bazaar = {
             <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
             <div class="fn__space"></div>
             <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__none fn__flex-center" style="background: var(--b3-theme-surface)"></div>
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
         </div>
         <div id="configBazaarDownloaded">
             ${loadingHTML}
@@ -112,12 +116,14 @@ export const bazaar = {
                 <option ${localSort.theme === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.theme === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
-            <div class="fn__flex-1"></div>
+            <div class="fn__space"></div>
             <select id="bazaarSelect" class="b3-select">
                 <option selected value="2">${window.siyuan.languages.all}</option>
                 <option value="0">${window.siyuan.languages.themeLight}</option>
                 <option value="1">${window.siyuan.languages.themeDark}</option>
             </select>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__flex-center" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
             <div class="fn__space"></div>
         </div>
@@ -138,6 +144,10 @@ export const bazaar = {
                 <option ${localSort.template === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.template === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__flex-center" style="background: var(--b3-theme-surface)"></div>
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
         </div>
         <div id="configBazaarTemplate">
             ${loadingHTML}
@@ -156,6 +166,10 @@ export const bazaar = {
                 <option ${localSort.plugin === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.plugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__flex-center" style="background: var(--b3-theme-surface)"></div>
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
         </div>
         <div id="configBazaarPlugin">
             ${loadingHTML}
@@ -174,6 +188,10 @@ export const bazaar = {
                 <option ${localSort.icon === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.icon === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__flex-center" style="background: var(--b3-theme-surface)"></div>
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
         </div>
         <div id="configBazaarIcon">
             ${loadingHTML}
@@ -192,6 +210,10 @@ export const bazaar = {
                 <option ${localSort.widget === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.widget === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__flex-1"></div>
+            <div class="counter fn__flex-center" style="background: var(--b3-theme-surface)"></div>
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
         </div>
         <div id="configBazaarWidget">
             ${loadingHTML}
@@ -287,27 +309,33 @@ export const bazaar = {
             if (["icons", "themes"].includes(bazaarType)) {
                 showSwitch = true;
             }
-            response.data.packages.forEach((item: IBazaarItem) => {
-                const dataObj = {
-                    bazaarType,
-                    themeMode: item.modes?.toString(),
-                    updated: item.updated,
-                    name: item.name,
-                    repoURL: item.repoURL,
-                    repoHash: item.repoHash,
-                    downloaded: true
-                };
-                let hasSetting = false;
-                if (bazaarType === "plugins") {
-                    app.plugins.find((item: Plugin) => {
-                        if (item.name === dataObj.name) {
-                            // @ts-ignore
-                            hasSetting = item.setting || item.__proto__.hasOwnProperty("openSetting");
-                            return true;
-                        }
-                    });
-                }
-                html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}${(window.siyuan.config.bazaar.petalDisabled && bazaarType === "plugins") ? " b3-card--disabled" : ""}">
+            const counterElement = contentElement.parentElement.querySelector(".counter")
+            if (response.data.packages.length === 0) {
+                counterElement.classList.add("fn__none")
+            } else {
+                counterElement.classList.remove("fn__none")
+                counterElement.textContent = response.data.packages.length;
+                response.data.packages.forEach((item: IBazaarItem) => {
+                    const dataObj = {
+                        bazaarType,
+                        themeMode: item.modes?.toString(),
+                        updated: item.updated,
+                        name: item.name,
+                        repoURL: item.repoURL,
+                        repoHash: item.repoHash,
+                        downloaded: true
+                    };
+                    let hasSetting = false;
+                    if (bazaarType === "plugins") {
+                        app.plugins.find((item: Plugin) => {
+                            if (item.name === dataObj.name) {
+                                // @ts-ignore
+                                hasSetting = item.setting || item.__proto__.hasOwnProperty("openSetting");
+                                return true;
+                            }
+                        });
+                    }
+                    html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}${(window.siyuan.config.bazaar.petalDisabled && bazaarType === "plugins") ? " b3-card--disabled" : ""}">
     <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='${item.previewURLThumb}'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
@@ -338,7 +366,8 @@ export const bazaar = {
         <input class="b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" ${item.enabled ? "checked" : ""} data-type="plugin-enable" type="checkbox" ${item.incompatible ? " disabled" : ""}>
     </div>
 </div>`;
-            });
+                });
+            }
             bazaar._data.downloaded = response.data.packages;
             if (bazaarType === "plugins") {
                 html = `<div class="fn__flex">
@@ -839,7 +868,7 @@ export const bazaar = {
         });
 
         bazaar.element.querySelectorAll(".b3-select").forEach((selectElement: HTMLSelectElement) => {
-            selectElement.addEventListener("change", () => {
+            selectElement.addEventListener("change", (event) => {
                 if (selectElement.id === "bazaarSelect") {
                     // theme select
                     bazaar.element.querySelectorAll("#configBazaarTheme .b3-card").forEach((item) => {
@@ -860,6 +889,7 @@ export const bazaar = {
                             item.classList.remove("fn__none");
                         }
                     });
+                    (event.target as HTMLElement).parentElement.querySelector(".counter").textContent = bazaar.element.querySelectorAll("#configBazaarTheme .b3-card:not(.fn__none)").length.toString();
                 } else {
                     // sort
                     const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
@@ -925,7 +955,7 @@ export const bazaar = {
         });
         bazaar._data[bazaarType] = response.data.packages;
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
-
+        element.parentElement.querySelector(".counter").textContent = element.querySelectorAll(".b3-card:not(.fn__none)").length.toString();
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         if (localSort[bazaarType.replace("s", "")] === "1") {
             html = "";

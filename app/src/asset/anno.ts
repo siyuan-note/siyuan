@@ -6,7 +6,6 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
-import {showMessage} from "../dialog/message";
 
 export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
     getConfig(pdf);

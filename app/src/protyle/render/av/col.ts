@@ -1,4 +1,3 @@
-import {hasClosestBlock} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";

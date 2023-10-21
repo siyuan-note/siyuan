@@ -125,10 +125,10 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
     event.stopPropagation();
     event.preventDefault();
-    let textHTML;
-    let textPlain;
-    let siyuanHTML;
-    let files;
+    let textHTML: string;
+    let textPlain: string;
+    let siyuanHTML: string;
+    let files: FileList | DataTransferItemList;
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
@@ -192,6 +192,37 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             textHTML = doc.body.innerHTML.trim().replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "");
         }
         textHTML = Lute.Sanitize(textHTML);
+    }
+
+    if (protyle && protyle.app && protyle.app.plugins) {
+        for (let i = 0; i < protyle.app.plugins.length; i++) {
+            const response: IObject & { files: FileList } = await new Promise((resolve) => {
+                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                    protyle,
+                    resolve,
+                    textHTML,
+                    textPlain,
+                    siyuanHTML,
+                    files
+                });
+                if (emitResult) {
+                    resolve(undefined);
+                }
+            });
+
+            if (response?.textHTML) {
+                textHTML = response.textHTML;
+            }
+            if (response?.textPlain) {
+                textPlain = response.textPlain;
+            }
+            if (response?.siyuanHTML) {
+                siyuanHTML = response.siyuanHTML;
+            }
+            if (response?.files) {
+                files = response.files as FileList;
+            }
+        }
     }
 
     const nodeElement = hasClosestBlock(event.target);

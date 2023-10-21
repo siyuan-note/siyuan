@@ -1,4 +1,3 @@
-import {setTitle} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -107,9 +106,6 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             afterCB: options.afterCB,
         }, options.protyle);
-        if (options.protyle.model) {
-            setTitle(response.data.ial.title);
-        }
         removeLoading(options.protyle);
     });
 };
@@ -301,7 +297,8 @@ const setHTML = (options: {
         options.afterCB();
     }
     protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("loaded-protyle", protyle);
+        item.eventBus.emit("loaded-protyle", protyle);  // 准备废弃
+        item.eventBus.emit("loaded-protyle-static", {protyle});
     });
 };
 

@@ -119,6 +119,7 @@ const closeMenu = (tab: Tab) => {
 const splitSubMenu = (app: App, tab: Tab) => {
     const subMenus: IMenu[] = [{
         icon: "iconSplitLR",
+        accelerator: window.siyuan.config.keymap.general.splitLR.custom,
         label: window.siyuan.languages.splitLR,
         click: () => {
             tab.parent.split("lr").addTab(copyTab(app, tab));
@@ -127,6 +128,7 @@ const splitSubMenu = (app: App, tab: Tab) => {
     if (tab.parent.children.length > 1) {
         subMenus.push({
             icon: "iconLayoutRight",
+            accelerator: window.siyuan.config.keymap.general.splitMoveR.custom,
             label: window.siyuan.languages.splitMoveR,
             click: () => {
                 const newWnd = tab.parent.split("lr");
@@ -139,6 +141,7 @@ const splitSubMenu = (app: App, tab: Tab) => {
     }
     subMenus.push({
         icon: "iconSplitTB",
+        accelerator: window.siyuan.config.keymap.general.splitTB.custom,
         label: window.siyuan.languages.splitTB,
         click: () => {
             tab.parent.split("tb").addTab(copyTab(app, tab));
@@ -148,6 +151,7 @@ const splitSubMenu = (app: App, tab: Tab) => {
     if (tab.parent.children.length > 1) {
         subMenus.push({
             icon: "iconLayoutBottom",
+            accelerator: window.siyuan.config.keymap.general.splitMoveB.custom,
             label: window.siyuan.languages.splitMoveB,
             click: () => {
                 const newWnd = tab.parent.split("tb");

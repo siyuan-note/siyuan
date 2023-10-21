@@ -47,7 +47,7 @@ export const resize = (protyle: IProtyle) => {
 
 export const resizeAV = (item: HTMLElement) => {
     if (!item.classList.contains("av") || item.getAttribute("data-render") !== "true") {
-        return
+        return;
     }
 
     const containerElement = item.querySelector<HTMLElement>(".av__container");
@@ -56,4 +56,4 @@ export const resizeAV = (item: HTMLElement) => {
     } else {
         containerElement.style.width = "";
     }
-}
+};

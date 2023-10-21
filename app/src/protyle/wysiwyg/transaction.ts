@@ -716,7 +716,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     } else if (operation.action === "doUpdateUpdated") {
         updateElements.forEach(item => {
             item.setAttribute("updated", operation.data);
-        })
+        });
     }
 };
 

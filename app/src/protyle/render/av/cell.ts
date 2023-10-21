@@ -355,7 +355,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect,
             avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
         }
     }
-    const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect()
+    const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {
@@ -370,7 +370,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect,
             }
         }
     }
-}
+};
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
     if (!type) {
@@ -385,7 +385,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const blockElement = hasClosestBlock(cellElements[0]);
     let cellRect = cellElements[0].getBoundingClientRect();
     if (blockElement) {
-        cellScrollIntoView(blockElement, cellRect)
+        cellScrollIntoView(blockElement, cellRect);
     }
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";

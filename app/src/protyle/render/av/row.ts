@@ -27,7 +27,7 @@ export const selectRow = (firstcolElement: Element, type: "toggle" | "select" | 
     }
     focusBlock(hasClosestBlock(rowElement) as HTMLElement);
     updateHeader(rowElement);
-}
+};
 
 export const updateHeader = (rowElement: HTMLElement) => {
     const blockElement = hasClosestBlock(rowElement);

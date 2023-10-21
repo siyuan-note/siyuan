@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -256,6 +257,11 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogWarnf("block [%s] not found", id)
+		return
+	}
+
 	for _, kv := range node.KramdownIAL {
 		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
 	}

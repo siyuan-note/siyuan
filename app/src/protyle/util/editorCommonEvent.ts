@@ -877,6 +877,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 avID,
                                 previousID,
                                 srcIDs: sourceIds,
+                                isDetached: false,
                             }], [{
                                 action: "removeAttrViewBlock",
                                 srcIDs: sourceIds,
@@ -934,6 +935,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         avID,
                         previousID,
                         srcIDs: ids,
+                        isDetached: false,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: ids,

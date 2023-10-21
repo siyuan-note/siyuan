@@ -51,7 +51,7 @@ type TEventBus = "ws-main" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "paste" |
     "input-search" |
-    "loaded-protyle" | "loaded-protyle-dynamic" |
+    "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "destroy-protyle"
 type TAVCol =
     "text"

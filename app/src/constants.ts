@@ -256,6 +256,10 @@ export abstract class Constants {
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},
+            splitLR: {default: "", custom: ""},
+            splitMoveR: {default: "", custom: ""},
+            splitTB: {default: "", custom: ""},
+            splitMoveB: {default: "", custom: ""},
         },
         editor: {
             general: {

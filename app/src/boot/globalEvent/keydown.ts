@@ -10,7 +10,7 @@ import {
 import {newFile} from "../../util/newFile";
 import {Constants} from "../../constants";
 import {openSetting} from "../../config";
-import {getDockByType, getInstanceById} from "../../layout/util";
+import {copyTab, getDockByType, getInstanceById, resizeTabs} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {setEditMode} from "../../protyle/util/setEditMode";
@@ -1326,6 +1326,31 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 return true;
             }
         });
+        return;
+    }
+
+    if ((matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.splitMoveR.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event)) && !event.repeat) {
+        event.preventDefault();
+        const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
+        if (activeTabElement) {
+            const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
+            if (tab) {
+                if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
+                    tab.parent.split("lr").addTab(copyTab(app, tab));
+                } else if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event)) {
+                    tab.parent.split("tb").addTab(copyTab(app, tab));
+                } else if (tab.parent.children.length > 1) {
+                    const newWnd = tab.parent.split(matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event) ? "tb" : "lr");
+                    newWnd.headersElement.append(tab.headElement);
+                    newWnd.headersElement.parentElement.classList.remove("fn__none");
+                    newWnd.moveTab(tab);
+                    resizeTabs();
+                }
+            }
+        }
         return;
     }
 

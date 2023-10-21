@@ -27,7 +27,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     }
     focusBlock(hasClosestBlock(rowElement) as HTMLElement);
     updateHeader(rowElement);
-}
+};
 
 export const updateHeader = (rowElement: HTMLElement) => {
     const blockElement = hasClosestBlock(rowElement);

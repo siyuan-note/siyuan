@@ -1341,7 +1341,7 @@ export class WYSIWYG {
             }
             const nodeElement = hasClosestBlock(target);
 
-            const avRowElement = hasClosestByClassName(target, "av__row")
+            const avRowElement = hasClosestByClassName(target, "av__row");
             if (avRowElement && avContextmenu(protyle, avRowElement, {
                 x: event.clientX,
                 y: avRowElement.getBoundingClientRect().bottom,

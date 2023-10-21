@@ -1176,7 +1176,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                     if (e.classList.contains("av")) {
-                        e.style.margin = ""
+                        e.style.margin = "";
                         resizeAV(e);
                     } else {
                         e.style.textAlign = "left";
@@ -1198,7 +1198,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                     if (e.classList.contains("av")) {
-                        e.style.margin = "0 auto"
+                        e.style.margin = "0 auto";
                         resizeAV(e);
                     } else {
                         e.style.textAlign = "center";

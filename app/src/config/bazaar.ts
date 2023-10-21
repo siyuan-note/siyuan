@@ -309,11 +309,11 @@ export const bazaar = {
             if (["icons", "themes"].includes(bazaarType)) {
                 showSwitch = true;
             }
-            const counterElement = contentElement.parentElement.querySelector(".counter")
+            const counterElement = contentElement.parentElement.querySelector(".counter");
             if (response.data.packages.length === 0) {
-                counterElement.classList.add("fn__none")
+                counterElement.classList.add("fn__none");
             } else {
-                counterElement.classList.remove("fn__none")
+                counterElement.classList.remove("fn__none");
                 counterElement.textContent = response.data.packages.length;
                 response.data.packages.forEach((item: IBazaarItem) => {
                     const dataObj = {

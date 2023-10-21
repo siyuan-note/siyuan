@@ -1616,7 +1616,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = ""
+                            e.style.margin = "";
                             resizeAV(e);
                         } else {
                             e.style.textAlign = "left";

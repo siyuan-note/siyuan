@@ -219,7 +219,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                         if (newCellElement) {
                             newCellElement.classList.add("av__cell--select");
                         }
-                        focusBlock(e)
+                        focusBlock(e);
                     }
                     if (cb) {
                         cb();

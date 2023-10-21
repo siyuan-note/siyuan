@@ -28,13 +28,13 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        let newCellElement
+        let newCellElement;
         if (event.key === "ArrowLeft") {
-            const previousRowElement = selectCellElement.parentElement.previousElementSibling
+            const previousRowElement = selectCellElement.parentElement.previousElementSibling;
             if (selectCellElement.previousElementSibling && selectCellElement.previousElementSibling.classList.contains("av__cell")) {
-                newCellElement = selectCellElement.previousElementSibling
+                newCellElement = selectCellElement.previousElementSibling;
             } else if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
-                newCellElement = previousRowElement.lastElementChild.previousElementSibling
+                newCellElement = previousRowElement.lastElementChild.previousElementSibling;
             }
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
@@ -45,11 +45,11 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowRight") {
-            const nextRowElement = selectCellElement.parentElement.nextElementSibling
+            const nextRowElement = selectCellElement.parentElement.nextElementSibling;
             if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
-                newCellElement = selectCellElement.nextElementSibling
+                newCellElement = selectCellElement.nextElementSibling;
             } else if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
-                newCellElement = nextRowElement.querySelector(".av__cell")
+                newCellElement = nextRowElement.querySelector(".av__cell");
             }
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
@@ -60,9 +60,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowUp") {
-            const previousRowElement = selectCellElement.parentElement.previousElementSibling
+            const previousRowElement = selectCellElement.parentElement.previousElementSibling;
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
-                newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`)
+                newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
@@ -73,9 +73,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowDown") {
-            const nextRowElement = selectCellElement.parentElement.nextElementSibling
+            const nextRowElement = selectCellElement.parentElement.nextElementSibling;
             if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
-                newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`)
+                newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
@@ -111,30 +111,30 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
         // TODO event.shiftKey
         if (event.key === "ArrowUp") {
-            const previousRowElement = selectRowElements[0].previousElementSibling
+            const previousRowElement = selectRowElements[0].previousElementSibling;
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
                 selectRow(previousRowElement.querySelector(".av__firstcol"), "select");
                 cellScrollIntoView(nodeElement, previousRowElement.getBoundingClientRect(), true);
             } else {
-                nodeElement.classList.add("protyle-wysiwyg--select")
+                nodeElement.classList.add("protyle-wysiwyg--select");
             }
             event.preventDefault();
             return true;
         }
         if (event.key === "ArrowDown") {
-            const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling
+            const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling;
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
                 selectRow(nextRowElement.querySelector(".av__firstcol"), "select");
                 cellScrollIntoView(nodeElement, nextRowElement.getBoundingClientRect(), true);
             } else {
-                nodeElement.classList.add("protyle-wysiwyg--select")
+                nodeElement.classList.add("protyle-wysiwyg--select");
             }
             event.preventDefault();
             return true;
         }
     }
     return false;
-}
+};
 

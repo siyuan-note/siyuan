@@ -65,7 +65,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const gutterElement = hasClosestByClassName(event.target, "av__gutters");
     if (gutterElement) {
-        const gutterRect = gutterElement.getBoundingClientRect()
+        const gutterRect = gutterElement.getBoundingClientRect();
         avContextmenu(protyle, gutterElement.parentElement, {
             x: gutterRect.left,
             y: gutterRect.bottom,
@@ -262,7 +262,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            const avID = blockElement.getAttribute("data-av-id")
+            const avID = blockElement.getAttribute("data-av-id");
             const undoOperations: IOperation[] = [];
             rowElements.forEach(item => {
                 undoOperations.push({
@@ -271,8 +271,8 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     previousID: item.previousElementSibling?.getAttribute("data-id") || "",
                     srcIDs: [item.getAttribute("data-id")],
                     isDetached: item.querySelector('.av__cell[data-detached="true"]') ? true : false,
-                })
-            })
+                });
+            });
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
                 srcIDs: blockIds,
@@ -349,7 +349,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     if (newData === nameElement.dataset.title.trim()) {
         return;
     }
-    const newUpdated = dayjs().format("YYYYMMDDHHmmss")
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,

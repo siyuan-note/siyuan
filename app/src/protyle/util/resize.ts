@@ -52,7 +52,7 @@ export const resize = (protyle: IProtyle) => {
 
 export const resizeAV = (item: HTMLElement) => {
     if (!item.classList.contains("av") || item.getAttribute("data-render") !== "true") {
-        return
+        return;
     }
     if (item.style.width.endsWith("%") || item.style.margin) {
         const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
@@ -63,7 +63,7 @@ export const resizeAV = (item: HTMLElement) => {
         avBodyElement.style.paddingRight = "";
         item.style.alignSelf = "";
         if (!item.style.width.endsWith("%")) {
-            item.style.width = ""
+            item.style.width = "";
             item.style.maxWidth = "100%";
         }
     } else {
@@ -81,4 +81,4 @@ export const resizeAV = (item: HTMLElement) => {
             item.style.maxWidth = "";
         }
     }
-}
+};

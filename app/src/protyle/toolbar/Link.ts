@@ -1,7 +1,6 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {linkMenu} from "../../menus/protyle";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {focusByRange, focusByWbr} from "../util/selection";
 import {readText} from "../util/compatibility";
 import {Constants} from "../../constants";
 

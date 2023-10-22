@@ -743,6 +743,9 @@ app.whenReady().then(() => {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;
+            case "unregisterAll":
+                globalShortcut.unregisterAll();
+                break;
             case "show":
                 showWindow(currentWindow);
                 break;

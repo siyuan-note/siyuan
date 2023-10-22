@@ -375,7 +375,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
         response.data.blocks.forEach((item: IBlock) => {
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText}</span>`;
             if (source === "search") {
-                value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}</span>`;
+                value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${item.name || item.refText}</span>`;
             }
             dataList.push({
                 value,

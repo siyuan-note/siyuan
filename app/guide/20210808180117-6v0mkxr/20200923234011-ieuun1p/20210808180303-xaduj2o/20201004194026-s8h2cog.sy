@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20230820191236"
+		"updated": "20231022211844"
 	},
 	"Children": [
 		{
@@ -87,12 +87,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092947-5m97t0e",
-				"updated": "20221025093148"
+				"updated": "20231022211844"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In addition to the use of the local LAN, the use of the public network can be achieved by the following two methods::"
+					"Data": "In addition to the use of the local LAN, the use of the public network can be achieved by the following two methods:"
 				}
 			]
 		},

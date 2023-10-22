@@ -202,7 +202,9 @@ export const about = {
             tokenElement.select();
         });
         tokenElement.addEventListener("change", () => {
-            fetchPost("/api/system/setAPIToken", {token: tokenElement.value});
+            fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
+                window.siyuan.config.api.token = tokenElement.value;
+            });
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {

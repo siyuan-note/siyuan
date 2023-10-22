@@ -239,6 +239,20 @@ func setUILayout(c *gin.Context) {
 	model.Conf.Save()
 }
 
+func setAPIToken(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	token := arg["token"].(string)
+	model.Conf.Api.Token = token
+	model.Conf.Save()
+}
+
 func setAccessAuthCode(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

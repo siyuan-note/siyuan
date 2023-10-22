@@ -1343,6 +1343,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     if (VideoSrc) {
         subMenus.push({
             label: window.siyuan.languages.openBy,
+            icon: "iconOpen",
             submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]
         });
     }

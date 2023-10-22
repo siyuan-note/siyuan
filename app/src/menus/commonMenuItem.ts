@@ -746,6 +746,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
+        icon: "iconOpen",
         submenu
     }).element);
 };

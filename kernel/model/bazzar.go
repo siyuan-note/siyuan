@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -32,8 +33,9 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	return
 }
 
-func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
+func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 	plugins = bazaar.Plugins(frontend)
+	plugins = filterPlugins(plugins, keyword)
 	for _, plugin := range plugins {
 		plugin.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
 		if plugin.Installed {
@@ -45,6 +47,29 @@ func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
 				}
 			}
 		}
+	}
+	return
+}
+
+func filterPlugins(packages []*bazaar.Plugin, keyword string) (ret []*bazaar.Plugin) {
+	ret = []*bazaar.Plugin{}
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		return packages
+	}
+
+	for _, pkg := range packages {
+		if strings.Contains(pkg.DisplayName.Default, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
+			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
+			strings.Contains(pkg.Description.Default, keyword) ||
+			strings.Contains(pkg.Description.ZhCN, keyword) ||
+			strings.Contains(pkg.Description.ZhCHT, keyword) ||
+			strings.Contains(pkg.Description.EnUS, keyword) {
+			continue
+		}
+		ret = append(ret, pkg)
 	}
 	return
 }
@@ -93,8 +118,9 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	return nil
 }
 
-func BazaarWidgets() (widgets []*bazaar.Widget) {
+func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 	widgets = bazaar.Widgets()
+	widgets = filterWidgets(widgets, keyword)
 	for _, widget := range widgets {
 		widget.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
@@ -106,6 +132,29 @@ func BazaarWidgets() (widgets []*bazaar.Widget) {
 				}
 			}
 		}
+	}
+	return
+}
+
+func filterWidgets(packages []*bazaar.Widget, keyword string) (ret []*bazaar.Widget) {
+	ret = []*bazaar.Widget{}
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		return packages
+	}
+
+	for _, pkg := range packages {
+		if strings.Contains(pkg.DisplayName.Default, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
+			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
+			strings.Contains(pkg.Description.Default, keyword) ||
+			strings.Contains(pkg.Description.ZhCN, keyword) ||
+			strings.Contains(pkg.Description.ZhCHT, keyword) ||
+			strings.Contains(pkg.Description.EnUS, keyword) {
+			continue
+		}
+		ret = append(ret, pkg)
 	}
 	return
 }
@@ -133,8 +182,9 @@ func UninstallBazaarWidget(widgetName string) error {
 	return nil
 }
 
-func BazaarIcons() (icons []*bazaar.Icon) {
+func BazaarIcons(keyword string) (icons []*bazaar.Icon) {
 	icons = bazaar.Icons()
+	icons = filterIcons(icons, keyword)
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
 			if installed == icon.Name {
@@ -147,6 +197,29 @@ func BazaarIcons() (icons []*bazaar.Icon) {
 			}
 			icon.Current = icon.Name == Conf.Appearance.Icon
 		}
+	}
+	return
+}
+
+func filterIcons(packages []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
+	ret = []*bazaar.Icon{}
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		return packages
+	}
+
+	for _, pkg := range packages {
+		if strings.Contains(pkg.DisplayName.Default, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
+			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
+			strings.Contains(pkg.Description.Default, keyword) ||
+			strings.Contains(pkg.Description.ZhCN, keyword) ||
+			strings.Contains(pkg.Description.ZhCHT, keyword) ||
+			strings.Contains(pkg.Description.EnUS, keyword) {
+			continue
+		}
+		ret = append(ret, pkg)
 	}
 	return
 }
@@ -182,8 +255,9 @@ func UninstallBazaarIcon(iconName string) error {
 	return nil
 }
 
-func BazaarThemes() (ret []*bazaar.Theme) {
+func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 	ret = bazaar.Themes()
+	ret = filterThemes(ret, keyword)
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
 	for _, installed := range installs {
@@ -196,6 +270,29 @@ func BazaarThemes() (ret []*bazaar.Theme) {
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 			}
 		}
+	}
+	return
+}
+
+func filterThemes(packages []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) {
+	ret = []*bazaar.Theme{}
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		return packages
+	}
+
+	for _, pkg := range packages {
+		if strings.Contains(pkg.DisplayName.Default, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
+			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
+			strings.Contains(pkg.Description.Default, keyword) ||
+			strings.Contains(pkg.Description.ZhCN, keyword) ||
+			strings.Contains(pkg.Description.ZhCHT, keyword) ||
+			strings.Contains(pkg.Description.EnUS, keyword) {
+			continue
+		}
+		ret = append(ret, pkg)
 	}
 	return
 }
@@ -246,8 +343,9 @@ func UninstallBazaarTheme(themeName string) error {
 	return nil
 }
 
-func BazaarTemplates() (templates []*bazaar.Template) {
+func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 	templates = bazaar.Templates()
+	templates = filterTemplates(templates, keyword)
 	for _, template := range templates {
 		template.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
@@ -257,6 +355,29 @@ func BazaarTemplates() (templates []*bazaar.Template) {
 				}
 			}
 		}
+	}
+	return
+}
+
+func filterTemplates(packages []*bazaar.Template, keyword string) (ret []*bazaar.Template) {
+	ret = []*bazaar.Template{}
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		return packages
+	}
+
+	for _, pkg := range packages {
+		if strings.Contains(pkg.DisplayName.Default, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
+			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
+			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
+			strings.Contains(pkg.Description.Default, keyword) ||
+			strings.Contains(pkg.Description.ZhCN, keyword) ||
+			strings.Contains(pkg.Description.ZhCHT, keyword) ||
+			strings.Contains(pkg.Description.EnUS, keyword) {
+			continue
+		}
+		ret = append(ret, pkg)
 	}
 	return
 }

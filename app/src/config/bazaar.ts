@@ -122,6 +122,8 @@ export const bazaar = {
                 <option value="0">${window.siyuan.languages.themeLight}</option>
                 <option value="1">${window.siyuan.languages.themeDark}</option>
             </select>
+            <div class="fn__space"></div>
+            <input class="b3-text-field">
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -144,6 +146,8 @@ export const bazaar = {
                 <option ${localSort.template === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.template === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__space"></div>
+            <input class="b3-text-field">
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -166,6 +170,8 @@ export const bazaar = {
                 <option ${localSort.plugin === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.plugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__space"></div>
+            <input class="b3-text-field">
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -188,6 +194,8 @@ export const bazaar = {
                 <option ${localSort.icon === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.icon === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__space"></div>
+            <input class="b3-text-field">
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -210,6 +218,8 @@ export const bazaar = {
                 <option ${localSort.widget === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.widget === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
+            <div class="fn__space"></div>
+            <input class="b3-text-field">
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>

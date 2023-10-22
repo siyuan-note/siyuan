@@ -123,7 +123,10 @@ export const bazaar = {
                 <option value="1">${window.siyuan.languages.themeDark}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field">
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -147,7 +150,10 @@ export const bazaar = {
                 <option ${localSort.template === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field">
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -171,7 +177,10 @@ export const bazaar = {
                 <option ${localSort.plugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field">
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -195,7 +204,10 @@ export const bazaar = {
                 <option ${localSort.icon === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field">
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -219,7 +231,10 @@ export const bazaar = {
                 <option ${localSort.widget === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field">
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -875,6 +890,49 @@ export const bazaar = {
                 }
                 target = target.parentElement;
             }
+        });
+
+        bazaar.element.querySelectorAll(".bazaarPanel .b3-form__icon > .b3-text-field").forEach((inputElement: HTMLInputElement) => {
+            inputElement.addEventListener("keydown", (event) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter") {
+                    const keyword = inputElement.value.trim();
+                    const type = (hasClosestByClassName(inputElement, "bazaarPanel") as HTMLElement).getAttribute("data-type");
+                    if (type === "template") {
+                        fetchPost("/api/bazaar/getBazaarTemplate", {keyword}, response => {
+                            bazaar._onBazaar(response, "templates", false);
+                            bazaar._data.templates = response.data.packages;
+                        });
+                    } else if (type === "icon") {
+                        fetchPost("/api/bazaar/getBazaarIcon", {keyword}, response => {
+                            bazaar._onBazaar(response, "icons", false);
+                            bazaar._data.icons = response.data.packages;
+                        });
+                    } else if (type === "widget") {
+                        fetchPost("/api/bazaar/getBazaarWidget", {keyword}, response => {
+                            bazaar._onBazaar(response, "widgets", false);
+                            bazaar._data.widgets = response.data.packages;
+                        });
+                    } else if (type === "theme") {
+                        fetchPost("/api/bazaar/getBazaarTheme", {keyword}, response => {
+                            bazaar._onBazaar(response, "themes", false);
+                            bazaar._data.themes = response.data.packages;
+                        });
+                    } else if (type === "plugin") {
+                        fetchPost("/api/bazaar/getBazaarPlugin", {
+                            frontend: getFrontend(),
+                            keyword
+                        }, response => {
+                            bazaar._onBazaar(response, "plugins", false);
+                            bazaar._data.plugins = response.data.packages;
+                        });
+                    }
+                    event.preventDefault();
+                    return;
+                }
+            })
         });
 
         bazaar.element.querySelectorAll(".b3-select").forEach((selectElement: HTMLSelectElement) => {

@@ -275,7 +275,11 @@ export const keymap = {
         searchKeymapElement.addEventListener("keydown", function (event: KeyboardEvent) {
             event.stopPropagation();
             event.preventDefault();
-            const keymapStr = keymap._getKeymapString(event, this);
+            const keymapStr = keymap._getKeymapString(event);
+            // Mac 中文下会直接输入
+            setTimeout(() => {
+                this.value = updateHotkeyTip(keymapStr);
+            });
             keymap.search(searchElement.value, keymapStr);
         });
         keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {
@@ -352,7 +356,7 @@ export const keymap = {
             item.addEventListener("keydown", function (event: KeyboardEvent) {
                 event.stopPropagation();
                 event.preventDefault();
-                const keymapStr = keymap._getKeymapString(event, this);
+                const keymapStr = keymap._getKeymapString(event);
                 clearTimeout(timeout);
                 timeout = window.setTimeout(() => {
                     const keys = this.getAttribute("data-key").split(Constants.ZWSP);
@@ -362,12 +366,13 @@ export const keymap = {
                     if (keys[1] === "heading") {
                         keys[1] = "headings";
                     }
+                    let hasConflict = false
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
-                        showMessage(`${window.siyuan.languages.keymap} [${keymap._getTip(this)}] ${window.siyuan.languages.invalid}`);
-                        return;
+                        showMessage(`${window.siyuan.languages.invalid} [${keymapStr}]`);
+                        hasConflict = true;
                     }
-                    const hasConflict = Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
+                   Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
                         if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {
@@ -376,13 +381,17 @@ export const keymap = {
                             if (inputValueList[1] === "heading") {
                                 inputValueList[1] = "headings";
                             }
-                            showMessage(`${window.siyuan.languages.keymap} [${keymap._getTip(this)}] [${keymap._getTip(inputItem)}] ${window.siyuan.languages.conflict}`);
+                            showMessage(`${window.siyuan.languages.conflict} [${keymap._getTip(inputItem)} ${keymapStr}]`);
+                            hasConflict = true;
                             return true;
                         }
                     });
                     if (hasConflict) {
+                        this.value = this.getAttribute("data-value");
                         return;
                     }
+                    this.setAttribute("data-value", keymapStr);
+                    this.value = updateHotkeyTip(keymapStr);
                     keymap._setkeymap(app);
                 }, 1000);
             });
@@ -395,7 +404,7 @@ export const keymap = {
             });
         });
     },
-    _getKeymapString(event: KeyboardEvent, it: HTMLInputElement) {
+    _getKeymapString(event: KeyboardEvent) {
         let keymapStr = "";
         if (event.ctrlKey && !event.metaKey && isMac()) {
             keymapStr += "⌃";
@@ -429,11 +438,6 @@ export const keymap = {
                 keymapStr += Constants.KEYCODELIST[event.keyCode] || (event.key.length > 1 ? event.key : event.key.toUpperCase());
             }
         }
-        it.setAttribute("data-value", keymapStr);
-        // Mac 中文下会直接输入
-        setTimeout(() => {
-            it.value = updateHotkeyTip(keymapStr);
-        });
         return keymapStr;
     }
 };

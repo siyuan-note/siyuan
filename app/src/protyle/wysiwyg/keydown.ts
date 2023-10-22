@@ -73,7 +73,7 @@ import {avKeydown} from "../render/av/keydown";
 import {resizeAV} from "../util/resize";
 
 
-const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
+export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
     Array.from(range.cloneContents().childNodes).forEach((item: HTMLElement) => {
         if (item.nodeType === 3) {
@@ -1007,33 +1007,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             event.preventDefault();
             event.stopPropagation();
-            return true;
-        }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            let actionElement;
-            if (selectElements.length === 1) {
-                actionElement = selectElements[0];
-            } else {
-                const selectImgElement = nodeElement.querySelector(".img--select");
-                if (selectImgElement) {
-                    copyPNG(selectImgElement.querySelector("img"));
-                    return true;
-                }
-                actionElement = nodeElement;
-            }
-            const actionElementId = actionElement.getAttribute("data-node-id");
-            if (selectText !== "") {
-                getContentByInlineHTML(range, (content) => {
-                    writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(content.trim())}"))`);
-                });
-            } else {
-                fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {
-                    writeText(`((${actionElementId} '${response.data}'))`);
-                });
-            }
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {

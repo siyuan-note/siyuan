@@ -134,12 +134,6 @@ export class Title {
                 getEditorRange(this.editElement).selectNodeContents(this.editElement);
                 event.preventDefault();
                 event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
-                fetchPost("/api/block/getRefText", {id: protyle.block.rootID}, (response) => {
-                    writeText(`((${protyle.block.rootID} '${response.data}'))`);
-                });
-                event.preventDefault();
-                event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
                 writeText(protyle.block.rootID);
                 event.preventDefault();

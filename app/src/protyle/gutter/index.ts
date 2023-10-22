@@ -55,7 +55,8 @@ export class Gutter {
         this.element.setAttribute("data-position", "right");
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
-            let selectIds: string[] = [event.target.getAttribute("data-node-id")];
+            const buttonElement = event.target.parentElement
+            let selectIds: string[] = [buttonElement.getAttribute("data-node-id")];
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 selectIds = [];
@@ -66,9 +67,9 @@ export class Gutter {
             if (selectElements.length === 0) {
                 event.dataTransfer.setDragImage(protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`), 0, 0);
             }
-            event.target.style.opacity = "0.1";
+            buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = protyle.wysiwyg.element;
-            event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${event.target.getAttribute("data-type")}${Constants.ZWSP}${event.target.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,
+            event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,
                 protyle.wysiwyg.element.innerHTML);
         });
         this.element.addEventListener("dragend", () => {
@@ -1842,8 +1843,12 @@ export class Gutter {
                     html = "";
                 }
                 index += 1;
+                const buttonHTML = `<button data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
+    <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
+    <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
+</button>`
                 if (isShow) {
-                    html = `<button ${protyle.disabled ? "" : 'draggable="true"'} data-type="${type}"  data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}"><svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg></button>` + html;
+                    html = buttonHTML + html;
                 }
                 let foldHTML = "";
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
@@ -1853,7 +1858,7 @@ export class Gutter {
                 if (type === "NodeListItem" || type === "NodeList") {
                     listItem = nodeElement;
                     if (type === "NodeListItem" && nodeElement.childElementCount > 3) {
-                        html = `<button ${protyle.disabled ? "" : 'draggable="true"'} data-type="${type}"  data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}"><svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg></button>${foldHTML}`;
+                        html = buttonHTML + foldHTML;
                     }
                 }
                 if (type === "NodeHeading") {

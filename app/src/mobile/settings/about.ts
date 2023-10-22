@@ -86,9 +86,10 @@ export const initAbout = () => {
 </div>
 <div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.about13}
-    <span class="b3-label__text">${window.siyuan.config.api.token}</span>
     <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="token">
+    <input class="b3-text-field fn__block" id="token" value="${window.siyuan.config.api.token}">
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="tokenCopy">
         <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}
     </button>
     <div class="b3-label__text">${window.siyuan.languages.about14}</div>
@@ -233,7 +234,7 @@ export const initAbout = () => {
                         event.preventDefault();
                         event.stopPropagation();
                         break;
-                    } else if (target.id === "token") {
+                    } else if (target.id === "tokenCopy") {
                         showMessage(window.siyuan.languages.copied);
                         writeText(window.siyuan.config.api.token);
                         event.preventDefault();
@@ -358,6 +359,12 @@ export const initAbout = () => {
             networkServeElement.addEventListener("change", () => {
                 fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                     exitSiYuan();
+                });
+            });
+            const tokenElement = modelMainElement.querySelector("#token") as HTMLInputElement;
+            tokenElement.addEventListener("change", () => {
+                fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
+                    window.siyuan.config.api.token = tokenElement.value;
                 });
             });
         }

@@ -51,25 +51,13 @@ func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 	return
 }
 
-func filterPlugins(packages []*bazaar.Plugin, keyword string) (ret []*bazaar.Plugin) {
+func filterPlugins(plugins []*bazaar.Plugin, keyword string) (ret []*bazaar.Plugin) {
 	ret = []*bazaar.Plugin{}
-	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		return packages
-	}
-
-	for _, pkg := range packages {
-		if strings.Contains(pkg.DisplayName.Default, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
-			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
-			strings.Contains(pkg.Description.Default, keyword) ||
-			strings.Contains(pkg.Description.ZhCN, keyword) ||
-			strings.Contains(pkg.Description.ZhCHT, keyword) ||
-			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+	keywords := getSearchKeywords(keyword)
+	for _, plugin := range plugins {
+		if matchPackage(keywords, plugin.Package) {
+			ret = append(ret, plugin)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -136,25 +124,13 @@ func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 	return
 }
 
-func filterWidgets(packages []*bazaar.Widget, keyword string) (ret []*bazaar.Widget) {
+func filterWidgets(widgets []*bazaar.Widget, keyword string) (ret []*bazaar.Widget) {
 	ret = []*bazaar.Widget{}
-	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		return packages
-	}
-
-	for _, pkg := range packages {
-		if strings.Contains(pkg.DisplayName.Default, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
-			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
-			strings.Contains(pkg.Description.Default, keyword) ||
-			strings.Contains(pkg.Description.ZhCN, keyword) ||
-			strings.Contains(pkg.Description.ZhCHT, keyword) ||
-			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+	keywords := getSearchKeywords(keyword)
+	for _, w := range widgets {
+		if matchPackage(keywords, w.Package) {
+			ret = append(ret, w)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -201,25 +177,13 @@ func BazaarIcons(keyword string) (icons []*bazaar.Icon) {
 	return
 }
 
-func filterIcons(packages []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
+func filterIcons(icons []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
 	ret = []*bazaar.Icon{}
-	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		return packages
-	}
-
-	for _, pkg := range packages {
-		if strings.Contains(pkg.DisplayName.Default, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
-			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
-			strings.Contains(pkg.Description.Default, keyword) ||
-			strings.Contains(pkg.Description.ZhCN, keyword) ||
-			strings.Contains(pkg.Description.ZhCHT, keyword) ||
-			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+	keywords := getSearchKeywords(keyword)
+	for _, i := range icons {
+		if matchPackage(keywords, i.Package) {
+			ret = append(ret, i)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -274,25 +238,13 @@ func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 	return
 }
 
-func filterThemes(packages []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) {
+func filterThemes(themes []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) {
 	ret = []*bazaar.Theme{}
-	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		return packages
-	}
-
-	for _, pkg := range packages {
-		if strings.Contains(pkg.DisplayName.Default, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
-			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
-			strings.Contains(pkg.Description.Default, keyword) ||
-			strings.Contains(pkg.Description.ZhCN, keyword) ||
-			strings.Contains(pkg.Description.ZhCHT, keyword) ||
-			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+	keywords := getSearchKeywords(keyword)
+	for _, t := range themes {
+		if matchPackage(keywords, t.Package) {
+			ret = append(ret, t)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -359,25 +311,13 @@ func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 	return
 }
 
-func filterTemplates(packages []*bazaar.Template, keyword string) (ret []*bazaar.Template) {
+func filterTemplates(templates []*bazaar.Template, keyword string) (ret []*bazaar.Template) {
 	ret = []*bazaar.Template{}
-	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		return packages
-	}
-
-	for _, pkg := range packages {
-		if strings.Contains(pkg.DisplayName.Default, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCN, keyword) ||
-			strings.Contains(pkg.DisplayName.ZhCHT, keyword) ||
-			strings.Contains(pkg.DisplayName.EnUS, keyword) ||
-			strings.Contains(pkg.Description.Default, keyword) ||
-			strings.Contains(pkg.Description.ZhCN, keyword) ||
-			strings.Contains(pkg.Description.ZhCHT, keyword) ||
-			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+	keywords := getSearchKeywords(keyword)
+	for _, t := range templates {
+		if matchPackage(keywords, t.Package) {
+			ret = append(ret, t)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -403,4 +343,39 @@ func UninstallBazaarTemplate(templateName string) error {
 		return errors.New(fmt.Sprintf(Conf.Language(47), err.Error()))
 	}
 	return nil
+}
+
+func matchPackage(keywords []string, pkg *bazaar.Package) bool {
+	if 1 > len(keywords) {
+		return true
+	}
+
+	for _, keyword := range keywords {
+		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCHT), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.EnUS), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.Default), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.ZhCN), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.ZhCHT), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+func getSearchKeywords(query string) (ret []string) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return
+	}
+
+	keywords := strings.Split(query, " ")
+	for _, k := range keywords {
+		if "" != k {
+			ret = append(ret, strings.ToLower(k))
+		}
+	}
+	return
 }

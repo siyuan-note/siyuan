@@ -390,7 +390,7 @@ export const keymap = {
                         this.value = this.getAttribute("data-value");
                         return;
                     }
-                    this.setAttribute("data-value", keymapStr);
+                    this.setAttribute("data-value", updateHotkeyTip(keymapStr));
                     this.value = updateHotkeyTip(keymapStr);
                     keymap._setkeymap(app);
                 }, 1000);

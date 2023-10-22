@@ -39,11 +39,9 @@ func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 	for _, plugin := range plugins {
 		plugin.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
 		if plugin.Installed {
-			if plugin.Installed {
-				if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
-					if plugin.Version != pluginConf.Version {
-						plugin.Outdated = true
-					}
+			if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
+				if plugin.Version != pluginConf.Version {
+					plugin.Outdated = true
 				}
 			}
 		}
@@ -112,11 +110,9 @@ func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 	for _, widget := range widgets {
 		widget.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
-			if widget.Installed {
-				if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
-					if widget.Version != widgetConf.Version {
-						widget.Outdated = true
-					}
+			if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
+				if widget.Version != widgetConf.Version {
+					widget.Outdated = true
 				}
 			}
 		}

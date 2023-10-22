@@ -252,7 +252,6 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
 
     protyle.upload.isUploading = true;
     xhr.onreadystatechange = () => {
-        console.log(xhr.readyState)
         if (xhr.readyState === XMLHttpRequest.DONE) {
             protyle.upload.isUploading = false;
             if (!document.body.contains(protyle.element)) {

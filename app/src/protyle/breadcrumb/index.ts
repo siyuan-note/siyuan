@@ -256,7 +256,6 @@ export class Breadcrumb {
                 uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
                     target: HTMLInputElement
                 }) => {
-                    console.log(event.target.files.length)
                     if (event.target.files.length === 0) {
                         return;
                     }

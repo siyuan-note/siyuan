@@ -374,7 +374,7 @@ export const keymap = {
                         hasConflict = true;
                     }
                    Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
-                        if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === adoptKeymapStr) {
+                        if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {
                                 inputValueList[1] = "list1";
@@ -388,10 +388,10 @@ export const keymap = {
                         }
                     });
                     if (hasConflict) {
-                        this.value = this.getAttribute("data-value");
+                        this.value = updateHotkeyTip(this.getAttribute("data-value"));
                         return;
                     }
-                    this.setAttribute("data-value", adoptKeymapStr);
+                    this.setAttribute("data-value", keymapStr);
                     this.value = adoptKeymapStr;
                     keymap._setkeymap(app);
                 }, 1000);

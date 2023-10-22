@@ -758,6 +758,7 @@ export const renameMenu = (options: {
 }) => {
     return new MenuItem({
         accelerator: window.siyuan.config.keymap.editor.general.rename.custom,
+        icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click: () => {
             rename(options);

@@ -67,9 +67,8 @@ func filterPlugins(packages []*bazaar.Plugin, keyword string) (ret []*bazaar.Plu
 			strings.Contains(pkg.Description.ZhCN, keyword) ||
 			strings.Contains(pkg.Description.ZhCHT, keyword) ||
 			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+			ret = append(ret, pkg)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -152,9 +151,8 @@ func filterWidgets(packages []*bazaar.Widget, keyword string) (ret []*bazaar.Wid
 			strings.Contains(pkg.Description.ZhCN, keyword) ||
 			strings.Contains(pkg.Description.ZhCHT, keyword) ||
 			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+			ret = append(ret, pkg)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -217,9 +215,8 @@ func filterIcons(packages []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
 			strings.Contains(pkg.Description.ZhCN, keyword) ||
 			strings.Contains(pkg.Description.ZhCHT, keyword) ||
 			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+			ret = append(ret, pkg)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -290,9 +287,8 @@ func filterThemes(packages []*bazaar.Theme, keyword string) (ret []*bazaar.Theme
 			strings.Contains(pkg.Description.ZhCN, keyword) ||
 			strings.Contains(pkg.Description.ZhCHT, keyword) ||
 			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+			ret = append(ret, pkg)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }
@@ -375,9 +371,8 @@ func filterTemplates(packages []*bazaar.Template, keyword string) (ret []*bazaar
 			strings.Contains(pkg.Description.ZhCN, keyword) ||
 			strings.Contains(pkg.Description.ZhCHT, keyword) ||
 			strings.Contains(pkg.Description.EnUS, keyword) {
-			continue
+			ret = append(ret, pkg)
 		}
-		ret = append(ret, pkg)
 	}
 	return
 }

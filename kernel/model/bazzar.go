@@ -346,6 +346,10 @@ func UninstallBazaarTemplate(templateName string) error {
 }
 
 func matchPackage(keywords []string, pkg *bazaar.Package) bool {
+	if 1 > len(keywords) {
+		return true
+	}
+
 	for _, keyword := range keywords {
 		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
 			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||

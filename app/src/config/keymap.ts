@@ -357,6 +357,7 @@ export const keymap = {
                 event.stopPropagation();
                 event.preventDefault();
                 const keymapStr = keymap._getKeymapString(event);
+                const adoptKeymapStr = updateHotkeyTip(keymapStr);
                 clearTimeout(timeout);
                 timeout = window.setTimeout(() => {
                     const keys = this.getAttribute("data-key").split(Constants.ZWSP);
@@ -369,11 +370,11 @@ export const keymap = {
                     let hasConflict = false
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
-                        showMessage(`${window.siyuan.languages.invalid} [${keymapStr}]`);
+                        showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`);
                         hasConflict = true;
                     }
                    Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
-                        if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
+                        if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === adoptKeymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {
                                 inputValueList[1] = "list1";
@@ -381,7 +382,7 @@ export const keymap = {
                             if (inputValueList[1] === "heading") {
                                 inputValueList[1] = "headings";
                             }
-                            showMessage(`${window.siyuan.languages.conflict} [${keymap._getTip(inputItem)} ${keymapStr}]`);
+                            showMessage(`${window.siyuan.languages.conflict} [${keymap._getTip(inputItem)} ${adoptKeymapStr}]`);
                             hasConflict = true;
                             return true;
                         }
@@ -390,8 +391,8 @@ export const keymap = {
                         this.value = this.getAttribute("data-value");
                         return;
                     }
-                    this.setAttribute("data-value", updateHotkeyTip(keymapStr));
-                    this.value = updateHotkeyTip(keymapStr);
+                    this.setAttribute("data-value", adoptKeymapStr);
+                    this.value = adoptKeymapStr;
                     keymap._setkeymap(app);
                 }, 1000);
             });

@@ -73,6 +73,7 @@
     padding: 4px;
     transition: var(--b3-transition);
     cursor: pointer;
+    position: relative;
 
     &:hover svg {
       color: var(--b3-theme-on-surface);
@@ -80,6 +81,15 @@
 
     &:active {
       cursor: grabbing;
+    }
+
+    span {
+      z-index: 2;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
     }
   }
 

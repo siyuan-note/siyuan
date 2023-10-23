@@ -97,6 +97,7 @@ export abstract class Constants {
     public static readonly LOCAL_LAYOUTS = "local-layouts";
     public static readonly LOCAL_AI = "local-ai";
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
+    public static readonly LOCAL_FLASHCARD = "local-flashcard";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;

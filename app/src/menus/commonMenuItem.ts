@@ -746,6 +746,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
+        icon: "iconOpen",
         submenu
     }).element);
 };
@@ -758,6 +759,7 @@ export const renameMenu = (options: {
 }) => {
     return new MenuItem({
         accelerator: window.siyuan.config.keymap.editor.general.rename.custom,
+        icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click: () => {
             rename(options);

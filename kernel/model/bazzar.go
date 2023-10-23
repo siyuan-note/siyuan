@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -32,18 +33,28 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	return
 }
 
-func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
+func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 	plugins = bazaar.Plugins(frontend)
+	plugins = filterPlugins(plugins, keyword)
 	for _, plugin := range plugins {
 		plugin.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
 		if plugin.Installed {
-			if plugin.Installed {
-				if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
-					if plugin.Version != pluginConf.Version {
-						plugin.Outdated = true
-					}
+			if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
+				if plugin.Version != pluginConf.Version {
+					plugin.Outdated = true
 				}
 			}
+		}
+	}
+	return
+}
+
+func filterPlugins(plugins []*bazaar.Plugin, keyword string) (ret []*bazaar.Plugin) {
+	ret = []*bazaar.Plugin{}
+	keywords := getSearchKeywords(keyword)
+	for _, plugin := range plugins {
+		if matchPackage(keywords, plugin.Package) {
+			ret = append(ret, plugin)
 		}
 	}
 	return
@@ -93,18 +104,28 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	return nil
 }
 
-func BazaarWidgets() (widgets []*bazaar.Widget) {
+func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 	widgets = bazaar.Widgets()
+	widgets = filterWidgets(widgets, keyword)
 	for _, widget := range widgets {
 		widget.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
-			if widget.Installed {
-				if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
-					if widget.Version != widgetConf.Version {
-						widget.Outdated = true
-					}
+			if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
+				if widget.Version != widgetConf.Version {
+					widget.Outdated = true
 				}
 			}
+		}
+	}
+	return
+}
+
+func filterWidgets(widgets []*bazaar.Widget, keyword string) (ret []*bazaar.Widget) {
+	ret = []*bazaar.Widget{}
+	keywords := getSearchKeywords(keyword)
+	for _, w := range widgets {
+		if matchPackage(keywords, w.Package) {
+			ret = append(ret, w)
 		}
 	}
 	return
@@ -133,8 +154,9 @@ func UninstallBazaarWidget(widgetName string) error {
 	return nil
 }
 
-func BazaarIcons() (icons []*bazaar.Icon) {
+func BazaarIcons(keyword string) (icons []*bazaar.Icon) {
 	icons = bazaar.Icons()
+	icons = filterIcons(icons, keyword)
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
 			if installed == icon.Name {
@@ -146,6 +168,17 @@ func BazaarIcons() (icons []*bazaar.Icon) {
 				}
 			}
 			icon.Current = icon.Name == Conf.Appearance.Icon
+		}
+	}
+	return
+}
+
+func filterIcons(icons []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
+	ret = []*bazaar.Icon{}
+	keywords := getSearchKeywords(keyword)
+	for _, i := range icons {
+		if matchPackage(keywords, i.Package) {
+			ret = append(ret, i)
 		}
 	}
 	return
@@ -182,8 +215,9 @@ func UninstallBazaarIcon(iconName string) error {
 	return nil
 }
 
-func BazaarThemes() (ret []*bazaar.Theme) {
+func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 	ret = bazaar.Themes()
+	ret = filterThemes(ret, keyword)
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
 	for _, installed := range installs {
@@ -195,6 +229,17 @@ func BazaarThemes() (ret []*bazaar.Theme) {
 				}
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 			}
+		}
+	}
+	return
+}
+
+func filterThemes(themes []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) {
+	ret = []*bazaar.Theme{}
+	keywords := getSearchKeywords(keyword)
+	for _, t := range themes {
+		if matchPackage(keywords, t.Package) {
+			ret = append(ret, t)
 		}
 	}
 	return
@@ -246,8 +291,9 @@ func UninstallBazaarTheme(themeName string) error {
 	return nil
 }
 
-func BazaarTemplates() (templates []*bazaar.Template) {
+func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 	templates = bazaar.Templates()
+	templates = filterTemplates(templates, keyword)
 	for _, template := range templates {
 		template.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
@@ -256,6 +302,17 @@ func BazaarTemplates() (templates []*bazaar.Template) {
 					template.Outdated = true
 				}
 			}
+		}
+	}
+	return
+}
+
+func filterTemplates(templates []*bazaar.Template, keyword string) (ret []*bazaar.Template) {
+	ret = []*bazaar.Template{}
+	keywords := getSearchKeywords(keyword)
+	for _, t := range templates {
+		if matchPackage(keywords, t.Package) {
+			ret = append(ret, t)
 		}
 	}
 	return
@@ -282,4 +339,39 @@ func UninstallBazaarTemplate(templateName string) error {
 		return errors.New(fmt.Sprintf(Conf.Language(47), err.Error()))
 	}
 	return nil
+}
+
+func matchPackage(keywords []string, pkg *bazaar.Package) bool {
+	if 1 > len(keywords) {
+		return true
+	}
+
+	for _, keyword := range keywords {
+		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCHT), keyword) ||
+			strings.Contains(strings.ToLower(pkg.DisplayName.EnUS), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.Default), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.ZhCN), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.ZhCHT), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+func getSearchKeywords(query string) (ret []string) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return
+	}
+
+	keywords := strings.Split(query, " ")
+	for _, k := range keywords {
+		if "" != k {
+			ret = append(ret, strings.ToLower(k))
+		}
+	}
+	return
 }

@@ -1,4 +1,4 @@
-import {isCtrl, isMac, updateHotkeyTip} from "../../protyle/util/compatibility";
+import {isCtrl, isMac, updateHotkeyTip, writeText} from "../../protyle/util/compatibility";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {openSearch} from "../../search/spread";
 import {
@@ -60,6 +60,8 @@ import {Custom} from "../../layout/dock/Custom";
 import {Protyle} from "../../protyle";
 import {transaction} from "../../protyle/wysiwyg/transaction";
 import {quickMakeCard} from "../../card/makeCard";
+import {copyPNG} from "../../menus/util";
+import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -335,6 +337,42 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         });
         event.preventDefault();
         return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (hasClosestByClassName(range.startContainer, "protyle-title")) {
+            fetchPost("/api/block/getRefText", {id: protyle.block.rootID}, (response) => {
+                writeText(`((${protyle.block.rootID} '${response.data}'))`);
+            });
+        } else {
+            const nodeElement = hasClosestBlock(range.startContainer);
+            if (!nodeElement) {
+                return false;
+            }
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            let actionElement;
+            if (selectElements.length === 1) {
+                actionElement = selectElements[0];
+            } else {
+                const selectImgElement = nodeElement.querySelector(".img--select");
+                if (selectImgElement) {
+                    copyPNG(selectImgElement.querySelector("img"));
+                    return true;
+                }
+                actionElement = nodeElement;
+            }
+            const actionElementId = actionElement.getAttribute("data-node-id");
+            if (range.toString() !== "") {
+                getContentByInlineHTML(range, (content) => {
+                    writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(content.trim())}"))`);
+                });
+            } else {
+                fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {
+                    writeText(`((${actionElementId} '${response.data}'))`);
+                });
+            }
+        }
     }
     if (hasClosestByClassName(target, "protyle-title__input")) {
         return false;

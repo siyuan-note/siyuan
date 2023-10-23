@@ -181,6 +181,9 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
+        defaultStorage[Constants.LOCAL_FLASHCARD] = {
+            fullscreen: false
+        };
         defaultStorage[Constants.LOCAL_BAZAAR] = {
             theme: "0",
             template: "0",
@@ -235,7 +238,7 @@ export const getLocalStorage = (cb: () => void) => {
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
-            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET].forEach((key) => {
+            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

@@ -127,6 +127,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
+        icon: "iconOpen",
         submenu: openSubmenus,
     }).element);
     /// #endif

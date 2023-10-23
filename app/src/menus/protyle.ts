@@ -795,6 +795,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     if (imagePath.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.rename,
+            icon: "iconEdit",
             click() {
                 renameAsset(imagePath);
             }
@@ -1032,6 +1033,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.rename,
+            icon: "iconEdit",
             click() {
                 renameAsset(linkAddress);
             }
@@ -1181,6 +1183,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.rename,
+        icon: "iconEdit",
         click() {
             renameTag(tagElement.textContent.replace(Constants.ZWSP, ""));
         }
@@ -1330,6 +1333,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
         });
         subMenus.push({
             label: window.siyuan.languages.rename,
+            icon: "iconEdit",
             click() {
                 renameAsset(src);
             }
@@ -1339,6 +1343,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     if (VideoSrc) {
         subMenus.push({
             label: window.siyuan.languages.openBy,
+            icon: "iconOpen",
             submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]
         });
     }

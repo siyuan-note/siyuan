@@ -135,6 +135,12 @@
       }
     }
 
+    &__hinttext {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
     &__hinticon {
       width: 12px;
       height: 12px;

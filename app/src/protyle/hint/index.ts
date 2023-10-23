@@ -61,10 +61,9 @@ export class Hint {
                 if (this.source !== "search") {
                     this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, isCtrl(event));
                 } else {
-                    // 划选引用点击，需先重置 range
                     setTimeout(() => {
-                        this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
-                    }, 148);
+                        this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, !isCtrl(event));
+                    }, 148);    // 划选引用点击，需先重置 range
                 }
                 focusByRange(protyle.toolbar.range);
 
@@ -303,8 +302,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 upDownHint(this.element.lastElementChild, event);
                 if (event.key === "Enter") {
                     setTimeout(() => {
-                        this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle);
-                    }, 148);
+                        this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, true, !isCtrl(event));
+                    }, 148);    // 划选引用点击，需先重置 range
                     focusByRange(protyle.toolbar.range);
                     event.preventDefault();
                 } else if (event.key === "Escape") {
@@ -541,6 +540,12 @@ ${genHintItemHTML(item)}
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;
+                }
+            } else {
+                tempElement.setAttribute("data-subtype", "d");
+                const dynamicTexts = tempElement.innerText.split(Constants.ZWSP);
+                if (dynamicTexts.length === 2) {
+                    tempElement.innerText = dynamicTexts[1];
                 }
             }
             protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {

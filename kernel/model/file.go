@@ -848,12 +848,6 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 					if n.HeadingLevel <= level {
 						break
 					}
-				} else if ast.NodeSuperBlock == n.Type {
-					if h := treenode.SuperBlockHeading(n); nil != h {
-						if level >= h.HeadingLevel {
-							break
-						}
-					}
 				}
 				nodes = append(nodes, n)
 				count++

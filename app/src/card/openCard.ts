@@ -16,6 +16,7 @@ import {openFile} from "../editor/util";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
 import {resize} from "../protyle/util/resize";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const genCardHTML = (options: {
     id: string,
@@ -123,6 +124,10 @@ export const bindCardEvent = (options: {
     id?: string,
     dialog?: Dialog,
 }) => {
+    if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
+        fullscreen(options.element.querySelector(".card__main"),
+            options.element.querySelector('[data-type="fullscreen"]'));
+    }
     let index = 0;
     const editor = new Protyle(options.app, options.element.querySelector("[data-type='render']") as HTMLElement, {
         blockId: "",
@@ -204,6 +209,8 @@ export const bindCardEvent = (options: {
                 fullscreen(options.element.querySelector(".card__main"),
                     options.element.querySelector('[data-type="fullscreen"]'));
                 resize(editor.protyle);
+                window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen = !window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen
+                setStorageVal(Constants.LOCAL_FLASHCARD,  window.siyuan.storage[Constants.LOCAL_FLASHCARD]);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

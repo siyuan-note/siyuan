@@ -167,8 +167,13 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	if 1 > len(attrView.Views) {
-		err = av.ErrViewNotFound
-		return
+		view := av.NewView()
+		attrView.Views = append(attrView.Views, view)
+		attrView.ViewID = view.ID
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 
 	var view *av.View

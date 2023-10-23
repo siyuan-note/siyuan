@@ -29,10 +29,12 @@ export const loadPlugins = async (app: App) => {
         loadPluginJS(app, item);
         css += item.css || "" + "\n";
     });
-    const styleElement = document.createElement("style");
-    styleElement.id = "pluginsStyle";
-    styleElement.textContent = css;
-    document.head.append(styleElement);
+    const pluginsStyle = document.getElementById("pluginsStyle")
+    if (pluginsStyle) {
+        pluginsStyle.innerHTML = css;
+    } else {
+        document.head.insertAdjacentHTML("beforeend", `<style id="pluginsStyle">${css}</style>`);
+    }
 };
 
 const loadPluginJS = async (app: App, item: IPluginData) => {

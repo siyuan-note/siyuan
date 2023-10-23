@@ -3,6 +3,7 @@ import {addStyle} from "../util/addStyle";
 import {Constants} from "../../constants";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestBlock} from "../util/hasClosest";
+import {looseJsonParse} from "../../util/functions";
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
     let mathElements: Element[] = [];
@@ -29,7 +30,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 }
                 let macros = {};
                 try {
-                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}");
+                    macros = looseJsonParse(window.siyuan.config.editor.katexMacros || "{}");
                 } catch (e) {
                     console.warn("KaTex macros is not JSON", e);
                 }

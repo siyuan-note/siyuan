@@ -115,7 +115,7 @@ export const about = {
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__block" id="resetRepo">
-            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.resetRepo}
+            <svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.resetRepo}
         </button>
     </div>
 </div>
@@ -126,7 +126,7 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.purge}
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
 </label>
 <label class="fn__flex b3-label config__item">

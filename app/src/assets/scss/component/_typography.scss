@@ -263,6 +263,8 @@
     position: relative;
     padding: 0;
     margin: 1em 0;
+    display: flex;
+    flex-direction: row-reverse;
 
     .protyle-action {
       left: 4px;
@@ -304,11 +306,7 @@
     min-height: 22px !important;
     overflow-x: overlay;
     tab-size: 4;
-
-    &.protyle-linenumber {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
+    flex: 1;
   }
 
   [data-subtype="echarts"],
@@ -535,14 +533,11 @@
   }
 
   &-linenumber {
-    margin-left: calc(3.6em);
-    position: relative;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
 
     &__rows {
-      position: absolute;
       pointer-events: none;
-      top: 0;
-      left: 0;
       user-select: none;
       counter-reset: linenumber;
       font-size: 85%;

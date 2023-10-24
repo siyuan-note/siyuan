@@ -136,7 +136,7 @@ export const lineNumberRender = (block: HTMLElement) => {
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
     const lineNumberTemp = document.createElement("div");
     lineNumberTemp.className = "hljs protyle-linenumber";
-    lineNumberTemp.setAttribute("style", `padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
+    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: calc(100% - 3.6em);position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
 
@@ -160,11 +160,9 @@ export const lineNumberRender = (block: HTMLElement) => {
     });
 
     lineNumberTemp.remove();
-    const height = block.offsetHeight;
     if (block.nextElementSibling?.classList.contains("protyle-linenumber__rows")) {
         block.nextElementSibling.innerHTML = lineNumberHTML;
-        (block.nextElementSibling as HTMLElement).style.height = height + "px";
     } else {
-        block.insertAdjacentHTML("afterend", `<span contenteditable="false" style="height:${height}px" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
+        block.insertAdjacentHTML("afterend", `<span contenteditable="false" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
     }
 };

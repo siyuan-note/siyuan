@@ -498,6 +498,12 @@ interface IPluginDockTab {
     show?: boolean
 }
 
+interface IExportOptions {
+    type: string,
+    id: string,
+    fileType: string
+}
+
 interface IOpenFileOptions {
     app: import("../index").App,
     searchData?: ISearchOption, // 搜索必填

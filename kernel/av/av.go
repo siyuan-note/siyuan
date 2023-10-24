@@ -46,7 +46,7 @@ type AttributeView struct {
 	Views     []*View      `json:"views"`     // 视图
 }
 
-func CloneAttributeView(av *AttributeView) (ret *AttributeView) {
+func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
 	ret = &AttributeView{}
 	data, err := gulu.JSON.MarshalJSON(av)
 	if nil != err {

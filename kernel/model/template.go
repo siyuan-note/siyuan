@@ -285,7 +285,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 			if nil != parseErr {
 				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
 			} else {
-				cloned := av.CloneAttributeView(attrView)
+				cloned := av.ShallowCloneAttributeView(attrView)
 				if nil != cloned {
 					n.AttributeViewID = cloned.ID
 					if !preview {

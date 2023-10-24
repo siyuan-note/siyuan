@@ -1141,7 +1141,7 @@
       "/conf/appearance/boot",
       "/conf/appearance/langs",
       "/conf/appearance/emojis/conf.json",
-      "/conf/appearance/icons/index.html",
+      "/conf/appearance/icons/index.html"
     ],
     "name": "zip-file-name"
   }

@@ -1149,7 +1149,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
       "/conf/appearance/boot",
       "/conf/appearance/langs",
       "/conf/appearance/emojis/conf.json",
-      "/conf/appearance/icons/index.html",
+      "/conf/appearance/icons/index.html"
     ],
     "name": "zip-file-name"
   }

@@ -7,7 +7,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {resizeAV} from "../../util/resize";
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, preview = false) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -49,6 +49,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
+                preview,
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header

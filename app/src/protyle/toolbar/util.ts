@@ -9,7 +9,8 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
     }
     fetchPost("/api/template/render", {
         id: parentId,
-        path: pathString
+        path: pathString,
+        preview: true
     }, (response) => {
         element.innerHTML = `<div class="protyle-wysiwyg" style="padding: 8px">${response.data.content.replace(/contenteditable="true"/g, "")}</div>`;
     });

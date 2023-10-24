@@ -29,7 +29,7 @@ export const loadPlugins = async (app: App) => {
         loadPluginJS(app, item);
         css += item.css || "" + "\n";
     });
-    const pluginsStyle = document.getElementById("pluginsStyle")
+    const pluginsStyle = document.getElementById("pluginsStyle");
     if (pluginsStyle) {
         pluginsStyle.innerHTML = css;
     } else {

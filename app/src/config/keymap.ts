@@ -380,7 +380,7 @@ export const keymap = {
                     if (keys[1] === "heading") {
                         keys[1] = "headings";
                     }
-                    let hasConflict = false
+                    let hasConflict = false;
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
                         showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`);

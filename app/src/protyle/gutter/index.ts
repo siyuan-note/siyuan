@@ -55,7 +55,7 @@ export class Gutter {
         this.element.setAttribute("data-position", "right");
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
-            const buttonElement = event.target.parentElement
+            const buttonElement = event.target.parentElement;
             let selectIds: string[] = [buttonElement.getAttribute("data-node-id")];
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
@@ -1846,7 +1846,7 @@ export class Gutter {
                 const buttonHTML = `<button data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
-</button>`
+</button>`;
                 if (isShow) {
                     html = buttonHTML + html;
                 }

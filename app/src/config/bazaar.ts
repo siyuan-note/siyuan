@@ -932,7 +932,7 @@ export const bazaar = {
                     event.preventDefault();
                     return;
                 }
-            })
+            });
         });
 
         bazaar.element.querySelectorAll(".b3-select").forEach((selectElement: HTMLSelectElement) => {

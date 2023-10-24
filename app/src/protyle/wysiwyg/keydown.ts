@@ -68,7 +68,6 @@ import {getSavePath} from "../../util/newFile";
 import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
-import {copyPNG} from "../../menus/util";
 import {avKeydown} from "../render/av/keydown";
 import {resizeAV} from "../util/resize";
 

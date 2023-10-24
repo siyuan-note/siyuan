@@ -178,12 +178,12 @@ const saveUI = () => {
         onlyData: false,
         errorExit: false
     });
-}
+};
 
 export const unbindSaveUI = () => {
     window.removeEventListener("beforeunload", saveUI);
     window.removeEventListener("pagehide", saveUI);
-}
+};
 
 export const initWindow = async (app: App) => {
     /// #if !BROWSER

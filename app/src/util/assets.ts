@@ -225,7 +225,7 @@ export const setInlineStyle = (set = true) => {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";
     }
     if (set) {
-        const siyuanStyle = document.getElementById("siyuanStyle")
+        const siyuanStyle = document.getElementById("siyuanStyle");
         if (siyuanStyle) {
             siyuanStyle.innerHTML = style;
         } else {

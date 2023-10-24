@@ -251,6 +251,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 			// 重新生成 ID
 			n.ID = ast.NewNodeID()
 			n.SetIALAttr("id", n.ID)
+			n.RemoveIALAttr(av.NodeAttrNameAvs)
 
 			// Blocks created via template update time earlier than creation time https://github.com/siyuan-note/siyuan/issues/8607
 			refreshUpdated(n)

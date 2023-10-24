@@ -46,6 +46,45 @@ type AttributeView struct {
 	Views     []*View      `json:"views"`     // 视图
 }
 
+func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
+	ret = &AttributeView{}
+	data, err := gulu.JSON.MarshalJSON(av)
+	if nil != err {
+		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
+		return nil
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", av.ID, err)
+		return nil
+	}
+
+	ret.ID = ast.NewNodeID()
+	view, err := ret.GetView()
+	if nil == err {
+		view.ID = ast.NewNodeID()
+		ret.ViewID = view.ID
+	} else {
+		view = NewView()
+		ret.ViewID = view.ID
+		ret.Views = append(ret.Views, view)
+	}
+
+	keyIDMap := map[string]string{}
+	for _, kv := range ret.KeyValues {
+		newID := ast.NewNodeID()
+		keyIDMap[kv.Key.ID] = newID
+		kv.Key.ID = newID
+		kv.Values = []*Value{}
+	}
+
+	view.Table.ID = ast.NewNodeID()
+	for _, column := range view.Table.Columns {
+		column.ID = keyIDMap[column.ID]
+	}
+	view.Table.RowIDs = []string{}
+	return
+}
+
 // KeyValues 描述了属性视图属性列值的结构。
 type KeyValues struct {
 	Key    *Key     `json:"key"`              // 属性视图属性列

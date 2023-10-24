@@ -80,7 +80,12 @@ func renderTemplate(c *gin.Context) {
 		return
 	}
 
-	content, err := model.RenderTemplate(p, id)
+	preview := false
+	if previewArg := arg["preview"]; nil != previewArg {
+		preview = previewArg.(bool)
+	}
+
+	content, err := model.RenderTemplate(p, id, preview)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())

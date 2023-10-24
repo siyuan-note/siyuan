@@ -74,8 +74,15 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 func LoadPetals(frontend string) (ret []*Petal) {
 	ret = []*Petal{}
 
-	if Conf.Bazaar.PetalDisabled || !Conf.Bazaar.Trust {
+	if Conf.Bazaar.PetalDisabled {
 		return
+	}
+
+	if !Conf.Bazaar.Trust {
+		// 移动端没有集市模块，所以要默认开启，桌面端和 Docker 容器需要用户手动确认过信任后才能开启
+		if util.ContainerStd == util.Container || util.ContainerDocker == util.Container {
+			return
+		}
 	}
 
 	petals := getPetals()

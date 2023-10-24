@@ -25,11 +25,14 @@ export const afterExport = (exportPath: string, msgId: string) => {
     /// #endif
 };
 
-export const exportImage = (id: string) => {
+export const exportImage = (id: string, fileType:string) => {
     const exportDialog = new Dialog({
         title: window.siyuan.languages.exportAsImage,
         content: `<div class="b3-dialog__content" style="${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
-    <div style="${isMobile() ? "padding: 16px;margin: 16px 0" : "padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: var(--b3-border-radius-b);" class="export-img protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview"></div>
+    <div style="${isMobile() ? "padding: 16px;margin: 16px 0" : "padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: var(--b3-border-radius-b);" 
+class="export-img protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" 
+data-doc-type="${fileType}" 
+id="preview"></div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
 </div>

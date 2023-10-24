@@ -1890,16 +1890,10 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		var view *av.View
-		if "" != attrView.ViewID {
-			for _, v := range attrView.Views {
-				if v.ID == attrView.ViewID {
-					view = v
-					break
-				}
-			}
-		} else {
-			view = attrView.Views[0]
+		view, err := attrView.GetView()
+		if nil != err {
+			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
+			return ast.WalkContinue
 		}
 
 		table, err := renderAttributeViewTable(attrView, view)

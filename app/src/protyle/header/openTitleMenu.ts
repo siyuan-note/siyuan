@@ -208,6 +208,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click: () => {
                 showFileInFolder(path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));
@@ -229,7 +230,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }).element);
         }
         genImportMenu(protyle.notebookId, protyle.path);
-        window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
+        window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID, protyle.wysiwyg.element.getAttribute("data-doc-type")));
 
         if (protyle?.app?.plugins) {
             emitOpenMenu({

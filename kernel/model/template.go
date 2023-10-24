@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -163,11 +164,11 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return
 }
 
-func RenderTemplate(p, id string) (string, error) {
-	return renderTemplate(p, id)
+func RenderTemplate(p, id string, preview bool) (string, error) {
+	return renderTemplate(p, id, preview)
 }
 
-func renderTemplate(p, id string) (string, error) {
+func renderTemplate(p, id string, preview bool) (string, error) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
 		return "", err
@@ -250,6 +251,7 @@ func renderTemplate(p, id string) (string, error) {
 			// 重新生成 ID
 			n.ID = ast.NewNodeID()
 			n.SetIALAttr("id", n.ID)
+			n.RemoveIALAttr(av.NodeAttrNameAvs)
 
 			// Blocks created via template update time earlier than creation time https://github.com/siyuan-note/siyuan/issues/8607
 			refreshUpdated(n)
@@ -277,6 +279,57 @@ func renderTemplate(p, id string) (string, error) {
 				n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, "|", "&#124;")
 			}
 		}
+
+		if ast.NodeAttributeView == n.Type {
+			// 重新生成数据库视图
+			attrView, parseErr := av.ParseAttributeView(n.AttributeViewID)
+			if nil != parseErr {
+				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
+			} else {
+				cloned := av.ShallowCloneAttributeView(attrView)
+				if nil != cloned {
+					n.AttributeViewID = cloned.ID
+					if !preview {
+						// 非预览时持久化数据库
+						if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
+							logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
+						}
+					} else {
+						// 预览时使用简单表格渲染
+						view, getErr := attrView.GetView()
+						if nil != getErr {
+							logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
+							return ast.WalkContinue
+						}
+
+						table, renderErr := renderAttributeViewTable(attrView, view)
+						if nil != renderErr {
+							logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
+							return ast.WalkContinue
+						}
+
+						var aligns []int
+						for range table.Columns {
+							aligns = append(aligns, 0)
+						}
+						mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
+						mdTableHead := &ast.Node{Type: ast.NodeTableHead}
+						mdTable.AppendChild(mdTableHead)
+						mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
+						mdTableHead.AppendChild(mdTableHeadRow)
+						for _, col := range table.Columns {
+							cell := &ast.Node{Type: ast.NodeTableCell}
+							cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
+							mdTableHeadRow.AppendChild(cell)
+						}
+
+						n.InsertBefore(mdTable)
+						unlinks = append(unlinks, n)
+					}
+				}
+			}
+		}
+
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {

@@ -23,6 +23,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
 import {isBrowser} from "../util/functions";
+import {unbindSaveUI} from "../boot/onGetConfig";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -84,7 +85,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
                 iconHTML: "",
                 click: async () => {
-                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                         cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         properties: ["openDirectory", "createDirectory"],
@@ -276,6 +277,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             }
         }];
+        if (window.siyuan.storage[Constants.LOCAL_LAYOUTS].length > 0) {
+            layoutSubMenu.push({type: "separator"});
+        }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
                 iconHTML: Constants.ZWSP,
@@ -297,6 +301,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             return;
                         }
                         fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+                            unbindSaveUI();
                             window.location.reload();
                         });
                     });
@@ -440,26 +445,26 @@ const workspaceItem = (item: IWorkspace) => {
         iconHTML: Constants.ZWSP,
         type: "submenu",
         submenu: [{
-            iconHTML: Constants.ZWSP,
+            icon: "iconOpenWindow",
             label: window.siyuan.languages.openBy,
             click() {
                 openWorkspace(item.path);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click() {
                 showFileInFolder(item.path);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconCopy",
             label: window.siyuan.languages.copyPath,
             click() {
                 writeText(item.path);
                 showMessage(window.siyuan.languages.copied);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconTrashcan",
             label: window.siyuan.languages.removeWorkspaceTip,
             click() {
                 fetchPost("/api/system/removeWorkspaceDir", {path: item.path});

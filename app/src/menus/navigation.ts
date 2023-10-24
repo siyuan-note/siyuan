@@ -297,6 +297,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click: () => {
             shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));

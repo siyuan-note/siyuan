@@ -209,7 +209,7 @@ export const bindCardEvent = (options: {
                 fullscreen(options.element.querySelector(".card__main"),
                     options.element.querySelector('[data-type="fullscreen"]'));
                 resize(editor.protyle);
-                window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen = !window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen
+                window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen = !window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen;
                 setStorageVal(Constants.LOCAL_FLASHCARD,  window.siyuan.storage[Constants.LOCAL_FLASHCARD]);
                 event.stopPropagation();
                 event.preventDefault();

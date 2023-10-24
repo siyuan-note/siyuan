@@ -14,15 +14,15 @@ import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
 
-export const saveExport = (option: { type: string, id: string }) => {
+export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
             confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
-                renderPDF(option.id);
+                renderPDF(option.id, option.fileType);
             });
         } else {
-            renderPDF(option.id);
+            renderPDF(option.id, option.fileType);
         }
     } else if (option.type === "word") {
         const localData = window.siyuan.storage[Constants.LOCAL_EXPORTWORD];
@@ -69,7 +69,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
-const renderPDF = (id: string) => {
+const renderPDF = (id: string, fileType:string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
@@ -243,7 +243,9 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
+<div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" 
+data-doc-type="${fileType}" 
+id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
@@ -515,7 +517,7 @@ const renderPDF = (id: string) => {
     });
 };
 
-const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {
+const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubdocs?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, async (response) => {
@@ -569,17 +571,17 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                     }
                     afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
                 } else {
-                    onExport(exportResponse, savePath, option.type, removeAssets, msgId);
+                    onExport(exportResponse, savePath, option, removeAssets, msgId);
                 }
             });
         }
     });
 };
 
-const onExport = (data: IWebSocketData, filePath: string, type: string, removeAssets?: boolean, msgId?: string) => {
+const onExport = (data: IWebSocketData, filePath: string, exportOption:IExportOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
-    if (["html", "htmlmd"].includes(type) && window.siyuan.config.appearance.mode === 1) {
+    if (["html", "htmlmd"].includes(exportOption.type) && window.siyuan.config.appearance.mode === 1) {
         themeName = window.siyuan.config.appearance.themeDark;
         mode = 1;
     }
@@ -607,7 +609,10 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     </style>
 </head>
 <body>
-<div class="${["htmlmd", "word"].includes(type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
+<div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 
+style="max-width: 800px;margin: 0 auto;" 
+data-doc-type="${exportOption.fileType}" 
+id="preview">${data.data.content}</div>
 <script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
@@ -627,7 +632,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     };
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");
-    Protyle.mathRender(previewElement, "stage/protyle", ${type === "pdf"});
+    Protyle.mathRender(previewElement, "stage/protyle", ${exportOption.type === "pdf"});
     Protyle.mermaidRender(previewElement, "stage/protyle");
     Protyle.flowchartRender(previewElement, "stage/protyle");
     Protyle.graphvizRender(previewElement, "stage/protyle");

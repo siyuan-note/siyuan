@@ -172,6 +172,19 @@ const winOnMaxRestore = async () => {
     /// #endif
 };
 
+const saveUI = () => {
+    exportLayout({
+        reload: false,
+        onlyData: false,
+        errorExit: false
+    });
+};
+
+export const unbindSaveUI = () => {
+    window.removeEventListener("beforeunload", saveUI);
+    window.removeEventListener("pagehide", saveUI);
+};
+
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
     const winOnClose = (close = false) => {
@@ -509,19 +522,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
     }
-    window.addEventListener("beforeunload", () => {
-        exportLayout({
-            reload: false,
-            onlyData: false,
-            errorExit: false
-        });
-    }, false);
-    window.addEventListener("pagehide", () => {
-        exportLayout({
-            reload: false,
-            onlyData: false,
-            errorExit: false
-        });
-    }, false);
+    window.addEventListener("beforeunload", saveUI, false);
+    window.addEventListener("pagehide", saveUI, false);
     /// #endif
 };

@@ -222,7 +222,7 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 
 	if !gulu.File.IsDir(WorkspaceDir) {
-		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
 		if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
 			logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
 			os.Exit(logging.ExitCodeInitWorkspaceErr)

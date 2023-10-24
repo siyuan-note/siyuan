@@ -16,7 +16,11 @@
 
 package util
 
-import "regexp"
+import (
+	"regexp"
+
+	"github.com/88250/gulu"
+)
 
 var emojiRegex = regexp.MustCompile(`/([0-9#][\x{20E3}])|` +
 	`[\x{00ae}\x{00a9}\x{203C}\x{2047}\x{2048}\x{2049}\x{3030}\x{303D}\x{2139}\x{2122}\x{3297}\x{3299}]|` +
@@ -37,6 +41,8 @@ var emojiRegex = regexp.MustCompile(`/([0-9#][\x{20E3}])|` +
 	`[\x{2700}-\x{27BF}]|` +
 	`[\x{10000}-\x{E01EF}]`)
 
-func RemoveEmoji(text string) string {
-	return emojiRegex.ReplaceAllString(text, "")
+func RemoveEmojiInvisible(text string) (ret string) {
+	ret = emojiRegex.ReplaceAllString(text, "")
+	ret = gulu.Str.RemoveInvisible(ret)
+	return
 }

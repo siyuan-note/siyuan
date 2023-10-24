@@ -384,6 +384,7 @@ id="preview">
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
             editor: { 
+              fontSize: ${window.siyuan.config.editor.fontSize},
               codeLineWrap: true,
               codeLigatures: ${window.siyuan.config.editor.codeLigatures},
               plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",

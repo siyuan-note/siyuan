@@ -36,6 +36,7 @@ import {Custom} from "./dock/Custom";
 import {App} from "../index";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
+import {setTitle} from "../dialog/processSystem";
 
 export class Wnd {
     private app: App;
@@ -775,6 +776,7 @@ export class Wnd {
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app));
+                setTitle(window.siyuan.languages.siyuanNote);
             }
         }
         /// #if !BROWSER

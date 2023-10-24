@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -277,6 +278,23 @@ func renderTemplate(p, id string) (string, error) {
 				n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, "|", "&#124;")
 			}
 		}
+
+		if ast.NodeAttributeView == n.Type {
+			// 重新生成数据库视图
+			attrView, parseErr := av.ParseAttributeView(n.AttributeViewID)
+			if nil != parseErr {
+				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
+			} else {
+				cloned := av.CloneAttributeView(attrView)
+				if nil != cloned {
+					n.AttributeViewID = cloned.ID
+					if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
+						logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
+					}
+				}
+			}
+		}
+
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {

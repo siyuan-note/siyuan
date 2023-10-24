@@ -23,6 +23,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
 import {isBrowser} from "../util/functions";
+import {unbindSaveUI} from "../boot/onGetConfig";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -276,6 +277,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             }
         }];
+        if (window.siyuan.storage[Constants.LOCAL_LAYOUTS].length > 0) {
+            layoutSubMenu.push({type: "separator"});
+        }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
                 iconHTML: Constants.ZWSP,
@@ -297,6 +301,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             return;
                         }
                         fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+                            unbindSaveUI();
                             window.location.reload();
                         });
                     });

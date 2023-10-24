@@ -1448,7 +1448,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		if !gulu.File.IsExist(tplPath) {
 			logging.LogWarnf("not found daily note template [%s]", tplPath)
 		} else {
-			dom, err = renderTemplate(tplPath, id)
+			dom, err = renderTemplate(tplPath, id, false)
 			if nil != err {
 				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
 			}

@@ -164,11 +164,11 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return
 }
 
-func RenderTemplate(p, id string) (string, error) {
-	return renderTemplate(p, id)
+func RenderTemplate(p, id string, preview bool) (string, error) {
+	return renderTemplate(p, id, preview)
 }
 
-func renderTemplate(p, id string) (string, error) {
+func renderTemplate(p, id string, preview bool) (string, error) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
 		return "", err
@@ -288,8 +288,10 @@ func renderTemplate(p, id string) (string, error) {
 				cloned := av.CloneAttributeView(attrView)
 				if nil != cloned {
 					n.AttributeViewID = cloned.ID
-					if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
-						logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
+					if !preview {
+						if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
+							logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
+						}
 					}
 				}
 			}

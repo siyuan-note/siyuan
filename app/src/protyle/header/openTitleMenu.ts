@@ -208,6 +208,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click: () => {
                 showFileInFolder(path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));

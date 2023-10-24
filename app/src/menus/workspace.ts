@@ -85,7 +85,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
                 iconHTML: "",
                 click: async () => {
-                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET,{
+                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                         cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         properties: ["openDirectory", "createDirectory"],
@@ -445,26 +445,26 @@ const workspaceItem = (item: IWorkspace) => {
         iconHTML: Constants.ZWSP,
         type: "submenu",
         submenu: [{
-            iconHTML: Constants.ZWSP,
+            icon: "iconOpenWindow",
             label: window.siyuan.languages.openBy,
             click() {
                 openWorkspace(item.path);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click() {
                 showFileInFolder(item.path);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconCopy",
             label: window.siyuan.languages.copyPath,
             click() {
                 writeText(item.path);
                 showMessage(window.siyuan.languages.copied);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            icon: "iconTrashcan",
             label: window.siyuan.languages.removeWorkspaceTip,
             click() {
                 fetchPost("/api/system/removeWorkspaceDir", {path: item.path});

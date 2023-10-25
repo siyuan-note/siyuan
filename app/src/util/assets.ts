@@ -218,7 +218,7 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg .h5 img.emoji, .b3-typography h5 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.13 * 1.25)}px}
 .protyle-wysiwyg .h6 img.emoji, .b3-typography h6 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.25)}px}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {

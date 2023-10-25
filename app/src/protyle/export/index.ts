@@ -68,6 +68,16 @@ export const saveExport = (option: IExportOptions) => {
     /// #endif
 };
 
+const getSnippetCSS = () => {
+    let snippetCSS = "";
+    document.querySelectorAll("style").forEach((item) => {
+        if (item.id.startsWith("snippet")) {
+            snippetCSS += item.innerHTML;
+        }
+    });
+    return snippetCSS;
+};
+
 /// #if !BROWSER
 const renderPDF = (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
@@ -78,12 +88,6 @@ const renderPDF = (id: string) => {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
-    let snippetCSS = "";
-    document.querySelectorAll("style").forEach((item) => {
-        if (item.id.startsWith("snippet")) {
-            snippetCSS += item.innerHTML;
-        }
-    });
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
@@ -101,6 +105,7 @@ const renderPDF = (id: string) => {
     <style>
         body {
           margin: 0;
+          font-family: var(--b3-font-family);
         }
         
         #action {
@@ -152,10 +157,8 @@ const renderPDF = (id: string) => {
           margin-bottom: 12px;
         }
         ${setInlineStyle(false)}
-    </style>
-    <style>
         ${document.getElementById("pluginsStyle").innerHTML}
-        ${snippetCSS}
+        ${getSnippetCSS()}
     </style>
 </head>
 <body>
@@ -617,8 +620,10 @@ const onExport = (data: IWebSocketData, filePath: string, exportOption: IExportO
     ${themeStyle}
     <title>${pathPosix().basename(filePath)} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
     <style>
-        body {background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
+        body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${setInlineStyle(false)}
+        ${document.getElementById("pluginsStyle").innerHTML}
+        ${getSnippetCSS()}
     </style>
 </head>
 <body>

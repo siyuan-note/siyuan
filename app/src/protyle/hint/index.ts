@@ -517,7 +517,7 @@ ${genHintItemHTML(item)}
                 }, response => {
                     protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
-                        color: `${response.data}${Constants.ZWSP}${(fileNames.length === 2 || refIsS) ? "s" : "d"}${Constants.ZWSP}${(fileNames.length === 2 ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
+                        color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
                 });
             });

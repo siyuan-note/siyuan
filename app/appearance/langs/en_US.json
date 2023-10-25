@@ -1089,7 +1089,7 @@
     "6": "Create notebook [%s] folder [%s] failed: %s",
     "7": "Remove notebook [%s] path [%s] failed: %s",
     "8": "Check update failed",
-    "9": "A new version is available, please browse the release announcement %s",
+    "9": "\uD83D\uDE80 A new version is available, please browse the release announcement %s",
     "10": "Is the latest version",
     "11": "\uD83D\uDCE2 系統公告：<a target='_blank' href='%s'>%s</a>",
     "12": "Query asset failed [%s]",

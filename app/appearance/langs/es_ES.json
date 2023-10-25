@@ -1089,7 +1089,7 @@
     "6": "Crear cuaderno [%s] carpeta [%s] falló: %s",
     "7": "Eliminar libreta [%s] ruta [%s] falló: %s",
     "8": "Comprobar la actualización falló",
-    "9": "Una nueva versión está disponible, por favor, busque el anuncio de lanzamiento %s",
+    "9": "\uD83D\uDE80 Una nueva versión está disponible, por favor, busque el anuncio de lanzamiento %s",
     "10": "Es la última versión",
     "11": "\uD83D\uDCE2 Anuncio del sistema: <a target='_blank' href='%s'>%s</a>",
     "12": "Fallo en la consulta de activos [%s]",

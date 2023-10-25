@@ -230,7 +230,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }).element);
         }
         genImportMenu(protyle.notebookId, protyle.path);
-        window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID, protyle.wysiwyg.element.getAttribute("data-doc-type")));
+        window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
 
         if (protyle?.app?.plugins) {
             emitOpenMenu({

@@ -501,7 +501,6 @@ interface IPluginDockTab {
 interface IExportOptions {
     type: string,
     id: string,
-    fileType: string
 }
 
 interface IOpenFileOptions {

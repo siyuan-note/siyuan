@@ -431,7 +431,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
     }];
 };
 
-export const exportMd = (id: string, fileType = "NodeDocument") => {
+export const exportMd = (id: string) => {
     return new MenuItem({
         label: window.siyuan.languages.export,
         type: "submenu",
@@ -532,7 +532,7 @@ export const exportMd = (id: string, fileType = "NodeDocument") => {
             label: window.siyuan.languages.image,
             icon: "iconImage",
             click: () => {
-                exportImage(id, fileType);
+                exportImage(id);
             }
         },
             /// #if !BROWSER
@@ -540,26 +540,26 @@ export const exportMd = (id: string, fileType = "NodeDocument") => {
                 label: "PDF",
                 icon: "iconPDF",
                 click: () => {
-                    saveExport({type: "pdf", id, fileType});
+                    saveExport({type: "pdf", id});
                 }
             }, {
                 label: "HTML (SiYuan)",
                 iconClass: "ft__error",
                 icon: "iconHTML5",
                 click: () => {
-                    saveExport({type: "html", id, fileType});
+                    saveExport({type: "html", id});
                 }
             }, {
                 label: "HTML (Markdown)",
                 icon: "iconHTML5",
                 click: () => {
-                    saveExport({type: "htmlmd", id, fileType});
+                    saveExport({type: "htmlmd", id});
                 }
             }, {
                 label: "Word .docx",
                 icon: "iconExact",
                 click: () => {
-                    saveExport({type: "word", id, fileType});
+                    saveExport({type: "word", id});
                 }
             }, {
                 label: window.siyuan.languages.more,

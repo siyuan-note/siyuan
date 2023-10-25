@@ -19,10 +19,10 @@ export const saveExport = (option: IExportOptions) => {
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
             confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
-                renderPDF(option.id, option.fileType);
+                renderPDF(option.id);
             });
         } else {
-            renderPDF(option.id, option.fileType);
+            renderPDF(option.id);
         }
     } else if (option.type === "word") {
         const localData = window.siyuan.storage[Constants.LOCAL_EXPORTWORD];
@@ -69,7 +69,7 @@ export const saveExport = (option: IExportOptions) => {
 };
 
 /// #if !BROWSER
-const renderPDF = (id: string, fileType: string) => {
+const renderPDF = (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
@@ -244,7 +244,6 @@ const renderPDF = (id: string, fileType: string) => {
     </div>
 </div>
 <div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" 
-data-doc-type="${fileType}" 
 id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
@@ -359,8 +358,21 @@ id="preview">
             cb(response);
         })
     }
-    const renderPreview = (html) => {
-        previewElement.innerHTML = html;
+    const renderPreview = (data) => {
+        previewElement.innerHTML = data.content;
+        previewElement.setAttribute("data-doc-type", data.type || "NodeDocument");
+        if (data.attrs.memo) {
+            previewElement.setAttribute("memo", data.attrs.memo);
+        }
+        if (data.attrs.name) {
+            previewElement.setAttribute("name", data.attrs.name);
+        }
+        if (data.attrs.bookmark) {
+            previewElement.setAttribute("bookmark", data.attrs.bookmark);
+        }
+        if (data.attrs.alias) {
+            previewElement.setAttribute("alias", data.attrs.alias);
+        }
         Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
         Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
         Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
@@ -439,7 +451,7 @@ id="preview">
                     return;
                 }
                 setPadding();
-                renderPreview(response2.data.content);
+                renderPreview(response2.data);
             })
         };
         
@@ -510,7 +522,7 @@ id="preview">
             actionElement.remove();
         });
         setPadding();
-        renderPreview(response.data.content);
+        renderPreview(response.data);
     });
 </script></body></html>`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {

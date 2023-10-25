@@ -1089,7 +1089,7 @@
     "6": "La création du dossier du carnet de notes  [%s] dossier [%s] failed: %s",
     "7": "La suppression du carnet de notes [%s] path [%s] a échoué : %s",
     "8": "La vérification de la mise à jour a échoué",
-    "9": "Une nouvelle version est disponible, veuillez consulter l'annonce de la version %s",
+    "9": "\uD83D\uDE80 Une nouvelle version est disponible, veuillez consulter l'annonce de la version %s",
     "10": "C'est la dernière version",
     "11": "\uD83D\uDCE2 Annonce système : <a target='_blank' href='%s'>%s</a>",
     "12": "Échec de la requête asset [%s]",

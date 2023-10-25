@@ -480,6 +480,7 @@ func NewAssetsSearcher() *AssetsSearcher {
 const (
 	TxtAssetContentMaxSize = 1024 * 1024 * 4
 	PDFAssetContentMaxPage = 1024
+	PDFAssetContentMaxSize = 1024 * 1024 * 64
 )
 
 type AssetParseResult struct {
@@ -825,6 +826,12 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	if PDFAssetContentMaxPage < pc.PageCount {
 		// PDF files longer than 1024 pages are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9053
 		logging.LogWarnf("ignore large PDF asset [%s] with [%d] pages", absPath, pc.PageCount)
+		return
+	}
+
+	if PDFAssetContentMaxSize < len(pdfData) {
+		// PDF files larger than 64MB are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9500
+		logging.LogWarnf("ignore large PDF asset [%s] with [%s]", absPath, humanize.Bytes(uint64(len(pdfData))))
 		return
 	}
 

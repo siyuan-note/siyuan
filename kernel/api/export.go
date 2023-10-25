@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -462,14 +463,23 @@ func exportPreviewHTML(c *gin.Context) {
 	if nil != arg["image"] {
 		image = arg["image"].(bool)
 	}
-	name, content := model.ExportHTML(id, "", true, image, keepFold, merge)
+	name, content, node := model.ExportHTML(id, "", true, image, keepFold, merge)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
+
+	attrs := map[string]string{}
+	var typ string
+	if nil != node {
+		attrs = parse.IAL2Map(node.KramdownIAL)
+		typ = node.Type.String()
+	}
 
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,
 		"content": content,
+		"attrs":   attrs,
+		"type":    typ,
 	}
 }
 
@@ -493,7 +503,7 @@ func exportHTML(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
-	name, content := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
+	name, content, _ := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

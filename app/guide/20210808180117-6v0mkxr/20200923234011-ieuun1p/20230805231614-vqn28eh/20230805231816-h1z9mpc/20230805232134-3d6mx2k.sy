@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232134-3d6mx2k",
 		"title": "Search asset content",
-		"updated": "20230903112423"
+		"updated": "20231025095300"
 	},
 	"Children": [
 		{
@@ -205,7 +205,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​:"
+					"Data": "​​:"
 				}
 			]
 		},
@@ -215,27 +215,81 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230903112419-45ps71g",
-				"updated": "20230903112423"
+				"updated": "20231025095300"
 			},
 			"Children": [
 				{
-					"ID": "20230903112419-t7iom3o",
+					"ID": "20231025095236-xu5tp9f",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230903112419-t7iom3o",
-						"updated": "20230903112423"
+						"id": "20231025095236-xu5tp9f"
 					},
 					"Children": [
 						{
-							"ID": "20230903112419-8gd73ed",
+							"ID": "20231025095236-18gmg9h",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230903112419-8gd73ed",
-								"updated": "20230903112423"
+								"id": "20231025095236-18gmg9h",
+								"updated": "20231025095237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text files larger than 4MB are not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095244-lpf6spo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095244-lpf6spo"
+					},
+					"Children": [
+						{
+							"ID": "20231025095244-m8ut4h2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095244-m8ut4h2",
+								"updated": "20231025095244"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDFs larger than 64MB or 1024 pages are not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095259-wrlui2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095259-wrlui2y",
+						"updated": "20231025095300"
+					},
+					"Children": [
+						{
+							"ID": "20231025095259-cm641sa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095259-cm641sa",
+								"updated": "20231025095300"
 							},
 							"Children": [
 								{

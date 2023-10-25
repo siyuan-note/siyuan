@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805230218-aea8icj",
 		"title": "搜索资源文件内容",
-		"updated": "20230903112313"
+		"updated": "20231025095306"
 	},
 	"Children": [
 		{
@@ -207,7 +207,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​​："
 				}
 			]
 		},
@@ -217,27 +217,81 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230903112243-pwm33kc",
-				"updated": "20230903112313"
+				"updated": "20231025095306"
 			},
 			"Children": [
 				{
-					"ID": "20230903112244-2ye7sed",
+					"ID": "20231025095048-l224arr",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230903112244-2ye7sed",
-						"updated": "20230903112313"
+						"id": "20231025095048-l224arr"
 					},
 					"Children": [
 						{
-							"ID": "20230903112244-ux44rel",
+							"ID": "20231025095048-u6ge0ue",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230903112244-ux44rel",
-								"updated": "20230903112313"
+								"id": "20231025095048-u6ge0ue",
+								"updated": "20231025095053"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持大于 4MB 的文本文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095053-a0quwv1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095053-a0quwv1"
+					},
+					"Children": [
+						{
+							"ID": "20231025095053-ee3etgb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095053-ee3etgb",
+								"updated": "20231025095107"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持大于 64MB 或 1024 页的 PDF"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095306-wro7c1x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095306-wro7c1x",
+						"updated": "20231025095306"
+					},
+					"Children": [
+						{
+							"ID": "20231025095306-6gcc6ba",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095306-6gcc6ba",
+								"updated": "20231025095306"
 							},
 							"Children": [
 								{

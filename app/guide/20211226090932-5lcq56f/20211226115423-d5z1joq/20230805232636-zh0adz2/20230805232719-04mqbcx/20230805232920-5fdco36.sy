@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232920-5fdco36",
 		"title": "搜索資源文件內容",
-		"updated": "20230903112449"
+		"updated": "20231025095336"
 	},
 	"Children": [
 		{
@@ -220,9 +220,64 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230903112449-mq7jbfe",
-				"updated": "20230903112449"
+				"updated": "20231025095336"
 			},
 			"Children": [
+				{
+					"ID": "20231025095311-dviybbz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095311-dviybbz"
+					},
+					"Children": [
+						{
+							"ID": "20231025095311-uri9j00",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095311-uri9j00",
+								"updated": "20231025095316"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支援大於 4MB 的文字文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095319-kupw6kw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095319-kupw6kw",
+						"updated": "20231025095323"
+					},
+					"Children": [
+						{
+							"ID": "20231025095319-egfy5yi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095319-egfy5yi",
+								"updated": "20231025095323"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支援大於 64MB 或 1024 頁的 PDF"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20230903112449-ihee8jo",
 					"Type": "NodeListItem",
@@ -232,7 +287,7 @@
 					},
 					"Properties": {
 						"id": "20230903112449-ihee8jo",
-						"updated": "20230903112449"
+						"updated": "20231025095336"
 					},
 					"Children": [
 						{
@@ -240,12 +295,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230903112449-v6wir40",
-								"updated": "20230903112449"
+								"updated": "20231025095336"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Android/iOS 端不支持 PDF 資源文件內容搜索"
+									"Data": "Android/iOS 端不支援 PDF 資源檔案內容搜索"
 								}
 							]
 						}

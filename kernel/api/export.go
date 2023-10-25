@@ -467,6 +467,7 @@ func exportPreviewHTML(c *gin.Context) {
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
+	// Add `data-doc-type` and attribute when exporting image and PDF https://github.com/siyuan-note/siyuan/issues/9497
 	attrs := map[string]string{}
 	var typ string
 	if nil != node {

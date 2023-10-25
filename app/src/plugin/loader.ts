@@ -2,7 +2,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {exportLayout, resizeTopbar} from "../layout/util";
+import {exportLayout, resizeTopBar} from "../layout/util";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
@@ -187,7 +187,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         }
     }
     /// #if !MOBILE
-    resizeTopbar();
+    resizeTopBar();
     mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status");

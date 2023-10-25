@@ -221,7 +221,7 @@ export abstract class Constants {
     };
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃⇧⇥", "⌃⇥", "⌘⇥", "⇧⌘⇥", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
@@ -254,6 +254,17 @@ export abstract class Constants {
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             recentDocs: {default: "⌘E", custom: "⌘E"},
+            goToTab1: {default: "⌘1", custom: "⌘1"},
+            goToTab2: {default: "⌘2", custom: "⌘2"},
+            goToTab3: {default: "⌘3", custom: "⌘3"},
+            goToTab4: {default: "⌘4", custom: "⌘4"},
+            goToTab5: {default: "⌘5", custom: "⌘5"},
+            goToTab6: {default: "⌘6", custom: "⌘6"},
+            goToTab7: {default: "⌘7", custom: "⌘7"},
+            goToTab8: {default: "⌘8", custom: "⌘8"},
+            goToTab9: {default: "⌘9", custom: "⌘9"},
+            goToTabNext: {default: "⇧⌘]", custom: "⇧⌘]"},
+            goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},
@@ -261,6 +272,11 @@ export abstract class Constants {
             splitMoveR: {default: "", custom: ""},
             splitTB: {default: "", custom: ""},
             splitMoveB: {default: "", custom: ""},
+            closeOthers: {default: "", custom: ""},
+            closeAll: {default: "", custom: ""},
+            closeUnmodified: {default: "", custom: ""},
+            closeLeft: {default: "", custom: ""},
+            closeRight: {default: "", custom: ""},
         },
         editor: {
             general: {

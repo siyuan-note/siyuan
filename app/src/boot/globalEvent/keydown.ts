@@ -10,7 +10,9 @@ import {
 import {newFile} from "../../util/newFile";
 import {Constants} from "../../constants";
 import {openSetting} from "../../config";
-import {copyTab, getDockByType, getInstanceById, resizeTabs} from "../../layout/util";
+import {getInstanceById} from "../../layout/util";
+import {closeTabByType, copyTab, getDockByType, resizeTabs, switchTabByIndex} from "../../layout/tabUtil";
+import {getActiveTab} from "../../layout/tabUtil";
 import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {setEditMode} from "../../protyle/util/setEditMode";
@@ -156,7 +158,6 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
 };
 
 const editKeydown = (app: App, event: KeyboardEvent) => {
-    const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
     let protyle: IProtyle;
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -177,14 +178,14 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             }
         });
     }
-    if (!protyle && activeTabElement) {
-        const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
-        if (tab.model instanceof Editor) {
-            protyle = tab.model.editor.protyle;
-        } else if (tab.model instanceof Search) {
-            protyle = tab.model.edit.protyle;
-        } else if (tab.model instanceof Custom && tab.model.data?.editor instanceof Protyle) {
-            protyle = tab.model.data.editor.protyle;
+    const activeTab = getActiveTab()
+    if (!protyle && activeTab) {
+        if (activeTab.model instanceof Editor) {
+            protyle = activeTab.model.editor.protyle;
+        } else if (activeTab.model instanceof Search) {
+            protyle = activeTab.model.edit.protyle;
+        } else if (activeTab.model instanceof Custom && activeTab.model.data?.editor instanceof Protyle) {
+            protyle = activeTab.model.data.editor.protyle;
         } else {
             return false;
         }
@@ -1338,7 +1339,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     // close tab
     if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
         event.preventDefault();
-        let activeTabElement = document.querySelector(".layout__tab--active");
+        const activeTabElement = document.querySelector(".layout__tab--active");
         if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
             let type = "";
             Array.from(activeTabElement.classList).find(item => {
@@ -1352,18 +1353,131 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             }
             return;
         }
-        activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
-        if (activeTabElement) {
-            const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
+        const tab = getActiveTab(false);
+        if (tab) {
             tab.parent.removeTab(tab.id);
-            return;
         }
-        getAllTabs().find(item => {
-            if (item.headElement?.classList.contains("item--focus")) {
-                item.parent.removeTab(item.id);
-                return true;
+        return;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab1.custom, event) && !event.repeat) {
+        switchTabByIndex(0);
+        event.preventDefault();
+        return;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab2.custom, event) && !event.repeat) {
+        switchTabByIndex(1);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab3.custom, event) && !event.repeat) {
+        switchTabByIndex(2);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab4.custom, event) && !event.repeat) {
+        switchTabByIndex(3);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab5.custom, event) && !event.repeat) {
+        switchTabByIndex(4);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab6.custom, event) && !event.repeat) {
+        switchTabByIndex(5);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab7.custom, event) && !event.repeat) {
+        switchTabByIndex(6);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab8.custom, event) && !event.repeat) {
+        switchTabByIndex(7);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTab9.custom, event) && !event.repeat) {
+        switchTabByIndex(-1);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTabNext.custom, event) && !event.repeat) {
+        switchTabByIndex(-3);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.goToTabPrev.custom, event) && !event.repeat) {
+        switchTabByIndex(-2);
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.closeOthers.custom, event) && !event.repeat) {
+        const tab = getActiveTab();
+        if (tab) {
+            closeTabByType(tab, "closeOthers");
+        }
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.closeAll.custom, event) && !event.repeat) {
+        const tab = getActiveTab();
+        if (tab) {
+            closeTabByType(tab, "closeAll");
+        }
+        event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.closeUnmodified.custom, event) && !event.repeat) {
+        const tab = getActiveTab();
+        if (tab) {
+            const unmodifiedTabs: Tab[] = []
+            tab.parent.children.forEach((item: Tab) => {
+                const editor = item.model as Editor;
+                if (!editor || (editor.editor?.protyle && !editor.editor?.protyle.updated)) {
+                    unmodifiedTabs.push(item);
+                }
+            });
+            if (unmodifiedTabs.length > 0) {
+                closeTabByType(tab, "other", unmodifiedTabs);
             }
-        });
+        }
+        event.preventDefault();
+        return;
+    }
+    if ((matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event) || matchHotKey(window.siyuan.config.keymap.general.closeRight.custom, event)) &&
+        !event.repeat) {
+        const tab = getActiveTab();
+        if (tab) {
+            const leftTabs: Tab[] = [];
+            const rightTabs: Tab[] = [];
+            let midIndex = -1;
+            tab.parent.children.forEach((item: Tab, index: number) => {
+                const editor = item.model as Editor;
+                if (item.id === tab.id) {
+                    midIndex = index;
+                }
+                if (midIndex === -1) {
+                    leftTabs.push(item);
+                } else if (index > midIndex) {
+                    rightTabs.push(item);
+                }
+            });
+            if (matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event)) {
+                if (leftTabs.length > 0) {
+                    closeTabByType(tab, "other", leftTabs);
+                }
+            } else {
+                if (rightTabs.length > 0) {
+                    closeTabByType(tab, "other", rightTabs);
+                }
+            }
+        }
+        event.preventDefault();
         return;
     }
 
@@ -1372,21 +1486,18 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event)) && !event.repeat) {
         event.preventDefault();
-        const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
-        if (activeTabElement) {
-            const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
-            if (tab) {
-                if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
-                    tab.parent.split("lr").addTab(copyTab(app, tab));
-                } else if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event)) {
-                    tab.parent.split("tb").addTab(copyTab(app, tab));
-                } else if (tab.parent.children.length > 1) {
-                    const newWnd = tab.parent.split(matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event) ? "tb" : "lr");
-                    newWnd.headersElement.append(tab.headElement);
-                    newWnd.headersElement.parentElement.classList.remove("fn__none");
-                    newWnd.moveTab(tab);
-                    resizeTabs();
-                }
+        const tab = getActiveTab(false);
+        if (tab) {
+            if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
+                tab.parent.split("lr").addTab(copyTab(app, tab));
+            } else if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event)) {
+                tab.parent.split("tb").addTab(copyTab(app, tab));
+            } else if (tab.parent.children.length > 1) {
+                const newWnd = tab.parent.split(matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event) ? "tb" : "lr");
+                newWnd.headersElement.append(tab.headElement);
+                newWnd.headersElement.parentElement.classList.remove("fn__none");
+                newWnd.moveTab(tab);
+                resizeTabs();
             }
         }
         return;

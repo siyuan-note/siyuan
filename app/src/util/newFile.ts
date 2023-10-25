@@ -1,7 +1,7 @@
 import {showMessage} from "../dialog/message";
 import {getAllModels} from "../layout/getAll";
 import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {getDockByType} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
 import {openFileById} from "../editor/util";

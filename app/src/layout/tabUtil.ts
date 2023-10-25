@@ -43,21 +43,21 @@ export const getActiveTab = (wndActive = true) => {
 export const switchTabByIndex = (index: number) => {
     const activeDockIcoElement = document.querySelector(".dock .dock__item--activefocus");
     if (activeDockIcoElement) {
-        let indexElement = activeDockIcoElement.parentElement.children[index]
+        let indexElement = activeDockIcoElement.parentElement.children[index];
         if (index === -1) {
             // 最后一个
-            indexElement = activeDockIcoElement.parentElement.lastElementChild
+            indexElement = activeDockIcoElement.parentElement.lastElementChild;
             if (!indexElement.getAttribute("data-type")) {
-                indexElement = indexElement.previousElementSibling
+                indexElement = indexElement.previousElementSibling;
             }
         } else if (index === -2) {
             // 上一个
-            indexElement = activeDockIcoElement.previousElementSibling
+            indexElement = activeDockIcoElement.previousElementSibling;
         } else if (index === -3) {
             // 下一个
-            indexElement = activeDockIcoElement.nextElementSibling
+            indexElement = activeDockIcoElement.nextElementSibling;
         }
-        const type = indexElement?.getAttribute("data-type")
+        const type = indexElement?.getAttribute("data-type");
         if (type) {
             getDockByType(type)?.toggleModel(type, true, false);
         }
@@ -65,23 +65,23 @@ export const switchTabByIndex = (index: number) => {
     }
     const tab = getActiveTab(false);
     if (tab) {
-        let indexElement = tab.parent.headersElement.children[index]
+        let indexElement = tab.parent.headersElement.children[index];
         if (index === -1) {
             // 最后一个
-            indexElement = tab.parent.headersElement.lastElementChild
+            indexElement = tab.parent.headersElement.lastElementChild;
         } else if (index === -2) {
             // 上一个
-            indexElement = tab.headElement.previousElementSibling
+            indexElement = tab.headElement.previousElementSibling;
         } else if (index === -3) {
             // 下一个
-            indexElement = tab.headElement.nextElementSibling
+            indexElement = tab.headElement.nextElementSibling;
         }
         if (indexElement) {
             tab.parent.switchTab(indexElement as HTMLElement, true);
             tab.parent.showHeading();
         }
     }
-}
+};
 
 let resizeTimeout: number;
 export const resizeTabs = () => {

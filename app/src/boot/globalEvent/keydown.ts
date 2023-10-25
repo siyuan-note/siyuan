@@ -178,7 +178,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             }
         });
     }
-    const activeTab = getActiveTab()
+    const activeTab = getActiveTab();
     if (!protyle && activeTab) {
         if (activeTab.model instanceof Editor) {
             protyle = activeTab.model.editor.protyle;
@@ -1435,7 +1435,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.closeUnmodified.custom, event) && !event.repeat) {
         const tab = getActiveTab(false);
         if (tab) {
-            const unmodifiedTabs: Tab[] = []
+            const unmodifiedTabs: Tab[] = [];
             tab.parent.children.forEach((item: Tab) => {
                 const editor = item.model as Editor;
                 if (!editor || (editor.editor?.protyle && !editor.editor?.protyle.updated)) {

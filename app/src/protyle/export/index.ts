@@ -69,7 +69,7 @@ export const saveExport = (option: IExportOptions) => {
 };
 
 /// #if !BROWSER
-const renderPDF = (id: string, fileType:string) => {
+const renderPDF = (id: string, fileType: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
@@ -579,7 +579,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
     });
 };
 
-const onExport = (data: IWebSocketData, filePath: string, exportOption:IExportOptions, removeAssets?: boolean, msgId?: string) => {
+const onExport = (data: IWebSocketData, filePath: string, exportOption: IExportOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(exportOption.type) && window.siyuan.config.appearance.mode === 1) {

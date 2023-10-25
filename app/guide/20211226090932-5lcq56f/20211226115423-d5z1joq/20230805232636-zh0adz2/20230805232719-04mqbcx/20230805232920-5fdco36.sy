@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232920-5fdco36",
 		"title": "搜索資源文件內容",
-		"updated": "20231025095336"
+		"updated": "20231025095553"
 	},
 	"Children": [
 		{
@@ -220,7 +220,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230903112449-mq7jbfe",
-				"updated": "20231025095336"
+				"updated": "20231025095553"
 			},
 			"Children": [
 				{
@@ -259,7 +259,7 @@
 					},
 					"Properties": {
 						"id": "20231025095319-kupw6kw",
-						"updated": "20231025095323"
+						"updated": "20231025095553"
 					},
 					"Children": [
 						{
@@ -267,12 +267,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231025095319-egfy5yi",
-								"updated": "20231025095323"
+								"updated": "20231025095553"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支援大於 64MB 或 1024 頁的 PDF"
+									"Data": "不支援大於 128MB 或 1024 頁的 PDF"
 								}
 							]
 						}

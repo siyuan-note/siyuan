@@ -1417,7 +1417,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeOthers.custom, event) && !event.repeat) {
-        const tab = getActiveTab();
+        const tab = getActiveTab(false);
         if (tab) {
             closeTabByType(tab, "closeOthers");
         }
@@ -1425,7 +1425,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeAll.custom, event) && !event.repeat) {
-        const tab = getActiveTab();
+        const tab = getActiveTab(false);
         if (tab) {
             closeTabByType(tab, "closeAll");
         }
@@ -1433,7 +1433,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeUnmodified.custom, event) && !event.repeat) {
-        const tab = getActiveTab();
+        const tab = getActiveTab(false);
         if (tab) {
             const unmodifiedTabs: Tab[] = []
             tab.parent.children.forEach((item: Tab) => {
@@ -1451,13 +1451,12 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
     if ((matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event) || matchHotKey(window.siyuan.config.keymap.general.closeRight.custom, event)) &&
         !event.repeat) {
-        const tab = getActiveTab();
+        const tab = getActiveTab(false);
         if (tab) {
             const leftTabs: Tab[] = [];
             const rightTabs: Tab[] = [];
             let midIndex = -1;
             tab.parent.children.forEach((item: Tab, index: number) => {
-                const editor = item.model as Editor;
                 if (item.id === tab.id) {
                     midIndex = index;
                 }

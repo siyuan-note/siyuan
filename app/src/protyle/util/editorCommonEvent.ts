@@ -1060,11 +1060,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部
                 targetElement = editorElement.lastElementChild as HTMLElement;
-                point.className = "dragover__bottom"
+                point.className = "dragover__bottom";
             } else if (event.clientY < editorElement.firstElementChild.getBoundingClientRect().top) {
                 // 命中顶部
-                targetElement = editorElement.firstElementChild as HTMLElement
-                point.className = "dragover__top"
+                targetElement = editorElement.firstElementChild as HTMLElement;
+                point.className = "dragover__top";
             } else {
                 if (event.clientX < editorPosition.left) {
                     // 左侧
@@ -1105,7 +1105,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (point.className) {
-                targetElement.classList.add(point.className)
+                targetElement.classList.add(point.className);
                 return;
             }
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
@@ -1197,7 +1197,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverElement = targetElement;
         }
     });
-    editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
+    editorElement.addEventListener("dragleave", () => {
         editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
             item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
         });

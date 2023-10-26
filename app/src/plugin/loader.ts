@@ -7,7 +7,6 @@ import {exportLayout, resizeTopBar} from "../layout/util";
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
-import {Menu} from "./Menu";
 
 const getObject = (key: string) => {
     const api = {

@@ -105,7 +105,7 @@ class App {
                                     if (unPinMenu) {
                                         unPinMenu.forEach(unpinItem => {
                                             unPinsMenu.push(unpinItem);
-                                        })
+                                        });
                                     }
                                 });
                                 if (unPinsMenu.length > 0) {

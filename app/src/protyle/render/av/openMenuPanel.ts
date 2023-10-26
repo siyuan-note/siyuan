@@ -296,13 +296,17 @@ export const openMenuPanel = (options: {
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
+            let targetElement = hasClosestByAttribute(target, "draggable", "true");
+            if (!targetElement) {
+                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true")
+            }
             if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
                 return;
             }
             event.preventDefault();
             if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
                 const nodeRect = targetElement.getBoundingClientRect();
+                targetElement.classList.remove("dragover__bottom", "dragover__top");
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                 } else {
@@ -312,12 +316,10 @@ export const openMenuPanel = (options: {
             }
             dragoverElement = targetElement;
         });
-        avPanelElement.addEventListener("dragleave", (event) => {
-            const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
-            if (targetElement) {
-                targetElement.classList.remove("dragover__top", "dragover__bottom");
-            }
+        avPanelElement.addEventListener("dragleave", () => {
+            avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__bottom", "dragover__top");
+            });
         });
         avPanelElement.addEventListener("dragend", () => {
             if (window.siyuan.dragElement) {
@@ -752,7 +754,7 @@ export const openMenuPanel = (options: {
                     /// #if !MOBILE
                     if (isLocalPath(assetLink) && (
                         [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
-                            suffix !== ".pdf" || ( suffix === ".pdf" && !assetLink.startsWith("file://"))
+                            suffix !== ".pdf" || (suffix === ".pdf" && !assetLink.startsWith("file://"))
                         )
                     )) {
                         openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");

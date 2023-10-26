@@ -379,3 +379,10 @@ img.av__cellassetimg {
   max-width: none;
 }
 
+html[data-theme-mode="dark"] .av__panel .b3-menu__item {
+  mix-blend-mode: lighten;
+}
+
+html[data-theme-mode="light"] .av__panel .b3-menu__item {
+  mix-blend-mode: darken;
+}

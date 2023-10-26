@@ -423,8 +423,7 @@ export class Files extends Model {
             }
             let liElement = hasClosestByTag(event.target, "LI");
             if (!liElement) {
-                liElement = document.elementFromPoint(event.clientX, event.clientY - 1) as HTMLElement;
-                liElement = hasClosestByTag(liElement, "LI");
+                liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");
             }
             if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();

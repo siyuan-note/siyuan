@@ -439,6 +439,16 @@
     background-color: var(--b3-protyle-code-linenumber-hl) !important;
   }
 
+  .dragover {
+    &__top:not(.av__row) {
+      box-shadow: 0 -4px 0 0px var(--b3-theme-primary-lighter) !important;
+    }
+
+    &__bottom:not(.av__row) {
+      box-shadow: 0 4px 0 0px var(--b3-theme-primary-lighter) !important
+    }
+  }
+
   &--attr .protyle-attr {
     opacity: 1;
 

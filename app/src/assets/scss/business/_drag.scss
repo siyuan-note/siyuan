@@ -1,9 +1,10 @@
 .dragover {
   background-color: var(--b3-theme-primary-lightest);
 
+  // 需要 !important，否则拖拽到闪卡无效果
   &__top {
     border-radius: 0 !important;
-    box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
+    box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
   }
 
   &__bottom {

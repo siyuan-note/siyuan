@@ -195,6 +195,7 @@ html {
       margin: 0;
       height: 31.5px;
       border-radius: 0;
+
       svg {
         width: 10px !important;
       }
@@ -321,6 +322,23 @@ html {
 
   &:hover .block__icons .block__icon[disabled] {
     opacity: .38;
+  }
+
+  .dragover__top:after,
+  .dragover__bottom:after {
+    content: "";
+    width: var(--file-toggle-width);
+    height: 4px;
+    background-color: var(--b3-theme-surface);
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    z-index: 1;
+  }
+
+  .dragover__top:after {
+    top: -3px;
+    bottom: auto;
   }
 
   &__close {

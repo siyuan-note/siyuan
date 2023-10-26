@@ -50,6 +50,10 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	for _, child := range children {
 		childrenIDs = append(childrenIDs, child.ID)
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
 			n.SetIALAttr("fold", "1")
 			n.SetIALAttr("heading-fold", "1")
 			return ast.WalkContinue
@@ -86,6 +90,10 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 			return ast.WalkContinue
@@ -104,7 +112,6 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	}
 	sql.UpsertTreeQueue(tree)
 
-	children = treenode.HeadingChildren(heading)
 	luteEngine := NewLute()
 	operation.RetData = renderBlockDOMByNodes(children, luteEngine)
 	return
@@ -307,14 +314,21 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	// 折叠标题转换为文档时需要自动展开下方块 https://github.com/siyuan-note/siyuan/issues/2947
 	children := treenode.HeadingChildren(headingNode)
 	for _, child := range children {
-		child.RemoveIALAttr("heading-fold")
-		child.RemoveIALAttr("fold")
+		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("heading-fold")
+			n.RemoveIALAttr("fold")
+			return ast.WalkContinue
+		})
 	}
 	headingNode.RemoveIALAttr("fold")
+	headingNode.RemoveIALAttr("heading-fold")
 
 	luteEngine := util.NewLute()
 	newTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: srcHeadingID}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	children = treenode.HeadingChildren(headingNode)
 	for _, c := range children {
 		newTree.Root.AppendChild(c)
 	}

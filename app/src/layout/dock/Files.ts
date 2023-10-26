@@ -421,7 +421,11 @@ export class Files extends Model {
             if (window.siyuan.config.readonly) {
                 return;
             }
-            const liElement = hasClosestByTag(event.target, "LI");
+            let liElement = hasClosestByTag(event.target, "LI");
+            if (!liElement) {
+                liElement = document.elementFromPoint(event.clientX, event.clientY - 1) as HTMLElement;
+                liElement = hasClosestByTag(liElement, "LI");
+            }
             if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();
                 return;
@@ -485,11 +489,10 @@ export class Files extends Model {
             liElement.classList.add("dragover");
             event.preventDefault();
         });
-        this.element.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
-            const liElement = hasClosestByTag(event.target, "LI");
-            if (liElement) {
-                liElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
-            }
+        this.element.addEventListener("dragleave", () => {
+            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+            });
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
             const newElement = hasClosestByTag(event.target, "LI");

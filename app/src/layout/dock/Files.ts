@@ -494,7 +494,7 @@ export class Files extends Model {
             });
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-            const newElement = hasClosestByTag(event.target, "LI");
+            const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
             if (!newElement) {
                 return;
             }

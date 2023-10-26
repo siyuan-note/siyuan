@@ -110,10 +110,8 @@ export const openMenuPanel = (options: {
                 event.stopPropagation();
                 return;
             }
-            const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
-            if (!targetElement ||
-                (!targetElement.classList.contains("dragover__top") && !targetElement.classList.contains("dragover__bottom"))) {
+            const targetElement = avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
+            if (!targetElement) {
                 return;
             }
             let type = "columns";
@@ -298,7 +296,7 @@ export const openMenuPanel = (options: {
             const target = event.target as HTMLElement;
             let targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement) {
-                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true")
+                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
             }
             if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
                 return;

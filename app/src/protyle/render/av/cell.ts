@@ -413,6 +413,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (inputElement) {
         inputElement.select();
         inputElement.focus();
+        inputElement.scrollIntoView();
         if (blockElement && type === "template") {
             fetchPost("/api/av/renderAttributeView", {id: blockElement.dataset.avId}, (response) => {
                 response.data.view.columns.find((item: IAVColumn) => {

@@ -221,18 +221,21 @@ export const about = {
                 updateElement.innerHTML = `<svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`;
             });
         });
-        /// #if !BROWSER
         about.element.querySelectorAll('[data-type="open"]').forEach(item => {
             item.addEventListener("click", () => {
                 const url = item.getAttribute("data-url");
+                /// #if !BROWSER
                 if (url.startsWith("http")) {
                     shell.openExternal(url);
                 } else {
                     shell.openPath(url);
                 }
+                /// #else
+                window.open(url);
+                /// #endif
             });
         });
-        /// #endif
+
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
         });

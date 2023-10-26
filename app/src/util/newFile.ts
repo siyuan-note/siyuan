@@ -52,13 +52,18 @@ export const getNewFilePath = (useSavePath: boolean) => {
     }
     /// #endif
     if (!notebookId) {
-        window.siyuan.notebooks.find(item => {
-            if (!item.closed) {
-                notebookId = item.id;
-                currentPath = "/";
-                return true;
-            }
-        });
+        if (window.siyuan.mobile.editor) {
+            notebookId = window.siyuan.mobile.editor.protyle.notebookId;
+        }
+        if (!notebookId) {
+            window.siyuan.notebooks.find(item => {
+                if (!item.closed) {
+                    notebookId = item.id;
+                    currentPath = "/";
+                    return true;
+                }
+            });
+        }
     }
     return {notebookId, currentPath};
 };

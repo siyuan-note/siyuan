@@ -610,6 +610,11 @@ func (table *Table) SortRows() {
 	}
 
 	sort.Slice(table.Rows, func(i, j int) bool {
+		block := table.Rows[i].GetBlockValue()
+		if !block.IsInitialized && nil != block.Block && "" == block.Block.Content && block.IsDetached {
+			return false
+		}
+
 		for _, colIndexSort := range colIndexSorts {
 			result := table.Rows[i].Cells[colIndexSort.Index].Value.Compare(table.Rows[j].Cells[colIndexSort.Index].Value)
 			if 0 == result {

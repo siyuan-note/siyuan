@@ -339,16 +339,6 @@
 
       &__item {
         transition: margin .2s cubic-bezier(0, 0, .2, 1) 0ms;
-
-        &.dragover__bottom {
-          background-color: var(--b3-theme-primary-lightest);
-          box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter) inset;
-        }
-
-        &.dragover__top {
-          background-color: var(--b3-theme-primary-lightest);
-          box-shadow: 0 2px 0 var(--b3-theme-primary-lighter) inset;
-        }
       }
 
       &__item:hover .b3-menu__action {

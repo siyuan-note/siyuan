@@ -1,0 +1,23 @@
+.dragover {
+  background-color: var(--b3-theme-primary-lightest);
+
+  &__top {
+    border-radius: 0 !important;
+    box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
+  }
+
+  &__bottom {
+    border-radius: 0 !important;
+    box-shadow: 0 2px 0 var(--b3-theme-primary-lighter), inset 0px -2px 0 var(--b3-theme-primary-lighter) !important;
+  }
+
+  &__left {
+    border-radius: 0 !important;
+    box-shadow: -4px 0 0 var(--b3-theme-primary-lighter) !important;
+  }
+
+  &__right {
+    border-radius: 0 !important;
+    box-shadow: 4px 0 0 var(--b3-theme-primary-lighter) !important;
+  }
+}

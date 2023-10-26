@@ -17,6 +17,7 @@
 @import "business/graph";
 @import "business/layout";
 @import "business/block";
+@import "business/drag";
 @import "util/reset";
 @import "component/card";
 @import "component/menu";
@@ -314,20 +315,6 @@ html {
 }
 
 .file-tree {
-  .dragover {
-    background-color: var(--b3-theme-primary-lightest);
-
-    &__top {
-      border-radius: 0;
-      box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter);
-    }
-
-    &__bottom {
-      border-radius: 0;
-      box-shadow: 0 2px 0 var(--b3-theme-primary-lighter), inset 0px -2px 0 var(--b3-theme-primary-lighter);
-    }
-  }
-
   &:hover .block__icons .block__icon:not([disabled]) {
     opacity: 1;
   }

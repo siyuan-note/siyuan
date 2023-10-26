@@ -439,25 +439,6 @@
     background-color: var(--b3-protyle-code-linenumber-hl) !important;
   }
 
-  .dragover {
-    // 需要 !important，否则拖拽到闪卡无 border
-    &__top {
-      box-shadow: 0 4px 0 var(--b3-theme-primary-lighter) inset !important;
-    }
-
-    &__bottom {
-      box-shadow: 0 -4px 0 var(--b3-theme-primary-lighter) inset !important;
-    }
-
-    &__left {
-      box-shadow: -4px 0 0 var(--b3-theme-primary-lighter) !important;
-    }
-
-    &__right {
-      box-shadow: 4px 0 0 var(--b3-theme-primary-lighter) !important;
-    }
-  }
-
   &--attr .protyle-attr {
     opacity: 1;
 

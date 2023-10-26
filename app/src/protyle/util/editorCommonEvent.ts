@@ -1046,14 +1046,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const nodeRect = targetElement.getBoundingClientRect();
             targetElement.classList.remove("protyle-wysiwyg--select", "dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
-                targetElement.classList.add("protyle-wysiwyg--select");
                 return;
             }
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__bottom");
                 } else if (!targetElement.classList.contains("av__row--header")) {
-                    targetElement.classList.add("dragover__top", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__top");
                 }
                 return;
             }
@@ -1061,24 +1060,24 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.classList.contains("av__cell")) {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
                     !targetElement.classList.contains("av__row")) {
-                    targetElement.classList.add("dragover__left", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__left");
                 } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX < nodeRect.right &&
                     !targetElement.classList.contains("av__row")) {
-                    targetElement.classList.add("dragover__right", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__right");
                 }
                 return;
             }
             if (event.clientX < nodeRect.left + 32 && event.clientX > nodeRect.left &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__left", "protyle-wysiwyg--select");
+                targetElement.classList.add("dragover__left");
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__right", "protyle-wysiwyg--select");
+                targetElement.classList.add("dragover__right");
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
-                    targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__bottom");
                 } else if (disabledPosition !== "top") {
-                    targetElement.classList.add("dragover__top", "protyle-wysiwyg--select");
+                    targetElement.classList.add("dragover__top");
                 }
             }
             return;

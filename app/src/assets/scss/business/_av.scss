@@ -86,6 +86,10 @@
     position: relative;
     font-size: 87.5%;
 
+    &.dragover__bottom, {
+      border-bottom-color: var(--b3-theme-primary-lighter);
+    }
+
     &:hover {
       [data-type="block-ref"],
       [data-type="block-more"] {

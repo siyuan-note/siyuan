@@ -51,6 +51,16 @@
 
     &.list {
       padding-left: 0;
+
+      .dragover {
+        &__top:not(.av__row) {
+          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0px 1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+
+        &__bottom:not(.av__row) {
+          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0px -1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+      }
     }
 
     &.li {

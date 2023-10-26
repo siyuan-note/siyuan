@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232134-3d6mx2k",
 		"title": "Search asset content",
-		"updated": "20231025095559"
+		"updated": "20231026085302"
 	},
 	"Children": [
 		{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230903112419-45ps71g",
-				"updated": "20231025095559"
+				"updated": "20231026085302"
 			},
 			"Children": [
 				{
@@ -262,12 +262,58 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231025095244-m8ut4h2",
-								"updated": "20231025095559"
+								"updated": "20231026085241"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "PDFs larger than 128MB or 1024 pages are not supported"
+									"Data": "PDFs larger than 1024 pages are not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231026085243-o2jstdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231026085243-o2jstdb",
+						"updated": "20231026085302"
+					},
+					"Children": [
+						{
+							"ID": "20231026085243-3mtefdv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231026085243-3mtefdv",
+								"updated": "20231026085302"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "By default, PDFs larger than 128MB are not supported. You can set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. The value unit is bytes, for example: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE=256000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to adjust the upper limit to 256MB"
 								}
 							]
 						}

@@ -202,7 +202,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
     ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", "AI Chat")}
-    ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newFile)}
+    ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newSubDoc)}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">

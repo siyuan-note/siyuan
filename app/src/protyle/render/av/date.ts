@@ -35,8 +35,8 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
-    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
+    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
+    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span>${window.siyuan.languages.endDate}</span>
@@ -46,7 +46,7 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     <label class="b3-menu__item">
         <span>${window.siyuan.languages.includeTime}</span>
         <span class="fn__space fn__flex-1"></span>
-        <input type="checkbox" class="b3-switch fn__flex-center"${cellValue.value.date.isNotTime ? "" : " checked"}>
+        <input type="checkbox" class="b3-switch fn__flex-center"${(!cellValue || cellValue?.value?.date?.isNotTime) ? "" : " checked"}>
     </label>
     <button class="b3-menu__separator"></button>
     <button class="b3-menu__item" data-type="clearDate">

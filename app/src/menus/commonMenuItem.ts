@@ -36,7 +36,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     const reminder = nodeElement.getAttribute(Constants.CUSTOM_REMINDER_WECHAT);
     let reminderFormat = "";
     if (reminder) {
-        reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+        reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "50vw",
@@ -101,7 +101,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
         const reminder = response.data.ial[Constants.CUSTOM_REMINDER_WECHAT];
         let reminderFormat = "";
         if (reminder) {
-            reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+            reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new Dialog({
             width: isMobile() ? "92vw" : "50vw",
@@ -162,7 +162,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
+    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DD HH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
             hasAV = true;

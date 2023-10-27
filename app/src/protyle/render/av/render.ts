@@ -120,10 +120,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             text = '<span class="av__celltext">';
                             const dataValue = cell.value ? cell.value.date : null;
                             if (dataValue && dataValue.isNotEmpty) {
-                                text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
+                                text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
                             }
                             if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-                                text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format("YYYY-MM-DD HH:mm")}`;
+                                text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
                             }
                             text += "</span>";
                         } else if (["created", "updated"].includes(cell.valueType)) {

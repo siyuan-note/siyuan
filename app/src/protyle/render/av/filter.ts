@@ -245,11 +245,11 @@ export const setFilter = (options: {
         const dateValue = options.filter.value ? options.filter.value[colData.type as "date"] : null;
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({
@@ -377,15 +377,15 @@ export const getFiltersHTML = (data: IAVTable) => {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.value?.date?.content) {
                     if (filter.value?.date?.content2 && filter.operator === "Is between") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD")}`;
                     } else if ("=" === filter.operator) {
-                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if ([">", "<"].includes(filter.operator)) {
-                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if (">=" === filter.operator) {
-                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if ("<=" === filter.operator) {
-                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     }
                 } else if (filter.value?.mSelect?.length > 0) {
                     let selectContent = "";

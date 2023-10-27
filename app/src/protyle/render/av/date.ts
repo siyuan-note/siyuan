@@ -27,21 +27,26 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     let value = "";
     if (cellValue?.value?.date?.isNotEmpty) {
-        value = dayjs(cellValue.value.date.content).format("YYYY-MM-DDTHH:mm");
+        value = dayjs(cellValue.value.date.content).format(cellValue.value.date.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     }
     let value2 = "";
     if (cellValue?.value?.date?.isNotEmpty2) {
-        value2 = dayjs(cellValue.value.date.content2).format("YYYY-MM-DDTHH:mm");
+        value2 = dayjs(cellValue.value.date.content2).format(cellValue.value.date.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="datetime-local" value="${value}" class="b3-text-field fn__size200"><br>
-    <input type="datetime-local" value="${value2}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
+    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value}" data-value="${value}" class="b3-text-field fn__size200"><br>
+    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value2}" data-value="${value2}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span>${window.siyuan.languages.endDate}</span>
         <span class="fn__space fn__flex-1"></span>
         <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
+    </label>
+    <label class="b3-menu__item">
+        <span>${window.siyuan.languages.includeTime}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input type="checkbox" class="b3-switch fn__flex-center"${cellValue.value.date.isNotTime ? "" : " checked"}>
     </label>
     <button class="b3-menu__separator"></button>
     <button class="b3-menu__item" data-type="clearDate">
@@ -58,7 +63,7 @@ export const bindDateEvent = (options: {
     menuElement: HTMLElement,
     cellElements: HTMLElement[]
 }) => {
-    const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll(".b3-text-field");
+    const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     inputElements[0].addEventListener("change", () => {
         setDateValue({
             cellElements: options.cellElements,
@@ -69,6 +74,7 @@ export const bindDateEvent = (options: {
                 content: new Date(inputElements[0].value).getTime()
             }
         });
+        inputElements[0].dataset.value = inputElements[0].value;
     });
     inputElements[1].addEventListener("change", () => {
         setDateValue({
@@ -80,10 +86,10 @@ export const bindDateEvent = (options: {
                 content2: new Date(inputElements[1].value).getTime()
             }
         });
+        inputElements[1].dataset.value = inputElements[1].value;
     });
-    const checkElement = options.menuElement.querySelector(".b3-switch") as HTMLInputElement;
-    checkElement.addEventListener("change", () => {
-        if (checkElement.checked) {
+    inputElements[2].addEventListener("change", () => {
+        if (inputElements[2].checked) {
             inputElements[1].classList.remove("fn__none");
         } else {
             inputElements[1].classList.add("fn__none");
@@ -93,7 +99,28 @@ export const bindDateEvent = (options: {
             data: options.data,
             protyle: options.protyle,
             value: {
-                hasEndDate: checkElement.checked
+                hasEndDate: inputElements[2].checked
+            }
+        });
+    });
+    inputElements[3].addEventListener("change", () => {
+        if (inputElements[3].checked) {
+            inputElements[0].setAttribute("type", "datetime-local");
+            inputElements[1].setAttribute("type", "datetime-local");
+            inputElements[0].value = inputElements[0].dataset.value
+            inputElements[1].value = inputElements[1].dataset.value
+        } else {
+            inputElements[0].setAttribute("type", "date");
+            inputElements[1].setAttribute("type", "date");
+            inputElements[0].value = inputElements[0].dataset.value.substring(0, 10)
+            inputElements[1].value = inputElements[1].dataset.value.substring(0, 10)
+        }
+        setDateValue({
+            cellElements: options.cellElements,
+            data: options.data,
+            protyle: options.protyle,
+            value: {
+                isNotTime: !inputElements[3].checked
             }
         });
     });

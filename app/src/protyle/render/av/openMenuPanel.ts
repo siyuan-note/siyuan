@@ -827,7 +827,8 @@ export const openMenuPanel = (options: {
                             isNotEmpty: false,
                             content: null,
                             content2: null,
-                            hasEndDate: false
+                            hasEndDate: false,
+                            isNotTime: true,
                         }
                     });
                     avPanelElement.remove();

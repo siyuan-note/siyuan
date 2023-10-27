@@ -113,6 +113,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     content2: null,
                     isNotEmpty2: false,
                     hasEndDate: false,
+                    isNotTime: true,
                 }
             };
         }

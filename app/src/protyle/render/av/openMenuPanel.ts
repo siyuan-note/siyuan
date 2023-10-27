@@ -1,9 +1,9 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol} from "./addCol";
+import {addCol} from "./col";
 import {bindEditEvent, duplicateCol, getColIconByType, getEditHTML} from "./col";
 import {setPosition} from "../../../util/setPosition";
-import {hasClosestByAttribute} from "../../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
@@ -596,6 +596,47 @@ export const openMenuPanel = (options: {
                         colId: target.parentElement.dataset.id
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "updateColType") {
+                    if (target.dataset.newType !== target.dataset.oldType) {
+                        const name = target.dataset.name
+                        transaction(options.protyle, [{
+                            action: "updateAttrViewCol",
+                            id: options.colId,
+                            avID,
+                            name,
+                            type: target.dataset.newType as TAVCol,
+                        }], [{
+                            action: "updateAttrViewCol",
+                            id: options.colId,
+                            avID,
+                            name,
+                            type:  target.dataset.oldType as TAVCol,
+                        }]);
+                    }
+                    avPanelElement.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goUpdateColType") {
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu")
+                    if (editMenuElement) {
+                        editMenuElement.firstElementChild.classList.add("fn__none");
+                        editMenuElement.lastElementChild.classList.remove("fn__none");
+                    }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goEditCol") {
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu")
+                    if (editMenuElement) {
+                        editMenuElement.firstElementChild.classList.remove("fn__none");
+                        editMenuElement.lastElementChild.classList.add("fn__none");
+                    }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

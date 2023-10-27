@@ -415,6 +415,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
 			}
 
+			treenode.FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)
+
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)

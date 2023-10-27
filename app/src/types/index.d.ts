@@ -1097,6 +1097,7 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+    isNotTime?: boolean
 }
 
 interface IAVCellSelectValue {

@@ -1070,7 +1070,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 左侧
                     point.x = editorPosition.left;
                     point.className = "dragover__left";
-                } else if (event.clientX > editorPosition.right) {
+                } else if (event.clientX >= editorPosition.right) {
                     // 右侧
                     point.x = editorPosition.right - 6;
                     point.className = "dragover__right";
@@ -1121,13 +1121,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
                     !targetElement.classList.contains("av__row")) {
                     targetElement.classList.add("dragover__left");
-                } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX < nodeRect.right &&
+                } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX <= nodeRect.right + 1 &&
                     !targetElement.classList.contains("av__row")) {
                     targetElement.classList.add("dragover__right");
                 }
                 return;
             }
-            if (event.clientX < nodeRect.left + 32 && event.clientX > nodeRect.left &&
+            if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left");
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&

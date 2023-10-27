@@ -215,6 +215,10 @@
       top: 8px;
     }
 
+    &.dragover__right {
+      border-right-color: var(--b3-theme-primary-lighter);
+    }
+
     &--select {
       background-color: var(--b3-theme-primary-lightest);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;

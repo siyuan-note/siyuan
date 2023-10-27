@@ -35,8 +35,8 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value}" data-value="${value}" class="b3-text-field fn__size200"><br>
-    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value2}" data-value="${value2}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
+    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
+    <input type="${cellValue.value.date.isNotTime ? "date" : "datetime-local"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span>${window.siyuan.languages.endDate}</span>
@@ -74,7 +74,7 @@ export const bindDateEvent = (options: {
                 content: new Date(inputElements[0].value).getTime()
             }
         });
-        inputElements[0].dataset.value = inputElements[0].value;
+        inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
     });
     inputElements[1].addEventListener("change", () => {
         setDateValue({
@@ -86,7 +86,7 @@ export const bindDateEvent = (options: {
                 content2: new Date(inputElements[1].value).getTime()
             }
         });
-        inputElements[1].dataset.value = inputElements[1].value;
+        inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
     });
     inputElements[2].addEventListener("change", () => {
         if (inputElements[2].checked) {

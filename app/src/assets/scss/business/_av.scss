@@ -377,10 +377,11 @@
 }
 
 img.av__cellassetimg {
-  max-height: 18px;
+  max-height: 20px;
   border-radius: var(--b3-border-radius);
   margin: 1px 2px;
   max-width: none;
+  vertical-align: top;
 }
 
 html[data-theme-mode="dark"] .av__panel .b3-menu__item {

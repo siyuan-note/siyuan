@@ -1249,6 +1249,13 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             imgPreviewElement.remove();
             return;
         }
+
+        const avElement = document.querySelector(".av__panel")
+        if (avElement) {
+            avElement.remove();
+            return
+        }
+
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
             if (window.siyuan.dialogs.length > 0 &&
                 window.siyuan.menus.menu.element.style.zIndex < (window.siyuan.dialogs[0].element.querySelector(".b3-dialog") as HTMLElement).style.zIndex) {

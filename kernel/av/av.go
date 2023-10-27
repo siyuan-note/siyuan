@@ -364,6 +364,7 @@ type ValueDate struct {
 	Content          int64  `json:"content"`
 	IsNotEmpty       bool   `json:"isNotEmpty"`
 	HasEndDate       bool   `json:"hasEndDate"`
+	IsNotTime        bool   `json:"isNotTime"`
 	Content2         int64  `json:"content2"`
 	IsNotEmpty2      bool   `json:"isNotEmpty2"`
 	FormattedContent string `json:"formattedContent"`
@@ -376,10 +377,21 @@ const (
 	DateFormatDuration DateFormat = "duration"
 )
 
-func NewFormattedValueDate(content, content2 int64, format DateFormat) (ret *ValueDate) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime bool) (ret *ValueDate) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
 	if 0 < content2 {
-		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
+		var formattedContent2 string
+		if isNotTime {
+			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02")
+		} else {
+			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02 15:04")
+		}
+		formatted += " → " + formattedContent2
 	}
 	switch format {
 	case DateFormatNone:
@@ -392,6 +404,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat) (ret *Val
 		Content:          content,
 		Content2:         content2,
 		HasEndDate:       false,
+		IsNotTime:        true,
 		FormattedContent: formatted,
 	}
 	return

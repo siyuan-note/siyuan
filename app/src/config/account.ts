@@ -44,16 +44,16 @@ export const account = {
     ${window.siyuan.languages.sponsor}
 </a>
 <div class="fn__hr--b"></div>
-<div class="fn__hr--b"></div>
-<div style="text-align: left">
+<div class="fn__flex-1"></div>
+<div>
 ${window.siyuan.languages.accountSupport1}
 </div>
 <div class="fn__hr--b"></div>
-<div style="text-align: left">
+<div>
 ${window.siyuan.languages.accountSupport2}
 </div>`;
         if (onlyPayHTML) {
-            return `<div class="ft__center">${payHTML}</div>`;
+            return payHTML;
         }
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -145,9 +145,9 @@ ${renewHTML}
     </div>
 </div>
 <div class="config-account__center config-account__center--text${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}">
-    <div class="fn__flex-1 fn__hr"></div>
-    <div class="ft__center">${subscriptionHTML}</div>
-    <div class="fn__flex-1 fn__hr"></div>
+    <div class="fn__flex-1 fn__hr--b"></div>
+    ${subscriptionHTML}
+    <div class="fn__flex-1 fn__hr--b"></div>
     ${activeSubscriptionHTML}
 </div></div>`;
         }
@@ -202,15 +202,13 @@ ${renewHTML}
     </div>
 </div>
 <div class="config-account__center config-account__center--text${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}">
+    <div class="fn__flex-1 fn__hr--b"></div>
     ${genSVGBG()}
-    <div class="fn__hr--b"></div>
-    <div class="fn__flex-1"></div>
-    <div class="ft__center">
-        ${payHTML}
-    </div>
-    <div class="fn__flex-1"></div>
-    <div class="fn__hr--b"></div>
+    <div class="fn__flex-1 fn__hr--b"></div>    
+    ${payHTML}
+    <div class="fn__flex-1 fn__hr--b"></div>
     ${genSVGBG()}
+    <div class="fn__flex-1 fn__hr--b"></div>
 </div>
 </div>`;
     },

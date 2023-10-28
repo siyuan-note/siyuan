@@ -12,6 +12,20 @@ import {syncGuide} from "../sync/syncGuide";
 import {hideElements} from "../protyle/ui/hideElements";
 import {getCloudURL} from "./util/about";
 
+const genSVGBG = () => {
+    let html = "";
+    const svgs: string[] = [];
+    document.querySelectorAll("body > svg > defs > symbol").forEach((item) => {
+        svgs.push(item.id);
+    });
+    Array.from({length: 45}, () => {
+        const index = Math.floor(Math.random()*svgs.length);
+        html += `<svg><use xlink:href="#${svgs[index]}"></use></svg>`;
+        svgs.splice(index, 1);
+    });
+    return `<div class="fn__flex config-account__svg">${html}</div>`;
+}
+
 export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
@@ -30,14 +44,14 @@ export const account = {
     ${window.siyuan.languages.sponsor}
 </a>
 <div class="fn__hr--b"></div>
+<div class="fn__hr--b"></div>
 <div style="text-align: left">
 ${window.siyuan.languages.accountSupport1}
 </div>
 <div class="fn__hr--b"></div>
 <div style="text-align: left">
 ${window.siyuan.languages.accountSupport2}
-</div>
-<div class="fn__hr--b"></div>`;
+</div>`;
         if (onlyPayHTML) {
             return `<div class="ft__center">${payHTML}</div>`;
         }
@@ -188,9 +202,15 @@ ${renewHTML}
     </div>
 </div>
 <div class="config-account__center config-account__center--text${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}">
+    ${genSVGBG()}
+    <div class="fn__hr--b"></div>
+    <div class="fn__flex-1"></div>
     <div class="ft__center">
         ${payHTML}
     </div>
+    <div class="fn__flex-1"></div>
+    <div class="fn__hr--b"></div>
+    ${genSVGBG()}
 </div>
 </div>`;
     },

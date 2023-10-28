@@ -93,6 +93,7 @@
       &--text {
         background-color: var(--b3-theme-surface);
         padding: 16px 24px;
+        overflow: auto;
 
         .b3-button--outline {
           white-space: normal;
@@ -150,6 +151,16 @@
       position: absolute;
       width: 100%;
       text-align: center;
+    }
+
+    &__svg {
+      flex-wrap: wrap;
+
+      svg {
+        margin: 8px;
+        height: 16px;
+        width: 16px;
+      }
     }
   }
 

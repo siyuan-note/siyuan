@@ -29,6 +29,21 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getParentNextChildID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	ret.Data = map[string]string{
+		"id": model.GetParentNextChildID(id),
+	}
+}
+
 func transferBlockRef(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

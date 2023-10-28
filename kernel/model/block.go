@@ -89,6 +89,25 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
+func GetParentNextChildID(id string) string {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return ""
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return ""
+	}
+
+	for p := node.Parent; nil != p; p = p.Parent {
+		if nil != p.Next {
+			return p.Next.ID
+		}
+	}
+	return ""
+}
+
 func IsBlockFolded(id string) bool {
 	for i := 0; i < 32; i++ {
 		b, _ := getBlock(id, nil)

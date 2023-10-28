@@ -52,6 +52,7 @@ type TEventBus = "ws-main" |
     "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
+    "switch-protyle" |
     "destroy-protyle"
 type TAVCol =
     "text"

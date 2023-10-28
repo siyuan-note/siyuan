@@ -539,6 +539,9 @@ export const updatePanelByEditor = (options: {
     const models = getAllModels();
     updateOutline(models, options.protyle, options.reload);
     updateBacklinkGraph(models, options.protyle);
+    options.protyle.app.plugins.forEach(item => {
+        item.eventBus.emit("switch-protyle", {protyle:options.protyle});
+    });
 };
 
 export const isCurrentEditor = (blockId: string) => {

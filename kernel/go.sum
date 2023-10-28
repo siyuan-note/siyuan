@@ -51,6 +51,8 @@ github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef h1:2JGTg6JapxP
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef/go.mod h1:JS7hed4L1fj0hXcyEejnW57/7LCetXggd+vwrRnYeII=
 github.com/aws/aws-sdk-go v1.46.5 h1:NYYUrhOftwiXPkqZwEpB3043bMukegJAt15ozrqJbEY=
 github.com/aws/aws-sdk-go v1.46.5/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
+github.com/aws/aws-sdk-go v1.46.6 h1:6wFnNC9hETIZLMf6SOTN7IcclrOGwp/n9SLp8Pjt6E8=
+github.com/aws/aws-sdk-go v1.46.6/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.10.1 h1:7a1wuFXL1cMy7a3f7/VFcEtriuXQnUBhtoVfOZiaysc=
@@ -66,6 +68,8 @@ github.com/chenzhuoyu/iasm v0.9.0 h1:9fhXjVzq5hUy2gkhhgHl95zG2cEAhw9OSGs8toWWAwo
 github.com/chenzhuoyu/iasm v0.9.0/go.mod h1:Xjy2NpN3h7aUqeqM+woSuuvxmIe6+DDsiNLIrkAmYog=
 github.com/cloudflare/circl v1.3.5 h1:g+wWynZqVALYAlpSQFAa7TscDnUK8mKYtrxMpw6AUKo=
 github.com/cloudflare/circl v1.3.5/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
+github.com/cloudflare/circl v1.3.6 h1:/xbKIqSHbZXHwkhbrhrt2YOHIwYJlXH94E3tI/gDlUg=
+github.com/cloudflare/circl v1.3.6/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
 github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be h1:J5BL2kskAlV9ckgEsNQXscjIaLiOYiZ75d4e94E6dcQ=
 github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be/go.mod h1:mk5IQ+Y0ZeO87b858TlA645sVcEcbiX6YqP98kt+7+w=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
@@ -303,6 +307,8 @@ github.com/quic-go/qtls-go1-20 v0.4.1 h1:D33340mCNDAIKBqXuAvexTNMUByrYmFYVfKfDN5
 github.com/quic-go/qtls-go1-20 v0.4.1/go.mod h1:X9Nh97ZL80Z+bX/gUXMbipO6OxdiDi58b/fMC9mAL+k=
 github.com/quic-go/quic-go v0.39.2 h1:hmwAf8zAHlvan0Y5PXxeeBFZEW17IW99sXLry8I2kjk=
 github.com/quic-go/quic-go v0.39.2/go.mod h1:T09QsDQWjLiQ74ZmacDfqZmhY/NLnw5BC40MANNNZ1Q=
+github.com/quic-go/quic-go v0.39.3 h1:o3YB6t2SR+HU/pgwF29kJ6g4jJIJEwEZ8CKia1h1TKg=
+github.com/quic-go/quic-go v0.39.3/go.mod h1:T09QsDQWjLiQ74ZmacDfqZmhY/NLnw5BC40MANNNZ1Q=
 github.com/radovskyb/watcher v1.0.7 h1:AYePLih6dpmS32vlHfhCeli8127LzkIgwJGcwwe8tUE=
 github.com/radovskyb/watcher v1.0.7/go.mod h1:78okwvY5wPdzcb1UYnip1pvrZNIVEIh/Cm+ZuvsUYIg=
 github.com/refraction-networking/utls v1.5.4 h1:9k6EO2b8TaOGsQ7Pl7p9w6PUhx18/ZCeT0WNTZ7Uw4o=
@@ -340,6 +346,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dejavu v0.0.0-20231027035007-b9c9f5063648 h1:OomGgIO4Wyn4F/UGgQNFZ0QCoQCRqmx2ZaPkirVcIug=
 github.com/siyuan-note/dejavu v0.0.0-20231027035007-b9c9f5063648/go.mod h1:L0QFR1YRvUm1tfx4NMa4R1pwsjcUy3Mgp/rftNzr8h4=
+github.com/siyuan-note/dejavu v0.0.0-20231028072607-baaf2d87d0b7 h1:YNR6K/1XHAJ+wXXr6lXlt7NqO6pV9TOj1t+s241zJnw=
+github.com/siyuan-note/dejavu v0.0.0-20231028072607-baaf2d87d0b7/go.mod h1:sI8koptyofmnE4zcS6/HhOCHmxUcOSvr8ZYF0EqOku4=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80 h1:XghjHKJd+SiL0DkGYFVC+UGUDFtnR4v9gkAbPeh9Eq8=
@@ -348,6 +356,8 @@ github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524 h1:ZuxN5gwqtU
 github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524/go.mod h1:jK5lCYfPbFOrW23/HMeU7kmpLdEd5GkennF+kUpy7Vs=
 github.com/siyuan-note/httpclient v0.0.0-20231022090258-7737650817b5 h1:IdvfdvjgiVW91FDXHiWmJKBBCHBs3JKhuUFf9eaCYs4=
 github.com/siyuan-note/httpclient v0.0.0-20231022090258-7737650817b5/go.mod h1:7NakvgYimbsFL+0/ltwkrbijt3EI6mZk9Xce9btlpl8=
+github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13 h1:DQwiRQa63wsjSKQN5TvTWI2Dd5XSulhnXvxIdOG8/x8=
+github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13/go.mod h1:mS0nX5fX99R/5HLnKqG40kpbathSCXxL/oxe88rURNI=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493 h1:oaN5b0WDFkjdBgGxmmBnMrtZxaJ76LZLwhQSZnznJMI=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc h1:EDbkzdLfR+gMYyU4h/xUiwxngz75d3L5M0IN0NTqdVU=

@@ -366,7 +366,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             const actionElementId = actionElement.getAttribute("data-node-id");
             if (range.toString() !== "") {
                 getContentByInlineHTML(range, (content) => {
-                    writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(content.trim())}"))`);
+                    writeText(`((${actionElementId} "${content.trim()}"))`);
                 });
             } else {
                 fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {

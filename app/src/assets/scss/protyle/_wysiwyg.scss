@@ -51,6 +51,16 @@
 
     &.list {
       padding-left: 0;
+
+      .dragover {
+        &__top:not(.av__row) {
+          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0px 1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+
+        &__bottom:not(.av__row) {
+          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0px -1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+      }
     }
 
     &.li {
@@ -440,21 +450,12 @@
   }
 
   .dragover {
-    // 需要 !important，否则拖拽到闪卡无 border
-    &__top {
-      box-shadow: 0 4px 0 var(--b3-theme-primary-lighter) inset !important;
+    &__top:not(.av__row) {
+      box-shadow: 0 -4px 0 0px var(--b3-theme-primary-lighter) !important;
     }
 
-    &__bottom {
-      box-shadow: 0 -4px 0 var(--b3-theme-primary-lighter) inset !important;
-    }
-
-    &__left {
-      box-shadow: -4px 0 0 var(--b3-theme-primary-lighter) !important;
-    }
-
-    &__right {
-      box-shadow: 4px 0 0 var(--b3-theme-primary-lighter) !important;
+    &__bottom:not(.av__row) {
+      box-shadow: 0 4px 0 0px var(--b3-theme-primary-lighter) !important
     }
   }
 

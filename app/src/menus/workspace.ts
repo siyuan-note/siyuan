@@ -11,7 +11,8 @@ import {isInAndroid, isInIOS, setStorageVal, writeText} from "../protyle/util/co
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
-import {exportLayout, getDockByType} from "../layout/util";
+import {exportLayout} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";

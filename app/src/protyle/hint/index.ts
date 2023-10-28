@@ -350,6 +350,7 @@ ${genHintItemHTML(item)}
                 searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
             }
             this.element.lastElementChild.innerHTML = searchHTML;
+            setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right))
         });
     }
 
@@ -517,7 +518,7 @@ ${genHintItemHTML(item)}
                 }, response => {
                     protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
-                        color: `${response.data}${Constants.ZWSP}${(fileNames.length === 2 || refIsS) ? "s" : "d"}${Constants.ZWSP}${(fileNames.length === 2 ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
+                        color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
                 });
             });

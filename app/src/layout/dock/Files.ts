@@ -1,7 +1,8 @@
 import {escapeHtml} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {getDockByType, getInstanceById, setPanelFocus} from "../util";
+import {getInstanceById, setPanelFocus} from "../util";
+import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFile} from "../../util/newFile";
@@ -420,7 +421,10 @@ export class Files extends Model {
             if (window.siyuan.config.readonly) {
                 return;
             }
-            const liElement = hasClosestByTag(event.target, "LI");
+            let liElement = hasClosestByTag(event.target, "LI");
+            if (!liElement) {
+                liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");
+            }
             if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();
                 return;
@@ -484,14 +488,13 @@ export class Files extends Model {
             liElement.classList.add("dragover");
             event.preventDefault();
         });
-        this.element.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
-            const liElement = hasClosestByTag(event.target, "LI");
-            if (liElement) {
-                liElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
-            }
+        this.element.addEventListener("dragleave", () => {
+            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+            });
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-            const newElement = hasClosestByTag(event.target, "LI");
+            const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
             if (!newElement) {
                 return;
             }
@@ -1035,6 +1038,7 @@ export class Files extends Model {
         const ariaLabel = `${getDisplayName(item.name, true, true)} ${item.hSize}${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
+style="--file-toggle-width:${(item.path.split("/").length - 2) * 18 + 40}px" 
 class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

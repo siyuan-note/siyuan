@@ -663,6 +663,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
 			}
 
+			FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)
+
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)
@@ -720,6 +722,63 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 	}
 	return
+}
+
+func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID string) {
+	if nil == tableCell.Value {
+		tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: colID, BlockID: rowID, Type: tableCell.ValueType}
+	}
+	tableCell.Value.Type = tableCell.ValueType
+	switch tableCell.ValueType {
+	case av.KeyTypeText:
+		if nil == tableCell.Value.Text {
+			tableCell.Value.Text = &av.ValueText{}
+		}
+	case av.KeyTypeNumber:
+		if nil == tableCell.Value.Number {
+			tableCell.Value.Number = &av.ValueNumber{}
+		}
+	case av.KeyTypeDate:
+		if nil == tableCell.Value.Date {
+			tableCell.Value.Date = &av.ValueDate{}
+		}
+	case av.KeyTypeSelect:
+		if 1 > len(tableCell.Value.MSelect) {
+			tableCell.Value.MSelect = []*av.ValueSelect{}
+		}
+	case av.KeyTypeMSelect:
+		if 1 > len(tableCell.Value.MSelect) {
+			tableCell.Value.MSelect = []*av.ValueSelect{}
+		}
+	case av.KeyTypeURL:
+		if nil == tableCell.Value.URL {
+			tableCell.Value.URL = &av.ValueURL{}
+		}
+	case av.KeyTypeEmail:
+		if nil == tableCell.Value.Email {
+			tableCell.Value.Email = &av.ValueEmail{}
+		}
+	case av.KeyTypePhone:
+		if nil == tableCell.Value.Phone {
+			tableCell.Value.Phone = &av.ValuePhone{}
+		}
+	case av.KeyTypeMAsset:
+		if 1 > len(tableCell.Value.MAsset) {
+			tableCell.Value.MAsset = []*av.ValueAsset{}
+		}
+	case av.KeyTypeTemplate:
+		if nil == tableCell.Value.Template {
+			tableCell.Value.Template = &av.ValueTemplate{}
+		}
+	case av.KeyTypeCreated:
+		if nil == tableCell.Value.Created {
+			tableCell.Value.Created = &av.ValueCreated{}
+		}
+	case av.KeyTypeUpdated:
+		if nil == tableCell.Value.Updated {
+			tableCell.Value.Updated = &av.ValueUpdated{}
+		}
+	}
 }
 
 func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {

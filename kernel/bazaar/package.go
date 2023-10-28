@@ -77,6 +77,7 @@ type Package struct {
 	Description   *Description `json:"description"`
 	Readme        *Readme      `json:"readme"`
 	Funding       *Funding     `json:"funding"`
+	Keywords      []string     `json:"keywords"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`

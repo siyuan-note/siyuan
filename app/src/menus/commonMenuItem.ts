@@ -36,7 +36,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     const reminder = nodeElement.getAttribute(Constants.CUSTOM_REMINDER_WECHAT);
     let reminderFormat = "";
     if (reminder) {
-        reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+        reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "50vw",
@@ -101,7 +101,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
         const reminder = response.data.ial[Constants.CUSTOM_REMINDER_WECHAT];
         let reminderFormat = "";
         if (reminder) {
-            reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+            reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new Dialog({
             width: isMobile() ? "92vw" : "50vw",
@@ -162,7 +162,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
+    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DD HH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
             hasAV = true;
@@ -431,7 +431,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
     }];
 };
 
-export const exportMd = (id: string, fileType = "NodeDocument") => {
+export const exportMd = (id: string) => {
     return new MenuItem({
         label: window.siyuan.languages.export,
         type: "submenu",
@@ -532,7 +532,7 @@ export const exportMd = (id: string, fileType = "NodeDocument") => {
             label: window.siyuan.languages.image,
             icon: "iconImage",
             click: () => {
-                exportImage(id, fileType);
+                exportImage(id);
             }
         },
             /// #if !BROWSER
@@ -540,26 +540,26 @@ export const exportMd = (id: string, fileType = "NodeDocument") => {
                 label: "PDF",
                 icon: "iconPDF",
                 click: () => {
-                    saveExport({type: "pdf", id, fileType});
+                    saveExport({type: "pdf", id});
                 }
             }, {
                 label: "HTML (SiYuan)",
                 iconClass: "ft__error",
                 icon: "iconHTML5",
                 click: () => {
-                    saveExport({type: "html", id, fileType});
+                    saveExport({type: "html", id});
                 }
             }, {
                 label: "HTML (Markdown)",
                 icon: "iconHTML5",
                 click: () => {
-                    saveExport({type: "htmlmd", id, fileType});
+                    saveExport({type: "htmlmd", id});
                 }
             }, {
                 label: "Word .docx",
                 icon: "iconExact",
                 click: () => {
-                    saveExport({type: "word", id, fileType});
+                    saveExport({type: "word", id});
                 }
             }, {
                 label: window.siyuan.languages.more,

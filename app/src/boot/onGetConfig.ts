@@ -1,4 +1,5 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
+import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
@@ -146,7 +147,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
             resizeTabs();
-            resizeTopbar();
+            resizeTopBar();
         }, 200);
     });
     addGA();

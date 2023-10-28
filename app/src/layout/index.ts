@@ -1,6 +1,7 @@
 import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
-import {addResize, resizeTabs} from "./util";
+import {addResize} from "./util";
+import {resizeTabs} from "./tabUtil";
 /// #if MOBILE
 // 检测移动端是否引入了桌面端的代码
 console.error("Need remove unused code");

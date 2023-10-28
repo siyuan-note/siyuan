@@ -88,7 +88,7 @@
   }
 
   &__tab--active {
-    .b3-list--background .b3-list-item--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+    .b3-list--background .b3-list-item--focus {
       background-color: var(--b3-theme-primary-lightest);
     }
 

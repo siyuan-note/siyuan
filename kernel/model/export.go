@@ -585,7 +585,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	return
 }
 
-func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string, node *ast.Node) {
 	savePath = strings.TrimSpace(savePath)
 
 	bt := treenode.GetBlockTree(id)
@@ -594,6 +594,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	}
 
 	tree := prepareExportTree(bt)
+	node = treenode.GetNodeInTree(tree, id)
 
 	if merge {
 		var mergeErr error
@@ -1524,6 +1525,25 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		})
 	}
 
+	// When exporting Markdown, `<br />` nodes in non-tables are replaced with `\n` text nodes https://github.com/siyuan-note/siyuan/issues/9509
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeBr == n.Type {
+			if !n.ParentIs(ast.NodeTableCell) {
+				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte("\n")})
+				unlinks = append(unlinks, n)
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -1926,7 +1946,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 				if nil != cell.Value {
 					if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
-							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone)
+							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime)
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {

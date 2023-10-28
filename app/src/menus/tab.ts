@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {MenuItem} from "./Menu";
 import {Editor} from "../editor";
-import {copyTab, resizeTabs} from "../layout/util";
+import {closeTabByType, copyTab, resizeTabs} from "../layout/tabUtil";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 /// #endif
@@ -9,7 +9,6 @@ import {copySubMenu} from "./commonMenuItem";
 import {App} from "../index";
 
 const closeMenu = (tab: Tab) => {
-    const allTabs: Tab[] = [];
     const unmodifiedTabs: Tab[] = [];
     const leftTabs: Tab[] = [];
     const rightTabs: Tab[] = [];
@@ -27,7 +26,6 @@ const closeMenu = (tab: Tab) => {
         } else if (index > midIndex) {
             rightTabs.push(item);
         }
-        allTabs.push(item);
     });
 
     window.siyuan.menus.menu.append(new MenuItem({
@@ -38,77 +36,45 @@ const closeMenu = (tab: Tab) => {
             tab.parent.removeTab(tab.id);
         }
     }).element);
-    if (allTabs.length > 1) {
+    if (tab.parent.children.length > 1) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.closeOthers,
+            accelerator: window.siyuan.config.keymap.general.closeOthers.custom,
             click() {
-                for (let index = 0; index < allTabs.length; index++) {
-                    if (allTabs[index].id !== tab.id && !allTabs[index].headElement.classList.contains("item--pin")) {
-                        allTabs[index].parent.removeTab(allTabs[index].id, true, true, false);
-                    }
-                }
-                if (!tab.headElement.parentElement.querySelector(".item--focus")) {
-                    tab.parent.switchTab(tab.headElement, true);
-                }
+                closeTabByType(tab, "closeOthers");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.closeAll,
-            click: async () => {
-                for (let index = 0; index < allTabs.length; index++) {
-                    if (!allTabs[index].headElement.classList.contains("item--pin")) {
-                        await allTabs[index].parent.removeTab(allTabs[index].id, true);
-                    }
-                }
-                if (allTabs[0].headElement.parentElement) {
-                    allTabs[0].parent.switchTab(allTabs[0].headElement, true);
-                }
+            accelerator: window.siyuan.config.keymap.general.closeAll.custom,
+            click() {
+                closeTabByType(tab, "closeAll");
             }
         }).element);
         if (unmodifiedTabs.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.closeUnmodified,
-                click: async () => {
-                    for (let index = 0; index < unmodifiedTabs.length; index++) {
-                        if (!unmodifiedTabs[index].headElement.classList.contains("item--pin")) {
-                            await unmodifiedTabs[index].parent.removeTab(unmodifiedTabs[index].id);
-                        }
-                    }
-                    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
-                        tab.parent.switchTab(tab.headElement, true);
-                    } else if (allTabs[0].headElement.parentElement) {
-                        allTabs[0].parent.switchTab(allTabs[0].headElement, true);
-                    }
+                accelerator: window.siyuan.config.keymap.general.closeUnmodified.custom,
+                click() {
+                    closeTabByType(tab, "other", unmodifiedTabs);
                 }
             }).element);
         }
         if (leftTabs.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.closeLeft,
+                accelerator: window.siyuan.config.keymap.general.closeLeft.custom,
                 click: async () => {
-                    for (let index = 0; index < leftTabs.length; index++) {
-                        if (!leftTabs[index].headElement.classList.contains("item--pin")) {
-                            await leftTabs[index].parent.removeTab(leftTabs[index].id);
-                        }
-                    }
-                    if (!tab.headElement.parentElement.querySelector(".item--focus")) {
-                        tab.parent.switchTab(tab.headElement, true);
-                    }
+                    closeTabByType(tab, "other", leftTabs);
                 }
             }).element);
         }
         if (rightTabs.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.closeRight,
-                click: async () => {
-                    for (let index = 0; index < rightTabs.length; index++) {
-                        if (!rightTabs[index].headElement.classList.contains("item--pin")) {
-                            await rightTabs[index].parent.removeTab(rightTabs[index].id);
-                        }
-                    }
-                    if (!tab.headElement.parentElement.querySelector(".item--focus")) {
-                        tab.parent.switchTab(tab.headElement, true);
-                    }
+                accelerator: window.siyuan.config.keymap.general.closeRight.custom,
+                click () {
+                    closeTabByType(tab, "other", rightTabs);
                 }
             }).element);
         }

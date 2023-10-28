@@ -1,9 +1,9 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol} from "./addCol";
+import {addCol} from "./col";
 import {bindEditEvent, duplicateCol, getColIconByType, getEditHTML} from "./col";
 import {setPosition} from "../../../util/setPosition";
-import {hasClosestByAttribute} from "../../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
@@ -110,10 +110,8 @@ export const openMenuPanel = (options: {
                 event.stopPropagation();
                 return;
             }
-            const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
-            if (!targetElement ||
-                (!targetElement.classList.contains("dragover__top") && !targetElement.classList.contains("dragover__bottom"))) {
+            const targetElement = avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
+            if (!targetElement) {
                 return;
             }
             let type = "columns";
@@ -296,13 +294,17 @@ export const openMenuPanel = (options: {
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
+            let targetElement = hasClosestByAttribute(target, "draggable", "true");
+            if (!targetElement) {
+                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
+            }
             if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
                 return;
             }
             event.preventDefault();
             if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
                 const nodeRect = targetElement.getBoundingClientRect();
+                targetElement.classList.remove("dragover__bottom", "dragover__top");
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                 } else {
@@ -312,12 +314,10 @@ export const openMenuPanel = (options: {
             }
             dragoverElement = targetElement;
         });
-        avPanelElement.addEventListener("dragleave", (event) => {
-            const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "draggable", "true");
-            if (targetElement) {
-                targetElement.classList.remove("dragover__top", "dragover__bottom");
-            }
+        avPanelElement.addEventListener("dragleave", () => {
+            avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__bottom", "dragover__top");
+            });
         });
         avPanelElement.addEventListener("dragend", () => {
             if (window.siyuan.dragElement) {
@@ -599,6 +599,47 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "updateColType") {
+                    if (target.dataset.newType !== target.dataset.oldType) {
+                        const name = target.dataset.name;
+                        transaction(options.protyle, [{
+                            action: "updateAttrViewCol",
+                            id: options.colId,
+                            avID,
+                            name,
+                            type: target.dataset.newType as TAVCol,
+                        }], [{
+                            action: "updateAttrViewCol",
+                            id: options.colId,
+                            avID,
+                            name,
+                            type:  target.dataset.oldType as TAVCol,
+                        }]);
+                    }
+                    avPanelElement.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goUpdateColType") {
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu");
+                    if (editMenuElement) {
+                        editMenuElement.firstElementChild.classList.add("fn__none");
+                        editMenuElement.lastElementChild.classList.remove("fn__none");
+                    }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goEditCol") {
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu");
+                    if (editMenuElement) {
+                        editMenuElement.firstElementChild.classList.remove("fn__none");
+                        editMenuElement.lastElementChild.classList.add("fn__none");
+                    }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "hideCol") {
                     const isEdit = menuElement.querySelector('[data-type="goProperties"]');
                     const colId = isEdit ? menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id") : target.parentElement.getAttribute("data-id");
@@ -752,7 +793,7 @@ export const openMenuPanel = (options: {
                     /// #if !MOBILE
                     if (isLocalPath(assetLink) && (
                         [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
-                            suffix !== ".pdf" || ( suffix === ".pdf" && !assetLink.startsWith("file://"))
+                            suffix !== ".pdf" || (suffix === ".pdf" && !assetLink.startsWith("file://"))
                         )
                     )) {
                         openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");
@@ -786,7 +827,8 @@ export const openMenuPanel = (options: {
                             isNotEmpty: false,
                             content: null,
                             content2: null,
-                            hasEndDate: false
+                            hasEndDate: false,
+                            isNotTime: true,
                         }
                     });
                     avPanelElement.remove();

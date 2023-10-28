@@ -52,6 +52,7 @@ type TEventBus = "ws-main" |
     "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
+    "switch-protyle" |
     "destroy-protyle"
 type TAVCol =
     "text"
@@ -501,7 +502,6 @@ interface IPluginDockTab {
 interface IExportOptions {
     type: string,
     id: string,
-    fileType: string
 }
 
 interface IOpenFileOptions {
@@ -1098,6 +1098,7 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+    isNotTime?: boolean // 默认 true
 }
 
 interface IAVCellSelectValue {

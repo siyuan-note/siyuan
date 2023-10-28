@@ -1,7 +1,7 @@
 import {fetchPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
 import {openCard} from "../../card/openCard";
-import {getDockByType} from "../../layout/util";
+import {getDockByType} from "../../layout/tabUtil";
 import {getAllTabs} from "../../layout/getAll";
 import {App} from "../../index";
 

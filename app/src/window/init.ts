@@ -1,7 +1,8 @@
 import {Constants} from "../constants";
 import {webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
-import {getInstanceById, JSONToCenter, resizeTabs} from "../layout/util";
+import {getInstanceById, JSONToCenter} from "../layout/util";
+import {resizeTabs} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearance} from "../config/appearance";
 import {initAssets, setInlineStyle} from "../util/assets";

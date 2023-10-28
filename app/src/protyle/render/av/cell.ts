@@ -113,6 +113,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     content2: null,
                     isNotEmpty2: false,
                     hasEndDate: false,
+                    isNotTime: true,
                 }
             };
         }
@@ -355,6 +356,10 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect,
             avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
         }
     }
+    if (!blockElement.querySelector(".av__header")) {
+        // 属性面板
+        return;
+    }
     const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
@@ -385,7 +390,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const blockElement = hasClosestBlock(cellElements[0]);
     let cellRect = cellElements[0].getBoundingClientRect();
     if (blockElement) {
+        /// #if MOBILE
+        const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+        if (contentElement) {
+            contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
+        }
+        /// #else
         cellScrollIntoView(blockElement, cellRect);
+        /// #endif
     }
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";

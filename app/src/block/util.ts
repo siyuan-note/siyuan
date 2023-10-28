@@ -7,6 +7,8 @@ import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
 import {hideElements} from "../protyle/ui/hideElements";
 import {blockRender} from "../protyle/render/blockRender";
+import {fetchPost} from "../util/fetch";
+import {zoomOut} from "../menus/protyle";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
@@ -80,6 +82,15 @@ export const jumpToParentNext = (protyle: IProtyle, nodeElement: Element) => {
         if (nextElement) {
             focusBlock(nextElement);
             scrollCenter(protyle, nextElement);
+        } else {
+            fetchPost("/api/block/getParentNextChildID", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
+                if (response.data.id) {
+                    zoomOut({
+                        protyle,
+                        id: response.data.id,
+                    })
+                }
+            })
         }
     }
 };

@@ -3,8 +3,7 @@ import {genUUID} from "../util/genID";
 import {
     getInstanceById,
     getWndByLayout, JSONToCenter,
-    newCenterEmptyTab, newModelByInitData, pdfIsLoading,
-    resizeTabs,
+    newModelByInitData, pdfIsLoading,
     setPanelFocus,
     switchWnd
 } from "./util";
@@ -36,6 +35,8 @@ import {Custom} from "./dock/Custom";
 import {App} from "../index";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
+import {setTitle} from "../dialog/processSystem";
+import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 
 export class Wnd {
     private app: App;
@@ -744,6 +745,7 @@ export class Wnd {
                         });
                         if (latestHeadElement && !closeAll) {
                             this.switchTab(latestHeadElement, true, true, false);
+                            this.showHeading();
                         }
                     }
                     if (animate) {
@@ -775,6 +777,7 @@ export class Wnd {
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app));
+                setTitle(window.siyuan.languages.siyuanNote);
             }
         }
         /// #if !BROWSER

@@ -47,7 +47,10 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
     if (!mouseIsEnter &&
         event.buttons === 0 &&  // 鼠标按键被按下时不触发
         window.siyuan.layout.bottomDock &&
-        !isWindow() && !hasClosestByClassName(event.target, "b3-dialog") && !hasClosestByClassName(event.target, "b3-menu")) {
+        !isWindow() &&
+        !hasClosestByClassName(event.target, "b3-dialog", true) &&
+        !hasClosestByClassName(event.target, "block__popover", true) &&
+        !hasClosestByClassName(event.target, "b3-menu")) {
         if (event.clientX < 43) {
             if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围

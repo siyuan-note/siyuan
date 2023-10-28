@@ -357,6 +357,12 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) {
 			return true
 		}
+
+		for _, pkgKeyword := range pkg.Keywords {
+			if strings.Contains(strings.ToLower(pkgKeyword), keyword) {
+				return true
+			}
+		}
 	}
 	return false
 }

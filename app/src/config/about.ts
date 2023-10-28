@@ -76,7 +76,7 @@ export const about = {
         <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
-<label class="b3-label config__item${isBrowser() ? " fn__none" : " fn__flex"}">
+<label class="b3-label config__item${(isBrowser() && !isInAndroid()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
@@ -221,18 +221,21 @@ export const about = {
                 updateElement.innerHTML = `<svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`;
             });
         });
-        /// #if !BROWSER
         about.element.querySelectorAll('[data-type="open"]').forEach(item => {
             item.addEventListener("click", () => {
                 const url = item.getAttribute("data-url");
+                /// #if !BROWSER
                 if (url.startsWith("http")) {
                     shell.openExternal(url);
                 } else {
                     shell.openPath(url);
                 }
+                /// #else
+                window.open(url);
+                /// #endif
             });
         });
-        /// #endif
+
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
         });

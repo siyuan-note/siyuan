@@ -7,7 +7,7 @@ import {openCalcMenu, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {insertAttrViewBlockAnimation, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
-import {addCol} from "./addCol";
+import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";

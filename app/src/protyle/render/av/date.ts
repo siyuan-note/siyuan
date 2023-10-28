@@ -65,28 +65,30 @@ export const bindDateEvent = (options: {
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     inputElements[0].addEventListener("change", () => {
+        inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
         setDateValue({
             cellElements: options.cellElements,
             data: options.data,
             protyle: options.protyle,
             value: {
                 isNotEmpty: inputElements[0].value !== "",
-                content: new Date(inputElements[0].value).getTime()
+                content: new Date(inputElements[0].dataset.value).getTime(),
+                isNotTime: !inputElements[3].checked
             }
         });
-        inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
     });
     inputElements[1].addEventListener("change", () => {
+        inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
         setDateValue({
             cellElements: options.cellElements,
             data: options.data,
             protyle: options.protyle,
             value: {
                 isNotEmpty2: inputElements[1].value !== "",
-                content2: new Date(inputElements[1].value).getTime()
+                content2: new Date(inputElements[1].dataset.value).getTime(),
+                isNotTime: !inputElements[3].checked
             }
         });
-        inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
     });
     inputElements[2].addEventListener("change", () => {
         if (inputElements[2].checked) {

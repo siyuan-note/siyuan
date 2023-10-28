@@ -53,7 +53,13 @@ ${window.siyuan.languages.accountSupport1}
 ${window.siyuan.languages.accountSupport2}
 </div>`;
         if (onlyPayHTML) {
-            return payHTML;
+            return `<div class="fn__flex-1 fn__hr--b"></div>
+${genSVGBG()}
+<div class="fn__flex-1 fn__hr--b"></div>    
+${payHTML}
+<div class="fn__flex-1 fn__hr--b"></div>
+${genSVGBG()}
+<div class="fn__flex-1 fn__hr--b"></div>`;
         }
         if (window.siyuan.user) {
             let userTitlesHTML = "";

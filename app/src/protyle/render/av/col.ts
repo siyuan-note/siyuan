@@ -325,7 +325,7 @@ export const getColNameByType = (type: TAVCol) => {
         case "mAsset":
             return window.siyuan.languages.assets;
     }
-}
+};
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {
@@ -650,8 +650,8 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol, name: string) => {
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>
     <span class="b3-menu__label">${getColNameByType(type)}</span>
     ${type === oldType ? '<span class="b3-menu__accelerator"><svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg></span>' : ""}
-</button>`
-}
+</button>`;
+};
 
 export const addCol = (protyle: IProtyle, blockElement: Element) => {
     const menu = new Menu("av-header-add");

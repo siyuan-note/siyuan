@@ -601,7 +601,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "updateColType") {
                     if (target.dataset.newType !== target.dataset.oldType) {
-                        const name = target.dataset.name
+                        const name = target.dataset.name;
                         transaction(options.protyle, [{
                             action: "updateAttrViewCol",
                             id: options.colId,
@@ -621,7 +621,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goUpdateColType") {
-                    const editMenuElement = hasClosestByClassName(target, "b3-menu")
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
                         editMenuElement.firstElementChild.classList.add("fn__none");
                         editMenuElement.lastElementChild.classList.remove("fn__none");
@@ -631,7 +631,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goEditCol") {
-                    const editMenuElement = hasClosestByClassName(target, "b3-menu")
+                    const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
                         editMenuElement.firstElementChild.classList.remove("fn__none");
                         editMenuElement.lastElementChild.classList.add("fn__none");

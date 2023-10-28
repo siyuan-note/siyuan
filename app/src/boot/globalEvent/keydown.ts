@@ -1250,10 +1250,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
 
-        const avElement = document.querySelector(".av__panel")
+        const avElement = document.querySelector(".av__panel");
         if (avElement) {
             avElement.remove();
-            return
+            return;
         }
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {

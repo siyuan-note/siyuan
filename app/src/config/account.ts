@@ -19,12 +19,12 @@ const genSVGBG = () => {
         svgs.push(item.id);
     });
     Array.from({length: 45}, () => {
-        const index = Math.floor(Math.random()*svgs.length);
+        const index = Math.floor(Math.random() * svgs.length);
         html += `<svg><use xlink:href="#${svgs[index]}"></use></svg>`;
         svgs.splice(index, 1);
     });
     return `<div class="fn__flex config-account__svg">${html}</div>`;
-}
+};
 
 export const account = {
     element: undefined as Element,

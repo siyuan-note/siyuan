@@ -109,13 +109,13 @@ export const bindDateEvent = (options: {
         if (inputElements[3].checked) {
             inputElements[0].setAttribute("type", "datetime-local");
             inputElements[1].setAttribute("type", "datetime-local");
-            inputElements[0].value = inputElements[0].dataset.value
-            inputElements[1].value = inputElements[1].dataset.value
+            inputElements[0].value = inputElements[0].dataset.value;
+            inputElements[1].value = inputElements[1].dataset.value;
         } else {
             inputElements[0].setAttribute("type", "date");
             inputElements[1].setAttribute("type", "date");
-            inputElements[0].value = inputElements[0].dataset.value.substring(0, 10)
-            inputElements[1].value = inputElements[1].dataset.value.substring(0, 10)
+            inputElements[0].value = inputElements[0].dataset.value.substring(0, 10);
+            inputElements[1].value = inputElements[1].dataset.value.substring(0, 10);
         }
         setDateValue({
             cellElements: options.cellElements,

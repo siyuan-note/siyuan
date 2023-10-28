@@ -101,6 +101,10 @@ func GetParentNextChildID(id string) string {
 	}
 
 	for p := node.Parent; nil != p; p = p.Parent {
+		if ast.NodeDocument == p.Type {
+			return node.Next.ID
+		}
+
 		if nil != p.Next {
 			return p.Next.ID
 		}

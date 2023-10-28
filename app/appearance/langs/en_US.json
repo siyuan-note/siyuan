@@ -342,7 +342,7 @@
   "syncConfGuide5": "If the amount of data is large, the first sync will be slow, please wait patiently<br>Do not switch apps and keep the screen bright while the iOS/iPad is syncing",
   "copyPlainText": "Copy plain text",
   "findInDoc": "Match ${y} items in ${x} docs",
-  "jumpToParentNext": "Jump to the next block in the previous level",
+  "jumpToParentNext": "Jump to the next block in the parent level",
   "initRepoKeyTip": "If the key has been initialized on other devices, please use [Import Key] or generate the key with the same passphrase, otherwise the data cannot be synced to the cloud, so be sure to use the same key on all devices",
   "crossKeepLazyLoad": "Cross-page multi-selection needs to select [Keep Loaded Content] in the more menu",
   "keepLazyLoad": "Keep loaded content",

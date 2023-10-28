@@ -342,7 +342,7 @@
   "syncConfGuide5": "Si la cantidad de datos es grande, la primera sincronización será lenta, espere pacientemente<br>No cambie de aplicación y mantenga la pantalla brillante mientras iOS/iPad se sincroniza",
   "copyPlainText": "Copiar texto sin formato",
   "findInDoc": "Hacer coincidir ${y} elementos en ${x} documentos",
-  "jumpToParentNext": "Saltar al siguiente bloque en el nivel anterior",
+  "jumpToParentNext": "Saltar al siguiente bloque en el nivel principal",
   "initRepoKeyTip": "Si la clave se ha inicializado en otros dispositivos, use [Importar la clave] o genere la clave con la misma contraseña; de lo contrario, los datos no se pueden sincronizar con la nube, así que asegúrese de usar la misma clave en todos los dispositivos.",
   "crossKeepLazyLoad": "La selección múltiple entre páginas debe seleccionar [Mantener contenido cargado] en el menú más",
   "keepLazyLoad": "Mantener el contenido cargado",

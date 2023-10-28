@@ -342,7 +342,7 @@
   "syncConfGuide5": "如果数据量较大，第一次同步会比较慢，请耐心等待<br>iOS/iPad 端在同步时请勿切换应用并保持亮屏",
   "copyPlainText": "复制纯文本",
   "findInDoc": "${x} 个文档中匹配 ${y} 项",
-  "jumpToParentNext": "跳转到上一层级的下一个块",
+  "jumpToParentNext": "跳转到父级的下一个块",
   "initRepoKeyTip": "如果其他设备上已经初始化过密钥，请使用 [导入密钥] 或者通过相同的密码生成密钥，否则无法云端同步数据，所以请务必在所有设备上使用相同的密钥",
   "crossKeepLazyLoad": "跨页多选需在更多菜单中选中 [保持已加载内容]",
   "keepLazyLoad": "保持已加载的内容",

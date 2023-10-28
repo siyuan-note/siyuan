@@ -101,8 +101,18 @@ func GetParentNextChildID(id string) string {
 	}
 
 	for p := node.Parent; nil != p; p = p.Parent {
-		if nil != p.Next {
-			return p.Next.ID
+		if ast.NodeDocument == p.Type {
+			if nil != node.Next {
+				return node.Next.ID
+			}
+			return ""
+		}
+
+		for f := p.Next; nil != f; f = f.Next {
+			// 遍历取下一个块级元素（比如跳过超级块 Close 节点）
+			if f.IsBlock() {
+				return f.ID
+			}
 		}
 	}
 	return ""

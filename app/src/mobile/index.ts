@@ -29,6 +29,7 @@ import {Menu} from "../plugin/Menu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
+    public appId:string;
 
     constructor() {
         if (!window.webkit?.messageHandlers && !window.JSAndroid) {
@@ -37,6 +38,7 @@ class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        this.appId =Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
             notebooks: [],

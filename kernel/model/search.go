@@ -334,7 +334,7 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 				}
 
 				switch n.Type {
-				case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+				case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 					if 0 == method {
 						if bytes.Contains(n.Tokens, []byte(keyword)) {
 							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))

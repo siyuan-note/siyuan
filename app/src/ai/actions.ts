@@ -11,7 +11,8 @@ import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../util/escape";
+import {showMessage} from "../dialog/message";
 
 export const fillContent = (protyle: IProtyle, data: string, elements: Element[]) => {
     if (!data) {
@@ -36,38 +37,6 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         click() {
             const dialog = new Dialog({
                 title: window.siyuan.languages.aiCustomAction,
-                content: `<div class="b3-dialog__content"><textarea class="b3-text-field fn__block"></textarea></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                width: isMobile() ? "92vw" : "520px",
-            });
-            const inputElement = dialog.element.querySelector("textarea");
-            const btnsElement = dialog.element.querySelectorAll(".b3-button");
-            dialog.bindInput(inputElement, () => {
-                (btnsElement[1] as HTMLButtonElement).click();
-            });
-            inputElement.focus();
-            btnsElement[0].addEventListener("click", () => {
-                dialog.destroy();
-            });
-            btnsElement[1].addEventListener("click", () => {
-                fetchPost("/api/ai/chatGPTWithAction", {
-                    ids,
-                    action: inputElement.value,
-                }, (response) => {
-                    dialog.destroy();
-                    fillContent(protyle, response.data, elements);
-                });
-            });
-        }
-    }, {
-        iconHTML: Constants.ZWSP,
-        label: `${window.siyuan.languages.aiCustomAction} & ${window.siyuan.languages.save}`,
-        click() {
-            const dialog = new Dialog({
-                title: window.siyuan.languages.save,
                 content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" value="" placeholder="${window.siyuan.languages.memo}">
     <div class="fn__hr"></div>
@@ -75,55 +44,111 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.use}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.save}</button>
 </div>`,
                 width: isMobile() ? "92vw" : "520px",
             });
-            const inputElement = dialog.element.querySelector("input");
+            const nameElement = dialog.element.querySelector("input")
+            nameElement.focus();
+            const customElement = dialog.element.querySelector("textarea");
             const btnsElement = dialog.element.querySelectorAll(".b3-button");
-            dialog.bindInput(inputElement, () => {
+            dialog.bindInput(customElement, () => {
                 (btnsElement[1] as HTMLButtonElement).click();
             });
-            inputElement.focus();
             btnsElement[0].addEventListener("click", () => {
                 dialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
-                const memo = dialog.element.querySelector("textarea").value;
-                window.siyuan.storage[Constants.LOCAL_AI].push({
-                    name: inputElement.value,
-                    memo
-                });
-                setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
+                if (!customElement.value) {
+                    showMessage(window.siyuan.languages["_kernel"][142])
+                    return
+                }
                 fetchPost("/api/ai/chatGPTWithAction", {
                     ids,
-                    action: memo,
+                    action: customElement.value,
                 }, (response) => {
                     dialog.destroy();
                     fillContent(protyle, response.data, elements);
                 });
+            });
+            btnsElement[2].addEventListener("click", () => {
+                if (!nameElement.value && !customElement.value) {
+                    showMessage(window.siyuan.languages["_kernel"][142])
+                    return
+                }
+                window.siyuan.storage[Constants.LOCAL_AI].push({
+                    name: nameElement.value,
+                    memo: customElement.value
+                });
+                setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
                 dialog.destroy();
             });
         }
     }];
+    if (window.siyuan.storage[Constants.LOCAL_AI].length > 0) {
+        customMenu.push({type: "separator"});
+    }
     window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }) => {
         customMenu.push({
             iconHTML: Constants.ZWSP,
-            action: "iconCloseRound",
-            label: `<div aria-label="${escapeAttr(item.memo)}" data-type="a">${escapeHtml(item.name)}</div>`,
+            action: "iconEdit",
+            label: `<div aria-label="${escapeAriaLabel(item.memo)}" data-type="a">${escapeHtml(item.name)}</div>`,
             bind: (element) => {
                 element.addEventListener("click", (event) => {
                     if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
-                        window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
-                            name: string,
-                            memo: string
-                        }, index: number) => {
-                            if (element.querySelector(".b3-menu__label").textContent.trim() === subItem.name) {
-                                window.siyuan.storage[Constants.LOCAL_AI].splice(index, 1);
-                                setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
-                                element.remove();
-                                return true;
-                            }
+                        const dialog = new Dialog({
+                            title: window.siyuan.languages.update,
+                            content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.aiCustomAction}"></textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+</div>`,
+                            width: isMobile() ? "92vw" : "520px",
+                        });
+                        const nameElement = dialog.element.querySelector("input");
+                        nameElement.value = item.name;
+                        nameElement.focus()
+                        const customElement = dialog.element.querySelector("textarea");
+                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                        dialog.bindInput(customElement, () => {
+                            (btnsElement[1] as HTMLButtonElement).click();
+                        });
+                        customElement.value = item.memo;
+                        btnsElement[0].addEventListener("click", () => {
+                            dialog.destroy();
+                        });
+                        btnsElement[1].addEventListener("click", () => {
+                            window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
+                                name: string,
+                                memo: string
+                            }) => {
+                                if (item.name === subItem.name && item.memo === subItem.memo) {
+                                    item.name = nameElement.value;
+                                    item.memo = customElement.value;
+                                    setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
+                                    return true;
+                                }
+                            });
+                            dialog.destroy();
+                        });
+                        btnsElement[2].addEventListener("click", () => {
+                            window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
+                                name: string,
+                                memo: string
+                            }, index: number) => {
+                                if (item.name === subItem.name && item.memo === subItem.memo) {
+                                    window.siyuan.storage[Constants.LOCAL_AI].splice(index, 1);
+                                    setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
+                                    return true;
+                                }
+                            });
+                            dialog.destroy();
                         });
                     } else {
                         fetchPost("/api/ai/chatGPTWithAction", {
@@ -132,8 +157,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                         }, (response) => {
                             fillContent(protyle, response.data, elements);
                         });
-                        window.siyuan.menus.menu.remove();
                     }
+                    window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
                 });

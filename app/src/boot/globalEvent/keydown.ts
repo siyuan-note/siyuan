@@ -215,7 +215,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                             }
                         });
                     }
-                    if (!protyle) {
+                    if (!protyle && item.editors.length > 0) {
                         protyle = item.editors[0].protyle;
                     }
                     return true;

@@ -19,17 +19,16 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
-import {loadPlugins} from "../plugin/loader";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
-    public appId:string;
+    public appId: string;
 
     constructor() {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
-        this.appId =Constants.SIYUAN_APPID;
+        this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -128,9 +127,8 @@ class App {
                 }
             }),
         };
-        fetchPost("/api/system/getConf", {}, async (response) => {
+        fetchPost("/api/system/getConf", {}, (response) => {
             window.siyuan.config = response.data.conf;
-            await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;

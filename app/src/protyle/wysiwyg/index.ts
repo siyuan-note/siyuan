@@ -395,7 +395,7 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (!newWidth || newWidth !== oldWidth + "px") {
+                    if (!newWidth || newWidth === oldWidth + "px") {
                         return;
                     }
                     transaction(protyle, [{

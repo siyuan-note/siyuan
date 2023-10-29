@@ -51,7 +51,7 @@ export const getNewFilePath = (useSavePath: boolean) => {
         }
     }
     /// #else
-    if (window.siyuan.mobile.editor) {
+    if (window.siyuan.mobile.editor && document.getElementById("empty").classList.contains("fn__none")) {
         notebookId = window.siyuan.mobile.editor.protyle.notebookId;
         if (useSavePath) {
             currentPath = window.siyuan.mobile.editor.protyle.path;

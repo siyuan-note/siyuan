@@ -53,6 +53,11 @@ export const getNewFilePath = (useSavePath: boolean) => {
     /// #else
     if (window.siyuan.mobile.editor) {
         notebookId = window.siyuan.mobile.editor.protyle.notebookId;
+        if (useSavePath) {
+            currentPath = window.siyuan.mobile.editor.protyle.path;
+        } else {
+            currentPath = pathPosix().dirname(window.siyuan.mobile.editor.protyle.path);
+        }
     }
     /// #endif
     if (!notebookId) {

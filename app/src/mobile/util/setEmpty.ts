@@ -51,26 +51,10 @@ export const setEmpty = (app: App) => {
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyNewFile") {
-                if (window.siyuan.mobile.editor) {
-                    newFile({
-                        app,
-                        notebookId: window.siyuan.mobile.editor.protyle.notebookId,
-                        currentPath: window.siyuan.mobile.editor.protyle.path,
-                        useSavePath: true
-                    });
-                } else {
-                    window.siyuan.notebooks.find(item => {
-                        if (!item.closed) {
-                            newFile({
-                                app,
-                                notebookId: item.id,
-                                currentPath: "/",
-                                useSavePath: true
-                            });
-                            return true;
-                        }
-                    });
-                }
+                newFile({
+                    app,
+                    useSavePath: true
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

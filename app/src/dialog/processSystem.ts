@@ -18,7 +18,7 @@ import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
-import {hideElements} from "../protyle/ui/hideElements";
+import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
@@ -168,6 +168,7 @@ export const kernelError = () => {
 };
 
 export const exitSiYuan = () => {
+    hideAllElements(["util"]);
     /// #if MOBILE
     saveScroll(window.siyuan.mobile.editor.protyle);
     /// #endif

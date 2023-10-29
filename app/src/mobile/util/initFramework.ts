@@ -23,7 +23,7 @@ import {loadPlugins} from "../../plugin/loader";
 
 export const initFramework = async (app: App) => {
     setInlineStyle();
-    await loadPlugins(this);
+    await loadPlugins(app);
     renderSnippet();
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");

@@ -10,11 +10,11 @@ import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initWindow} from "../boot/onGetConfig";
 import {App} from "../index";
-import {afterLoadPlugin} from "../plugin/loader";
+import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
 import {initWindowEvent} from "../boot/globalEvent/event";
 
-export const init = (app: App) => {
+export const init = async (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
@@ -47,8 +47,9 @@ export const init = (app: App) => {
     initWindow(app);
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
-    renderSnippet();
     setInlineStyle();
+    await loadPlugins(app);
+    renderSnippet();
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
@@ -58,7 +59,7 @@ export const init = (app: App) => {
     });
 };
 
-const afterLayout = (app:App) => {
+const afterLayout = (app: App) => {
     app.plugins.forEach(item => {
         afterLoadPlugin(item);
     });

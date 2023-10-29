@@ -770,6 +770,7 @@ var KernelID = gulu.Rand.String(7)
 func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	endpoint := util.GetCloudWebSocketServer() + "/apis/siyuan/dejavu/ws"
 	header := http.Header{
+		"User-Agent":        []string{util.UserAgent},
 		"x-siyuan-uid":      []string{Conf.User.UserId},
 		"x-siyuan-kernel":   []string{KernelID},
 		"x-siyuan-ver":      []string{util.Ver},

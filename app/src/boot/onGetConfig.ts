@@ -88,7 +88,7 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
-export const onGetConfig = async (isStart: boolean, app: App) => {
+export const onGetConfig = (isStart: boolean, app: App) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -142,7 +142,6 @@ export const onGetConfig = async (isStart: boolean, app: App) => {
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
-    await loadPlugins(app);
     renderSnippet();
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {

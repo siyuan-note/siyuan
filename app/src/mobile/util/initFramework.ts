@@ -19,11 +19,9 @@ import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardTo
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
-import {loadPlugins} from "../../plugin/loader";
 
-export const initFramework = async (app: App) => {
+export const initFramework = (app: App) => {
     setInlineStyle();
-    await loadPlugins(app);
     renderSnippet();
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");

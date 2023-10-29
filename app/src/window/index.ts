@@ -19,6 +19,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
+import {loadPlugins} from "../plugin/loader";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -127,8 +128,9 @@ class App {
                 }
             }),
         };
-        fetchPost("/api/system/getConf", {}, (response) => {
+        fetchPost("/api/system/getConf", {}, async (response) => {
             window.siyuan.config = response.data.conf;
+            await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;

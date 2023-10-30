@@ -10,10 +10,6 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20231023172823-f152fc5d93ef h1:LVJO3aj18v63T2whGGt3gL5imkJk+7ujPfFv38X7Oi8=
 github.com/88250/gulu v1.2.3-0.20231023172823-f152fc5d93ef/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
-github.com/88250/lute v1.7.6-0.20231025033833-375686999503 h1:2NnFQ3MzYoWulvt6o6p7FNJUey1llu/1dbfIEytMf0A=
-github.com/88250/lute v1.7.6-0.20231025033833-375686999503/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
-github.com/88250/lute v1.7.6-0.20231028154609-ac16015d5941 h1:aivU1+5XHmzLNPHY/ZdTbDnWWr15+JEBB5FjwjsIt3A=
-github.com/88250/lute v1.7.6-0.20231028154609-ac16015d5941/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/lute v1.7.6-0.20231028162145-1bc5cc6e689a h1:H1WaOyTfyvjFS95XabKa1YtvBoedywqH5PJw/QLnt3Y=
 github.com/88250/lute v1.7.6-0.20231028162145-1bc5cc6e689a/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
@@ -342,10 +338,8 @@ github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFR
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20231028150225-cfb485a4235d h1:olisJ1eg3rrAMSM2QXCQKxLVBHRRCn8M0+sld7B9Jgc=
-github.com/siyuan-note/dejavu v0.0.0-20231028150225-cfb485a4235d/go.mod h1:sI8koptyofmnE4zcS6/HhOCHmxUcOSvr8ZYF0EqOku4=
-github.com/siyuan-note/dejavu v0.0.0-20231029013956-be65f6fb8afe h1:igKhT3NXQVhs4pB7hElii10Fjsd1mYo7qqo+OLNiqaA=
-github.com/siyuan-note/dejavu v0.0.0-20231029013956-be65f6fb8afe/go.mod h1:sI8koptyofmnE4zcS6/HhOCHmxUcOSvr8ZYF0EqOku4=
+github.com/siyuan-note/dejavu v0.0.0-20231030033735-e1159566cf1f h1:qcnlaDdl74QBBJcTts4g46Fjoo2bftHQZe63DN91/lc=
+github.com/siyuan-note/dejavu v0.0.0-20231030033735-e1159566cf1f/go.mod h1:sI8koptyofmnE4zcS6/HhOCHmxUcOSvr8ZYF0EqOku4=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80 h1:XghjHKJd+SiL0DkGYFVC+UGUDFtnR4v9gkAbPeh9Eq8=
@@ -354,8 +348,8 @@ github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524 h1:ZuxN5gwqtU
 github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524/go.mod h1:jK5lCYfPbFOrW23/HMeU7kmpLdEd5GkennF+kUpy7Vs=
 github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13 h1:DQwiRQa63wsjSKQN5TvTWI2Dd5XSulhnXvxIdOG8/x8=
 github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13/go.mod h1:mS0nX5fX99R/5HLnKqG40kpbathSCXxL/oxe88rURNI=
-github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493 h1:oaN5b0WDFkjdBgGxmmBnMrtZxaJ76LZLwhQSZnznJMI=
-github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
+github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff h1:5GcxrTOJTsusXOLhg4GuHWbEa4M5gu+CNfL0giwNjDM=
+github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc h1:EDbkzdLfR+gMYyU4h/xUiwxngz75d3L5M0IN0NTqdVU=
 github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc/go.mod h1:WxG165xAPeGok0Q/15KMhnNbesoU5ZG+/zikTyWzZi8=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=

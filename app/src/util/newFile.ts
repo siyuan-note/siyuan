@@ -50,20 +50,24 @@ export const getNewFilePath = (useSavePath: boolean) => {
             }
         }
     }
+    /// #else
+    if (window.siyuan.mobile.editor && document.getElementById("empty").classList.contains("fn__none")) {
+        notebookId = window.siyuan.mobile.editor.protyle.notebookId;
+        if (useSavePath) {
+            currentPath = window.siyuan.mobile.editor.protyle.path;
+        } else {
+            currentPath = pathPosix().dirname(window.siyuan.mobile.editor.protyle.path);
+        }
+    }
     /// #endif
     if (!notebookId) {
-        if (window.siyuan.mobile.editor) {
-            notebookId = window.siyuan.mobile.editor.protyle.notebookId;
-        }
-        if (!notebookId) {
-            window.siyuan.notebooks.find(item => {
-                if (!item.closed) {
-                    notebookId = item.id;
-                    currentPath = "/";
-                    return true;
-                }
-            });
-        }
+        window.siyuan.notebooks.find(item => {
+            if (!item.closed) {
+                notebookId = item.id;
+                currentPath = "/";
+                return true;
+            }
+        });
     }
     return {notebookId, currentPath};
 };

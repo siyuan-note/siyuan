@@ -11,6 +11,8 @@ import {exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewImage} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
+import {hideMessage, showMessage} from "../../../dialog/message";
+import {fetchPost} from "../../../util/fetch";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -323,3 +325,43 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
         h: rect.height,
     });
 };
+
+export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string) => {
+    const msgId = showMessage(window.siyuan.languages.uploading, 0);
+    fetchPost("/api/asset/insertLocalAssets", {
+        assetPaths: files,
+        isUpload: true,
+        id: protyle.block.rootID
+    }, (response) => {
+        hideMessage(msgId);
+        const addUpdateValue: IAVCellAssetValue[] = []
+        Object.keys(response.data.succMap).forEach(key => {
+            const type = pathPosix().extname(key).toLowerCase();
+            const name = key.substring(0, key.length - type.length)
+            if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+                addUpdateValue.push({
+                    type: "image",
+                    name,
+                    content: response.data.succMap[key],
+                })
+            } else {
+                addUpdateValue.push({
+                    type: "file",
+                    name,
+                    content: response.data.succMap[key],
+                })
+            }
+        })
+        fetchPost("/api/av/renderAttributeView", {
+            id: avID,
+        }, (response) => {
+            updateAssetCell({
+                protyle,
+                data: response.data as IAV,
+                cellElements: [cellElement],
+                type: "addUpdate",
+                addUpdateValue
+            });
+        })
+    });
+}

@@ -80,9 +80,10 @@ class App {
         window.addEventListener("pagehide", () => {
             saveScroll(window.siyuan.mobile.editor.protyle);
         }, false);
-        fetchPost("/api/system/getConf", {}, (confResponse) => {
+        fetchPost("/api/system/getConf", {}, async (confResponse) => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
+            await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;

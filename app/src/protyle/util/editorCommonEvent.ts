@@ -26,6 +26,7 @@ import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
+import {dragUpload} from "../render/av/asset";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -988,15 +989,31 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
-            focusByRange(getRangeByPoint(event.clientX, event.clientY));
-            if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                const files: string[] = [];
-                for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                    files.push(event.dataTransfer.files[i].path);
+            // https://github.com/siyuan-note/siyuan/issues/9544
+            const avElement = hasClosestByClassName(event.target, 'av')
+            if (!avElement) {
+                focusByRange(getRangeByPoint(event.clientX, event.clientY));
+                if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                    const files: string[] = [];
+                    for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                        files.push(event.dataTransfer.files[i].path);
+                    }
+                    uploadLocalFiles(files, protyle, !event.altKey);
+                } else {
+                    paste(protyle, event);
                 }
-                uploadLocalFiles(files, protyle, !event.altKey);
             } else {
-                paste(protyle, event);
+                const cellElement = hasClosestByClassName(event.target, 'av__cell')
+                if (cellElement) {
+                    const cellType = avElement.querySelector(`.av__row--header [data-col-id="${cellElement.dataset.colId}"]`)?.getAttribute("data-dtype")
+                    if (cellType === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                        const files: string[] = [];
+                        for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                            files.push(event.dataTransfer.files[i].path);
+                        }
+                        dragUpload(files, protyle, cellElement, avElement.dataset.avId);
+                    }
+                }
             }
         }
         if (window.siyuan.dragElement) {

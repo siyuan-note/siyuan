@@ -17,6 +17,7 @@ import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
 import {App} from "../../index";
 import {isHuawei, isInAndroid, isInIOS} from "../../protyle/util/compatibility";
+import {newFile} from "../../util/newFile";
 
 export const popMenu = () => {
     activeBlur();
@@ -60,6 +61,9 @@ export const initRightMenu = (app: App) => {
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">
         <svg class="b3-menu__icon"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-menu__label">${window.siyuan.languages.syncNow}</span>
+    </div>
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewDoc">
+        <svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewNotebook">
         <svg class="b3-menu__icon"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newNotebook}</span>
@@ -170,6 +174,15 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuNewNotebook") {
                 newNotebook();
+                closePanel();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuNewDoc") {
+                newFile({
+                    app,
+                    useSavePath: true
+                });
                 closePanel();
                 event.preventDefault();
                 event.stopPropagation();

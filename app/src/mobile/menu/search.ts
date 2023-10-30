@@ -602,7 +602,10 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
     });
 
     openModel({
-        title: `<input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">`,
+        title: `<div class="fn__flex">
+    <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">
+    <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconFile"></use></svg>
+</div>`,
         icon: "iconSearch",
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">
@@ -671,6 +674,9 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
      <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
+            document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
+                newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
+            })
             initSearchEvent(app, element.firstElementChild, config);
             updateSearchResult(config, element);
         }

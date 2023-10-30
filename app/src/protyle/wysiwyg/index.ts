@@ -365,9 +365,9 @@ export class WYSIWYG {
             }
             const documentSelf = document;
             const rect = protyle.element.getBoundingClientRect();
-            const mostLeft = rect.left + parseInt(protyle.wysiwyg.element.style.paddingLeft) + 1;
+            const mostLeft = rect.left + (parseInt(protyle.wysiwyg.element.style.paddingLeft) || 24) + 1;
             // 不能用 firstElement，否则 https://ld246.com/article/1668758661338
-            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 2;
+            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - (parseInt(protyle.wysiwyg.element.style.paddingLeft) || 24) - (parseInt(protyle.wysiwyg.element.style.paddingRight) || 16)) - 2;
             const mostBottom = rect.bottom;
             const y = event.clientY;
 
@@ -395,7 +395,7 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (!newWidth || newWidth !== oldWidth + "px") {
+                    if (!newWidth || newWidth === oldWidth + "px") {
                         return;
                     }
                     transaction(protyle, [{
@@ -1814,7 +1814,7 @@ export class WYSIWYG {
                         openByMobile(linkAddress);
                         /// #endif
                     }
-                } else {
+                } else if (linkAddress) {
                     /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
                         showMessage(e);

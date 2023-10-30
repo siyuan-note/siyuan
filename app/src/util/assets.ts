@@ -229,7 +229,7 @@ export const setInlineStyle = (set = true) => {
         if (siyuanStyle) {
             siyuanStyle.innerHTML = style;
         } else {
-            document.head.insertAdjacentHTML("beforeend", `<style id="siyuanStyle">${style}</style>`);
+            document.querySelector("#pluginsStyle").insertAdjacentHTML("beforebegin", `<style id="siyuanStyle">${style}</style>`);
         }
     }
     return style;

@@ -1227,7 +1227,7 @@ export class Toolbar {
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            if ( listElement.firstElementChild.nextElementSibling) {
+            if (listElement.firstElementChild.nextElementSibling) {
                 listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
             } else {
                 listElement.firstElementChild.classList.add("b3-list-item--focus");
@@ -1522,9 +1522,10 @@ export class Toolbar {
         });
     }
 
-    private renderAssetList(listElement: Element, previewElement: Element, k: string, position: IPosition) {
+    private renderAssetList(listElement: Element, previewElement: Element, k: string, position: IPosition, exts: string[] = []) {
         fetchPost("/api/search/searchAsset", {
             k,
+            exts
         }, (response) => {
             let searchHTML = "";
             response.data.forEach((item: { path: string, hName: string }, index: number) => {
@@ -1540,7 +1541,7 @@ export class Toolbar {
         });
     }
 
-    public showAssets(protyle: IProtyle, position: IPosition, avCB?: (url: string) => void) {
+    public showAssets(protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts: string[] = []) {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = "";
@@ -1585,12 +1586,12 @@ export class Toolbar {
             if (event.key === "Enter") {
                 if (!isEmpty) {
                     const currentURL = this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value");
-                    if (avCB) {
-                        avCB(currentURL);
+                    if (callback) {
+                        callback(currentURL);
                     } else {
                         hintRenderAssets(currentURL, protyle);
                     }
-                } else if (!avCB) {
+                } else if (!callback) {
                     focusByRange(this.range);
                 }
                 this.subElement.classList.add("fn__none");
@@ -1598,14 +1599,14 @@ export class Toolbar {
                 event.preventDefault();
             } else if (event.key === "Escape") {
                 this.subElement.classList.add("fn__none");
-                if (!avCB) {
+                if (!callback) {
                     focusByRange(this.range);
                 }
             }
         });
         inputElement.addEventListener("input", (event) => {
             event.stopPropagation();
-            this.renderAssetList(listElement, previewElement, inputElement.value, position);
+            this.renderAssetList(listElement, previewElement, inputElement.value, position, exts);
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
@@ -1623,7 +1624,7 @@ export class Toolbar {
             }
             if (target.classList.contains("b3-list--empty")) {
                 this.subElement.classList.add("fn__none");
-                if (!avCB) {
+                if (!callback) {
                     focusByRange(this.range);
                 }
                 event.stopPropagation();
@@ -1633,8 +1634,8 @@ export class Toolbar {
             if (listItemElement) {
                 event.stopPropagation();
                 const currentURL = listItemElement.getAttribute("data-value");
-                if (avCB) {
-                    avCB(currentURL);
+                if (callback) {
+                    callback(currentURL);
                 } else {
                     hintRenderAssets(currentURL, protyle);
                 }
@@ -1648,7 +1649,7 @@ export class Toolbar {
         /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
-        this.renderAssetList(listElement, previewElement, "", position);
+        this.renderAssetList(listElement, previewElement, "", position, exts);
     }
 
     public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {

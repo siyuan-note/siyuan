@@ -333,7 +333,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
 
-	if err := filelock.Move(fromPath, toPath); nil != err {
+	if err := filelock.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
 		return errors.New(msg)

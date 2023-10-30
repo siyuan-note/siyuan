@@ -4,7 +4,7 @@ import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {getBackend, getFrontend} from "../util/functions";
-import {renderSnippets} from "../config/util/snippets";
+import {renderSnippet, renderSnippets} from "../config/util/snippets";
 /// #if !MOBILE
 import {openFile, openFileById} from "../editor/util";
 import {openNewWindow, openNewWindowById} from "../window/openNewWindow";
@@ -172,6 +172,7 @@ export const API = {
     fetchGet,
     getFrontend,
     getBackend,
+    renderSnippet,
     renderSnippets,
     openTab,
     openWindow,

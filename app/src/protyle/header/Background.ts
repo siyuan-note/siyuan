@@ -304,10 +304,9 @@ export class Background {
                 } else if (type === "asset") {
                     const rect = target.getBoundingClientRect();
                     protyle.toolbar.showAssets(protyle, {
-                        x: rect.right,
-                        y: rect.bottom,
-                        w: target.parentElement.clientWidth + 8,
-                        h: rect.height
+                        x: rect.right - 798,
+                        y: rect.bottom + 8,
+                        isLeft: false,
                     }, (url) => {
                         this.ial["title-img"] = `background-image:url("${url}")`;
                         this.render(this.ial, protyle.block.rootID);

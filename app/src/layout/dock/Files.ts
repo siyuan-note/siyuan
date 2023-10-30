@@ -502,6 +502,7 @@ export class Files extends Model {
             if (!newUlElement) {
                 return;
             }
+            const oldScrollTop = this.element.scrollTop;
             const toURL = newUlElement.getAttribute("data-url");
             const toPath = newElement.getAttribute("data-path");
             let gutterType = "";
@@ -649,7 +650,7 @@ export class Files extends Model {
                                     showMessage(window.siyuan.languages.emptyContent);
                                     return;
                                 }
-                                this.onLsHTML(response.data);
+                                this.onLsHTML(response.data, oldScrollTop);
                             });
                         }
                     });
@@ -897,7 +898,7 @@ export class Files extends Model {
         }
     }
 
-    private onLsHTML(data: { files: IFile[], box: string, path: string }) {
+    private onLsHTML(data: { files: IFile[], box: string, path: string }, scrollTop?: number) {
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
@@ -924,6 +925,9 @@ export class Files extends Model {
                     item.classList.remove("file-tree__sliderDown");
                     item.removeAttribute("style");
                 });
+                if (typeof scrollTop === "number") {
+                    this.element.scroll({top: scrollTop, behavior: "smooth"})
+                }
             }, 120);
         }, 2);
     }

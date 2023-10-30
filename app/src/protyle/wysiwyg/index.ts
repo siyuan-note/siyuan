@@ -1335,7 +1335,7 @@ export class WYSIWYG {
                     return false;
                 }
             }
-            if (!protyle.disabled && target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
+            if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {
                     clientX: x + 4,
                     clientY: y

@@ -3,37 +3,41 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
 
 export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
-        response.data.snippets.forEach((item: ISnippet) => {
-            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLScriptElement;
-            if (!item.enabled) {
-                if (exitElement) {
-                    exitElement.remove();
-                }
-                return;
-            }
+    fetchPost("/api/snippet/getSnippet", { type: "all", enabled: 2 }, (response) => {
+        renderSnippets(response.data.snippets);
+    });
+};
+
+export const renderSnippets = (snippets: ISnippet[]) => {
+    snippets.forEach(item => {
+        const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
+        let exitElement = document.getElementById(id) as HTMLScriptElement;
+        if (!item.enabled) {
             if (exitElement) {
-                if (exitElement.innerHTML === item.content) {
-                    return;
-                }
                 exitElement.remove();
             }
-            if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
-            } else if (item.type === "js") {
-                exitElement = document.createElement("script");
-                exitElement.type = "text/javascript";
-                exitElement.text = item.content;
-                exitElement.id = id;
-                document.head.appendChild(exitElement);
+            return;
+        }
+        if (exitElement) {
+            if (exitElement.innerHTML === item.content) {
+                return;
             }
-        });
+            exitElement.remove();
+        }
+        if (item.type === "css") {
+            document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
+        } else if (item.type === "js") {
+            exitElement = document.createElement("script");
+            exitElement.type = "text/javascript";
+            exitElement.text = item.content;
+            exitElement.id = id;
+            document.head.appendChild(exitElement);
+        }
     });
 };
 
 export const openSnippets = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
+    fetchPost("/api/snippet/getSnippet", { type: "all", enabled: 2 }, (response) => {
         let cssHTML = "";
         let jsHTML = "";
         response.data.snippets.forEach((item: ISnippet) => {
@@ -108,7 +112,7 @@ export const openSnippets = () => {
                         enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
                     });
                 });
-                fetchPost("/api/snippet/setSnippet", {snippets}, () => {
+                fetchPost("/api/snippet/setSnippet", { snippets }, () => {
                     removeIds.forEach(item => {
                         const rmElement = document.querySelector(item);
                         if (rmElement) {

@@ -101,7 +101,15 @@ func searchAsset(c *gin.Context) {
 	}
 
 	k := arg["k"].(string)
-	ret.Data = model.SearchAssetsByName(k)
+
+	var exts []string
+	if extsArg := arg["exts"]; nil != extsArg {
+		for _, ext := range extsArg.([]interface{}) {
+			exts = append(exts, ext.(string))
+		}
+	}
+
+	ret.Data = model.SearchAssetsByName(k, exts)
 	return
 }
 

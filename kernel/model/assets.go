@@ -220,11 +220,26 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 	return
 }
 
-func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
+func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 
 	count := 0
+	filterByExt := 0 < len(exts)
 	for _, asset := range cache.GetAssets() {
+		if filterByExt {
+			ext := filepath.Ext(asset.HName)
+			includeExt := false
+			for _, e := range exts {
+				if strings.ToLower(ext) == strings.ToLower(e) {
+					includeExt = true
+					break
+				}
+			}
+			if !includeExt {
+				continue
+			}
+		}
+
 		if !strings.Contains(strings.ToLower(asset.HName), strings.ToLower(keyword)) {
 			continue
 		}

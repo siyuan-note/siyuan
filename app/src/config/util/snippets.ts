@@ -3,7 +3,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
 
 export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", { type: "all", enabled: 2 }, (response) => {
+    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         renderSnippets(response.data.snippets);
     });
 };
@@ -37,7 +37,7 @@ export const renderSnippets = (snippets: ISnippet[]) => {
 };
 
 export const openSnippets = () => {
-    fetchPost("/api/snippet/getSnippet", { type: "all", enabled: 2 }, (response) => {
+    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         let cssHTML = "";
         let jsHTML = "";
         response.data.snippets.forEach((item: ISnippet) => {
@@ -112,7 +112,7 @@ export const openSnippets = () => {
                         enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
                     });
                 });
-                fetchPost("/api/snippet/setSnippet", { snippets }, () => {
+                fetchPost("/api/snippet/setSnippet", {snippets}, () => {
                     removeIds.forEach(item => {
                         const rmElement = document.querySelector(item);
                         if (rmElement) {

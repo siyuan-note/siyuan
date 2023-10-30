@@ -279,7 +279,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
                     return true;
                 }
             });
-            if (hasSelected) {
+            if (hasSelected || !addOptionElement.value) {
                 return;
             }
             colData.options.push({

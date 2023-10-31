@@ -118,7 +118,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     let name = target.parentElement.dataset.name;
     let color = target.parentElement.dataset.color;
     const menu = new Menu("av-col-option", () => {
-        if (name === inputElement.value) {
+        if (name === inputElement.value || !inputElement.value) {
             return;
         }
         transaction(protyle, [{

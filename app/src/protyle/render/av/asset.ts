@@ -334,24 +334,24 @@ export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTML
         id: protyle.block.rootID
     }, (response) => {
         hideMessage(msgId);
-        const addUpdateValue: IAVCellAssetValue[] = []
+        const addUpdateValue: IAVCellAssetValue[] = [];
         Object.keys(response.data.succMap).forEach(key => {
             const type = pathPosix().extname(key).toLowerCase();
-            const name = key.substring(0, key.length - type.length)
+            const name = key.substring(0, key.length - type.length);
             if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
                 addUpdateValue.push({
                     type: "image",
                     name,
                     content: response.data.succMap[key],
-                })
+                });
             } else {
                 addUpdateValue.push({
                     type: "file",
                     name,
                     content: response.data.succMap[key],
-                })
+                });
             }
-        })
+        });
         fetchPost("/api/av/renderAttributeView", {
             id: avID,
         }, (response) => {
@@ -362,6 +362,6 @@ export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTML
                 type: "addUpdate",
                 addUpdateValue
             });
-        })
+        });
     });
-}
+};

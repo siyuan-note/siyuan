@@ -990,7 +990,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544
-            const avElement = hasClosestByClassName(event.target, 'av')
+            const avElement = hasClosestByClassName(event.target, "av");
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
                 if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
@@ -1003,9 +1003,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     paste(protyle, event);
                 }
             } else {
-                const cellElement = hasClosestByClassName(event.target, 'av__cell')
+                const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
-                    const cellType = avElement.querySelector(`.av__row--header [data-col-id="${cellElement.dataset.colId}"]`)?.getAttribute("data-dtype")
+                    const cellType = avElement.querySelector(`.av__row--header [data-col-id="${cellElement.dataset.colId}"]`)?.getAttribute("data-dtype");
                     if (cellType === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                         const files: string[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {

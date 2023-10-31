@@ -676,7 +676,7 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
                 newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
-            })
+            });
             initSearchEvent(app, element.firstElementChild, config);
             updateSearchResult(config, element);
         }

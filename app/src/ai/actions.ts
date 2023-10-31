@@ -49,7 +49,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
 </div>`,
                 width: isMobile() ? "92vw" : "520px",
             });
-            const nameElement = dialog.element.querySelector("input")
+            const nameElement = dialog.element.querySelector("input");
             const customElement = dialog.element.querySelector("textarea");
             const btnsElement = dialog.element.querySelectorAll(".b3-button");
             dialog.bindInput(customElement, () => {
@@ -60,8 +60,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             });
             btnsElement[1].addEventListener("click", () => {
                 if (!customElement.value) {
-                    showMessage(window.siyuan.languages["_kernel"][142])
-                    return
+                    showMessage(window.siyuan.languages["_kernel"][142]);
+                    return;
                 }
                 fetchPost("/api/ai/chatGPTWithAction", {
                     ids,
@@ -73,8 +73,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             });
             btnsElement[2].addEventListener("click", () => {
                 if (!nameElement.value && !customElement.value) {
-                    showMessage(window.siyuan.languages["_kernel"][142])
-                    return
+                    showMessage(window.siyuan.languages["_kernel"][142]);
+                    return;
                 }
                 window.siyuan.storage[Constants.LOCAL_AI].push({
                     name: nameElement.value,
@@ -149,7 +149,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                             });
                             dialog.destroy();
                         });
-                        nameElement.focus()
+                        nameElement.focus();
                     } else {
                         fetchPost("/api/ai/chatGPTWithAction", {
                             ids,

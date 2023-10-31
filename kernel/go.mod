@@ -47,12 +47,12 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.15.4
 	github.com/shirou/gopsutil/v3 v3.23.9
-	github.com/siyuan-note/dejavu v0.0.0-20231029013956-be65f6fb8afe
+	github.com/siyuan-note/dejavu v0.0.0-20231031012159-d985a65825cf
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
-	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
+	github.com/siyuan-note/filelock v0.0.0-20231030092426-0ff158f5f8ca
 	github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13
-	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
+	github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff
 	github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -75,7 +75,7 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.46.6 // indirect
+	github.com/aws/aws-sdk-go v1.46.7 // indirect
 	github.com/bytedance/sonic v1.10.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect

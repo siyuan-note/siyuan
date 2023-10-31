@@ -1227,7 +1227,7 @@ export class Toolbar {
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            if ( listElement.firstElementChild.nextElementSibling) {
+            if (listElement.firstElementChild.nextElementSibling) {
                 listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
             } else {
                 listElement.firstElementChild.classList.add("b3-list-item--focus");
@@ -1522,9 +1522,10 @@ export class Toolbar {
         });
     }
 
-    private renderAssetList(listElement: Element, previewElement: Element, k: string, position: IPosition) {
+    private renderAssetList(listElement: Element, previewElement: Element, k: string, position: IPosition, exts: string[] = []) {
         fetchPost("/api/search/searchAsset", {
             k,
+            exts
         }, (response) => {
             let searchHTML = "";
             response.data.forEach((item: { path: string, hName: string }, index: number) => {
@@ -1540,13 +1541,13 @@ export class Toolbar {
         });
     }
 
-    public showAssets(protyle: IProtyle, position: IPosition, avCB?: (url: string) => void) {
+    public showAssets(protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts: string[] = []) {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:50vw"}">
+<div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:420px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
@@ -1556,7 +1557,7 @@ export class Toolbar {
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
+<div style="width: 360px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
         const previewElement = this.subElement.firstElementChild.lastElementChild;
@@ -1585,12 +1586,12 @@ export class Toolbar {
             if (event.key === "Enter") {
                 if (!isEmpty) {
                     const currentURL = this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value");
-                    if (avCB) {
-                        avCB(currentURL);
+                    if (callback) {
+                        callback(currentURL);
                     } else {
                         hintRenderAssets(currentURL, protyle);
                     }
-                } else if (!avCB) {
+                } else if (!callback) {
                     focusByRange(this.range);
                 }
                 this.subElement.classList.add("fn__none");
@@ -1598,14 +1599,14 @@ export class Toolbar {
                 event.preventDefault();
             } else if (event.key === "Escape") {
                 this.subElement.classList.add("fn__none");
-                if (!avCB) {
+                if (!callback) {
                     focusByRange(this.range);
                 }
             }
         });
         inputElement.addEventListener("input", (event) => {
             event.stopPropagation();
-            this.renderAssetList(listElement, previewElement, inputElement.value, position);
+            this.renderAssetList(listElement, previewElement, inputElement.value, position, exts);
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
@@ -1623,7 +1624,7 @@ export class Toolbar {
             }
             if (target.classList.contains("b3-list--empty")) {
                 this.subElement.classList.add("fn__none");
-                if (!avCB) {
+                if (!callback) {
                     focusByRange(this.range);
                 }
                 event.stopPropagation();
@@ -1633,8 +1634,8 @@ export class Toolbar {
             if (listItemElement) {
                 event.stopPropagation();
                 const currentURL = listItemElement.getAttribute("data-value");
-                if (avCB) {
-                    avCB(currentURL);
+                if (callback) {
+                    callback(currentURL);
                 } else {
                     hintRenderAssets(currentURL, protyle);
                 }
@@ -1648,7 +1649,7 @@ export class Toolbar {
         /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
-        this.renderAssetList(listElement, previewElement, "", position);
+        this.renderAssetList(listElement, previewElement, "", position, exts);
     }
 
     public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {

@@ -177,5 +177,6 @@ export const API = {
     Plugin,
     Dialog,
     Menu,
-    Setting
+    Setting,
+    Constants,
 };

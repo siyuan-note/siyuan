@@ -926,7 +926,7 @@ export class Files extends Model {
                     item.removeAttribute("style");
                 });
                 if (typeof scrollTop === "number") {
-                    this.element.scroll({top: scrollTop, behavior: "smooth"})
+                    this.element.scroll({top: scrollTop, behavior: "smooth"});
                 }
             }, 120);
         }, 2);

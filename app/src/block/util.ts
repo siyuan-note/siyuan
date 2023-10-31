@@ -88,9 +88,9 @@ export const jumpToParentNext = (protyle: IProtyle, nodeElement: Element) => {
                     zoomOut({
                         protyle,
                         id: response.data.id,
-                    })
+                    });
                 }
-            })
+            });
         }
     }
 };

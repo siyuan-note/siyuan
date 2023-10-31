@@ -350,7 +350,7 @@ ${genHintItemHTML(item)}
                 searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
             }
             this.element.lastElementChild.innerHTML = searchHTML;
-            setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right))
+            setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
         });
     }
 

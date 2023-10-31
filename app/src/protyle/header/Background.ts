@@ -266,10 +266,10 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "show-random") {
-                    let html = ""
+                    let html = "";
                     bgs.forEach((item: string, index: number) => {
-                        html += `<div data-index="${index}" style="height: 148px;width: 148px;${item}" class="b3-card"></div>`
-                    })
+                        html += `<div data-index="${index}" style="height: 148px;width: 148px;${item}" class="b3-card"></div>`;
+                    });
                     const dialog = new Dialog({
                         title: window.siyuan.languages.random,
                         content: `<div class="b3-cards" style="margin-right: 0">${html}</div>`,
@@ -277,7 +277,7 @@ export class Background {
                         height: isMobile() ? "80vh" : "70vh",
                     });
                     dialog.element.addEventListener("click", (event) => {
-                        const target = event.target as HTMLElement
+                        const target = event.target as HTMLElement;
                         if (target.classList.contains("b3-card")) {
                             this.ial["title-img"] = bgs[parseInt(target.getAttribute("data-index"))];
                             this.render(this.ial, protyle.block.rootID);
@@ -287,7 +287,7 @@ export class Background {
                             });
                             dialog.destroy();
                         }
-                    })
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

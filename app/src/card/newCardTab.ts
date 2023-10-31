@@ -22,16 +22,11 @@ export const newCardModel = (options: {
         tab: options.tab,
         data: options.data,
         init() {
-            fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
-                (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                rootID: this.data.id,
-                deckID: this.data.id,
-                notebook: this.data.id,
-            }, (response) => {
+            if (options.data.blocks) {
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
                     cardType: this.data.cardType,
-                    blocks: response.data.cards,
+                    blocks: options.data.blocks,
                     isTab: true,
                 });
 
@@ -41,10 +36,35 @@ export const newCardModel = (options: {
                     id: this.data.id,
                     title: this.data.title,
                     cardType: this.data.cardType,
-                    blocks: response.data.cards,
+                    blocks: options.data.blocks,
+                    index: options.data.index,
                 });
-                customObj.data.editor = editor;
-            });
+                this.data.editor = editor;
+            } else {
+                fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
+                    (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
+                    rootID: this.data.id,
+                    deckID: this.data.id,
+                    notebook: this.data.id,
+                }, (response) => {
+                    this.element.innerHTML = genCardHTML({
+                        id: this.data.id,
+                        cardType: this.data.cardType,
+                        blocks: response.data.cards,
+                        isTab: true,
+                    });
+
+                    editor = bindCardEvent({
+                        app: options.app,
+                        element: this.element,
+                        id: this.data.id,
+                        title: this.data.title,
+                        cardType: this.data.cardType,
+                        blocks: response.data.cards,
+                    });
+                    customObj.data.editor = editor;
+                });
+            }
         },
         destroy() {
             if (editor) {

@@ -123,12 +123,16 @@ export const bindCardEvent = (options: {
     cardType: TCardType,
     id?: string,
     dialog?: Dialog,
+    index?: number
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
             options.element.querySelector('[data-type="fullscreen"]'));
     }
     let index = 0;
+    if (typeof options.index === "number") {
+        index = options.index
+    }
     const editor = new Protyle(options.app, options.element.querySelector("[data-type='render']") as HTMLElement, {
         blockId: "",
         action: [Constants.CB_GET_ALL],
@@ -158,6 +162,7 @@ export const bindCardEvent = (options: {
     }
     options.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = options.element.querySelector('[data-type="count"]');
+    countElement.innerHTML = `${options.index + 1}/${options.blocks.length}`;
     const actionElements = options.element.querySelectorAll(".card__action");
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
@@ -210,7 +215,7 @@ export const bindCardEvent = (options: {
                     options.element.querySelector('[data-type="fullscreen"]'));
                 resize(editor.protyle);
                 window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen = !window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen;
-                setStorageVal(Constants.LOCAL_FLASHCARD,  window.siyuan.storage[Constants.LOCAL_FLASHCARD]);
+                setStorageVal(Constants.LOCAL_FLASHCARD, window.siyuan.storage[Constants.LOCAL_FLASHCARD]);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -225,6 +230,8 @@ export const bindCardEvent = (options: {
                         icon: "iconRiffCard",
                         title: window.siyuan.languages.spaceRepetition,
                         data: {
+                            blocks: options.blocks,
+                            index,
                             cardType: filterElement.getAttribute("data-cardtype") as TCardType,
                             id: filterElement.getAttribute("data-id"),
                             title: options.title

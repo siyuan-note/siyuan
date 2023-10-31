@@ -717,11 +717,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 			currentDir := filepath.Dir(currentPath)
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || ast.NodeLinkDest != n.Type {
+				if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
 					return ast.WalkContinue
 				}
 
-				dest := n.TokensStr()
+				var dest string
+				if ast.NodeLinkDest == n.Type {
+					dest = n.TokensStr()
+				} else {
+					dest = n.TextMarkAHref
+				}
+
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
 					processBase64Img(n, dest, assetDirPath, err)
 					return ast.WalkContinue
@@ -729,7 +735,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 				dest = strings.ReplaceAll(dest, "%20", " ")
 				dest = strings.ReplaceAll(dest, "%5C", "/")
-				n.Tokens = []byte(dest)
+				if ast.NodeLinkDest == n.Type {
+					n.Tokens = []byte(dest)
+				} else {
+					n.TextMarkAHref = dest
+				}
 				if !util.IsRelativePath(dest) {
 					return ast.WalkContinue
 				}
@@ -759,7 +769,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					} else {
 						name = existName
 					}
-					n.Tokens = []byte("assets/" + name)
+					if ast.NodeLinkDest == n.Type {
+						n.Tokens = []byte("assets/" + name)
+					} else {
+						n.TextMarkAHref = "assets/" + name
+					}
 				}
 				return ast.WalkContinue
 			})
@@ -803,11 +817,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || ast.NodeLinkDest != n.Type {
+			if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
 				return ast.WalkContinue
 			}
 
-			dest := n.TokensStr()
+			var dest string
+			if ast.NodeLinkDest == n.Type {
+				dest = n.TokensStr()
+			} else {
+				dest = n.TextMarkAHref
+			}
+
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
 				processBase64Img(n, dest, assetDirPath, err)
 				return ast.WalkContinue
@@ -815,7 +835,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			dest = strings.ReplaceAll(dest, "%20", " ")
 			dest = strings.ReplaceAll(dest, "%5C", "/")
-			n.Tokens = []byte(dest)
+			if ast.NodeLinkDest == n.Type {
+				n.Tokens = []byte(dest)
+			} else {
+				n.TextMarkAHref = dest
+			}
 			if !util.IsRelativePath(dest) {
 				return ast.WalkContinue
 			}
@@ -838,7 +862,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
 					return ast.WalkContinue
 				}
-				n.Tokens = []byte("assets/" + name)
+				if ast.NodeLinkDest == n.Type {
+					n.Tokens = []byte("assets/" + name)
+				} else {
+					n.TextMarkAHref = "assets/" + name
+				}
 			}
 			return ast.WalkContinue
 		})

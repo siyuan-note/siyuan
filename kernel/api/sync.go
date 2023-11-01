@@ -17,7 +17,9 @@
 package api
 
 import (
+	"encoding/hex"
 	"github.com/siyuan-note/logging"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,6 +31,62 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func importSyncProviderWebDAV(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file[]"]
+	if 1 != len(files) {
+		ret.Code = -1
+		ret.Msg = "invalid upload file"
+		return
+	}
+
+	f := files[0]
+	fh, err := f.Open()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := io.ReadAll(fh)
+	fh.Close()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data = util.AESDecrypt(string(data))
+	data, _ = hex.DecodeString(string(data))
+	webdav := &conf.WebDAV{}
+	if err = gulu.JSON.UnmarshalJSON(data, webdav); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	err = model.SetSyncProviderWebDAV(webdav)
+	if nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
 
 func exportSyncProviderWebDAV(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -69,6 +127,62 @@ func exportSyncProviderWebDAV(c *gin.Context) {
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
+	}
+}
+
+func importSyncProviderS3(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file[]"]
+	if 1 != len(files) {
+		ret.Code = -1
+		ret.Msg = "invalid upload file"
+		return
+	}
+
+	f := files[0]
+	fh, err := f.Open()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := io.ReadAll(fh)
+	fh.Close()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data = util.AESDecrypt(string(data))
+	data, _ = hex.DecodeString(string(data))
+	s3 := &conf.S3{}
+	if err = gulu.JSON.UnmarshalJSON(data, s3); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	err = model.SetSyncProviderS3(s3)
+	if nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 }
 

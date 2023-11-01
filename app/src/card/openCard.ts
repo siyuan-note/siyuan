@@ -162,7 +162,7 @@ export const bindCardEvent = (options: {
     }
     options.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = options.element.querySelector('[data-type="count"]');
-    countElement.innerHTML = `${options.index + 1}/${options.blocks.length}`;
+    countElement.innerHTML = `${index + 1}/${options.blocks.length}`;
     const actionElements = options.element.querySelectorAll(".card__action");
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {

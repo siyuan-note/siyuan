@@ -64,6 +64,7 @@ import {transaction} from "../../protyle/wysiwyg/transaction";
 import {quickMakeCard} from "../../card/makeCard";
 import {copyPNG} from "../../menus/util";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
+import {searchKeydown} from "./searchKeydown";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1018,6 +1019,12 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
+    if (searchKeydown(app, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+
     const isTabWindow = isWindow();
     if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
         if (switchDialog && switchDialog.element.parentElement) {
@@ -1580,7 +1587,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return;
     }
-
     // https://github.com/siyuan-note/insider/issues/445
     if (matchHotKey("⌘S", event)) {
         event.preventDefault();

@@ -1,9 +1,5 @@
-/// #if !BROWSER
-import * as path from "path";
-/// #endif
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {upDownHint} from "../util/upDownHint";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !MOBILE
@@ -11,7 +7,6 @@ import {getQueryTip} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
-import {showFileInFolder} from "../util/pathName";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -78,7 +73,6 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
 </div>`;
-    const searchPanelElement = element.querySelector("#searchAssetList");
     if (element.querySelector("#searchAssetList").innerHTML !== "") {
         return;
     }
@@ -122,95 +116,6 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         window.siyuan.storage[Constants.LOCAL_SEARCHASSET].k = searchInputElement.value;
         window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
         setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-    });
-    const historyElement = element.querySelector("#searchAssetHistoryList");
-    const lineHeight = 28;
-    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
-        const isHistory = !historyElement.classList.contains("fn__none");
-        if (event.key === "Enter") {
-            if (!isHistory) {
-                if (currentList) {
-                    /// #if !BROWSER
-                    showFileInFolder(path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
-                    /// #endif
-                }
-            } else {
-                searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
-                assetInputEvent(element, localSearch);
-                toggleAssetHistory(historyElement, searchInputElement);
-                renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
-            }
-            event.preventDefault();
-            return;
-        }
-        if (event.key === "ArrowDown" && event.altKey) {
-            toggleAssetHistory(historyElement, searchInputElement);
-            return;
-        }
-        if (isHistory) {
-            if (event.key === "Escape") {
-                toggleAssetHistory(historyElement, searchInputElement);
-            } else {
-                upDownHint(historyElement, event);
-            }
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
-        if (!currentList) {
-            return;
-        }
-        if (event.key === "ArrowDown") {
-            currentList.classList.remove("b3-list-item--focus");
-            if (!currentList.nextElementSibling) {
-                searchPanelElement.firstElementChild.classList.add("b3-list-item--focus");
-            } else {
-                currentList.nextElementSibling.classList.add("b3-list-item--focus");
-            }
-            currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-            if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-                searchPanelElement.scrollTop > currentList.offsetTop) {
-                searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
-            }
-            event.preventDefault();
-            renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
-        } else if (event.key === "ArrowUp") {
-            currentList.classList.remove("b3-list-item--focus");
-            if (!currentList.previousElementSibling) {
-                searchPanelElement.lastElementChild.classList.add("b3-list-item--focus");
-            } else {
-                currentList.previousElementSibling.classList.add("b3-list-item--focus");
-            }
-            currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-            if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-                searchPanelElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
-                searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
-            }
-            event.preventDefault();
-            renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
-        } else if (Constants.KEYCODELIST[event.keyCode] === "PageUp") {
-            if (!element.querySelector('[data-type="assetPrevious"]').getAttribute("disabled")) {
-                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
-                if (currentPage > 1) {
-                    currentPage--;
-                    assetInputEvent(element, localSearch, currentPage);
-                }
-            }
-            event.preventDefault();
-        } else if (Constants.KEYCODELIST[event.keyCode] === "PageDown") {
-            if (!element.querySelector('[data-type="assetNext"]').getAttribute("disabled")) {
-                let currentPage = parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[0]);
-                if (currentPage < parseInt(element.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
-                    currentPage++;
-                    assetInputEvent(element, localSearch, currentPage);
-                }
-            }
-            event.preventDefault();
-        }
     });
     assetInputEvent(element, localSearch);
 

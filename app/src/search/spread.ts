@@ -98,7 +98,7 @@ export const openSearch = async (options: {
         }
     });
     dialog.element.setAttribute("data-key", options.hotkey);
-    const edit = genSearch(options.app, {
+    const config = {
         removed: localData.removed,
         k: options.key || localData.k,
         r: localData.r,
@@ -110,8 +110,10 @@ export const openSearch = async (options: {
         sort: localData.sort,
         types: Object.assign({}, localData.types),
         page: options.key ? 1 : localData.page
-    }, dialog.element.querySelector(".b3-dialog__body"), () => {
+    }
+    const edit = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {
         dialog.destroy({focus: "false"});
     });
     dialog.editor = edit;
+    dialog.data = config;
 };

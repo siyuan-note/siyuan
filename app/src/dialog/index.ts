@@ -12,6 +12,7 @@ export class Dialog {
     private id: string;
     private disableClose: boolean;
     public editor: Protyle;
+    public data: any;
 
     constructor(options: {
         title?: string,

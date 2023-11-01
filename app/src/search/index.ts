@@ -6,7 +6,7 @@ import {setPanelFocus} from "../layout/util";
 import {App} from "../index";
 
 export class Search extends Model {
-    private element: HTMLElement;
+    public element: HTMLElement;
     public config: ISearchOption;
     public edit: Protyle;
 

@@ -17,7 +17,11 @@
 package api
 
 import (
+	"github.com/siyuan-note/logging"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -25,6 +29,90 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func exportSyncProviderWebDAV(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	name := "siyuan-webdav-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	webdav := model.Conf.Sync.WebDAV
+	if nil == webdav {
+		webdav = &conf.WebDAV{}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.WebDAV)
+	if nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	dataStr := util.AESEncrypt(string(data))
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, []byte(dataStr), 0644); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
+
+func exportSyncProviderS3(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	name := "siyuan-s3-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	s3 := model.Conf.Sync.S3
+	if nil == s3 {
+		s3 = &conf.S3{}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.S3)
+	if nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	dataStr := util.AESEncrypt(string(data))
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, []byte(dataStr), 0644); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
 
 func getSyncInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

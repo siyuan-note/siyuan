@@ -25,16 +25,16 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (hasClosestByClassName(range.startContainer, "protyle", true)) {
         return false;
     }
-    let element: HTMLElement
-    let dialog: Dialog
-    let edit
-    let config: ISearchOption
+    let element: HTMLElement;
+    let dialog: Dialog;
+    let edit;
+    let config: ISearchOption;
     window.siyuan.dialogs.find((item) => {
         if (item.element.contains(range.startContainer) && item.element.querySelector("#searchList")) {
             element = item.element.querySelector(".b3-dialog__body");
-            dialog = item
-            config = dialog.data
-            edit = dialog.editor
+            dialog = item;
+            config = dialog.data;
+            edit = dialog.editor;
             return true;
         }
     });
@@ -43,7 +43,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             if (item.element.contains(range.startContainer)) {
                 element = item.element;
                 edit = item.edit;
-                config = item.config
+                config = item.config;
                 return true;
             }
         });
@@ -52,7 +52,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     const assetsElement = element.querySelector("#searchAssets");
-    const isAsset = !assetsElement.classList.contains("fn__none")
+    const isAsset = !assetsElement.classList.contains("fn__none");
     const listElement = isAsset ? assetsElement.querySelector("#searchAssetList") : element.querySelector("#searchList");
     let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
@@ -63,7 +63,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         newFileByName(app, searchInputElement.value);
         return true;
     }
-    const targetId = (event.target as HTMLElement).id
+    const targetId = (event.target as HTMLElement).id;
     const historyElement = element.querySelector("#searchHistoryList");
     const replaceHistoryElement = element.querySelector("#replaceHistoryList");
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
@@ -82,14 +82,14 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         }
         return true;
     }
-    const assetLocal = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption
+    const assetLocal = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     let history;
     if (!historyElement.classList.contains("fn__none")) {
-        history = "history"
+        history = "history";
     } else if (!replaceHistoryElement.classList.contains("fn__none")) {
-        history = "replaceHistory"
+        history = "replaceHistory";
     } else if (isAsset && !assetHistoryElement.classList.contains("fn__none")) {
-        history = "assetHistory"
+        history = "assetHistory";
     }
     if (history) {
         if (event.key === "Escape") {
@@ -155,7 +155,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             });
             return true;
         }
-        const id = currentList.getAttribute("data-node-id")
+        const id = currentList.getAttribute("data-node-id");
         if (matchHotKey("⌘/", event)) {
             const currentRect = currentList.getBoundingClientRect();
             initSearchMenu(id).popup({
@@ -215,12 +215,12 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 }
             }
         }
-        return true
+        return true;
     }
     if (Constants.KEYCODELIST[event.keyCode] === "PageDown") {
         if (isAsset) {
             if (!assetsElement.querySelector('[data-type="assetNext"]').getAttribute("disabled")) {
-                const assetPages = assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")
+                const assetPages = assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/");
                 let currentPage = parseInt(assetPages[0]);
                 if (currentPage < parseInt(assetPages[1])) {
                     currentPage++;
@@ -236,7 +236,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 }
             }
         }
-        return true
+        return true;
     }
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         return false;
@@ -298,7 +298,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 edit,
             });
         }
-        return true
+        return true;
     }
     if (event.key === "ArrowUp") {
         currentList.classList.remove("b3-list-item--focus");

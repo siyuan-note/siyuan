@@ -131,7 +131,7 @@ export const bindCardEvent = (options: {
     }
     let index = 0;
     if (typeof options.index === "number") {
-        index = options.index
+        index = options.index;
     }
     const editor = new Protyle(options.app, options.element.querySelector("[data-type='render']") as HTMLElement, {
         blockId: "",

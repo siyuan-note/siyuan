@@ -21,7 +21,7 @@ import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
-import {hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
+import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
 import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
 import {openBy} from "../../editor/util";
@@ -35,7 +35,6 @@ import * as dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";
-import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
 import {hideMessage, showMessage} from "../../dialog/message";

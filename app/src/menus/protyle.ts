@@ -84,11 +84,11 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
             inputElement.select();
         }
     });
-}
+};
 
 export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts?: string[]) => {
     window.siyuan.menus.menu.remove();
-    const menu = new Menu()
+    const menu = new Menu();
     menu.addItem({
         iconHTML: "",
         type: "readonly",
@@ -185,8 +185,8 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
             });
             renderAssetList(element, "", position, exts);
         }
-    })
-}
+    });
+};
 
 export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
     const nodeElement = hasClosestBlock(refElement);

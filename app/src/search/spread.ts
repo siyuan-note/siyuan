@@ -110,7 +110,7 @@ export const openSearch = async (options: {
         sort: localData.sort,
         types: Object.assign({}, localData.types),
         page: options.key ? 1 : localData.page
-    }
+    };
     const edit = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {
         dialog.destroy({focus: "false"});
     });

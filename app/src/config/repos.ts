@@ -2,7 +2,6 @@ import {needLogin, needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
 
@@ -436,7 +435,7 @@ export const repos = {
         repos.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && target !== repos.element) {
-                const action = target.getAttribute("data-action")
+                const action = target.getAttribute("data-action");
                 if (action === "config") {
                     if (syncConfigElement.classList.contains("fn__none")) {
                         getSyncCloudList(syncConfigElement, true);
@@ -444,7 +443,7 @@ export const repos = {
                     } else {
                         syncConfigElement.classList.add("fn__none");
                     }
-                    break
+                    break;
                 } else if (action === "togglePassword") {
                     const isEye = target.firstElementChild.getAttribute("xlink:href") === "#iconEye";
                     target.firstElementChild.setAttribute("xlink:href", isEye ? "#iconEyeoff" : "#iconEye");
@@ -453,10 +452,10 @@ export const repos = {
                 } else if (action === "exportData") {
                     fetchPost(target.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, response => {
                         window.location.href = response.data.zip;
-                    })
+                    });
                     break;
                 }
-                target = target.parentElement
+                target = target.parentElement;
             }
         });
     },

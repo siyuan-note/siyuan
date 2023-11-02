@@ -72,9 +72,13 @@ func getInstalledPlugin(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPlugins(frontend),
+		"packages": model.InstalledPlugins(frontend, keyword),
 	}
 }
 

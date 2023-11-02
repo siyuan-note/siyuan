@@ -36,6 +36,7 @@ import (
 type BlockAttributeViewKeys struct {
 	AvID      string          `json:"avID"`
 	AvName    string          `json:"avName"`
+	BlockIDs  []string        `json:"blockIDs"`
 	KeyValues []*av.KeyValues `json:"keyValues"`
 }
 
@@ -140,9 +141,12 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			})
 		}
 
+		blockIDs := av.GetMirrorBlockIDs(avID)
+
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:      avID,
 			AvName:    attrView.Name,
+			BlockIDs:  blockIDs,
 			KeyValues: keyValues,
 		})
 	}

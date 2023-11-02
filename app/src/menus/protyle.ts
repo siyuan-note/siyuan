@@ -1,4 +1,9 @@
-import {hasClosestBlock, hasClosestByMatchTag} from "../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByMatchTag
+} from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {
@@ -46,6 +51,142 @@ import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
 import {openBacklink, openGraph} from "../layout/dock/util";
 import {updateHeader} from "../protyle/render/av/row";
+import {renderAssetsPreview} from "../asset/renderAssets";
+import {upDownHint} from "../util/upDownHint";
+import {hintRenderAssets} from "../protyle/hint/extend";
+import {Menu} from "../plugin/Menu";
+
+const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
+    fetchPost("/api/search/searchAsset", {
+        k,
+        exts
+    }, (response) => {
+        let searchHTML = "";
+        response.data.forEach((item: { path: string, hName: string }, index: number) => {
+            searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
+        });
+
+        const listElement = element.querySelector(".b3-list");
+        const previewElement = element.querySelector("#preview");
+        const inputElement = element.querySelector("input");
+        listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        if (response.data.length > 0) {
+            previewElement.innerHTML = renderAssetsPreview(response.data[0].path);
+        } else {
+            previewElement.innerHTML = window.siyuan.languages.emptyContent;
+        }
+        /// #if MOBILE
+        window.siyuan.menus.menu.fullscreen();
+        /// #else
+        window.siyuan.menus.menu.popup(position);
+        /// #endif
+        if (!k) {
+            inputElement.select();
+        }
+    });
+}
+
+export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts?: string[]) => {
+    window.siyuan.menus.menu.remove();
+    const menu = new Menu()
+    menu.addItem({
+        iconHTML: "",
+        type: "readonly",
+        label: `<div class="fn__flex" style="max-height: 50vh">
+<div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:420px"}">
+    <div class="fn__flex" style="margin: 0 8px 4px 8px">
+        <input class="b3-text-field fn__flex-1"/>
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
+    </div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
+</div>
+<div id="preview" style="width: 360px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
+</div>`,
+        bind(element) {
+            element.style.maxWidth = "none";
+            const listElement = element.querySelector(".b3-list");
+            const previewElement = element.querySelector("#preview");
+            listElement.addEventListener("mouseover", (event) => {
+                const target = event.target as HTMLElement;
+                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!hoverItemElement) {
+                    return;
+                }
+                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+            });
+            const inputElement = element.querySelector("input");
+            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                const isEmpty = element.querySelector(".b3-list--empty");
+                if (!isEmpty) {
+                    const currentElement = upDownHint(listElement, event);
+                    if (currentElement) {
+                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                        event.stopPropagation();
+                    }
+                }
+
+                if (event.key === "Enter") {
+                    if (!isEmpty) {
+                        const currentURL = element.querySelector(".b3-list-item--focus").getAttribute("data-value");
+                        if (callback) {
+                            callback(currentURL);
+                        } else {
+                            hintRenderAssets(currentURL, protyle);
+                            window.siyuan.menus.menu.remove();
+                        }
+                    } else if (!callback) {
+                        window.siyuan.menus.menu.remove();
+                        focusByRange(protyle.toolbar.range);
+                    }
+                    // 空行处插入 mp3 会多一个空的 mp3 块
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else if (event.key === "Escape") {
+                    if (!callback) {
+                        focusByRange(protyle.toolbar.range);
+                    }
+                }
+            });
+            inputElement.addEventListener("input", (event) => {
+                event.stopPropagation();
+                renderAssetList(element, inputElement.value, position, exts);
+            });
+            element.lastElementChild.addEventListener("click", (event) => {
+                const target = event.target as HTMLElement;
+                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
+                if (previousElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                    event.stopPropagation();
+                    return;
+                }
+                const nextElement = hasClosestByAttribute(target, "data-type", "next");
+                if (nextElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                    event.stopPropagation();
+                    return;
+                }
+                const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (listItemElement) {
+                    event.stopPropagation();
+                    const currentURL = listItemElement.getAttribute("data-value");
+                    if (callback) {
+                        callback(currentURL);
+                    } else {
+                        hintRenderAssets(currentURL, protyle);
+                        window.siyuan.menus.menu.remove();
+                    }
+                }
+            });
+            renderAssetList(element, "", position, exts);
+        }
+    })
+}
 
 export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
     const nodeElement = hasClosestBlock(refElement);

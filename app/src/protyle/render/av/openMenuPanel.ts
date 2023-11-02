@@ -20,6 +20,7 @@ import {getSearch} from "../../../util/functions";
 import {openAsset} from "../../../editor/util";
 /// #endif
 import {previewImage} from "../../preview/image";
+import {assetMenu} from "../../../menus/protyle";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -613,7 +614,7 @@ export const openMenuPanel = (options: {
                             id: options.colId,
                             avID,
                             name,
-                            type:  target.dataset.oldType as TAVCol,
+                            type: target.dataset.oldType as TAVCol,
                         }]);
                     }
                     avPanelElement.remove();
@@ -755,7 +756,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addAssetExist") {
                     const rect = target.getBoundingClientRect();
-                    options.protyle.toolbar.showAssets(options.protyle, {
+                    assetMenu(options.protyle, {
                         x: rect.right,
                         y: rect.bottom,
                         w: target.parentElement.clientWidth + 8,
@@ -782,7 +783,7 @@ export const openMenuPanel = (options: {
                             type: "addUpdate",
                             addUpdateValue: [value]
                         });
-                        hideElements(["util"], options.protyle);
+                        window.siyuan.menus.menu.remove();
                     });
                     event.preventDefault();
                     event.stopPropagation();

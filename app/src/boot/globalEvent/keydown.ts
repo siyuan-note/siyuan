@@ -1259,12 +1259,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
 
-        const avElement = document.querySelector(".av__panel");
-        if (avElement) {
-            avElement.remove();
-            return;
-        }
-
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
             if (window.siyuan.dialogs.length > 0 &&
                 window.siyuan.menus.menu.element.style.zIndex < (window.siyuan.dialogs[0].element.querySelector(".b3-dialog") as HTMLElement).style.zIndex) {
@@ -1277,6 +1271,13 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
         if (window.siyuan.dialogs.length > 0) {
             window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
+            return;
+        }
+
+        // 需放在 menus 后，否则资源列中添加资源会先关闭菜单
+        const avElement = document.querySelector(".av__panel");
+        if (avElement) {
+            avElement.remove();
             return;
         }
 

@@ -44,7 +44,7 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
-	files := form.File["file[]"]
+	files := form.File["file"]
 	if 1 != len(files) {
 		ret.Code = -1
 		ret.Msg = "invalid upload file"
@@ -69,11 +69,43 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
+	tmpDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, f.Filename)
+	if err = os.WriteFile(tmp, data, 0644); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = gulu.Zip.Unzip(tmp, tmpDir); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, f.Filename[:len(f.Filename)-4])
+	data, err = os.ReadFile(tmp)
+	if nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
 	data = util.AESDecrypt(string(data))
 	data, _ = hex.DecodeString(string(data))
 	webdav := &conf.WebDAV{}
 	if err = gulu.JSON.UnmarshalJSON(data, webdav); nil != err {
-		logging.LogErrorf("import S3 provider failed: %s", err)
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -81,7 +113,7 @@ func importSyncProviderWebDAV(c *gin.Context) {
 
 	err = model.SetSyncProviderWebDAV(webdav)
 	if nil != err {
-		logging.LogErrorf("import S3 provider failed: %s", err)
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -123,7 +155,29 @@ func exportSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
-	zipPath := "/export/" + name
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name + ".zip"
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -142,7 +196,7 @@ func importSyncProviderS3(c *gin.Context) {
 		return
 	}
 
-	files := form.File["file[]"]
+	files := form.File["file"]
 	if 1 != len(files) {
 		ret.Code = -1
 		ret.Msg = "invalid upload file"
@@ -162,6 +216,38 @@ func importSyncProviderS3(c *gin.Context) {
 	fh.Close()
 	if nil != err {
 		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, f.Filename)
+	if err = os.WriteFile(tmp, data, 0644); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = gulu.Zip.Unzip(tmp, tmpDir); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, f.Filename[:len(f.Filename)-4])
+	data, err = os.ReadFile(tmp)
+	if nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -221,7 +307,29 @@ func exportSyncProviderS3(c *gin.Context) {
 		return
 	}
 
-	zipPath := "/export/" + name
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name + ".zip"
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,

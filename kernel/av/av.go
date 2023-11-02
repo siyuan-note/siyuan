@@ -590,6 +590,31 @@ var (
 	attributeViewBlocksLock = sync.Mutex{}
 )
 
+func IsMirror(avID string) bool {
+	attributeViewBlocksLock.Lock()
+	defer attributeViewBlocksLock.Unlock()
+
+	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
+	if !gulu.File.IsExist(blocks) {
+		return false
+	}
+
+	data, err := filelock.ReadFile(blocks)
+	if nil != err {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+		return false
+	}
+
+	avBlocks := map[string][]string{}
+	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
+		return false
+	}
+
+	blockIDs := avBlocks[avID]
+	return nil != blockIDs && 1 < len(blockIDs)
+}
+
 func RemoveBlockRel(avID, blockID string) {
 	attributeViewBlocksLock.Lock()
 	defer attributeViewBlocksLock.Unlock()

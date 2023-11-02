@@ -176,6 +176,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
             <div class="fn__flex-1"></div>
+            ${response.data.isMirror?` <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mirrorTip}">
+    <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>`:""}
             <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${data.filters.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.filter}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>

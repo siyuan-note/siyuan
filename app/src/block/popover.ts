@@ -27,7 +27,11 @@ export const initBlockPopover = (app: App) => {
             }
             if (aElement.classList.contains("av__celltext")) {
                 if (aElement.scrollWidth > aElement.parentElement.clientWidth - 11) {
-                    tip = aElement.textContent;
+                    if (aElement.querySelector(".av__cellicon")) {
+                        tip = `${aElement.firstChild.textContent} ➡️ ${aElement.lastChild.textContent}`
+                    } else {
+                        tip = aElement.textContent;
+                    }
                 } else {
                     return;
                 }

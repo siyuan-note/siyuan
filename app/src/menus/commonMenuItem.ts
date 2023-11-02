@@ -45,7 +45,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     <div class="fn__flex">
         <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" value="${reminderFormat}">
+        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
@@ -110,7 +110,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     <div class="fn__flex">
         <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" value="${reminderFormat}">
+        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
@@ -162,7 +162,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DD HH:mm")}">
+    <input class="b3-text-field fn__block" type="datetime-local" max="9999-12-31 23:59" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DD HH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
             hasAV = true;

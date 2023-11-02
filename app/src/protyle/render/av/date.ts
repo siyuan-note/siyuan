@@ -35,8 +35,8 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
-    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
+    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" max="9999-12-31 23:59" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
+    <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" max="9999-12-31 23:59" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span>${window.siyuan.languages.endDate}</span>

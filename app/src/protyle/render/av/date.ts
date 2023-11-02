@@ -101,7 +101,8 @@ export const bindDateEvent = (options: {
             data: options.data,
             protyle: options.protyle,
             value: {
-                hasEndDate: inputElements[2].checked
+                hasEndDate: inputElements[2].checked,
+                isNotTime: !inputElements[3].checked
             }
         });
     });

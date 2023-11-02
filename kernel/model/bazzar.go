@@ -60,9 +60,9 @@ func filterPlugins(plugins []*bazaar.Plugin, keyword string) (ret []*bazaar.Plug
 	return
 }
 
-func InstalledPlugins(frontend string) (plugins []*bazaar.Plugin) {
+func InstalledPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 	plugins = bazaar.InstalledPlugins(frontend, true)
-
+	plugins = filterPlugins(plugins, keyword)
 	petals := getPetals()
 	for _, plugin := range plugins {
 		petal := getPetalByName(plugin.Name, petals)

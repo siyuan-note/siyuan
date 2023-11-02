@@ -118,6 +118,10 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	ret.Data = map[string]interface{}{
+		"webdav": model.Conf.Sync.WebDAV,
+	}
 }
 
 func exportSyncProviderWebDAV(c *gin.Context) {
@@ -269,6 +273,10 @@ func importSyncProviderS3(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"s3": model.Conf.Sync.S3,
 	}
 }
 

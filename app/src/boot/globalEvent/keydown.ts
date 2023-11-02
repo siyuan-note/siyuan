@@ -979,6 +979,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
     // 仅处理以下快捷键操作
     if (!event.ctrlKey && !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey &&
+        Constants.KEYCODELIST[event.keyCode] !== "PageUp" &&
+        Constants.KEYCODELIST[event.keyCode] !== "PageDown" &&
         !/^F\d{1,2}$/.test(event.key) && event.key.indexOf("Arrow") === -1 && event.key !== "Enter" && event.key !== "Backspace" && event.key !== "Delete") {
         return;
     }

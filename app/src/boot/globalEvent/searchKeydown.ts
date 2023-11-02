@@ -14,6 +14,8 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {getArticle, inputEvent, replace, toggleReplaceHistory, toggleSearchHistory} from "../../search/util";
 import {showFileInFolder} from "../../util/pathName";
 import {assetInputEvent, renderPreview, toggleAssetHistory} from "../../search/assets";
+import {initSearchMenu} from "../../menus/search";
+import {writeText} from "../../protyle/util/compatibility";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -135,24 +137,67 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         }
         return false;
     }
-    if (!isAsset && matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
-        const id = currentList.getAttribute("data-node-id");
-        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-            openFileById({
-                app,
-                id,
-                position: "right",
-                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                    (id === currentList.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                zoomIn: foldResponse.data
+    if (!isAsset) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
+            const id = currentList.getAttribute("data-node-id");
+            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                openFileById({
+                    app,
+                    id,
+                    position: "right",
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
+                        (id === currentList.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
+                    zoomIn: foldResponse.data
+                });
+                if (dialog) {
+                    dialog.destroy({focus: "false"});
+                }
             });
-            if (dialog) {
-                dialog.destroy({focus: "false"});
-            }
-        });
-        return true;
+            return true;
+        }
+        const id = currentList.getAttribute("data-node-id")
+        if (matchHotKey("⌘/", event)) {
+            const currentRect = currentList.getBoundingClientRect();
+            initSearchMenu(id).popup({
+                x: currentRect.left + 30,
+                y: currentRect.bottom
+            });
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
+            fetchPost("/api/block/getRefText", {id}, (response) => {
+                writeText(`((${id} '${response.data}'))`);
+            });
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
+            writeText(`{{select * from blocks where id='${id}'}}`);
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
+            writeText(`siyuan://blocks/${id}`);
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
+            fetchPost("/api/block/getRefText", {id}, (response) => {
+                writeText(`[${response.data}](siyuan://blocks/${id})`);
+            });
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
+            fetchPost("/api/filetree/getHPathByID", {
+                id
+            }, (response) => {
+                writeText(response.data);
+            });
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+            writeText(id);
+            return true;
+        }
     }
-    // TODO https://github.com/siyuan-note/siyuan/issues/9548
+
     if (Constants.KEYCODELIST[event.keyCode] === "PageUp") {
         if (isAsset) {
             if (!assetsElement.querySelector('[data-type="assetPrevious"]').getAttribute("disabled")) {

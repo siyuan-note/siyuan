@@ -403,7 +403,9 @@ export const repos = {
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 const formData = new FormData();
                 formData.append("file", event.target.files[0]);
-                fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData);
+                fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, () => {
+                    renderProvider(window.siyuan.config.sync.provider);
+                });
             });
         });
         const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");

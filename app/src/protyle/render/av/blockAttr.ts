@@ -80,6 +80,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                 },
                 values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
             }[],
+            blockIDs: string[],
             avID: string
             avName: string
         }) => {

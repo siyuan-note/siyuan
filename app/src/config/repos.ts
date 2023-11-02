@@ -403,8 +403,10 @@ export const repos = {
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 const formData = new FormData();
                 formData.append("file", event.target.files[0]);
-                fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, () => {
+                fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
+                    window.siyuan.config.sync.s3 = response.data.s3;
                     renderProvider(window.siyuan.config.sync.provider);
+                    showMessage(window.siyuan.languages.imported);
                 });
             });
         });
@@ -454,6 +456,7 @@ export const repos = {
                 } else if (action === "exportData") {
                     fetchPost(target.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, response => {
                         window.location.href = response.data.zip;
+                        showMessage(window.siyuan.languages.exported);
                     });
                     break;
                 }

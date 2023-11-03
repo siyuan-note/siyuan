@@ -162,6 +162,8 @@ export const setDateValue = (options: {
                     cellData.id = item.dataset.id;
                     if (!cellData.value) {
                         cellData.value = {};
+                    } else {
+                        cellData.value.id = item.dataset.id;
                     }
                 } else {
                     cellData = row.cells.find(cellItem => {

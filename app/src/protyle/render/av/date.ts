@@ -33,6 +33,7 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     if (cellValue?.value?.date?.isNotEmpty2) {
         value2 = dayjs(cellValue.value.date.content2).format(cellValue.value.date.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     }
+    const isNotTime = !cellValue || cellValue?.value?.date?.isNotTime;
     return `<div class="b3-menu__items">
 <div>
     <input type="${(!cellValue || cellValue?.value?.date?.isNotTime) ? "date" : "datetime-local"}" max="9999-12-31 23:59" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>

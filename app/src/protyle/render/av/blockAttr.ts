@@ -90,7 +90,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
 </div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons" data-id="${id}">
-    <div class="block__logo">
+    <div class="block__logo popover__block">
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
     </div>

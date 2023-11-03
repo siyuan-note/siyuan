@@ -1,4 +1,6 @@
 {
+  "imported": "Import completed",
+  "mirrorTip": "Mirror database, all data updates will be synchronized to all other mirrors",
   "includeTime": "Include time",
   "accountSupport1": "Since its first public release on August 31, 2020, SiYuan has been released a total of 481 times, solved user requirements and feedback 9257 times, and submitted code 10189 times. We cannot do without your support and feedback.",
   "accountSupport2": "Your support and feedback will allow SiYuan to develop and develop better. We will always be friends with users, work hard to make products better, and provide you with a better knowledge management experience. Thank you very much for your support!",

@@ -309,11 +309,13 @@ export const initWindow = async (app: App) => {
                 const focus = urlObj.searchParams.get("focus") === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
-                        openFileById({
-                            app,
-                            id,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                            zoomIn: focus,
+                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                            openFileById({
+                                app,
+                                id,
+                                action: (foldResponse.data || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                                zoomIn: foldResponse.data || focus
+                            });
                         });
                         ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                     }

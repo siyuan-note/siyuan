@@ -16,7 +16,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {imgMenu} from "../../menus/protyle";
+import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
@@ -608,7 +608,7 @@ ${genHintItemHTML(item)}
                 this.fixImageCursor(range);
                 protyle.toolbar.range = range;
                 const rangePosition = getSelectionPosition(nodeElement, range);
-                protyle.toolbar.showAssets(protyle, {x: rangePosition.left, y: rangePosition.top + 26, w: 0, h: 26});
+                assetMenu(protyle, {x: rangePosition.left, y: rangePosition.top + 26, w: 0, h: 26});
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 3) {

@@ -1058,6 +1058,7 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
+    id?: string,
     type?: TAVCol,
     isDetached?: boolean,
     text?: {

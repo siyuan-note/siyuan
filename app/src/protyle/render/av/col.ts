@@ -175,7 +175,6 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("number", colData.type, colData.name)}
     ${genUpdateColItem("select", colData.type, colData.name)}
     ${genUpdateColItem("mSelect", colData.type, colData.name)}
-    ${genUpdateColItem("mSelect", colData.type, colData.name)}
     ${genUpdateColItem("date", colData.type, colData.name)}
     ${genUpdateColItem("mAsset", colData.type, colData.name)}
     ${genUpdateColItem("url", colData.type, colData.name)}

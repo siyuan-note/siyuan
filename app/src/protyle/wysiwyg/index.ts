@@ -1708,10 +1708,6 @@ export class WYSIWYG {
                     activeBlur();
                     hideKeyboardToolbar();
                     /// #else
-                    if (aElement) {
-                        window.open(aLink);
-                        return;
-                    }
                     if (event.shiftKey) {
                         openFileById({
                             app: protyle.app,

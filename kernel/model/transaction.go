@@ -712,6 +712,10 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	syncDelete2AttributeView(node)
+	if ast.NodeAttributeView == node.Type {
+		avID := node.AttributeViewID
+		av.RemoveBlockRel(avID, node.ID)
+	}
 	return
 }
 
@@ -898,6 +902,11 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
+	if ast.NodeAttributeView == insertedNode.Type {
+		avID := insertedNode.AttributeViewID
+		av.UpsertBlockRel(avID, insertedNode.ID)
+	}
+
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
 	return
@@ -985,6 +994,11 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
+	}
+
+	if ast.NodeAttributeView == updatedNode.Type {
+		avID := updatedNode.AttributeViewID
+		av.UpsertBlockRel(avID, updatedNode.ID)
 	}
 	return
 }

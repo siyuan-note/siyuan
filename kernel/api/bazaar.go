@@ -72,9 +72,13 @@ func getInstalledPlugin(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPlugins(frontend),
+		"packages": model.InstalledPlugins(frontend, keyword),
 	}
 }
 
@@ -151,8 +155,18 @@ func getInstalledWidget(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledWidgets(),
+		"packages": model.InstalledWidgets(keyword),
 	}
 }
 
@@ -226,8 +240,18 @@ func getInstalledIcon(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledIcons(),
+		"packages": model.InstalledIcons(keyword),
 	}
 }
 
@@ -303,8 +327,18 @@ func getInstalledTemplate(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledTemplates(),
+		"packages": model.InstalledTemplates(keyword),
 	}
 }
 
@@ -379,8 +413,18 @@ func getInstalledTheme(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keyword string
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledThemes(),
+		"packages": model.InstalledThemes(keyword),
 	}
 }
 

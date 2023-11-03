@@ -2,9 +2,9 @@ import {needLogin, needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
+import {openByMobile} from "../protyle/util/compatibility";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -64,7 +64,7 @@ const renderProvider = (provider: number) => {
     <div class="fn__space"></div>
     <div class="b3-form__icona fn__block">
         <input id="secretKey" type="password" class="b3-text-field b3-form__icona-input" value="${window.siyuan.config.sync.s3.secretKey}">
-        <svg class="b3-form__icona-icon"><use xlink:href="#iconEye"></use></svg>
+        <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
 </label>
 <label class="b3-label b3-label--noborder fn__flex config__item">
@@ -97,7 +97,18 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
         <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
-</label>`;
+</label>
+<div class="b3-label fn__flex">
+    <div class="fn__flex-1"></div>
+    <button class="b3-button b3-button--outline fn__size200" style="position: relative">
+        <input id="importData" class="b3-form__upload" type="file" data-type="s3">
+        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    </button>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200" data-action="exportData" data-type="s3">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>`;
     } else if (provider === 3) {
         return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
@@ -121,7 +132,7 @@ const renderProvider = (provider: number) => {
     <div class="fn__space"></div>
     <div class="b3-form__icona fn__block">
         <input id="password" type="password" class="b3-text-field b3-form__icona-input" value="${window.siyuan.config.sync.webdav.password}">
-        <svg class="b3-form__icona-icon"><use xlink:href="#iconEye"></use></svg>
+        <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
 </label>
 <label class="b3-label b3-label--noborder fn__flex config__item">
@@ -136,12 +147,43 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
         <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
-</label>`;
+</label>
+<div class="b3-label fn__flex">
+    <div class="fn__flex-1"></div>
+    <button class="b3-button b3-button--outline fn__size200" style="position: relative">
+        <input id="importData" class="b3-form__upload" type="file" data-type="webdav">
+        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    </button>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200" data-action="exportData" data-type="webdav">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>`;
     }
     return "";
 };
 
 const bindProviderEvent = () => {
+    const importElement = repos.element.querySelector("#importData") as HTMLInputElement;
+    if (importElement) {
+        importElement.addEventListener("change", () => {
+            const formData = new FormData();
+            formData.append("file", importElement.files[0]);
+            const isS3 = importElement.getAttribute("data-type") === "s3"
+            fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
+                if (isS3) {
+                    window.siyuan.config.sync.s3 = response.data.s3;
+                } else {
+                    window.siyuan.config.sync.webdav = response.data.webdav;
+                }
+                repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
+                bindProviderEvent();
+                showMessage(window.siyuan.languages.imported);
+                importElement.value = "";
+            });
+        });
+    }
+
     const reposDataElement = repos.element.querySelector("#reposData");
     const loadingElement = repos.element.querySelector("#reposLoading");
     if (window.siyuan.config.sync.provider === 0) {
@@ -328,7 +370,7 @@ export const repos = {
     <label class="fn__flex config__item">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
         <div class="fn__flex-1"></div>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="config">
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="config">
             <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
         </button>
     </label>
@@ -405,21 +447,29 @@ export const repos = {
         loadingElement.style.height = repos.element.clientHeight + "px";
         bindSyncCloudListEvent(syncConfigElement);
         repos.element.firstElementChild.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-            if (target.getAttribute("data-type") === "config") {
-                if (syncConfigElement.classList.contains("fn__none")) {
-                    getSyncCloudList(syncConfigElement, true);
-                    syncConfigElement.classList.remove("fn__none");
-                } else {
-                    syncConfigElement.classList.add("fn__none");
+            let target = event.target as HTMLElement;
+            while (target && target !== repos.element) {
+                const action = target.getAttribute("data-action");
+                if (action === "config") {
+                    if (syncConfigElement.classList.contains("fn__none")) {
+                        getSyncCloudList(syncConfigElement, true);
+                        syncConfigElement.classList.remove("fn__none");
+                    } else {
+                        syncConfigElement.classList.add("fn__none");
+                    }
+                    break;
+                } else if (action === "togglePassword") {
+                    const isEye = target.firstElementChild.getAttribute("xlink:href") === "#iconEye";
+                    target.firstElementChild.setAttribute("xlink:href", isEye ? "#iconEyeoff" : "#iconEye");
+                    target.previousElementSibling.setAttribute("type", isEye ? "text" : "password");
+                    break;
+                } else if (action === "exportData") {
+                    fetchPost(target.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, response => {
+                        openByMobile(response.data.zip);
+                    });
+                    break;
                 }
-                return;
-            }
-            const eyeElement = hasClosestByClassName(target, "b3-form__icona-icon");
-            if (eyeElement) {
-                const isEye = eyeElement.firstElementChild.getAttribute("xlink:href") === "#iconEye";
-                eyeElement.firstElementChild.setAttribute("xlink:href", isEye ? "#iconEyeoff" : "#iconEye");
-                eyeElement.previousElementSibling.setAttribute("type", isEye ? "text" : "password");
+                target = target.parentElement;
             }
         });
     },

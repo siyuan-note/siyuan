@@ -94,6 +94,12 @@ export const bazaar = {
             <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
             <div class="fn__space"></div>
             <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
+            <div class="fn__space"></div>
+            <div class="b3-form__icon">
+                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+            </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__none fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -127,6 +133,7 @@ export const bazaar = {
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
             </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -154,6 +161,7 @@ export const bazaar = {
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
             </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -181,6 +189,7 @@ export const bazaar = {
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
             </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -208,6 +217,7 @@ export const bazaar = {
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
             </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -235,6 +245,7 @@ export const bazaar = {
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
             </div>
+            <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
             <div class="fn__space"></div>
@@ -326,7 +337,8 @@ export const bazaar = {
             url = "/api/bazaar/getInstalledPlugin";
         }
         fetchPost(url, {
-            frontend: getFrontend()
+            frontend: getFrontend(),
+            keyword: (contentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement)?.value || "",
         }, response => {
             contentElement.removeAttribute("data-loading");
             let html = "";
@@ -928,6 +940,9 @@ export const bazaar = {
                             bazaar._onBazaar(response, "plugins", false);
                             bazaar._data.plugins = response.data.packages;
                         });
+                    } else if (type === "downloaded") {
+                        const bazaarType = inputElement.parentElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type").replace("my", "").toLowerCase() + "s" as TBazaarType
+                        this._genMyHTML(bazaarType, app);
                     }
                     event.preventDefault();
                     return;

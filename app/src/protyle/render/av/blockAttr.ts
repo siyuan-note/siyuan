@@ -80,10 +80,12 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                 },
                 values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
             }[],
+            blockIDs: string[],
             avID: string
             avName: string
         }) => {
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView"><div class="block__logo custom-attr__avheader">
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
+<div class="block__logo custom-attr__avheader popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
     <svg><use xlink:href="#iconDatabase"></use></svg>
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;

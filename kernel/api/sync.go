@@ -17,7 +17,13 @@
 package api
 
 import (
+	"encoding/hex"
+	"github.com/siyuan-note/logging"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -25,6 +31,318 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func importSyncProviderWebDAV(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file"]
+	if 1 != len(files) {
+		ret.Code = -1
+		ret.Msg = "invalid upload file"
+		return
+	}
+
+	f := files[0]
+	fh, err := f.Open()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := io.ReadAll(fh)
+	fh.Close()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, f.Filename)
+	if err = os.WriteFile(tmp, data, 0644); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = gulu.Zip.Unzip(tmp, tmpDir); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, f.Filename[:len(f.Filename)-4])
+	data, err = os.ReadFile(tmp)
+	if nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data = util.AESDecrypt(string(data))
+	data, _ = hex.DecodeString(string(data))
+	webdav := &conf.WebDAV{}
+	if err = gulu.JSON.UnmarshalJSON(data, webdav); nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	err = model.SetSyncProviderWebDAV(webdav)
+	if nil != err {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"webdav": model.Conf.Sync.WebDAV,
+	}
+}
+
+func exportSyncProviderWebDAV(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	name := "siyuan-webdav-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	webdav := model.Conf.Sync.WebDAV
+	if nil == webdav {
+		webdav = &conf.WebDAV{}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.WebDAV)
+	if nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	dataStr := util.AESEncrypt(string(data))
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, []byte(dataStr), 0644); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); nil != err {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name + ".zip"
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
+
+func importSyncProviderS3(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file"]
+	if 1 != len(files) {
+		ret.Code = -1
+		ret.Msg = "invalid upload file"
+		return
+	}
+
+	f := files[0]
+	fh, err := f.Open()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := io.ReadAll(fh)
+	fh.Close()
+	if nil != err {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, f.Filename)
+	if err = os.WriteFile(tmp, data, 0644); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = gulu.Zip.Unzip(tmp, tmpDir); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, f.Filename[:len(f.Filename)-4])
+	data, err = os.ReadFile(tmp)
+	if nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data = util.AESDecrypt(string(data))
+	data, _ = hex.DecodeString(string(data))
+	s3 := &conf.S3{}
+	if err = gulu.JSON.UnmarshalJSON(data, s3); nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	err = model.SetSyncProviderS3(s3)
+	if nil != err {
+		logging.LogErrorf("import S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"s3": model.Conf.Sync.S3,
+	}
+}
+
+func exportSyncProviderS3(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	name := "siyuan-s3-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	s3 := model.Conf.Sync.S3
+	if nil == s3 {
+		s3 = &conf.S3{}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(model.Conf.Sync.S3)
+	if nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	dataStr := util.AESEncrypt(string(data))
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, []byte(dataStr), 0644); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); nil != err {
+		logging.LogErrorf("export S3 provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name + ".zip"
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
 
 func getSyncInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

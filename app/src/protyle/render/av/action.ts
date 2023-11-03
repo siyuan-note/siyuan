@@ -370,6 +370,20 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     blockElement.setAttribute("updated", newUpdated);
     nameElement.dataset.title = newData;
     blockElement.querySelector(".layout-tab-bar .item__text").textContent = newData;
+
+    // 当前页面不能进行推送，否则光标会乱跳
+    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
+        if(blockElement.isSameNode(item)) {
+            return;
+        }
+        const titleElement = item.querySelector(".av__title") as HTMLElement;
+        if (!titleElement) {
+            return;
+        }
+        titleElement.textContent = newData;
+        titleElement.dataset.title = newData;
+        item.querySelector(".layout-tab-bar .item__text").textContent = newData;
+    });
 };
 
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {

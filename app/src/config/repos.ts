@@ -400,18 +400,20 @@ export const repos = {
                 window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
             });
         });
-        repos.element.querySelectorAll("#importData").forEach(item => {
-            item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+        repos.element.querySelectorAll("#importData").forEach((item: HTMLInputElement) => {
+            item.addEventListener("change", () => {
                 const formData = new FormData();
-                formData.append("file", event.target.files[0]);
-                fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
-                    if (item.getAttribute("data-type") === "s3") {
+                formData.append("file", item.files[0]);
+                const isS3 = item.getAttribute("data-type") === "s3"
+                fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
+                    if (isS3) {
                         window.siyuan.config.sync.s3 = response.data.s3;
                     } else {
                         window.siyuan.config.sync.webdav = response.data.webdav;
                     }
-                    renderProvider(window.siyuan.config.sync.provider);
+                    repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
                     showMessage(window.siyuan.languages.imported);
+                    item.value = "";
                 });
             });
         });

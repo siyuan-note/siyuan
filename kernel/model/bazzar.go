@@ -131,8 +131,9 @@ func filterWidgets(widgets []*bazaar.Widget, keyword string) (ret []*bazaar.Widg
 	return
 }
 
-func InstalledWidgets() (widgets []*bazaar.Widget) {
+func InstalledWidgets(keyword string) (widgets []*bazaar.Widget) {
 	widgets = bazaar.InstalledWidgets()
+	widgets = filterWidgets(widgets, keyword)
 	return
 }
 
@@ -184,8 +185,9 @@ func filterIcons(icons []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
 	return
 }
 
-func InstalledIcons() (icons []*bazaar.Icon) {
+func InstalledIcons(keyword string) (icons []*bazaar.Icon) {
 	icons = bazaar.InstalledIcons()
+	icons = filterIcons(icons, keyword)
 	for _, icon := range icons {
 		icon.Current = icon.Name == Conf.Appearance.Icon
 	}
@@ -245,8 +247,9 @@ func filterThemes(themes []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) 
 	return
 }
 
-func InstalledThemes() (ret []*bazaar.Theme) {
+func InstalledThemes(keyword string) (ret []*bazaar.Theme) {
 	ret = bazaar.InstalledThemes()
+	ret = filterThemes(ret, keyword)
 	for _, theme := range ret {
 		theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 	}
@@ -318,8 +321,9 @@ func filterTemplates(templates []*bazaar.Template, keyword string) (ret []*bazaa
 	return
 }
 
-func InstalledTemplates() (templates []*bazaar.Template) {
+func InstalledTemplates(keyword string) (templates []*bazaar.Template) {
 	templates = bazaar.InstalledTemplates()
+	templates = filterTemplates(templates, keyword)
 	return
 }
 

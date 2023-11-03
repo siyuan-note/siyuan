@@ -4,6 +4,7 @@ import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
+import {openByMobile} from "../protyle/util/compatibility";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -404,7 +405,11 @@ export const repos = {
                 const formData = new FormData();
                 formData.append("file", event.target.files[0]);
                 fetchPost(item.getAttribute("data-type") === "s3" ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
-                    window.siyuan.config.sync.s3 = response.data.s3;
+                    if (item.getAttribute("data-type") === "s3") {
+                        window.siyuan.config.sync.s3 = response.data.s3;
+                    } else {
+                        window.siyuan.config.sync.webdav = response.data.webdav;
+                    }
                     renderProvider(window.siyuan.config.sync.provider);
                     showMessage(window.siyuan.languages.imported);
                 });
@@ -455,8 +460,7 @@ export const repos = {
                     break;
                 } else if (action === "exportData") {
                     fetchPost(target.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, response => {
-                        window.location.href = response.data.zip;
-                        showMessage(window.siyuan.languages.exported);
+                        openByMobile(response.data.zip);
                     });
                     break;
                 }

@@ -165,22 +165,24 @@ const renderProvider = (provider: number) => {
 
 const bindProviderEvent = () => {
     const importElement = repos.element.querySelector("#importData") as HTMLInputElement;
-    importElement.addEventListener("change", () => {
-        const formData = new FormData();
-        formData.append("file", importElement.files[0]);
-        const isS3 = importElement.getAttribute("data-type") === "s3"
-        fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
-            if (isS3) {
-                window.siyuan.config.sync.s3 = response.data.s3;
-            } else {
-                window.siyuan.config.sync.webdav = response.data.webdav;
-            }
-            repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
-            bindProviderEvent();
-            showMessage(window.siyuan.languages.imported);
-            importElement.value = "";
+    if (importElement) {
+        importElement.addEventListener("change", () => {
+            const formData = new FormData();
+            formData.append("file", importElement.files[0]);
+            const isS3 = importElement.getAttribute("data-type") === "s3"
+            fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
+                if (isS3) {
+                    window.siyuan.config.sync.s3 = response.data.s3;
+                } else {
+                    window.siyuan.config.sync.webdav = response.data.webdav;
+                }
+                repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
+                bindProviderEvent();
+                showMessage(window.siyuan.languages.imported);
+                importElement.value = "";
+            });
         });
-    });
+    }
 
     const reposDataElement = repos.element.querySelector("#reposData");
     const loadingElement = repos.element.querySelector("#reposLoading");

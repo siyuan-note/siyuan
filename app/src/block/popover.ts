@@ -157,8 +157,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElemen
         } else {
             for (let i = 0; i < window.siyuan.blockPanels.length; i++) {
                 const item = window.siyuan.blockPanels[i];
-                if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false" &&
-                    parseInt(item.element.getAttribute("data-level")) > (maxEditLevels[item.element.getAttribute("data-oid")] || 0)) {
+                if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false") {
                     item.destroy();
                     i--;
                 }

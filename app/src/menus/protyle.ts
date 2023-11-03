@@ -1074,11 +1074,19 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     const linkAddress = linkElement.getAttribute("data-href");
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
-        label: `<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" placeholder="${window.siyuan.languages.link}"></textarea>`,
+        type: "readonly",
+        label: `<div class="b3-menu__label">${window.siyuan.languages.link}</div>
+<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
+<div class="fn__hr"></div>
+<div class="b3-menu__label">${window.siyuan.languages.anchor}</div>
+<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>
+<div class="fn__hr"></div>
+<div class="b3-menu__label">${window.siyuan.languages.title}</div>
+<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
         bind(element) {
-            const inputElement = element.querySelector("textarea");
-            inputElement.value = Lute.UnEscapeHTMLStr(linkAddress) || "";
-            inputElement.addEventListener("keydown", (event) => {
+            const inputElements = element.querySelectorAll("textarea");
+            inputElements[0].value = Lute.UnEscapeHTMLStr(linkAddress) || "";
+            inputElements[0].addEventListener("keydown", (event) => {
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1086,18 +1094,12 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 } else if (event.key === "Tab" && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
-                    element.nextElementSibling.querySelector("textarea").focus();
+                    inputElements[1].focus();
                 } else if (electronUndo(event)) {
                     return;
                 }
             });
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
-        label: `<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.anchor}"></textarea>`,
-        bind(element) {
-            const inputElement = element.querySelector("textarea");
+
             // https://github.com/siyuan-note/siyuan/issues/6798
             let anchor = linkElement.textContent.replace(Constants.ZWSP, "");
             if (!anchor && linkAddress) {
@@ -1107,17 +1109,17 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 }
                 linkElement.innerHTML = Lute.EscapeHTMLStr(anchor);
             }
-            inputElement.value = anchor;
-            inputElement.addEventListener("compositionend", () => {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "*");
+            inputElements[1].value = anchor;
+            inputElements[1].addEventListener("compositionend", () => {
+                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "*");
             });
-            inputElement.addEventListener("input", (event: KeyboardEvent) => {
+            inputElements[1].addEventListener("input", (event: KeyboardEvent) => {
                 if (!event.isComposing) {
                     // https://github.com/siyuan-note/siyuan/issues/4511
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "*";
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "*";
                 }
             });
-            inputElement.addEventListener("keydown", (event) => {
+            inputElements[1].addEventListener("keydown", (event) => {
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1126,23 +1128,17 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (event.shiftKey) {
-                        element.previousElementSibling.querySelector("textarea").focus();
+                        inputElements[0].focus();
                     } else {
-                        element.nextElementSibling.querySelector("textarea").focus();
+                        inputElements[2].focus();
                     }
                 } else if (electronUndo(event)) {
                     return;
                 }
             });
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
-        label: `<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.title}"></textarea>`,
-        bind(element) {
-            const inputElement = element.querySelector("textarea");
-            inputElement.value = Lute.UnEscapeHTMLStr(linkElement.getAttribute("data-title") || "");
-            inputElement.addEventListener("keydown", (event) => {
+
+            inputElements[2].value = Lute.UnEscapeHTMLStr(linkElement.getAttribute("data-title") || "");
+            inputElements[2].addEventListener("keydown", (event) => {
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1150,13 +1146,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 } else if (event.key === "Tab" && event.shiftKey && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
-                    element.previousElementSibling.querySelector("textarea").focus();
+                    inputElements[1].focus();
                 } else if (electronUndo(event)) {
                     return;
                 }
             });
         }
     }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.remove,
@@ -1208,7 +1205,6 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         }).element);
     }
     if (linkAddress) {
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, linkAddress, false, true);
         /// #if !BROWSER
         if (linkAddress?.startsWith("assets/")) {

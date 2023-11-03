@@ -234,6 +234,9 @@ export class MenuItem {
 const getActionMenu = (element: Element, next: boolean) => {
     let actionMenuElement = element;
     while (actionMenuElement && (actionMenuElement.classList.contains("b3-menu__separator") || actionMenuElement.classList.contains("b3-menu__item--readonly"))) {
+        if (actionMenuElement.querySelector(".b3-text-field")) {
+            break;
+        }
         if (next) {
             actionMenuElement = actionMenuElement.nextElementSibling;
         } else {
@@ -278,7 +281,6 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (actionMenuElement) {
             actionMenuElement.classList.add("b3-menu__item--current");
             actionMenuElement.classList.remove("b3-menu__item--show");
-
             const parentRect = actionMenuElement.parentElement.getBoundingClientRect();
             const actionMenuRect = actionMenuElement.getBoundingClientRect();
             if (parentRect.top > actionMenuRect.top || parentRect.bottom < actionMenuRect.bottom) {

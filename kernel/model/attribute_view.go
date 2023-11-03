@@ -142,6 +142,33 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		blockIDs := av.GetMirrorBlockIDs(avID)
+		if 1 > len(blockIDs) {
+			// 老数据兼容处理
+			avBts := treenode.GetBlockTreesByType("av")
+			for _, avBt := range avBts {
+				if nil == avBt {
+					continue
+				}
+				tree, _ := loadTreeByBlockID(avBt.ID)
+				if nil == tree {
+					continue
+				}
+				node := treenode.GetNodeInTree(tree, avBt.ID)
+				if nil == node {
+					continue
+				}
+				if avID == node.AttributeViewID {
+					blockIDs = append(blockIDs, avBt.ID)
+				}
+			}
+			if 1 > len(blockIDs) {
+				continue
+			}
+			blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+			for _, blockID := range blockIDs {
+				av.UpsertBlockRel(avID, blockID)
+			}
+		}
 
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:      avID,

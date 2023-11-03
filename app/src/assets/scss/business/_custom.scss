@@ -19,11 +19,19 @@
     }
 
     &.custom-attr__avheader {
+      color: var(--b3-protyle-inline-blockref-color);
+      opacity: .86;
+      transition: var(--b3-transition);
       width: 100%;
       align-items: center;
       justify-content: center;
       border-bottom: 1px solid var(--b3-border-color);
       padding: 8px 0;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 

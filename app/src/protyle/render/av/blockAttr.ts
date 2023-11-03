@@ -84,13 +84,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
             avID: string
             avName: string
         }) => {
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView"><div class="block__logo custom-attr__avheader">
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
+<div class="block__logo custom-attr__avheader popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
     <svg><use xlink:href="#iconDatabase"></use></svg>
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons" data-id="${id}">
-    <div class="block__logo popover__block">
+    <div class="block__logo">
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
     </div>

@@ -907,6 +907,12 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 		return ast.WalkContinue
 	})
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	for i, dest := range ret {
+		// 对于 macOS 的 rtfd 文件夹格式需要特殊处理，为其加上结尾 /
+		if strings.HasSuffix(dest, ".rtfd") {
+			ret[i] = dest + "/"
+		}
+	}
 	return
 }
 

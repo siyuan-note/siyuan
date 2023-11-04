@@ -150,6 +150,8 @@ func Upload(c *gin.Context) {
 	for _, file := range files {
 		baseName := file.Filename
 
+		logging.LogInfof("uploading %s", baseName)
+
 		fName := baseName
 		fName = util.FilterUploadFileName(fName)
 		ext := filepath.Ext(fName)

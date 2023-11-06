@@ -169,7 +169,7 @@ const bindProviderEvent = () => {
         importElement.addEventListener("change", () => {
             const formData = new FormData();
             formData.append("file", importElement.files[0]);
-            const isS3 = importElement.getAttribute("data-type") === "s3"
+            const isS3 = importElement.getAttribute("data-type") === "s3";
             fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
                 if (isS3) {
                     window.siyuan.config.sync.s3 = response.data.s3;

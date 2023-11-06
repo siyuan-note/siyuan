@@ -68,7 +68,7 @@ func LoadSnippets() (ret []*conf.Snippet, err error) {
 func loadSnippets() (ret []*conf.Snippet, err error) {
 	ret = []*conf.Snippet{}
 	confPath := filepath.Join(util.SnippetsPath, "conf.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		return
 	}
 

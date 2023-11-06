@@ -440,7 +440,7 @@ func RemoveUnusedAssets() (ret []string) {
 	var hashes []string
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
-		if p = filepath.Join(util.DataDir, p); gulu.File.IsExist(p) {
+		if p = filepath.Join(util.DataDir, p); filelock.IsExist(p) {
 			if err = filelock.Copy(p, historyPath); nil != err {
 				return
 			}
@@ -453,7 +453,7 @@ func RemoveUnusedAssets() (ret []string) {
 	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
-		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); gulu.File.IsExist(unusedAsset) {
+		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
 			if err := os.RemoveAll(unusedAsset); nil != err {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
 			}
@@ -471,7 +471,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 func RemoveUnusedAsset(p string) (ret string) {
 	absPath := filepath.Join(util.DataDir, p)
-	if !gulu.File.IsExist(absPath) {
+	if !filelock.IsExist(absPath) {
 		return absPath
 	}
 
@@ -483,7 +483,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 	newP := strings.TrimPrefix(absPath, util.DataDir)
 	historyPath := filepath.Join(historyDir, newP)
-	if gulu.File.IsExist(absPath) {
+	if filelock.IsExist(absPath) {
 		if err = filelock.Copy(absPath, historyPath); nil != err {
 			return
 		}
@@ -528,7 +528,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
-	if gulu.File.IsExist(filepath.Join(util.DataDir, oldPath+".sya")) {
+	if filelock.IsExist(filepath.Join(util.DataDir, oldPath+".sya")) {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
 		if err = filelock.Copy(filepath.Join(util.DataDir, oldPath+".sya"), filepath.Join(util.DataDir, newPath+".sya")); nil != err {
 			logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
@@ -804,7 +804,7 @@ func MissingAssets() (ret []string) {
 			if "" == assetsPathMap[dest] {
 				if strings.HasPrefix(dest, "assets/.") {
 					// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
-					if !gulu.File.IsExist(filepath.Join(util.DataDir, dest)) {
+					if !filelock.IsExist(filepath.Join(util.DataDir, dest)) {
 						ret = append(ret, dest)
 					}
 				} else {

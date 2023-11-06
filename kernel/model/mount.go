@@ -78,7 +78,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	localPath := filepath.Join(util.DataDir, boxID)
-	if !gulu.File.IsExist(localPath) {
+	if !filelock.IsExist(localPath) {
 		return
 	}
 	if !gulu.File.IsDir(localPath) {

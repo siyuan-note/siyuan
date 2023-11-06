@@ -586,7 +586,7 @@ func NewAttributeView(id string) (ret *AttributeView) {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := GetAttributeViewDataPath(avID)
-	if !gulu.File.IsExist(avJSONPath) {
+	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
 	}

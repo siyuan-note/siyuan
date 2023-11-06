@@ -153,7 +153,7 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	name = util.FilterFileName(name) + ".md"
 	name = util.TruncateLenFileName(name)
 	savePath := filepath.Join(util.DataDir, "templates", name)
-	if gulu.File.IsExist(savePath) {
+	if filelock.IsExist(savePath) {
 		if !overwrite {
 			code = 1
 			return

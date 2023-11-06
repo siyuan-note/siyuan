@@ -21,7 +21,7 @@ func GetMirrorBlockIDs(avID string) []string {
 	defer attributeViewBlocksLock.Unlock()
 
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !gulu.File.IsExist(blocks) {
+	if !filelock.IsExist(blocks) {
 		return nil
 	}
 
@@ -46,7 +46,7 @@ func IsMirror(avID string) bool {
 	defer attributeViewBlocksLock.Unlock()
 
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !gulu.File.IsExist(blocks) {
+	if !filelock.IsExist(blocks) {
 		return false
 	}
 
@@ -71,7 +71,7 @@ func RemoveBlockRel(avID, blockID string) {
 	defer attributeViewBlocksLock.Unlock()
 
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !gulu.File.IsExist(blocks) {
+	if !filelock.IsExist(blocks) {
 		return
 	}
 
@@ -117,7 +117,7 @@ func UpsertBlockRel(avID, blockID string) {
 
 	avBlocks := map[string][]string{}
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !gulu.File.IsExist(blocks) {
+	if !filelock.IsExist(blocks) {
 		if err := os.MkdirAll(filepath.Dir(blocks), 0755); nil != err {
 			logging.LogErrorf("create attribute view dir failed: %s", err)
 			return

@@ -1380,12 +1380,12 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             if (label === window.siyuan.languages.default) {
-                if (assetElement.style.display === "block") {
-                    assetElement.style.width = "";
-                } else {
-                    assetElement.removeAttribute("style");
-                }
+                const isCenter = assetElement.style.display === "block"
+                assetElement.removeAttribute("style");
                 imgElement.removeAttribute("style");
+                if (isCenter) {
+                    assetElement.style.display = "block";
+                }
             } else {
                 assetElement.style.width = label;
                 imgElement.style.width = "10000px";

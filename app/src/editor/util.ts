@@ -14,7 +14,6 @@ import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {ipcRenderer, shell} from "electron";
-import {newCardModel} from "../card/newCardTab";
 /// #endif
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
@@ -27,6 +26,7 @@ import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
 import {App} from "../index";
+import {newCardModel} from "../card/newCardTab";
 
 export const openFileById = async (options: {
     app: App,

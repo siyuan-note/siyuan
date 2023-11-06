@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/open-spaced-repetition/go-fsrs"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -814,15 +815,15 @@ func RemoveDeck(deckID string) (err error) {
 
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
-	if gulu.File.IsExist(deckPath) {
-		if err = os.Remove(deckPath); nil != err {
+	if filelock.IsExist(deckPath) {
+		if err = filelock.Remove(deckPath); nil != err {
 			return
 		}
 	}
 
 	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
-	if gulu.File.IsExist(cardsPath) {
-		if err = os.Remove(cardsPath); nil != err {
+	if filelock.IsExist(cardsPath) {
+		if err = filelock.Remove(cardsPath); nil != err {
 			return
 		}
 	}

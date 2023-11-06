@@ -1347,7 +1347,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			if !gulu.File.IsDir(srcPath) && strings.HasSuffix(strings.ToLower(srcPath), ".pdf") {
 				sya := srcPath + ".sya"
-				if gulu.File.IsExist(sya) {
+				if filelock.IsExist(sya) {
 					// Related PDF annotation information is not exported when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/7836
 					if syaErr := filelock.Copy(sya, destPath+".sya"); nil != syaErr {
 						logging.LogErrorf("copy sya from [%s] to [%s] failed: %s", sya, destPath+".sya", syaErr)
@@ -1373,7 +1373,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			avID := n.AttributeViewID
 			avJSONPath := av.GetAttributeViewDataPath(avID)
-			if !gulu.File.IsExist(avJSONPath) {
+			if !filelock.IsExist(avJSONPath) {
 				return ast.WalkContinue
 			}
 
@@ -1410,7 +1410,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	sortIDs := map[string]int{}
 	var sortData []byte
 	var sortErr error
-	if gulu.File.IsExist(sortPath) {
+	if filelock.IsExist(sortPath) {
 		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read sort conf failed: %s", sortErr)
@@ -1900,7 +1900,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 		}
 
 		avID := n.AttributeViewID
-		if avJSONPath := av.GetAttributeViewDataPath(avID); !gulu.File.IsExist(avJSONPath) {
+		if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
 			return ast.WalkContinue
 		}
 

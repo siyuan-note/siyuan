@@ -50,19 +50,19 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20231031012159-d985a65825cf
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
-	github.com/siyuan-note/filelock v0.0.0-20231030092426-0ff158f5f8ca
+	github.com/siyuan-note/filelock v0.0.0-20231106131407-1cd9e9a9230c
 	github.com/siyuan-note/httpclient v0.0.0-20231028070852-3c2c5a151c13
 	github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff
-	github.com/siyuan-note/riff v0.0.0-20230928143458-ffd178c7e0fc
+	github.com/siyuan-note/riff v0.0.0-20231106140614-c67ff0c69e33
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
-	github.com/vmihailenco/msgpack/v5 v5.4.0
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	github.com/xuri/excelize/v2 v2.8.0
 	golang.org/x/image v0.12.0
 	golang.org/x/mobile v0.0.0-20230901161150-52620a4a7557
 	golang.org/x/mod v0.13.0
-	golang.org/x/text v0.13.0
+	golang.org/x/text v0.14.0
 )
 
 require (
@@ -158,7 +158,7 @@ require (
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.4.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

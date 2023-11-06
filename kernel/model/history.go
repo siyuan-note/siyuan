@@ -142,6 +142,7 @@ func ClearWorkspaceHistory() (err error) {
 
 func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content string, isLargeDoc bool, err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
 	}
 
@@ -214,6 +215,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 func RollbackDocHistory(boxID, historyPath string) (err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
 	}
 
@@ -268,6 +270,7 @@ func getRollbackDockPath(boxID, historyPath string) (destPath string, err error)
 func RollbackAssetsHistory(historyPath string) (err error) {
 	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("assets history [%s] not exist", historyPath)
 		return
 	}
 
@@ -285,6 +288,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 
 func RollbackNotebookHistory(historyPath string) (err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("notebook history [%s] not exist", historyPath)
 		return
 	}
 
@@ -482,6 +486,7 @@ func (box *Box) generateDocHistory0() {
 
 func clearOutdatedHistoryDir(historyDir string) {
 	if !gulu.File.IsExist(historyDir) {
+		logging.LogWarnf("history dir [%s] not exist", historyDir)
 		return
 	}
 

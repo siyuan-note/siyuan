@@ -101,7 +101,7 @@ func LoadPetals(frontend string) (ret []*Petal) {
 func loadCode(petal *Petal) {
 	pluginDir := filepath.Join(util.DataDir, "plugins", petal.Name)
 	jsPath := filepath.Join(pluginDir, "index.js")
-	if !gulu.File.IsExist(jsPath) {
+	if !filelock.IsExist(jsPath) {
 		logging.LogErrorf("plugin [%s] js not found", petal.Name)
 		return
 	}
@@ -114,7 +114,7 @@ func loadCode(petal *Petal) {
 	petal.JS = string(data)
 
 	cssPath := filepath.Join(pluginDir, "index.css")
-	if gulu.File.IsExist(cssPath) {
+	if filelock.IsExist(cssPath) {
 		data, err = filelock.ReadFile(cssPath)
 		if nil != err {
 			logging.LogErrorf("read plugin [%s] css failed: %s", petal.Name, err)
@@ -204,7 +204,7 @@ func getPetals() (ret []*Petal) {
 	}
 
 	confPath := filepath.Join(petalDir, "petals.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		data, err := gulu.JSON.MarshalIndentJSON(ret, "", "\t")
 		if nil != err {
 			logging.LogErrorf("marshal petals failed: %s", err)

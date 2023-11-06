@@ -278,9 +278,9 @@ func Upload(c *gin.Context) {
 
 func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 	assets = filepath.Join(docDirLocalPath, "assets")
-	if !gulu.File.IsExist(assets) {
+	if !filelock.IsExist(assets) {
 		assets = filepath.Join(boxLocalPath, "assets")
-		if !gulu.File.IsExist(assets) {
+		if !filelock.IsExist(assets) {
 			assets = filepath.Join(util.DataDir, "assets")
 		}
 	}

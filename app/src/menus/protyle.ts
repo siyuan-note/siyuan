@@ -889,7 +889,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     imgElement.setAttribute("title", value);
                     titleElement.textContent = value;
                     mathRender(titleElement);
-                    assetElement.style.maxWidth = (imgElement.clientWidth + 10) + "px";
                 });
                 textElements[2].value = imgElement.getAttribute("alt") || "";
             }
@@ -992,7 +991,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 alignImgLeft(protyle, nodeElement, [assetElement], id, html);
             }
         }).element);
-        const width = parseInt(assetElement.style.width || "0");
+        const width = assetElement.style.width.endsWith("%") ? parseInt(assetElement.style.width) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
             submenu: [genImageWidthMenu("25%", assetElement, imgElement, protyle, id, nodeElement, html),
@@ -1013,7 +1012,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeElement.addEventListener("input", () => {
                             assetElement.style.width = rangeElement.value + "%";
                             imgElement.style.width = "10000px";
-                            assetElement.style.maxWidth = "";
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                         });
                         rangeElement.addEventListener("change", () => {
@@ -1384,14 +1382,12 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
             if (label === window.siyuan.languages.default) {
                 if (assetElement.style.display === "block") {
                     assetElement.style.width = "";
-                    assetElement.style.maxWidth = "";
                 } else {
                     assetElement.removeAttribute("style");
                 }
                 imgElement.removeAttribute("style");
             } else {
                 assetElement.style.width = label;
-                assetElement.style.maxWidth = "";
                 imgElement.style.width = "10000px";
             }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);

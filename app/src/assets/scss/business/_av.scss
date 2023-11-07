@@ -4,7 +4,7 @@
 
   &__pulse {
     width: 70%;
-    height: 26px;
+    height: 23px;
     position: relative;
     overflow: hidden;
     background: var(--b3-border-color);
@@ -61,10 +61,14 @@
   &__gutters {
     @extend .protyle-gutters;
     position: absolute;
-    top: 5px;
-    left: -26px;
+    top: 0;
+    left: -44px;
     opacity: 0;
-    padding-right: 4px;
+    display: flex;
+
+    svg {
+      height: 25px;
+    }
   }
 
   &__mask {

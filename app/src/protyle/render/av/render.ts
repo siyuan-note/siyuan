@@ -79,8 +79,9 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
-    <button><svg><use xlink:href="#iconDrag"></use></svg></button>
+<div class="av__gutters">
+    <button class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.d}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+    <button class="ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {

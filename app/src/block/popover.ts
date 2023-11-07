@@ -21,10 +21,6 @@ export const initBlockPopover = (app: App) => {
             hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
-            // 折叠块标文案替换
-            if (hasClosestByAttribute(event.target, "data-type", "fold", true)) {
-                tip = window.siyuan.languages.fold;
-            }
             if (aElement.classList.contains("av__celltext")) {
                 if (aElement.scrollWidth > aElement.parentElement.clientWidth - 11) {
                     if (aElement.querySelector(".av__cellicon")) {

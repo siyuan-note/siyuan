@@ -28,7 +28,7 @@ import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {isInAndroid, isMac, updateHotkeyTip} from "../util/compatibility";
+import {isInAndroid, isMac} from "../util/compatibility";
 import {resize} from "../util/resize";
 
 export class Breadcrumb {

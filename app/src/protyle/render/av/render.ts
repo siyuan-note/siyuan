@@ -6,7 +6,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {resizeAV} from "../../util/resize";
-import {isMac, updateHotkeyTip} from "../../util/compatibility";
+import {isMac} from "../../util/compatibility";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];

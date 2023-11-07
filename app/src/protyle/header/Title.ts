@@ -11,7 +11,7 @@ import {
 } from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
-import {isMac, readText, updateHotkeyTip, writeText} from "../util/compatibility";
+import {isMac, readText, writeText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {setPanelFocus} from "../../layout/util";
 import {openFileById, updatePanelByEditor} from "../../editor/util";
@@ -25,7 +25,6 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
 import {electronUndo} from "../undo";
-import {replace} from "../../search/util";
 
 export class Title {
     public element: HTMLElement;

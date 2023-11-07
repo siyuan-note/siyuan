@@ -42,13 +42,13 @@ import {resizeAV} from "../util/resize";
 
 export class Gutter {
     public element: HTMLElement;
-    private gutterTip: string
+    private gutterTip: string;
 
     constructor(protyle: IProtyle) {
         if (isMac()) {
-            this.gutterTip = window.siyuan.languages.gutterTip
+            this.gutterTip = window.siyuan.languages.gutterTip;
         } else {
-            this.gutterTip = window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+")
+            this.gutterTip = window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";

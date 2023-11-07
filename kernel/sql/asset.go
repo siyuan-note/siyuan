@@ -18,10 +18,10 @@ package sql
 
 import (
 	"database/sql"
+	"github.com/siyuan-note/filelock"
 	"path/filepath"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -139,17 +139,17 @@ func scanAssetRows(rows *sql.Rows) (ret *Asset) {
 
 func assetLocalPath(linkDest, boxLocalPath, docDirLocalPath string) (ret string) {
 	ret = filepath.Join(docDirLocalPath, linkDest)
-	if gulu.File.IsExist(ret) {
+	if filelock.IsExist(ret) {
 		return
 	}
 
 	ret = filepath.Join(boxLocalPath, linkDest)
-	if gulu.File.IsExist(ret) {
+	if filelock.IsExist(ret) {
 		return
 	}
 
 	ret = filepath.Join(util.DataDir, linkDest)
-	if gulu.File.IsExist(ret) {
+	if filelock.IsExist(ret) {
 		return
 	}
 	return ""

@@ -941,7 +941,7 @@ export const bazaar = {
                             bazaar._data.plugins = response.data.packages;
                         });
                     } else if (type === "downloaded") {
-                        const bazaarType = inputElement.parentElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type").replace("my", "").toLowerCase() + "s" as TBazaarType
+                        const bazaarType = inputElement.parentElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type").replace("my", "").toLowerCase() + "s" as TBazaarType;
                         this._genMyHTML(bazaarType, app);
                     }
                     event.preventDefault();

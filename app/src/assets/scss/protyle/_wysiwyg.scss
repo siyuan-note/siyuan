@@ -320,8 +320,8 @@
         cursor: col-resize;
         transition: var(--b3-transition);
         position: absolute;
-        top: 45%;
-        right: 4px;
+        top: 35%;
+        margin-left: -8px;
         box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
         box-sizing: border-box;
         z-index: 1;

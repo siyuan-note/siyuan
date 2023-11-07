@@ -13,6 +13,8 @@ export const newCardModel = (options: {
         cardType: TCardType,
         id: string,
         title?: string
+        blocks?: ICard[],
+        index?: number,
     }
 }) => {
     let editor: Protyle;
@@ -40,6 +42,9 @@ export const newCardModel = (options: {
                     index: options.data.index,
                 });
                 this.data.editor = editor;
+                // https://github.com/siyuan-note/siyuan/issues/9561#issuecomment-1794473512
+                delete options.data.blocks;
+                delete options.data.index;
             } else {
                 fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
                     (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {

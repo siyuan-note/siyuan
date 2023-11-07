@@ -210,7 +210,7 @@
       color: var(--b3-theme-primary);
     }
 
-    &--current {
+    &--current:not(.b3-menu__item--readonly) {
       background-color: var(--b3-list-hover);
 
       & > .b3-menu__action {

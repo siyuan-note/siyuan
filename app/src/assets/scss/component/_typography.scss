@@ -404,6 +404,7 @@
     vertical-align: top; // https://ld246.com/article/1647522074722
     margin: 0 auto;
     max-width: 100%;
+    user-select: none;
 
     &:not([style]) {
       display: initial;

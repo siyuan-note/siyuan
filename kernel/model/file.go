@@ -1205,7 +1205,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		} else {
 			absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromFolder)
 			absToPath := filepath.Join(util.DataDir, toBox.ID, newFolder)
-			if gulu.File.IsExist(absToPath) {
+			if filelock.IsExist(absToPath) {
 				filelock.Remove(absToPath)
 			}
 			if err = filelock.Rename(absFromPath, absToPath); nil != err {
@@ -1445,7 +1445,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	var dom string
 	if "" != boxConf.DailyNoteTemplatePath {
 		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
-		if !gulu.File.IsExist(tplPath) {
+		if !filelock.IsExist(tplPath) {
 			logging.LogWarnf("not found daily note template [%s]", tplPath)
 		} else {
 			dom, err = renderTemplate(tplPath, id, false)
@@ -1570,7 +1570,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	ids := treenode.RootChildIDs(rootID)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
-	if gulu.File.IsExist(fromConfPath) {
+	if filelock.IsExist(fromConfPath) {
 		data, err := filelock.ReadFile(fromConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1587,7 +1587,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 
 	toConfPath := filepath.Join(util.DataDir, toBox, ".siyuan", "sort.json")
 	toFullSortIDs := map[string]int{}
-	if gulu.File.IsExist(toConfPath) {
+	if filelock.IsExist(toConfPath) {
 		data, err := filelock.ReadFile(toConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1663,7 +1663,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	confPath := filepath.Join(confDir, "sort.json")
 	fullSortIDs := map[string]int{}
 	var data []byte
-	if gulu.File.IsExist(confPath) {
+	if filelock.IsExist(confPath) {
 		data, err = filelock.ReadFile(confPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1694,7 +1694,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 func (box *Box) fillSort(files *[]*File) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		return
 	}
 
@@ -1718,7 +1718,7 @@ func (box *Box) fillSort(files *[]*File) {
 
 func (box *Box) removeSort(ids []string) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		return
 	}
 

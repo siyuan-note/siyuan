@@ -24,6 +24,25 @@ import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 
+export const avAdd = (protyle: IProtyle, blockElement: HTMLElement, rowElement: HTMLElement, above: boolean) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const srcIDs = [Lute.NewNodeID()];
+    const previousID = above ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : rowElement.getAttribute("data-id");
+    transaction(protyle, [{
+        action: "insertAttrViewBlock",
+        avID,
+        previousID,
+        srcIDs,
+        isDetached: true,
+    }], [{
+        action: "removeAttrViewBlock",
+        srcIDs,
+        avID,
+    }]);
+    insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+    popTextCell(protyle, [rowElement[above ? "previousElementSibling" : "nextElementSibling"].querySelector('[data-detached="true"]')], "block");
+}
+
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
@@ -63,15 +82,20 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "av__gutters");
-    if (gutterElement) {
-        const gutterRect = gutterElement.getBoundingClientRect()
-        avContextmenu(protyle, gutterElement.parentElement.parentElement, {
-            x: gutterRect.left,
-            y: gutterRect.bottom,
-            w: gutterRect.width,
-            h: gutterRect.height
-        });
+    const gutterElement = hasClosestByClassName(event.target, "av__gutter");
+    if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
+        const rowElement = gutterElement.parentElement.parentElement.parentElement;
+        if (gutterElement.dataset.action === "add") {
+            avAdd(protyle, blockElement, rowElement, event.altKey);
+        } else {
+            const gutterRect = gutterElement.getBoundingClientRect();
+            avContextmenu(protyle, rowElement, {
+                x: gutterRect.left,
+                y: gutterRect.bottom,
+                w: gutterRect.width,
+                h: gutterRect.height
+            });
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -286,6 +310,24 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     });
     if (rowIds.length === 1) {
         menu.addSeparator();
+        menu.addItem({
+            label: window.siyuan.languages.addAttr,
+            icon: "iconAdd",
+            type: "submenu",
+            submenu: [
+                {
+                    label: window.siyuan.languages.insertRowAbove,
+                    icon: "iconBefore",
+                    click: () => avAdd(protyle, blockElement, rowElement, true),
+                },
+                {
+                    label: window.siyuan.languages.insertRowBelow,
+                    icon: "iconAfter",
+                    click: () => avAdd(protyle, blockElement, rowElement, false),
+                },
+            ]
+        });
+        menu.addSeparator();
         openEditorTab(protyle.app, rowIds[0]);
         menu.addItem({
             label: window.siyuan.languages.copy,
@@ -373,7 +415,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 
     // 当前页面不能进行推送，否则光标会乱跳
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-        if(blockElement.isSameNode(item)) {
+        if (blockElement.isSameNode(item)) {
             return;
         }
         const titleElement = item.querySelector(".av__title") as HTMLElement;

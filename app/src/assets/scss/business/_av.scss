@@ -8,7 +8,7 @@
 
   &__pulse {
     width: 70%;
-    height: 26px;
+    height: 23px;
     position: relative;
     overflow: hidden;
     background: var(--b3-border-color);
@@ -74,6 +74,7 @@
     top: 0;
     left: 0;
     opacity: 0;
+    width: 24px;
 
     button {
       padding: 0;
@@ -89,8 +90,8 @@
   }
 
   &__scroll {
-    overflow: auto hidden;
     cursor: pointer;
+    overflow-x: auto;
   }
 
   &__body {
@@ -195,7 +196,7 @@
       font-size: 87.5%;
 
       .av__calc {
-        padding: 5px;
+        padding: 0 5px;
         align-items: center;
         position: sticky;
         left: 49px;

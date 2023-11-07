@@ -1,4 +1,5 @@
 {
+  "addBelowAbove": "Haga clic para agregar abajo<br>Alt+Clic para agregar arriba",
   "imported": "Importación completada",
   "mirrorTip": "Base de datos espejo, todas las actualizaciones de datos se sincronizarán con todos los demás espejos",
   "includeTime": "Incluir tiempo",

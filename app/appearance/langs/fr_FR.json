@@ -1,4 +1,5 @@
 {
+  "addBelowAbove": "Cliquez pour ajouter ci-dessous<br>Alt+Cliquez pour ajouter ci-dessus",
   "imported": "Importation terminée",
   "mirrorTip": "Base de données miroir, toutes les mises à jour des données seront synchronisées avec tous les autres miroirs",
   "includeTime": "Inclure l'heure",

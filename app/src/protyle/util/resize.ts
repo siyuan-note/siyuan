@@ -54,6 +54,7 @@ export const resizeAV = (item: HTMLElement) => {
     if (!item.classList.contains("av") || item.getAttribute("data-render") !== "true") {
         return;
     }
+    const attrElement = item.querySelector(".protyle-attr") as HTMLElement
     if (item.style.width.endsWith("%") || item.style.margin) {
         const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
         avHeaderElement.style.paddingLeft = "";
@@ -61,6 +62,7 @@ export const resizeAV = (item: HTMLElement) => {
         const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
         avBodyElement.style.paddingLeft = "";
         avBodyElement.style.paddingRight = "";
+        attrElement.style.paddingRight = "";
         item.style.alignSelf = "";
         if (!item.style.width.endsWith("%")) {
             item.style.width = "";
@@ -75,6 +77,7 @@ export const resizeAV = (item: HTMLElement) => {
         const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
         avBodyElement.style.paddingLeft = paddingLeft;
         avBodyElement.style.paddingRight = paddingRight;
+        attrElement.style.paddingRight = paddingRight;
         item.style.alignSelf = "center";
         if (item.parentElement.clientWidth > 0) {
             item.style.width = item.parentElement.clientWidth + "px";

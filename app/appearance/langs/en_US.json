@@ -1,4 +1,5 @@
 {
+  "addBelowAbove": "Click to add below<br>Alt+Click to add above",
   "imported": "Import completed",
   "mirrorTip": "Mirror database, all data updates will be synchronized to all other mirrors",
   "includeTime": "Include time",

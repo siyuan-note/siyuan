@@ -726,12 +726,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.parentElement.getAttribute("data-col-id")]}`,
                     target.innerHTML);
                 return;
-            } else if (target.classList.contains("av__gutters")) {
+            } else if (target.classList.contains("ariaLabel")) {
                 const blockElement = hasClosestBlock(target);
                 if (!blockElement) {
                     return;
                 }
-                const rowElement = target.parentElement;
+                const rowElement = target.parentElement.parentElement;
                 const selectIds = [];
                 if (rowElement.classList.contains("av__row--select")) {
                     rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {

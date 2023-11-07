@@ -67,7 +67,7 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
 
     let html = "";
     new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row" data-avid="${avId}">
+        html += `<div class="av__row" data-avid="${avId}" data-previous-id="${previousId}">
     <div style="width: 24px"></div>
     ${colHTML}
 </div>`;

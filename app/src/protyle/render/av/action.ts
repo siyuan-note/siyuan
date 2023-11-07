@@ -63,15 +63,35 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "av__gutters");
-    if (gutterElement) {
-        const gutterRect = gutterElement.getBoundingClientRect();
-        avContextmenu(protyle, gutterElement.parentElement, {
-            x: gutterRect.left,
-            y: gutterRect.bottom,
-            w: gutterRect.width,
-            h: gutterRect.height
-        });
+    const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
+    if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
+        const rowElement = gutterElement.parentElement.parentElement;
+        if (gutterElement.dataset.action === "add") {
+            const avID = blockElement.getAttribute("data-av-id");
+            const srcIDs = [Lute.NewNodeID()];
+            const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : rowElement.getAttribute("data-id");
+            transaction(protyle, [{
+                action: "insertAttrViewBlock",
+                avID,
+                previousID,
+                srcIDs,
+                isDetached: true,
+            }], [{
+                action: "removeAttrViewBlock",
+                srcIDs,
+                avID,
+            }]);
+            insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+            popTextCell(protyle, [rowElement[event.altKey ? "previousElementSibling" : "nextElementSibling"].querySelector('[data-detached="true"]')], "block");
+        } else {
+            const gutterRect = gutterElement.getBoundingClientRect();
+            avContextmenu(protyle, rowElement, {
+                x: gutterRect.left,
+                y: gutterRect.bottom,
+                w: gutterRect.width,
+                h: gutterRect.height
+            });
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -373,7 +393,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 
     // 当前页面不能进行推送，否则光标会乱跳
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-        if(blockElement.isSameNode(item)) {
+        if (blockElement.isSameNode(item)) {
             return;
         }
         const titleElement = item.querySelector(".av__title") as HTMLElement;

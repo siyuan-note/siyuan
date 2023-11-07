@@ -464,7 +464,8 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         const avid = cellElements[0].parentElement.dataset.avid;
         if (avid) {
             // 新增行后弹出的输入框
-            cellElements[0] = protyle.wysiwyg.element.querySelector(`[data-av-id="${avid}"] .av__row--add`).previousElementSibling.querySelector('[data-detached="true"]');
+            const previousId = cellElements[0].parentElement.dataset.previousId;
+            cellElements[0] = protyle.wysiwyg.element.querySelector(previousId ? `[data-av-id="${avid}"] .av__row[data-id="${previousId}"]` : `[data-av-id="${avid}"] .av__row--header`).nextElementSibling.querySelector('[data-detached="true"]');
         } else {
             // 修改单元格后立即修改其他单元格
             cellElements[0] = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`);

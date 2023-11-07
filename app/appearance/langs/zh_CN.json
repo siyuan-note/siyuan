@@ -1,5 +1,5 @@
 {
-  "addBelowAbove": "Click 在下方添加<br>Alt+Click 在上方添加",
+  "addBelowAbove": "Click 在下方添加<br>⌥Click 在上方添加",
   "imported": "导入完成",
   "mirrorTip": "镜像数据库，所有数据更新会同步到其他所有镜像中",
   "includeTime": "具体时间",

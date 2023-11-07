@@ -11,7 +11,7 @@ import {
 } from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
-import {readText, writeText} from "../util/compatibility";
+import {isMac, readText, updateHotkeyTip, writeText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {setPanelFocus} from "../../layout/util";
 import {openFileById, updatePanelByEditor} from "../../editor/util";
@@ -25,6 +25,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
 import {electronUndo} from "../undo";
+import {replace} from "../../search/util";
 
 export class Title {
     public element: HTMLElement;
@@ -38,7 +39,7 @@ export class Title {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
         // 标题内需要一个空格，避免首次加载出现`请输入文档名`干扰
-        this.element.innerHTML = `<span aria-label="${window.siyuan.languages.gutterTip2}" data-position="right" class="protyle-title__icon ariaLabel"><svg><use xlink:href="#iconFile"></use></svg></span>
+        this.element.innerHTML = `<span aria-label="${isMac() ? window.siyuan.languages.gutterTip2 : window.siyuan.languages.gutterTip2.replace("⇧", "Shift+")}" data-position="right" class="protyle-title__icon ariaLabel"><svg><use xlink:href="#iconFile"></use></svg></span>
 <div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}" class="protyle-title__input" data-tip="${window.siyuan.languages._kernel[16]}"> </div><div class="protyle-attr"></div>`;
         this.editElement = this.element.querySelector(".protyle-title__input");
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {

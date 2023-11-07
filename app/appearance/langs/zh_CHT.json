@@ -1,5 +1,5 @@
 {
-  "addBelowAbove": "Click 在下方新增<br>Alt+Click 在上方新增",
+  "addBelowAbove": "Click 在下方新增<br>⌥Click 在上方新增",
   "imported": "導入完成",
   "mirrorTip": "鏡像資料庫，所有資料更新會同步到其他所有鏡像中",
   "includeTime": "具體時間",

@@ -115,7 +115,7 @@ export const isInIOS = () => {
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
-    if (/Mac/.test(navigator.platform) || navigator.platform === "iPhone") {
+    if (isMac()) {
         return hotkey;
     }
 

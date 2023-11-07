@@ -3,7 +3,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
+import {copyPlainText, isMac, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction,
@@ -42,8 +42,14 @@ import {resizeAV} from "../util/resize";
 
 export class Gutter {
     public element: HTMLElement;
+    private gutterTip: string
 
     constructor(protyle: IProtyle) {
+        if (isMac()) {
+            this.gutterTip = window.siyuan.languages.gutterTip
+        } else {
+            this.gutterTip = window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+")
+        }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
@@ -1836,7 +1842,7 @@ export class Gutter {
                     html = "";
                 }
                 index += 1;
-                const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.gutterTip}" 
+                const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${this.gutterTip}" 
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${protyle.disabled ? "" : 'draggable="true"'}></span>

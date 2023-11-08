@@ -1451,6 +1451,8 @@ export class WYSIWYG {
                 const embedElement = hasClosestByAttribute(nodeElement, "data-type", "NodeBlockQueryEmbed");
                 if (embedElement) {
                     protyle.gutter.render(protyle, embedElement, this.element);
+                } else {
+                    protyle.gutter.render(protyle, nodeElement, this.element);
                 }
             }
         });

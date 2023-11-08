@@ -352,8 +352,6 @@ github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFR
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20231108025940-1adebb159e56 h1:/PAQWUdK2WO0GFJQb6GpT7He8ueelNrMYngb4Y0aIv4=
-github.com/siyuan-note/dejavu v0.0.0-20231108025940-1adebb159e56/go.mod h1:QJg/fY8KE4eeEOa0Mu2Mp8aBWpshm0qgLaHxNBCc/OM=
 github.com/siyuan-note/dejavu v0.0.0-20231108034856-670a6dc62c56 h1:qNNxfRgvt7oYCb9zkJuqKoEICfqyJ4ta4SZ4NqMTiis=
 github.com/siyuan-note/dejavu v0.0.0-20231108034856-670a6dc62c56/go.mod h1:QJg/fY8KE4eeEOa0Mu2Mp8aBWpshm0qgLaHxNBCc/OM=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=

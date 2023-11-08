@@ -56,6 +56,29 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         }
     }
 
+    const addRowElement = hasClosestByClassName(event.target, "av__row--add");
+    if (addRowElement) {
+        const avID = blockElement.getAttribute("data-av-id");
+        const srcIDs = [Lute.NewNodeID()];
+        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
+        transaction(protyle, [{
+            action: "insertAttrViewBlock",
+            avID,
+            previousID,
+            srcIDs,
+            isDetached: true,
+        }], [{
+            action: "removeAttrViewBlock",
+            srcIDs,
+            avID,
+        }]);
+        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
         writeText(copyElement.previousElementSibling.textContent.trim());
@@ -220,29 +243,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const calcElement = hasClosestByClassName(event.target, "av__calc");
     if (calcElement) {
         openCalcMenu(protyle, calcElement);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    const addRowElement = hasClosestByClassName(event.target, "av__row--add");
-    if (addRowElement) {
-        const avID = blockElement.getAttribute("data-av-id");
-        const srcIDs = [Lute.NewNodeID()];
-        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
-        transaction(protyle, [{
-            action: "insertAttrViewBlock",
-            avID,
-            previousID,
-            srcIDs,
-            isDetached: true,
-        }], [{
-            action: "removeAttrViewBlock",
-            srcIDs,
-            avID,
-        }]);
-        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
-        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
         event.preventDefault();
         event.stopPropagation();
         return true;

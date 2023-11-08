@@ -60,7 +60,7 @@
 
   &__gutters {
     @extend .protyle-gutters;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: -44px;
     opacity: 0;

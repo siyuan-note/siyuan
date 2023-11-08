@@ -151,7 +151,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         }
                         if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType)) {
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
-                                text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"

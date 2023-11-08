@@ -80,7 +80,7 @@
   }
 
   &__scroll {
-    // overflow: auto hidden; 不能使用，否则 https://ld246.com/article/1699077234816
+    overflow: auto hidden;
     cursor: pointer;
   }
 

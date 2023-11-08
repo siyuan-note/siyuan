@@ -1916,11 +1916,18 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         }
         if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
             const iconElement = nodeElement.querySelector(".item__graphic");
+            let top = rect.top + 8
             if (iconElement) {
-                this.element.style.top = `${Math.max(iconElement.getBoundingClientRect().top - (window.siyuan.config.editor.fontSize * 1.625 - 14) / 2, wysiwyg.parentElement.getBoundingClientRect().top)}px`;
-            } else {
-                this.element.style.top = `${Math.max(rect.top, wysiwyg.parentElement.getBoundingClientRect().top) + 8}px`;
+                top = iconElement.getBoundingClientRect().top - (window.siyuan.config.editor.fontSize * 1.625 - 14) / 2;
             }
+            // 防止遮挡可左右滚动的 cell
+            const maxTop = wysiwyg.parentElement.getBoundingClientRect().top
+            if (top < maxTop - 43) {
+                top = -1000
+            } else if (top > maxTop - 43 && top <= maxTop) {
+                top = maxTop
+            }
+            this.element.style.top = `${top}px`;
         } else {
             this.element.style.top = `${Math.max(rect.top, wysiwyg.parentElement.getBoundingClientRect().top) + marginHeight}px`;
         }

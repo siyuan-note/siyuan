@@ -1452,6 +1452,12 @@ export class WYSIWYG {
                 if (embedElement) {
                     protyle.gutter.render(protyle, embedElement, this.element);
                 } else {
+                    // database 行块标
+                    const rowElement = hasClosestByClassName(event.target, "av__row");
+                    if (rowElement && rowElement.dataset.id) {
+                        const rowRect = rowElement.getBoundingClientRect();
+                        rowElement.firstElementChild.setAttribute("style", `left:${rowRect.left - 44}px;top:${rowRect.top}px`);
+                    }
                     protyle.gutter.render(protyle, nodeElement, this.element);
                 }
             }

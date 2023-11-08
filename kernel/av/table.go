@@ -80,82 +80,96 @@ func (value *Value) Compare(other *Value) int {
 	if nil == other {
 		return 1
 	}
-	if nil != value.Block && nil != other.Block {
-		return strings.Compare(value.Block.Content, other.Block.Content)
-	}
-	if nil != value.Text && nil != other.Text {
-		return strings.Compare(value.Text.Content, other.Text.Content)
-	}
-	if nil != value.Number && nil != other.Number {
-		if value.Number.Content > other.Number.Content {
-			return 1
-		} else if value.Number.Content < other.Number.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Date && nil != other.Date {
-		if value.Date.Content > other.Date.Content {
-			return 1
-		} else if value.Date.Content < other.Date.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Created && nil != other.Created {
-		if value.Created.Content > other.Created.Content {
-			return 1
-		} else if value.Created.Content < other.Created.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Updated && nil != other.Updated {
-		if value.Updated.Content > other.Updated.Content {
-			return 1
-		} else if value.Updated.Content < other.Updated.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
 
-	if nil != value.MSelect && nil != other.MSelect {
-		var v1 string
-		for _, v := range value.MSelect {
-			v1 += v.Content
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil != value.Block && nil != other.Block {
+			return strings.Compare(value.Block.Content, other.Block.Content)
 		}
-		var v2 string
-		for _, v := range other.MSelect {
-			v2 += v.Content
+	case KeyTypeText:
+		if nil != value.Text && nil != other.Text {
+			return strings.Compare(value.Text.Content, other.Text.Content)
 		}
-		return strings.Compare(v1, v2)
-	}
-	if nil != value.URL && nil != other.URL {
-		return strings.Compare(value.URL.Content, other.URL.Content)
-	}
-	if nil != value.Email && nil != other.Email {
-		return strings.Compare(value.Email.Content, other.Email.Content)
-	}
-	if nil != value.Phone && nil != other.Phone {
-		return strings.Compare(value.Phone.Content, other.Phone.Content)
-	}
-	if nil != value.MAsset && nil != other.MAsset {
-		var v1 string
-		for _, v := range value.MAsset {
-			v1 += v.Content
+	case KeyTypeNumber:
+		if nil != value.Number && nil != other.Number {
+			if value.Number.Content > other.Number.Content {
+				return 1
+			} else if value.Number.Content < other.Number.Content {
+				return -1
+			} else {
+				return 0
+			}
 		}
-		var v2 string
-		for _, v := range other.MAsset {
-			v2 += v.Content
+	case KeyTypeDate:
+		if nil != value.Date && nil != other.Date {
+			if value.Date.Content > other.Date.Content {
+				return 1
+			} else if value.Date.Content < other.Date.Content {
+				return -1
+			} else {
+				return 0
+			}
 		}
-		return strings.Compare(v1, v2)
-	}
-	if nil != value.Template && nil != other.Template {
-		return strings.Compare(value.Template.Content, other.Template.Content)
+	case KeyTypeCreated:
+		if nil != value.Created && nil != other.Created {
+			if value.Created.Content > other.Created.Content {
+				return 1
+			} else if value.Created.Content < other.Created.Content {
+				return -1
+			} else {
+				return 0
+			}
+		}
+	case KeyTypeUpdated:
+		if nil != value.Updated && nil != other.Updated {
+			if value.Updated.Content > other.Updated.Content {
+				return 1
+			} else if value.Updated.Content < other.Updated.Content {
+				return -1
+			} else {
+				return 0
+			}
+		}
+	case KeyTypeSelect, KeyTypeMSelect:
+		if nil != value.MSelect && nil != other.MSelect {
+			var v1 string
+			for _, v := range value.MSelect {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MSelect {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeURL:
+		if nil != value.URL && nil != other.URL {
+			return strings.Compare(value.URL.Content, other.URL.Content)
+		}
+	case KeyTypeEmail:
+		if nil != value.Email && nil != other.Email {
+			return strings.Compare(value.Email.Content, other.Email.Content)
+		}
+	case KeyTypePhone:
+		if nil != value.Phone && nil != other.Phone {
+			return strings.Compare(value.Phone.Content, other.Phone.Content)
+		}
+	case KeyTypeMAsset:
+		if nil != value.MAsset && nil != other.MAsset {
+			var v1 string
+			for _, v := range value.MAsset {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MAsset {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeTemplate:
+		if nil != value.Template && nil != other.Template {
+			return strings.Compare(value.Template.Content, other.Template.Content)
+		}
 	}
 	return 0
 }

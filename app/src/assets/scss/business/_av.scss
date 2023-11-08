@@ -90,8 +90,8 @@
   }
 
   &__scroll {
+    overflow: auto hidden;
     cursor: pointer;
-    overflow-x: auto;
   }
 
   &__body {

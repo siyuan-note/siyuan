@@ -350,6 +350,7 @@ func serveCheckAuth(c *gin.Context) {
 		"workspace":              filepath.Base(util.WorkspaceDir),
 		"workspacePath":          util.WorkspaceDir,
 		"keymapGeneralToggleWin": keymapHideWindow,
+		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); nil != err {

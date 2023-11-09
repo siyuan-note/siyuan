@@ -143,6 +143,7 @@ var (
 	Langs           = map[string]map[int]string{}
 	TimeLangs       = map[string]map[string]interface{}{}
 	TaskActionLangs = map[string]map[string]interface{}{}
+	TrayMenuLangs   = map[string]map[string]interface{}{}
 )
 
 var (

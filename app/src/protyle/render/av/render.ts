@@ -5,7 +5,6 @@ import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {resizeAV} from "../../util/resize";
 import {isMac} from "../../util/compatibility";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
@@ -173,7 +172,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 </div>`;
                 });
                 setTimeout(() => {
-                    e.firstElementChild.outerHTML = `<div>
+                    e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
@@ -208,7 +207,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     </div>
 </div>`;
                     e.setAttribute("data-render", "true");
-                    resizeAV(e);
+                    // 历史兼容
+                    e.style.margin = "";
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }

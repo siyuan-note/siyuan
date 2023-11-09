@@ -38,7 +38,6 @@ import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {resizeAV} from "../util/resize";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1616,8 +1615,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "";
-                            resizeAV(e);
+                            e.style.justifyContent = "";
                         } else {
                             e.style.textAlign = "left";
                         }
@@ -1630,8 +1628,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "0 auto";
-                            resizeAV(e);
+                            e.style.justifyContent = "center";
                         } else {
                             e.style.textAlign = "center";
                         }
@@ -1644,8 +1641,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "0 0 0 auto";
-                            resizeAV(e);
+                            e.style.justifyContent = "flex-end";
                         } else {
                             e.style.textAlign = "right";
                         }
@@ -1687,8 +1683,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "";
-                            resizeAV(e);
+                            e.style.justifyContent = "";
                         } else {
                             e.style.textAlign = "";
                             e.style.direction = "";
@@ -1708,7 +1703,6 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         e.style.width = item;
                         e.style.flex = "none";
-                        resizeAV(e);
                     });
                 }
             });
@@ -1754,7 +1748,6 @@ export class Gutter {
                                 id: e.getAttribute("data-node-id"),
                                 data: e.outerHTML
                             });
-                            resizeAV(e);
                         });
                         transaction(protyle, operations, undoOperations);
                         window.siyuan.menus.menu.remove();
@@ -1771,7 +1764,6 @@ export class Gutter {
                         if (e.style.width) {
                             e.style.width = "";
                             e.style.flex = "";
-                            resizeAV(e);
                         }
                     });
                 }
@@ -1902,6 +1894,7 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
         this.element.style.width = "";
+        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem) {
@@ -1913,24 +1906,10 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         } else if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
             (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
             marginHeight = (rect.height - this.element.clientHeight) / 2;
+        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView" && contentTop < rect.top) {
+            marginHeight = 8;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-            const iconElement = nodeElement.querySelector(".item__graphic");
-            let top = rect.top + 8
-            if (iconElement) {
-                top = iconElement.getBoundingClientRect().top - (window.siyuan.config.editor.fontSize * 1.625 - 14) / 2;
-            }
-            // 防止遮挡可左右滚动的 cell
-            const maxTop = wysiwyg.parentElement.getBoundingClientRect().top
-            if (top < maxTop - 43) {
-                top = -1000
-            } else if (top > maxTop - 43 && top <= maxTop) {
-                top = maxTop
-            }
-            this.element.style.top = `${top}px`;
-        } else {
-            this.element.style.top = `${Math.max(rect.top, wysiwyg.parentElement.getBoundingClientRect().top) + marginHeight}px`;
-        }
+        this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
         let left = rect.left - this.element.clientWidth - space;
         if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
             // 嵌入块为列表时

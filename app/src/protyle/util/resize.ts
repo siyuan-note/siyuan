@@ -42,46 +42,5 @@ export const resize = (protyle: IProtyle) => {
                 }
             }
         }
-        if (abs.padding > MIN_ABS || abs.width > MIN_ABS || isNaN(abs.padding)) {
-            protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-                resizeAV(item);
-            });
-        }
     }, Constants.TIMEOUT_TRANSITION);   // 等待 setPadding 动画结束
-};
-
-export const resizeAV = (item: HTMLElement) => {
-    if (!item.classList.contains("av") || item.getAttribute("data-render") !== "true") {
-        return;
-    }
-    const attrElement = item.querySelector(".protyle-attr") as HTMLElement
-    if (item.style.width.endsWith("%") || item.style.margin) {
-        const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
-        avHeaderElement.style.paddingLeft = "";
-        avHeaderElement.style.paddingRight = "";
-        const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
-        avBodyElement.style.paddingLeft = "";
-        avBodyElement.style.paddingRight = "";
-        attrElement.style.paddingRight = "";
-        item.style.alignSelf = "";
-        if (!item.style.width.endsWith("%")) {
-            item.style.width = "";
-            item.style.maxWidth = "100%";
-        }
-    } else {
-        const paddingLeft = item.parentElement.style.paddingLeft;
-        const paddingRight = item.parentElement.style.paddingRight;
-        const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
-        avHeaderElement.style.paddingLeft = paddingLeft;
-        avHeaderElement.style.paddingRight = paddingRight;
-        const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
-        avBodyElement.style.paddingLeft = paddingLeft;
-        avBodyElement.style.paddingRight = paddingRight;
-        attrElement.style.paddingRight = paddingRight;
-        item.style.alignSelf = "center";
-        if (item.parentElement.clientWidth > 0) {
-            item.style.width = item.parentElement.clientWidth + "px";
-            item.style.maxWidth = "";
-        }
-    }
 };

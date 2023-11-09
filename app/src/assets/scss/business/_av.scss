@@ -1,6 +1,12 @@
 .av {
   user-select: none;
   box-sizing: border-box;
+  display: flex;
+  max-width: 100%;
+
+  &__container {
+    overflow: auto;
+  }
 
   &__pulse {
     width: 70%;
@@ -369,13 +375,13 @@
       }
     }
   }
+}
 
-  &.protyle-wysiwyg--select,
-  &.protyle-wysiwyg--hl {
-    .av__row--header,
-    .av__row--footer {
-      background-color: transparent;
-    }
+.protyle-wysiwyg--select,
+.protyle-wysiwyg--hl {
+  .av__row--header,
+  .av__row--footer {
+    background-color: transparent;
   }
 }
 

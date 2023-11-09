@@ -23,11 +23,14 @@ import (
 )
 
 type Repo struct {
-	Key []byte `json:"key"` // AES 密钥
+	Key                  []byte `json:"key"`                  // AES 密钥
+	HistoryRetentionDays int    `json:"historyRetentionDays"` // 历史保留天数
 }
 
 func NewRepo() *Repo {
-	return &Repo{}
+	return &Repo{
+		HistoryRetentionDays: 30,
+	}
 }
 
 func (*Repo) GetSaveDir() string {

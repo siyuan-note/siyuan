@@ -148,12 +148,16 @@
       .av__firstcol svg {
         opacity: 1;
       }
+
+      &:hover {
+        background-color: var(--b3-list-icon-hover);
+      }
     }
 
     &--header,
-    &--add,
     &--footer {
       background-color: var(--b3-theme-background);
+      position: relative;
     }
 
     &--add,
@@ -234,10 +238,6 @@
       left: 25px;
       font-size: 87.5%;
       padding: 0 0.5em;
-
-      &:hover {
-        background-color: var(--b3-list-icon-hover);
-      }
     }
 
     .block__icon {

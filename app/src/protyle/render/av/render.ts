@@ -6,6 +6,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
+import {stickyScrollY} from "../../scroll/stickyScroll";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -40,8 +41,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 e.firstElementChild.innerHTML = html;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
-            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
-            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -150,7 +149,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         }
                         if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType)) {
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
-                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto; left:5px;"'} data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
@@ -216,11 +215,16 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
-                    if (headerTransform) {
-                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                    }
-                    if (footerTransform) {
-                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                    const bodyElement = e.querySelector<HTMLElement>(".av__body");
+                    if (bodyElement) {
+                        const headerElement = bodyElement.querySelector<HTMLElement>(".av__row--header");
+                        const footerElement = bodyElement.querySelector<HTMLElement>(".av__row--footer");
+                        stickyScrollY(
+                            protyle.contentElement,
+                            bodyElement as HTMLElement,
+                            headerElement ? [{element: headerElement}] : [],
+                            footerElement ? [{element: footerElement}] : [],
+                        );
                     }
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);

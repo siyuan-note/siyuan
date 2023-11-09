@@ -468,6 +468,8 @@
     }
 
     const submitAuth = () => {
+        const inputElement = document.getElementById('authCode')
+        const captchaElement = document.getElementById('captcha')
         fetch('/api/system/loginAuth', {
             method: 'POST',
             body: JSON.stringify({

@@ -317,6 +317,25 @@ func serveCheckAuth(c *gin.Context) {
 		return
 	}
 
+	keymapHideWindow := "⌥M"
+	if nil != (*model.Conf.Keymap)["general"] {
+		switch (*model.Conf.Keymap)["general"].(type) {
+		case map[string]interface{}:
+			keymapGeneral := (*model.Conf.Keymap)["general"].(map[string]interface{})
+			if nil != keymapGeneral["toggleWin"] {
+				switch keymapGeneral["toggleWin"].(type) {
+				case map[string]interface{}:
+					toggleWin := keymapGeneral["toggleWin"].(map[string]interface{})
+					if nil != toggleWin["custom"] {
+						keymapHideWindow = toggleWin["custom"].(string)
+					}
+				}
+			}
+		}
+		if "" == keymapHideWindow {
+			keymapHideWindow = "⌥M"
+		}
+	}
 	model := map[string]interface{}{
 		"l0":               model.Conf.Language(173),
 		"l1":               model.Conf.Language(174),
@@ -330,6 +349,7 @@ func serveCheckAuth(c *gin.Context) {
 		"appearanceModeOS": model.Conf.Appearance.ModeOS,
 		"workspace":        filepath.Base(util.WorkspaceDir),
 		"workspacePath":    util.WorkspaceDir,
+		"keymapHideWindow": keymapHideWindow,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); nil != err {

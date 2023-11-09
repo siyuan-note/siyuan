@@ -1315,6 +1315,7 @@
     "214": "This function needs to be signed in to use",
     "215": "Save failed: The target file is being used by another program",
     "216": "Rebuilding asset content data index, please wait...",
-    "217": "[%d/%d] Created asset content data index"
+    "217": "[%d/%d] Created asset content data index",
+    "218": "Too many snapshots of the data repo have been detected, which slows down program startup and data sync. Please consider executing [Settings - About - Data repo purge]"
   }
 }

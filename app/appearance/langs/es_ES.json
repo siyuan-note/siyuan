@@ -1315,6 +1315,7 @@
     "214": "Esta función requiere iniciar sesión en la cuenta antes de poder usarla",
     "215": "Error al guardar: el archivo de destino está siendo utilizado por otro programa",
     "216": "Reconstruyendo el índice de datos de contenido de recursos, espere...",
-    "217": "[%d/%d] Índice de datos de contenido de activos creado"
+    "217": "[%d/%d] Índice de datos de contenido de activos creado",
+    "218": "Se han detectado demasiadas instantáneas del repositorio de datos, lo que ralentiza el inicio del programa y la sincronización de datos. Considere ejecutar [Configuración - Acerca de - Purga del repositorio de datos]"
   }
 }

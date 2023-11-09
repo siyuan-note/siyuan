@@ -1445,6 +1445,8 @@ func needFullReindex(upsertTrees int) bool {
 	return 0.2 < float64(upsertTrees)/float64(treenode.CountTrees())
 }
 
+var promotedPurgeDataRepo bool
+
 func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
@@ -1483,7 +1485,16 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 
 	if 7000 < elapsed.Milliseconds() {
+		// If the data repo indexing time is greater than 7s, prompt user to purge the data repo https://github.com/siyuan-note/siyuan/issues/9613
 		logging.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
+		if !promotedPurgeDataRepo {
+			go func() {
+				util.WaitForUILoaded()
+				time.Sleep(3 * time.Second)
+				util.PushMsg(Conf.language(218), 24000)
+				promotedPurgeDataRepo = true
+			}()
+		}
 	}
 	return
 }

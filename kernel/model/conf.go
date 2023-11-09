@@ -325,9 +325,6 @@ func InitConf() {
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()
 	}
-	if 1 > Conf.Repo.HistoryRetentionDays {
-		Conf.Repo.HistoryRetentionDays = 30
-	}
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()

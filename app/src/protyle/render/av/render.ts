@@ -53,13 +53,13 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg class="icon__check"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
                 let calcHTML = "";
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" 
+                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}"  
 style="width: ${column.width || "200px"};
 ${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
@@ -80,17 +80,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__firstcol">
-    <svg class="icon__check"><use xlink:href="#iconUncheck"></use></svg>
-    <div class="av__gutters">
-        <button class="av__gutter ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
-            <svg><use xlink:href="#iconDrag"></use></svg>
-        </button>
-        <button class="av__gutter ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}">
-            <svg><use xlink:href="#iconAdd"></use></svg>
-        </button>
-    </div>
-</div>`;
+<div class="av__gutters">
+    <button class="ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+    <button class="ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
+</div>
+<div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
                         if (data.columns[index].hidden) {
                             return;
@@ -160,12 +154,12 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
-
-                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}" data-wrap="${data.columns[index].wrap}"
+                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
 ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
@@ -179,7 +173,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 </div>`;
                 });
                 setTimeout(() => {
-                    e.firstElementChild.outerHTML = `<div class="av__container">
+                    e.firstElementChild.outerHTML = `<div>
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
@@ -203,17 +197,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div class="av__body">
+        <div style="float: left;">
             ${tableHTML}
             <div class="av__row--add">
-                <div class="av__firstcol">
-                    <svg><use xlink:href="#iconAdd"></use></svg>
-                </div>
-                <div class="av__calc" style>
-                    ${window.siyuan.languages.addAttr}
-                </div>
+                <svg><use xlink:href="#iconAdd"></use></svg>
+                ${window.siyuan.languages.addAttr}
             </div>
-            <div class="av__row--footer"><div class="av__firstcol"></div>${calcHTML}</div>
+            <div class="av__row--footer"><div style="width: 24px"></div>${calcHTML}</div>
         </div>
     </div>
 </div>`;

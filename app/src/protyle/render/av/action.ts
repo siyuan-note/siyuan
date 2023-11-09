@@ -24,25 +24,6 @@ import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 
-export const avAdd = (protyle: IProtyle, blockElement: HTMLElement, rowElement: HTMLElement, above: boolean) => {
-    const avID = blockElement.getAttribute("data-av-id");
-    const srcIDs = [Lute.NewNodeID()];
-    const previousID = above ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : rowElement.getAttribute("data-id");
-    transaction(protyle, [{
-        action: "insertAttrViewBlock",
-        avID,
-        previousID,
-        srcIDs,
-        isDetached: true,
-    }], [{
-        action: "removeAttrViewBlock",
-        srcIDs,
-        avID,
-    }]);
-    insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
-    popTextCell(protyle, [rowElement[above ? "previousElementSibling" : "nextElementSibling"].querySelector('[data-detached="true"]')], "block");
-}
-
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
@@ -54,29 +35,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
             return true;
         }
-    }
-
-    const addRowElement = hasClosestByClassName(event.target, "av__row--add");
-    if (addRowElement) {
-        const avID = blockElement.getAttribute("data-av-id");
-        const srcIDs = [Lute.NewNodeID()];
-        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
-        transaction(protyle, [{
-            action: "insertAttrViewBlock",
-            avID,
-            previousID,
-            srcIDs,
-            isDetached: true,
-        }], [{
-            action: "removeAttrViewBlock",
-            srcIDs,
-            avID,
-        }]);
-        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
-        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
     }
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
@@ -105,11 +63,26 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "av__gutter");
+    const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
     if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
-        const rowElement = gutterElement.parentElement.parentElement.parentElement;
+        const rowElement = gutterElement.parentElement.parentElement;
         if (gutterElement.dataset.action === "add") {
-            avAdd(protyle, blockElement, rowElement, event.altKey);
+            const avID = blockElement.getAttribute("data-av-id");
+            const srcIDs = [Lute.NewNodeID()];
+            const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : rowElement.getAttribute("data-id");
+            transaction(protyle, [{
+                action: "insertAttrViewBlock",
+                avID,
+                previousID,
+                srcIDs,
+                isDetached: true,
+            }], [{
+                action: "removeAttrViewBlock",
+                srcIDs,
+                avID,
+            }]);
+            insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+            popTextCell(protyle, [rowElement[event.altKey ? "previousElementSibling" : "nextElementSibling"].querySelector('[data-detached="true"]')], "block");
         } else {
             const gutterRect = gutterElement.getBoundingClientRect();
             avContextmenu(protyle, rowElement, {
@@ -124,10 +97,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const firstcolElement = hasClosestByClassName(event.target, "av__firstcol");
-    if (firstcolElement) {
+    const checkElement = hasClosestByClassName(event.target, "av__firstcol");
+    if (checkElement) {
         window.siyuan.menus.menu.remove();
-        selectRow(firstcolElement, "toggle");
+        selectRow(checkElement, "toggle");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -229,7 +202,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
         } else {
             cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
-                item.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconUncheck");
+                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
                 item.classList.remove("av__row--select");
             });
             updateHeader(cellElement.parentElement);
@@ -243,6 +216,29 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const calcElement = hasClosestByClassName(event.target, "av__calc");
     if (calcElement) {
         openCalcMenu(protyle, calcElement);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const addRowElement = hasClosestByClassName(event.target, "av__row--add");
+    if (addRowElement) {
+        const avID = blockElement.getAttribute("data-av-id");
+        const srcIDs = [Lute.NewNodeID()];
+        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
+        transaction(protyle, [{
+            action: "insertAttrViewBlock",
+            avID,
+            previousID,
+            srcIDs,
+            isDetached: true,
+        }], [{
+            action: "removeAttrViewBlock",
+            srcIDs,
+            avID,
+        }]);
+        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -263,7 +259,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
         });
-        blockElement.querySelectorAll(".av__firstcol .icon__check use").forEach(item => {
+        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
             item.setAttribute("xlink:href", "#iconUncheck");
         });
     }
@@ -273,7 +269,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         return true;
     }
     rowElement.classList.add("av__row--select");
-    rowElement.querySelector(".av__firstcol .icon__check use").setAttribute("xlink:href", "#iconCheck");
+    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowIds: string[] = [];
     const blockIds: string[] = [];
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
@@ -309,24 +305,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         }
     });
     if (rowIds.length === 1) {
-        menu.addSeparator();
-        menu.addItem({
-            label: window.siyuan.languages.addAttr,
-            icon: "iconAdd",
-            type: "submenu",
-            submenu: [
-                {
-                    label: window.siyuan.languages.insertRowAbove,
-                    icon: "iconBefore",
-                    click: () => avAdd(protyle, blockElement, rowElement, true),
-                },
-                {
-                    label: window.siyuan.languages.insertRowBelow,
-                    icon: "iconAfter",
-                    click: () => avAdd(protyle, blockElement, rowElement, false),
-                },
-            ]
-        });
         menu.addSeparator();
         openEditorTab(protyle.app, rowIds[0]);
         menu.addItem({

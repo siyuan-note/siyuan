@@ -1,27 +1,27 @@
 import {hasClosestBlock} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 
-export const selectRow = (firstcolElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
-    const rowElement = firstcolElement.parentElement;
-    const useElement = firstcolElement.querySelector(".icon__check use");
+export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
+    const rowElement = checkElement.parentElement;
+    const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-            rowElement.parentElement.querySelectorAll(".av__row .av__firstcol").forEach(item => {
-                item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconUncheck");
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+                item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 item.parentElement.classList.remove("av__row--select");
             });
         } else {
-            rowElement.parentElement.querySelectorAll(".av__row .av__firstcol").forEach(item => {
-                item.querySelector(".icon__check use").setAttribute("xlink:href", "#iconCheck");
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+                item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 item.parentElement.classList.add("av__row--select");
             });
         }
     } else {
         if (type === "select" || (useElement.getAttribute("xlink:href") === "#iconUncheck" && type === "toggle")) {
-            firstcolElement.parentElement.classList.add("av__row--select");
+            checkElement.parentElement.classList.add("av__row--select");
             useElement.setAttribute("xlink:href", "#iconCheck");
         } else if (type === "unselect" || (useElement.getAttribute("xlink:href") === "#iconCheck" && type === "toggle")) {
-            firstcolElement.parentElement.classList.remove("av__row--select");
+            checkElement.parentElement.classList.remove("av__row--select");
             useElement.setAttribute("xlink:href", "#iconUncheck");
         }
     }
@@ -37,7 +37,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     const selectCount = rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
     const diffCount = rowElement.parentElement.childElementCount - 3 - selectCount;
     const headElement = rowElement.parentElement.firstElementChild;
-    const headUseElement = headElement.querySelector(".icon__check use");
+    const headUseElement = headElement.querySelector("use");
     const counterElement = blockElement.querySelector(".av__counter");
     const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
     if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {

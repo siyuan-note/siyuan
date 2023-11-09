@@ -63,8 +63,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
-    if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
+    const gutterElement = hasClosestByClassName(event.target, "av__gutter");
+    if (gutterElement) {
         const rowElement = gutterElement.parentElement.parentElement;
         if (gutterElement.dataset.action === "add") {
             const avID = blockElement.getAttribute("data-av-id");

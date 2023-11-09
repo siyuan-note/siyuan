@@ -196,7 +196,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="float: left;">
+        <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
                 <div class="av__firstcol">

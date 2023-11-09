@@ -265,6 +265,7 @@
 
   &__celltext {
     overflow: hidden;
+    line-height: normal;
 
     .b3-chip {
       margin: 1px 2px;
@@ -283,6 +284,13 @@
   }
 
   &__firstcol {
+    background-color: var(--b3-theme-background);
+    position: sticky;
+    left: 0;
+    width: 24px;
+  }
+
+  &__check {
     svg {
       color: var(--b3-theme-on-surface);
       height: 33px;

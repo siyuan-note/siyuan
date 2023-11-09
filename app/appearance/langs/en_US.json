@@ -1,4 +1,5 @@
 {
+  "snippetsTip": "The code snippet has been updated, do you want to save it?",
   "addBelowAbove": "Click to add below<br>⌥Click to add above",
   "imported": "Import completed",
   "mirrorTip": "Mirror database, all data updates will be synchronized to all other mirrors",

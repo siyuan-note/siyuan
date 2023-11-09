@@ -419,21 +419,6 @@
 </div>
 <script>
     const {ipcRenderer} = require('electron')
-    if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
-        document.body.classList.add('dark')
-    }
-    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        document.querySelector('.b3-button--white').remove()
-    }
-
-    try {
-        ipcRenderer.on('siyuan-save-close', (event, close) => {
-            exitSiYuan()
-        })
-    } catch (e) {
-        // console.log(e)
-    }
-
     const exitApp = () => {
         try {
             const {ipcRenderer} = require('electron')
@@ -446,6 +431,7 @@
             }
         }
     }
+
     const exitSiYuan = () => {
         try {
             fetch('/api/system/exit', {
@@ -480,19 +466,6 @@
             exitApp()
         }
     }
-
-    const inputElement = document.getElementById('authCode')
-    const captchaElement = document.getElementById('captcha')
-    inputElement.focus()
-    inputElement.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            submitAuth()
-        }
-    })
-
-    captchaElement.previousElementSibling.addEventListener('click', function () {
-        this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
-    })
 
     const submitAuth = () => {
         fetch('/api/system/loginAuth', {
@@ -530,12 +503,50 @@
         })
     }
 
-    // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-    new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
-    ipcRenderer.send("siyuan-hotkey", {
-        languages: {{.trayMenuLangs}},
-        hotkeys: ['{{.keymapGeneralToggleWin}}']
-    });
+    const init = async () => {
+        if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
+            document.body.classList.add('dark')
+        }
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            document.querySelector('.b3-button--white').remove()
+        }
+
+        try {
+            ipcRenderer.on('siyuan-save-close', (event, close) => {
+                exitSiYuan()
+            })
+        } catch (e) {
+            // console.log(e)
+        }
+
+        const inputElement = document.getElementById('authCode')
+        const captchaElement = document.getElementById('captcha')
+        inputElement.focus()
+        inputElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                submitAuth()
+            }
+        })
+
+        captchaElement.previousElementSibling.addEventListener('click', function () {
+            this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
+        })
+
+        // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
+        new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
+
+        await ipcRenderer.invoke("siyuan-init", {
+            languages: {{.trayMenuLangs}},
+            workspaceDir: '/Users/Vanessa/Work/SiYuan',
+            port: location.port
+        });
+        ipcRenderer.send("siyuan-hotkey", {
+            languages: {{.trayMenuLangs}},
+            hotkeys: ['{{.keymapGeneralToggleWin}}']
+        });
+    }
+
+    init();
 </script>
 </body>
 </html>

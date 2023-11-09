@@ -72,6 +72,10 @@
     opacity: 0;
     display: flex;
 
+    &[draggable=true] {
+      cursor: grab;
+    }
+
     svg {
       height: 25px;
     }

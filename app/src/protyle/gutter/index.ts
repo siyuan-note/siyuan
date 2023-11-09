@@ -1616,8 +1616,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "";
-                            resizeAV(e);
+                            e.style.alignItems = "flex-start";
                         } else {
                             e.style.textAlign = "left";
                         }
@@ -1630,8 +1629,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "0 auto";
-                            resizeAV(e);
+                            e.style.alignItems = "center";
                         } else {
                             e.style.textAlign = "center";
                         }
@@ -1644,8 +1642,7 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
-                            e.style.margin = "0 0 0 auto";
-                            resizeAV(e);
+                            e.style.alignItems = "flex-end";
                         } else {
                             e.style.textAlign = "right";
                         }
@@ -1656,7 +1653,11 @@ export class Gutter {
                 icon: "iconMenu",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.textAlign = "justify";
+                        if (e.classList.contains("av")) {
+                            e.style.alignItems = "stretch";
+                        } else {
+                            e.style.textAlign = "justify";
+                        }
                     });
                 }
             }, {
@@ -1686,12 +1687,11 @@ export class Gutter {
                 icon: "iconTrashcan",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        e.style.direction = "";
                         if (e.classList.contains("av")) {
-                            e.style.margin = "";
-                            resizeAV(e);
+                            e.style.alignItems = "";
                         } else {
                             e.style.textAlign = "";
-                            e.style.direction = "";
                         }
                     });
                 }
@@ -1754,7 +1754,6 @@ export class Gutter {
                                 id: e.getAttribute("data-node-id"),
                                 data: e.outerHTML
                             });
-                            resizeAV(e);
                         });
                         transaction(protyle, operations, undoOperations);
                         window.siyuan.menus.menu.remove();

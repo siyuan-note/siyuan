@@ -5,6 +5,16 @@ import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
+const getOffsetTop = (element: HTMLElement, topElement: HTMLElement) => {
+    let tempElement = element
+    let top = 0
+    while (topElement.contains(tempElement)) {
+        top += tempElement.offsetTop
+        tempElement = tempElement.offsetParent as HTMLElement
+    }
+    return top;
+}
+
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
@@ -25,25 +35,23 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            if (item.parentElement.classList.contains("protyle-wysiwyg")) {
-                const headerTop = item.offsetTop + 43;
-                const headerElement = item.querySelector(".av__row--header") as HTMLElement;
-                if (headerElement) {
-                    if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {
-                        headerElement.style.transform = `translateY(${element.scrollTop - headerTop}px)`;
-                    } else {
-                        headerElement.style.transform = "";
-                    }
+            const headerTop = getOffsetTop(item, element) + 43;
+            const headerElement = item.querySelector(".av__row--header") as HTMLElement;
+            if (headerElement) {
+                if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {
+                    headerElement.style.transform = `translateY(${element.scrollTop - headerTop}px)`;
+                } else {
+                    headerElement.style.transform = "";
                 }
-                const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
-                if (footerElement) {
-                    const footerBottom = headerTop + footerElement.parentElement.clientHeight;
-                    const scrollBottom = element.scrollTop + element.clientHeight + 5;
-                    if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
-                        footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
-                    } else {
-                        footerElement.style.transform = "";
-                    }
+            }
+            const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
+            if (footerElement) {
+                const footerBottom = headerTop + footerElement.parentElement.clientHeight;
+                const scrollBottom = element.scrollTop + element.clientHeight + 5;
+                if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
+                    footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
+                } else {
+                    footerElement.style.transform = "";
                 }
             }
         });
@@ -64,7 +72,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if ((protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
-                        // goHome 时 data-eof 不为 1
+                            // goHome 时 data-eof 不为 1
                             protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0") &&
                         (hasClosestByClassName(targetElement, "protyle-background") || hasClosestByClassName(targetElement, "protyle-title"))) {
                         const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;

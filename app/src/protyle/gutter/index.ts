@@ -1906,7 +1906,8 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         } else if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
             (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
             marginHeight = (rect.height - this.element.clientHeight) / 2;
-        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView" && contentTop < rect.top) {
+        } else if ((nodeElement.getAttribute("data-type") === "NodeAttributeView" ||
+            element.getAttribute("data-type") === "NodeAttributeView") && contentTop < rect.top) {
             marginHeight = 8;
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
@@ -1914,8 +1915,6 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
             // 嵌入块为列表时
             left = nodeElement.getBoundingClientRect().left - this.element.clientWidth - space;
-        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-            left = left + (parseInt((nodeElement.firstElementChild.firstElementChild as HTMLElement)?.style.paddingLeft) || 0);
         }
         this.element.style.left = `${left}px`;
         if (left < this.element.parentElement.getBoundingClientRect().left) {

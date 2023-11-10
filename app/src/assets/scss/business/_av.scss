@@ -98,6 +98,13 @@
     float: left;
   }
 
+  &__sticky {
+    display: flex;
+    position: sticky;
+    z-index: 1;
+    left: 0;
+  }
+
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
@@ -162,6 +169,7 @@
     &--footer {
       background-color: var(--b3-theme-background);
       position: relative;
+      z-index: 2;
     }
 
     &--add,
@@ -296,11 +304,7 @@
   &__firstcol {
     background-color: var(--b3-theme-background);
     border-right: 1px solid var(--b3-theme-surface-lighter);
-
-    position: sticky;
-    left: 0;
     width: 24px;
-    z-index: 1;
 
     svg {
       color: var(--b3-theme-on-surface);

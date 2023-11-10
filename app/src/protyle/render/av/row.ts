@@ -1,27 +1,28 @@
 import {hasClosestBlock} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 
-export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
-    const rowElement = checkElement.parentElement;
+export const selectRow = (checkElement: HTMLElement, type: "toggle" | "select" | "unselect" | "unselectAll") => {
+    const rowElement = checkElement.parentElement.parentElement;
+    const bodyElement = rowElement.parentElement;
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            bodyElement.querySelectorAll(".av__check").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                item.parentElement.classList.remove("av__row--select");
+                item.parentElement.parentElement.classList.remove("av__row--select");
             });
         } else {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            bodyElement.querySelectorAll(".av__check").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                item.parentElement.classList.add("av__row--select");
+                item.parentElement.parentElement.classList.add("av__row--select");
             });
         }
     } else {
         if (type === "select" || (useElement.getAttribute("xlink:href") === "#iconUncheck" && type === "toggle")) {
-            checkElement.parentElement.classList.add("av__row--select");
+            rowElement.classList.add("av__row--select");
             useElement.setAttribute("xlink:href", "#iconCheck");
         } else if (type === "unselect" || (useElement.getAttribute("xlink:href") === "#iconCheck" && type === "toggle")) {
-            checkElement.parentElement.classList.remove("av__row--select");
+            rowElement.classList.remove("av__row--select");
             useElement.setAttribute("xlink:href", "#iconUncheck");
         }
     }

@@ -51,7 +51,12 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__check"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = `<div class="av__row av__row--header">
+    <div class="av__sticky">
+        <div class="av__firstcol av__check">
+            <svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg>
+        </div>
+    </div>`;
                 let calcHTML = "";
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
@@ -82,7 +87,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
     <button class="av__gutter ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
     <button class="av__gutter ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
 </div>
-<div class="av__firstcol av__check"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
+<div class="av__sticky">
+    <div class="av__firstcol av__check">
+        <svg><use xlink:href="#iconUncheck"></use></svg>
+    </div>
+</div>`;
                     row.cells.forEach((cell, index) => {
                         if (data.columns[index].hidden) {
                             return;
@@ -198,14 +207,21 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
-                <div class="av__firstcol">
-                    <svg><use xlink:href="#iconAdd"></use></svg>
+                <div class="av__sticky">
+                    <div class="av__firstcol">
+                        <svg><use xlink:href="#iconAdd"></use></svg>
+                    </div>
                 </div>
                 <div class="av__cell--add">
                     ${window.siyuan.languages.addAttr}
                 </div>
             </div>
-            <div class="av__row--footer"><div class="av__firstcol"></div>${calcHTML}</div>
+            <div class="av__row--footer">
+                <div class="av__sticky">
+                    <div class="av__firstcol"></div>
+                </div>
+                ${calcHTML}
+            </div>
         </div>
     </div>
 </div>`;

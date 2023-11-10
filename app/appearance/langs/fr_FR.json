@@ -1317,6 +1317,7 @@
     "215": "Échec de l'enregistrement : le fichier de destination est utilisé par un autre programme",
     "216": "Reconstruction de l'index des données du contenu des ressources, veuillez patienter...",
     "217": "[%d/%d] Création d'un index de données de contenu d'actif",
-    "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]"
+    "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",
+    "219": "Le service de stockage cloud n'est pas disponible, veuillez réessayer plus tard"
   }
 }

@@ -534,6 +534,8 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.Language(212)
 	} else if errors.Is(err, cloud.ErrCloudCheckFailed) {
 		msg = Conf.Language(213)
+	} else if errors.Is(err, cloud.ErrCloudServiceUnavailable) {
+		msg = Conf.language(219)
 	} else {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {

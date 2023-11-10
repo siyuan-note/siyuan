@@ -714,11 +714,22 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	syncDelete2AttributeView(node)
-	if ast.NodeAttributeView == node.Type {
-		avID := node.AttributeViewID
-		av.RemoveBlockRel(avID, node.ID)
-	}
+	removeAvBlockRel(node)
 	return
+}
+
+func removeAvBlockRel(node *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView == n.Type {
+			avID := n.AttributeViewID
+			av.RemoveBlockRel(avID, n.ID)
+		}
+		return ast.WalkContinue
+	})
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
@@ -904,10 +915,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
-	if ast.NodeAttributeView == insertedNode.Type {
-		avID := insertedNode.AttributeViewID
-		av.UpsertBlockRel(avID, insertedNode.ID)
-	}
+	upsertAvBlockRel(insertedNode)
 
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
@@ -998,11 +1006,22 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 
-	if ast.NodeAttributeView == updatedNode.Type {
-		avID := updatedNode.AttributeViewID
-		av.UpsertBlockRel(avID, updatedNode.ID)
-	}
+	upsertAvBlockRel(updatedNode)
 	return
+}
+
+func upsertAvBlockRel(node *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView == n.Type {
+			avID := n.AttributeViewID
+			av.UpsertBlockRel(avID, n.ID)
+		}
+		return ast.WalkContinue
+	})
 }
 
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {

@@ -6,12 +6,12 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 item.parentElement.classList.remove("av__row--select");
             });
         } else {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 item.parentElement.classList.add("av__row--select");
             });

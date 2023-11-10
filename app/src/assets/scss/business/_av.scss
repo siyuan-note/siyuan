@@ -72,10 +72,6 @@
     opacity: 0;
     display: flex;
 
-    &[draggable=true] {
-      cursor: grab;
-    }
-
     svg {
       height: 25px;
     }
@@ -92,10 +88,6 @@
   &__scroll {
     overflow: auto hidden;
     cursor: pointer;
-  }
-
-  &__body {
-    float: left;
   }
 
   &__row {
@@ -121,10 +113,6 @@
       .av__gutters {
         opacity: 1;
       }
-
-      .av__firstcol svg {
-        opacity: 1;
-      }
     }
 
     &--select {
@@ -148,23 +136,11 @@
       }
     }
 
-    &--add {
-      .av__firstcol svg {
-        opacity: 1;
-      }
-
-      &:hover {
-        background-color: var(--b3-list-icon-hover);
-      }
-    }
-
     &--header,
     &--footer {
       background-color: var(--b3-theme-background);
-      position: relative;
     }
 
-    &--add,
     &--footer {
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
@@ -208,6 +184,27 @@
         }
       }
     }
+
+    &--add {
+      color: var(--b3-theme-on-surface);
+      padding: 5px 5px 5px 7px;
+      display: flex;
+      align-items: center;
+      transition: background 20ms ease-in 0s;
+      font-size: 87.5%;
+
+      svg {
+        height: 12px;
+        width: 12px;
+        color: var(--b3-theme-on-surface);
+        margin-right: 5px;
+        flex-shrink: 0;
+      }
+
+      &:hover {
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
   }
 
   &__cell {
@@ -235,13 +232,6 @@
       background-color: var(--b3-theme-primary-lightest);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;
       border-radius: var(--b3-border-radius);
-    }
-
-    &--add {
-      position: sticky;
-      left: 25px;
-      font-size: 87.5%;
-      padding: 0 0.5em;
     }
 
     .block__icon {
@@ -275,7 +265,6 @@
 
   &__celltext {
     overflow: hidden;
-    line-height: normal;
 
     .b3-chip {
       margin: 1px 2px;
@@ -294,14 +283,6 @@
   }
 
   &__firstcol {
-    background-color: var(--b3-theme-background);
-    border-right: 1px solid var(--b3-theme-surface-lighter);
-
-    position: sticky;
-    left: 0;
-    width: 24px;
-    z-index: 1;
-
     svg {
       color: var(--b3-theme-on-surface);
       height: 33px;
@@ -310,6 +291,10 @@
       padding: 5px;
       box-sizing: border-box;
       float: left;
+    }
+
+    &:hover svg {
+      opacity: 1;
     }
   }
 
@@ -395,7 +380,6 @@
 .protyle-wysiwyg--select,
 .protyle-wysiwyg--hl {
   .av__row--header,
-  .av__firstcol,
   .av__row--footer {
     background-color: transparent;
   }

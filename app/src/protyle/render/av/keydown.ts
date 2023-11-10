@@ -19,7 +19,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     if (selectCellElement) {
         if (event.key === "Escape") {
             selectCellElement.classList.remove("av__cell--select");
-            selectRow(selectCellElement.parentElement.querySelector(".av__check"), "select");
+            selectRow(selectCellElement.parentElement.querySelector(".av__firstcol"), "select");
             event.preventDefault();
             return true;
         }
@@ -100,11 +100,11 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
         if (event.key === "Escape") {
             event.preventDefault();
-            selectRow(selectRowElements[0].querySelector(".av__check"), "unselectAll");
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             return true;
         }
         if (event.key === "Enter") {
-            selectRow(selectRowElements[0].querySelector(".av__check"), "unselectAll");
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             popTextCell(protyle, [selectRowElements[0].querySelector(".av__cell")]);
             event.preventDefault();
             return true;
@@ -112,9 +112,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         // TODO event.shiftKey
         if (event.key === "ArrowUp") {
             const previousRowElement = selectRowElements[0].previousElementSibling;
-            selectRow(selectRowElements[0].querySelector(".av__check"), "unselectAll");
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
-                selectRow(previousRowElement.querySelector(".av__check"), "select");
+                selectRow(previousRowElement.querySelector(".av__firstcol"), "select");
                 cellScrollIntoView(nodeElement, previousRowElement.getBoundingClientRect(), true);
             } else {
                 nodeElement.classList.add("protyle-wysiwyg--select");
@@ -124,9 +124,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
         if (event.key === "ArrowDown") {
             const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling;
-            selectRow(selectRowElements[0].querySelector(".av__check"), "unselectAll");
+            selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
             if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
-                selectRow(nextRowElement.querySelector(".av__check"), "select");
+                selectRow(nextRowElement.querySelector(".av__firstcol"), "select");
                 cellScrollIntoView(nodeElement, nextRowElement.getBoundingClientRect(), true);
             } else {
                 nodeElement.classList.add("protyle-wysiwyg--select");
@@ -137,3 +137,4 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     }
     return false;
 };
+

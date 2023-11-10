@@ -4,7 +4,6 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
-import {stickyScrollY} from "./stickyScroll";
 
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
@@ -26,18 +25,26 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            const bodyElement = item.querySelector(".av__body") as HTMLElement;
-            
-            if (bodyElement) {
-                const headerElement = bodyElement.querySelector(".av__row--header") as HTMLElement;
-                const footerElement = bodyElement.querySelector(".av__row--footer") as HTMLElement;
-
-                stickyScrollY(
-                    element,
-                    bodyElement,
-                    headerElement ? [{element: headerElement}] : [],
-                    footerElement ? [{element: footerElement}] : [],
-                );
+            if (item.parentElement.classList.contains("protyle-wysiwyg")) {
+                const headerTop = item.offsetTop + 43;
+                const headerElement = item.querySelector(".av__row--header") as HTMLElement;
+                if (headerElement) {
+                    if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {
+                        headerElement.style.transform = `translateY(${element.scrollTop - headerTop}px)`;
+                    } else {
+                        headerElement.style.transform = "";
+                    }
+                }
+                const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
+                if (footerElement) {
+                    const footerBottom = headerTop + footerElement.parentElement.clientHeight;
+                    const scrollBottom = element.scrollTop + element.clientHeight + 5;
+                    if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
+                        footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
+                    } else {
+                        footerElement.style.transform = "";
+                    }
+                }
             }
         });
 

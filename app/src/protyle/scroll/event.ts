@@ -5,28 +5,14 @@ import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
-const getOffsetTop = (element: HTMLElement, topElement: HTMLElement) => {
-    let tempElement = element;
-    let top = 0;
-    while (topElement.contains(tempElement)) {
-        top += tempElement.offsetTop;
-        tempElement = tempElement.offsetParent as HTMLElement;
-    }
-    return top;
-};
-
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
-    let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
+        const elementRect = element.getBoundingClientRect();
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
             const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
-            if (elementRect.width === 0) {
-                elementRect = element.getBoundingClientRect();
-            }
-            const toolbarHeight = 29;
-            if (top < elementRect.top - toolbarHeight || top > elementRect.bottom - toolbarHeight) {
+            if (top < elementRect.top - protyle.toolbar.toolbarHeight || top > elementRect.bottom - protyle.toolbar.toolbarHeight) {
                 protyle.toolbar.element.style.display = "none";
             } else {
                 protyle.toolbar.element.style.top = top + "px";
@@ -35,21 +21,28 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            const headerTop = getOffsetTop(item, element) + 43;
+            if (item.dataset.render !== "true") {
+                return;
+            }
+            const scrollRect = item.querySelector(".av__scroll").getBoundingClientRect()
             const headerElement = item.querySelector(".av__row--header") as HTMLElement;
             if (headerElement) {
-                if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {
-                    headerElement.style.transform = `translateY(${element.scrollTop - headerTop}px)`;
+                const distance = elementRect.top - scrollRect.top;
+                if (distance > 0 && distance < scrollRect.height) {
+                    headerElement.style.transform = `translateY(${distance}px)`;
                 } else {
                     headerElement.style.transform = "";
                 }
             }
             const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
             if (footerElement) {
-                const footerBottom = headerTop + footerElement.parentElement.clientHeight;
-                const scrollBottom = element.scrollTop + element.clientHeight + 5;
-                if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
-                    footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
+                if (footerElement.querySelector(".av__calc--ashow")) {
+                    const distance = elementRect.bottom - scrollRect.bottom;
+                    if (distance < 0 && -distance < scrollRect.height) {
+                        footerElement.style.transform = `translateY(${distance}px)`;
+                    } else {
+                        footerElement.style.transform = "";
+                    }
                 } else {
                     footerElement.style.transform = "";
                 }
@@ -67,7 +60,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
             clearTimeout(getIndexTimeout);
             getIndexTimeout = window.setTimeout(() => {
-                elementRect = element.getBoundingClientRect();
                 const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {

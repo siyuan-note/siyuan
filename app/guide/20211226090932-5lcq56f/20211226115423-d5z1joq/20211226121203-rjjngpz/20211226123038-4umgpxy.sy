@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230820185516"
+		"updated": "20231110112927"
 	},
 	"Children": [
 		{
@@ -861,7 +861,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231516-o6k9mj1",
-				"updated": "20230211103259"
+				"updated": "20231110112927"
 			},
 			"Children": [
 				{
@@ -873,7 +873,7 @@
 					},
 					"Properties": {
 						"id": "20230202231516-pwj2ndg",
-						"updated": "20230211103259"
+						"updated": "20231110112927"
 					},
 					"Children": [
 						{
@@ -881,7 +881,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231516-8trf08t",
-								"updated": "20230211103259"
+								"updated": "20231110112927"
 							},
 							"Children": [
 								{
@@ -910,6 +910,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​；如果要停用 OCR，請設定環境變量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
 								},
 								{
 									"Type": "NodeText",

@@ -61,9 +61,8 @@ type Block struct {
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
 
-	RiffCardID   string     `json:"riffCardID"`
-	RiffCardReps uint64     `json:"riffCardReps"`
-	RiffCard     *fsrs.Card `json:"riffCard"`
+	RiffCardID string     `json:"riffCardID"`
+	RiffCard   *fsrs.Card `json:"riffCard"`
 }
 
 func (block *Block) IsContainerBlock() bool {

@@ -904,6 +904,7 @@ interface IBlockTree {
 
 interface IBlock {
     riffCardReps?: number   // 闪卡复习次数
+    riffCard?: IRiffCard,
     depth?: number,
     box?: string;
     path?: string;
@@ -923,6 +924,10 @@ interface IBlock {
     children?: IBlock[]
     length?: number
     ial: IObject
+}
+
+interface IRiffCard {
+    Due?: string;
 }
 
 interface IModels {

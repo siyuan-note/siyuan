@@ -967,7 +967,7 @@ func syncRepoDownload() (err error) {
 	}
 
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
 		return
@@ -1035,7 +1035,7 @@ func syncRepoUpload() (err error) {
 	}
 
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
 		return
@@ -1105,7 +1105,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1193,9 +1193,8 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	latest, _ := repo.Latest()
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1235,8 +1234,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	syncedLatest, _ := repo.Latest()
-	dataChanged = nil == latest || latest.ID != syncedLatest.ID
+	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
@@ -1447,15 +1445,15 @@ func needFullReindex(upsertTrees int) bool {
 
 var promotedPurgeDataRepo bool
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
+func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
-	latest, _ := repo.Latest()
-	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
+	beforeIndex, _ = repo.Latest()
+	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
 	if errors.Is(err, dejavu.ErrNotFoundObject) {
 		var resetErr error
-		index, resetErr = resetRepository(repo)
+		afterIndex, resetErr = resetRepository(repo)
 		if nil != resetErr {
 			return
 		}
@@ -1471,10 +1469,10 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 	elapsed := time.Since(start)
 
-	if nil == latest || latest.ID != index.ID {
+	if nil == beforeIndex || beforeIndex.ID != afterIndex.ID {
 		// 对新创建的快照需要更新备注，加入耗时统计
-		index.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
-		if err = repo.PutIndex(index); nil != err {
+		afterIndex.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
+		if err = repo.PutIndex(afterIndex); nil != err {
 			util.PushStatusBar("Save data snapshot for cloud sync failed")
 			logging.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 			return

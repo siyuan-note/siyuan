@@ -82,7 +82,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 avID,
             }]);
             insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
-            popTextCell(protyle, [rowElement[event.altKey ? "previousElementSibling" : "nextElementSibling"].querySelector('[data-detached="true"]')], "block");
         } else {
             const gutterRect = gutterElement.getBoundingClientRect();
             avContextmenu(protyle, rowElement, {
@@ -238,7 +237,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             avID,
         }]);
         insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
-        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
         event.preventDefault();
         event.stopPropagation();
         return true;

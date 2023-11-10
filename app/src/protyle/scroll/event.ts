@@ -6,6 +6,16 @@ import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyScrollY} from "./stickyScroll";
 
+const getOffsetTop = (element: HTMLElement, topElement: HTMLElement) => {
+    let tempElement = element;
+    let top = 0;
+    while (topElement.contains(tempElement)) {
+        top += tempElement.offsetTop;
+        tempElement = tempElement.offsetParent as HTMLElement;
+    }
+    return top;
+};
+
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
@@ -57,7 +67,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if ((protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
-                        // goHome 时 data-eof 不为 1
+                            // goHome 时 data-eof 不为 1
                             protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0") &&
                         (hasClosestByClassName(targetElement, "protyle-background") || hasClosestByClassName(targetElement, "protyle-title"))) {
                         const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;

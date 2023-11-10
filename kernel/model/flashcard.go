@@ -260,7 +260,7 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		}
 
 		b.RiffCardID = cards[i].ID()
-		b.RiffCardReps = cards[i].(*riff.FSRSCard).C.Reps
+		b.RiffCard = GetRiffCard(cards[i].(*riff.FSRSCard).C)
 	}
 	return
 }

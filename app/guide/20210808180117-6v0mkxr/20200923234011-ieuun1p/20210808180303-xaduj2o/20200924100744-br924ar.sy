@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230820185510"
+		"updated": "20231110112758"
 	},
 	"Children": [
 		{
@@ -856,7 +856,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231731-bdh7lab",
-				"updated": "20230211103249"
+				"updated": "20231110112758"
 			},
 			"Children": [
 				{
@@ -868,7 +868,7 @@
 					},
 					"Properties": {
 						"id": "20230202231732-n7z8jth",
-						"updated": "20230211103249"
+						"updated": "20231110112758"
 					},
 					"Children": [
 						{
@@ -876,7 +876,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231732-f3jkj7p",
-								"updated": "20230211103249"
+								"updated": "20231110112758"
 							},
 							"Children": [
 								{
@@ -908,7 +908,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the kernel boot log"
+									"Data": "​ in the kernel boot log; If you want to disable OCR, set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN\\_TESSERACT\\_ENABLED=false"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -936,7 +945,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan does not enable all installed language packs, because too many language packs will cause OCR to be slow or even timeout and return empty results, and take up too many system resources, so by default only "
+									"Data": "SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " does not enable all installed language packs, because too many language packs will cause OCR to be slow or even timeout and return empty results, and take up too many system resources, so by default only "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -945,7 +958,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, "
+									"Data": "​​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -954,7 +967,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, "
+									"Data": "​​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -963,7 +976,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, "
+									"Data": "​​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -972,7 +985,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, "
+									"Data": "​​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -981,7 +994,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, "
+									"Data": "​​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -990,7 +1003,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ and "
+									"Data": "​​ and "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -999,7 +1012,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ will be enabled at most, if you need more accurate language support, you can specify the language pack by configuring the environment variable "
+									"Data": "​​ will be enabled at most, if you need more accurate language support, you can specify the language pack by configuring the environment variable "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1008,7 +1021,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, such as "
+									"Data": "​​, such as "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1017,7 +1030,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1081,7 +1094,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, the unit of value is bytes, for example: "
+									"Data": "​​, the unit of value is bytes, for example: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1090,7 +1103,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ adjust the upper limit to 4MB"
+									"Data": "​​ adjust the upper limit to 4MB"
 								}
 							]
 						}

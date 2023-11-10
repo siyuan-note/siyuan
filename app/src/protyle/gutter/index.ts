@@ -55,16 +55,28 @@ export class Gutter {
             hideTooltip();
             const buttonElement = event.target.parentElement;
             let selectIds: string[] = [buttonElement.getAttribute("data-node-id")];
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length > 0) {
                 selectIds = [];
                 selectElements.forEach(item => {
                     selectIds.push(item.getAttribute("data-node-id"));
                 });
+            } else {
+                selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)];
             }
-            if (selectElements.length === 0) {
-                event.dataTransfer.setDragImage(protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`), 0, 0);
-            }
+
+            const ghostElement = document.createElement("div");
+            ghostElement.className = protyle.wysiwyg.element.className;
+            selectElements.forEach(item => {
+                ghostElement.append(item.cloneNode(true));
+            });
+            ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
+            document.body.append(ghostElement);
+            event.dataTransfer.setDragImage(ghostElement, 0, 0);
+            setTimeout(() => {
+                ghostElement.remove();
+            });
+
             buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,
@@ -1894,7 +1906,7 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
         this.element.style.width = "";
-        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top
+        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem) {
@@ -1906,7 +1918,8 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         } else if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
             (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
             marginHeight = (rect.height - this.element.clientHeight) / 2;
-        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView" && contentTop < rect.top) {
+        } else if ((nodeElement.getAttribute("data-type") === "NodeAttributeView" ||
+            element.getAttribute("data-type") === "NodeAttributeView") && contentTop < rect.top) {
             marginHeight = 8;
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
@@ -1914,8 +1927,6 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
             // 嵌入块为列表时
             left = nodeElement.getBoundingClientRect().left - this.element.clientWidth - space;
-        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-            left = left + (parseInt((nodeElement.firstElementChild.firstElementChild as HTMLElement)?.style.paddingLeft) || 0);
         }
         this.element.style.left = `${left}px`;
         if (left < this.element.parentElement.getBoundingClientRect().left) {

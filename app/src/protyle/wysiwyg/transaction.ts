@@ -712,7 +712,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColIcon"].includes(operation.action)) {
-        refreshAV(protyle, operation);
+        refreshAV(protyle, operation, isUndo);
     } else if (operation.action === "doUpdateUpdated") {
         updateElements.forEach(item => {
             item.setAttribute("updated", operation.data);

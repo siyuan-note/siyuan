@@ -69,7 +69,9 @@ func GetAssetText(asset string, force bool) string {
 	AssetsTextsLock.Lock()
 	AssetsTexts[asset] = ret
 	AssetsTextsLock.Unlock()
-	AssetsTextsChanged = true
+	if "" != ret {
+		AssetsTextsChanged = true
+	}
 	return ret
 }
 
@@ -146,6 +148,17 @@ func InitTesseract() {
 	if "" != maxSizeVal {
 		if maxSize, parseErr := strconv.ParseUint(maxSizeVal, 10, 64); nil == parseErr {
 			TesseractMaxSize = maxSize
+		}
+	}
+
+	// Supports via environment var `SIYUAN_TESSERACT_ENABLED=false` to close OCR https://github.com/siyuan-note/siyuan/issues/9619
+	if enabled := os.Getenv("SIYUAN_TESSERACT_ENABLED"); "" != enabled {
+		if enabledBool, parseErr := strconv.ParseBool(enabled); nil == parseErr {
+			TesseractEnabled = enabledBool
+			if !enabledBool {
+				logging.LogInfof("tesseract-ocr disabled by env")
+				return
+			}
 		}
 	}
 

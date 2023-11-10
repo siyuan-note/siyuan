@@ -926,8 +926,8 @@ interface IBlock {
 }
 
 interface IRiffCard {
-    Due?: string;
-    Reps?: number; // 闪卡复习次数
+    due?: string;
+    reps?: number; // 闪卡复习次数
 }
 
 interface IModels {

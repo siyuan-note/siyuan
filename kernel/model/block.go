@@ -61,8 +61,20 @@ type Block struct {
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
 
-	RiffCardID string     `json:"riffCardID"`
-	RiffCard   *fsrs.Card `json:"riffCard"`
+	RiffCardID string    `json:"riffCardID"`
+	RiffCard   *RiffCard `json:"riffCard"`
+}
+
+type RiffCard struct {
+	Due  time.Time `json:"due"`
+	Reps uint64    `json:"reps"`
+}
+
+func GetRiffCard(card *fsrs.Card) *RiffCard {
+	return &RiffCard{
+		Due:  card.Due,
+		Reps: card.Reps,
+	}
 }
 
 func (block *Block) IsContainerBlock() bool {

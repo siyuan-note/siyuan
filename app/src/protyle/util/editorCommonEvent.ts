@@ -910,7 +910,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             insertAttrViewBlockAnimation(blockElement, sourceIds.length, previousID);
                         }
                     }
-                } else {
+                } else if (sourceElements.length > 0) {
                     if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
@@ -1067,18 +1067,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
         let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
-        if (gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}`.toLowerCase())) {
-            // 表头只能拖拽到当前 av 的表头中
-            targetElement = hasClosestByClassName(event.target, "av__cell");
-            if (targetElement && !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
-                targetElement = false;
-            }
-        } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}`.toLowerCase())) {
-            // 行只能拖拽当前 av 中
-            if (!targetElement.classList.contains("av__row") || !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
-                targetElement = false;
-            }
-        }
         const point = {x: event.clientX, y: event.clientY, className: ""};
         if (!targetElement) {
             const editorRect = editorElement.getBoundingClientRect();
@@ -1119,7 +1107,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 6), "li");
             }
         }
-        if (!targetElement || targetElement.classList.contains("av")) {
+        if (gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}`.toLowerCase())) {
+            // 表头只能拖拽到当前 av 的表头中
+            targetElement = hasClosestByClassName(event.target, "av__cell");
+            if (targetElement && !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
+                targetElement = false;
+            }
+        } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}`.toLowerCase())) {
+            // 行只能拖拽当前 av 中
+            if (!targetElement.classList.contains("av__row") || !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
+                targetElement = false;
+            }
+        }
+        if (!targetElement) {
             return;
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";

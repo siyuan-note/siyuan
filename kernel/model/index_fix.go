@@ -52,11 +52,31 @@ func FixIndexJob() {
 	task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
 	sql.WaitForWritingDatabase()
 
+	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseRefs)
+
 	util.PushStatusBar(Conf.Language(185))
 	debug.FreeOSMemory()
 }
 
 var autoFixLock = sync.Mutex{}
+
+// removeDuplicateDatabaseRefs 删除重复的数据库引用关系。
+func removeDuplicateDatabaseRefs() {
+	defer logging.Recover()
+
+	autoFixLock.Lock()
+	defer autoFixLock.Unlock()
+
+	util.PushStatusBar(Conf.Language(58))
+	duplicatedRootIDs := sql.GetRefDuplicatedDefRootIDs()
+	for _, rootID := range duplicatedRootIDs {
+		refreshRefsByDefID(rootID)
+	}
+
+	if 0 < len(duplicatedRootIDs) {
+		logging.LogWarnf("exist more than one ref duplicated [%d], reindex it", duplicatedRootIDs)
+	}
+}
 
 // removeDuplicateDatabaseIndex 删除重复的数据库索引。
 func removeDuplicateDatabaseIndex() {

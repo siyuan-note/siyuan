@@ -39,21 +39,26 @@ import (
 
 func RefreshBacklink(id string) {
 	WaitForWritingFiles()
+	refreshRefsByDefID(id)
+}
 
-	refs := sql.QueryRefsByDefID(id, false)
+func refreshRefsByDefID(defID string) {
+	refs := sql.QueryRefsByDefID(defID, false)
 	trees := map[string]*parse.Tree{}
 	for _, ref := range refs {
 		tree := trees[ref.RootID]
-		if nil == tree {
-			var loadErr error
-			tree, loadErr = loadTreeByBlockID(ref.RootID)
-			if nil != loadErr {
-				logging.LogErrorf("refresh tree refs failed: %s", loadErr)
-				continue
-			}
-			trees[ref.RootID] = tree
-			sql.UpdateRefsTreeQueue(tree)
+		if nil != tree {
+			continue
 		}
+
+		var loadErr error
+		tree, loadErr = loadTreeByBlockID(ref.RootID)
+		if nil != loadErr {
+			logging.LogErrorf("refresh tree refs failed: %s", loadErr)
+			continue
+		}
+		trees[ref.RootID] = tree
+		sql.UpdateRefsTreeQueue(tree)
 	}
 }
 

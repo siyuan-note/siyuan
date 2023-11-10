@@ -733,16 +733,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const rowElement = target.parentElement.parentElement;
                 const selectIds = [];
+                const rowElements = []
                 if (rowElement.classList.contains("av__row--select")) {
                     rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {
                         selectIds.push(item.getAttribute("data-id"));
+                        rowElements.push(item)
                     });
                 } else {
                     selectIds.push(rowElement.getAttribute("data-id"));
+                    rowElements.push(rowElement)
                 }
-                if (selectIds.length === 1) {
-                    event.dataTransfer.setDragImage(rowElement, 0, 0);
-                }
+
+                const ghostElement = document.createElement("div");
+                ghostElement.className = protyle.wysiwyg.element.className;
+                rowElements.forEach(item => {
+                    ghostElement.append(item.cloneNode(true));
+                })
+                ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${rowElements[0].clientWidth}px;padding:0;`)
+                document.body.append(ghostElement);
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
+                setTimeout(() => {
+                    ghostElement.remove();
+                });
+
                 window.siyuan.dragElement = rowElement;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}${selectIds}`,
                     rowElement.innerHTML);

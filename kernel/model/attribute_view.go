@@ -712,7 +712,10 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 			return
 		}
 	} else {
-		blockID = ast.NewNodeID()
+		if "" == blockID {
+			blockID = ast.NewNodeID()
+			logging.LogWarnf("detached block id is empty, generate a new one [%s]", blockID)
+		}
 	}
 
 	attrView, err := av.ParseAttributeView(operation.AvID)

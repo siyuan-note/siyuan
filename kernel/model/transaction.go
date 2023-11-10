@@ -208,6 +208,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColumnWrap(op)
 		case "setAttrViewColHidden":
 			ret = tx.doSetAttrViewColumnHidden(op)
+		case "setAttrViewColPin":
+			ret = tx.doSetAttrViewColumnPin(op)
 		case "setAttrViewColIcon":
 			ret = tx.doSetAttrViewColumnIcon(op)
 		case "insertAttrViewBlock":

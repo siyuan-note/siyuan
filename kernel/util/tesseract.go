@@ -149,6 +149,17 @@ func InitTesseract() {
 		}
 	}
 
+	// Supports via environment var `SIYUAN_TESSERACT_ENABLED=false` to close OCR https://github.com/siyuan-note/siyuan/issues/9619
+	if enabled := os.Getenv("SIYUAN_TESSERACT_ENABLED"); "" != enabled {
+		if enabledBool, parseErr := strconv.ParseBool(enabled); nil == parseErr {
+			TesseractEnabled = enabledBool
+			if !enabledBool {
+				logging.LogInfof("tesseract-ocr disabled by env")
+				return
+			}
+		}
+	}
+
 	TesseractLangs = filterTesseractLangs(langs)
 	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.Bytes(TesseractMaxSize), strings.Join(TesseractLangs, "+"))
 }

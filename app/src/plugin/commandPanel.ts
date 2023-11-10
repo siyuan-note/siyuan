@@ -90,7 +90,7 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
             if (!hasFocus) {
                 element.classList.add("b3-list-item--focus");
             }
-            hasFocus = true
+            hasFocus = true;
             element.classList.remove("fn__none");
         } else {
             element.classList.add("fn__none");

@@ -6,14 +6,14 @@ import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
 const getOffsetTop = (element: HTMLElement, topElement: HTMLElement) => {
-    let tempElement = element
-    let top = 0
+    let tempElement = element;
+    let top = 0;
     while (topElement.contains(tempElement)) {
-        top += tempElement.offsetTop
-        tempElement = tempElement.offsetParent as HTMLElement
+        top += tempElement.offsetTop;
+        tempElement = tempElement.offsetParent as HTMLElement;
     }
     return top;
-}
+};
 
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {

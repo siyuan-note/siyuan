@@ -733,23 +733,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const rowElement = target.parentElement.parentElement;
                 const selectIds = [];
-                const rowElements = []
+                const rowElements = [];
                 if (rowElement.classList.contains("av__row--select")) {
                     rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {
                         selectIds.push(item.getAttribute("data-id"));
-                        rowElements.push(item)
+                        rowElements.push(item);
                     });
                 } else {
                     selectIds.push(rowElement.getAttribute("data-id"));
-                    rowElements.push(rowElement)
+                    rowElements.push(rowElement);
                 }
 
                 const ghostElement = document.createElement("div");
                 ghostElement.className = protyle.wysiwyg.element.className;
                 rowElements.forEach(item => {
                     ghostElement.append(item.cloneNode(true));
-                })
-                ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${rowElements[0].clientWidth}px;padding:0;`)
+                });
+                ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${rowElements[0].clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 0, 0);
                 setTimeout(() => {

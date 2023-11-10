@@ -62,15 +62,15 @@ export class Gutter {
                     selectIds.push(item.getAttribute("data-node-id"));
                 });
             } else {
-                selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)]
+                selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)];
             }
 
             const ghostElement = document.createElement("div");
             ghostElement.className = protyle.wysiwyg.element.className;
             selectElements.forEach(item => {
                 ghostElement.append(item.cloneNode(true));
-            })
-            ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`)
+            });
+            ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
             event.dataTransfer.setDragImage(ghostElement, 0, 0);
             setTimeout(() => {
@@ -1906,7 +1906,7 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
         this.element.style.width = "";
-        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top
+        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem) {

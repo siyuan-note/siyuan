@@ -162,7 +162,7 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
         renderSnippet();
         dialog.destroy({cancel: "true"});
     });
-}
+};
 
 const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[], confirm = false) => {
     const snippets: ISnippet[] = [];
@@ -180,10 +180,10 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
     } else {
         if (confirm) {
             confirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
-                setSnippetPost(dialog, snippets, removeIds)
-            })
+                setSnippetPost(dialog, snippets, removeIds);
+            });
         } else {
-            setSnippetPost(dialog, snippets, removeIds)
+            setSnippetPost(dialog, snippets, removeIds);
         }
     }
-}
+};

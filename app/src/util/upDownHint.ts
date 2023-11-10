@@ -23,7 +23,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
             }
         }
         if (!currentHintElement) {
-            return
+            return;
         }
         currentHintElement.classList.add(classActiveName);
         if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight ||
@@ -43,14 +43,14 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
         }
 
         if (!currentHintElement) {
-            currentHintElement = listElement.children[listElement.children.length - 1] as HTMLElement
+            currentHintElement = listElement.children[listElement.children.length - 1] as HTMLElement;
             while (currentHintElement &&
             (currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className))) {
                 currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
             }
         }
         if (!currentHintElement) {
-            return
+            return;
         }
         currentHintElement.classList.add(classActiveName);
 

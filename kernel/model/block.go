@@ -24,6 +24,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/open-spaced-repetition/go-fsrs"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -60,8 +61,20 @@ type Block struct {
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
 
-	RiffCardID   string `json:"riffCardID"`
-	RiffCardReps uint64 `json:"riffCardReps"`
+	RiffCardID string    `json:"riffCardID"`
+	RiffCard   *RiffCard `json:"riffCard"`
+}
+
+type RiffCard struct {
+	Due  time.Time `json:"due"`
+	Reps uint64    `json:"reps"`
+}
+
+func GetRiffCard(card *fsrs.Card) *RiffCard {
+	return &RiffCard{
+		Due:  card.Due,
+		Reps: card.Reps,
+	}
 }
 
 func (block *Block) IsContainerBlock() bool {

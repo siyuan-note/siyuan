@@ -175,6 +175,7 @@
   "searchTip5": "pour ignorer",
   "showRecentUpdatedBlocks": "Les blocs les plus récemment mis à jour seront affichés lorsque l'entrée est vide",
   "revisionCount": "Nombre de révisions",
+  "nextDue": "Revoir la prochaine fois",
   "flashcardNewCardLimit": "Nouvelle limite de carte",
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",
   "flashcardReviewCardLimit": "Revoir la limite de la carte",

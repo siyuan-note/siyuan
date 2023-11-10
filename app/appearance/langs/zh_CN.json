@@ -175,6 +175,7 @@
   "searchTip5": "退出搜索",
   "showRecentUpdatedBlocks": "输入为空时将显示最近更新的块",
   "revisionCount": "复习次数",
+  "nextDue": "下次复习",
   "flashcardNewCardLimit": "新卡上限",
   "flashcardNewCardLimitTip": "如果新卡较多，可以通过该项设置新卡复习的数量",
   "flashcardReviewCardLimit": "复习卡上限",

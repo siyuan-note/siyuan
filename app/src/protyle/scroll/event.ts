@@ -6,28 +6,14 @@ import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyScrollY} from "./stickyScroll";
 
-const getOffsetTop = (element: HTMLElement, topElement: HTMLElement) => {
-    let tempElement = element;
-    let top = 0;
-    while (topElement.contains(tempElement)) {
-        top += tempElement.offsetTop;
-        tempElement = tempElement.offsetParent as HTMLElement;
-    }
-    return top;
-};
-
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
-    let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
+        const elementRect = element.getBoundingClientRect();
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
             const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
-            if (elementRect.width === 0) {
-                elementRect = element.getBoundingClientRect();
-            }
-            const toolbarHeight = 29;
-            if (top < elementRect.top - toolbarHeight || top > elementRect.bottom - toolbarHeight) {
+            if (top < elementRect.top - protyle.toolbar.toolbarHeight || top > elementRect.bottom - protyle.toolbar.toolbarHeight) {
                 protyle.toolbar.element.style.display = "none";
             } else {
                 protyle.toolbar.element.style.top = top + "px";
@@ -37,7 +23,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
             const bodyElement = item.querySelector(".av__body") as HTMLElement;
-            
+
             if (bodyElement) {
                 const headerElement = bodyElement.querySelector(".av__row--header") as HTMLElement;
                 const footerElement = bodyElement.querySelector(".av__row--footer") as HTMLElement;
@@ -62,7 +48,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
             clearTimeout(getIndexTimeout);
             getIndexTimeout = window.setTimeout(() => {
-                elementRect = element.getBoundingClientRect();
                 const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {

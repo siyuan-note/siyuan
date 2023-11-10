@@ -966,6 +966,7 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
+	logging.LogInfof("downloading data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "d", true)
 	start := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
@@ -1034,6 +1035,7 @@ func syncRepoUpload() (err error) {
 		return
 	}
 
+	logging.LogInfof("uploading data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "u", true)
 	start := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
@@ -1193,6 +1195,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
+	logging.LogInfof("syncing data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "a", byHand)
 	start := time.Now()
 	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
@@ -1248,7 +1251,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
-	logging.LogInfof("synced data repo [kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]",
+	logging.LogInfof("synced data repo [kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)),
 		elapsed.Seconds(),

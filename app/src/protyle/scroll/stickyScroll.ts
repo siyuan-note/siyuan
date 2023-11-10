@@ -203,13 +203,13 @@ export const stickyScrollY = (
                     default:
                         current.target.top = viewRect.top + current.offset;
                         current.target.bottom = current.target.top + current.rect.height;
-                        if (next) {
-                            const nextTop = Math.min(next.target.top, next.origin.top);
-                            if (nextTop < current.target.bottom) {
-                                const diff = nextTop - current.target.bottom;
-                                current.target.top += diff;
-                                current.target.bottom += diff;
-                            }
+                        const nextTop = next
+                            ? Math.min(next.target.top, next.origin.top, containerRect.bottom)
+                            : containerRect.bottom;
+                        if (nextTop < current.target.bottom) {
+                            const diff = nextTop - current.target.bottom;
+                            current.target.top += diff;
+                            current.target.bottom += diff;
                         }
                         current.style.top = current.base + (current.target.top - current.current.top);
                         break;
@@ -253,13 +253,13 @@ export const stickyScrollY = (
                     default:
                         current.target.bottom = viewRect.bottom - current.offset;
                         current.target.top = current.target.bottom - current.rect.height;
-                        if (last) {
-                            const lastBottom = Math.max(last.target.bottom, last.origin.bottom);
-                            if (current.target.top < lastBottom) {
-                                const diff = lastBottom - current.target.top;
-                                current.target.top += diff;
-                                current.target.bottom += diff;
-                            }
+                        const lastBottom = last
+                            ? Math.max(last.target.bottom, last.origin.bottom, containerRect.top)
+                            : containerRect.top;
+                        if (current.target.top < lastBottom) {
+                            const diff = lastBottom - current.target.top;
+                            current.target.top += diff;
+                            current.target.bottom += diff;
                         }
                         current.style.bottom = current.base - (current.target.bottom - current.current.bottom);
                         break;

@@ -218,7 +218,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
 <span class="${(isMobile() || !hPath) ? "fn__none " : ""}b3-list-item__meta b3-list-item__meta--ellipsis" title="${escapeAttr(hPath)}">${escapeHtml(hPath)}</span>
-<span aria-label="${window.siyuan.languages.nextDue}" class="b3-tooltips b3-tooltips__w counter${!item.riffCard?.due ? " fn__none" : ""}">${dayjs(item.riffCard?.due).format("YYYY-MM-DD")}</span>
+<span aria-label="${window.siyuan.languages.nextDue}" class="b3-tooltips b3-tooltips__w b3-list-item__meta${!item.riffCard?.due ? " fn__none" : ""}">${dayjs(item.riffCard?.due).format("YYYY-MM-DD")}</span>
 <span aria-label="${window.siyuan.languages.revisionCount}" class="b3-tooltips b3-tooltips__w counter${item.riffCard?.reps === 0 ? " fn__none" : ""}">${item.riffCard?.reps}</span>
 </div>`;
             isFirst = false;

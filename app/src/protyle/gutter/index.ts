@@ -55,16 +55,28 @@ export class Gutter {
             hideTooltip();
             const buttonElement = event.target.parentElement;
             let selectIds: string[] = [buttonElement.getAttribute("data-node-id")];
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length > 0) {
                 selectIds = [];
                 selectElements.forEach(item => {
                     selectIds.push(item.getAttribute("data-node-id"));
                 });
+            } else {
+                selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)]
             }
-            if (selectElements.length === 0) {
-                event.dataTransfer.setDragImage(protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`), 0, 0);
-            }
+
+            const ghostElement = document.createElement("div");
+            ghostElement.className = protyle.wysiwyg.element.className;
+            selectElements.forEach(item => {
+                ghostElement.append(item.cloneNode(true));
+            })
+            ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`)
+            document.body.append(ghostElement);
+            event.dataTransfer.setDragImage(ghostElement, 0, 0);
+            setTimeout(() => {
+                ghostElement.remove();
+            });
+
             buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,

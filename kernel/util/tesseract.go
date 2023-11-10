@@ -69,7 +69,9 @@ func GetAssetText(asset string, force bool) string {
 	AssetsTextsLock.Lock()
 	AssetsTexts[asset] = ret
 	AssetsTextsLock.Unlock()
-	AssetsTextsChanged = true
+	if "" != ret {
+		AssetsTextsChanged = true
+	}
 	return ret
 }
 

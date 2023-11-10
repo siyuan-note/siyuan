@@ -172,7 +172,11 @@
       z-index: 2;
     }
 
-    &--add,
+    &--add {
+      display: flex;
+      color: var(--b3-theme-on-surface);
+    }
+
     &--footer {
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);

@@ -418,7 +418,6 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
-    const {ipcRenderer} = require('electron')
     const exitApp = () => {
         try {
             const {ipcRenderer} = require('electron')
@@ -514,9 +513,19 @@
         }
 
         try {
+            const {ipcRenderer} = require('electron')
             ipcRenderer.on('siyuan-save-close', (event, close) => {
                 exitSiYuan()
             })
+            await ipcRenderer.invoke("siyuan-init", {
+                languages: {{.trayMenuLangs}},
+                workspaceDir: '{{.workspaceDir}}',
+                port: location.port
+            });
+            ipcRenderer.send("siyuan-hotkey", {
+                languages: {{.trayMenuLangs}},
+                hotkeys: ['{{.keymapGeneralToggleWin}}']
+            });
         } catch (e) {
             // console.log(e)
         }
@@ -536,18 +545,7 @@
 
         // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
         new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
-
-        await ipcRenderer.invoke("siyuan-init", {
-            languages: {{.trayMenuLangs}},
-            workspaceDir: '{{.workspaceDir}}',
-            port: location.port
-        });
-        ipcRenderer.send("siyuan-hotkey", {
-            languages: {{.trayMenuLangs}},
-            hotkeys: ['{{.keymapGeneralToggleWin}}']
-        });
     }
-
     init();
 </script>
 </body>

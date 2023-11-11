@@ -37,8 +37,9 @@ func autoOCRAssets() {
 			util.AssetsTextsLock.Lock()
 			util.AssetsTexts[p] = text
 			util.AssetsTextsLock.Unlock()
-			util.AssetsTextsChanged = true
-
+			if "" != text {
+				util.AssetsTextsChanged = true
+			}
 			if 4 <= i { // 一次任务中最多处理 4 张图片，防止卡顿
 				break
 			}

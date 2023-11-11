@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20230406105617"
+		"updated": "20231108220523"
 	},
 	"Children": [
 		{
@@ -396,7 +396,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210301202938-prn2v5a",
-				"updated": "20210824203825"
+				"updated": "20231108220518"
 			},
 			"Children": [
 				{
@@ -417,7 +417,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -519,7 +523,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227201751-yyfayag",
-				"updated": "20211112103126"
+				"updated": "20231108220523"
 			},
 			"Children": [
 				{
@@ -533,7 +537,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and "
+					"Data": "​ and "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -542,7 +546,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " are configured as "
+					"Data": "​ are configured as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -551,16 +555,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the corresponding startup commands is: "
+					"Data": "​, the corresponding startup commands is: "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​."
 				}
 			]
 		},

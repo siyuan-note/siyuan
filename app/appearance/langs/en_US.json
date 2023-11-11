@@ -1,4 +1,5 @@
 {
+  "snippetsTip": "The code snippet has been updated, do you want to save it?",
   "addBelowAbove": "Click to add below<br>⌥Click to add above",
   "imported": "Import completed",
   "mirrorTip": "Mirror database, all data updates will be synchronized to all other mirrors",
@@ -174,6 +175,7 @@
   "searchTip5": "to dismiss",
   "showRecentUpdatedBlocks": "The most recently updated blocks will be shown when the input is empty",
   "revisionCount": "Number of revisions",
+  "nextDue": "Next Due",
   "flashcardNewCardLimit": "New Card Limit",
   "flashcardNewCardLimitTip": "If there are many new cards, you can set the number of new cards to review through this item",
   "flashcardReviewCardLimit": "Review Card Limit",
@@ -1314,6 +1316,8 @@
     "214": "This function needs to be signed in to use",
     "215": "Save failed: The target file is being used by another program",
     "216": "Rebuilding asset content data index, please wait...",
-    "217": "[%d/%d] Created asset content data index"
+    "217": "[%d/%d] Created asset content data index",
+    "218": "Too many snapshots of the data repo have been detected, which slows down program startup and data sync. Please consider executing [Settings - About - Data repo purge]",
+    "219": "The cloud storage service is unavailable, please try again later"
   }
 }

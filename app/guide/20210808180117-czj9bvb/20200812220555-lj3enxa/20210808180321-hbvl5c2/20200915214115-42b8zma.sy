@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230820185522"
+		"updated": "20231110112936"
 	},
 	"Children": [
 		{
@@ -878,7 +878,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231309-pcjl7c2",
-				"updated": "20230211103308"
+				"updated": "20231110112936"
 			},
 			"Children": [
 				{
@@ -890,7 +890,7 @@
 					},
 					"Properties": {
 						"id": "20230202231311-7qdk1za",
-						"updated": "20230211103308"
+						"updated": "20231110112936"
 					},
 					"Children": [
 						{
@@ -898,7 +898,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231311-n1pf7in",
-								"updated": "20230211103308"
+								"updated": "20231110112936"
 							},
 							"Children": [
 								{
@@ -927,6 +927,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​；如果要禁用 OCR，请设置环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
 								},
 								{
 									"Type": "NodeText",

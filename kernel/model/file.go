@@ -722,8 +722,12 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			}
 
 			if "1" == n.IALAttr("heading-fold") {
-				unlinks = append(unlinks, n)
-				return ast.WalkContinue
+				// 折叠标题下被引用的块无法悬浮查看
+				// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
+				if 0 != mode && id != n.ID {
+					unlinks = append(unlinks, n)
+					return ast.WalkContinue
+				}
 			}
 
 			if "" != n.ID {

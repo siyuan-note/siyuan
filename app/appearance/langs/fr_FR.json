@@ -1,4 +1,5 @@
 {
+  "snippetsTip": "L'extrait de code a été mis à jour, voulez-vous le sauvegarder ?",
   "addBelowAbove": "Cliquez pour ajouter ci-dessous<br>⌥Cliquez pour ajouter ci-dessus",
   "imported": "Importation terminée",
   "mirrorTip": "Base de données miroir, toutes les mises à jour des données seront synchronisées avec tous les autres miroirs",
@@ -174,6 +175,7 @@
   "searchTip5": "pour ignorer",
   "showRecentUpdatedBlocks": "Les blocs les plus récemment mis à jour seront affichés lorsque l'entrée est vide",
   "revisionCount": "Nombre de révisions",
+  "nextDue": "Revoir la prochaine fois",
   "flashcardNewCardLimit": "Nouvelle limite de carte",
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",
   "flashcardReviewCardLimit": "Revoir la limite de la carte",
@@ -1314,6 +1316,8 @@
     "214": "La fonctionnalité nécessite un numéro de compte de connexion avant de pouvoir être utilisée",
     "215": "Échec de l'enregistrement : le fichier de destination est utilisé par un autre programme",
     "216": "Reconstruction de l'index des données du contenu des ressources, veuillez patienter...",
-    "217": "[%d/%d] Création d'un index de données de contenu d'actif"
+    "217": "[%d/%d] Création d'un index de données de contenu d'actif",
+    "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",
+    "219": "Le service de stockage cloud n'est pas disponible, veuillez réessayer plus tard"
   }
 }

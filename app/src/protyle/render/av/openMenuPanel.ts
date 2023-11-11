@@ -92,7 +92,7 @@ export const openMenuPanel = (options: {
                 bindEditEvent({protyle: options.protyle, data, menuElement});
             }
         }
-        avPanelElement.addEventListener("dragstart", (event) => {
+        avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             window.siyuan.dragElement = event.target as HTMLElement;
             window.siyuan.dragElement.style.opacity = ".1";
             return;

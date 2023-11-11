@@ -39,6 +39,7 @@ type ViewTableColumn struct {
 
 	Wrap   bool        `json:"wrap"`           // 是否换行
 	Hidden bool        `json:"hidden"`         // 是否隐藏
+	Pin    bool        `json:"pin"`            // 是否固定
 	Width  string      `json:"width"`          // 列宽度
 	Calc   *ColumnCalc `json:"calc,omitempty"` // 计算
 }
@@ -562,6 +563,7 @@ type TableColumn struct {
 	Icon   string      `json:"icon"`   // 列图标
 	Wrap   bool        `json:"wrap"`   // 是否换行
 	Hidden bool        `json:"hidden"` // 是否隐藏
+	Pin    bool        `json:"pin"`    // 是否固定
 	Width  string      `json:"width"`  // 列宽度
 	Calc   *ColumnCalc `json:"calc"`   // 计算
 
@@ -624,11 +626,6 @@ func (table *Table) SortRows() {
 	}
 
 	sort.Slice(table.Rows, func(i, j int) bool {
-		block := table.Rows[i].GetBlockValue()
-		if !block.IsInitialized && nil != block.Block && "" == block.Block.Content && block.IsDetached {
-			return false
-		}
-
 		for _, colIndexSort := range colIndexSorts {
 			result := table.Rows[i].Cells[colIndexSort.Index].Value.Compare(table.Rows[j].Cells[colIndexSort.Index].Value)
 			if 0 == result {

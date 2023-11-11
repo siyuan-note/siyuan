@@ -67,8 +67,8 @@ export const setFilter = (options: {
                 cellValue = genCellValue(colData.type, {
                     isNotEmpty2: textElements[1].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: new Date(textElements[0].value).getTime(),
-                    content2: new Date(textElements[1].value).getTime(),
+                    content: new Date(textElements[0].value + " 00:00").getTime(),
+                    content2: new Date(textElements[1].value + " 00:00").getTime(),
                     hasEndDate: operator === "Is between"
                 });
             } else {
@@ -245,11 +245,11 @@ export const setFilter = (options: {
         const dateValue = options.filter.value ? options.filter.value[colData.type as "date"] : null;
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({

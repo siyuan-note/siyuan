@@ -51,7 +51,7 @@ export class Toolbar {
     public subElement: HTMLElement;
     public subElementCloseCB: () => void;
     public range: Range;
-    private toolbarHeight: number;
+    public toolbarHeight: number;
 
     constructor(protyle: IProtyle) {
         const options = protyle.options;
@@ -134,6 +134,7 @@ export class Toolbar {
         }
         const rangePosition = getSelectionPosition(nodeElement, range);
         this.element.classList.remove("fn__none");
+        this.toolbarHeight = this.element.clientHeight;
         const y = rangePosition.top - this.toolbarHeight - 4;
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
         setPosition(this.element, rangePosition.left - 52, y);

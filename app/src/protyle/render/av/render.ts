@@ -1,11 +1,10 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {getCalcValue} from "./cell";
+import {getCalcValue, popTextCell} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {resizeAV} from "../../util/resize";
 import {isMac} from "../../util/compatibility";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
@@ -173,13 +172,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 </div>`;
                 });
                 setTimeout(() => {
-                    e.firstElementChild.outerHTML = `<div>
+                    e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
             <div class="fn__flex-1"></div>
-            ${response.data.isMirror?` <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mirrorTip}">
-    <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>`:""}
+            ${response.data.isMirror ? ` <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.mirrorTip}">
+    <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
             <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${data.filters.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.filter}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
@@ -208,7 +207,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     </div>
 </div>`;
                     e.setAttribute("data-render", "true");
-                    resizeAV(e);
+                    // 历史兼容
+                    e.style.margin = "";
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
@@ -236,7 +236,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 
 let lastParentID: string;
 let lastElement: HTMLElement;
-export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
@@ -267,9 +267,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
-            avRender(item, protyle);
+            avRender(item, protyle, () => {
+                // https://github.com/siyuan-note/siyuan/issues/9599
+                if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached) {
+                    popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] > .av__cell[data-detached="true"]`)], "block");
+                }
+            });
         });
     }
+
     setTimeout(() => {
         lastParentID = null;
     }, Constants.TIMEOUT_TRANSITION);

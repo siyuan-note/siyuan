@@ -966,8 +966,9 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
+	logging.LogInfof("downloading data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "d", true)
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
 		return
@@ -1034,8 +1035,9 @@ func syncRepoUpload() (err error) {
 		return
 	}
 
+	logging.LogInfof("uploading data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "u", true)
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
 		return
@@ -1105,7 +1107,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1193,9 +1195,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	latest, _ := repo.Latest()
+	logging.LogInfof("syncing data repo [kernel=%s, provider=%d, mode=%s/%t]", KernelID, Conf.Sync.Provider, "a", byHand)
 	start := time.Now()
-	err = indexRepoBeforeCloudSync(repo)
+	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1235,8 +1237,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	syncedLatest, _ := repo.Latest()
-	dataChanged = nil == latest || latest.ID != syncedLatest.ID
+	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
@@ -1250,7 +1251,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
-	logging.LogInfof("synced data repo [kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]",
+	logging.LogInfof("synced data repo [kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)),
 		elapsed.Seconds(),
@@ -1445,15 +1446,17 @@ func needFullReindex(upsertTrees int) bool {
 	return 0.2 < float64(upsertTrees)/float64(treenode.CountTrees())
 }
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
+var promotedPurgeDataRepo bool
+
+func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
-	latest, _ := repo.Latest()
-	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
+	beforeIndex, _ = repo.Latest()
+	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
 	if errors.Is(err, dejavu.ErrNotFoundObject) {
 		var resetErr error
-		index, resetErr = resetRepository(repo)
+		afterIndex, resetErr = resetRepository(repo)
 		if nil != resetErr {
 			return
 		}
@@ -1469,10 +1472,10 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 	elapsed := time.Since(start)
 
-	if nil == latest || latest.ID != index.ID {
+	if nil == beforeIndex || beforeIndex.ID != afterIndex.ID {
 		// 对新创建的快照需要更新备注，加入耗时统计
-		index.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
-		if err = repo.PutIndex(index); nil != err {
+		afterIndex.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
+		if err = repo.PutIndex(afterIndex); nil != err {
 			util.PushStatusBar("Save data snapshot for cloud sync failed")
 			logging.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 			return
@@ -1483,7 +1486,16 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 
 	if 7000 < elapsed.Milliseconds() {
+		// If the data repo indexing time is greater than 7s, prompt user to purge the data repo https://github.com/siyuan-note/siyuan/issues/9613
 		logging.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
+		if !promotedPurgeDataRepo {
+			go func() {
+				util.WaitForUILoaded()
+				time.Sleep(3 * time.Second)
+				util.PushMsg(Conf.language(218), 24000)
+				promotedPurgeDataRepo = true
+			}()
+		}
 	}
 	return
 }

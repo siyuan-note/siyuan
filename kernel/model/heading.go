@@ -54,7 +54,6 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 				return ast.WalkContinue
 			}
 
-			n.SetIALAttr("fold", "1")
 			n.SetIALAttr("heading-fold", "1")
 			return ast.WalkContinue
 		})

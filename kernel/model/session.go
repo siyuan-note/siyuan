@@ -168,7 +168,7 @@ func CheckAuth(c *gin.Context) {
 		forwardedHost := c.GetHeader("X-Forwarded-Host")
 		if !localhost ||
 			("" != host && !util.IsLocalHost(host)) ||
-			("" != origin && !util.IsLocalOrigin(origin)) ||
+			("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
 			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
 			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
 			c.Abort()

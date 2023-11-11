@@ -156,6 +156,19 @@ func CheckReadonly(c *gin.Context) {
 	}
 }
 
+func CheckBasicAuth(c *gin.Context) {
+	// Authorization: Basic
+	if _, password, ok := c.Request.BasicAuth(); ok {
+		if Conf.AccessAuthCode == password {
+			c.Next()
+			return
+		}
+	}
+
+	c.Header("WWW-Authenticate", "Basic realm=Authorization Required")
+	c.AbortWithStatus(http.StatusUnauthorized)
+}
+
 func CheckAuth(c *gin.Context) {
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 

@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/net/webdav"
 )
 
 var cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
@@ -77,6 +78,7 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	servePublic(ginServer)
 	serveRepoDiff(ginServer)
+	serveWebDAV(ginServer)
 	api.ServeAPI(ginServer)
 
 	// TODO 升级后结束旧内核进程
@@ -502,6 +504,46 @@ func serveWebSocket(ginServer *gin.Engine) {
 		logging.LogTracef("parse cmd [%s] consumed [%d]ms", command.Name(), end.Sub(start).Milliseconds())
 
 		cmd.Exec(command)
+	})
+}
+
+func serveWebDAV(ginServer *gin.Engine) {
+	// REF: https://github.com/fungaren/gin-webdav
+	handler := webdav.Handler{
+		Prefix:     "/webdav/",
+		FileSystem: webdav.Dir(util.WorkspaceDir),
+		LockSystem: webdav.NewMemLS(),
+		Logger: func(r *http.Request, err error) {
+			if nil != err {
+				logging.LogErrorf("WebDAV [%s %s]: %s", r.Method, r.URL.String(), err.Error())
+			}
+		},
+	}
+	methods := []string{
+		"OPTIONS",
+		"GET", "HEAD",
+		"POST", "PUT",
+		"DELETE",
+		"MKCOL",
+		"COPY", "MOVE",
+		"LOCK", "UNLOCK",
+		"PROPFIND", "PROPPATCH",
+	}
+	ginGroup := ginServer.Group("/webdav", model.CheckBasicAuth)
+	ginGroup.Match(methods, "/*path", func(c *gin.Context) {
+		c.Status(200) // 200 by default, which may be override later
+		if util.ReadOnly {
+			switch c.Request.Method {
+			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "PROPPATCH":
+				result := util.NewResult()
+				result.Code = -1
+				result.Msg = model.Conf.Language(34)
+				c.AbortWithStatusJSON(http.StatusForbidden, result)
+				return
+			}
+		}
+		handler.ServeHTTP(c.Writer, c.Request)
+		c.Abort()
 	})
 }
 

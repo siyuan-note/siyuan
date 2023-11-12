@@ -14,7 +14,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
@@ -243,7 +243,7 @@ export class Files extends Model {
             if (ulElement) {
                 const notebookId = ulElement.getAttribute("data-url");
                 while (target && !target.isEqualNode(this.element)) {
-                    if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
+                    if (isNotCtrl(event) && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
                         const rect = target.getBoundingClientRect();
@@ -263,14 +263,14 @@ export class Files extends Model {
                             });
                         }
                         break;
-                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__toggle")) {
+                    } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__toggle")) {
                         this.getLeaf(target.parentElement, notebookId);
                         this.setCurrent(target.parentElement);
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
                         break;
-                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__action")) {
+                    } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__action")) {
                         const type = target.getAttribute("data-type");
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
@@ -298,7 +298,7 @@ export class Files extends Model {
                         event.stopPropagation();
                         break;
                     } else if (target.tagName === "LI") {
-                        if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
+                        if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
                             target.classList.toggle("b3-list-item--focus");
                         } else {
                             this.setCurrent(target, false);
@@ -308,7 +308,7 @@ export class Files extends Model {
                                     return;
                                 }
                                 target.setAttribute("data-opening", "true");
-                                if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                                if (event.altKey && isNotCtrl(event) && !event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
@@ -318,7 +318,7 @@ export class Files extends Model {
                                             target.removeAttribute("data-opening");
                                         }
                                     });
-                                } else if (!event.altKey && !event.metaKey && !event.ctrlKey && event.shiftKey) {
+                                } else if (!event.altKey && isNotCtrl(event) && event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
@@ -329,7 +329,7 @@ export class Files extends Model {
                                         }
                                     });
                                 } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab &&
-                                    event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey) {
+                                    event.altKey && isOnlyMeta(event) && !event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         removeCurrentTab: false,

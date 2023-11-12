@@ -248,7 +248,7 @@ const getActionMenu = (element: Element, next: boolean) => {
 
 export const bindMenuKeydown = (event: KeyboardEvent) => {
     if (window.siyuan.menus.menu.element.classList.contains("fn__none")
-        || event.altKey || event.shiftKey || isCtrl(event)) {
+        || event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
         return false;
     }
     const target = event.target as HTMLElement;

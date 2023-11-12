@@ -3,7 +3,7 @@ import {genUUID} from "../util/genID";
 import {moveResize} from "./moveResize";
 /// #endif
 import {isMobile} from "../util/functions";
-import {isCtrl} from "../protyle/util/compatibility";
+import {isNotCtrl} from "../protyle/util/compatibility";
 import {Protyle} from "../protyle";
 
 export class Dialog {
@@ -104,7 +104,7 @@ export class Dialog {
                 event.stopPropagation();
                 return;
             }
-            if (!event.shiftKey && !isCtrl(event) && event.key === "Enter" && enterEvent) {
+            if (!event.shiftKey && isNotCtrl(event) && event.key === "Enter" && enterEvent) {
                 if (confirmElement) {
                     confirmElement.dispatchEvent(new CustomEvent("click"));
                 } else {

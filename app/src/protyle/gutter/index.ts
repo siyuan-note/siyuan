@@ -3,7 +3,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {copyPlainText, isMac, updateHotkeyTip, writeText} from "../util/compatibility";
+import {copyPlainText, isMac, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction,
@@ -170,7 +170,7 @@ export class Gutter {
                 window.siyuan.menus.menu.remove();
                 return;
             }
-            if (event.ctrlKey || event.metaKey) {
+            if (isOnlyMeta(event)) {
                 zoomOut({protyle, id});
             } else if (event.altKey) {
                 let foldElement: Element;

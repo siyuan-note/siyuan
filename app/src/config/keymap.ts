@@ -1,4 +1,4 @@
-import {isCtrl, isMac, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isMac, updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
@@ -429,7 +429,7 @@ export const keymap = {
     },
     _getKeymapString(event: KeyboardEvent) {
         let keymapStr = "";
-        if (event.ctrlKey && !event.metaKey && isMac()) {
+        if (event.ctrlKey && isMac()) {
             keymapStr += "⌃";
         }
         if (event.altKey) {
@@ -438,7 +438,7 @@ export const keymap = {
         if (event.shiftKey) {
             keymapStr += "⇧";
         }
-        if (isCtrl(event)) {
+        if (event.metaKey || (!isMac() && event.ctrlKey)) {
             keymapStr += "⌘";
         }
         if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control" && event.key !== "Unidentified") {

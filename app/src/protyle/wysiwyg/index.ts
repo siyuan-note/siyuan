@@ -64,7 +64,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isCtrl, isInIOS, openByMobile} from "../util/compatibility";
+import {isInIOS, isOnlyMeta, openByMobile} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -1582,7 +1582,7 @@ export class WYSIWYG {
                 return;
             }
 
-            if ((event.shiftKey || isCtrl(event)) && !event.isComposing && range.toString() !== "") {
+            if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "") {
                 // 工具栏
                 protyle.toolbar.render(protyle, range, event);
                 countSelectWord(range);
@@ -1634,7 +1634,7 @@ export class WYSIWYG {
                 });
             });
             hideElements(["hint", "util"], protyle);
-            const ctrlIsPressed = event.metaKey || event.ctrlKey;
+            const ctrlIsPressed = isOnlyMeta(event);
             /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

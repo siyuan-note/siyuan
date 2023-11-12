@@ -1,4 +1,4 @@
-import {openByMobile, writeText} from "../util/compatibility";
+import {isOnlyMeta, openByMobile, writeText} from "../util/compatibility";
 import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
@@ -98,7 +98,7 @@ export class Preview {
                     event.preventDefault();
                     if (isLocalPath(linkAddress)) {
                         /// #if !MOBILE
-                        if (event.metaKey || event.ctrlKey) {
+                        if (isOnlyMeta(event)) {
                             openBy(linkAddress, "folder");
                         } else if (event.shiftKey) {
                             openBy(linkAddress, "app");

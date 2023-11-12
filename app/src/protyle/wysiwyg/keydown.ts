@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {copyPlainText, isCtrl, isMac, writeText} from "../util/compatibility";
+import {copyPlainText, isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -121,7 +121,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (nodeElement.classList.contains("protyle-wysiwyg--select") && !isCtrl(event) && !event.shiftKey && !event.altKey) {
+        if (nodeElement.classList.contains("protyle-wysiwyg--select") && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
             if (event.key.toLowerCase() === "a") {
                 event.stopPropagation();
                 event.preventDefault();
@@ -146,7 +146,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
-        if (!isCtrl(event) && !event.shiftKey && !event.altKey) {
+        if (isNotCtrl(event) && !event.shiftKey && !event.altKey) {
             if (event.code === "Slash") {
                 protyle.hint.enableSlash = true;
             } else if (event.code === "Backslash") {
@@ -171,7 +171,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             (event.code.startsWith("Arrow") || event.code === "Enter") &&
-            !event.altKey && !event.shiftKey && !isCtrl(event)) {
+            !event.altKey && !event.shiftKey && isNotCtrl(event)) {
             event.preventDefault();
             return;
         } else if (event.key !== "Escape") {
@@ -182,7 +182,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             protyle.breadcrumb.hide();
         }
 
-        if (!event.altKey && !event.shiftKey && !isCtrl(event) && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+        if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 event.preventDefault();
@@ -268,7 +268,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // 仅处理以下快捷键操作
         if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
-            !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
+            isNotCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
             event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "ContextMenu") {
             event.stopPropagation();
             hideElements(["select"], protyle);
@@ -470,8 +470,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if ((event.shiftKey && !event.altKey && !isCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) ||
-            (event.shiftKey && !event.altKey && isCtrl(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
+        if ((event.shiftKey && !event.altKey && isNotCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) ||
+            (event.shiftKey && !event.altKey && isOnlyMeta(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
             const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null);
             if (topElement) {
                 // 超级块内已选中某个块
@@ -495,7 +495,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // ctrl+home 光标移动到顶
-        if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
+        if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "Home") {
             goHome(protyle);
             hideElements(["select"], protyle);
             event.stopPropagation();
@@ -503,7 +503,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // ctrl+end 光标移动到尾
-        if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "End") {
+        if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "End") {
             goEnd(protyle);
             hideElements(["select"], protyle);
             event.stopPropagation();
@@ -511,7 +511,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // 向上/下滚动一屏
-        if (!event.altKey && !event.shiftKey && !isCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
+        if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
             if (event.key === "PageUp") {
                 protyle.contentElement.scrollTop = protyle.contentElement.scrollTop - protyle.contentElement.clientHeight;
                 protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
@@ -534,7 +534,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // hint: 上下、回车选择
         if (!event.altKey && !event.shiftKey &&
-            ((event.key.indexOf("Arrow") > -1 && !isCtrl(event)) || event.key === "Enter") &&
+            ((event.key.indexOf("Arrow") > -1 && isNotCtrl(event)) || event.key === "Enter") &&
             !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
             event.stopPropagation();
             event.preventDefault();
@@ -607,7 +607,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const selectText = range.toString();
         // 上下左右光标移动
-        if (!event.altKey && !event.shiftKey && !isCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
+        if (!event.altKey && !event.shiftKey && isNotCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             // 需使用 editabled，否则代码块会把语言字数算入
             const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
@@ -716,7 +716,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
+        // 删除，不可使用 isNotCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if (!event.altKey && (event.key === "Backspace" || event.key === "Delete")) {
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
@@ -853,7 +853,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                     // 代码块中空行 ⌘+Del 异常 https://ld246.com/article/1663166544901
-                    if (nodeElement.classList.contains("code-block") && isCtrl(event) &&
+                    if (nodeElement.classList.contains("code-block") && isOnlyMeta(event) &&
                         range.startContainer.nodeType === 3 && range.startContainer.textContent.substring(range.startOffset - 1, range.startOffset) === "\n") {
                         event.stopPropagation();
                         event.preventDefault();
@@ -939,7 +939,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 回车
-        if (!event.altKey && !event.shiftKey && !isCtrl(event) && event.key === "Enter") {
+        if (!event.altKey && !event.shiftKey && isNotCtrl(event) && event.key === "Enter") {
             event.stopPropagation();
             event.preventDefault();
             enter(nodeElement, range, protyle);
@@ -1535,7 +1535,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // tab 需等待 list 和 table 处理完成
-        if (event.key === "Tab" && !event.ctrlKey && !isCtrl(event) && !event.altKey) {
+        if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
             const tabSpace = window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ");
             if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && selectText !== "") {
@@ -1698,7 +1698,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         /// #endif
 
         // 置于最后，太多快捷键会使用到选中元素
-        if (!isCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
+        if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
             hideElements(["select"], protyle);
         }
     });

@@ -120,7 +120,7 @@ export abstract class Constants {
         9: "⇥",
         13: "↩",
         16: "⇧",
-        17: "⌘",
+        17: "⌃",
         18: "⌥",
         19: "Pause",
         20: "CapsLock",

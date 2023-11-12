@@ -23,7 +23,7 @@ import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
@@ -810,7 +810,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 }
                             }
                         }, Constants.TIMEOUT_DBLCLICK);
-                    } else if (isDblClick && !event.ctrlKey) {
+                    } else if (isDblClick && isNotCtrl(event)) {
                         clearTimeout(clickTimeout);
                         if (isAsset) {
                             /// #if !BROWSER

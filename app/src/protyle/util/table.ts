@@ -2,7 +2,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {getSelectionOffset, focusByWbr, focusByRange, focusBlock} from "./selection";
 import {hasClosestBlock, hasClosestByMatchTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
-import {isCtrl} from "./compatibility";
+import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 
@@ -369,7 +369,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // shift+enter 软换行
-    if (event.key === "Enter" && event.shiftKey && !isCtrl(event) && !event.altKey) {
+    if (event.key === "Enter" && event.shiftKey && isNotCtrl(event) && !event.altKey) {
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
         const oldHTML = nodeElement.outerHTML;
@@ -394,7 +394,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
     // enter 光标跳转到下一行同列
-    if (!isCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
+    if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
         event.preventDefault();
         const trElement = cellElement.parentElement as HTMLTableRowElement;
         if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
@@ -423,7 +423,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
     // tab：光标移向下一个 cell
-    if (event.key === "Tab" && !event.ctrlKey) {
+    if (event.key === "Tab" && isNotCtrl(event)) {
         if (event.shiftKey) {
             // shift + tab 光标移动到前一个 cell
             goPreviousCell(cellElement, range);
@@ -453,7 +453,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    if (event.key === "ArrowUp" && !isCtrl(event) && !event.shiftKey && !event.altKey) {
+    if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
         const startContainer = range.startContainer as HTMLElement;
         let previousBrElement;
         if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
@@ -484,7 +484,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    if (event.key === "ArrowDown" && !isCtrl(event) && !event.shiftKey && !event.altKey) {
+    if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
         const endContainer = range.endContainer as HTMLElement;
         let nextBrElement;
         if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
@@ -520,7 +520,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // Backspace：光标移动到前一个 cell
-    if (!isCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Backspace"
+    if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Backspace"
         && getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === 0 && range.toString() === "" &&
         // 空换行无法删除 https://github.com/siyuan-note/siyuan/issues/2732
         (range.startOffset === 0 || (range.startOffset === 1 && cellElement.querySelectorAll("br").length === 1))) {

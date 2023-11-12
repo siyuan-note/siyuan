@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {Menu} from "../../../plugin/Menu";
 import {updateAttrViewCellAnimation} from "./action";
-import {isCtrl} from "../../util/compatibility";
+import {isNotCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
@@ -444,7 +444,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 return;
             }
             if (event.key === "Escape" ||
-                (event.key === "Enter" && !event.shiftKey && !isCtrl(event))) {
+                (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValue(protyle, type, cellElements);
                 event.preventDefault();
                 event.stopPropagation();

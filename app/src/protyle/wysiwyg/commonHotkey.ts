@@ -301,7 +301,14 @@ export const goEnd = (protyle: IProtyle) => {
             mode: 4,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS]});
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [Constants.CB_GET_FOCUS],
+                afterCB() {
+                    focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+                }
+            });
         });
     } else {
         protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;

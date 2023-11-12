@@ -129,6 +129,7 @@
       .av__cell {
         padding: 0;
         transition: background 20ms ease-in 0s;
+        display: flex;
 
         &:hover {
           background-color: var(--b3-list-icon-hover);
@@ -213,7 +214,8 @@
     padding: 5px;
     flex-shrink: 0;
     border-right: 1px solid var(--b3-theme-surface-lighter);
-    display: flex;
+    overflow: hidden;
+    //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
     [data-type="block-ref"],
     [data-type="block-more"] {

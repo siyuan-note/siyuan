@@ -1,4 +1,6 @@
 {
+  "freezeCol": "Geler la colonne",
+  "unfreezeCol": "Dégeler la colonne",
   "snippetsTip": "L'extrait de code a été mis à jour, voulez-vous le sauvegarder ?",
   "addBelowAbove": "Cliquez pour ajouter ci-dessous<br>⌥Cliquez pour ajouter ci-dessus",
   "imported": "Importation terminée",

@@ -1,4 +1,6 @@
 {
+  "freezeCol": "Freeze column",
+  "unfreezeCol": "Unfreeze column",
   "snippetsTip": "The code snippet has been updated, do you want to save it?",
   "addBelowAbove": "Click to add below<br>⌥Click to add above",
   "imported": "Import completed",

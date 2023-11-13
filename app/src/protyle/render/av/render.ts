@@ -6,7 +6,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
-import {stickyScrollY} from "../../scroll/stickyScroll";
+import {avScroll} from "./scroll";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -62,7 +62,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}"
+                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="false"
 style="width: ${column.width || "200px"};">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
@@ -229,17 +229,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
-                    const bodyElement = e.querySelector<HTMLElement>(".av__body");
-                    if (bodyElement) {
-                        const headerElement = bodyElement.querySelector<HTMLElement>(".av__row--header");
-                        const footerElement = bodyElement.querySelector<HTMLElement>(".av__row--footer");
-                        stickyScrollY(
-                            protyle.contentElement,
-                            bodyElement as HTMLElement,
-                            headerElement ? [{element: headerElement}] : [],
-                            footerElement ? [{element: footerElement}] : [],
-                        );
-                    }
+                    avScroll(protyle.contentElement, e);
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {

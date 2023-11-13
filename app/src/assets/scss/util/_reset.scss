@@ -68,6 +68,10 @@ body {
         padding-left: 10px;
         padding-right: 108px;
       }
+
+      & > .block__icons > .search__label {
+        right: 108px;
+      }
     }
   }
 

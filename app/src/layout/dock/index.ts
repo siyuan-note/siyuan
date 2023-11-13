@@ -331,11 +331,11 @@ export class Dock {
                 } else {
                     this.layout.element.style.height = "0px";
                 }
-                if (document.querySelector("body").classList.contains("body--win32")) {
-                    document.getElementById("drag").classList.remove("fn__hidden");
-                }
                 this.resizeElement.classList.add("fn__none");
                 this.hideDock();
+            }
+            if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
+                document.getElementById("drag")?.classList.remove("fn__hidden");
             }
             // 关闭 dock 后设置光标
             if (!document.querySelector(".layout__center .layout__wnd--active")) {
@@ -483,9 +483,8 @@ export class Dock {
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
             }
-            if ((type === "graph" || type === "globalGraph") &&
-                document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
-                document.getElementById("drag").classList.add("fn__hidden");
+            if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
+                document.getElementById("drag")?.classList.add("fn__hidden");
             }
             if (this.pin) {
                 this.layout.element.style.opacity = "";

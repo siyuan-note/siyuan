@@ -1463,36 +1463,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 复制块不能单纯的 BlockDOM2StdMd，否则 https://github.com/siyuan-note/siyuan/issues/9362
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
-            if (selectText === "") {
-                const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-                let html = "";
-                if (selectsElement.length === 0) {
-                    selectsElement.push(nodeElement);
-                }
-                selectsElement.forEach(item => {
-                    // 不能使用 [contenteditable="true"], 否则嵌入块无法复制
-                    item.querySelectorAll("[spellcheck]").forEach(editItem => {
-                        const cloneNode = editItem.cloneNode(true) as HTMLElement;
-                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
-                            slashItem.firstElementChild.remove();
-                        });
-                        html += cloneNode.textContent + "\n";
-                    });
-                });
-                copyPlainText(html.trimEnd());
-            } else {
-                const cloneContents = range.cloneContents();
-                cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
-                    item.firstElementChild.remove();
-                });
-                writeText(cloneContents.textContent);
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-
         if (matchHotKey(window.siyuan.config.keymap.editor.general.vLayout.custom, event)) {
             event.preventDefault();
             event.stopPropagation();

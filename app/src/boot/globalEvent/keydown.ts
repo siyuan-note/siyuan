@@ -1,4 +1,11 @@
-import {isMac, isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../../protyle/util/compatibility";
+import {
+    copyPlainText,
+    isMac,
+    isNotCtrl,
+    isOnlyMeta,
+    updateHotkeyTip,
+    writeText
+} from "../../protyle/util/compatibility";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {openSearch} from "../../search/spread";
 import {
@@ -311,6 +318,38 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     if (target.tagName !== "TABLE" && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!nodeElement) {
+            return false;
+        }
+        if (range.toString() === "") {
+            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let html = "";
+            if (selectsElement.length === 0) {
+                selectsElement.push(nodeElement);
+            }
+            selectsElement.forEach(item => {
+                // 不能使用 [contenteditable="true"], 否则嵌入块无法复制
+                item.querySelectorAll("[spellcheck]").forEach(editItem => {
+                    const cloneNode = editItem.cloneNode(true) as HTMLElement;
+                    cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
+                        slashItem.firstElementChild.remove();
+                    });
+                    html += cloneNode.textContent + "\n";
+                });
+            });
+            copyPlainText(html.trimEnd());
+        } else {
+            const cloneContents = range.cloneContents();
+            cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
+                item.firstElementChild.remove();
+            });
+            writeText(cloneContents.textContent);
+        }
+        event.preventDefault();
+        return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
         reloadProtyle(protyle, true);

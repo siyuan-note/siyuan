@@ -41,7 +41,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (copyElement) {
         const textElement = copyElement.previousElementSibling
         if (textElement.querySelector(".av__cellicon")) {
-            writeText(`${textElement.firstChild.textContent} ➡️ ${textElement.lastChild.textContent}`);
+            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
         } else {
             writeText(textElement.textContent);
         }

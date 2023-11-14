@@ -74,7 +74,7 @@ func removeDuplicateDatabaseRefs() {
 	}
 
 	if 0 < len(duplicatedRootIDs) {
-		logging.LogWarnf("exist more than one ref duplicated [%d], reindex it", duplicatedRootIDs)
+		logging.LogWarnf("exist more than one ref duplicated [%d], reindex it", len(duplicatedRootIDs))
 	}
 }
 

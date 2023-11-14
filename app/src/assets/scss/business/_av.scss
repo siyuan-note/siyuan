@@ -207,7 +207,6 @@
 
     &--add {
       color: var(--b3-theme-on-surface);
-      transition: background 20ms ease-in 0s;
       font-size: 87.5%;
       align-items: center;
       display: flex;
@@ -215,6 +214,10 @@
       .av__colsticky {
         align-items: center;
         background-color: transparent;
+      }
+
+      .av__cell--add {
+        padding: 0 0.25em;
       }
 
       &:hover {

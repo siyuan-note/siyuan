@@ -32,16 +32,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (event.shiftKey) {
         const rowElement = hasClosestByClassName(event.target, "av__row");
         if (rowElement && !rowElement.classList.contains("av__row--header")) {
-            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+            selectRow(rowElement.querySelector(".av__check"), "toggle");
             return true;
         }
     }
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
-        const textElement = copyElement.previousElementSibling;
+        const textElement = copyElement.previousElementSibling
         if (textElement.querySelector(".av__cellicon")) {
-            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
+            writeText(`${textElement.firstChild.textContent} ➡️ ${textElement.lastChild.textContent}`);
         } else {
             writeText(textElement.textContent);
         }
@@ -68,11 +68,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
-    if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
+    const gutterElement = hasClosestByClassName(event.target, "av__gutter");
+    if (gutterElement) {
         const rowElement = hasClosestByClassName(gutterElement, "av__row");
         if (!rowElement) {
-            return;
+            return
         }
         if (gutterElement.dataset.action === "add") {
             const avID = blockElement.getAttribute("data-av-id");
@@ -104,7 +104,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const checkElement = hasClosestByClassName(event.target, "av__firstcol");
+    const checkElement = hasClosestByClassName(event.target, "av__check");
     if (checkElement) {
         window.siyuan.menus.menu.remove();
         selectRow(checkElement, "toggle");
@@ -204,9 +204,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !hasClosestByClassName(cellElement, "av__row--header")) {
-        const scrollElement = hasClosestByClassName(cellElement, "av__scroll");
+        const scrollElement = hasClosestByClassName(cellElement, "av__scroll")
         if (!scrollElement) {
-            return;
+            return
         }
         const rowElement = hasClosestByClassName(cellElement, "av__row");
         if (!rowElement) {
@@ -214,10 +214,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         }
         const type = getTypeByCellElement(cellElement);
         if (type === "updated" || type === "created" || (type === "block" && !cellElement.getAttribute("data-detached"))) {
-            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+            selectRow(cellElement.parentElement.querySelector(".av__check"), "toggle");
         } else {
             scrollElement.querySelectorAll(".av__row--select").forEach(item => {
-                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+                item.querySelector(".av__check use").setAttribute("xlink:href", "#iconUncheck");
                 item.classList.remove("av__row--select");
             });
             updateHeader(rowElement);
@@ -273,7 +273,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
         });
-        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
+        blockElement.querySelectorAll(".av__check use").forEach(item => {
             item.setAttribute("xlink:href", "#iconUncheck");
         });
     }
@@ -283,7 +283,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         return true;
     }
     rowElement.classList.add("av__row--select");
-    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+    rowElement.querySelector(".av__check use").setAttribute("xlink:href", "#iconCheck");
     const rowIds: string[] = [];
     const blockIds: string[] = [];
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");

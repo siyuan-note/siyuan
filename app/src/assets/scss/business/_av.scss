@@ -140,6 +140,8 @@
     &--header,
     &--footer {
       background-color: var(--av-background);
+      position: relative;
+      z-index: 2;
     }
 
     &--footer {

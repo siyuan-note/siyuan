@@ -111,32 +111,40 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxDirPath := filepath.Join(util.DataDir, dir.Name())
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
-		if !filelock.IsExist(boxConfPath) {
+		isExistConf := filelock.IsExist(boxConfPath)
+		if !isExistConf {
 			// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
 			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
-			continue
-		}
-
-		data, readErr := filelock.ReadFile(boxConfPath)
-		if nil != readErr {
-			logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
-			continue
-		}
-		if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
-			logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-			os.RemoveAll(boxConfPath)
-			continue
+		} else {
+			data, readErr := filelock.ReadFile(boxConfPath)
+			if nil != readErr {
+				logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+				continue
+			}
+			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
+				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+				os.RemoveAll(boxConfPath)
+				continue
+			}
 		}
 
 		id := dir.Name()
-		ret = append(ret, &Box{
+		box := &Box{
 			ID:       id,
 			Name:     boxConf.Name,
 			Icon:     boxConf.Icon,
 			Sort:     boxConf.Sort,
 			SortMode: boxConf.SortMode,
 			Closed:   boxConf.Closed,
-		})
+		}
+
+		if !isExistConf {
+			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
+			box.SaveConf(boxConf)
+			box.Unindex()
+			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
+		}
+		ret = append(ret, box)
 	}
 
 	switch Conf.FileTree.Sort {

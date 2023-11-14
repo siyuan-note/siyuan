@@ -39,7 +39,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
-        writeText(copyElement.previousElementSibling.textContent.trim());
+        const textElement = copyElement.previousElementSibling
+        if (textElement.querySelector(".av__cellicon")) {
+            writeText(`${textElement.firstChild.textContent} ➡️ ${textElement.lastChild.textContent}`);
+        } else {
+            writeText(textElement.textContent);
+        }
         showMessage(window.siyuan.languages.copied);
         event.preventDefault();
         event.stopPropagation();

@@ -95,13 +95,6 @@
     float: left;
   }
 
-  &__sticky {
-    display: flex;
-    position: sticky;
-    z-index: 1;
-    left: 0;
-  }
-
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
@@ -156,16 +149,6 @@
       }
     }
 
-    &--add {
-      .av__firstcol svg {
-        opacity: 1;
-      }
-
-      &:hover {
-        background-color: var(--b3-list-icon-hover);
-      }
-    }
-
     &--header,
     &--footer {
       background-color: var(--av-background);
@@ -185,9 +168,9 @@
         opacity: 1;
       }
 
-      .av__colsticky {
-        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
-      }
+      // .av__colsticky {
+      //   background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+      // }
 
       .av__calc {
         display: flex;
@@ -231,14 +214,7 @@
 
       .av__colsticky {
         align-items: center;
-
-        svg {
-          height: 14px;
-          width: 14px;
-          color: var(--b3-theme-on-surface);
-          padding: 10px 10px 10px 5px;
-          flex-shrink: 0;
-        }
+        background-color: transparent;
       }
 
       &:hover {
@@ -281,13 +257,6 @@
       background-color: var(--b3-theme-primary-lightest);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;
       border-radius: var(--b3-border-radius);
-    }
-
-    &--add {
-      position: sticky;
-      left: 25px;
-      font-size: 87.5%;
-      padding: 0 0.5em;
     }
 
     .block__icon {
@@ -342,7 +311,6 @@
   }
 
   &__firstcol {
-    background-color: var(--b3-theme-background);
     border-right: 1px solid var(--b3-theme-surface-lighter);
     width: 24px;
 
@@ -355,6 +323,7 @@
       box-sizing: border-box;
       float: left;
     }
+
   }
 
   &__colsticky {
@@ -362,11 +331,7 @@
     left: 0;
     z-index: 1;
     display: flex;
-
-    &.av__firstcol,
-    & > div {
-      background-color: var(--av-background);
-    }
+    background-color: var(--av-background);
   }
 
   &__widthdrag {
@@ -452,10 +417,8 @@
 .protyle-wysiwyg--hl {
   .av__row--header,
   .av__row--footer,
-  .av__row--footer .av__colsticky,
   .av__row--select .av__cell,
-  .av__colsticky.av__firstcol,
-  .av__colsticky > div,
+  .av__colsticky,
   .av__counter {
     background-color: var(--b3-av-background-hl);
   }
@@ -465,16 +428,13 @@
 .dragover__bottom {
   .av__colsticky {
     z-index: 0;
-
-    & > div {
-      background-color: transparent;
-    }
+    background-color: transparent;
   }
 }
 
 .dragover__bottom + .av__row,
 .av__row:has(+ .dragover__top) {
-  .av__colsticky > div {
+  .av__colsticky {
     background-color: transparent;
   }
 }

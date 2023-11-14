@@ -47,7 +47,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     const selectCount = rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
     const diffCount = rowElement.parentElement.childElementCount - 3 - selectCount;
     const headElement = rowElement.parentElement.firstElementChild;
-    const headUseElement = headElement.querySelector("use");
+    const headUseElement = headElement.querySelector(".av__check use");
     const counterElement = blockElement.querySelector(".av__counter");
     const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
     if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {

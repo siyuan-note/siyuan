@@ -902,7 +902,12 @@ func upgradeUserGuide() {
 		boxConf := conf.NewBoxConf()
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		if !filelock.IsExist(boxConfPath) {
-			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			logging.LogWarnf("found a corrupted user guide box [%s]", boxDirPath)
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
+			} else {
+				logging.LogInfof("removed corrupted user guide box [%s]", boxDirPath)
+			}
 			continue
 		}
 

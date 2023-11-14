@@ -1,4 +1,6 @@
 {
+  "freezeCol": "固定列",
+  "unfreezeCol": "取消列固定",
   "snippetsTip": "程式碼片段已更新，是否儲存？",
   "addBelowAbove": "Click 在下方新增<br>⌥Click 在上方新增",
   "imported": "導入完成",

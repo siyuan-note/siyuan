@@ -38,14 +38,10 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
     const isFullscreen = element.className.includes("fullscreen");
     if (isFullscreen) {
         element.classList.remove("fullscreen");
-        if (document.querySelector("body").classList.contains("body--win32")) {
-            document.getElementById("drag")?.classList.remove("fn__hidden");
-        }
+        document.getElementById("drag")?.classList.remove("fn__hidden");
     } else {
         element.classList.add("fullscreen");
-        if (document.querySelector("body").classList.contains("body--win32")) {
-            document.getElementById("drag")?.classList.add("fn__hidden");
-        }
+        document.getElementById("drag")?.classList.add("fn__hidden");
     }
 
     if (btnElement) {

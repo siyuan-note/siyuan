@@ -175,9 +175,13 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     if (!blockElement) {
         return;
     }
-    calcElement.parentElement.classList.add("av__row--show");
+    const rowElement = hasClosestByClassName(calcElement, "av__row--footer");
+    if (!rowElement) {
+        return;
+    }
+    rowElement.classList.add("av__row--show");
     const menu = new Menu("av-calc", () => {
-        calcElement.parentElement.classList.remove("av__row--show");
+        rowElement.classList.remove("av__row--show");
     });
     if (menu.isOpen) {
         return;
@@ -346,14 +350,28 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
 };
 
-export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect, onlyHeight = true) => {
+export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Element, onlyHeight = true) => {
+    const cellRect = cellElement.getBoundingClientRect();
     if (!onlyHeight) {
         const avScrollElement = blockElement.querySelector(".av__scroll");
-        const avScrollRect = avScrollElement.getBoundingClientRect();
-        if (avScrollRect.left > cellRect.left) {
-            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
-        } else if (avScrollRect.right < cellRect.right) {
-            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+        if (avScrollElement) {
+            const avScrollRect = avScrollElement.getBoundingClientRect();
+            if (avScrollRect.right < cellRect.right) {
+                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
+            } else {
+                const rowElement = hasClosestByClassName(cellElement, "av__row");
+                if (rowElement) {
+                    const stickyElement = rowElement.querySelector(".av__colsticky");
+                    if (stickyElement) {
+                        const stickyRight = stickyElement.getBoundingClientRect().right
+                        if (stickyRight > cellRect.left) {
+                            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                        }
+                    } else if (avScrollRect.left > cellRect.left) {
+                        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
+                    }
+                }
+            }
         }
     }
     if (!blockElement.querySelector(".av__header")) {
@@ -377,9 +395,17 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellRect: DOMRect,
     }
 };
 
+export const getTypeByCellElement = (cellElement: Element) => {
+    const scrollElement = hasClosestByClassName(cellElement, "av__scroll")
+    if (!scrollElement) {
+        return;
+    }
+    return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+}
+
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
     if (!type) {
-        type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+        type = getTypeByCellElement(cellElements[0])
     }
     if (type === "updated" || type === "created") {
         return;
@@ -396,7 +422,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
         }
         /// #else
-        cellScrollIntoView(blockElement, cellRect);
+        cellScrollIntoView(blockElement, cellElements[0], false);
         /// #endif
     }
     cellRect = cellElements[0].getBoundingClientRect();
@@ -406,14 +432,17 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
-    } else if (["select", "mSelect"].includes(type) && blockElement) {
-        openMenuPanel({protyle, blockElement, type: "select", cellElements});
-        return;
-    } else if (type === "mAsset" && blockElement) {
-        openMenuPanel({protyle, blockElement, type: "asset", cellElements});
-        return;
-    } else if (type === "date" && blockElement) {
-        openMenuPanel({protyle, blockElement, type: "date", cellElements});
+    } else if (blockElement) {
+        if (["select", "mSelect"].includes(type)) {
+            openMenuPanel({protyle, blockElement, type: "select", cellElements});
+        } else if (type === "mAsset") {
+            openMenuPanel({protyle, blockElement, type: "asset", cellElements});
+        } else if (type === "date") {
+            openMenuPanel({protyle, blockElement, type: "date", cellElements});
+        }
+        if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+            cellElements[0].classList.add("av__cell--select");
+        }
         return;
     }
     window.siyuan.menus.menu.remove();
@@ -459,12 +488,16 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
 };
 
 const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
+    const rowElement = hasClosestByClassName(cellElements[0], "av__row");
+    if (!rowElement) {
+        return;
+    }
     if (!document.contains(cellElements[0]) && cellElements.length === 1) {
         // 原始 cell 已被更新
-        const avid = cellElements[0].parentElement.dataset.avid;
+        const avid = rowElement.dataset.avid;
         if (avid) {
             // 新增行后弹出的输入框
-            const previousId = cellElements[0].parentElement.dataset.previousId;
+            const previousId = rowElement.dataset.previousId;
             cellElements[0] = protyle.wysiwyg.element.querySelector(previousId ? `[data-av-id="${avid}"] .av__row[data-id="${previousId}"]` : `[data-av-id="${avid}"] .av__row--header`).nextElementSibling.querySelector('[data-detached="true"]');
         } else {
             // 修改单元格后立即修改其他单元格
@@ -474,7 +507,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             }
         }
     }
-    if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !cellElements[0].parentElement.dataset.id) {
+    if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !rowElement.dataset.id) {
         return;
     }
     const blockElement = hasClosestBlock(cellElements[0]);
@@ -514,10 +547,16 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             const rowID = rowElement.getAttribute("data-id");
             const cellId = item.getAttribute("data-id");
             const colId = item.getAttribute("data-col-id");
-            const inputValue: { content: string | number, isNotEmpty?: boolean } = {
+            const inputValue: {
+                content: string | number,
+                isNotEmpty?: boolean
+            } = {
                 content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
             };
-            const oldValue: { content: string | number, isNotEmpty?: boolean } = {
+            const oldValue: {
+                content: string | number,
+                isNotEmpty?: boolean
+            } = {
                 content: type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim()
             };
             if (type === "number") {

@@ -84,6 +84,8 @@ html {
   & > .block__icons > .fn__flex-1 {
     -webkit-app-region: drag;
     min-width: 32px;
+    height: 100%;
+    box-sizing: border-box;
 
     &:hover {
       border-radius: var(--b3-border-radius-b);
@@ -316,7 +318,8 @@ html {
 }
 
 .file-tree {
-  &:hover .block__icons .block__icon:not([disabled]) {
+  &:hover .block__icons .block__icon:not([disabled]),
+  &.fullscreen .block__icons .block__icon:not([disabled]) {
     opacity: 1;
   }
 

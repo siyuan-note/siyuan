@@ -90,7 +90,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons" data-id="${id}">
+                html += `<div class="block__icons av__row" data-id="${id}">
     <div class="block__logo">
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>

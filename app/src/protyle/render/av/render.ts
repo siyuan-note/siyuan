@@ -6,6 +6,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
+import {hasClosestByClassName} from "../../util/hasClosest";
 import {avScroll} from "./scroll";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
@@ -44,34 +45,57 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
-                selectCellId = selectCellElement.parentElement.dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
+                selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
             }
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = `<div class="av__row av__row--header">
-    <div class="av__sticky">
-        <div class="av__firstcol av__check">
-            <svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg>
-        </div>
-    </div>`;
-                let calcHTML = "";
-                data.columns.forEach((column: IAVColumn) => {
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                let calcHTML = '<div style="width: 24px"></div>';
+                let pinIndex = -1;
+                let pinMaxIndex = -1;
+                let indexWidth = 0;
+                const eWidth = e.clientWidth;
+                data.columns.forEach((item, index) => {
+                    if (!item.hidden) {
+                        if (item.pin) {
+                            pinIndex = index;
+                        }
+                        if (indexWidth < eWidth - 200) {
+                            indexWidth += parseInt(item.width) || 200;
+                            pinMaxIndex = index;
+                        }
+                    }
+                })
+                pinIndex = Math.min(pinIndex, pinMaxIndex);
+                if (pinIndex > -1) {
+                    tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>'
+                    calcHTML = '<div class="av__colsticky"><div style="width: 24px"></div>'
+                }
+                data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="false"
-style="width: ${column.width || "200px"};">
+                    tableHTML += `<div class="av__cell" data-col-id="${column.id}" 
+data-icon="${column.icon}" data-dtype="${column.type}"  data-pin="${column.pin}" 
+style="width: ${column.width || "200px"};
+${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
+                    if (pinIndex === index) {
+                        tableHTML += '</div>'
+                    }
                     calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+                    if (pinIndex === index) {
+                        calcHTML += '</div>'
+                    }
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -83,14 +107,15 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
 <div class="av__gutters">
-    <button class="av__gutter ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
-    <button class="av__gutter ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
-</div>
-<div class="av__sticky">
-    <div class="av__firstcol av__check">
-        <svg><use xlink:href="#iconUncheck"></use></svg>
-    </div>
+    <button class="ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+    <button class="ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
 </div>`;
+                    if (pinIndex > -1) {
+                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>'
+                    } else {
+                        tableHTML += `<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>`
+                    }
+
                     row.cells.forEach((cell, index) => {
                         if (data.columns[index].hidden) {
                             return;
@@ -151,13 +176,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             });
                             if (!text) {
                                 text = '<span class="av__celltext"></span>';
-                            } else {
-                                text = `<span class="av__celltext">${text}</span>`;
                             }
                         }
                         if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType)) {
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
-                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto; left:5px;"'} data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}" data-wrap="${data.columns[index].wrap}"
@@ -167,6 +190,10 @@ style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
+
+                        if (pinIndex === index) {
+                            tableHTML += '</div>'
+                        }
                     });
                     tableHTML += "<div></div></div>";
                 });
@@ -178,7 +205,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 </div>`;
                 });
                 setTimeout(() => {
-                    e.firstElementChild.outerHTML = `<div class="av__container">
+                    e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
@@ -205,21 +232,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
-                <div class="av__sticky">
-                    <div class="av__firstcol">
-                        <svg><use xlink:href="#iconAdd"></use></svg>
-                    </div>
-                </div>
-                <div class="av__cell--add">
+                <div class="av__colsticky">
+                    <svg><use xlink:href="#iconAdd"></use></svg>
                     ${window.siyuan.languages.addAttr}
                 </div>
             </div>
-            <div class="av__row--footer">
-                <div class="av__sticky">
-                    <div class="av__firstcol"></div>
-                </div>
-                ${calcHTML}
-            </div>
+            <div class="av__row--footer"><div style="width: 24px"></div>${calcHTML}</div>
         </div>
     </div>
 </div>`;
@@ -235,7 +253,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                         if (newCellElement) {
                             newCellElement.classList.add("av__cell--select");
                         }
-                        focusBlock(e);
+                        if (!document.querySelector(".av__panel")) {
+                            focusBlock(e);
+                        }
                     }
                     if (cb) {
                         cb();
@@ -282,7 +302,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
             avRender(item, protyle, () => {
                 // https://github.com/siyuan-note/siyuan/issues/9599
                 if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached) {
-                    popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] > .av__cell[data-detached="true"]`)], "block");
+                    popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
                 }
             });
         });

@@ -54,7 +54,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
     const undoOperations: IOperation[] = [];
     let newData: IAVCellSelectValue[];
     cellElements.forEach((item, elementIndex) => {
-        const rowID = item.parentElement.dataset.id;
+        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         const cellId = item.dataset.id;
         let cellData: IAVCell;
         data.view.rows.find(row => {
@@ -157,7 +157,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         } else {
             cellElements.forEach((cellElement: HTMLMediaElement) => {
                 data.view.rows.find(row => {
-                    if (row.id === cellElement.parentElement.dataset.id) {
+                    if (row.id === (hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id) {
                         row.cells.find(cell => {
                             if (cell.id === cellElement.dataset.id) {
                                 cell.value.mSelect.find((item) => {
@@ -235,7 +235,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
-                            if (row.id === cellElement.parentElement.dataset.id) {
+                            if (row.id === (hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id) {
                                 row.cells.find(cell => {
                                     if (cell.id === cellElement.dataset.id) {
                                         cell.value.mSelect.find((item, index) => {
@@ -314,7 +314,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
-                            if (row.id === cellElement.parentElement.dataset.id) {
+                            if (row.id === (hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id) {
                                 row.cells.find(cell => {
                                     if (cell.id === cellElement.dataset.id) {
                                         cell.value.mSelect.find((item) => {
@@ -394,8 +394,6 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement);
         } else if (event.key === "Backspace" && inputElement.value === "") {
             removeCellOption(protyle, data, cellElements, inputElement.previousElementSibling as HTMLElement);
-        } else if (event.key === "Escape") {
-            menuElement.parentElement.remove();
         }
     });
 };
@@ -413,14 +411,18 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         return;
     }
 
-    const colId = cellElements[0].dataset.colId;
+    const rowElement = hasClosestByClassName(cellElements[0], "av__row");
+    if (!rowElement) {
+        return;
+    }
     let cellIndex: number;
-    Array.from(cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
+    Array.from(rowElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
         }
     });
+    const colId = cellElements[0].dataset.colId;
     let colData: IAVColumn;
     data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
@@ -436,8 +438,12 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     const cellUndoOperations: IOperation[] = [];
     let newValue: IAVCellSelectValue[];
     cellElements.forEach((item, index) => {
+        const itemRowElement = hasClosestByClassName(item, "av__row");
+        if (!itemRowElement) {
+            return;
+        }
         let cellData: IAVCell;
-        const rowID = item.parentElement.dataset.id;
+        const rowID = itemRowElement.dataset.id;
         data.view.rows.find(row => {
             if (row.id === rowID) {
                 if (typeof cellIndex === "number") {
@@ -553,7 +559,8 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
 
     let allUniqueOptions: IAVCellSelectValue[] = [];
     data.rows.find(row => {
-        if (cellElements[0].parentElement.dataset.id === row.id) {
+        const rowElement = hasClosestByClassName(cellElements[0], "av__row");
+        if (rowElement && rowElement.dataset.id === row.id) {
             row.cells.find(cell => {
                 if (cell.id === cellElements[0].dataset.id) {
                     if (cell.value && cell.value.mSelect) {

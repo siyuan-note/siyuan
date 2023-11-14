@@ -13,6 +13,7 @@ import {previewImage} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
+import {hasClosestByClassName} from "../../util/hasClosest";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -49,7 +50,7 @@ export const bindAssetEvent = (options: {
 
 export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     const cellId = cellElements[0].dataset.id;
-    const rowId = cellElements[0].parentElement.dataset.id;
+    const rowId = (hasClosestByClassName(cellElements[0], "av__row") as HTMLElement).dataset.id;
     let cellData: IAVCell;
     data.rows.find(row => {
         if (row.id === rowId) {
@@ -112,7 +113,7 @@ export const updateAssetCell = (options: {
     removeContent?: string
 }) => {
     let cellIndex: number;
-    Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
+    Array.from((hasClosestByClassName(options.cellElements[0], "av__row") as HTMLElement).querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === options.cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
@@ -124,7 +125,7 @@ export const updateAssetCell = (options: {
     let newValue: IAVCellAssetValue[] = [];
     options.cellElements.forEach((item, elementIndex) => {
         let cellData: IAVCell;
-        const rowID = item.parentElement.dataset.id;
+        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
                 if (typeof cellIndex === "number") {

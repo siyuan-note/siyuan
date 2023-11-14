@@ -706,7 +706,13 @@ app.whenReady().then(() => {
             return hasMatch;
         }
     });
-    ipcMain.once("siyuan-event", (event) => {
+
+    const initEventId = [];
+    ipcMain.on("siyuan-event", (event) => {
+        if (initEventId.includes(event.sender.id)) {
+            return;
+        }
+        initEventId.push(event.sender.id);
         const currentWindow = getWindowByContentId(event.sender.id);
         currentWindow.on("focus", () => {
             event.sender.send("siyuan-event", "focus");

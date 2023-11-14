@@ -1270,15 +1270,20 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             }
         }
 
-        if (window.siyuan.dialogs.length > 0) {
-            window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
+        // 需放在 menus 后，否则资源列中添加资源会先关闭菜单
+        // 需放在 dialog 前，否则属性面板中修改日期会先关闭 dialog，只剩修改界面
+        const avElement = document.querySelector(".av__panel");
+        if (avElement) {
+            const selectCellElement = document.querySelector(".av__cell--select")
+            if (selectCellElement) {
+                focusBlock(hasClosestBlock(selectCellElement) as HTMLElement);
+            }
+            avElement.remove();
             return;
         }
 
-        // 需放在 menus 后，否则资源列中添加资源会先关闭菜单
-        const avElement = document.querySelector(".av__panel");
-        if (avElement) {
-            avElement.remove();
+        if (window.siyuan.dialogs.length > 0) {
+            window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
             return;
         }
 

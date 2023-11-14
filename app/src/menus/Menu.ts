@@ -1,4 +1,4 @@
-import {getEventName, isCtrl, updateHotkeyTip} from "../protyle/util/compatibility";
+import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";

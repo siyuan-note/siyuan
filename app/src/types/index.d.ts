@@ -27,6 +27,7 @@ type TOperation =
     | "updateAttrViewColTemplate"
     | "sortAttrViewRow"
     | "sortAttrViewCol"
+    | "setAttrViewColPin"
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
@@ -1029,11 +1030,12 @@ interface IAVSort {
 }
 
 interface IAVColumn {
-    width: number,
+    width: string,
     icon: string,
     id: string,
     name: string,
     wrap: boolean,
+    pin: boolean,
     hidden: boolean,
     type: TAVCol,
     numberFormat: string,

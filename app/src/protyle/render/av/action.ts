@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {openCalcMenu, popTextCell} from "./cell";
+import {getTypeByCellElement, openCalcMenu, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {insertAttrViewBlockAnimation, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -70,7 +70,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
     if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
-        const rowElement = gutterElement.parentElement.parentElement;
+        const rowElement = hasClosestByClassName(gutterElement, "av__row");
+        if (!rowElement) {
+            return
+        }
         if (gutterElement.dataset.action === "add") {
             const avID = blockElement.getAttribute("data-av-id");
             const srcIDs = [Lute.NewNodeID()];
@@ -200,16 +203,24 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
-    if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
-        const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+    if (cellElement && !hasClosestByClassName(cellElement, "av__row--header")) {
+        const scrollElement = hasClosestByClassName(cellElement, "av__scroll")
+        if (!scrollElement) {
+            return
+        }
+        const rowElement = hasClosestByClassName(cellElement, "av__row");
+        if (!rowElement) {
+            return;
+        }
+        const type = getTypeByCellElement(cellElement);
         if (type === "updated" || type === "created" || (type === "block" && !cellElement.getAttribute("data-detached"))) {
-            selectRow(cellElement.parentElement.querySelector(".av__firstcol"), "toggle");
+            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
         } else {
-            cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
+            scrollElement.querySelectorAll(".av__row--select").forEach(item => {
                 item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
                 item.classList.remove("av__row--select");
             });
-            updateHeader(cellElement.parentElement);
+            updateHeader(rowElement);
             popTextCell(protyle, [cellElement]);
         }
         event.preventDefault();
@@ -307,7 +318,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             updateHeader(blockElement.querySelector(".av__row"));
         }
     });
-    if (rowIds.length === 1) {
+    if (rowIds.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
         menu.addSeparator();
         openEditorTab(protyle.app, rowIds[0]);
         menu.addItem({
@@ -410,8 +421,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 };
 
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
-    cellElement.style.opacity = "0.38";
-    cellElement.style.backgroundColor = "var(--b3-theme-surface-light)";
+    cellElement.style.backgroundColor = "var(--b3-av-hover)";
 };
 
 export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {

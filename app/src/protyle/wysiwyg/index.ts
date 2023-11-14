@@ -384,9 +384,12 @@ export class WYSIWYG {
                 let newWidth: string;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 58) + "px";
-                    dragElement.parentElement.parentElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
-                    });
+                    const scrollElement = hasClosestByClassName(dragElement, "av__scroll")
+                    if (scrollElement) {
+                        scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
+                            (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
+                        });
+                    }
                 };
 
                 documentSelf.onmouseup = () => {

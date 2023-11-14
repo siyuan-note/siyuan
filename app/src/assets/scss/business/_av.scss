@@ -11,6 +11,7 @@
   &__pulse {
     width: 70%;
     height: 23px;
+    display: block;
     position: relative;
     overflow: hidden;
     background: var(--b3-border-color);
@@ -27,10 +28,6 @@
       height: 100%;
       width: 100%;
     }
-  }
-
-  &:hover .av__row--footer > .av__calc--show {
-    opacity: 1;
   }
 
   &__header {
@@ -61,7 +58,7 @@
     bottom: 0;
     height: 30px;
     padding: 0 5px;
-    background-color: var(--b3-theme-background);
+    background-color: var(--av-background);
   }
 
   &__gutters {
@@ -116,7 +113,9 @@
     }
 
     &--select {
-      background-color: var(--b3-theme-primary-lightest);
+      .av__cell {
+        background-color: var(--b3-av-hover);
+      }
 
       .av__firstcol svg {
         opacity: 1;
@@ -124,39 +123,45 @@
     }
 
     &--header {
-      z-index: 1;
+      z-index: 3;
 
       .av__cell {
         padding: 0;
         transition: background 20ms ease-in 0s;
         display: flex;
+        overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
 
         &:hover {
-          background-color: var(--b3-list-icon-hover);
+          background-color: var(--b3-av-hover);
         }
       }
     }
 
     &--header,
     &--footer {
-      background-color: var(--b3-theme-background);
+      background-color: var(--av-background);
     }
 
     &--footer {
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
+      position: relative;
+      z-index: 2;
 
-      &:hover > .av__calc,
-      &.av__row--show > .av__calc {
+      &:hover .av__calc,
+      &.av__row--show .av__calc {
         opacity: 1;
       }
 
-      & > .av__calc {
-        transition: opacity 150ms linear, background 20ms ease-in 0s;
+      .av__colsticky {
+        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+      }
+
+      .av__calc {
         display: flex;
         align-items: center;
-        padding: 5px 5px 5px 7px;
+        padding: 5px;
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
@@ -181,29 +186,32 @@
         }
 
         &:hover {
-          background-color: var(--b3-list-icon-hover);
+          background-color: var(--b3-av-hover);
         }
       }
     }
 
     &--add {
       color: var(--b3-theme-on-surface);
-      padding: 5px 5px 5px 7px;
-      display: flex;
-      align-items: center;
       transition: background 20ms ease-in 0s;
       font-size: 87.5%;
+      align-items: center;
+      display: flex;
 
-      svg {
-        height: 12px;
-        width: 12px;
-        color: var(--b3-theme-on-surface);
-        margin-right: 5px;
-        flex-shrink: 0;
+      .av__colsticky {
+        align-items: center;
+
+        svg {
+          height: 14px;
+          width: 14px;
+          color: var(--b3-theme-on-surface);
+          padding: 10px 10px 10px 5px;
+          flex-shrink: 0;
+        }
       }
 
       &:hover {
-        background-color: var(--b3-list-icon-hover);
+        background-color: var(--b3-av-hover);
       }
     }
   }
@@ -300,6 +308,18 @@
     }
   }
 
+  &__colsticky {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    display: flex;
+
+    &.av__firstcol,
+    & > div {
+      background-color: var(--av-background);
+    }
+  }
+
   &__widthdrag {
     position: absolute;
     cursor: col-resize;
@@ -382,7 +402,30 @@
 .protyle-wysiwyg--select,
 .protyle-wysiwyg--hl {
   .av__row--header,
-  .av__row--footer {
+  .av__row--footer,
+  .av__row--footer .av__colsticky,
+  .av__row--select .av__cell,
+  .av__colsticky.av__firstcol,
+  .av__colsticky > div,
+  .av__counter {
+    background-color: var(--b3-av-background-hl);
+  }
+}
+
+.dragover__top,
+.dragover__bottom {
+  .av__colsticky {
+    z-index: 0;
+
+    & > div {
+      background-color: transparent;
+    }
+  }
+}
+
+.dragover__bottom + .av__row,
+.av__row:has(+ .dragover__top) {
+  .av__colsticky > div {
     background-color: transparent;
   }
 }

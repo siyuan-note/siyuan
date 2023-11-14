@@ -27,7 +27,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             const scrollRect = item.querySelector(".av__scroll").getBoundingClientRect()
             const headerElement = item.querySelector(".av__row--header") as HTMLElement;
             if (headerElement) {
-                const distance = elementRect.top - scrollRect.top;
+                const distance = Math.floor(elementRect.top - scrollRect.top);
                 if (distance > 0 && distance < scrollRect.height) {
                     headerElement.style.transform = `translateY(${distance}px)`;
                 } else {
@@ -37,7 +37,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
             if (footerElement) {
                 if (footerElement.querySelector(".av__calc--ashow")) {
-                    const distance = elementRect.bottom - scrollRect.bottom;
+                    const distance = Math.floor(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
                     if (distance < 0 && -distance < scrollRect.height) {
                         footerElement.style.transform = `translateY(${distance}px)`;
                     } else {

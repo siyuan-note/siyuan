@@ -1,27 +1,36 @@
-import {hasClosestBlock} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
-    const rowElement = checkElement.parentElement;
+    const rowElement = hasClosestByClassName(checkElement, "av__row");
+    if (!rowElement) {
+        return
+    }
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                item.parentElement.classList.remove("av__row--select");
+                const rowItemElement = hasClosestByClassName(item, "av__row");
+                if (rowItemElement) {
+                    rowItemElement.classList.remove("av__row--select");
+                }
             });
         } else {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                item.parentElement.classList.add("av__row--select");
+                const rowItemElement = hasClosestByClassName(item, "av__row");
+                if (rowItemElement) {
+                    rowItemElement.classList.add("av__row--select");
+                }
             });
         }
     } else {
         if (type === "select" || (useElement.getAttribute("xlink:href") === "#iconUncheck" && type === "toggle")) {
-            checkElement.parentElement.classList.add("av__row--select");
+            rowElement.classList.add("av__row--select");
             useElement.setAttribute("xlink:href", "#iconCheck");
         } else if (type === "unselect" || (useElement.getAttribute("xlink:href") === "#iconCheck" && type === "toggle")) {
-            checkElement.parentElement.classList.remove("av__row--select");
+            rowElement.classList.remove("av__row--select");
             useElement.setAttribute("xlink:href", "#iconUncheck");
         }
     }
@@ -60,15 +69,21 @@ export const updateHeader = (rowElement: HTMLElement) => {
 
 export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
-    let colHTML = "";
-    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
+    let colHTML = '<div style="width: 24px"></div>';
+    const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
+    if (pinIndex > -1) {
+        colHTML = `<div class="av__colsticky"><div style="width: 24px"></div>`;
+    }
+    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
+        if (pinIndex === index) {
+            colHTML += `</div>`;
+        }
     });
 
     let html = "";
     new Array(size).fill(1).forEach(() => {
         html += `<div class="av__row" data-avid="${avId}" data-previous-id="${previousId}">
-    <div style="width: 24px"></div>
     ${colHTML}
 </div>`;
     });

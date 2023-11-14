@@ -2,13 +2,14 @@ import {transaction} from "../../wysiwyg/transaction";
 import * as dayjs from "dayjs";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
+import {hasClosestByClassName} from "../../util/hasClosest";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
     let cellValue: IAVCell;
     cellElements.forEach((cellElement) => {
         data.rows.find(row => {
-            if (cellElement.parentElement.dataset.id === row.id) {
+            if ((hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id === row.id) {
                 row.cells.find(cell => {
                     if (cell.id === cellElement.dataset.id) {
                         if (!cell.value || !cell.value.date || !cell.value.date.hasEndDate) {
@@ -141,7 +142,7 @@ export const setDateValue = (options: {
     value: IAVCellDateValue
 }) => {
     let cellIndex: number;
-    Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
+    Array.from((hasClosestByClassName(options.cellElements[0], "av__row") as HTMLElement).querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === options.cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
@@ -153,7 +154,7 @@ export const setDateValue = (options: {
     options.cellElements.forEach(item => {
         let cellData: IAVCell;
         let oldValue;
-        const rowID = item.parentElement.dataset.id;
+        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
                 if (typeof cellIndex === "number") {

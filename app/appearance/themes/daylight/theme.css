@@ -55,6 +55,10 @@
     --b3-tooltips-color: var(--b3-theme-background-light);
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
+    /* av */
+    --b3-av-hover: #e8e8e9;
+    --b3-av-background-hl: #e8eefc;
+
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface-light);
 
@@ -92,11 +96,11 @@
     --b3-font-background5: #e2e3e4;
     --b3-font-background6: #acd0fc;
     --b3-font-background7: #fdeed6;
-    --b3-font-background8: rgba(255, 193, 153, 0.5);
+    --b3-font-background8: #fae1cf;
     --b3-font-background9: #fdd5e7;
     --b3-font-background10: #e6c7e6;
     --b3-font-background11: #def0d9;
-    --b3-font-background12: rgba(253, 198, 200, 0.5);
+    --b3-font-background12: #fae3e4;
     --b3-font-background13: var(--b3-theme-on-background);
 
     /* 动画效果 */

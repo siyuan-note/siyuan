@@ -577,6 +577,26 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 }]);
             }
         });
+    }
+    const isPin = cellElement.dataset.pin === "true"
+    menu.addItem({
+        icon: "iconPin",
+        label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
+        click() {
+            transaction(protyle, [{
+                action: "setAttrViewColPin",
+                id: colId,
+                avID,
+                data: !isPin
+            }], [{
+                action: "setAttrViewColPin",
+                id: colId,
+                avID,
+                data: isPin
+            }]);
+        }
+    });
+    if (type !== "block") {
         menu.addItem({
             icon: "iconCopy",
             label: window.siyuan.languages.duplicate,

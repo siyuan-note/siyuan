@@ -852,15 +852,39 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         const avID = blockElement.getAttribute("data-av-id");
+                        let previousID = "";
+                        if (targetClass.includes("dragover__left")) {
+                            if (targetElement.previousElementSibling) {
+                                if (targetElement.previousElementSibling.classList.contains("av__colsticky")) {
+                                    previousID = targetElement.previousElementSibling.lastElementChild.getAttribute("data-col-id")
+                                } else {
+                                    previousID = targetElement.previousElementSibling.getAttribute("data-col-id")
+                                }
+                            }
+                        } else {
+                            previousID = targetElement.getAttribute("data-col-id")
+                        }
+                        let oldPreviousID = "";
+                        const rowElement = hasClosestByClassName(targetElement, "av__row");
+                        if (rowElement) {
+                            const oldPreviousElement = rowElement.querySelector(`[data-col-id="${gutterTypes[2]}"`)?.previousElementSibling
+                            if (oldPreviousElement) {
+                                if (oldPreviousElement.classList.contains("av__colsticky")) {
+                                    oldPreviousID = oldPreviousElement.lastElementChild.getAttribute("data-col-id")
+                                } else {
+                                    oldPreviousID = oldPreviousElement.getAttribute("data-col-id")
+                                }
+                            }
+                        }
                         transaction(protyle, [{
                             action: "sortAttrViewCol",
                             avID,
-                            previousID: (targetClass.includes("dragover__left") ? targetElement.previousElementSibling?.getAttribute("data-col-id") : targetElement.getAttribute("data-col-id")) || "",
+                            previousID,
                             id: gutterTypes[2],
                         }], [{
                             action: "sortAttrViewCol",
                             avID,
-                            previousID: targetElement.parentElement.querySelector(`[data-col-id="${gutterTypes[2]}"`).previousElementSibling?.getAttribute("data-col-id") || "",
+                            previousID: oldPreviousID,
                             id: gutterTypes[2],
                         }]);
                     }
@@ -1111,8 +1135,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}`.toLowerCase())) {
             // 表头只能拖拽到当前 av 的表头中
             targetElement = hasClosestByClassName(event.target, "av__cell");
-            if (targetElement && !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
-                targetElement = false;
+            if (targetElement) {
+                const targetRowElement = hasClosestByClassName(targetElement, "av__row--header")
+                const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header")
+                if (!targetRowElement || !dragRowElement ||
+                    (targetRowElement && dragRowElement && !targetRowElement.isSameNode(dragRowElement))
+                ) {
+                    targetElement = false;
+                }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}`.toLowerCase())) {
             // 行只能拖拽当前 av 中

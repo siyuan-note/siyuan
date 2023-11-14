@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -1008,7 +1009,12 @@ func createTreeTx(tree *parse.Tree) {
 	PerformTransactions(&[]*Transaction{transaction})
 }
 
+var createDocLock = sync.Mutex{}
+
 func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1027,6 +1033,9 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 }
 
 func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1037,6 +1046,81 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	return
+}
+
+func CreateDailyNote(boxID string) (p string, existed bool, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
+	box := Conf.Box(boxID)
+	if nil == box {
+		err = ErrBoxNotFound
+		return
+	}
+
+	boxConf := box.GetConf()
+	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
+		err = errors.New(Conf.Language(49))
+		return
+	}
+
+	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
+	if nil != err {
+		return
+	}
+
+	WaitForWritingFiles()
+
+	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
+	if nil != existRoot {
+		existed = true
+		p = existRoot.Path
+		return
+	}
+
+	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
+	if nil != err {
+		return
+	}
+
+	var dom string
+	if "" != boxConf.DailyNoteTemplatePath {
+		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
+		if !filelock.IsExist(tplPath) {
+			logging.LogWarnf("not found daily note template [%s]", tplPath)
+		} else {
+			dom, err = renderTemplate(tplPath, id, false)
+			if nil != err {
+				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
+			}
+		}
+	}
+	if "" != dom {
+		var tree *parse.Tree
+		tree, err = loadTreeByBlockID(id)
+		if nil == err {
+			tree.Root.FirstChild.Unlink()
+
+			luteEngine := util.NewLute()
+			newTree := luteEngine.BlockDOM2Tree(dom)
+			var children []*ast.Node
+			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
+				children = append(children, c)
+			}
+			for _, c := range children {
+				tree.Root.AppendChild(c)
+			}
+			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+			if err = indexWriteJSONQueue(tree); nil != err {
+				return
+			}
+		}
+	}
+	IncSync()
+
+	b := treenode.GetBlockTree(id)
+	p = b.Path
 	return
 }
 
@@ -1411,78 +1495,6 @@ func RenameDoc(boxID, p, title string) (err error) {
 	box.renameSubTrees(tree)
 	updateRefTextRenameDoc(tree)
 	IncSync()
-	return
-}
-
-func CreateDailyNote(boxID string) (p string, existed bool, err error) {
-	box := Conf.Box(boxID)
-	if nil == box {
-		err = ErrBoxNotFound
-		return
-	}
-
-	boxConf := box.GetConf()
-	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
-		err = errors.New(Conf.Language(49))
-		return
-	}
-
-	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
-	if nil != err {
-		return
-	}
-
-	WaitForWritingFiles()
-
-	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
-	if nil != existRoot {
-		existed = true
-		p = existRoot.Path
-		return
-	}
-
-	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
-	if nil != err {
-		return
-	}
-
-	var dom string
-	if "" != boxConf.DailyNoteTemplatePath {
-		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
-		if !filelock.IsExist(tplPath) {
-			logging.LogWarnf("not found daily note template [%s]", tplPath)
-		} else {
-			dom, err = renderTemplate(tplPath, id, false)
-			if nil != err {
-				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
-			}
-		}
-	}
-	if "" != dom {
-		var tree *parse.Tree
-		tree, err = loadTreeByBlockID(id)
-		if nil == err {
-			tree.Root.FirstChild.Unlink()
-
-			luteEngine := util.NewLute()
-			newTree := luteEngine.BlockDOM2Tree(dom)
-			var children []*ast.Node
-			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
-				children = append(children, c)
-			}
-			for _, c := range children {
-				tree.Root.AppendChild(c)
-			}
-			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-			if err = indexWriteJSONQueue(tree); nil != err {
-				return
-			}
-		}
-	}
-	IncSync()
-
-	b := treenode.GetBlockTree(id)
-	p = b.Path
 	return
 }
 

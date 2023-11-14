@@ -1313,7 +1313,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         // 需放在 dialog 前，否则属性面板中修改日期会先关闭 dialog，只剩修改界面
         const avElement = document.querySelector(".av__panel");
         if (avElement) {
-            const selectCellElement = document.querySelector(".av__cell--select")
+            const selectCellElement = document.querySelector(".av__cell--select");
             if (selectCellElement) {
                 focusBlock(hasClosestBlock(selectCellElement) as HTMLElement);
             }

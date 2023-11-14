@@ -363,7 +363,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
                 if (rowElement) {
                     const stickyElement = rowElement.querySelector(".av__colsticky");
                     if (stickyElement) {
-                        const stickyRight = stickyElement.getBoundingClientRect().right
+                        const stickyRight = stickyElement.getBoundingClientRect().right;
                         if (stickyRight > cellRect.left) {
                             avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
                         }
@@ -396,16 +396,16 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
 };
 
 export const getTypeByCellElement = (cellElement: Element) => {
-    const scrollElement = hasClosestByClassName(cellElement, "av__scroll")
+    const scrollElement = hasClosestByClassName(cellElement, "av__scroll");
     if (!scrollElement) {
         return;
     }
     return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
-}
+};
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
     if (!type) {
-        type = getTypeByCellElement(cellElements[0])
+        type = getTypeByCellElement(cellElements[0]);
     }
     if (type === "updated" || type === "created") {
         return;

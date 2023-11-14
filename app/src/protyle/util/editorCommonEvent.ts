@@ -856,23 +856,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (targetClass.includes("dragover__left")) {
                             if (targetElement.previousElementSibling) {
                                 if (targetElement.previousElementSibling.classList.contains("av__colsticky")) {
-                                    previousID = targetElement.previousElementSibling.lastElementChild.getAttribute("data-col-id")
+                                    previousID = targetElement.previousElementSibling.lastElementChild.getAttribute("data-col-id");
                                 } else {
-                                    previousID = targetElement.previousElementSibling.getAttribute("data-col-id")
+                                    previousID = targetElement.previousElementSibling.getAttribute("data-col-id");
                                 }
                             }
                         } else {
-                            previousID = targetElement.getAttribute("data-col-id")
+                            previousID = targetElement.getAttribute("data-col-id");
                         }
                         let oldPreviousID = "";
                         const rowElement = hasClosestByClassName(targetElement, "av__row");
                         if (rowElement) {
-                            const oldPreviousElement = rowElement.querySelector(`[data-col-id="${gutterTypes[2]}"`)?.previousElementSibling
+                            const oldPreviousElement = rowElement.querySelector(`[data-col-id="${gutterTypes[2]}"`)?.previousElementSibling;
                             if (oldPreviousElement) {
                                 if (oldPreviousElement.classList.contains("av__colsticky")) {
-                                    oldPreviousID = oldPreviousElement.lastElementChild.getAttribute("data-col-id")
+                                    oldPreviousID = oldPreviousElement.lastElementChild.getAttribute("data-col-id");
                                 } else {
-                                    oldPreviousID = oldPreviousElement.getAttribute("data-col-id")
+                                    oldPreviousID = oldPreviousElement.getAttribute("data-col-id");
                                 }
                             }
                         }
@@ -1136,8 +1136,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 表头只能拖拽到当前 av 的表头中
             targetElement = hasClosestByClassName(event.target, "av__cell");
             if (targetElement) {
-                const targetRowElement = hasClosestByClassName(targetElement, "av__row--header")
-                const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header")
+                const targetRowElement = hasClosestByClassName(targetElement, "av__row--header");
+                const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header");
                 if (!targetRowElement || !dragRowElement ||
                     (targetRowElement && dragRowElement && !targetRowElement.isSameNode(dragRowElement))
                 ) {

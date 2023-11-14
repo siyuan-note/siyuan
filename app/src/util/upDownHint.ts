@@ -1,7 +1,7 @@
 export const upDownHint = (listElement: Element, event: KeyboardEvent, classActiveName = "b3-list-item--focus") => {
     let currentHintElement: HTMLElement = listElement.querySelector("." + classActiveName);
     if (!currentHintElement) {
-        return
+        return;
     }
     const className = classActiveName.split("--")[0];
     if (event.key === "ArrowDown") {

@@ -43,7 +43,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                     newCellElement = selectCellElement.previousElementSibling.lastElementChild;
                 }
             } else if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
-                const previousCellElements = previousRowElement.querySelectorAll(".av__cell")
+                const previousCellElements = previousRowElement.querySelectorAll(".av__cell");
                 newCellElement = previousCellElements[previousCellElements.length - 1];
             }
             if (newCellElement) {

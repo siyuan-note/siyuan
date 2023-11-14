@@ -69,11 +69,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                             pinMaxIndex = index;
                         }
                     }
-                })
+                });
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
                 if (pinIndex > -1) {
-                    tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>'
-                    calcHTML = '<div class="av__colsticky"><div style="width: 24px"></div>'
+                    tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                    calcHTML = '<div class="av__colsticky"><div style="width: 24px"></div>';
                 }
                 data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
@@ -90,12 +90,12 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     <div class="av__widthdrag"></div>
 </div>`;
                     if (pinIndex === index) {
-                        tableHTML += '</div>'
+                        tableHTML += "</div>";
                     }
                     calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
                     if (pinIndex === index) {
-                        calcHTML += '</div>'
+                        calcHTML += "</div>";
                     }
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">
@@ -112,9 +112,9 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
     <button class="ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
 </div>`;
                     if (pinIndex > -1) {
-                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>'
+                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
-                        tableHTML += `<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>`
+                        tableHTML += "<div class=\"av__firstcol av__colsticky\"><svg><use xlink:href=\"#iconUncheck\"></use></svg></div>";
                     }
 
                     row.cells.forEach((cell, index) => {
@@ -194,7 +194,7 @@ ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 
                         if (pinIndex === index) {
-                            tableHTML += '</div>'
+                            tableHTML += "</div>";
                         }
                     });
                     tableHTML += "<div></div></div>";

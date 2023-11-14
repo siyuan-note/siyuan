@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {copyPlainText, isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
+import {isMac, isNotCtrl, isOnlyMeta, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,

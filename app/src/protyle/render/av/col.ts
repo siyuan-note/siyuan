@@ -578,7 +578,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             }
         });
     }
-    const isPin = cellElement.dataset.pin === "true"
+    const isPin = cellElement.dataset.pin === "true";
     menu.addItem({
         icon: "iconPin",
         label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,

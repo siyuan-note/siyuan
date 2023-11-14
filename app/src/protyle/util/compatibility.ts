@@ -92,8 +92,8 @@ export const isNotCtrl = (event: KeyboardEvent | MouseEvent) => {
     if (!event.metaKey && !event.ctrlKey) {
         return true;
     }
-    return false
-}
+    return false;
+};
 
 export const isHuawei = () => {
     return window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei") > -1;

@@ -24,7 +24,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             if (item.dataset.render !== "true") {
                 return;
             }
-            const scrollRect = item.querySelector(".av__scroll").getBoundingClientRect()
+            const scrollRect = item.querySelector(".av__scroll").getBoundingClientRect();
             const headerElement = item.querySelector(".av__row--header") as HTMLElement;
             if (headerElement) {
                 const distance = Math.floor(elementRect.top - scrollRect.top);

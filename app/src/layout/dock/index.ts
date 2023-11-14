@@ -190,7 +190,7 @@ export class Dock {
                 documentSelf.onselect = null;
                 this.setSize();
                 this.element.querySelectorAll(".dock__item--active").forEach(item => {
-                    const customModel = this.data[item.getAttribute("data-type")]
+                    const customModel = this.data[item.getAttribute("data-type")];
                     if (customModel && customModel instanceof Custom && customModel.resize) {
                         customModel.resize();
                     }

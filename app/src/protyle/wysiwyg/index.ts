@@ -77,6 +77,7 @@ import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {updateHeader} from "../render/av/row";
+import {avScroll} from "../render/av/scroll";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -189,7 +190,7 @@ export class WYSIWYG {
         protyle.wysiwyg.element.querySelectorAll(".img--select, .av__cell--select, .av__row--select").forEach((item: HTMLElement) => {
             if (item.classList.contains("av__row--select") && !hasClosestByClassName(element, "av")) {
                 item.classList.remove("av__row--select");
-                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+                item.querySelector(".av__check use").setAttribute("xlink:href", "#iconUncheck");
                 updateHeader(item);
             } else {
                 item.classList.remove("img--select", "av__cell--select");
@@ -390,6 +391,7 @@ export class WYSIWYG {
                             (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
                         });
                     }
+                    avScroll(protyle.contentElement, nodeElement);
                 };
 
                 documentSelf.onmouseup = () => {

@@ -7,6 +7,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {avScroll} from "./scroll";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -41,8 +42,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 e.firstElementChild.innerHTML = html;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
-            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
-            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -53,8 +52,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = '<div style="width: 24px"></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg class="av__check"><use xlink:href="#iconUncheck"></use></svg></div>'
+                let calcHTML = '<div class="av__colsticky"><div class="av__firstcol"></div>';
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
@@ -71,18 +70,17 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                     }
                 });
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
-                if (pinIndex > -1) {
-                    tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-                    calcHTML = '<div class="av__colsticky"><div style="width: 24px"></div>';
+                if (pinIndex < 0) {
+                    tableHTML += '</div>';
+                    calcHTML += '</div>';
                 }
                 data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
                         return;
                     }
                     tableHTML += `<div class="av__cell" data-col-id="${column.id}" 
-data-icon="${column.icon}" data-dtype="${column.type}"  data-pin="${column.pin}" 
-style="width: ${column.width || "200px"};
-${column.wrap ? "" : "white-space: nowrap;"}">
+data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+style="width: ${column.width || "200px"};">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
@@ -108,13 +106,12 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
 <div class="av__gutters">
-    <button class="ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
-    <button class="ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
+    <button class="av__gutter ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+    <button class="av__gutter ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
 </div>`;
-                    if (pinIndex > -1) {
-                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-                    } else {
-                        tableHTML += "<div class=\"av__firstcol av__colsticky\"><svg><use xlink:href=\"#iconUncheck\"></use></svg></div>";
+                    tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg class="av__check"><use xlink:href="#iconUncheck"></use></svg></div>'
+                    if (pinIndex < 0) {
+                        tableHTML += '</div>'
                     }
 
                     row.cells.forEach((cell, index) => {
@@ -184,12 +181,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         }
-                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
+                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}" data-wrap="${data.columns[index].wrap}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
 ${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 
@@ -231,12 +227,16 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="float: left;">
+        <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
                 <div class="av__colsticky">
-                    <svg><use xlink:href="#iconAdd"></use></svg>
-                    ${window.siyuan.languages.addAttr}
+                    <div class="av__firstcol">
+                        <svg style="opacity: 1;"><use xlink:href="#iconAdd"></use></svg>
+                    </div>
+                    <div class="av__cell--add">
+                        ${window.siyuan.languages.addAttr}
+                    </div>
                 </div>
             </div>
             <div class="av__row--footer">${calcHTML}</div>
@@ -249,12 +249,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
-                    if (headerTransform) {
-                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                    }
-                    if (footerTransform) {
-                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
-                    }
+                    avScroll(protyle.contentElement, e);
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {

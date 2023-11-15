@@ -1361,7 +1361,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `bodyEncoding`：The encoding scheme used by `body`, is consistent with field `responseEncoding` in request, default is `text`, optional values are as follows
+    * `bodyEncoding`: The encoding scheme used by `body`, is consistent with field `responseEncoding` in request, default is `text`, optional values are as follows
 
         * `text`
         * `base64` | `base64-std`

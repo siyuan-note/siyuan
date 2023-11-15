@@ -272,6 +272,13 @@
       opacity: 1;
       background-color: var(--b3-theme-background-light) !important;
     }
+
+    .b3-chip {
+      margin: 1px 2px;
+      padding: 2px 6px;
+      position: relative;
+      top: -2px;
+    }
   }
 
   &__cellheader {
@@ -294,13 +301,6 @@
   &__celltext {
     overflow: hidden;
     line-height: normal;
-
-    .b3-chip {
-      margin: 1px 2px;
-      padding: 2px 6px;
-      position: relative;
-      top: -2px;
-    }
 
     &--url {
       text-decoration: underline var(--b3-border-color);

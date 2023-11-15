@@ -47,7 +47,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/sashabaranov/go-openai v1.17.5
+	github.com/sashabaranov/go-openai v1.17.6
 	github.com/shirou/gopsutil/v3 v3.23.10
 	github.com/siyuan-note/dejavu v0.0.0-20231114024923-42c60dc5343a
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
@@ -77,7 +77,7 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.47.10 // indirect
+	github.com/aws/aws-sdk-go v1.47.11 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect

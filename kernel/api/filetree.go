@@ -249,6 +249,36 @@ func getFullHPathByID(c *gin.Context) {
 	ret.Data = hPath
 }
 
+func getIDsByHPath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	if nil == arg["path"] {
+		return
+	}
+	if nil == arg["notebook"] {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	p := arg["path"].(string)
+	ids, err := model.GetIDsByHPath(p, notebook)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = ids
+}
+
 func moveDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

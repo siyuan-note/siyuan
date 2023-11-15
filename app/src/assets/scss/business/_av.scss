@@ -140,12 +140,10 @@
     &--header,
     &--footer {
       background-color: var(--av-background);
-      position: relative;
-      z-index: 2;
     }
 
     &--footer {
-      display: inline-flex;
+      display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
       position: relative;

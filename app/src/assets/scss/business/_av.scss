@@ -87,6 +87,10 @@
     cursor: pointer;
   }
 
+  &__body {
+    float: left;
+  }
+
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
@@ -145,7 +149,7 @@
     }
 
     &--footer {
-      display: inline-flex;
+      display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
       position: relative;

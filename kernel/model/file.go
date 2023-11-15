@@ -1183,6 +1183,19 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	return
 }
 
+func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
+	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)
+	if 1 > len(roots) {
+		return
+	}
+
+	for _, root := range roots {
+		ret = append(ret, root.ID)
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
 func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {

@@ -106,6 +106,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/getHPathsByPaths", model.CheckAuth, getHPathsByPaths)
 	ginServer.Handle("POST", "/api/filetree/getHPathByID", model.CheckAuth, getHPathByID)
 	ginServer.Handle("POST", "/api/filetree/getFullHPathByID", model.CheckAuth, getFullHPathByID)
+	ginServer.Handle("POST", "/api/filetree/getIDsByHPath", model.CheckAuth, getIDsByHPath)
 	ginServer.Handle("POST", "/api/filetree/doc2Heading", model.CheckAuth, model.CheckReadonly, doc2Heading)
 	ginServer.Handle("POST", "/api/filetree/heading2Doc", model.CheckAuth, model.CheckReadonly, heading2Doc)
 	ginServer.Handle("POST", "/api/filetree/li2Doc", model.CheckAuth, model.CheckReadonly, li2Doc)

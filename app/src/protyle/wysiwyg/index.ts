@@ -77,6 +77,7 @@ import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {updateHeader} from "../render/av/row";
+import {avScroll} from "../render/av/scroll";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -389,6 +390,7 @@ export class WYSIWYG {
                         scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
                             (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
                         });
+                        avScroll(protyle.contentElement, nodeElement);
                     }
                 };
 

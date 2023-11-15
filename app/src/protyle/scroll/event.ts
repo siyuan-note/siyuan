@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+import {avScroll} from "../render/av/scroll";
 
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
@@ -21,32 +22,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            if (item.dataset.render !== "true") {
-                return;
-            }
-            const scrollRect = item.querySelector(".av__scroll").getBoundingClientRect();
-            const headerElement = item.querySelector(".av__row--header") as HTMLElement;
-            if (headerElement) {
-                const distance = Math.floor(elementRect.top - scrollRect.top);
-                if (distance > 0 && distance < scrollRect.height) {
-                    headerElement.style.transform = `translateY(${distance}px)`;
-                } else {
-                    headerElement.style.transform = "";
-                }
-            }
-            const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
-            if (footerElement) {
-                if (footerElement.querySelector(".av__calc--ashow")) {
-                    const distance = Math.floor(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
-                    if (distance < 0 && -distance < scrollRect.height) {
-                        footerElement.style.transform = `translateY(${distance}px)`;
-                    } else {
-                        footerElement.style.transform = "";
-                    }
-                } else {
-                    footerElement.style.transform = "";
-                }
-            }
+            avScroll(element, item);
         });
 
         if (!protyle.element.classList.contains("block__edit") && !isMobile()) {

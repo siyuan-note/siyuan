@@ -7,6 +7,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {avScroll} from "./scroll";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -41,8 +42,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 e.firstElementChild.innerHTML = html;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
-            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
-            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -222,7 +221,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="float: left;">
+        <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
                 <div class="av__colsticky">
@@ -240,12 +239,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
-                    if (headerTransform) {
-                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                    }
-                    if (footerTransform) {
-                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
-                    }
+                    avScroll(protyle.contentElement, e);
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {

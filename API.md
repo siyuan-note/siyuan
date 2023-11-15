@@ -415,7 +415,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get human readable path based on path
+### Get human-readable path based on path
 
 * `/api/filetree/getHPathByPath`
 * Parameters
@@ -439,7 +439,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get human readable path based on ID
+### Get human-readable path based on ID
 
 * `/api/filetree/getHPathByID`
 * Parameters
@@ -458,6 +458,32 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "code": 0,
     "msg": "",
     "data": "/foo/bar"
+  }
+  ```
+
+### Get IDs based on human-readable path
+
+* `/api/filetree/getIDsByHPath`
+* Parameters
+
+  ```json
+  {
+    "path": "/foo/bar",
+    "notebook": "20210808180117-czj9bvb"
+  }
+  ```
+
+  * `path`: Human-readable path
+  * `notebook`: Notebook ID
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+        "20200813004931-q4cu8na"
+    ]
   }
   ```
 
@@ -1335,7 +1361,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `bodyEncoding`：The encoding scheme used by `body`, is consistent with field `responseEncoding` in request, default is `text`, optional values are as follows
+    * `bodyEncoding`: The encoding scheme used by `body`, is consistent with field `responseEncoding` in request, default is `text`, optional values are as follows
 
         * `text`
         * `base64` | `base64-std`

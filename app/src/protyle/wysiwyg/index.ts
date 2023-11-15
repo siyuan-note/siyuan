@@ -1477,6 +1477,12 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            const blockElement = hasClosestBlock(event.target)
+            if (blockElement && !getContenteditableElement(blockElement)) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             paste(protyle, event);
         });
 

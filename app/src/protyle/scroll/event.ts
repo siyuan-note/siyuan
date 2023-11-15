@@ -37,7 +37,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
             if (footerElement) {
                 if (footerElement.querySelector(".av__calc--ashow")) {
-                    const distance = Math.floor(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
+                    const distance = Math.ceil(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
                     if (distance < 0 && -distance < scrollRect.height) {
                         footerElement.style.transform = `translateY(${distance}px)`;
                     } else {

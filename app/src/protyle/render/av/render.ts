@@ -86,6 +86,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
+        ${column.pin ? '<div class="fn__flex-1"></div><svg class="av__cellicon"><use xlink:href="#iconPin"></use></svg>' : ""}
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
@@ -140,16 +141,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }
                         } else if (cell.valueType === "number") {
-                            text = `<span class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
+                            text = `<span style="float: right" class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
                             cell.value?.mSelect?.forEach((item) => {
                                 text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
                             });
-                            if (!text) {
-                                text = '<span class="av__celltext"></span>';
-                            } else {
-                                text = `<span class="av__celltext">${text}</span>`;
-                            }
                         } else if (cell.valueType === "date") {
                             text = '<span class="av__celltext">';
                             const dataValue = cell.value ? cell.value.date : null;
@@ -175,14 +171,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                     text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
                                 }
                             });
-                            if (!text) {
-                                text = '<span class="av__celltext"></span>';
-                            }
                         }
-                        if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType)) {
-                            if (cell.value && cell.value[cell.valueType as "url"].content) {
-                                text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
-                            }
+                        if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType) &&
+                            cell.value && cell.value[cell.valueType as "url"].content) {
+                            text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
@@ -190,7 +182,6 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
-${cell.valueType !== "number" ? "" : "flex-direction: row-reverse;"}
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 
                         if (pinIndex === index) {

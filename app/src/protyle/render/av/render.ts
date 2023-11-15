@@ -7,6 +7,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {stickyRow} from "./row";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -240,12 +241,19 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
+
+                    const editRect = protyle.contentElement.getBoundingClientRect();
                     if (headerTransform) {
                         (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
+                    } else {
+                        stickyRow(e, editRect, "top");
                     }
                     if (footerTransform) {
                         (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                    } else {
+                        stickyRow(e, editRect, "bottom");
                     }
+
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {

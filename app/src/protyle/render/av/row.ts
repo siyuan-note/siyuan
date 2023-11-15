@@ -89,3 +89,30 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
     });
     previousElement.insertAdjacentHTML("afterend", html);
 };
+
+export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
+    const scrollRect = blockElement.querySelector(".av__scroll").getBoundingClientRect();
+    const headerElement = blockElement.querySelector(".av__row--header") as HTMLElement;
+    if (headerElement && (status === "top" || status === "all")) {
+        const distance = Math.floor(elementRect.top - scrollRect.top);
+        if (distance > 0 && distance < scrollRect.height) {
+            headerElement.style.transform = `translateY(${distance}px)`;
+        } else {
+            headerElement.style.transform = "";
+        }
+    }
+
+    const footerElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
+    if (footerElement && (status === "bottom" || status === "all")) {
+        if (footerElement.querySelector(".av__calc--ashow")) {
+            const distance = Math.ceil(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
+            if (distance < 0 && -distance < scrollRect.height) {
+                footerElement.style.transform = `translateY(${distance}px)`;
+            } else {
+                footerElement.style.transform = "";
+            }
+        } else {
+            footerElement.style.transform = "";
+        }
+    }
+}

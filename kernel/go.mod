@@ -47,6 +47,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
+	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
 	github.com/sashabaranov/go-openai v1.17.6
 	github.com/shirou/gopsutil/v3 v3.23.10
 	github.com/siyuan-note/dejavu v0.0.0-20231114024923-42c60dc5343a
@@ -139,7 +140,6 @@ require (
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect

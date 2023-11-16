@@ -54,10 +54,10 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 				}
 				resetFlashcards(deckID, blockIDs)
 			}
-			deckID = builtinDeckID
-		} else {
-			resetFlashcards(deckID, blockIDs)
+			return
 		}
+
+		resetFlashcards(deckID, blockIDs)
 		return
 	}
 

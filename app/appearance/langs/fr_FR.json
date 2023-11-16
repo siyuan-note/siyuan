@@ -19,6 +19,8 @@
   "goToTab9": "Aller au dernier onglet",
   "goToTabNext": "Aller à l'onglet suivant",
   "goToTabPrev": "Aller à l'onglet précédent",
+  "goToEditTabNext": "Aller à l'onglet modifié suivant",
+  "goToEditTabPrev": "Aller à l'onglet modifié précédent",
   "createdTime": "Heure de création",
   "updatedTime": "Heure mise à jour",
   "removeBookmark": "Supprimer le signet de ${x} ?",

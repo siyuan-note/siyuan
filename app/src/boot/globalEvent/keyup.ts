@@ -4,21 +4,24 @@ import {openCard} from "../../card/openCard";
 import {getDockByType} from "../../layout/tabUtil";
 import {getAllTabs} from "../../layout/getAll";
 import {App} from "../../index";
+import {Constants} from "../../constants";
+import {matchHotKey} from "../../protyle/util/hotKey";
 
-export const windowKeyUp  = (app: App,event:KeyboardEvent) => {
+export const windowKeyUp = (app: App, event: KeyboardEvent) => {
     window.siyuan.ctrlIsPressed = false;
     window.siyuan.shiftIsPressed = false;
     window.siyuan.altIsPressed = false;
     const switchDialog = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === "⌃⇥") {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.goToEditTabNext.custom) {
             return true;
         }
     });
     if (switchDialog && switchDialog.element.parentElement) {
-        if (event.key === "Tab") {
+        if (window.siyuan.config.keymap.general.goToEditTabNext.custom.endsWith(Constants.KEYCODELIST[event.keyCode]) ||
+            window.siyuan.config.keymap.general.goToEditTabPrev.custom.endsWith(Constants.KEYCODELIST[event.keyCode])) {
             let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
             currentLiElement.classList.remove("b3-list-item--focus");
-            if (event.shiftKey) {
+            if (matchHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event)) {
                 if (currentLiElement.previousElementSibling) {
                     currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
                 } else if (currentLiElement.getAttribute("data-original")) {
@@ -73,12 +76,14 @@ export const windowKeyUp  = (app: App,event:KeyboardEvent) => {
             if (originalElement) {
                 originalElement.removeAttribute("data-original");
             }
-        } else if (event.key === "Control") {
+        } else if (window.siyuan.config.keymap.general.goToEditTabNext.custom.startsWith(Constants.KEYCODELIST[event.keyCode]) ||
+            window.siyuan.config.keymap.general.goToEditTabPrev.custom.startsWith(Constants.KEYCODELIST[event.keyCode])) {
             let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
             // 快速切换时，不触发 Tab
             if (currentLiElement.getAttribute("data-original")) {
                 currentLiElement.classList.remove("b3-list-item--focus");
-                if (event.shiftKey) {
+                if (matchHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event)) {
+                    // 上一个
                     if (currentLiElement.previousElementSibling) {
                         currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
                     } else {

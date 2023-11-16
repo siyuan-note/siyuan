@@ -19,6 +19,8 @@
   "goToTab9": "Ir a la última pestaña",
   "goToTabNext": "Ir a la siguiente pestaña",
   "goToTabPrev": "Ir a la pestaña anterior",
+  "goToEditTabNext": "Ir a la siguiente pestaña editada",
+  "goToEditTabPrev": "Ir a la pestaña editada anteriormente",
   "createdTime": "Hora de creación",
   "updatedTime": "Hora actualizada",
   "removeBookmark": "¿Eliminar marcador de ${x}?",

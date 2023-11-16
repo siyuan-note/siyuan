@@ -6,7 +6,7 @@ import {
     updateHotkeyTip,
     writeText
 } from "../../protyle/util/compatibility";
-import {matchHotKey} from "../../protyle/util/hotKey";
+import {matchAuxiliaryHotKey, matchHotKey} from "../../protyle/util/hotKey";
 import {openSearch} from "../../search/spread";
 import {
     hasClosestBlock,
@@ -1055,8 +1055,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
     }
 
-    // mac 中只能使用 ⌃
-    if (switchDialog && event.ctrlKey && !event.metaKey && event.key.startsWith("Arrow")) {
+    if (switchDialog &&
+        (matchAuxiliaryHotKey(window.siyuan.config.keymap.general.goToEditTabNext.custom, event) ||
+            matchAuxiliaryHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event))
+        && event.key.startsWith("Arrow")) {
         dialogArrow(app, switchDialog.element, event);
         return;
     }
@@ -1068,7 +1070,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     const isTabWindow = isWindow();
-    if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
+    if (matchHotKey(window.siyuan.config.keymap.general.goToEditTabNext.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event)) {
         if (switchDialog && switchDialog.element.parentElement) {
             return;
         }
@@ -1126,7 +1129,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     <div class="switch-doc__path"></div>
 </div>`,
         });
-        switchDialog.element.setAttribute("data-key", "⌃⇥");
+        switchDialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.goToEditTabNext.custom);
         // 需移走光标，否则编辑器会继续监听并执行按键操作
         switchDialog.element.querySelector("input").focus();
         if (isMac()) {

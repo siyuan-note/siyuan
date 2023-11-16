@@ -52,7 +52,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "notebook":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)
@@ -63,7 +63,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "tree":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)
@@ -74,7 +74,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "deck":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)

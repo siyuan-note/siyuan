@@ -8,7 +8,7 @@ export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
             return false;
         }
     } else {
-        if (event.ctrlKey) {
+        if (isMac() ? event.ctrlKey : (hotKey.includes("⌘") ? !event.ctrlKey : event.ctrlKey)) {
             return false;
         }
     }
@@ -35,7 +35,7 @@ export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
             return false;
         }
     } else {
-        if (isMac() ? event.metaKey : event.ctrlKey) {
+        if (isMac() ? event.metaKey : (hotKey.includes("⌃") ? !event.ctrlKey : event.ctrlKey)) {
             return false;
         }
     }

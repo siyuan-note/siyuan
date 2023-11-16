@@ -39,6 +39,80 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ResetFlashcards(typ, id string, blockIDs []string) {
+	// Support resetting the learning progress of flashcards https://github.com/siyuan-note/siyuan/issues/9564
+
+	if 0 < len(blockIDs) {
+		resetFlashcards(id, blockIDs)
+		return
+	}
+
+	var blocks []*Block
+	switch typ {
+	case "notebook":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
+			if 1 > len(blocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+		for _, block := range blocks {
+			blockIDs = append(blockIDs, block.ID)
+		}
+	case "tree":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
+			if 1 > len(blocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+		for _, block := range blocks {
+			blockIDs = append(blockIDs, block.ID)
+		}
+	case "deck":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
+			if 1 > len(blocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+	default:
+		logging.LogErrorf("invalid type [%s]", typ)
+	}
+
+	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+	resetFlashcards(id, blockIDs)
+}
+
+func resetFlashcards(deckID string, blockIDs []string) {
+	transactions := []*Transaction{
+		{
+			DoOperations: []*Operation{
+				{
+					Action:   "removeFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
+		{
+			DoOperations: []*Operation{
+				{
+					Action:   "addFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
+	}
+
+	PerformTransactions(&transactions)
+	WaitForWritingFiles()
+}
+
 func GetFlashcardNotebooks() (ret []*Box) {
 	deck := Decks[builtinDeckID]
 	if nil == deck {
@@ -193,7 +267,7 @@ func getTreeFlashcards(rootID string) (ret []riff.Card) {
 	return
 }
 
-func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
+func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	var cards []riff.Card
 	if "" == deckID {

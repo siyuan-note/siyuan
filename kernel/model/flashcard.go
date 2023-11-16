@@ -52,6 +52,9 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 						break
 					}
 				}
+				if "" == deckID {
+					continue
+				}
 				resetFlashcards(deckID, blockIDs)
 			}
 			return

@@ -44,6 +44,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 
 	if 0 < len(blockIDs) {
 		if "" == deckID {
+			// 从全局管理进入时不会指定卡包 ID，这时需要遍历所有卡包
 			for _, deck := range Decks {
 				allBlockIDs := deck.GetBlockIDs()
 				for _, blockID := range blockIDs {
@@ -53,6 +54,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 					}
 				}
 				if "" == deckID {
+					logging.LogWarnf("deck not found for blocks [%s]", strings.Join(blockIDs, ","))
 					continue
 				}
 				resetFlashcards(deckID, blockIDs)

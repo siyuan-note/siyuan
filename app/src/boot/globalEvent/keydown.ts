@@ -124,7 +124,7 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
             if (sideElement) {
                 const tempLiElement = sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild;
                 if (tempLiElement) {
-                    tempLiElement.classList.add("b3-list-item--focus")
+                    tempLiElement.classList.add("b3-list-item--focus");
                 } else {
                     currentLiElement.classList.add("b3-list-item--focus");
                 }
@@ -151,7 +151,7 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
         }
         currentLiElement = element.querySelector(".b3-list-item--focus");
         const rootId = currentLiElement.getAttribute("data-node-id");
-        const pathElement = element.querySelector(".switch-doc__path")
+        const pathElement = element.querySelector(".switch-doc__path");
         if (rootId) {
             fetchPost("/api/filetree/getFullHPathByID", {
                 id: rootId

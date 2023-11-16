@@ -383,7 +383,7 @@ export class WYSIWYG {
                 const dragColId = dragElement.getAttribute("data-col-id");
                 let newWidth: string;
                 const scrollElement = nodeElement.querySelector(".av__scroll");
-                const contentRect = protyle.contentElement.getBoundingClientRect()
+                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 58) + "px";
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
@@ -1477,7 +1477,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            const blockElement = hasClosestBlock(event.target)
+            const blockElement = hasClosestBlock(event.target);
             if (blockElement && !getContenteditableElement(blockElement)) {
                 event.stopPropagation();
                 event.preventDefault();

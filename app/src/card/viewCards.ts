@@ -158,7 +158,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                         id: deckID,
                         blockIDs: [target.getAttribute("data-id")],
                     }, () => {
-                        target.parentElement.querySelector(".ariaLabel.b3-list-item__meta").textContent = dayjs().format("YYYY-MM-DD")
+                        target.parentElement.querySelector(".ariaLabel.b3-list-item__meta").textContent = dayjs().format("YYYY-MM-DD");
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -172,10 +172,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                             id: deckID,
                         }, () => {
                             dialog.element.querySelectorAll(".ariaLabel.b3-list-item__meta").forEach(item => {
-                                item.textContent = dayjs().format("YYYY-MM-DD")
-                            })
+                                item.textContent = dayjs().format("YYYY-MM-DD");
+                            });
                         });
-                    })
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;

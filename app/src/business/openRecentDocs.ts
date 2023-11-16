@@ -12,7 +12,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 
 const getHTML = async (data: { rootID: string, icon: string, title: string }[], element: Element, key?: string) => {
     let tabHtml = "";
-    let index = 0
+    let index = 0;
     data.forEach((item) => {
         if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
@@ -31,18 +31,18 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
     }
     let dockHtml = "";
     if (!isWindow()) {
-        dockHtml = `<ul class="b3-list b3-list--background" style="overflow: auto;width: 200px;">`;
+        dockHtml = "<ul class=\"b3-list b3-list--background\" style=\"overflow: auto;width: 200px;\">";
         if (!key || window.siyuan.languages.riffCard.toLowerCase().includes(key.toLowerCase())) {
             dockHtml += `<li data-type="riffCard" data-index="0" class="b3-list-item${!switchPath ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}</span>
-</li>`
+</li>`;
             if (!switchPath) {
                 switchPath = window.siyuan.languages.riffCard;
             }
         }
-        let docIndex = 1
+        let docIndex = 1;
         getAllDocks().forEach((item) => {
             if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
                 dockHtml += `<li data-type="${item.type}" data-index="${docIndex}" class="b3-list-item${!switchPath ? " b3-list-item--focus" : ""}">
@@ -59,13 +59,13 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
         dockHtml = dockHtml + "</ul>";
     }
 
-    const pathElement = element.querySelector(".switch-doc__path")
+    const pathElement = element.querySelector(".switch-doc__path");
     pathElement.innerHTML = switchPath;
     pathElement.previousElementSibling.innerHTML = `<div class="fn__flex fn__flex-1" style="overflow:auto;">
         ${dockHtml}
         <ul${!isWindow() ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>`;
-}
+};
 
 export const openRecentDocs = () => {
     const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
@@ -102,16 +102,16 @@ export const openRecentDocs = () => {
                 }
             }
         });
-        const searchElement = dialog.element.querySelector("input")
+        const searchElement = dialog.element.querySelector("input");
         searchElement.focus();
         searchElement.addEventListener("compositionend", () => {
             getHTML(response.data, dialog.element, searchElement.value);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
-                return
+                return;
             }
-            getHTML(response.data, dialog.element, searchElement.value)
+            getHTML(response.data, dialog.element, searchElement.value);
         });
         dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom);
         dialog.element.addEventListener("click", (event) => {

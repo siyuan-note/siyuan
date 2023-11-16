@@ -111,8 +111,8 @@
 
     &:hover {
 
-      [data-type=block-ref],
-      [data-type=block-more] {
+      .b3-chip[data-type=block-ref],
+      .b3-chip[data-type=block-more] {
         display: block;
       }
 

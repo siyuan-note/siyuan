@@ -20,8 +20,10 @@ export const ai = {
         <select id="apiModel" class="b3-select">
             <option value="gpt-4" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4" ? "selected" : ""}>gpt-4</option>
             <option value="gpt-4-32k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-32k" ? "selected" : ""}>gpt-4-32k</option>
+            <option value="gpt-4-1106-preview" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-1106-preview" ? "selected" : ""}>gpt-4-1106-preview</option>
             <option value="gpt-3.5-turbo" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo" ? "selected" : ""}>gpt-3.5-turbo</option>
             <option value="gpt-3.5-turbo-16k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-16k" ? "selected" : ""}>gpt-3.5-turbo-16k</option>
+            <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
         </select>
     </div>
 </div>
@@ -67,8 +69,10 @@ export const ai = {
     <select id="apiModel" class="b3-select fn__flex-center fn__size200">
         <option value="gpt-4" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4" ? "selected" : ""}>gpt-4</option>
         <option value="gpt-4-32k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-32k" ? "selected" : ""}>gpt-4-32k</option>
+        <option value="gpt-4-1106-preview" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-1106-preview" ? "selected" : ""}>gpt-4-1106-preview</option>
         <option value="gpt-3.5-turbo" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo" ? "selected" : ""}>gpt-3.5-turbo</option>
         <option value="gpt-3.5-turbo-16k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-16k" ? "selected" : ""}>gpt-3.5-turbo-16k</option>
+        <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
     </select>
 </label>
 <label class="fn__flex b3-label">

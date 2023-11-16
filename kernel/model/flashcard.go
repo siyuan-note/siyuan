@@ -43,6 +43,10 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	// Support resetting the learning progress of flashcards https://github.com/siyuan-note/siyuan/issues/9564
 
 	if 0 < len(blockIDs) {
+		if "" == deckID {
+			deckID = builtinDeckID
+		}
+
 		resetFlashcards(deckID, blockIDs)
 		return
 	}

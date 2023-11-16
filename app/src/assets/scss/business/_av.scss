@@ -74,7 +74,8 @@
     }
 
     svg {
-      height: 25px;
+      height: 24px;
+      width: 16px;
     }
   }
 
@@ -169,14 +170,10 @@
         opacity: 1;
       }
 
-      // .av__colsticky {
-      //   background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
-      // }
-
       .av__calc {
         display: flex;
         align-items: center;
-        padding: 5px;
+        padding: 4px;
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
@@ -191,13 +188,12 @@
         svg {
           height: 8px;
           width: 8px;
-          margin-left: 5px;
+          margin-left: 0.5em;
         }
 
         span {
-          font-size: 116%;
           color: var(--b3-theme-on-background);
-          margin-left: 5px;
+          margin-left: 0.5em;
         }
 
         &:hover {
@@ -230,9 +226,8 @@
   &__cell {
     box-sizing: border-box;
     position: relative;
-    padding: 5px;
+    padding: 4px;
     flex-shrink: 0;
-    line-height: normal;
     border-right: 1px solid var(--b3-theme-surface-lighter);
     overflow: hidden;
     //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
@@ -241,9 +236,8 @@
     [data-type=block-more] {
       display: none;
       position: absolute;
-      right: 5px;
-      font-size: 85%;
-      top: 8px;
+      right: 4px;
+      top: 5px;
     }
 
     &[data-wrap=true] {
@@ -279,12 +273,13 @@
       margin: 1px 2px;
       padding: 2px 6px;
       font-size: 75%;
+      line-height: normal;
       white-space: nowrap;
     }
   }
 
   &__cellheader {
-    padding: 5px;
+    padding: 4px;
     display: flex;
     align-items: center;
     white-space: nowrap;
@@ -303,7 +298,6 @@
 
   &__celltext {
     overflow: hidden;
-    line-height: 1.625;
 
     &--url {
       text-decoration: underline var(--b3-border-color);
@@ -322,10 +316,10 @@
 
     svg {
       color: var(--b3-theme-on-surface);
-      height: 33px;
+      height: 32px;
       width: 24px;
       opacity: 0;
-      padding: 5px;
+      padding: 4px;
       box-sizing: border-box;
       float: left;
     }

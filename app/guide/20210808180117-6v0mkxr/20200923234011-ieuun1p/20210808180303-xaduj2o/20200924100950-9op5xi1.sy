@@ -4332,7 +4332,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌃Tab"
+									"TextMarkTextContent": "⌃⇥"
 								},
 								{
 									"Type": "NodeText",
@@ -4380,7 +4380,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌃⇧Tab"
+									"TextMarkTextContent": "⌃⇧⇥"
 								},
 								{
 									"Type": "NodeText",
@@ -8455,7 +8455,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Tab"
+									"TextMarkTextContent": "⇧⇥"
 								}
 							]
 						},

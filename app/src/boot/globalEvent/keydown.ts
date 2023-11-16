@@ -1158,15 +1158,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (matchHotKey(window.siyuan.config.keymap.general.recentDocs.custom, event)) {
-        const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
-            if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
-                return true;
-            }
-        });
-        if (openRecentDocsDialog) {
-            hideElements(["dialog"]);
-            return;
-        }
         openRecentDocs();
         event.preventDefault();
         return;

@@ -8,8 +8,18 @@ import {getAllDocks} from "../layout/getAll";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const openRecentDocs = () => {
+    const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
+            return true;
+        }
+    });
+    if (openRecentDocsDialog) {
+        hideElements(["dialog"]);
+        return;
+    }
     fetchPost("/api/storage/getRecentDocs", {}, (response) => {
         let range: Range;
         if (getSelection().rangeCount > 0) {

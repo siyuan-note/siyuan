@@ -120,11 +120,16 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
                 currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
             }
         } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            if (isWindow()) {
-                currentLiElement.classList.add("b3-list-item--focus");
+            const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
+            if (sideElement) {
+                const tempLiElement = sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild;
+                if (tempLiElement) {
+                    tempLiElement.classList.add("b3-list-item--focus")
+                } else {
+                    currentLiElement.classList.add("b3-list-item--focus");
+                }
             } else {
-                const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
-                (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
+                currentLiElement.classList.add("b3-list-item--focus");
             }
         } else if (event.key === "Enter") {
             const currentType = currentLiElement.getAttribute("data-type");
@@ -146,14 +151,15 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
         }
         currentLiElement = element.querySelector(".b3-list-item--focus");
         const rootId = currentLiElement.getAttribute("data-node-id");
+        const pathElement = element.querySelector(".switch-doc__path")
         if (rootId) {
             fetchPost("/api/filetree/getFullHPathByID", {
                 id: rootId
             }, (response) => {
-                currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = escapeHtml(response.data);
+                pathElement.innerHTML = escapeHtml(response.data);
             });
         } else {
-            currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
+            pathElement.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
         }
         const currentRect = currentLiElement.getBoundingClientRect();
         const currentParentRect = currentLiElement.parentElement.getBoundingClientRect();
@@ -1122,7 +1128,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         switchDialog = new Dialog({
             title: window.siyuan.languages.switchTab,
             content: `<div class="fn__flex-column switch-doc">
-    <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
+    <input style="opacity: 0;height: 0.1px;box-sizing: border-box;margin: 0;padding: 0;border: 0;">
     <div class="fn__flex" style="overflow:auto;">${dockHtml}
         <ul${!isTabWindow ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>

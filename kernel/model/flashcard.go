@@ -44,10 +44,20 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 
 	if 0 < len(blockIDs) {
 		if "" == deckID {
+			for _, deck := range Decks {
+				allBlockIDs := deck.GetBlockIDs()
+				for _, blockID := range blockIDs {
+					if gulu.Str.Contains(blockID, allBlockIDs) {
+						deckID = deck.ID
+						break
+					}
+				}
+				resetFlashcards(deckID, blockIDs)
+			}
 			deckID = builtinDeckID
+		} else {
+			resetFlashcards(deckID, blockIDs)
 		}
-
-		resetFlashcards(deckID, blockIDs)
 		return
 	}
 

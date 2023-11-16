@@ -7,7 +7,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {avScroll} from "./scroll";
+import {stickyRow} from "./row";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -42,6 +42,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 e.firstElementChild.innerHTML = html;
             }
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
+            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
+            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -241,7 +243,19 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (left) {
                         e.querySelector(".av__scroll").scrollLeft = left;
                     }
-                    avScroll(protyle.contentElement, e);
+
+                    const editRect = protyle.contentElement.getBoundingClientRect();
+                    if (headerTransform) {
+                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
+                    } else {
+                        stickyRow(e, editRect, "top");
+                    }
+                    if (footerTransform) {
+                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                    } else {
+                        stickyRow(e, editRect, "bottom");
+                    }
+
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {

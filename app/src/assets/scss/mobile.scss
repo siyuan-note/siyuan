@@ -277,6 +277,7 @@
   border-top: 1px solid var(--b3-theme-surface-lighter);
   overflow: hidden;
   flex-direction: column;
+  z-index: 1;
 
   &__dynamic {
     overflow: auto;
@@ -371,9 +372,8 @@
     &-icon {
       height: 20px;
       width: 20px;
-      padding: 6px;
+      margin: 6px;
       flex-shrink: 0;
-      margin: 8px 0 8px 8px;
       font-size: 20px;
       text-align: center;
       line-height: 20px;
@@ -381,7 +381,7 @@
 
     &-text {
       line-height: 48px;
-      margin-left: 8px;
+      margin-left: 6px;
     }
   }
 }

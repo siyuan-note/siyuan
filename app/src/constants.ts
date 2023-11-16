@@ -221,7 +221,7 @@ export abstract class Constants {
     };
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃⇧⇥", "⌃⇥", "⌘⇥", "⇧⌘⇥", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
@@ -265,6 +265,8 @@ export abstract class Constants {
             goToTab9: {default: "⌘9", custom: "⌘9"},
             goToTabNext: {default: "⇧⌘]", custom: "⇧⌘]"},
             goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
+            goToEditTabNext: {default: "⌃⇥", custom: "⌃⇥"},
+            goToEditTabPrev: {default: "⌃⇧⇥", custom: "⌃⇧⇥"},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},

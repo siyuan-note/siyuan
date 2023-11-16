@@ -4,7 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
-import {avScroll} from "../render/av/scroll";
+import {stickyRow} from "../render/av/row";
 
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
@@ -22,7 +22,10 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            avScroll(element, item);
+            if (item.dataset.render !== "true") {
+                return;
+            }
+            stickyRow(item, elementRect, "all");
         });
 
         if (!protyle.element.classList.contains("block__edit") && !isMobile()) {

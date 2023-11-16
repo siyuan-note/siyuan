@@ -19,6 +19,8 @@
   "goToTab9": "Go to last tab",
   "goToTabNext": "Go to next tab",
   "goToTabPrev": "Go to previous tab",
+  "goToEditTabNext": "Go to next edited tab",
+  "goToEditTabPrev": "Go to previous edited tab",
   "createdTime": "Created time",
   "updatedTime": "Updated time",
   "removeBookmark": "Remove bookmark from ${x}?",

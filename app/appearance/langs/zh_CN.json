@@ -19,6 +19,8 @@
   "goToTab9": "跳转到最后一个页签",
   "goToTabNext": "跳转到下一个页签",
   "goToTabPrev": "跳转到上一个页签",
+  "goToEditTabNext": "跳转到下一个编辑页签",
+  "goToEditTabPrev": "跳转到上一个编辑页签",
   "createdTime": "创建时间",
   "updatedTime": "更新时间",
   "removeBookmark": "移除 ${x} 中的书签？",

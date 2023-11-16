@@ -22,7 +22,8 @@ export class Menus {
                 return;
             }
             let target = event.target as HTMLElement;
-            while (target && !target.parentElement.isEqualNode(document.querySelector("body"))) {
+            while (target && target.parentElement   // ⌃⇥ 后点击会为空
+            && !target.parentElement.isEqualNode(document.querySelector("body"))) {
                 event.preventDefault();
                 const dataType = target.getAttribute("data-type");
                 if (dataType === "tab-header") {

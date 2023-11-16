@@ -19,6 +19,8 @@
   "goToTab9": "跳到最後一個頁籤",
   "goToTabNext": "跳到下一個頁籤",
   "goToTabPrev": "跳到上一個頁籤",
+  "goToEditTabNext": "跳到下一個編輯頁籤",
+  "goToEditTabPrev": "跳到上一個編輯頁籤",
   "createdTime": "建立時間",
   "updatedTime": "更新時間",
   "removeBookmark": "移除 ${x} 中的書籤？",

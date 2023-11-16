@@ -1,7 +1,47 @@
-import {isNotCtrl, isOnlyMeta} from "./compatibility";
+import {isMac, isNotCtrl, isOnlyMeta} from "./compatibility";
 import {Constants} from "../../constants";
 
-// 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⌥⇧[] / ⌥⇧⌘[] / ⇧[] / []
+// 是否匹配辅助键 ⌃⌥⇧⌘
+export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
+    if (hotKey.includes("⌃")) {
+        if (!event.ctrlKey) {
+            return false;
+        }
+    } else {
+        if (isMac() ? event.ctrlKey : (hotKey.includes("⌘") ? !event.ctrlKey : event.ctrlKey)) {
+            return false;
+        }
+    }
+    if (hotKey.includes("⌥")) {
+        if (!event.altKey) {
+            return false;
+        }
+    } else {
+        if (event.altKey) {
+            return false;
+        }
+    }
+    if (hotKey.includes("⇧")) {
+        if (!event.shiftKey) {
+            return false;
+        }
+    } else {
+        if (event.shiftKey) {
+            return false;
+        }
+    }
+    if (hotKey.includes("⌘")) {
+        if (isMac() ? !event.metaKey : !event.ctrlKey) {
+            return false;
+        }
+    } else {
+        if (isMac() ? event.metaKey : (hotKey.includes("⌃") ? !event.ctrlKey : event.ctrlKey)) {
+            return false;
+        }
+    }
+    return true;
+};
+
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     if (!hotKey) {
         return false;
@@ -41,7 +81,6 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         if (hotKeys.length === 4) {
             keyCode = hotKeys[3];
         }
-
         const isMatchKey = keyCode === Constants.KEYCODELIST[event.keyCode];
         // 是否匹配 ⌥[] / ⌥⌘[]
         if (isMatchKey && event.altKey && !event.shiftKey &&

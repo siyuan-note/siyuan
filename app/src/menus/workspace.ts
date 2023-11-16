@@ -25,6 +25,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
 import {isBrowser} from "../util/functions";
 import {unbindSaveUI} from "../boot/onGetConfig";
+import {openRecentDocs} from "../business/openRecentDocs";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -370,6 +371,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         viewCards(app, "", window.siyuan.languages.all, "");
                     }
                 }],
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.recentDocs,
+                icon: "iconFile",
+                accelerator: window.siyuan.config.keymap.general.recentDocs.custom,
+                click: () => {
+                    openRecentDocs();
+                }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.lockScreen,

@@ -188,15 +188,6 @@ export const newCenterEmptyTab = (app: App) => {
                         event.preventDefault();
                         break;
                     } else if (target.id === "editorEmptyRecent") {
-                        const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
-                            if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
-                                return true;
-                            }
-                        });
-                        if (openRecentDocsDialog) {
-                            hideElements(["dialog"]);
-                            return;
-                        }
                         openRecentDocs();
                         event.stopPropagation();
                         event.preventDefault();

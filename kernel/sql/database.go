@@ -354,7 +354,9 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 
 		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
-			refs = append(refs, ref)
+			if !isRepeatedRef(refs, ref) {
+				refs = append(refs, ref)
+			}
 		} else if treenode.IsFileAnnotationRef(n) {
 			pathID := n.TextMarkFileAnnotationRefID
 			idx := strings.LastIndex(pathID, "/")
@@ -385,15 +387,32 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		} else if treenode.IsEmbedBlockRef(n) {
 			ref := buildEmbedRef(tree, n)
-			refs = append(refs, ref)
+			if !isRepeatedRef(refs, ref) {
+				refs = append(refs, ref)
+			}
 		}
 		return ast.WalkContinue
 	})
 	return
 }
 
+func isRepeatedRef(refs []*Ref, ref *Ref) bool {
+	// Repeated references to the same block within a block only count as one reference https://github.com/siyuan-note/siyuan/issues/9670
+	for _, r := range refs {
+		if r.DefBlockID == ref.DefBlockID && r.BlockID == ref.BlockID {
+			return true
+		}
+	}
+	return false
+}
+
 func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
+	// 多个类型可能会导致渲染的 Markdown 不正确，所以这里只保留 block-ref 类型
+	tmpTyp := refNode.TextMarkType
+	refNode.TextMarkType = "block-ref"
 	markdown := treenode.ExportNodeStdMd(refNode, luteEngine)
+	refNode.TextMarkType = tmpTyp
+
 	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)

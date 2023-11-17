@@ -217,7 +217,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.backgroundColor = "";
                 e.style.fontSize = "";
                 if (e.classList.contains("av")) {
-                    e.querySelector(".av__container").setAttribute("style", "--av-background:--b3-theme-background");
+                    e.querySelector(".av__container").setAttribute("style", "--av-background:var(--b3-theme-background)");
                 }
             } else if (type === "style1") {
                 const colorList = color.split(Constants.ZWSP);

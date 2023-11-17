@@ -217,8 +217,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
             </span>
             <div class="fn__space"></div>
         </div>
-        <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
-        <div class="av__counter fn__none"></div>
+        <div class="av__titlebar">
+            <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
+            <div class="av__counter fn__none"></div>
+        </div>
     </div>
     <div class="av__scroll">
         <div class="av__body">

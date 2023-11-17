@@ -1,22 +1,10 @@
 import {isWindow} from "../util/functions";
 import {Wnd} from "../layout/Wnd";
-import {Layout} from "../layout";
-import {getAllTabs} from "../layout/getAll";
+import {getAllTabs, getAllWnds} from "../layout/getAll";
 import {Editor} from "../editor";
 import {Asset} from "../asset";
 import {Constants} from "../constants";
 import { ipcRenderer } from "electron";
-
-const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
-    for (let i = 0; i < layout.children.length; i++) {
-        const item = layout.children[i];
-        if (item instanceof Wnd) {
-            wnds.push(item);
-        } else if (item instanceof Layout) {
-            getAllWnds(item, wnds);
-        }
-    }
-};
 
 export const setTabPosition = () => {
     if (!isWindow()) {

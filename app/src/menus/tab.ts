@@ -9,6 +9,7 @@ import {copySubMenu} from "./commonMenuItem";
 import {App} from "../index";
 import {Layout} from "../layout";
 import {Wnd} from "../layout/Wnd";
+import {getAllWnds} from "../layout/getAll";
 
 const closeMenu = (tab: Tab) => {
     const unmodifiedTabs: Tab[] = [];
@@ -130,7 +131,9 @@ const splitSubMenu = (app: App, tab: Tab) => {
             }
         });
     }
-    if (tab.parent.parent.children.length > 1) {
+    const wndsTemp: Wnd[] = [];
+    getAllWnds(window.siyuan.layout.layout, wndsTemp);
+    if (wndsTemp.length > 1) {
         subMenus.push({
             label: window.siyuan.languages.unsplit,
             click: () => {

@@ -130,29 +130,18 @@ const splitSubMenu = (app: App, tab: Tab) => {
             }
         });
     }
-    let wndCounter = 0;
-    tab.parent.parent.children.find(item => {
-        if (item instanceof Wnd) {
-            wndCounter++;
-        }
-        if (wndCounter > 1) {
-            return true;
-        }
-    });
-    if (wndCounter > 1) {
+    if (tab.parent.parent.children.length > 1) {
         subMenus.push({
             label: window.siyuan.languages.unsplit,
             click: () => {
-                unsplitWnd(tab.parent.parent.children[0], tab.parent.parent);
+                unsplitWnd(tab.parent.parent.children[0], tab.parent.parent, true);
                 resizeTabs();
             }
         });
-    }
-    if (tab.parent.parent.children.length > 1) {
         subMenus.push({
             label: window.siyuan.languages.unsplitAll,
             click: () => {
-                unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout);
+                unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout, false);
                 resizeTabs();
             }
         });
@@ -217,15 +206,15 @@ export const initTabMenu = (app: App, tab: Tab) => {
     return window.siyuan.menus.menu;
 };
 
-const unsplitWnd = (target: Wnd | Layout, layout: Layout) => {
+const unsplitWnd = (target: Wnd | Layout, layout: Layout, onlyWnd: boolean) => {
     let wnd: Wnd = target as Wnd;
     while (wnd instanceof Layout) {
         wnd = wnd.children[0] as Wnd;
     }
     for (let i = 0; i < layout.children.length; i++) {
         const item = layout.children[i];
-        if (item instanceof Layout) {
-            unsplitWnd(wnd, item);
+        if (item instanceof Layout && !onlyWnd) {
+            unsplitWnd(wnd, item, onlyWnd);
         } else if (item instanceof Wnd && item.id !== wnd.id && item.children.length > 0) {
             for (let j = 0; j < item.children.length; j++) {
                 const tab = item.children[j];

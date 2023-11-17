@@ -1,4 +1,6 @@
 {
+  "unsplit": "Desdividir",
+  "unsplitAll": "Desdividir Todo",
   "resetCardTip": "¿Estás seguro de restablecer ${x} tarjetas?",
   "freezeCol": "Congelar columna",
   "unfreezeCol": "Descongelar columna",

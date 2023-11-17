@@ -1,5 +1,7 @@
 {
-  "resetCardTip": "确定重置 ${x} 条闪卡？",
+  "unsplit": "取消分屏",
+  "unsplitAll": "取消全部分屏",
+  "resetCardTip": "确定重置 ${x} 张闪卡？",
   "freezeCol": "固定列",
   "unfreezeCol": "取消列固定",
   "snippetsTip": "代码片段已更新，是否保存？",

@@ -1,4 +1,6 @@
 {
+  "unsplit": "Unsplit",
+  "unsplitAll": "Unsplit All",
   "resetCardTip": "Are you sure reset ${x} flashcards?",
   "freezeCol": "Freeze column",
   "unfreezeCol": "Unfreeze column",

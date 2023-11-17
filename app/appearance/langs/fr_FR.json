@@ -1,4 +1,6 @@
 {
+  "unsplit": "Unsplit",
+  "unsplitAll": "Tout dédiviser",
   "resetCardTip": "Êtes-vous sûr de réinitialiser ${x} flashcards ?",
   "freezeCol": "Geler la colonne",
   "unfreezeCol": "Dégeler la colonne",

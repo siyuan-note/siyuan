@@ -131,76 +131,49 @@ export class Background {
         this.tagsElement = this.element.querySelector(".b3-chips") as HTMLElement;
         this.iconElement = this.element.querySelector(".protyle-background__icon") as HTMLElement;
         this.imgElement = this.element.firstElementChild.firstElementChild as HTMLImageElement;
-        if (isTouchDevice()) {
-            this.imgElement.addEventListener("touchstart", (event: TouchEvent & { target: HTMLElement }) => {
-                event.preventDefault();
-                if (!this.element.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
-                    return;
-                }
-                const y = event.touches[0].clientY;
-                const documentSelf = document;
-                const height = this.imgElement.naturalHeight * this.imgElement.clientWidth / this.imgElement.naturalWidth - this.imgElement.clientHeight;
-                let originalPositionY = parseFloat(this.imgElement.style.objectPosition.substring(7)) || 50;
-                if (this.imgElement.style.objectPosition.endsWith("px")) {
-                    originalPositionY = -parseInt(this.imgElement.style.objectPosition.substring(7)) / height * 100;
-                }
-                documentSelf.ontouchmove = (moveEvent) => {
-                    this.imgElement.style.objectPosition = `center ${((y - moveEvent.touches[0].clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
-                    event.preventDefault();
-                };
 
-                documentSelf.ontouchend = () => {
-                    documentSelf.ontouchmove = null;
-                    documentSelf.ontouchstart = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-                };
-            });
-        } else {
-            this.element.addEventListener("dragover", async (event) => {
-                event.preventDefault();
-            });
-            this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-                if (event.dataTransfer.types[0] === "Files" && event.dataTransfer.files[0].type.indexOf("image") !== -1) {
-                    uploadFiles(protyle, [event.dataTransfer.files[0]], undefined, (responseText) => {
-                        const response = JSON.parse(responseText);
-                        const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
-                        this.ial["title-img"] = style;
-                        this.render(this.ial, protyle.block.rootID);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {"title-img": style}
-                        });
+        this.element.addEventListener("dragover", async (event) => {
+            event.preventDefault();
+        });
+        this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
+            if (event.dataTransfer.types[0] === "Files" && event.dataTransfer.files[0].type.indexOf("image") !== -1) {
+                uploadFiles(protyle, [event.dataTransfer.files[0]], undefined, (responseText) => {
+                    const response = JSON.parse(responseText);
+                    const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
+                    this.ial["title-img"] = style;
+                    this.render(this.ial, protyle.block.rootID);
+                    fetchPost("/api/attr/setBlockAttrs", {
+                        id: protyle.block.rootID,
+                        attrs: {"title-img": style}
                     });
-                }
-            });
-            this.imgElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+                });
+            }
+        });
+        this.imgElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+            event.preventDefault();
+            if (!this.element.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
+                return;
+            }
+            const y = event.clientY;
+            const documentSelf = document;
+            const height = this.imgElement.naturalHeight * this.imgElement.clientWidth / this.imgElement.naturalWidth - this.imgElement.clientHeight;
+            let originalPositionY = parseFloat(this.imgElement.style.objectPosition.substring(7)) || 50;
+            if (this.imgElement.style.objectPosition.endsWith("px")) {
+                originalPositionY = -parseInt(this.imgElement.style.objectPosition.substring(7)) / height * 100;
+            }
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                this.imgElement.style.objectPosition = `center ${((y - moveEvent.clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
                 event.preventDefault();
-                if (!this.element.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
-                    return;
-                }
-                const y = event.clientY;
-                const documentSelf = document;
-                const height = this.imgElement.naturalHeight * this.imgElement.clientWidth / this.imgElement.naturalWidth - this.imgElement.clientHeight;
-                let originalPositionY = parseFloat(this.imgElement.style.objectPosition.substring(7)) || 50;
-                if (this.imgElement.style.objectPosition.endsWith("px")) {
-                    originalPositionY = -parseInt(this.imgElement.style.objectPosition.substring(7)) / height * 100;
-                }
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    this.imgElement.style.objectPosition = `center ${((y - moveEvent.clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
-                    event.preventDefault();
-                };
+            };
 
-                documentSelf.onmouseup = () => {
-                    documentSelf.onmousemove = null;
-                    documentSelf.onmouseup = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-                };
-            });
-        }
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+            };
+        });
         this.element.querySelector("input").addEventListener("change", (event: InputEvent & {
             target: HTMLInputElement
         }) => {

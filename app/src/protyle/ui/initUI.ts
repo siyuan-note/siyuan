@@ -47,27 +47,6 @@ export const initUI = (protyle: IProtyle) => {
     setEditMode(protyle, protyle.options.mode);
     document.execCommand("DefaultParagraphSeparator", false, "p");
 
-    // 触摸屏背景和嵌入块按钮显示
-    protyle.contentElement.addEventListener("touchstart", (event) => {
-        // https://github.com/siyuan-note/siyuan/issues/6328
-        if (protyle.disabled) {
-            return;
-        }
-        const target = event.target as HTMLElement;
-        if (hasClosestByClassName(target, "protyle-icons") ||
-            hasClosestByClassName(target, "item") ||
-            target.classList.contains("protyle-background__icon")) {
-            return;
-        }
-        if (hasClosestByClassName(target, "protyle-background")) {
-            protyle.background.element.classList.toggle("protyle-background--mobileshow");
-            return;
-        }
-        const embedBlockElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
-        if (embedBlockElement) {
-            embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
-        }
-    });
     let wheelTimeout: number;
     const isMacOS = isMac();
     protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {

@@ -162,7 +162,6 @@ export const handleTouchStart = (event: TouchEvent) => {
     }
 };
 
-
 let previousClientX: number;
 export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;

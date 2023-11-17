@@ -839,5 +839,6 @@ func GetContainerText(container *ast.Node) string {
 
 func containsLimitClause(stmt string) bool {
 	return strings.Contains(strings.ToLower(stmt), " limit ") ||
-		strings.Contains(strings.ToLower(stmt), "\nlimit ")
+		strings.Contains(strings.ToLower(stmt), "\nlimit ") ||
+		strings.Contains(strings.ToLower(stmt), "\tlimit ")
 }

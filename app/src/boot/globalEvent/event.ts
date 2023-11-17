@@ -6,7 +6,7 @@ import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
 import {isIPad} from "../../protyle/util/compatibility";
-import {globalTouchEnd} from "./touch";
+import {globalTouchEnd, globalTouchStart} from "./touch";
 import {initDockMenu} from "../../menus/dock";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {initTabMenu} from "../../menus/tab";
@@ -80,34 +80,7 @@ export const initWindowEvent = (app: App) => {
         // 触摸屏背景和嵌入块按钮显示
         const backgroundElement = hasClosestByClassName(target, "protyle-background")
         if (backgroundElement) {
-            if (target.tagName === "IMG" && backgroundElement.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
-                // 文档背景位置调整
-                const contentElement = hasClosestByClassName(backgroundElement, "protyle-content");
-                if (!contentElement) {
-                    return;
-                }
-                contentElement.style.overflow = "hidden"
-                const y = event.touches[0].clientY;
-                const documentSelf = document;
-                const height = (target as HTMLImageElement).naturalHeight * target.clientWidth / (target as HTMLImageElement).naturalWidth - target.clientHeight;
-                let originalPositionY = parseFloat(target.style.objectPosition.substring(7)) || 50;
-                if (target.style.objectPosition.endsWith("px")) {
-                    originalPositionY = -parseInt(target.style.objectPosition.substring(7)) / height * 100;
-                }
-
-                documentSelf.ontouchmove = (moveEvent) => {
-
-                    target.style.objectPosition = `center ${((y - moveEvent.touches[0].clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
-                };
-                documentSelf.ontouchend = () => {
-                    contentElement.style.overflow = ""
-                    documentSelf.ontouchmove = null;
-                    documentSelf.ontouchstart = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-                };
-            } else {
+            if (!globalTouchStart(event)) {
                 backgroundElement.classList.toggle("protyle-background--mobileshow");
             }
             return;
@@ -156,7 +129,7 @@ export const initWindowEvent = (app: App) => {
 
             const backlinkBreadcrumbItemElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id")||backlinkBreadcrumbItemElement.getAttribute("data-node-id");
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id") || backlinkBreadcrumbItemElement.getAttribute("data-node-id");
                 if (breadcrumbId) {
                     fetchPost("/api/block/checkBlockFold", {id: breadcrumbId}, (foldResponse) => {
                         openFileById({

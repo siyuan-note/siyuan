@@ -392,6 +392,10 @@ html {
   max-width: 100%;
   min-width: 426px;
 
+  .b3-list {
+    padding: 8px 0;
+  }
+
   .b3-list:last-child {
     border-left: 1px solid var(--b3-theme-surface-lighter);
   }

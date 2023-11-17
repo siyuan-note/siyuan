@@ -70,9 +70,14 @@ type RiffCard struct {
 	Reps uint64    `json:"reps"`
 }
 
-func GetRiffCard(card *fsrs.Card) *RiffCard {
+func getRiffCard(card *fsrs.Card) *RiffCard {
+	due := card.Due
+	if due.IsZero() {
+		due = time.Now()
+	}
+
 	return &RiffCard{
-		Due:  card.Due,
+		Due:  due,
 		Reps: card.Reps,
 	}
 }

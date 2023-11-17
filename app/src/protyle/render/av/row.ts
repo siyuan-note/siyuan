@@ -116,4 +116,4 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
             footerElement.style.transform = "";
         }
     }
-}
+};

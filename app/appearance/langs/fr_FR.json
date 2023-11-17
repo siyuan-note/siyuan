@@ -1,4 +1,5 @@
 {
+  "resetCardTip": "Êtes-vous sûr de réinitialiser ${x} flashcards ?",
   "freezeCol": "Geler la colonne",
   "unfreezeCol": "Dégeler la colonne",
   "snippetsTip": "L'extrait de code a été mis à jour, voulez-vous le sauvegarder ?",

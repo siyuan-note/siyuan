@@ -73,8 +73,8 @@ func removeDuplicateDatabaseRefs() {
 		refreshRefsByDefID(rootID)
 	}
 
-	if 0 < len(duplicatedRootIDs) {
-		logging.LogWarnf("exist more than one ref duplicated [%d], reindex it", len(duplicatedRootIDs))
+	for _, rootID := range duplicatedRootIDs {
+		logging.LogWarnf("exist more than one ref duplicated [%s], reindex it", rootID)
 	}
 }
 

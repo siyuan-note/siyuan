@@ -36,9 +36,10 @@ func resetRiffCards(c *gin.Context) {
 		return
 	}
 
-	typ := arg["type"].(string)    // notebook, tree, deck
-	id := arg["id"].(string)       // notebook ID, root ID, deck ID
-	blockIDsArg := arg["blockIDs"] // 如果不传入 blockIDs （或者传入实参为空数组），则重置所有卡片
+	typ := arg["type"].(string)      // notebook, tree, deck
+	id := arg["id"].(string)         // notebook ID, root ID, deck ID
+	deckID := arg["deckID"].(string) // deck ID
+	blockIDsArg := arg["blockIDs"]   // 如果不传入 blockIDs （或者传入实参为空数组），则重置所有卡片
 	var blockIDs []string
 	if nil != blockIDsArg {
 		for _, blockID := range blockIDsArg.([]interface{}) {
@@ -46,7 +47,7 @@ func resetRiffCards(c *gin.Context) {
 		}
 	}
 
-	model.ResetFlashcards(typ, id, blockIDs)
+	model.ResetFlashcards(typ, id, deckID, blockIDs)
 }
 
 func getNotebookRiffCards(c *gin.Context) {

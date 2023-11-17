@@ -162,6 +162,9 @@ services:
     volumes:
       - /siyuan/workspace:/siyuan/workspace
     restart: unless-stopped
+    environment:
+      # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - TZ=${TimeZone}
 ```
 
 #### User permissions

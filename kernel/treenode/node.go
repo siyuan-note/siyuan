@@ -779,6 +779,10 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 		if nil == tableCell.Value.Updated {
 			tableCell.Value.Updated = &av.ValueUpdated{}
 		}
+	case av.KeyTypeCheckbox:
+		if nil == tableCell.Value.Checkbox {
+			tableCell.Value.Checkbox = &av.ValueCheckbox{}
+		}
 	}
 }
 

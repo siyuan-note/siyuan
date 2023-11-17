@@ -107,6 +107,7 @@ const (
 	KeyTypeTemplate KeyType = "template"
 	KeyTypeCreated  KeyType = "created"
 	KeyTypeUpdated  KeyType = "updated"
+	KeyTypeCheckbox KeyType = "checkbox"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -157,6 +158,7 @@ type Value struct {
 	Template *ValueTemplate `json:"template,omitempty"`
 	Created  *ValueCreated  `json:"created,omitempty"`
 	Updated  *ValueUpdated  `json:"updated,omitempty"`
+	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -234,6 +236,14 @@ func (value *Value) String() string {
 			return ""
 		}
 		return value.Updated.FormattedContent
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return ""
+		}
+		if value.Checkbox.Checked {
+			return "√"
+		}
+		return ""
 	default:
 		return ""
 	}
@@ -527,6 +537,10 @@ func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (re
 		FormattedContent: formatted,
 	}
 	return
+}
+
+type ValueCheckbox struct {
+	Checked bool `json:"checked"`
 }
 
 // View 描述了视图的结构。

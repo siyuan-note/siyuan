@@ -288,6 +288,9 @@ export class Background {
                             id: protyle.block.rootID,
                             attrs: {"title-img": this.ial["title-img"]}
                         });
+                        /// #if MOBILE
+                        window.siyuan.menus.menu.remove();
+                        /// #endif
                     }, Constants.SIYUAN_ASSETS_IMAGE);
                     event.preventDefault();
                     event.stopPropagation();

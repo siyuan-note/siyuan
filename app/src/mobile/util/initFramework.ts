@@ -20,7 +20,7 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
 
-export const initFramework = (app: App) => {
+export const initFramework = (app: App, isStart:boolean) => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();
@@ -120,6 +120,10 @@ export const initFramework = (app: App) => {
         if (idZoomIn.id) {
             openMobileFileById(app, idZoomIn.id,
                 idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+            return;
+        }
+        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
+            setEmpty(app);
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];

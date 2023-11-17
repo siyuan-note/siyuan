@@ -1051,13 +1051,13 @@ export class Toolbar {
                         }
                     } else {
                         // 行级备注自动移除换行  https://ld246.com/article/1664205917326
-                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value.replace(/\n/g, " ")));
+                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
                     }
                 });
             } else if (types.includes("inline-math")) {
                 // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
                 if (textElement.value) {
-                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value.replace(/\n/g, "")));
+                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
                     renderElement.removeAttribute("data-render");
                     processRender(renderElement);
                 } else {

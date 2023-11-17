@@ -43,7 +43,26 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	// Support resetting the learning progress of flashcards https://github.com/siyuan-note/siyuan/issues/9564
 
 	if 0 < len(blockIDs) {
-		resetFlashcards(id, blockIDs)
+		if "" == deckID {
+			// 从全局管理进入时不会指定卡包 ID，这时需要遍历所有卡包
+			for _, deck := range Decks {
+				allBlockIDs := deck.GetBlockIDs()
+				for _, blockID := range blockIDs {
+					if gulu.Str.Contains(blockID, allBlockIDs) {
+						deckID = deck.ID
+						break
+					}
+				}
+				if "" == deckID {
+					logging.LogWarnf("deck not found for blocks [%s]", strings.Join(blockIDs, ","))
+					continue
+				}
+				resetFlashcards(deckID, blockIDs)
+			}
+			return
+		}
+
+		resetFlashcards(deckID, blockIDs)
 		return
 	}
 
@@ -52,7 +71,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "notebook":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)
@@ -63,7 +82,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "tree":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)
@@ -74,7 +93,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	case "deck":
 		for i := 1; ; i++ {
 			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
-			if 1 > len(blocks) {
+			if 1 > len(pagedBlocks) {
 				break
 			}
 			blocks = append(blocks, pagedBlocks...)

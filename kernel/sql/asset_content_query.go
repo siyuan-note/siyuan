@@ -46,7 +46,7 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 		return
 	}
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
@@ -152,7 +152,7 @@ func selectAssetContentsRawStmt(stmt string, limit int) (ret []*AssetContent) {
 	}
 	defer rows.Close()
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		count++

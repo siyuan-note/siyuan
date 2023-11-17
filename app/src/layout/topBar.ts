@@ -299,7 +299,7 @@ const openPlugin = (app: App, target: Element) => {
     if(!isHuawei()) {
         menu.addItem({
             icon: "iconSettings",
-            label: window.siyuan.languages.config,
+            label: window.siyuan.languages.manage,
             click() {
                 openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
             }

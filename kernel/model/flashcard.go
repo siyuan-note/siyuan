@@ -329,11 +329,17 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		return
 	}
 
+	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
+	sort.Slice(cards, func(i, j int) bool {
+		due1 := cards[i].(*riff.FSRSCard).C.Due
+		due2 := cards[j].(*riff.FSRSCard).C.Due
+		return due1.Before(due2)
+	})
+
 	var blockIDs []string
 	for _, card := range cards {
 		blockIDs = append(blockIDs, card.BlockID())
 	}
-	sort.Strings(blockIDs)
 
 	sqlBlocks := sql.GetBlocks(blockIDs)
 	blocks = fromSQLBlocks(&sqlBlocks, "", 36)

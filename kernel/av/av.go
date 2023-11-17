@@ -107,6 +107,7 @@ const (
 	KeyTypeTemplate KeyType = "template"
 	KeyTypeCreated  KeyType = "created"
 	KeyTypeUpdated  KeyType = "updated"
+	KeyTypeCheckbox KeyType = "checkbox"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -157,6 +158,7 @@ type Value struct {
 	Template *ValueTemplate `json:"template,omitempty"`
 	Created  *ValueCreated  `json:"created,omitempty"`
 	Updated  *ValueUpdated  `json:"updated,omitempty"`
+	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -234,6 +236,14 @@ func (value *Value) String() string {
 			return ""
 		}
 		return value.Updated.FormattedContent
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return ""
+		}
+		if value.Checkbox.Checked {
+			return "√"
+		}
+		return ""
 	default:
 		return ""
 	}
@@ -529,6 +539,10 @@ func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (re
 	return
 }
 
+type ValueCheckbox struct {
+	Checked bool `json:"checked"`
+}
+
 // View 描述了视图的结构。
 type View struct {
 	ID   string `json:"id"`   // 视图 ID
@@ -609,7 +623,8 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {
-		if KeyTypeBlock == kv.Key.Type {
+		switch kv.Key.Type {
+		case KeyTypeBlock:
 			// 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
@@ -631,6 +646,12 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				}
 				if 0 == v.Block.Updated {
 					v.Block.Updated = now
+				}
+			}
+		case KeyTypeNumber:
+			for _, v := range kv.Values {
+				if 0 != v.Number.Content && !v.Number.IsNotEmpty {
+					v.Number.IsNotEmpty = true
 				}
 			}
 		}

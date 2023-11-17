@@ -43,4 +43,6 @@ const (
 	FilterOperatorEndsWith          FilterOperator = "Ends with"
 	FilterOperatorIsBetween         FilterOperator = "Is between"
 	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
+	FilterOperatorIsTrue            FilterOperator = "Is true"
+	FilterOperatorIsFalse           FilterOperator = "Is false"
 )

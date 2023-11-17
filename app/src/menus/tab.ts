@@ -131,13 +131,23 @@ const splitSubMenu = (app: App, tab: Tab) => {
             }
         });
     }
-    const wndsTemp: Wnd[] = [];
-    getAllWnds(window.siyuan.layout.layout, wndsTemp);
+    let wndsTemp: Wnd[] = [];
+    getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
     if (wndsTemp.length > 1) {
         subMenus.push({
             label: window.siyuan.languages.unsplit,
             click: () => {
-                unsplitWnd(tab.parent.parent.children[0], tab.parent.parent, true);
+                let layout = tab.parent.parent;
+                while (layout.id !== window.siyuan.layout.centerLayout.id) {
+                    wndsTemp = [];
+                    getAllWnds(layout, wndsTemp);
+                    if (wndsTemp.length > 1) {
+                        break;
+                    } else {
+                        layout = layout.parent;
+                    }
+                }
+                unsplitWnd(tab.parent.parent.children[0], layout, true);
                 resizeTabs();
             }
         });

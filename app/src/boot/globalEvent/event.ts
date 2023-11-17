@@ -13,6 +13,8 @@ import {initTabMenu} from "../../menus/tab";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {hideTooltip} from "../../dialog/tooltip";
+import {fetchPost} from "../../util/fetch";
+import {openFileById} from "../../editor/util";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -147,6 +149,25 @@ export const initWindowEvent = (app: App) => {
                     y: tabRect.bottom
                 });
                 hideTooltip();
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
+
+            const backlinkBreadcrumbItemElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
+            if (backlinkBreadcrumbItemElement) {
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id")||backlinkBreadcrumbItemElement.getAttribute("data-node-id");
+                if (breadcrumbId) {
+                    fetchPost("/api/block/checkBlockFold", {id: breadcrumbId}, (foldResponse) => {
+                        openFileById({
+                            app,
+                            id: breadcrumbId,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            zoomIn: foldResponse.data
+                        });
+                        window.siyuan.menus.menu.remove();
+                    });
+                }
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;

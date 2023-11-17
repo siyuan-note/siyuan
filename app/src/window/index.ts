@@ -117,9 +117,6 @@ class App {
                                     (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
                                 }
                                 break;
-                            case "createdailynote":
-                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
-                                break;
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;

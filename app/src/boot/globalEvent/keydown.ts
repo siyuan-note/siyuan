@@ -1265,7 +1265,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
-        newDailyNote();
+        newDailyNote(app);
         event.stopPropagation();
         event.preventDefault();
         return;

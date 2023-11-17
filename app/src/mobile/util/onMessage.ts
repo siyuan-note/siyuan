@@ -21,9 +21,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                     document.getElementById("toolbarSync").classList.add("fn__none");
                 }
                 break;
-            case "createdailynote":
-                openMobileFileById(app, data.data.id);
-                break;
             case "openFileById":
                 openMobileFileById(app, data.data.id, [Constants.CB_GET_FOCUS]);
                 break;

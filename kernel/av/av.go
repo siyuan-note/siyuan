@@ -623,7 +623,8 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {
-		if KeyTypeBlock == kv.Key.Type {
+		switch kv.Key.Type {
+		case KeyTypeBlock:
 			// 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
@@ -645,6 +646,12 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				}
 				if 0 == v.Block.Updated {
 					v.Block.Updated = now
+				}
+			}
+		case KeyTypeNumber:
+			for _, v := range kv.Values {
+				if 0 != v.Number.Content && !v.Number.IsNotEmpty {
+					v.Number.IsNotEmpty = true
 				}
 			}
 		}

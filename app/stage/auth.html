@@ -76,12 +76,12 @@
         .b3-button--white {
             color: var(--b3-theme-primary);
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
-            background-color: transparent;
+            background-color: #fff;
         }
 
         .b3-button--white:hover,
         .b3-button--white:focus {
-            background-color: var(--b3-theme-primary-lightest);
+            background-color: #e8eefc;
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
         }
 
@@ -432,6 +432,8 @@
     }
 
     const exitSiYuan = () => {
+        document.querySelector('#message').classList.add('b3-snackbar--show')
+        document.querySelector('#message').firstElementChild.innerHTML = "{{.l8}}"
         try {
             fetch('/api/system/exit', {
                 method: 'POST',
@@ -440,8 +442,7 @@
                 return response.json()
             }).then((response) => {
                 if (response.code === 1) {
-                    document.querySelector('#message').classList.add('b3-snackbar--show')
-                    document.querySelector('#message').firstElementChild.textContent = response.msg
+                    document.querySelector('#message').firstElementChild.innerHTML = response.msg
                     const buttonElement = document.querySelector(`#message button`)
                     if (buttonElement) {
                         buttonElement.addEventListener('click', () => {

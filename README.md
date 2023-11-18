@@ -149,13 +149,14 @@ To simplify, it is recommended to configure the workspace folder path to be cons
 docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
 ```
 
-Alternatively, see below for an example docker-compose file:
+Alternatively, see below for an example Docker Compose file:
+
 ```
 version: "3.9"
 services:
   main:
     image: b3log/siyuan
-    command: ['--workspace=/siyuan/workspace/','--accessAuthCode=${AuthCode}']
+    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
     user: '1000:1000'
     ports:
       - 6806:6806

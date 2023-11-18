@@ -215,7 +215,13 @@ func IndexEmbedBlockJob() {
 
 func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
-		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
+		md := strings.TrimSpace(embedBlock.Markdown)
+		if strings.Contains(md, "//js") {
+			// js 嵌入块不支持自动索引
+			continue
+		}
+
+		stmt := strings.TrimPrefix(md, "{{")
 		stmt = strings.TrimSuffix(stmt, "}}")
 		if !strings.Contains(strings.ToLower(stmt), "select") {
 			continue

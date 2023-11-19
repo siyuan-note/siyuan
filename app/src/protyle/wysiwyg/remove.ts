@@ -407,7 +407,13 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         previousLastElement.remove();
         return;
     }
-    const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
+    const isSelectNode = previousLastElement && (
+        previousLastElement.classList.contains("table") ||
+        previousLastElement.classList.contains("render-node") ||
+        previousLastElement.classList.contains("iframe") ||
+        previousLastElement.classList.contains("hr") ||
+        previousLastElement.classList.contains("av") ||
+        previousLastElement.classList.contains("code-block"));
     const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {
         if (previousLastElement.classList.contains("code-block")) {

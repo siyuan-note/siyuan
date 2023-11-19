@@ -1,5 +1,5 @@
 import {genEmptyElement, insertEmptyBlock} from "../../block/util";
-import {getSelectionOffset, focusByWbr, setLastNodeRange} from "../util/selection";
+import {getSelectionOffset, focusByWbr, setLastNodeRange, focusBlock} from "../util/selection";
 import {
     getContenteditableElement,
     getTopEmptyElement,
@@ -14,6 +14,7 @@ import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {setStorageVal} from "../util/compatibility";
+import {mathRender} from "../render/mathRender";
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
@@ -356,39 +357,40 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
         range.setStart(range.startContainer, 1);
     }
-    range.insertNode(document.createElement("wbr"));
+    const wbrElement = document.createElement("wbr")
+    range.insertNode(wbrElement);
     const html = blockElement.outerHTML;
+    wbrElement.remove();
     if (range.toString() !== "") {
         range.extractContents();
-        range.insertNode(document.createElement("wbr"));
     }
     if (editableElement.lastChild) {
         range.setEndAfter(editableElement.lastChild);
     }
-    const newElement = genEmptyElement(false, false);
-    const selectNode = range.extractContents();
-    if (selectNode.firstChild && selectNode.firstChild.nodeType !== 3 && selectNode.firstChild.textContent === "") {
-        // 回车移除空元素 https://github.com/siyuan-note/insider/issues/480
-        selectNode.firstChild.after(document.createElement("wbr"));
-        selectNode.firstChild.remove();
-    }
+
+    const id = blockElement.getAttribute("data-node-id");
+    const newElement = document.createElement("div");
+    newElement.appendChild(genEmptyElement(false, false));
+    newElement.querySelector('[contenteditable="true"]').appendChild(range.extractContents());
+    // https://github.com/siyuan-note/insider/issues/480
+    newElement.innerHTML = protyle.lute.SpinBlockDOM(newElement.innerHTML);
+    const newId = newElement.firstElementChild.getAttribute("data-node-id");
+
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
-    if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
-        !hasNextSibling(editableElement?.lastElementChild)) {
-        editableElement.insertAdjacentText("beforeend", "\n");
-    }
-    getContenteditableElement(newElement).appendChild(selectNode);
-    const id = blockElement.getAttribute("data-node-id");
-    const newId = newElement.getAttribute("data-node-id");
-    blockElement.insertAdjacentElement("afterend", newElement);
+    // https://github.com/siyuan-note/siyuan/issues/9682
+    const enterElement = document.createElement("div");
+    enterElement.innerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
+    editableElement.innerHTML = enterElement.querySelector('[contenteditable="true"]').innerHTML;
+    mathRender(editableElement);
+
     transaction(protyle, [{
         action: "update",
         data: blockElement.outerHTML,
         id: id,
     }, {
         action: "insert",
-        data: newElement.outerHTML,
+        data: newElement.innerHTML,
         id: newId,
         previousID: id,
     }], [{
@@ -399,10 +401,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         data: html,
         id: id,
     }]);
-    blockElement.insertAdjacentElement("afterend", newElement);
-    focusByWbr(newElement, range);
+    blockElement.insertAdjacentElement("afterend", newElement.firstElementChild);
+    mathRender(blockElement.nextElementSibling);
+    focusBlock(blockElement.nextElementSibling);
     scrollCenter(protyle);
-    removeEmptyNode(newElement);
     return true;
 };
 

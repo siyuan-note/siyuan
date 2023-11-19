@@ -353,10 +353,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         removeEmptyNode(newElement);
         return true;
     }
-    if (range.toString() === "" && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
-        // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
-        range.setStart(range.startContainer, 1);
-    }
     const wbrElement = document.createElement("wbr")
     range.insertNode(wbrElement);
     const html = blockElement.outerHTML;
@@ -379,6 +375,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
     // https://github.com/siyuan-note/siyuan/issues/9682
+    // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
     const enterElement = document.createElement("div");
     enterElement.innerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
     editableElement.innerHTML = enterElement.querySelector('[contenteditable="true"]').innerHTML;

@@ -6,7 +6,7 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset, getSelectionPosition,
-    selectAll,
+    selectAll, setFirstNodeRange,
 } from "../util/selection";
 import {
     hasClosestBlock,
@@ -856,6 +856,23 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 代码块中空行 ⌘+Del 异常 https://ld246.com/article/1663166544901
                     if (nodeElement.classList.contains("code-block") && isOnlyMeta(event) &&
                         range.startContainer.nodeType === 3 && range.startContainer.textContent.substring(range.startOffset - 1, range.startOffset) === "\n") {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/9690
+                    const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN")
+                    if (position.start === 2 && inlineElement &&
+                        getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
+                        inlineElement.textContent.startsWith(Constants.ZWSP)) {
+                        focusBlock(nodeElement);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                    if (position.start === 1 && !inlineElement && editElement.textContent.startsWith(Constants.ZWSP)) {
+                        setFirstNodeRange(editElement, range);
+                        removeBlock(protyle, nodeElement, range);
                         event.stopPropagation();
                         event.preventDefault();
                         return;

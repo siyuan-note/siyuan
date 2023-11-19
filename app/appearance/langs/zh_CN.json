@@ -1,4 +1,5 @@
 {
+  "copyInline": "复制行级元素",
   "unsplit": "取消分屏",
   "unsplitAll": "取消全部分屏",
   "resetCardTip": "确定重置 ${x} 张闪卡？",

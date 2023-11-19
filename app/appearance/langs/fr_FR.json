@@ -1,4 +1,5 @@
 {
+  "copyInline": "Copier l'élément en ligne",
   "unsplit": "Unsplit",
   "unsplitAll": "Tout dédiviser",
   "resetCardTip": "Êtes-vous sûr de réinitialiser ${x} flashcards ?",

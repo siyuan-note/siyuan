@@ -1,4 +1,5 @@
 {
+  "copyInline": "Copy inline element",
   "unsplit": "Unsplit",
   "unsplitAll": "Unsplit All",
   "resetCardTip": "Are you sure reset ${x} flashcards?",

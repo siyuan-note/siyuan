@@ -107,7 +107,7 @@ export const getEditHTML = (options: {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
-    <span class="b3-menu__label" style="padding: 4px"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
 </button>
 <button class="b3-menu__item" data-type="goUpdateColType">
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
@@ -120,7 +120,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label" style="padding: 4px"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
 </button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
@@ -177,6 +177,7 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("mSelect", colData.type, colData.name)}
     ${genUpdateColItem("date", colData.type, colData.name)}
     ${genUpdateColItem("mAsset", colData.type, colData.name)}
+    ${genUpdateColItem("checkbox", colData.type, colData.name)}
     ${genUpdateColItem("url", colData.type, colData.name)}
     ${genUpdateColItem("email", colData.type, colData.name)}
     ${genUpdateColItem("phone", colData.type, colData.name)}

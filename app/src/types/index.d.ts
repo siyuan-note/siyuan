@@ -88,6 +88,8 @@ type TAVFilterOperator =
     | "Ends with"
     | "Is between"
     | "Is relative to today"
+    | "Is true"
+    | "Is false"
 declare module "blueimp-md5"
 
 interface Window {

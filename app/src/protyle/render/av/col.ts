@@ -353,6 +353,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconPhone";
         case "template":
             return "iconMath";
+        case "checkbox":
+            return "iconCheck";
     }
 };
 
@@ -379,7 +381,7 @@ export const addAttrViewColAnimation = (options: {
         if (index === 0) {
             html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
     <div draggable="true" class="av__cellheader">
-        ${options.icon ? unicode2Emoji(options.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
+        ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
         <span class="av__celltext">${options.name}</span>
     </div>
     <div class="av__widthdrag"></div>
@@ -821,6 +823,31 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 protyle: protyle,
                 type: "mAsset",
                 name: window.siyuan.languages.assets,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconCheck",
+        label: window.siyuan.languages.checkbox,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.checkbox,
+                avID,
+                type: "checkbox",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "checkbox",
+                name: window.siyuan.languages.checkbox,
                 id
             });
         }

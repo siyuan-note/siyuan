@@ -85,9 +85,9 @@ data-icon="${column.icon}" data-dtype="${column.type}"  data-pin="${column.pin}"
 style="width: ${column.width || "200px"};
 ${column.wrap ? "" : "white-space: nowrap;"}">
     <div draggable="true" class="av__cellheader">
-        ${column.icon ? unicode2Emoji(column.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
+        ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
-        ${column.pin ? '<div class="fn__flex-1"></div><svg class="av__cellicon"><use xlink:href="#iconPin"></use></svg>' : ""}
+        ${column.pin ? '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>' : ""}
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
@@ -172,6 +172,8 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                     text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
                                 }
                             });
+                        } else if (cell.valueType === "checkbox") {
+                            text += `<svg class="av__checkbox"><use xlink:href="#icon${cell.value?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
                         }
                         if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType) &&
                             cell.value && cell.value[cell.valueType as "url"].content) {

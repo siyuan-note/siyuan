@@ -71,6 +71,7 @@ type TAVCol =
     | "template"
     | "created"
     | "updated"
+    | "checkbox"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -1094,6 +1095,9 @@ interface IAVCellValue {
     }
     template?: {
         content: string
+    },
+    checkbox?: {
+        checked: boolean
     }
     date?: IAVCellDateValue
     created?: IAVCellDateValue

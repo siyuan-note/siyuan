@@ -1,4 +1,9 @@
 {
+  "checked": "已完成",
+  "unchecked": "未完成",
+  "percentChecked": "已完成佔比",
+  "percentUnchecked": "未完成佔比",
+  "checkbox": "勾選方塊",
   "copyInline": "複製行級元素",
   "unsplit": "取消分割畫面",
   "unsplitAll": "取消全部分螢幕",

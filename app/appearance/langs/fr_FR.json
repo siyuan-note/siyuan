@@ -1,4 +1,9 @@
 {
+  "checked": "Coché",
+  "unchecked": "Décoché",
+  "percentChecked": "Pourcentage vérifié",
+  "percentUnchecked": "Pourcentage non coché",
+  "checkbox": "case à cocher",
   "copyInline": "Copier l'élément en ligne",
   "unsplit": "Unsplit",
   "unsplitAll": "Tout dédiviser",

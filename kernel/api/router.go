@@ -33,6 +33,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/loginAuth", model.LoginAuth)
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
+	ginServer.Handle("POST", "/api/system/setUILayout", setUILayout) // 这里不加鉴权 After modifying the access authentication code on the browser side, the other side does not refresh https://github.com/siyuan-note/siyuan/issues/8028
 
 	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 
@@ -58,15 +59,14 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
-	ginServer.Handle("POST", "/api/system/setUILayout", setUILayout) // 这里不加鉴权 After modifying the access authentication code on the browser side, the other side does not refresh https://github.com/siyuan-note/siyuan/issues/8028
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, checkUpdate)
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, exportLog)
 	ginServer.Handle("POST", "/api/system/getChangelog", model.CheckAuth, getChangelog)
 
-	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, setLocalStorage)
+	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckReadonly, setLocalStorage)
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)
-	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", model.CheckAuth, setLocalStorageVal)
+	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", model.CheckAuth, model.CheckReadonly, setLocalStorageVal)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVals", model.CheckAuth, model.CheckReadonly, removeLocalStorageVals)
 	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, model.CheckReadonly, setCriterion)
 	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
@@ -80,12 +80,12 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/account/startFreeTrial", model.CheckAuth, model.CheckReadonly, startFreeTrial)
 
 	ginServer.Handle("POST", "/api/notebook/lsNotebooks", model.CheckAuth, lsNotebooks)
-	ginServer.Handle("POST", "/api/notebook/openNotebook", model.CheckAuth, openNotebook)
+	ginServer.Handle("POST", "/api/notebook/openNotebook", model.CheckAuth, model.CheckReadonly, openNotebook)
 	ginServer.Handle("POST", "/api/notebook/closeNotebook", model.CheckAuth, model.CheckReadonly, closeNotebook)
 	ginServer.Handle("POST", "/api/notebook/getNotebookConf", model.CheckAuth, getNotebookConf)
 	ginServer.Handle("POST", "/api/notebook/setNotebookConf", model.CheckAuth, model.CheckReadonly, setNotebookConf)
 	ginServer.Handle("POST", "/api/notebook/createNotebook", model.CheckAuth, model.CheckReadonly, createNotebook)
-	ginServer.Handle("POST", "/api/notebook/removeNotebook", model.CheckAuth, removeNotebook)
+	ginServer.Handle("POST", "/api/notebook/removeNotebook", model.CheckAuth, model.CheckReadonly, removeNotebook)
 	ginServer.Handle("POST", "/api/notebook/renameNotebook", model.CheckAuth, model.CheckReadonly, renameNotebook)
 	ginServer.Handle("POST", "/api/notebook/changeSortNotebook", model.CheckAuth, model.CheckReadonly, changeSortNotebook)
 	ginServer.Handle("POST", "/api/notebook/setNotebookIcon", model.CheckAuth, model.CheckReadonly, setNotebookIcon)
@@ -143,7 +143,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/search/searchTag", model.CheckAuth, searchTag)
 	ginServer.Handle("POST", "/api/search/searchTemplate", model.CheckAuth, searchTemplate)
-	ginServer.Handle("POST", "/api/search/removeTemplate", model.CheckAuth, removeTemplate)
+	ginServer.Handle("POST", "/api/search/removeTemplate", model.CheckAuth, model.CheckReadonly, removeTemplate)
 	ginServer.Handle("POST", "/api/search/searchWidget", model.CheckAuth, searchWidget)
 	ginServer.Handle("POST", "/api/search/searchRefBlock", model.CheckAuth, searchRefBlock)
 	ginServer.Handle("POST", "/api/search/searchEmbedBlock", model.CheckAuth, searchEmbedBlock)
@@ -202,7 +202,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", model.CheckAuth, getBookmarkLabels)
 	ginServer.Handle("POST", "/api/attr/resetBlockAttrs", model.CheckAuth, model.CheckReadonly, resetBlockAttrs)
-	ginServer.Handle("POST", "/api/attr/setBlockAttrs", model.CheckAuth, setBlockAttrs)
+	ginServer.Handle("POST", "/api/attr/setBlockAttrs", model.CheckAuth, model.CheckReadonly, setBlockAttrs)
 	ginServer.Handle("POST", "/api/attr/getBlockAttrs", model.CheckAuth, getBlockAttrs)
 
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)
@@ -223,9 +223,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
 	ginServer.Handle("POST", "/api/sync/getSyncInfo", model.CheckAuth, getSyncInfo)
 	ginServer.Handle("POST", "/api/sync/exportSyncProviderS3", model.CheckAuth, exportSyncProviderS3)
-	ginServer.Handle("POST", "/api/sync/importSyncProviderS3", model.CheckAuth, importSyncProviderS3)
+	ginServer.Handle("POST", "/api/sync/importSyncProviderS3", model.CheckAuth, model.CheckReadonly, importSyncProviderS3)
 	ginServer.Handle("POST", "/api/sync/exportSyncProviderWebDAV", model.CheckAuth, exportSyncProviderWebDAV)
-	ginServer.Handle("POST", "/api/sync/importSyncProviderWebDAV", model.CheckAuth, importSyncProviderWebDAV)
+	ginServer.Handle("POST", "/api/sync/importSyncProviderWebDAV", model.CheckAuth, model.CheckReadonly, importSyncProviderWebDAV)
 
 	ginServer.Handle("POST", "/api/inbox/getShorthands", model.CheckAuth, getShorthands)
 	ginServer.Handle("POST", "/api/inbox/getShorthand", model.CheckAuth, getShorthand)
@@ -365,18 +365,18 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/riff/getRiffCards", model.CheckAuth, getRiffCards)
 	ginServer.Handle("POST", "/api/riff/getTreeRiffCards", model.CheckAuth, getTreeRiffCards)
 	ginServer.Handle("POST", "/api/riff/getNotebookRiffCards", model.CheckAuth, getNotebookRiffCards)
-	ginServer.Handle("POST", "/api/riff/resetRiffCards", model.CheckAuth, resetRiffCards)
+	ginServer.Handle("POST", "/api/riff/resetRiffCards", model.CheckAuth, model.CheckReadonly, resetRiffCards)
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)
 
 	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
-	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, setSnippet)
+	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, model.CheckReadonly, setSnippet)
 	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, model.CheckReadonly, removeSnippet)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
-	ginServer.Handle("POST", "/api/av/setAttributeViewBlockAttr", model.CheckAuth, setAttributeViewBlockAttr)
+	ginServer.Handle("POST", "/api/av/setAttributeViewBlockAttr", model.CheckAuth, model.CheckReadonly, setAttributeViewBlockAttr)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckReadonly, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckReadonly, chatGPTWithAction)
@@ -392,6 +392,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/broadcast/getChannels", model.CheckAuth, getChannels)
 	ginServer.Handle("POST", "/api/broadcast/getChannelInfo", model.CheckAuth, getChannelInfo)
 
-	ginServer.Handle("POST", "/api/archive/zip", model.CheckAuth, zip)
-	ginServer.Handle("POST", "/api/archive/unzip", model.CheckAuth, unzip)
+	ginServer.Handle("POST", "/api/archive/zip", model.CheckAuth, model.CheckReadonly, zip)
+	ginServer.Handle("POST", "/api/archive/unzip", model.CheckAuth, model.CheckReadonly, unzip)
 }

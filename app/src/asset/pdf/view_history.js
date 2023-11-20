@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {setStorageVal} from "../../protyle/util/compatibility";
 const DEFAULT_VIEW_HISTORY_CACHE_SIZE = 20;
 
 /**

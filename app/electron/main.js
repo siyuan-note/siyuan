@@ -605,7 +605,7 @@ if (!app.isPackaged) {
     argStart = 2
 }
 for (let i = argStart; i < process.argv.length; i++) {
-    if (process.argv[i].startsWith("--workspace=") || process.argv[i].startsWith("--port=")) {
+    if (process.argv[i].startsWith("--workspace=") || process.argv[i].startsWith("--port=") || process.argv[i].startsWith("siyuan://")) {
         // 跳过内置参数
         continue
     }

@@ -445,7 +445,7 @@ const openWorkspace = (workspace: string) => {
 const workspaceItem = (item: IWorkspace) => {
     /// #if !BROWSER
     return {
-        label: `<div data-type="a" aria-label="${item.path}" class="fn__ellipsis" style="max-width: 256px">
+        label: `<div aria-label="${item.path}" class="fn__ellipsis ariaLabel" style="max-width: 256px">
     ${originalPath().basename(item.path)}
 </div>`,
         current: !item.closed,

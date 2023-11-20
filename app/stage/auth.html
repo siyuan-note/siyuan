@@ -76,12 +76,12 @@
         .b3-button--white {
             color: var(--b3-theme-primary);
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
-            background-color: transparent;
+            background-color: #fff;
         }
 
         .b3-button--white:hover,
         .b3-button--white:focus {
-            background-color: var(--b3-theme-primary-lightest);
+            background-color: #e8eefc;
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
         }
 
@@ -135,6 +135,7 @@
 
         .b3-snackbar--show .b3-snackbar__content {
             transform: none;
+            text-align: center;
         }
 
         .b3-snackbar__content {
@@ -151,6 +152,10 @@
             word-break: break-word;
             color: var(--b3-theme-on-primary);
             box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
+        }
+
+        .b3-snackbar__content .b3-button {
+            margin: 8px 0 0 0;
         }
 
         a {
@@ -432,6 +437,8 @@
     }
 
     const exitSiYuan = () => {
+        document.querySelector('#message').classList.add('b3-snackbar--show')
+        document.querySelector('#message').firstElementChild.innerHTML = "{{.l8}}"
         try {
             fetch('/api/system/exit', {
                 method: 'POST',
@@ -440,8 +447,7 @@
                 return response.json()
             }).then((response) => {
                 if (response.code === 1) {
-                    document.querySelector('#message').classList.add('b3-snackbar--show')
-                    document.querySelector('#message').firstElementChild.textContent = response.msg
+                    document.querySelector('#message').firstElementChild.innerHTML = response.msg
                     const buttonElement = document.querySelector(`#message button`)
                     if (buttonElement) {
                         buttonElement.addEventListener('click', () => {

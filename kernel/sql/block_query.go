@@ -503,7 +503,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 		return
 	}
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
@@ -609,7 +609,7 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 	}
 	defer rows.Close()
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		count++
@@ -835,4 +835,10 @@ func GetContainerText(container *ast.Node) string {
 		return ast.WalkContinue
 	})
 	return buf.String()
+}
+
+func containsLimitClause(stmt string) bool {
+	return strings.Contains(strings.ToLower(stmt), " limit ") ||
+		strings.Contains(strings.ToLower(stmt), "\nlimit ") ||
+		strings.Contains(strings.ToLower(stmt), "\tlimit ")
 }

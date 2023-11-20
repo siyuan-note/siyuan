@@ -98,7 +98,7 @@ class App {
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             setNoteBook(() => {
-                                initFramework(this);
+                                initFramework(this, confResponse.data.start);
                                 initRightMenu(this);
                                 openChangelog();
                                 const unPinsMenu: IMenu[] = [];

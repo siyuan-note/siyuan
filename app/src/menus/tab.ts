@@ -7,6 +7,9 @@ import {openNewWindow} from "../window/openNewWindow";
 /// #endif
 import {copySubMenu} from "./commonMenuItem";
 import {App} from "../index";
+import {Layout} from "../layout";
+import {Wnd} from "../layout/Wnd";
+import {getAllWnds} from "../layout/getAll";
 
 const closeMenu = (tab: Tab) => {
     const unmodifiedTabs: Tab[] = [];
@@ -73,7 +76,7 @@ const closeMenu = (tab: Tab) => {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.closeRight,
                 accelerator: window.siyuan.config.keymap.general.closeRight.custom,
-                click () {
+                click() {
                     closeTabByType(tab, "other", rightTabs);
                 }
             }).element);
@@ -124,6 +127,34 @@ const splitSubMenu = (app: App, tab: Tab) => {
                 newWnd.headersElement.append(tab.headElement);
                 newWnd.headersElement.parentElement.classList.remove("fn__none");
                 newWnd.moveTab(tab);
+                resizeTabs();
+            }
+        });
+    }
+    let wndsTemp: Wnd[] = [];
+    getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
+    if (wndsTemp.length > 1) {
+        subMenus.push({
+            label: window.siyuan.languages.unsplit,
+            click: () => {
+                let layout = tab.parent.parent;
+                while (layout.id !== window.siyuan.layout.centerLayout.id) {
+                    wndsTemp = [];
+                    getAllWnds(layout, wndsTemp);
+                    if (wndsTemp.length > 1) {
+                        break;
+                    } else {
+                        layout = layout.parent;
+                    }
+                }
+                unsplitWnd(tab.parent.parent.children[0], layout, true);
+                resizeTabs();
+            }
+        });
+        subMenus.push({
+            label: window.siyuan.languages.unsplitAll,
+            click: () => {
+                unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout, false);
                 resizeTabs();
             }
         });
@@ -187,3 +218,24 @@ export const initTabMenu = (app: App, tab: Tab) => {
     /// #endif
     return window.siyuan.menus.menu;
 };
+
+const unsplitWnd = (target: Wnd | Layout, layout: Layout, onlyWnd: boolean) => {
+    let wnd: Wnd = target as Wnd;
+    while (wnd instanceof Layout) {
+        wnd = wnd.children[0] as Wnd;
+    }
+    for (let i = 0; i < layout.children.length; i++) {
+        const item = layout.children[i];
+        if (item instanceof Layout && !onlyWnd) {
+            unsplitWnd(wnd, item, onlyWnd);
+        } else if (item instanceof Wnd && item.id !== wnd.id && item.children.length > 0) {
+            for (let j = 0; j < item.children.length; j++) {
+                const tab = item.children[j];
+                wnd.headersElement.append(tab.headElement);
+                wnd.moveTab(tab);
+                j--;
+            }
+            i--;
+        }
+    }
+}

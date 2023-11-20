@@ -161,7 +161,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuNewDaily") {
-                newDailyNote();
+                newDailyNote(app);
                 closePanel();
                 event.preventDefault();
                 event.stopPropagation();

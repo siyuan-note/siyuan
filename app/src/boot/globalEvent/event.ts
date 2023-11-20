@@ -6,13 +6,15 @@ import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
 import {isIPad} from "../../protyle/util/compatibility";
-import {globalTouchEnd} from "./touch";
+import {globalTouchEnd, globalTouchStart} from "./touch";
 import {initDockMenu} from "../../menus/dock";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {initTabMenu} from "../../menus/tab";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {hideTooltip} from "../../dialog/tooltip";
+import {fetchPost} from "../../util/fetch";
+import {openFileById} from "../../editor/util";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -65,12 +67,33 @@ export const initWindowEvent = (app: App) => {
         globalClick(event);
     });
 
-    if (isIPad()) {
-        let time = 0;
-        document.addEventListener("touchstart", () => {
-            time = new Date().getTime();
-        }, false);
-        document.addEventListener("touchend", (event) => {
+    let time = 0;
+    document.addEventListener("touchstart", (event) => {
+        time = new Date().getTime();
+        // https://github.com/siyuan-note/siyuan/issues/6328
+        const target = event.target as HTMLElement;
+        if (hasClosestByClassName(target, "protyle-icons") ||
+            hasClosestByClassName(target, "item") ||
+            target.classList.contains("protyle-background__icon")) {
+            return;
+        }
+        // 触摸屏背景和嵌入块按钮显示
+        const backgroundElement = hasClosestByClassName(target, "protyle-background")
+        if (backgroundElement) {
+            if (!globalTouchStart(event)) {
+                backgroundElement.classList.toggle("protyle-background--mobileshow");
+            }
+            return;
+        }
+        const embedBlockElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
+        if (embedBlockElement) {
+            embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
+            return;
+        }
+    }, false);
+    document.addEventListener("touchend", (event) => {
+        if (isIPad()) {
+            // https://github.com/siyuan-note/siyuan/issues/9113
             if (globalTouchEnd(event, undefined, time, app)) {
                 event.stopImmediatePropagation();
                 event.preventDefault();
@@ -103,6 +126,25 @@ export const initWindowEvent = (app: App) => {
                 event.preventDefault();
                 return;
             }
-        }, false);
-    }
+
+            const backlinkBreadcrumbItemElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
+            if (backlinkBreadcrumbItemElement) {
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id") || backlinkBreadcrumbItemElement.getAttribute("data-node-id");
+                if (breadcrumbId) {
+                    fetchPost("/api/block/checkBlockFold", {id: breadcrumbId}, (foldResponse) => {
+                        openFileById({
+                            app,
+                            id: breadcrumbId,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            zoomIn: foldResponse.data
+                        });
+                        window.siyuan.menus.menu.remove();
+                    });
+                }
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
+        }
+    }, false);
 };

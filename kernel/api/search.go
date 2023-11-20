@@ -185,6 +185,39 @@ func searchTemplate(c *gin.Context) {
 	}
 }
 
+func getEmbedBlock(c *gin.Context) {
+	// Query embed block supports executing JavaScript https://github.com/siyuan-note/siyuan/issues/9648
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	embedBlockID := arg["embedBlockID"].(string)
+	includeIDsArg := arg["includeIDs"].([]interface{})
+	var includeIDs []string
+	for _, includeID := range includeIDsArg {
+		includeIDs = append(includeIDs, includeID.(string))
+	}
+	headingMode := 0 // 0：带标题下方块
+	headingModeArg := arg["headingMode"]
+	if nil != headingModeArg {
+		headingMode = int(headingModeArg.(float64))
+	}
+	breadcrumb := false
+	breadcrumbArg := arg["breadcrumb"]
+	if nil != breadcrumbArg {
+		breadcrumb = breadcrumbArg.(bool)
+	}
+
+	blocks := model.GetEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+	ret.Data = map[string]interface{}{
+		"blocks": blocks,
+	}
+}
+
 func searchEmbedBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

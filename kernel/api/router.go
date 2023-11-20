@@ -34,6 +34,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
 
+	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
+
 	// 需要鉴权
 
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
@@ -371,7 +373,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
 	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, setSnippet)
 	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, model.CheckReadonly, removeSnippet)
-	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
@@ -383,11 +384,12 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckReadonly, setPetalEnabled)
 
-	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckReadonly, forwardProxy)
+	ginServer.Any("/api/network/echo", model.CheckAuth, echo)
+	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, forwardProxy)
 
 	ginServer.Handle("GET", "/ws/broadcast", model.CheckAuth, broadcast)
-	ginServer.Handle("GET", "/api/broadcast/channels", model.CheckAuth, getChannels)
 	ginServer.Handle("POST", "/api/broadcast/postMessage", model.CheckAuth, postMessage)
+	ginServer.Handle("POST", "/api/broadcast/getChannels", model.CheckAuth, getChannels)
 	ginServer.Handle("POST", "/api/broadcast/getChannelInfo", model.CheckAuth, getChannelInfo)
 
 	ginServer.Handle("POST", "/api/archive/zip", model.CheckAuth, zip)

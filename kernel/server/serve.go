@@ -208,8 +208,9 @@ func serveAppearance(ginServer *gin.Engine) {
 
 	siyuan.Handle("GET", "/", func(c *gin.Context) {
 		userAgentHeader := c.GetHeader("User-Agent")
+		logging.LogInfof("serving [/] for user-agent [%s]", userAgentHeader)
 
-		/* Carry query parameters when redirecting */
+		// Carry query parameters when redirecting
 		location := url.URL{}
 		queryParams := c.Request.URL.Query()
 		queryParams.Set("r", gulu.Rand.String(7))

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20230630142312"
+		"updated": "20231120213316"
 	},
 	"Children": [
 		{
@@ -1143,7 +1143,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121454-kv5itch",
-				"updated": "20220807180200"
+				"updated": "20231120213316"
 			},
 			"Children": [
 				{
@@ -1196,7 +1196,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "請勿同時使用第三方同步碟和思源同步，可能會導致資料損壞"
+									"Data": "請勿同時使用第三方同步碟和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "思源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "同步，可能會導致資料損壞"
 								}
 							]
 						}
@@ -1225,6 +1233,179 @@
 								{
 									"Type": "NodeText",
 									"Data": "符號連結和隱藏文件不會被同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120213057-gojar0n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120213057-gojar0n",
+						"updated": "20231120213316"
+					},
+					"Children": [
+						{
+							"ID": "20231120213057-v754ak8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213057-v754ak8",
+								"updated": "20231120213316"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動同步模式下，如需退出，請使用正常的退出應用（例如行動端 APP 不要使用滑動移除，桌面端不要使用結束程序強制關閉）方式以確保資料同步執行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120213105-95jggay",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120213105-95jggay",
+						"updated": "20231120213106"
+					},
+					"Children": [
+						{
+							"ID": "20231120213106-0hx9knh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213106-0hx9knh",
+								"updated": "20231120213106"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料同步前進行資料快照如果耗時超過 7 秒會提示清理資料倉儲，若需要變更預設耗時，可透過以下兩種方式"
+								}
+							]
+						},
+						{
+							"ID": "20231120213106-kbnm4po",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20231120213106-kbnm4po",
+								"updated": "20231120213106"
+							},
+							"Children": [
+								{
+									"ID": "20231120213106-qr96es4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120213106-qr96es4",
+										"updated": "20231120213106"
+									},
+									"Children": [
+										{
+											"ID": "20231120213106-6m5igg4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120213106-6m5igg4",
+												"updated": "20231120213106"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "環境變數 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​，例如 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING=30000"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​，單位是毫秒"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20231120213106-d3jyt3j",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120213106-d3jyt3j",
+										"updated": "20231120213106"
+									},
+									"Children": [
+										{
+											"ID": "20231120213106-jnkaa0w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120213106-jnkaa0w",
+												"updated": "20231120213106"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "直接修改 工作空間/conf/conf.json 中的 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "repo.syncIndexTiming"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20231120213106-56yd2us",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213106-56yd2us",
+								"updated": "20231120213106"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最小值只能配置為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "7000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（7 秒），最大值不限制；啟動時會優先讀取環境變數覆蓋 conf 檔案中的值。"
 								}
 							]
 						}

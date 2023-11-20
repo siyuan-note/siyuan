@@ -34,7 +34,7 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             if (!tip) {
-                tip = aElement.getAttribute("data-href");
+                tip = aElement.getAttribute("data-href").substring(0, Constants.SIZE_TITLE);
                 const title = aElement.getAttribute("data-title");
                 if (title) {
                     tip += "<br>" + title;

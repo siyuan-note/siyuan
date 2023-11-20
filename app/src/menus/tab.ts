@@ -238,4 +238,4 @@ const unsplitWnd = (target: Wnd | Layout, layout: Layout, onlyWnd: boolean) => {
             i--;
         }
     }
-}
+};

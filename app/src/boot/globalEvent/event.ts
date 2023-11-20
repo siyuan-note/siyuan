@@ -78,7 +78,7 @@ export const initWindowEvent = (app: App) => {
             return;
         }
         // 触摸屏背景和嵌入块按钮显示
-        const backgroundElement = hasClosestByClassName(target, "protyle-background")
+        const backgroundElement = hasClosestByClassName(target, "protyle-background");
         if (backgroundElement) {
             if (!globalTouchStart(event)) {
                 backgroundElement.classList.toggle("protyle-background--mobileshow");

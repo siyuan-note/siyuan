@@ -15,7 +15,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 export const globalTouchStart = (event: TouchEvent) => {
     // 文档背景位置调整
     const target = event.target as HTMLElement;
-    const backgroundElement = hasClosestByClassName(target, "protyle-background")
+    const backgroundElement = hasClosestByClassName(target, "protyle-background");
     if (backgroundElement && target.tagName === "IMG" && backgroundElement.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
         const contentElement = hasClosestByClassName(target, "protyle-content", true);
         if (!contentElement) {
@@ -45,7 +45,7 @@ export const globalTouchStart = (event: TouchEvent) => {
         return true;
     }
     return false;
-}
+};
 
 export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, app: App) => {
     const target = event.target as HTMLElement;

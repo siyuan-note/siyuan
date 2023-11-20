@@ -657,7 +657,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         }).element);
     } else {
         // https://github.com/siyuan-note/siyuan/issues/9630
-        const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN")
+        const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN");
         if (inlineElement) {
             const inlineTypes = protyle.toolbar.getCurrentType(range);
             if (inlineTypes.includes("code") || inlineTypes.includes("kbd")) {

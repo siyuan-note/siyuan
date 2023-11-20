@@ -602,13 +602,13 @@ app.commandLine.appendSwitch("force_high_performance_gpu"); // Force using discr
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
 let argStart = 1;
 if (!app.isPackaged) {
-    argStart = 2
+    argStart = 2;
 }
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
     if (arg.startsWith("--workspace=") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
         // 跳过内置参数
-        continue
+        continue;
     }
 
     app.commandLine.appendSwitch(arg);

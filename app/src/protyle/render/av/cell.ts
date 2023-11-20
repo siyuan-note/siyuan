@@ -1,7 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
-import {Menu} from "../../../plugin/Menu";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
@@ -300,13 +299,13 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 inputValue.content = parseFloat(inputValue.content as string);
                 inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
             } else if (type === "checkbox") {
-                const useElement = item.querySelector("use")
-                inputValue.checked = useElement.getAttribute("xlink:href") === "#iconUncheck"
-                oldValue.checked = !inputValue.checked
-                useElement.setAttribute("xlink:href", inputValue.checked ? "#iconCheck" : "#iconUncheck")
+                const useElement = item.querySelector("use");
+                inputValue.checked = useElement.getAttribute("xlink:href") === "#iconUncheck";
+                oldValue.checked = !inputValue.checked;
+                useElement.setAttribute("xlink:href", inputValue.checked ? "#iconCheck" : "#iconUncheck");
             } else {
-                inputValue.content = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
-                oldValue.content = type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim()
+                inputValue.content = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value;
+                oldValue.content = type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim();
             }
             if (objEquals(inputValue, oldValue)) {
                 return;

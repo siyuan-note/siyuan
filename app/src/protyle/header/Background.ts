@@ -1,5 +1,5 @@
 import {hasClosestByClassName} from "../util/hasClosest";
-import {getRandom, isMobile, isTouchDevice} from "../../util/functions";
+import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";

@@ -353,7 +353,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         removeEmptyNode(newElement);
         return true;
     }
-    const wbrElement = document.createElement("wbr")
+    const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = blockElement.outerHTML;
     wbrElement.remove();

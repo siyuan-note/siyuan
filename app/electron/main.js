@@ -605,13 +605,14 @@ if (!app.isPackaged) {
     argStart = 2
 }
 for (let i = argStart; i < process.argv.length; i++) {
-    if (process.argv[i].startsWith("--workspace=") || process.argv[i].startsWith("--port=") || process.argv[i].startsWith("siyuan://")) {
+    let arg = process.argv[i];
+    if (arg.startsWith("--workspace=") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
         // 跳过内置参数
         continue
     }
 
-    app.commandLine.appendSwitch(process.argv[i]);
-    writeLog("command line switch [" + process.argv[i] + "]");
+    app.commandLine.appendSwitch(arg);
+    writeLog("command line switch [" + arg + "]");
 }
 
 app.whenReady().then(() => {

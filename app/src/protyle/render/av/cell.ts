@@ -339,13 +339,17 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 id,
                 data: blockElement.getAttribute("updated"),
             });
-            updateAttrViewCellAnimation(item);
+            if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+                updateAttrViewCellAnimation(item);
+            }
         });
     }
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
     }
-    cellElements[0].classList.add("av__cell--select");
+    if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+        cellElements[0].classList.add("av__cell--select");
+    }
     if (blockElement) {
         focusBlock(blockElement);
     }

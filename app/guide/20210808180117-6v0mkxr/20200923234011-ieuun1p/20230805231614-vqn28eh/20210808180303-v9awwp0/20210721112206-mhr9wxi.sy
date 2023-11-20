@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20230713213257"
+		"updated": "20231120213154"
 	},
 	"Children": [
 		{
@@ -1139,7 +1139,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721112403-th2r6zf",
-				"updated": "20220807180100"
+				"updated": "20231120213154"
 			},
 			"Children": [
 				{
@@ -1164,7 +1164,23 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Synchronization will not be triggered in the case of sudden disconnection such as sleep or shutdown, please manually click the synchronization button to synchronize"
+									"Data": "Synchronization will not be triggered in the case "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "of"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " sudden disconnection such "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "as"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " sleep or shutdown, please manually click the synchronization button to synchronize"
 								}
 							]
 						}
@@ -1192,7 +1208,27 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Do not use a third-party sync disk and SiYuan sync at the same time, it may cause data damage"
+									"Data": "Do"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " not use a third-party sync disk and "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " sync "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "at"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " the same time, it may cause data damage"
 								}
 							]
 						}
@@ -1221,6 +1257,178 @@
 								{
 									"Type": "NodeText",
 									"Data": "Symbolic links and hidden files will not be synchronized"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120213145-qvushc7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120213145-qvushc7"
+					},
+					"Children": [
+						{
+							"ID": "20231120213145-xe9nogq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213145-xe9nogq",
+								"updated": "20231120213148"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the automatic synchronization mode, if you need to exit, please use the normal exit method (for example, do not use sliding to remove on the mobile APP, do not use the end process to force close on the desktop) to ensure data sync"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120213153-tpjbi5o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120213153-tpjbi5o",
+						"updated": "20231120213154"
+					},
+					"Children": [
+						{
+							"ID": "20231120213154-sjzx64a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213154-sjzx64a",
+								"updated": "20231120213154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If the data snapshot takes more than 7 seconds before data synchronization, you will be prompted to clean up the data warehouse. If you need to change the default time, you can use the following two methods."
+								}
+							]
+						},
+						{
+							"ID": "20231120213154-llmdq2d",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20231120213154-llmdq2d",
+								"updated": "20231120213154"
+							},
+							"Children": [
+								{
+									"ID": "20231120213154-04v43ak",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120213154-04v43ak",
+										"updated": "20231120213154"
+									},
+									"Children": [
+										{
+											"ID": "20231120213154-s3auhbe",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120213154-s3auhbe",
+												"updated": "20231120213154"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Environment variable "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​, for example "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING=30000"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​, the unit is milliseconds"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20231120213154-vbz394m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120213154-vbz394m",
+										"updated": "20231120213154"
+									},
+									"Children": [
+										{
+											"ID": "20231120213154-j43r82y",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120213154-j43r82y",
+												"updated": "20231120213154"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Directly modify "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "repo.syncIndexTiming"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ in workspace/conf/conf.json"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20231120213154-aoykqw3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120213154-aoykqw3",
+								"updated": "20231120213154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The minimum value can only be configured to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "7000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (7 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
 								}
 							]
 						}

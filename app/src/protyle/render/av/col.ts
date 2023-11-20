@@ -186,7 +186,11 @@ export const getEditHTML = (options: {
 </div>`;
 };
 
-export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {
+export const bindEditEvent = (options: {
+    protyle: IProtyle,
+    data: IAV,
+    menuElement: HTMLElement
+}) => {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
@@ -323,6 +327,8 @@ export const getColNameByType = (type: TAVCol) => {
             return window.siyuan.languages.link;
         case "mAsset":
             return window.siyuan.languages.assets;
+        case "checkbox":
+            return window.siyuan.languages.checkbox;
     }
 };
 

@@ -1,13 +1,14 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {getCalcValue, popTextCell} from "./cell";
+import {popTextCell} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
+import {getCalcValue} from "./calc";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];

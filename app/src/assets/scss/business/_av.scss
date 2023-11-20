@@ -169,6 +169,7 @@
         opacity: 0;
         overflow: hidden;
         font-size: 75%;
+        white-space: nowrap;
 
         &.av__calc--ashow {
           opacity: 1;

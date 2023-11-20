@@ -325,6 +325,15 @@ func InitConf() {
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()
 	}
+	if timingEnv := os.Getenv("SIYUAN_SYNC_INDEX_TIMING"); "" != timingEnv {
+		val, err := strconv.Atoi(timingEnv)
+		if nil == err {
+			Conf.Repo.SyncIndexTiming = int64(val)
+		}
+	}
+	if 7000 > Conf.Repo.SyncIndexTiming {
+		Conf.Repo.SyncIndexTiming = 7 * 1000
+	}
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()

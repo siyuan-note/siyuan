@@ -33,6 +33,71 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func echo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	password, passwordSet := c.Request.URL.User.Password()
+
+	var rawData any
+	if data, err := c.GetRawData(); nil == err {
+		rawData = base64.StdEncoding.EncodeToString(data)
+	} else {
+		rawData = nil
+	}
+
+	ret.Data = map[string]interface{}{
+		"Context": map[string]interface{}{
+			"Params":       c.Params,
+			"HandlerNames": c.HandlerNames(),
+			"FullPath":     c.FullPath(),
+			"ClientIP":     c.ClientIP(),
+			"RemoteIP":     c.RemoteIP(),
+			"ContentType":  c.ContentType(),
+			"IsWebsocket":  c.IsWebsocket(),
+			"RawData":      rawData,
+		},
+		"Request": map[string]interface{}{
+			"Method":           c.Request.Method,
+			"URL":              c.Request.URL,
+			"Proto":            c.Request.Proto,
+			"ProtoMajor":       c.Request.ProtoMajor,
+			"ProtoMinor":       c.Request.ProtoMinor,
+			"Header":           c.Request.Header,
+			"ContentLength":    c.Request.ContentLength,
+			"TransferEncoding": c.Request.TransferEncoding,
+			"Close":            c.Request.Close,
+			"Host":             c.Request.Host,
+			"Form":             c.Request.Form,
+			"PostForm":         c.Request.PostForm,
+			"MultipartForm":    c.Request.MultipartForm,
+			"Trailer":          c.Request.Trailer,
+			"RemoteAddr":       c.Request.RemoteAddr,
+			"TLS":              c.Request.TLS,
+			"UserAgent":        c.Request.UserAgent(),
+			"Cookies":          c.Request.Cookies(),
+			"Referer":          c.Request.Referer(),
+		},
+		"URL": map[string]interface{}{
+			"EscapedPath":     c.Request.URL.EscapedPath(),
+			"EscapedFragment": c.Request.URL.EscapedFragment(),
+			"String":          c.Request.URL.String(),
+			"Redacted":        c.Request.URL.Redacted(),
+			"IsAbs":           c.Request.URL.IsAbs(),
+			"Query":           c.Request.URL.Query(),
+			"RequestURI":      c.Request.URL.RequestURI(),
+			"Hostname":        c.Request.URL.Hostname(),
+			"Port":            c.Request.URL.Port(),
+		},
+		"User": map[string]interface{}{
+			"Username":    c.Request.URL.User.Username(),
+			"Password":    password,
+			"PasswordSet": passwordSet,
+			"String":      c.Request.URL.User.String(),
+		},
+	}
+}
+
 func forwardProxy(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

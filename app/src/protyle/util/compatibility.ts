@@ -263,11 +263,13 @@ export const getLocalStorage = (cb: () => void) => {
         });
         cb();
 
-        // 数据兼容，移除历史数据，3.8.4 移除
-        fetchPost("/api/storage/removeLocalStorageVals", {
-            app: Constants.SIYUAN_APPID,
-            keys: ["leftColumn", "local-searchkey", "local-searchedata", "local-searchekeys", "local-searchetabdata", "rightColumn", "topBar"]
-        });
+        if (!window.siyuan.config.readonly) {
+            // 数据兼容，移除历史数据，3.8.4 移除
+            fetchPost("/api/storage/removeLocalStorageVals", {
+                app: Constants.SIYUAN_APPID,
+                keys: ["leftColumn", "local-searchkey", "local-searchedata", "local-searchekeys", "local-searchetabdata", "rightColumn", "topBar"]
+            });
+        }
     });
 };
 

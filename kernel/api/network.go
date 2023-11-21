@@ -39,12 +39,23 @@ func echo(c *gin.Context) {
 
 	password, passwordSet := c.Request.URL.User.Password()
 
+	var rawData any
+	if data, err := c.GetRawData(); nil == err {
+		rawData = base64.StdEncoding.EncodeToString(data)
+	} else {
+		rawData = nil
+	}
+
 	ret.Data = map[string]interface{}{
 		"Context": map[string]interface{}{
-			"FullPath":    c.FullPath(),
-			"ContentType": c.ContentType(),
-			"ClientIP":    c.ClientIP(),
-			"RemoteIP":    c.RemoteIP(),
+			"Params":       c.Params,
+			"HandlerNames": c.HandlerNames(),
+			"FullPath":     c.FullPath(),
+			"ClientIP":     c.ClientIP(),
+			"RemoteIP":     c.RemoteIP(),
+			"ContentType":  c.ContentType(),
+			"IsWebsocket":  c.IsWebsocket(),
+			"RawData":      rawData,
 		},
 		"Request": map[string]interface{}{
 			"Method":           c.Request.Method,
@@ -55,6 +66,7 @@ func echo(c *gin.Context) {
 			"Header":           c.Request.Header,
 			"ContentLength":    c.Request.ContentLength,
 			"TransferEncoding": c.Request.TransferEncoding,
+			"Close":            c.Request.Close,
 			"Host":             c.Request.Host,
 			"Form":             c.Request.Form,
 			"PostForm":         c.Request.PostForm,

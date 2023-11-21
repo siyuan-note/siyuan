@@ -107,7 +107,7 @@ export const getEditHTML = (options: {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
-    <span class="b3-menu__label" style="padding: 4px"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
 </button>
 <button class="b3-menu__item" data-type="goUpdateColType">
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
@@ -120,7 +120,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label" style="padding: 4px"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
 </button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
@@ -177,6 +177,7 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("mSelect", colData.type, colData.name)}
     ${genUpdateColItem("date", colData.type, colData.name)}
     ${genUpdateColItem("mAsset", colData.type, colData.name)}
+    ${genUpdateColItem("checkbox", colData.type, colData.name)}
     ${genUpdateColItem("url", colData.type, colData.name)}
     ${genUpdateColItem("email", colData.type, colData.name)}
     ${genUpdateColItem("phone", colData.type, colData.name)}
@@ -186,7 +187,11 @@ export const getEditHTML = (options: {
 </div>`;
 };
 
-export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {
+export const bindEditEvent = (options: {
+    protyle: IProtyle,
+    data: IAV,
+    menuElement: HTMLElement
+}) => {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
@@ -323,6 +328,8 @@ export const getColNameByType = (type: TAVCol) => {
             return window.siyuan.languages.link;
         case "mAsset":
             return window.siyuan.languages.assets;
+        case "checkbox":
+            return window.siyuan.languages.checkbox;
     }
 };
 
@@ -353,6 +360,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconPhone";
         case "template":
             return "iconMath";
+        case "checkbox":
+            return "iconCheck";
     }
 };
 
@@ -379,7 +388,7 @@ export const addAttrViewColAnimation = (options: {
         if (index === 0) {
             html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
     <div draggable="true" class="av__cellheader">
-        ${options.icon ? unicode2Emoji(options.icon, "av__cellicon", true) : `<svg class="av__cellicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
+        ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
         <span class="av__celltext">${options.name}</span>
     </div>
     <div class="av__widthdrag"></div>
@@ -821,6 +830,31 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 protyle: protyle,
                 type: "mAsset",
                 name: window.siyuan.languages.assets,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconCheck",
+        label: window.siyuan.languages.checkbox,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.checkbox,
+                avID,
+                type: "checkbox",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "checkbox",
+                name: window.siyuan.languages.checkbox,
                 id
             });
         }

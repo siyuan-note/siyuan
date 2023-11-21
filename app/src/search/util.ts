@@ -409,7 +409,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-chip__close") && type === "remove-criteria") {
-                const name = target.parentElement.innerText.trim();
+                const name = target.parentElement.textContent;
                 fetchPost("/api/storage/removeCriterion", {name});
                 criteriaData.find((item, index) => {
                     if (item.name === name) {

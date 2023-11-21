@@ -56,6 +56,9 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <span class="fn__space"></span>
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
+        case "checkbox":
+            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked?"Check":"Uncheck"}"></use></svg>`;
+            break;
         case "template":
             html = `<div class="fn__flex-1">${value.template.content}</div>`;
             break;
@@ -76,9 +79,17 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                 key: {
                     type: TAVCol,
                     name: string,
-                    options?: { name: string, color: string }[]
+                    options?: {
+                        name: string,
+                        color: string
+                    }[]
                 },
-                values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
+                values: {
+                    keyID: string,
+                    id: string,
+                    blockID: string,
+                    type?: TAVCol & IAVCellValue
+                }  []
             }[],
             blockIDs: string[],
             avID: string
@@ -124,6 +135,13 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             const mAssetElement = hasClosestByAttribute(target, "data-type", "mAsset");
             if (mAssetElement) {
                 popTextCell(protyle, [mAssetElement], "mAsset");
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            const checkboxElement = hasClosestByAttribute(target, "data-type", "checkbox");
+            if (checkboxElement) {
+                popTextCell(protyle, [checkboxElement], "checkbox");
                 event.stopPropagation();
                 event.preventDefault();
                 return;

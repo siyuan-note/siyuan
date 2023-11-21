@@ -93,7 +93,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         customMenu.push({
             iconHTML: Constants.ZWSP,
             action: "iconEdit",
-            label: `<div aria-label="${escapeAriaLabel(item.memo)}" data-type="a">${escapeHtml(item.name)}</div>`,
+            label: `<div aria-label="${escapeAriaLabel(item.memo)}" class="ariaLabel">${escapeHtml(item.name)}</div>`,
             bind: (element) => {
                 element.addEventListener("click", (event) => {
                     if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {

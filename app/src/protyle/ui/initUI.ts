@@ -2,7 +2,6 @@ import {setEditMode} from "../util/setEditMode";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
-import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";

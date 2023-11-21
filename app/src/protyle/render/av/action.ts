@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getTypeByCellElement, openCalcMenu, popTextCell} from "./cell";
+import {getTypeByCellElement, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {insertAttrViewBlockAnimation, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -23,6 +23,7 @@ import {getSearch} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";
+import {openCalcMenu} from "./calc";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);

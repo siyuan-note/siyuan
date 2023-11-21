@@ -861,7 +861,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                     // https://github.com/siyuan-note/siyuan/issues/9690
-                    const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN")
+                    const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN");
                     if (position.start === 2 && inlineElement &&
                         getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
                         inlineElement.textContent.startsWith(Constants.ZWSP)) {

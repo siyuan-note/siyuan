@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
-		"updated": "20230220103623"
+		"updated": "20231120213300"
 	},
 	"Children": [
 		{
@@ -1150,7 +1150,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230808120347-um16u4f",
-				"updated": "20220807180028"
+				"updated": "20231120213300"
 			},
 			"Children": [
 				{
@@ -1232,6 +1232,179 @@
 								{
 									"Type": "NodeText",
 									"Data": "符号链接和隐藏文件不会被同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120211520-p8tb9wg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120211520-p8tb9wg",
+						"updated": "20231120213300"
+					},
+					"Children": [
+						{
+							"ID": "20231120211520-1xtrwfh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120211520-1xtrwfh",
+								"updated": "20231120213300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自动同步模式下，如需退出，请使用正常的退出应用（比如移动端 APP 不要使用滑动移除，桌面端不要使用结束进程强制关闭）方式以保证数据同步执行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231120211807-pzxmsee",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231120211807-pzxmsee",
+						"updated": "20231120212111"
+					},
+					"Children": [
+						{
+							"ID": "20231120211807-n24g7wl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120211807-n24g7wl",
+								"updated": "20231120211921"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数据同步前进行数据快照如果耗时超过 7 秒会提示清理数据仓库，如果需要改动默认耗时，可通过如下两种方式"
+								}
+							]
+						},
+						{
+							"ID": "20231120211944-fvla0hc",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20231120211944-fvla0hc",
+								"updated": "20231120212046"
+							},
+							"Children": [
+								{
+									"ID": "20231120211944-ol64svy",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120211944-ol64svy",
+										"updated": "20231120211944"
+									},
+									"Children": [
+										{
+											"ID": "20231120211944-4edb9kx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120211944-4edb9kx",
+												"updated": "20231120211944"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "环境变量 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​，例如 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING=30000"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​，单位是毫秒"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20231120211944-5yhw1vi",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20231120211944-5yhw1vi",
+										"updated": "20231120212046"
+									},
+									"Children": [
+										{
+											"ID": "20231120211944-chb1tvm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20231120211944-chb1tvm",
+												"updated": "20231120212046"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "直接修改 工作空间/conf/conf.json 中的 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "repo.syncIndexTiming"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20231120211944-m955a64",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231120211944-m955a64",
+								"updated": "20231120212111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最小值只能配置为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "7000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（7 秒），最大值不限制；启动时会优先读取环境变量覆盖 conf 文件中的值。"
 								}
 							]
 						}

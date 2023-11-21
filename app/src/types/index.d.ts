@@ -71,6 +71,7 @@ type TAVCol =
     | "template"
     | "created"
     | "updated"
+    | "checkbox"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -87,6 +88,8 @@ type TAVFilterOperator =
     | "Ends with"
     | "Is between"
     | "Is relative to today"
+    | "Is true"
+    | "Is false"
 declare module "blueimp-md5"
 
 interface Window {
@@ -1094,6 +1097,9 @@ interface IAVCellValue {
     }
     template?: {
         content: string
+    },
+    checkbox?: {
+        checked: boolean
     }
     date?: IAVCellDateValue
     created?: IAVCellDateValue

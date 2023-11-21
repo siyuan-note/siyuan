@@ -239,7 +239,7 @@ export const saveCriterion = (config: ISearchOption,
         saveDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        const value = saveDialog.element.querySelector("input").value;
+        const value = saveDialog.element.querySelector("input").value.trim();
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);
             return;

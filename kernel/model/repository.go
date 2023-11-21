@@ -1485,8 +1485,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(148), elapsed.Seconds()))
 	}
 
-	if 7000 < elapsed.Milliseconds() {
-		// If the data repo indexing time is greater than 7s, prompt user to purge the data repo https://github.com/siyuan-note/siyuan/issues/9613
+	if Conf.Repo.SyncIndexTiming < elapsed.Milliseconds() {
 		logging.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 		if !promotedPurgeDataRepo {
 			go func() {

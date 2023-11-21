@@ -336,12 +336,11 @@
     border-right: 1px solid var(--b3-theme-surface-lighter);
     width: 24px;
 
-    .av__check {
-      @extend .__checkbox;
+    svg {
+      @extend .av__checkbox;
       opacity: 0;
-      padding: 9.5px 5px;
+      padding: 10px 4px;
     }
-
   }
 
   &__colsticky {

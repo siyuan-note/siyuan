@@ -8,9 +8,28 @@ import {Constants} from "../../constants";
 
 export const setProxy = () => {
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_CMD, {
-        cmd: "setProxy",
-        proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`
+    return new Promise((resolve, reject) => {
+        ipcRenderer.once(Constants.SIYUAN_PROXY_REPLY, (event, data: {
+            state: "fulfilled" | "rejected",
+            proxy: {mode: "system"} | {proxyRules: string},
+            error?: any,
+        }) => {
+            switch (data.state) {
+                case "fulfilled":
+                    resolve(data.proxy);
+                    break;
+                case "rejected":
+                    reject(data.error);
+                    break;
+                default:
+                    reject(new Error(`Unknown state: ${data.state}`));
+                    break;
+            }
+        });
+        ipcRenderer.send(Constants.SIYUAN_CMD, {
+            cmd: "setProxy",
+            proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`
+        });
     });
     /// #endif
 };

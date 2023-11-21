@@ -20,20 +20,29 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
-export const loadPlugins = async (app: App) => {
-    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-    let css = "";
-    // 为加快启动速度，不进行 await
-    response.data.forEach((item: IPluginData) => {
-        loadPluginJS(app, item);
-        css += item.css || "" + "\n";
-    });
-    const pluginsStyle = document.getElementById("pluginsStyle");
-    if (pluginsStyle) {
-        pluginsStyle.innerHTML = css;
-    } else {
-        document.head.insertAdjacentHTML("beforeend", `<style id="pluginsStyle">${css}</style>`);
+export const getStyleElement = (id: string) => {
+    let style = document.getElementById(id);
+    if (!style) {
+        style = document.createElement("style");
+        style.id = id;
+        document.head.append(style);
     }
+    return style;
+}
+
+export const loadPlugins = async (app: App) => {
+    const pluginsStyle = getStyleElement("pluginsStyle");
+    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
+    const css: string[] = [];
+    // 为加快启动速度，不进行 await
+    response.data.forEach((plugin: IPluginData) => {
+        loadPluginJS(app, plugin);
+        css.push(
+            `/* ${plugin.name} */`,
+            (plugin.css || ""),
+        );
+    });
+    pluginsStyle.innerHTML = css.join("\n");
 };
 
 const loadPluginJS = async (app: App, item: IPluginData) => {

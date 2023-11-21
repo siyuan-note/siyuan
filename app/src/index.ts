@@ -4,6 +4,7 @@ import {Model} from "./layout/Model";
 import {onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
 import {account} from "./config/account";
+import {setProxy} from "./config/util/about";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
@@ -33,11 +34,6 @@ export class App {
     public appId: string;
 
     constructor() {
-        /// #if BROWSER
-        registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
-        /// #endif
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
 
         this.appId = Constants.SIYUAN_APPID;
@@ -161,6 +157,18 @@ export class App {
                     data: response.data.conf.uiLayout.bottom
                 };
             }
+
+            await setProxy();
+
+            /// #if BROWSER
+            await registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
+            /// #endif
+            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
+
+            setNoteBook();
+            initBlockPopover(this);
+
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
@@ -177,8 +185,6 @@ export class App {
                 });
             });
         });
-        setNoteBook();
-        initBlockPopover(this);
     }
 }
 

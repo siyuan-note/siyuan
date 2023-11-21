@@ -28,6 +28,8 @@ export abstract class Constants {
     public static readonly SIYUAN_GET: string = "siyuan-get";
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
 
+    public static readonly SIYUAN_PROXY_REPLY: string = "siyuan-proxy-reply";
+
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";

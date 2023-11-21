@@ -22,7 +22,6 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
-import {setProxy} from "../config/util/about";
 import {openChangelog} from "./openChangelog";
 import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
@@ -135,7 +134,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         }
     });
     initBar(app);
-    setProxy();
     initStatus();
     initWindow(app);
     appearance.onSetappearance(window.siyuan.config.appearance);

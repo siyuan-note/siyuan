@@ -752,7 +752,7 @@ app.whenReady().then(() => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
     });
-    ipcMain.on("siyuan-cmd", (event, data) => {
+    ipcMain.on("siyuan-cmd", async (event, data) => {
         let cmd = data;
         let webContentsId = event.sender.id;
         if (typeof data !== "string") {
@@ -820,17 +820,29 @@ app.whenReady().then(() => {
                 }
                 break;
             case "setProxy":
-                event.sender.session.closeAllConnections().then(() => {
+                try {
+                    let proxy, log;
                     if (data.proxyURL.startsWith("://")) {
-                        event.sender.session.setProxy({mode: "system"}).then(() => {
-                            console.log("network proxy [system]");
-                        });
-                        return;
+                        proxy = {mode: "system"};
+                        log = "network proxy [system]";
+                    } else {
+                        proxy = {proxyRules: data.proxyURL};
+                        log = `network proxy [${data.proxyURL}]`;
                     }
-                    event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
-                        console.log("network proxy [" + data.proxyURL + "]");
+                    await event.sender.session.closeAllConnections();
+                    await event.sender.session.setProxy(proxy);
+                    console.log(log);
+                    event.reply("siyuan-proxy-reply", {
+                        state: "fulfilled",
+                        proxy,
                     });
-                });
+                } catch (error) {
+                    event.reply("siyuan-proxy-reply", {
+                        state: "rejected",
+                        proxy,
+                        error,
+                    });
+                }
                 break;
         }
     });

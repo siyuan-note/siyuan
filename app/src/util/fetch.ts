@@ -101,3 +101,4 @@ export const fetchGet = (url: string, cb: (response: IWebSocketData | IEmoji[]) 
     });
 };
 
+window.fetchSyncPost = fetchSyncPost

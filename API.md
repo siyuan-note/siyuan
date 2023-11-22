@@ -1032,6 +1032,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         * `code`: non-zero for exceptions
 
             * `-1`: Parameter parsing error
+            * `403`: Permission denied (file is not in the workspace)
             * `404`: Not Found (file doesn't exist)
             * `405`: Method Not Allowed (it's a directory)
             * `500`: Server Error (stat file failed / read file failed)

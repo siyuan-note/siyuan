@@ -45,7 +45,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
 	ret = []*BlockAttributeViewKeys{}
-	attrs := GetBlockAttrs(blockID)
+	attrs := GetBlockAttrsWithoutWaitWriting(blockID)
 	avs := attrs[av.NodeAttrNameAvs]
 	if "" == avs {
 		return
@@ -102,7 +102,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated:
-				ial := GetBlockAttrs(blockID)
+				ial := GetBlockAttrsWithoutWaitWriting(blockID)
 				updatedStr := ial["updated"]
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
@@ -122,7 +122,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					ial := map[string]string{}
 					block := getRowBlockValue(keyValues)
 					if !block.IsDetached {
-						ial = GetBlockAttrs(blockID)
+						ial = GetBlockAttrsWithoutWaitWriting(blockID)
 					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
@@ -464,7 +464,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
@@ -481,7 +481,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr {

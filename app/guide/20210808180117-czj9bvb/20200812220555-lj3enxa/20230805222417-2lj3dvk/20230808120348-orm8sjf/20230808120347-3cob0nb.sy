@@ -1400,11 +1400,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "7000"
+									"TextMarkTextContent": "12000"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​（7 秒），最大值不限制；启动时会优先读取环境变量覆盖 conf 文件中的值。"
+									"Data": "​（12 秒），最大值不限制；启动时会优先读取环境变量覆盖 conf 文件中的值。"
 								}
 							]
 						}

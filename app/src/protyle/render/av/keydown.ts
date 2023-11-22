@@ -34,7 +34,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         let newCellElement;
-        if (event.key === "ArrowLeft") {
+        if (event.key === "ArrowLeft" || matchHotKey("⇧⇥", event)) {
             const previousRowElement = rowElement.previousElementSibling;
             if (selectCellElement.previousElementSibling && !selectCellElement.previousElementSibling.classList.contains("av__firstcol")) {
                 if (selectCellElement.previousElementSibling.classList.contains("av__cell")) {
@@ -54,7 +54,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        if (event.key === "ArrowRight") {
+        if (event.key === "ArrowRight" || matchHotKey("⇥", event)) {
             const nextRowElement = rowElement.nextElementSibling;
             if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
                 newCellElement = selectCellElement.nextElementSibling;

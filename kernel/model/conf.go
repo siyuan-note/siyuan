@@ -331,8 +331,8 @@ func InitConf() {
 			Conf.Repo.SyncIndexTiming = int64(val)
 		}
 	}
-	if 7000 > Conf.Repo.SyncIndexTiming {
-		Conf.Repo.SyncIndexTiming = 7 * 1000
+	if 12000 > Conf.Repo.SyncIndexTiming {
+		Conf.Repo.SyncIndexTiming = 12 * 1000
 	}
 
 	if nil == Conf.Search {

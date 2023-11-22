@@ -163,10 +163,12 @@ func CheckAuth(c *gin.Context) {
 	// 未设置访问授权码
 	if "" == Conf.AccessAuthCode {
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
+		clientIP := c.ClientIP()
 		host := c.GetHeader("Host")
 		origin := c.GetHeader("Origin")
 		forwardedHost := c.GetHeader("X-Forwarded-Host")
 		if !localhost ||
+			("" != clientIP && !util.IsLocalHostname(clientIP)) ||
 			("" != host && !util.IsLocalHost(host)) ||
 			("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
 			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
@@ -243,7 +245,7 @@ func CheckAuth(c *gin.Context) {
 	if workspaceSession.AccessAuthCode != Conf.AccessAuthCode {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
-			if "GET" != c.Request.Method {
+			if "GET" != c.Request.Method || c.IsWebsocket() {
 				c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": Conf.Language(156)})
 				c.Abort()
 				return

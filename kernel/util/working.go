@@ -82,9 +82,21 @@ func Boot() {
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
 		if "" == AccessAuthCode {
-			// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
-			fmt.Printf("The access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker.")
-			os.Exit(1)
+			interruptBoot := true
+
+			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip  checking access auth code when deploying Docker https://github.com/siyuan-note/siyuan/issues/9709
+			byPassEnv := os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")
+			bypass, parseErr := strconv.ParseBool(byPassEnv)
+			if nil == parseErr && bypass {
+				interruptBoot = false
+				fmt.Println("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
+			}
+
+			if interruptBoot {
+				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
+				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker")
+				os.Exit(1)
+			}
 		}
 	}
 	if ContainerStd != Container {

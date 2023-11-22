@@ -47,23 +47,8 @@ func ValidOptionalPort(port string) bool {
 	return true
 }
 
-func SplitHost(host string) (hostname, port string) {
-	hostname = host
-
-	colon := strings.LastIndexByte(hostname, ':')
-	if colon != -1 && ValidOptionalPort(hostname[colon:]) {
-		hostname, port = hostname[:colon], hostname[colon+1:]
-	}
-
-	if strings.HasPrefix(hostname, "[") && strings.HasSuffix(hostname, "]") {
-		hostname = hostname[1 : len(hostname)-1]
-	}
-
-	return
-}
-
 func IsLocalHostname(hostname string) bool {
-	if "localhost" == hostname {
+	if "localhost" == hostname || strings.HasSuffix(hostname, ".localhost") {
 		return true
 	}
 	if ip := net.ParseIP(hostname); nil != ip {
@@ -73,8 +58,11 @@ func IsLocalHostname(hostname string) bool {
 }
 
 func IsLocalHost(host string) bool {
-	hostname, _ := SplitHost(host)
-	return IsLocalHostname(hostname)
+	if hostname, _, err := net.SplitHostPort(strings.TrimSpace(host)); nil != err {
+		return false
+	} else {
+		return IsLocalHostname(hostname)
+	}
 }
 
 func IsLocalOrigin(origin string) bool {

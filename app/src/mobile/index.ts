@@ -20,7 +20,7 @@ import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
-import {registerServiceWorker} from "../util/serviceWorker";
+import {registerServiceWorker, unregisterServiceWorker} from "../util/serviceWorker";
 import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
@@ -83,7 +83,9 @@ class App {
             window.siyuan.config = confResponse.data.conf;
 
             if (!window.webkit?.messageHandlers && !window.JSAndroid) {
-                await registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
+                await registerServiceWorker();
+            } else {
+                await unregisterServiceWorker();
             }
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");    

@@ -9,7 +9,7 @@ import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
 import {addBaseURL, getIdFromSYProtocol, isSYProtocol, setNoteBook} from "./util/pathName";
-import {registerServiceWorker} from "./util/serviceWorker";
+import {registerServiceWorker, unregisterServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
@@ -161,7 +161,9 @@ export class App {
             await setProxy();
 
             /// #if BROWSER
-            await registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
+            await registerServiceWorker();
+            /// #else
+            await unregisterServiceWorker();
             /// #endif
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");

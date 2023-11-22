@@ -162,6 +162,12 @@ func CheckAuth(c *gin.Context) {
 
 	// 未设置访问授权码
 	if "" == Conf.AccessAuthCode {
+		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
+		if util.SIYUAN_ACCESS_AUTH_CODE_BYPASS {
+			c.Next()
+			return
+		}
+
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
 		clientIP := c.ClientIP()
 		host := c.GetHeader("Host")

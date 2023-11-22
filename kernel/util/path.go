@@ -265,3 +265,12 @@ func IsDisplayableAsset(p string) bool {
 	}
 	return false
 }
+
+func GetAbsPathInWorkspace(relPath string) (string, error) {
+	absPath := filepath.Join(WorkspaceDir, relPath)
+	if IsSubPath(WorkspaceDir, absPath) {
+		return absPath, nil
+	} else {
+		return "", os.ErrPermission
+	}
+}

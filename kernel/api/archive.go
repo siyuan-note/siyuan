@@ -34,20 +34,34 @@ func zip(c *gin.Context) {
 		return
 	}
 
-	path := arg["path"].(string)
-	zipPath := arg["zipPath"].(string)
-	zipFile, err := gulu.Zip.Create(zipPath)
+	entryPath := arg["path"].(string)
+	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	base := filepath.Base(path)
-	if gulu.File.IsDir(path) {
-		err = zipFile.AddDirectory(base, path)
+	zipFilePath := arg["zipPath"].(string)
+	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipFile, err := gulu.Zip.Create(zipAbsFilePath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	base := filepath.Base(entryAbsPath)
+	if gulu.File.IsDir(entryAbsPath) {
+		err = zipFile.AddDirectory(base, entryAbsPath)
 	} else {
-		err = zipFile.AddEntry(base, path)
+		err = zipFile.AddEntry(base, entryAbsPath)
 	}
 	if nil != err {
 		ret.Code = -1
@@ -71,9 +85,23 @@ func unzip(c *gin.Context) {
 		return
 	}
 
-	zipPath := arg["zipPath"].(string)
-	path := arg["path"].(string)
-	if err := gulu.Zip.Unzip(zipPath, path); nil != err {
+	zipFilePath := arg["zipPath"].(string)
+	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	entryPath := arg["path"].(string)
+	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err := gulu.Zip.Unzip(zipAbsFilePath, entryAbsPath); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

@@ -394,6 +394,9 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
+
+	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
+	stmt += " AND created > '" + fmt.Sprintf("%d", ago.Unix()) + "'"
 	return
 }
 

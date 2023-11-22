@@ -89,12 +89,12 @@ func Boot() {
 			bypass, parseErr := strconv.ParseBool(byPassEnv)
 			if nil == parseErr && bypass {
 				interruptBoot = false
-				logging.LogInfof("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
+				fmt.Println("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
 			}
 
 			if interruptBoot {
 				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
-				fmt.Printf("The access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker.")
+				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker")
 				os.Exit(1)
 			}
 		}

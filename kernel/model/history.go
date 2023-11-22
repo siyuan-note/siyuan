@@ -500,6 +500,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 
 	now := time.Now()
+	ago := now.Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays)).Unix()
 	var removes []string
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()
@@ -507,7 +508,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
-		if Conf.Editor.HistoryRetentionDays < int(now.Sub(dirInfo.ModTime()).Hours()/24) {
+		if dirInfo.ModTime().Unix() < ago {
 			removes = append(removes, filepath.Join(historyDir, dir.Name()))
 		}
 	}
@@ -517,10 +518,10 @@ func clearOutdatedHistoryDir(historyDir string) {
 			continue
 		}
 		//logging.LogInfof("auto removed history dir [%s]", dir)
-
-		// 清理历史库
-		sql.DeleteHistoriesByPathPrefixQueue(dir)
 	}
+
+	// 清理历史库
+	sql.DeleteOutdatedHistories(fmt.Sprintf("%d", ago))
 }
 
 var boxLatestHistoryTime = map[string]time.Time{}

@@ -170,7 +170,9 @@ export const kernelError = () => {
 export const exitSiYuan = () => {
     hideAllElements(["util"]);
     /// #if MOBILE
-    saveScroll(window.siyuan.mobile.editor.protyle);
+    if (window.siyuan.mobile.editor) {
+        saveScroll(window.siyuan.mobile.editor.protyle);
+    }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) { // 同步执行失败

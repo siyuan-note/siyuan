@@ -20,7 +20,7 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
 
-export const initFramework = (app: App, isStart:boolean) => {
+export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();

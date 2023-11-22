@@ -61,10 +61,12 @@ export const hideAllElements = (types: string[]) => {
     if (types.includes("util")) {
         /// #if MOBILE
         const editor = getCurrentEditor();
-        editor.protyle.toolbar.subElement.classList.add("fn__none");
-        if (editor.protyle.toolbar.subElementCloseCB) {
-            editor.protyle.toolbar.subElementCloseCB();
-            editor.protyle.toolbar.subElementCloseCB = undefined;
+        if (editor) {
+            editor.protyle.toolbar.subElement.classList.add("fn__none");
+            if (editor.protyle.toolbar.subElementCloseCB) {
+                editor.protyle.toolbar.subElementCloseCB();
+                editor.protyle.toolbar.subElementCloseCB = undefined;
+            }
         }
         /// #else
         getAllEditor().forEach(item => {

@@ -47,17 +47,15 @@ const (
 )
 
 var (
-	RUN_IN_CONTAINER               = false // 是否运行在容器中
-	SIYUAN_ACCESS_AUTH_CODE_BYPASS = false // 是否跳过空访问授权码检查
+	RunInContainer             = false // 是否运行在容器中
+	SiyuanAccessAuthCodeBypass = false // 是否跳过空访问授权码检查
 )
 
 func initEnvVars() {
+	RunInContainer = isRunningInDockerContainer()
 	var err error
-
-	RUN_IN_CONTAINER = isRunningInDockerContainer()
-
-	if SIYUAN_ACCESS_AUTH_CODE_BYPASS, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); nil != err {
-		SIYUAN_ACCESS_AUTH_CODE_BYPASS = false
+	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); nil != err {
+		SiyuanAccessAuthCodeBypass = false
 	}
 }
 
@@ -95,13 +93,13 @@ func Boot() {
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
-	if RUN_IN_CONTAINER {
+	if RunInContainer {
 		Container = ContainerDocker
 		if "" == AccessAuthCode {
 			interruptBoot := true
 
 			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip checking empty access auth code https://github.com/siyuan-note/siyuan/issues/9709
-			if SIYUAN_ACCESS_AUTH_CODE_BYPASS {
+			if SiyuanAccessAuthCodeBypass {
 				interruptBoot = false
 				fmt.Println("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
 			}

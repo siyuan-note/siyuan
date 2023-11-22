@@ -163,7 +163,7 @@ func CheckAuth(c *gin.Context) {
 	// 未设置访问授权码
 	if "" == Conf.AccessAuthCode {
 		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
-		if util.SIYUAN_ACCESS_AUTH_CODE_BYPASS {
+		if util.SiyuanAccessAuthCodeBypass {
 			c.Next()
 			return
 		}

@@ -1424,11 +1424,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "7000"
+									"TextMarkTextContent": "12000"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ (7 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
+									"Data": "​ (12 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
 								}
 							]
 						}

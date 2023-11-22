@@ -49,6 +49,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
+                setTitle(response.data.name);
                 (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             });
         }

@@ -376,6 +376,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, renderHistoryAttributeView)
+	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, renderSnapshotAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
 	ginServer.Handle("POST", "/api/av/setAttributeViewBlockAttr", model.CheckAuth, model.CheckReadonly, setAttributeViewBlockAttr)
 

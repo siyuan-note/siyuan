@@ -91,6 +91,9 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
+    if (blockElement.querySelector(".av__title").getAttribute("contenteditable") === "false") {
+        return;
+    }
     const scrollRect = blockElement.querySelector(".av__scroll").getBoundingClientRect();
     const headerElement = blockElement.querySelector(".av__row--header") as HTMLElement;
     if (headerElement && (status === "top" || status === "all")) {

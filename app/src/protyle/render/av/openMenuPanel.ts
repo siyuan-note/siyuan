@@ -331,11 +331,14 @@ export const openMenuPanel = (options: {
             while (target && !target.isSameNode(avPanelElement)) {
                 const type = target.dataset.type;
                 if (type === "close") {
-                    if (options.protyle.toolbar.subElement.className.includes("fn__none")) {
-                        avPanelElement.remove();
-                    } else {
+                    if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
                         // 优先关闭资源文件搜索
                         hideElements(["util"], options.protyle);
+                    } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+                        // 过滤面板先关闭过滤条件
+                        window.siyuan.menus.menu.remove();
+                    } else {
+                        avPanelElement.remove();
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();

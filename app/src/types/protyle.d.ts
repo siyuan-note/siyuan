@@ -377,6 +377,7 @@ interface IHint {
 interface IOptions {
     history?: {
         created?: string
+        snapshot?: string
     },
     backlinkData?: {
         blockPaths: IBreadcrumb[],

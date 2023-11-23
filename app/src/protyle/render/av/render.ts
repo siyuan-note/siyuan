@@ -51,9 +51,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
             }
             const created = protyle.options.history?.created;
-            fetchPost(created ? "/api/av/renderHistoryAttributeView" : "/api/av/renderAttributeView", {
+            const snapshot = protyle.options.history?.snapshot;
+            fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
-                created
+                created,
+                snapshot
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header

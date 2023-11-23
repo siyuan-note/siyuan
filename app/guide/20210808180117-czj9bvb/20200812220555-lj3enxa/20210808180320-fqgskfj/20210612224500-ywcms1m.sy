@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
-		"updated": "20211223192459"
+		"updated": "20210613105851"
 	},
 	"Children": [
 		{
@@ -282,38 +282,9 @@
 			]
 		},
 		{
-			"ID": "20210613010024-s480zvu",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210613010024-s480zvu",
-				"updated": "20210613120902"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用属性"
-				}
-			]
-		},
-		{
-			"ID": "20210613102636-nmps3i3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210613102636-nmps3i3",
-				"updated": "20210824200842"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "属性主要有两个使用场景：根据属性查询内容块和存储挂件数据。"
-				}
-			]
-		},
-		{
 			"ID": "20210613105627-xbzpkz0",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613105627-xbzpkz0",
 				"updated": "20210613105851"
@@ -385,35 +356,6 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20210613105822-z219hfe",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210613105822-z219hfe",
-				"updated": "20210824200723"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "存储挂件数据"
-				}
-			]
-		},
-		{
-			"ID": "20210613105905-k6pckoi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210613105905-k6pckoi",
-				"updated": "20210824200729"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "挂件可以通过接口来设置属性，具体请参考开发文档。"
 				}
 			]
 		}

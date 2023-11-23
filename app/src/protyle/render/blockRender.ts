@@ -73,7 +73,6 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                 } else {
                     renderEmbed([], protyle, item, top);
                 }
-                console.log(includeIDs);
             } catch (e) {
                 renderEmbed([], protyle, item, top);
             }

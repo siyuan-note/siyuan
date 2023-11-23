@@ -261,7 +261,7 @@ export const setFilter = (options: {
     }
     menu.addItem({
         icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
+        label: window.siyuan.languages.removeFilters,
         click() {
             const oldFilters = Object.assign([], options.data.view.filters);
             options.data.view.filters.find((item: IAVFilter, index: number) => {
@@ -463,11 +463,11 @@ export const getFiltersHTML = (data: IAVTable) => {
 ${html}
 <button class="b3-menu__item${data.filters.length === data.columns.length ? " fn__none" : ""}" data-type="addFilter">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
 </button>
 <button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.removeFilters}</span>
 </button>
 </div>`;
 };

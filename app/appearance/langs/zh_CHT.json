@@ -1,4 +1,6 @@
 {
+  "addFilter": "新增篩選條件",
+  "removeFilters": "清空篩選規則",
   "checked": "已完成",
   "unchecked": "未完成",
   "percentChecked": "已完成佔比",
@@ -338,7 +340,7 @@
   "filterKeywordEnter": "關鍵字過濾 Enter",
   "defBlock": "定義塊",
   "defBlockChildren": "定義塊及其子塊",
-  "filter": "過濾",
+  "filter": "篩選",
   "headings1": "標題及下方塊",
   "tWithSubtitle": "帶子標題轉換",
   "clear": "清空",

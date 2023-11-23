@@ -1,4 +1,6 @@
 {
+  "addFilter": "添加筛选条件",
+  "removeFilters": "清空筛选规则",
   "checked": "已完成",
   "unchecked": "未完成",
   "percentChecked": "已完成占比",
@@ -338,7 +340,7 @@
   "filterKeywordEnter": "关键字过滤 Enter",
   "defBlock": "定义块",
   "defBlockChildren": "定义块及其子块",
-  "filter": "过滤",
+  "filter": "筛选",
   "headings1": "标题及下方块",
   "tWithSubtitle": "带子标题转换",
   "clear": "清空",

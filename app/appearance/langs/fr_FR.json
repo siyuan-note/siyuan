@@ -1,4 +1,6 @@
 {
+  "addFilter": "Ajouter un filtre",
+  "removeFilters": "Effacer le filtre",
   "checked": "Coché",
   "unchecked": "Décoché",
   "percentChecked": "Pourcentage vérifié",

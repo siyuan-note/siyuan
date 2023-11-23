@@ -14,7 +14,7 @@
     box-sizing: border-box;
     height: 100%;
 
-    .b3-label {
+    .b3-label:not(.b3-label--inner) {
       padding: 16px 0;
       margin: 0 24px;
     }

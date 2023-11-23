@@ -50,7 +50,7 @@ require (
 	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
 	github.com/sashabaranov/go-openai v1.17.8
 	github.com/shirou/gopsutil/v3 v3.23.10
-	github.com/siyuan-note/dejavu v0.0.0-20231122082037-f5d92ba84aff
+	github.com/siyuan-note/dejavu v0.0.0-20231123135859-866f8380004f
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20231107122348-6ed75b0b525a
@@ -78,7 +78,7 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.48.2 // indirect
+	github.com/aws/aws-sdk-go v1.48.3 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -96,7 +96,7 @@ require (
 	github.com/go-resty/resty/v2 v2.10.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/golang/glog v1.1.2 // indirect
+	github.com/golang/glog v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20231101202521-4ca4178f5c7a // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect

@@ -1,5 +1,5 @@
 import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
@@ -43,7 +43,12 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         }
         if (content.startsWith("//!js")) {
             try {
-                const includeIDs = new Function(content)();
+                const includeIDs = new Function(
+                    "fetchSyncPost",
+                    "item",
+                    "protyle",
+                    "top",
+                    content)(fetchSyncPost,item,protyle,top);
                 if (includeIDs instanceof Promise) {
                     includeIDs.then((promiseIds) => {
                         if (Array.isArray(promiseIds)) {
@@ -56,7 +61,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                                 renderEmbed(response.data.blocks || [], protyle, item, top);
                             });
                         } else {
-                            renderEmbed([], protyle, item, top);
+                            return;
                         }
                     }).catch(() => {
                         renderEmbed([], protyle, item, top);
@@ -71,7 +76,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                         renderEmbed(response.data.blocks || [], protyle, item, top);
                     });
                 } else {
-                    renderEmbed([], protyle, item, top);
+                    return;
                 }
             } catch (e) {
                 renderEmbed([], protyle, item, top);

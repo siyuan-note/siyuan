@@ -242,6 +242,25 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return
 	}
 
+	tree, _ := loadTree(srcPath, util.NewLute())
+	if nil != tree {
+		historyDir := strings.TrimPrefix(historyPath, util.HistoryDir+string(os.PathSeparator))
+		if strings.Contains(historyDir, string(os.PathSeparator)) {
+			historyDir = historyDir[:strings.Index(historyDir, string(os.PathSeparator))]
+		}
+		historyDir = filepath.Join(util.HistoryDir, historyDir)
+
+		// 恢复包含的的属性视图 https://github.com/siyuan-note/siyuan/issues/9567
+		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+		for _, avNode := range avNodes {
+			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+			destAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+			if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
+				logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+			}
+		}
+	}
+
 	util.ReloadUI()
 	FullReindex()
 	IncSync()

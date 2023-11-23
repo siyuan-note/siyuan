@@ -375,6 +375,9 @@ interface IHint {
 
 /** @link https://ld246.com/article/1549638745630#options */
 interface IOptions {
+    history?: {
+        created?: string
+    },
     backlinkData?: {
         blockPaths: IBreadcrumb[],
         dom: string

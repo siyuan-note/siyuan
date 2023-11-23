@@ -255,8 +255,10 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
 			destAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
-			if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
-				logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+			if gulu.File.IsExist(destAvPath) {
+				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
+					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+				}
 			}
 		}
 	}

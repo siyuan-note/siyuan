@@ -209,19 +209,19 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	if nil == avFile {
-		return
-	}
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := repo.OpenFile(avFile)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
 
-	data, readErr := repo.OpenFile(avFile)
-	if nil != readErr {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-		return
-	}
-
-	attrView = &av.AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 
 	viewable, err = renderAttributeView(attrView)
@@ -249,19 +249,22 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 	historyDir := matches[0]
 	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if !gulu.File.IsExist(avJSONPath) {
-		return
+		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
 	}
+	if !gulu.File.IsExist(avJSONPath) {
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := os.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
 
-	data, readErr := os.ReadFile(avJSONPath)
-	if nil != readErr {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-		return
-	}
-
-	attrView = &av.AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 
 	viewable, err = renderAttributeView(attrView)

@@ -464,6 +464,7 @@ func (box *Box) generateDocHistory0() {
 		return
 	}
 
+	luteEngine := util.NewLute()
 	for _, file := range files {
 		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
@@ -480,6 +481,23 @@ func (box *Box) generateDocHistory0() {
 		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
+		}
+
+		if strings.HasSuffix(file, ".sy") {
+			tree, loadErr := loadTree(file, luteEngine)
+			if nil != loadErr {
+				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
+			} else {
+				// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
+				avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+				for _, avNode := range avNodes {
+					srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+					destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+					if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+						logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+					}
+				}
+			}
 		}
 	}
 
@@ -544,7 +562,7 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 		}
 
 		if info.ModTime().After(latestHistoryTime) {
-			ret = append(ret, filepath.Join(path))
+			ret = append(ret, path)
 		}
 		return nil
 	})

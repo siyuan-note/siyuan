@@ -1,19 +1,6 @@
-/// #if !BROWSER
-import {ipcRenderer} from "electron";
-/// #endif
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
-import {Constants} from "../../constants";
-
-export const setProxy = () => {
-    /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_CMD, {
-        cmd: "setProxy",
-        proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`
-    });
-    /// #endif
-};
 
 export const setAccessAuthCode = () => {
     const dialog = new Dialog({

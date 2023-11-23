@@ -4,7 +4,7 @@ import {ipcRenderer, shell} from "electron";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {setAccessAuthCode, setProxy} from "./util/about";
+import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {isInAndroid, isInIOS, isIPad, openByMobile, writeText} from "../protyle/util/compatibility";
@@ -359,11 +359,22 @@ export const about = {
             const scheme = (about.element.querySelector("#aboutScheme") as HTMLInputElement).value;
             const host = (about.element.querySelector("#aboutHost") as HTMLInputElement).value;
             const port = (about.element.querySelector("#aboutPort") as HTMLInputElement).value;
-            fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, () => {
+            fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, async () => {
                 window.siyuan.config.system.networkProxy.scheme = scheme;
                 window.siyuan.config.system.networkProxy.host = host;
                 window.siyuan.config.system.networkProxy.port = port;
-                setProxy();
+                /// #if !BROWSER
+                ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                    cmd: "setProxy",
+                    proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`,
+                }).then(() => {
+                    exportLayout({
+                        reload: true,
+                        onlyData: false,
+                        errorExit: false,
+                    });
+                });
+                /// #endif
             });
         });
     }

@@ -121,7 +121,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         if (name === inputElement.value || !inputElement.value) {
             return;
         }
-        let hasName = false
+        let hasName = false;
         data.view.columns.find(column => {
             if (column.id === colId) {
                 column.options.find((item) => {

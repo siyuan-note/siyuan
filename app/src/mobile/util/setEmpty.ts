@@ -77,7 +77,7 @@ export const setEmpty = (app: App) => {
 };
 
 export const setEditor = () => {
-    const toolbarNameElement =  document.getElementById("toolbarName") as HTMLInputElement
+    const toolbarNameElement =  document.getElementById("toolbarName") as HTMLInputElement;
     setTitle(toolbarNameElement.value);
     toolbarNameElement.classList.remove("fn__hidden");
     document.getElementById("editor").classList.remove("fn__none");

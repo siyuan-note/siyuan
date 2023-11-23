@@ -60,7 +60,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                         }
                     }).catch(() => {
                         renderEmbed([], protyle, item, top);
-                    })
+                    });
                 } else if (Array.isArray(includeIDs)) {
                     fetchPost("/api/search/getEmbedBlock", {
                         embedBlockID: item.getAttribute("data-node-id"),
@@ -85,7 +85,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                 excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
                 breadcrumb
             }, (response) => {
-                renderEmbed(response.data.blocks, protyle, item, top)
+                renderEmbed(response.data.blocks, protyle, item, top);
             });
         }
     });
@@ -135,4 +135,4 @@ const renderEmbed = (blocks: {
         });
     }
     item.style.height = "";
-}
+};

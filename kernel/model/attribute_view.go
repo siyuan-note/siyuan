@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/Masterminds/sprig/v3"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -181,6 +182,49 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			KeyValues: keyValues,
 		})
 	}
+	return
+}
+
+func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	index, err := repo.GetIndex(indexID)
+	if nil != err {
+		return
+	}
+
+	files, err := repo.GetFiles(index)
+	if nil != err {
+		return
+	}
+	var avFile *entity.File
+	for _, f := range files {
+		if "/storage/av/"+avID+".json" == f.Path {
+			avFile = f
+			break
+		}
+	}
+
+	if nil == avFile {
+		return
+	}
+
+	data, readErr := repo.OpenFile(avFile)
+	if nil != readErr {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+		return
+	}
+
+	attrView = &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	viewable, err = renderAttributeView(attrView)
 	return
 }
 

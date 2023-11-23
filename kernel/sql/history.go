@@ -104,9 +104,9 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 	return historyDB.Query(query, args...)
 }
 
-func deleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string, context map[string]interface{}) (err error) {
-	stmt := "DELETE FROM histories_fts_case_insensitive WHERE path LIKE ?"
-	if err = execStmtTx(tx, stmt, pathPrefix+"%"); nil != err {
+func deleteOutdatedHistories(tx *sql.Tx, before string, context map[string]interface{}) (err error) {
+	stmt := "DELETE FROM histories_fts_case_insensitive WHERE created < ?"
+	if err = execStmtTx(tx, stmt, before); nil != err {
 		return
 	}
 	return

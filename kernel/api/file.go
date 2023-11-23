@@ -90,38 +90,45 @@ func getFile(c *gin.Context) {
 	}
 
 	filePath := arg["path"].(string)
-	filePath = filepath.Join(util.WorkspaceDir, filePath)
-	info, err := os.Stat(filePath)
+	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+	info, err := os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
-		ret.Code = 404
+		ret.Code = http.StatusNotFound
+		ret.Msg = err.Error()
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if nil != err {
-		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
-		ret.Code = 500
+		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if info.IsDir() {
-		logging.LogErrorf("file [%s] is a directory", filePath)
-		ret.Code = 405
+		logging.LogErrorf("file [%s] is a directory", fileAbsPath)
+		ret.Code = http.StatusMethodNotAllowed
 		ret.Msg = "file is a directory"
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 
-	data, err := filelock.ReadFile(filePath)
+	data, err := filelock.ReadFile(fileAbsPath)
 	if nil != err {
-		logging.LogErrorf("read file [%s] failed: %s", filePath, err)
-		ret.Code = 500
+		logging.LogErrorf("read file [%s] failed: %s", fileAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 
-	contentType := mime.TypeByExtension(filepath.Ext(filePath))
+	contentType := mime.TypeByExtension(filepath.Ext(fileAbsPath))
 	if "" == contentType {
 		if m := mimetype.Detect(data); nil != m {
 			contentType = m.String()
@@ -144,40 +151,46 @@ func readDir(c *gin.Context) {
 	}
 
 	dirPath := arg["path"].(string)
-	dirPath = filepath.Join(util.WorkspaceDir, dirPath)
-	info, err := os.Stat(dirPath)
+	dirAbsPath, err := util.GetAbsPathInWorkspace(dirPath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	info, err := os.Stat(dirAbsPath)
 	if os.IsNotExist(err) {
-		ret.Code = 404
+		ret.Code = http.StatusNotFound
+		ret.Msg = err.Error()
 		return
 	}
 	if nil != err {
-		logging.LogErrorf("stat [%s] failed: %s", dirPath, err)
-		ret.Code = 500
+		logging.LogErrorf("stat [%s] failed: %s", dirAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
 	if !info.IsDir() {
-		logging.LogErrorf("file [%s] is not a directory", dirPath)
-		ret.Code = 405
+		logging.LogErrorf("file [%s] is not a directory", dirAbsPath)
+		ret.Code = http.StatusMethodNotAllowed
 		ret.Msg = "file is not a directory"
 		return
 	}
 
-	entries, err := os.ReadDir(dirPath)
+	entries, err := os.ReadDir(dirAbsPath)
 	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", dirPath, err)
-		ret.Code = 500
+		logging.LogErrorf("read dir [%s] failed: %s", dirAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
 
 	files := []map[string]interface{}{}
 	for _, entry := range entries {
-		path := filepath.Join(dirPath, entry.Name())
+		path := filepath.Join(dirAbsPath, entry.Name())
 		info, err = os.Stat(path)
 		if nil != err {
 			logging.LogErrorf("stat [%s] failed: %s", path, err)
-			ret.Code = 500
+			ret.Code = http.StatusInternalServerError
 			ret.Msg = err.Error()
 			return
 		}
@@ -202,25 +215,36 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	filePath := arg["path"].(string)
-	filePath = filepath.Join(util.WorkspaceDir, filePath)
-	if !filelock.IsExist(filePath) {
-		ret.Code = 404
+	srcPath := arg["path"].(string)
+	srcAbsPath, err := util.GetAbsPathInWorkspace(srcPath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	if !filelock.IsExist(srcAbsPath) {
+		ret.Code = http.StatusNotFound
 		ret.Msg = "the [path] file or directory does not exist"
 		return
 	}
 
-	newPath := arg["newPath"].(string)
-	newPath = filepath.Join(util.WorkspaceDir, newPath)
-	if filelock.IsExist(newPath) {
-		ret.Code = 409
+	destPath := arg["newPath"].(string)
+	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+	if filelock.IsExist(destAbsPath) {
+		ret.Code = http.StatusConflict
 		ret.Msg = "the [newPath] file or directory already exists"
 		return
 	}
 
-	if err := filelock.Rename(filePath, newPath); nil != err {
-		logging.LogErrorf("rename file [%s] to [%s] failed: %s", filePath, newPath, err)
-		ret.Code = 500
+	if err := filelock.Rename(srcAbsPath, destAbsPath); nil != err {
+		logging.LogErrorf("rename file [%s] to [%s] failed: %s", srcAbsPath, destAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
@@ -237,22 +261,27 @@ func removeFile(c *gin.Context) {
 	}
 
 	filePath := arg["path"].(string)
-	filePath = filepath.Join(util.WorkspaceDir, filePath)
-	_, err := os.Stat(filePath)
+	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	_, err = os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
-		ret.Code = 404
+		ret.Code = http.StatusNotFound
 		return
 	}
 	if nil != err {
-		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
-		ret.Code = 500
+		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
 
-	if err = filelock.Remove(filePath); nil != err {
-		logging.LogErrorf("remove [%s] failed: %s", filePath, err)
-		ret.Code = 500
+	if err = filelock.Remove(fileAbsPath); nil != err {
+		logging.LogErrorf("remove [%s] failed: %s", fileAbsPath, err)
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
@@ -262,30 +291,36 @@ func putFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	var err error
 	filePath := c.PostForm("path")
-	filePath = filepath.Join(util.WorkspaceDir, filePath)
+	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
+	if nil != err {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+
 	isDirStr := c.PostForm("isDir")
 	isDir, _ := strconv.ParseBool(isDirStr)
 
-	var err error
 	if isDir {
-		err = os.MkdirAll(filePath, 0755)
+		err = os.MkdirAll(fileAbsPath, 0755)
 		if nil != err {
-			logging.LogErrorf("make a dir [%s] failed: %s", filePath, err)
+			logging.LogErrorf("make dir [%s] failed: %s", fileAbsPath, err)
 		}
 	} else {
 		fileHeader, _ := c.FormFile("file")
 		if nil == fileHeader {
-			logging.LogErrorf("form file is nil [path=%s]", filePath)
-			ret.Code = 400
+			logging.LogErrorf("form file is nil [path=%s]", fileAbsPath)
+			ret.Code = http.StatusBadRequest
 			ret.Msg = "form file is nil"
 			return
 		}
 
 		for {
-			dir := filepath.Dir(filePath)
+			dir := filepath.Dir(fileAbsPath)
 			if err = os.MkdirAll(dir, 0755); nil != err {
-				logging.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
+				logging.LogErrorf("put file [%s] make dir [%s] failed: %s", fileAbsPath, dir, err)
 				break
 			}
 
@@ -303,9 +338,9 @@ func putFile(c *gin.Context) {
 				break
 			}
 
-			err = filelock.WriteFile(filePath, data)
+			err = filelock.WriteFile(fileAbsPath, data)
 			if nil != err {
-				logging.LogErrorf("put a file [%s] failed: %s", filePath, err)
+				logging.LogErrorf("write file [%s] failed: %s", fileAbsPath, err)
 				break
 			}
 			break
@@ -323,15 +358,15 @@ func putFile(c *gin.Context) {
 		modTimeInt, parseErr := strconv.ParseInt(modTimeStr, 10, 64)
 		if nil != parseErr {
 			logging.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, parseErr)
-			ret.Code = 500
+			ret.Code = http.StatusInternalServerError
 			ret.Msg = parseErr.Error()
 			return
 		}
 		modTime = millisecond2Time(modTimeInt)
 	}
-	if err = os.Chtimes(filePath, modTime, modTime); nil != err {
+	if err = os.Chtimes(fileAbsPath, modTime, modTime); nil != err {
 		logging.LogErrorf("change time failed: %s", err)
-		ret.Code = 500
+		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}

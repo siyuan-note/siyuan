@@ -18,7 +18,10 @@ package model
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -181,6 +184,46 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	return
 }
 
+func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
+	if nil != parseErr {
+		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
+		return
+	}
+
+	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
+	globPath := filepath.Join(util.HistoryDir, dirPrefix+"*")
+	matches, err := filepath.Glob(globPath)
+	if nil != err {
+		logging.LogErrorf("glob [%s] failed: %s", globPath, err)
+		return
+	}
+	if 1 > len(matches) {
+		return
+	}
+
+	historyDir := matches[0]
+	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if !gulu.File.IsExist(avJSONPath) {
+		return
+	}
+
+	data, readErr := os.ReadFile(avJSONPath)
+	if nil != readErr {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+		return
+	}
+
+	attrView = &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	viewable, err = renderAttributeView(attrView)
+	return
+}
+
 func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
@@ -198,12 +241,17 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		return
 	}
 
+	viewable, err = renderAttributeView(attrView)
+	return
+}
+
+func renderAttributeView(attrView *av.AttributeView) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view := av.NewView()
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
 			return
 		}
 	}

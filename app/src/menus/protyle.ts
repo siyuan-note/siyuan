@@ -623,11 +623,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                const cloneContents = getSelection().getRangeAt(0).cloneContents();
-                cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
-                    item.firstElementChild.remove();
-                });
-                copyPlainText(cloneContents.textContent);
+                copyPlainText(getSelection().getRangeAt(0).toString());
             }
         }).element);
         if (protyle.disabled) {

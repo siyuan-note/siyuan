@@ -627,11 +627,7 @@ export class Gutter {
                 let html = "";
                 selectsElement.forEach(item => {
                     item.querySelectorAll("[spellcheck]").forEach(editItem => {
-                        const cloneNode = editItem.cloneNode(true) as HTMLElement;
-                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
-                            slashItem.firstElementChild.remove();
-                        });
-                        html += cloneNode.textContent + "\n";
+                        html += editItem.textContent + "\n";
                     });
                 });
                 copyPlainText(html.trimEnd());
@@ -1068,11 +1064,7 @@ export class Gutter {
             click() {
                 let text = "";
                 nodeElement.querySelectorAll("[spellcheck]").forEach(item => {
-                    const cloneNode = item.cloneNode(true) as HTMLElement;
-                    cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
-                        slashItem.firstElementChild.remove();
-                    });
-                    text += cloneNode.textContent + "\n";
+                    text += item.textContent + "\n";
                 });
                 copyPlainText(text.trimEnd());
             }

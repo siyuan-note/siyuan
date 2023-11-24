@@ -339,20 +339,12 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             selectsElement.forEach(item => {
                 // 不能使用 [contenteditable="true"], 否则嵌入块无法复制
                 item.querySelectorAll("[spellcheck]").forEach(editItem => {
-                    const cloneNode = editItem.cloneNode(true) as HTMLElement;
-                    cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
-                        slashItem.firstElementChild.remove();
-                    });
-                    html += cloneNode.textContent + "\n";
+                    html += editItem.textContent + "\n";
                 });
             });
             copyPlainText(html.trimEnd());
         } else {
-            const cloneContents = range.cloneContents();
-            cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
-                item.firstElementChild.remove();
-            });
-            writeText(cloneContents.textContent);
+            writeText(range.toString());
         }
         event.preventDefault();
         return true;

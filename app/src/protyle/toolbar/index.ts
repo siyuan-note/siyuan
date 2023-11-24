@@ -1585,11 +1585,7 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "copyPlainText") {
                 focusByRange(getEditorRange(nodeElement));
-                const cloneContents = getSelection().getRangeAt(0).cloneContents();
-                cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
-                    item.firstElementChild.remove();
-                });
-                copyPlainText(cloneContents.textContent);
+                copyPlainText(getSelection().getRangeAt(0).toString());
                 this.subElement.classList.add("fn__none");
             } else if (action === "pasteAsPlainText") {
                 focusByRange(getEditorRange(nodeElement));

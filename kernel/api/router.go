@@ -34,7 +34,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
 	ginServer.Handle("POST", "/api/system/setUILayout", setUILayout) // 这里不加鉴权 After modifying the access authentication code on the browser side, the other side does not refresh https://github.com/siyuan-note/siyuan/issues/8028
-
+	ginServer.Handle("POST", "/api/system/getNetwork", getNetwork)   // 启动时获取网络设置，不能加鉴权
 	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 
 	// 需要鉴权

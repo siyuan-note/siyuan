@@ -297,10 +297,10 @@ const boot = () => {
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     // set proxy
-    net.fetch(getServer() + "/api/system/getConf", {method: "POST"}).then((response) => {
+    net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
-        setProxy(`${response.data.conf.system.networkProxy.scheme}://${response.data.conf.system.networkProxy.host}:${response.data.conf.system.networkProxy.port}`, currentWindow.webContents).then(() => {
+        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
             // 加载主界面
             currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
         });

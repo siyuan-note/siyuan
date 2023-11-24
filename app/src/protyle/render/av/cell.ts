@@ -112,7 +112,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         // 属性面板
         return;
     }
-    const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect();
+    const avHeaderRect = blockElement.querySelector(".av__row--header").getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {

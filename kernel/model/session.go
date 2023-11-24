@@ -206,6 +206,10 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") {
+			c.Next()
+			return
+		}
 	}
 
 	// 通过 Cookie

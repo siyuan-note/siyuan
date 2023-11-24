@@ -218,6 +218,26 @@ func getEmbedBlock(c *gin.Context) {
 	}
 }
 
+func updateEmbedBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	content := arg["content"].(string)
+
+	err := model.UpdateEmbedBlock(id, content)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func searchEmbedBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

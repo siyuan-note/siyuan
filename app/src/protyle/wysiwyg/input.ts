@@ -145,8 +145,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = getContenteditableElement(blockElement).scrollLeft;
         }
-        // 使用 md 闭合后继续输入应为普通文本
-        blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
+        if (/<span data-type="backslash">.<\/span><wbr>/.test(html)) {
+            // 转义不需要添加 zwsp
+            blockElement.outerHTML = html;
+        } else {
+            // 使用 md 闭合后继续输入应为普通文本
+            blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
+        }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach((item: HTMLElement) => {
             if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
                 !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {

@@ -1559,11 +1559,12 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
+
             if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“" || event.data === "「")) {
                 clearTimeout(timeout);  // https://github.com/siyuan-note/siyuan/issues/9179
                 timeout = window.setTimeout(() => {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
-                });
+                }, event.data === "“" ? Constants.TIMEOUT_INPUT : 0);   // 百度输入法中文双引号光标跳动需要延迟 https://github.com/siyuan-note/siyuan/issues/9686
             } else {
                 input(protyle, blockElement, range, true);
             }

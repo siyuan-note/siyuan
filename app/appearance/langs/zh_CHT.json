@@ -1,4 +1,6 @@
 {
+  "tempUnlock": "暫時解鎖",
+  "cancelTempUnlock": "取消暫時解鎖",
   "addFilter": "新增篩選條件",
   "removeFilters": "清空篩選規則",
   "checked": "已完成",

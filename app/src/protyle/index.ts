@@ -22,7 +22,7 @@ import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Background} from "./header/Background";
-import {disabledProtyle, enableProtyle, onGet} from "./util/onGet";
+import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";

@@ -108,7 +108,7 @@ export class Breadcrumb {
                     break;
                 } else if (type === "readonly") {
                     if (!window.siyuan.config.readonly) {
-                        const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock"
+                        const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock";
                         if (window.siyuan.config.editor.readOnly) {
                             if (isReadonly) {
                                 enableProtyle(protyle);

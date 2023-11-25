@@ -378,7 +378,6 @@ export const enableProtyle = (protyle: IProtyle) => {
     hideTooltip();
 };
 
-
 const focusElementById = (protyle: IProtyle, action: string[]) => {
     let focusElement: Element;
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${protyle.block.id}"]`)).find((item: HTMLElement) => {

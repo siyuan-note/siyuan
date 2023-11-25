@@ -337,7 +337,7 @@ export const editor = {
         });
     },
     _onSetEditor: (editorData: IEditor) => {
-        const changeReadonly = editorData.readOnly !== window.siyuan.config.editor.readOnly
+        const changeReadonly = editorData.readOnly !== window.siyuan.config.editor.readOnly;
         if (changeReadonly) {
             editor.setReadonly(editorData.readOnly);
         }

@@ -1,4 +1,6 @@
 {
+  "tempUnlock": "Déverrouiller temporairement",
+  "cancelTempUnlock": "Annuler le déverrouillage temporaire",
   "addFilter": "Ajouter un filtre",
   "removeFilters": "Effacer le filtre",
   "checked": "Coché",

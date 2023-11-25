@@ -1,4 +1,6 @@
 {
+  "tempUnlock": "Temporarily unlock",
+  "cancelTempUnlock": "Cancel temporary unlock",
   "addFilter": "Add filter",
   "removeFilters": "Clear filter",
   "checked": "Checked",

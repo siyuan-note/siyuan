@@ -1,4 +1,6 @@
 {
+  "tempUnlock": "临时解锁",
+  "cancelTempUnlock": "取消临时解锁",
   "addFilter": "添加筛选条件",
   "removeFilters": "清空筛选规则",
   "checked": "已完成",

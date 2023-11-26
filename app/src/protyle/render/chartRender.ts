@@ -16,8 +16,16 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
         return;
     }
     if (echartsElements.length > 0) {
-        addScript(`${cdn}/js/echarts/echarts.min.js?v=5.3.2`, "protyleEchartsScript").then(() => {
-            addScript(`${cdn}/js/echarts/echarts-gl.min.js?v=2.0.9`, "protyleEchartsGLScript").then(() => {
+        addScript(
+            `${cdn}/js/echarts/echarts.min.js?v=5.3.2`,
+            Constants.ELEMENT_ID_PROTYLE_ECHARTS_SCRIPT,
+            Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+        ).then(() => {
+            addScript(
+                `${cdn}/js/echarts/echarts-gl.min.js?v=2.0.9`,
+                Constants.ELEMENT_ID_PROTYLE_ECHARTS_GL_SCRIPT,
+                Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+            ).then(() => {
                 let width: number = undefined;
                 if (echartsElements[0].firstElementChild.clientWidth === 0) {
                     const tabElement = hasClosestByClassName(echartsElements[0], "layout-tab-container", true);

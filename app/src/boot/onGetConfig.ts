@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
+import {exportLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
@@ -12,7 +12,6 @@ import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
-import {renderSnippet} from "../config/util/snippets";
 import {openFile, openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
@@ -22,7 +21,6 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
-import {openChangelog} from "./openChangelog";
 import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
@@ -86,7 +84,7 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
-export const onGetConfig = (isStart: boolean, app: App) => {
+export const onGetConfig = (app: App) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -109,6 +107,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             sendGlobalShortcut(app);
         });
     }
+    if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
+        window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
+    }
     /// #if !BROWSER
     ipcRenderer.invoke(Constants.SIYUAN_INIT, {
         languages: window.siyuan.languages["_trayMenu"],
@@ -117,29 +118,13 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     /// #endif
-    if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
-        window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
-    }
     initWindowEvent(app);
-    fetchPost("/api/system/getEmojiConf", {}, response => {
-        window.siyuan.emojis = response.data as IEmoji[];
-        try {
-            JSONToLayout(app, isStart);
-            /// #if !BROWSER
-            sendGlobalShortcut(app);
-            /// #endif
-            openChangelog();
-        } catch (e) {
-            resetLayout();
-        }
-    });
     initBar(app);
     initStatus();
     initWindow(app);
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
-    renderSnippet();
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);

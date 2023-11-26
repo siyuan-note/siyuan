@@ -3,32 +3,30 @@ import {Menus} from "../menus";
 import {Model} from "../layout/Model";
 import "../assets/scss/base.scss";
 import {initBlockPopover} from "../block/popover";
-import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
-import {fetchGet, fetchPost} from "../util/fetch";
-import {addBaseURL, setNoteBook} from "../util/pathName";
+import {fetchPost} from "../util/fetch";
+import {addBaseURL, addMetaAnchor} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
     progressStatus, reloadSync,
-    setTitle,
     transactionError
 } from "../dialog/processSystem";
-import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
-import {getLocalStorage} from "../protyle/util/compatibility";
-import {init} from "../window/init";
-import {loadPlugins} from "../plugin/loader";
+import {init, initLayout} from "../window/init";
+import {initApp} from "../boot/initApp";
+import {PluginLoader} from "../plugin/loader";
+import {unregisterServiceWorker} from "../util/serviceWorker";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
     public appId: string;
 
     constructor() {
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        addMetaAnchor();
+
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
@@ -112,9 +110,9 @@ class App {
                                 break;
                             case "refreshtheme":
                                 if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
-                                    (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
+                                    (document.getElementById(Constants.ELEMENT_ID_PROTYLE_THEME_STYLE) as HTMLLinkElement).href = data.data.theme;
                                 } else {
-                                    (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
+                                    (document.getElementById(Constants.ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE) as HTMLLinkElement).href = data.data.theme;
                                 }
                                 break;
                             case "openFileById":
@@ -125,24 +123,25 @@ class App {
                 }
             }),
         };
+
         fetchPost("/api/system/getConf", {}, async (response) => {
             window.siyuan.config = response.data.conf;
-            await loadPlugins(this);
-            getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
-                    window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus(this);
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                        window.siyuan.user = userResponse.data;
-                        init(this);
-                        setTitle(window.siyuan.languages.siyuanNote);
-                        initMessage();
-                    });
-                });
-            });
+
+            await unregisterServiceWorker();
+
+            const pluginLoader = new PluginLoader(this);
+
+            await initApp();
+
+            window.siyuan.menus = new Menus(this);
+
+            initBlockPopover(this);
+
+            init(this);
+            initLayout(this);
+
+            await pluginLoader.register();
         });
-        setNoteBook();
-        initBlockPopover(this);
     }
 }
 

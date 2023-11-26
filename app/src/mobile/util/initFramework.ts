@@ -5,7 +5,6 @@ import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
-import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
 import {getIdZoomInByPath, getOpenNotebookCount} from "../../util/pathName";
 import {popMenu} from "../menu";
@@ -23,7 +22,6 @@ import {setTitle} from "../../dialog/processSystem";
 
 export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();
-    renderSnippet();
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;

@@ -1645,7 +1645,7 @@ export const sendGlobalShortcut = (app: App) => {
     });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],
-        hotkeys
+        hotkeys,
     });
     /// #endif
 };

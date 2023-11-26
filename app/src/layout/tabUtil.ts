@@ -311,7 +311,9 @@ export const copyTab = (app: App, tab: Tab) => {
                     model = newModelByInitData(app, newTab, initData);
                 }
             }
-            newTab.addModel(model);
+            if (model) {
+                newTab.addModel(model);
+            }
         }
     });
 };

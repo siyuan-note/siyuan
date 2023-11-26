@@ -25,7 +25,7 @@ module.exports = (env, argv) => {
             extensions: [".ts", ".js", ".tpl", ".scss", ".png", ".svg"],
         },
         optimization: {
-            minimize: true,
+            minimize: false,
             minimizer: [
                 new EsbuildPlugin({target: "es2021"}),
             ],

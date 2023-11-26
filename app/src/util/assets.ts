@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
-import {addStyle} from "../protyle/util/addStyle";
+import {addStyle, addStyleElement} from "../protyle/util/addStyle";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
@@ -10,13 +10,21 @@ import {appearance} from "../config/appearance";
 import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
 
 const loadThirdIcon = (iconURL: string, data: IAppearance) => {
-    addScript(iconURL, "iconDefaultScript").then(() => {
+    addScript(
+        iconURL,
+        Constants.ELEMENT_ID_ICON_DEFAULT_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.THEME_SCRIPT,
+    ).then(() => {
         if (!["ant", "material"].includes(data.icon)) {
-            const iconScriptElement = document.getElementById("iconScript");
+            const iconScriptElement = document.getElementById(Constants.ELEMENT_ID_ICON_SCRIPT);
             if (iconScriptElement) {
                 iconScriptElement.remove();
             }
-            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
+            addScript(
+                `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`,
+                Constants.ELEMENT_ID_ICON_SCRIPT,
+                Constants.ELEMENT_ID_META_ANCHOR.THEME_SCRIPT,
+            );
         }
     });
 };
@@ -36,7 +44,7 @@ export const loadAssets = (data: IAppearance) => {
         window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
     }
 
-    const defaultStyleElement = document.getElementById("themeDefaultStyle");
+    const defaultStyleElement = document.getElementById(Constants.ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE);
     let defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
         defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
@@ -44,21 +52,37 @@ export const loadAssets = (data: IAppearance) => {
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
             defaultStyleElement.remove();
-            addStyle(defaultThemeAddress, "themeDefaultStyle");
+            addStyle(
+                defaultThemeAddress,
+                Constants.ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE,
+                Constants.ELEMENT_ID_META_ANCHOR.THEME_LINK,
+            );
         }
     } else {
-        addStyle(defaultThemeAddress, "themeDefaultStyle");
+        addStyle(
+            defaultThemeAddress,
+            Constants.ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE,
+            Constants.ELEMENT_ID_META_ANCHOR.THEME_LINK,
+        );
     }
-    const styleElement = document.getElementById("themeStyle");
+    const styleElement = document.getElementById(Constants.ELEMENT_ID_PROTYLE_THEME_STYLE);
     if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
         if (styleElement) {
             if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
                 styleElement.remove();
-                addStyle(themeAddress, "themeStyle");
+                addStyle(
+                    themeAddress,
+                    Constants.ELEMENT_ID_PROTYLE_THEME_STYLE,
+                    Constants.ELEMENT_ID_META_ANCHOR.THEME_LINK,
+                );
             }
         } else {
-            addStyle(themeAddress, "themeStyle");
+            addStyle(
+                themeAddress,
+                Constants.ELEMENT_ID_PROTYLE_THEME_STYLE,
+                Constants.ELEMENT_ID_META_ANCHOR.THEME_LINK,
+            );
         }
     } else if (styleElement) {
         styleElement.remove();
@@ -85,18 +109,26 @@ export const loadAssets = (data: IAppearance) => {
     /// #endif
     setCodeTheme();
 
-    const themeScriptElement = document.getElementById("themeScript");
+    const themeScriptElement = document.getElementById(Constants.ELEMENT_ID_THEME_SCRIPT);
     const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
     if (themeScriptElement) {
         if (!themeScriptElement.getAttribute("src").startsWith(themeScriptAddress)) {
             themeScriptElement.remove();
-            addScript(themeScriptAddress, "themeScript");
+            addScript(
+                themeScriptAddress,
+                Constants.ELEMENT_ID_THEME_SCRIPT,
+                Constants.ELEMENT_ID_META_ANCHOR.THEME_SCRIPT,
+            );
         }
     } else {
-        addScript(themeScriptAddress, "themeScript");
+        addScript(
+            themeScriptAddress,
+            Constants.ELEMENT_ID_THEME_SCRIPT,
+            Constants.ELEMENT_ID_META_ANCHOR.THEME_SCRIPT,
+        );
     }
 
-    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
+    const iconDefaultScriptElement = document.getElementById(Constants.ELEMENT_ID_ICON_DEFAULT_SCRIPT);
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
@@ -156,7 +188,13 @@ export const initAssets = () => {
 
 export const addGA = () => {
     if (!window.siyuan.config.system.disableGoogleAnalytics) {
-        addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript");
+        const url = new URL(Constants.ANALYTICS_TAG_ADDRESS);
+        url.searchParams.set("id", Constants.ANALYTICS_TAG_ID);
+        addScript(
+            url.href,
+            Constants.ELEMENT_ID_GOOGLE_ANALYTICS_SCRIPT,
+            Constants.ELEMENT_ID_META_ANCHOR.THIRDPARTY_SCRIPT,
+        );
         window.dataLayer = window.dataLayer || [];
         /*eslint-disable */
         const gtag = function (...args: any[]) {
@@ -164,7 +202,7 @@ export const addGA = () => {
         };
         /*eslint-enable */
         gtag("js", new Date());
-        gtag("config", "G-L7WEXVQCR9", {send_page_view: false});
+        gtag("config", Constants.ANALYTICS_TAG_ID, {send_page_view: false});
         const para = {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,
@@ -225,18 +263,21 @@ export const setInlineStyle = (set = true) => {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";
     }
     if (set) {
-        const siyuanStyle = document.getElementById("siyuanStyle");
+        const siyuanStyle = document.getElementById(Constants.ELEMENT_ID_SIYUAN_STYLE);
         if (siyuanStyle) {
-            siyuanStyle.innerHTML = style;
+            siyuanStyle.textContent = style;
         } else {
-            document.querySelector("#pluginsStyle").insertAdjacentHTML("beforebegin", `<style id="siyuanStyle">${style}</style>`);
+            const styleElement = document.createElement("style");
+            styleElement.id = Constants.ELEMENT_ID_SIYUAN_STYLE;
+            styleElement.textContent = style;
+            addStyleElement(styleElement, Constants.ELEMENT_ID_META_ANCHOR.SIYUAN_STYLE);
         }
     }
     return style;
 };
 
 export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
-    const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;
+    const hljsStyle = document.getElementById(Constants.ELEMENT_ID_PROTYLE_HLJS_STYLE) as HTMLLinkElement;
     let css;
     if (window.siyuan.config.appearance.mode === 0) {
         css = window.siyuan.config.appearance.codeBlockThemeLight;
@@ -250,11 +291,19 @@ export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
         }
     }
     const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.5.0`;
-    if (!protyleHljsStyle) {
-        addStyle(href, "protyleHljsStyle");
-    } else if (!protyleHljsStyle.href.includes(href)) {
-        protyleHljsStyle.remove();
-        addStyle(href, "protyleHljsStyle");
+    if (!hljsStyle) {
+        addStyle(
+            href,
+            Constants.ELEMENT_ID_PROTYLE_HLJS_STYLE,
+            Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_STYLE,
+        );
+    } else if (!hljsStyle.href.includes(href)) {
+        hljsStyle.remove();
+        addStyle(
+            href,
+            Constants.ELEMENT_ID_PROTYLE_HLJS_STYLE,
+            Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_STYLE,
+        );
     }
 };
 

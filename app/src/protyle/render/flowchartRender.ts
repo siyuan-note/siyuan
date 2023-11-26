@@ -18,7 +18,11 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     if (flowchartElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=0.0.0`, "protyleFlowchartScript").then(() => {
+    addScript(
+        `${cdn}/js/flowchart.js/flowchart.min.js?v=0.0.0`,
+        Constants.ELEMENT_ID_PROTYLE_FLOWCHART_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         if (flowchartElements[0].firstElementChild.clientWidth === 0) {
             const hideElement = hasClosestByAttribute(flowchartElements[0], "fold", "1");
             if (!hideElement) {

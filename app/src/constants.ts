@@ -115,6 +115,48 @@ export abstract class Constants {
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
+    // HTMLElement id
+    public static readonly ELEMENT_ID_GOOGLE_ANALYTICS_SCRIPT = "googleAnalyticsScript";
+    public static readonly ELEMENT_ID_ICON_DEFAULT_SCRIPT = "iconDefaultScript";
+    public static readonly ELEMENT_ID_ICON_SCRIPT = "iconScript";
+    public static readonly ELEMENT_ID_PDFJS_SCRIPT = "pdfjsScript";
+    public static readonly ELEMENT_ID_PROTYLE_ABCJS_SCRIPT = "protyleAbcjsScript";
+    public static readonly ELEMENT_ID_PROTYLE_ECHARTS_GL_SCRIPT = "protyleEchartsGLScript";
+    public static readonly ELEMENT_ID_PROTYLE_ECHARTS_SCRIPT = "protyleEchartsScript";
+    public static readonly ELEMENT_ID_PROTYLE_FLOWCHART_SCRIPT = "protyleFlowchartScript";
+    public static readonly ELEMENT_ID_PROTYLE_GRAPH_VIZ_SCRIPT = "protyleGraphVizScript";
+    public static readonly ELEMENT_ID_PROTYLE_HLJS_SCRIPT = "protyleHljsScript";
+    public static readonly ELEMENT_ID_PROTYLE_HLJS_STYLE = "protyleHljsStyle";
+    public static readonly ELEMENT_ID_PROTYLE_HLJS_THIRD_SCRIPT = "protyleHljsThirdScript";
+    public static readonly ELEMENT_ID_PROTYLE_HTML_2_CANVAS_SCRIPT = "protyleHtml2canvas";
+    public static readonly ELEMENT_ID_PROTYLE_HTML_SCRIPT = "protyleWcHtmlScript";
+    public static readonly ELEMENT_ID_PROTYLE_KATEX_MHCHEM = "protyleKatexMhchemScript";
+    public static readonly ELEMENT_ID_PROTYLE_KATEX_SCRIPT = "protyleKatexScript";
+    public static readonly ELEMENT_ID_PROTYLE_KATEX_STYLE = "protyleKatexStyle";
+    public static readonly ELEMENT_ID_PROTYLE_LUTE_SCRIPT = "protyleLuteScript";
+    public static readonly ELEMENT_ID_PROTYLE_MERMAID_SCRIPT = "protyleMermaidScript";
+    public static readonly ELEMENT_ID_PROTYLE_PLANTUML_SCRIPT = "protylePlantumlScript";
+    public static readonly ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE = "themeDefaultStyle";
+    public static readonly ELEMENT_ID_PROTYLE_THEME_STYLE = "themeStyle";
+    public static readonly ELEMENT_ID_PROTYLE_VIEWER_SCRIPT = "protyleViewerScript";
+    public static readonly ELEMENT_ID_PROTYLE_VIS_SCRIPT = "protyleVisScript";
+    public static readonly ELEMENT_ID_SIYUAN_STYLE = "siyuanStyle";
+    public static readonly ELEMENT_ID_THEME_SCRIPT = "themeScript";
+    public static readonly ELEMENT_ID_META_ANCHOR = {
+        THIRDPARTY_SCRIPT: "anchor-script-thirdparty",
+        PROTYLE_SCRIPT: "anchor-script-protyle",
+        THEME_SCRIPT: "anchor-script-theme",
+        SNIPPET_SCRIPT: "anchor-script-snippet",
+
+        PROTYLE_LINK: "anchor-link-protyle",
+        THEME_LINK: "anchor-link-theme",
+
+        PROTYLE_STYLE: "anchor-style-protyle",
+        SIYUAN_STYLE: "anchor-style-siyuan",
+        PLUGIN_STYLE: "anchor-style-plugin",
+        SNIPPET_STYLE: "anchor-style-snippet",
+    } as const;
+
     public static readonly KEYCODELIST: { [key: number]: string } = {
         8: "⌫",
         9: "⇥",
@@ -574,6 +616,8 @@ export abstract class Constants {
         "js", "ts", "html", "toml", "c#", "bat",
     ];
 
-    // Google Analytics 事件
+    // Google Analytics
+    public static readonly ANALYTICS_TAG_ADDRESS = "https://www.googletagmanager.com/gtag/js";
+    public static readonly ANALYTICS_TAG_ID = "G-L7WEXVQCR9";
     public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";
 }

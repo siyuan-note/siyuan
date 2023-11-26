@@ -3,12 +3,15 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
 import {objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {addStyleElement} from "../../protyle/util/addStyle";
+import {addScriptElement} from "../../protyle/util/addScript";
+import {Constants} from "../../constants";
 
-export const renderSnippet = () => {
+export const renderSnippet = (cb?: () => void) => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         response.data.snippets.forEach((item: ISnippet) => {
-            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLScriptElement;
+            const id = `snippet-${item.type}-${item.id}`;
+            const exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
             if (!item.enabled) {
                 if (exitElement) {
                     exitElement.remove();
@@ -16,21 +19,25 @@ export const renderSnippet = () => {
                 return;
             }
             if (exitElement) {
-                if (exitElement.innerHTML === item.content) {
+                if (exitElement.textContent === item.content) {
                     return;
                 }
                 exitElement.remove();
             }
             if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
+                const style = document.createElement("style");
+                style.id = id;
+                style.textContent = item.content;
+                addStyleElement(style, Constants.ELEMENT_ID_META_ANCHOR.SNIPPET_STYLE);
             } else if (item.type === "js") {
-                exitElement = document.createElement("script");
-                exitElement.type = "text/javascript";
-                exitElement.text = item.content;
-                exitElement.id = id;
-                document.head.appendChild(exitElement);
+                const script = document.createElement("script");
+                script.id = id;
+                script.type = "text/javascript";
+                script.text = item.content;
+                addScriptElement(script, Constants.ELEMENT_ID_META_ANCHOR.SNIPPET_SCRIPT);
             }
         });
+        cb?.();
     });
 };
 

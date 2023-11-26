@@ -1,43 +1,31 @@
-import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
-import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
-import {addBaseURL, getIdFromSYProtocol, isSYProtocol, setNoteBook} from "../util/pathName";
-import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
-import {fetchGet, fetchPost} from "../util/fetch";
-import {initFramework} from "./util/initFramework";
-import {addGA, initAssets, loadAssets} from "../util/assets";
-import {bootSync} from "../dialog/processSystem";
-import {initMessage, showMessage} from "../dialog/message";
+import {addBaseURL, addMetaAnchor, getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
+import {fetchPost} from "../util/fetch";
+import {bootSync, setTitle} from "../dialog/processSystem";
+import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, writeText} from "../protyle/util/compatibility";
-import {getCurrentEditor, openMobileFileById} from "./editor";
+import {openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
-import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
-import {registerServiceWorker} from "../util/serviceWorker";
-import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
-import {saveScroll} from "../protyle/scroll/saveScroll";
-import {removeBlock} from "../protyle/wysiwyg/remove";
-import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
-import {Menu} from "../plugin/Menu";
+import {registerServiceWorker, unregisterServiceWorker} from "../util/serviceWorker";
+import {PluginLoader} from "../plugin/loader";
+import {initApp} from "../boot/initApp";
+import {init, initPluginMenu} from "./init";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
     public appId: string;
 
     constructor() {
-        if (!window.webkit?.messageHandlers && !window.JSAndroid) {
-            registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
-        }
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        addMetaAnchor();
+
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
@@ -60,100 +48,32 @@ class App {
                 }
             })
         };
-        // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
-        window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
-                window.siyuan.menus.menu.remove();
-            }
-            const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
-            if (copyElement) {
-                let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd();
-                text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
-                writeText(text);
-                showMessage(window.siyuan.languages.copied, 2000);
-                event.preventDefault();
-            }
-        });
-        window.addEventListener("beforeunload", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
-        }, false);
-        window.addEventListener("pagehide", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
-        }, false);
+
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
-            await loadPlugins(this);
-            getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
-                    window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus(this);
-                    document.title = window.siyuan.languages.siyuanNote;
-                    bootSync();
-                    loadAssets(confResponse.data.conf.appearance);
-                    initMessage();
-                    initAssets();
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                        window.siyuan.user = userResponse.data;
-                        fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
-                            window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            setNoteBook(() => {
-                                initFramework(this, confResponse.data.start);
-                                initRightMenu(this);
-                                openChangelog();
-                                const unPinsMenu: IMenu[] = [];
-                                this.plugins.forEach(item => {
-                                    const unPinMenu = afterLoadPlugin(item);
-                                    if (unPinMenu) {
-                                        unPinMenu.forEach(unpinItem => {
-                                            unPinsMenu.push(unpinItem);
-                                        });
-                                    }
-                                });
-                                if (unPinsMenu.length > 0) {
-                                    const pluginElement = document.createElement("div");
-                                    pluginElement.classList.add("b3-menu__item");
-                                    pluginElement.setAttribute("data-menu", "true");
-                                    pluginElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>`;
-                                    pluginElement.addEventListener("click", () => {
-                                        const menu = new Menu();
-                                        unPinsMenu.forEach(item => {
-                                            menu.addItem(item);
-                                        });
-                                        menu.fullscreen();
-                                    });
-                                    document.querySelector("#menuAbout").after(pluginElement);
-                                }
-                            });
-                        });
-                    });
-                    addGA();
-                });
-            });
-            document.addEventListener("touchstart", handleTouchStart, false);
-            document.addEventListener("touchmove", handleTouchMove, false);
-            document.addEventListener("touchend", (event) => {
-                handleTouchEnd(event, siyuanApp);
-            }, false);
-            // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259
-            window.addEventListener("keydown", (event) => {
-                if (getSelection().rangeCount > 0) {
-                    const range = getSelection().getRangeAt(0);
-                    const editor = getCurrentEditor();
-                    if (range.toString() === "" &&
-                        editor && editor.protyle.wysiwyg.element.contains(range.startContainer) &&
-                        !event.altKey && (event.key === "Backspace" || event.key === "Delete")) {
-                        const nodeElement = hasClosestBlock(range.startContainer);
-                        if (nodeElement && isNotEditBlock(nodeElement)) {
-                            nodeElement.classList.add("protyle-wysiwyg--select");
-                            removeBlock(editor.protyle, nodeElement, range);
-                            event.stopPropagation();
-                            event.preventDefault();
-                            return;
-                        }
-                    }
-                }
-            });
+
+            if (!window.webkit?.messageHandlers && !window.JSAndroid) {
+                await registerServiceWorker();
+            } else {
+                await unregisterServiceWorker();
+            }
+
+            const pluginLoader = new PluginLoader(this);
+
+            await initApp();
+
+            window.siyuan.menus = new Menus(this);
+
+            bootSync();
+
+            init(this, confResponse.data.start);
+            openChangelog();
+
+            await pluginLoader.init();
+            await pluginLoader.load();
+            const menus = await pluginLoader.layoutReady();
+            initPluginMenu(menus);
         });
     }
 }

@@ -3,7 +3,11 @@ import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
 
 export const previewImage = (src: string) => {
-    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.10.4`, "protyleViewerScript").then(() => {
+    addScript(
+        `${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.10.4`,
+        Constants.ELEMENT_ID_PROTYLE_VIEWER_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
             const imagesElement = document.createElement("ul");
             imagesElement.innerHTML = `<li><img src="${src}"></li>`;
             window.siyuan.viewer = new Viewer(imagesElement, {
@@ -42,7 +46,11 @@ export const previewImage = (src: string) => {
 };
 
 export const previewDocImage = (src: string, id: string) => {
-    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.10.4`, "protyleViewerScript").then(() => {
+    addScript(
+        `${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.10.4`,
+        Constants.ELEMENT_ID_PROTYLE_VIEWER_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         fetchPost("/api/asset/getDocImageAssets", {id}, (response) => {
             const imagesElement = document.createElement("ul");
             let html = "";

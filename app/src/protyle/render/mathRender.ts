@@ -16,9 +16,21 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
     if (mathElements.length === 0) {
         return;
     }
-    addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.0`, "protyleKatexStyle");
-    addScript(`${cdn}/js/katex/katex.min.js?v=0.16.0`, "protyleKatexScript").then(() => {
-        addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.0`, "protyleKatexMhchemScript").then(() => {
+    addStyle(
+        `${cdn}/js/katex/katex.min.css?v=0.16.0`,
+        Constants.ELEMENT_ID_PROTYLE_KATEX_STYLE,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_LINK,
+    );
+    addScript(
+        `${cdn}/js/katex/katex.min.js?v=0.16.0`,
+        Constants.ELEMENT_ID_PROTYLE_KATEX_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
+        addScript(
+            `${cdn}/js/katex/mhchem.min.js?v=0.16.0`,
+            Constants.ELEMENT_ID_PROTYLE_KATEX_MHCHEM,
+            Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+        ).then(() => {
             mathElements.forEach((mathElement: HTMLElement) => {
                 if (mathElement.getAttribute("data-render") === "true") {
                     return;

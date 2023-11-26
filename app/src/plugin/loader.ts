@@ -9,17 +9,17 @@ import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 import {addStyleElement} from "../protyle/util/addStyle";
 
-const api = {
+const modules = {
     siyuan: API
 };
 const pluginRequire = (key: string) => {
     // @ts-ignore
-    return api[key]
+    return modules[key]
         ?? window.require?.(key);
 };
-// if (window.require instanceof Function) {
-//     pluginRequire.__proto__ = window.require;
-// }
+if (window.require instanceof Function) {
+    pluginRequire.__proto__ = window.require;
+}
 
 const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));

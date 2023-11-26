@@ -94,9 +94,9 @@ const focusStack = (backStack: IBackStack) => {
         } else {
             let readOnly = window.siyuan.config.readonly ? "true" : "false";
             if (readOnly === "false") {
-                readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-                if (!readOnly) {
-                    readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+                readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+                if (readOnly === "false") {
+                    readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
                 }
             }
             if (readOnly === "true") {

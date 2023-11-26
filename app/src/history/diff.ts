@@ -35,9 +35,9 @@ const renderCompare = (app: App, element: HTMLElement) => {
     if (!listElement) {
         return;
     }
-    const dialogContainerElement = hasClosestByClassName(element, "b3-dialog__container")
+    const dialogContainerElement = hasClosestByClassName(element, "b3-dialog__container");
     if (!dialogContainerElement) {
-        return
+        return;
     }
     const leftElement = listElement.nextElementSibling.firstElementChild;
     const rightElement = listElement.nextElementSibling.lastElementChild;

@@ -536,7 +536,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         const opElement = firstPanelElement.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
                         const typeElement = firstPanelElement.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
                         const notebookElement = firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
-                       const created = target.getAttribute("data-created")
+                       const created = target.getAttribute("data-created");
                         fetchPost("/api/history/getHistoryItems", {
                             notebook: notebookElement.value,
                             query: inputElement.value,
@@ -615,7 +615,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         } else {
                             mdElement.classList.add("fn__none");
                             docElement.classList.remove("fn__none");
-                            historyEditor.protyle.options.history.created = target.dataset.created
+                            historyEditor.protyle.options.history.created = target.dataset.created;
                             onGet({
                                 data: response,
                                 protyle: historyEditor.protyle,

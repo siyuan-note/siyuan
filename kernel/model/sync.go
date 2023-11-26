@@ -152,10 +152,10 @@ func BootSyncData() {
 }
 
 func SyncData(byHand bool) {
-	syncData(false, byHand, false)
+	syncData(false, byHand)
 }
 
-func syncData(exit, byHand, byWebSocket bool) {
+func syncData(exit, byHand bool) {
 	defer logging.Recover()
 
 	if !checkSync(false, exit, byHand) {
@@ -192,7 +192,7 @@ func syncData(exit, byHand, byWebSocket bool) {
 		connectSyncWebSocket()
 	}
 
-	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn && Conf.Sync.Perception && dataChanged {
+	if 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception && dataChanged {
 		// 如果处于自动同步模式且不是又 WS 触发的同步，则通知其他设备上的内核进行同步
 		request := map[string]interface{}{
 			"cmd":    "synced",
@@ -746,7 +746,7 @@ func connectSyncWebSocket() {
 			data := result.Data.(map[string]interface{})
 			switch data["cmd"].(string) {
 			case "synced":
-				syncData(false, false, true)
+				syncData(false, false)
 			case "kernels":
 				onlineKernelsLock.Lock()
 

@@ -1,4 +1,6 @@
 {
+  "tempUnlock": "Desbloquear temporalmente",
+  "cancelTempUnlock": "Cancelar desbloqueo temporal",
   "addFilter": "Agregar filtro",
   "removeFilters": "Borrar filtro",
   "checked": "marcado",

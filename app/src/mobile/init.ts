@@ -71,12 +71,9 @@ export const initWindowEvent = (app: App) => {
 };
 
 export const initPluginMenu = (menus: IMenu[][]) => {
-    const menuItems: IMenu[] = [];
-    menus.forEach(items => {
-        if (Array.isArray(items) && items.length > 0) {
-            menuItems.push(...items);
-        }
-    });
+    const menuItems = menus
+        .filter(items => Array.isArray(items) && items.length > 0)
+        .flat();
     if (menuItems.length > 0) {
         const pluginElement = document.createElement("div");
         pluginElement.classList.add("b3-menu__item");

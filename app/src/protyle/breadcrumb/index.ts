@@ -447,7 +447,7 @@ export class Breadcrumb {
                     type: "submenu",
                     submenu: [{
                         iconHTML: "",
-                        current: isCustomReadonly === "true",
+                        current: !isCustomReadonly || isCustomReadonly === "true",
                         label: window.siyuan.languages.enable,
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
@@ -463,16 +463,6 @@ export class Breadcrumb {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
                                 attrs: {[Constants.CUSTOM_SY_READONLY]: "false"}
-                            });
-                        }
-                    }, {
-                        iconHTML: "",
-                        current: !isCustomReadonly,
-                        label: window.siyuan.languages.default,
-                        click() {
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id: protyle.block.rootID,
-                                attrs: {[Constants.CUSTOM_SY_READONLY]: ""}
                             });
                         }
                     }]

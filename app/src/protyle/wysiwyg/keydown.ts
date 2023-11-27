@@ -147,15 +147,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
         if (isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (event.code === "Slash") {
+            if (Constants.KEYCODELIST[event.keyCode] === "Slash") {
                 protyle.hint.enableSlash = true;
-            } else if (event.code === "Backslash") {
+            } else if (Constants.KEYCODELIST[event.keyCode] === "Backslash" ) {
                 protyle.hint.enableSlash = false;
                 hideElements(["hint"], protyle);
                 // 此处不能返回，否则无法撤销 https://github.com/siyuan-note/siyuan/issues/2795
             }
         }
-
         // 有可能输入 shift+. ，因此需要使用 event.key 来进行判断
         if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             event.key !== "Escape" && event.key !== "Shift" && event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&

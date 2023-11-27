@@ -59,13 +59,15 @@ export const redirectToCheckAuth = (to: string = window.location.href) => {
 };
 
 export const addBaseURL = (href: string = location.origin) => {
-    let baseURLElement = document.getElementById("baseURL");
-    if (!baseURLElement) {
-        baseURLElement = document.createElement("base");
-        baseURLElement.id = "baseURL";
+    const baseURLElement = document.getElementById(Constants.ELEMENT_ID_BASE_URL);
+    if (baseURLElement) {
+        baseURLElement.setAttribute("href", href);
+    } else {
+        const baseURLElement = document.createElement("base");
+        baseURLElement.id = Constants.ELEMENT_ID_BASE_URL;
+        baseURLElement.setAttribute("href", href);
+        document.head.appendChild(baseURLElement);
     }
-    baseURLElement.setAttribute("href", href);
-    document.head.appendChild(baseURLElement);
 };
 
 export const addMetaAnchor = () => {

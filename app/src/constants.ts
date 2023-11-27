@@ -116,6 +116,8 @@ export abstract class Constants {
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
     // HTMLElement id
+    public static readonly ELEMENT_ID_BASE_URL = "baseURL";
+    public static readonly ELEMENT_ID_EDITOR_ATTR = "editorAttr";
     public static readonly ELEMENT_ID_GOOGLE_ANALYTICS_SCRIPT = "googleAnalyticsScript";
     public static readonly ELEMENT_ID_ICON_DEFAULT_SCRIPT = "iconDefaultScript";
     public static readonly ELEMENT_ID_ICON_SCRIPT = "iconScript";
@@ -143,8 +145,8 @@ export abstract class Constants {
     public static readonly ELEMENT_ID_SIYUAN_STYLE = "siyuanStyle";
     public static readonly ELEMENT_ID_THEME_SCRIPT = "themeScript";
     public static readonly ELEMENT_ID_META_ANCHOR = {
-        THIRDPARTY_SCRIPT: "anchor-script-thirdparty",
         PROTYLE_SCRIPT: "anchor-script-protyle",
+        THIRDPARTY_SCRIPT: "anchor-script-thirdparty",
         THEME_SCRIPT: "anchor-script-theme",
         SNIPPET_SCRIPT: "anchor-script-snippet",
 

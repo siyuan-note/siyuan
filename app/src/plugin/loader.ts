@@ -9,17 +9,13 @@ import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 import {addStyleElement} from "../protyle/util/addStyle";
 
-const modules = {
-    siyuan: API
-};
-const pluginRequire = (key: string) => {
+const getObject = (key: string) => {
+    const api = {
+        siyuan: API
+    };
     // @ts-ignore
-    return modules[key]
-        ?? window.require?.(key);
+    return api[key];
 };
-if (window.require instanceof Function) {
-    pluginRequire.__proto__ = window.require;
-}
 
 const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
@@ -96,7 +92,7 @@ const initPlugin = (app: App, petal: IPluginData) => {
     const exportsObj: { [key: string]: any } = {};
     const moduleObj = { exports: exportsObj };
     try {
-        runCode(petal.js, "plugin:" + encodeURIComponent(petal.name))(pluginRequire, moduleObj, exportsObj);
+        runCode(petal.js, "plugin:" + encodeURIComponent(petal.name))(getObject, moduleObj, exportsObj);
     } catch (e) {
         console.error(`plugin ${petal.name} run error:`, e);
         return;

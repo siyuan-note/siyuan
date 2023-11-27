@@ -919,6 +919,8 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
+
+	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1007,6 +1009,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	}
 
 	upsertAvBlockRel(updatedNode)
+
+	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1055,6 +1059,8 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	tx.writeTree(tree)
+
+	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1388,4 +1394,11 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		return ast.WalkContinue
 	})
 	return
+}
+
+func checkUpsertInUserGuide(tree *parse.Tree) {
+	// In production mode, data reset warning pops up when editing data in the user guide https://github.com/siyuan-note/siyuan/issues/9757
+	if "prod" == util.Mode && IsUserGuide(tree.Box) {
+		util.PushErrMsg(Conf.Language(52), 7000)
+	}
 }

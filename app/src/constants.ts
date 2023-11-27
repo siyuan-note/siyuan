@@ -279,6 +279,7 @@ export abstract class Constants {
             closeUnmodified: {default: "", custom: ""},
             closeLeft: {default: "", custom: ""},
             closeRight: {default: "", custom: ""},
+            tabToWindow: {default: "", custom: ""},
         },
         editor: {
             general: {

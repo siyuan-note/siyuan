@@ -72,6 +72,7 @@ import {quickMakeCard} from "../../card/makeCard";
 import {copyPNG} from "../../menus/util";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
+import {openNewWindow} from "../../window/openNewWindow";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1577,14 +1578,19 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
-    if ((matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) ||
+    if ((
+        matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.splitMoveR.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event) ||
-        matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event)) && !event.repeat) {
+        matchHotKey(window.siyuan.config.keymap.general.tabToWindow.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event)
+    ) && !event.repeat) {
         event.preventDefault();
         const tab = getActiveTab(false);
         if (tab) {
-            if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
+            if (matchHotKey(window.siyuan.config.keymap.general.tabToWindow.custom, event)) {
+                openNewWindow(tab);
+            } else if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
                 tab.parent.split("lr").addTab(copyTab(app, tab));
             } else if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event)) {
                 tab.parent.split("tb").addTab(copyTab(app, tab));

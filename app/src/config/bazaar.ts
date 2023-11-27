@@ -16,7 +16,7 @@ import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
-import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
+import {PluginLoader, registerPlugin} from "../plugin/loader";
 
 export const bazaar = {
     element: undefined as Element,
@@ -640,8 +640,8 @@ export const bazaar = {
                                         packageName: dataObj.name,
                                         enabled: true,
                                         frontend: getFrontend()
-                                    }, (response) => {
-                                        loadPlugin(app, response.data);
+                                    }, async (response) => {
+                                        await registerPlugin(app, response.data);
                                         bazaar._genMyHTML(bazaarType, app);
                                     });
                                 });
@@ -691,7 +691,7 @@ export const bazaar = {
                                             errorExit: false,
                                         });
                                     } else {
-                                        const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+                                        const linkElement = (document.getElementById(Constants.ELEMENT_ID_PROTYLE_THEME_DEFAULT_STYLE) as HTMLLinkElement);
                                         linkElement.href = linkElement.href + "1";
                                     }
                                 }
@@ -794,7 +794,7 @@ export const bazaar = {
                     if (!target.getAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
                         window.siyuan.config.bazaar.petalDisabled = !(target as HTMLInputElement).checked;
-                        fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, () => {
+                        fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, async () => {
                             target.removeAttribute("disabled");
                             if (window.siyuan.config.bazaar.petalDisabled) {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
@@ -805,11 +805,8 @@ export const bazaar = {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.classList.remove("b3-card--disabled");
                                 });
-                                loadPlugins(app).then(() => {
-                                    app.plugins.forEach(item => {
-                                        afterLoadPlugin(item);
-                                    });
-                                });
+                                const pluginLoader = new PluginLoader(app);
+                                await pluginLoader.register();
                             }
                         });
                     }
@@ -823,19 +820,18 @@ export const bazaar = {
                             packageName: dataObj.name,
                             enabled,
                             frontend: getFrontend()
-                        }, (response) => {
+                        }, async (response) => {
                             target.removeAttribute("disabled");
                             if (enabled) {
-                                loadPlugin(app, response.data).then((plugin: Plugin) => {
-                                    // @ts-ignore
-                                    if (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting")) {
-                                        target.parentElement.querySelector('[data-type="setting"]').classList.remove("fn__none");
-                                    } else {
-                                        target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
-                                    }
-                                });
+                                const plugin = await registerPlugin(app, response.data);
+                                // @ts-ignore
+                                if (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting")) {
+                                    target.parentElement.querySelector('[data-type="setting"]').classList.remove("fn__none");
+                                } else {
+                                    target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
+                                }
                             } else {
-                                uninstall(app, dataObj.name);
+                                await uninstall(app, dataObj.name);
                                 target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
                             }
                         });

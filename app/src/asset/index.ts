@@ -84,11 +84,11 @@ export class Asset extends Model {
     private render() {
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase();
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><img src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></div>`;
+            this.element.innerHTML = `<div class="asset"><img src="${this.path.startsWith("file") ? this.path : document.baseURI + this.path}"></div>`;
         } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></audio></div>`;
+            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${this.path.startsWith("file") ? this.path : document.baseURI + this.path}"></audio></div>`;
         } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></video></div>`;
+            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.baseURI + this.path}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
             this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
@@ -493,14 +493,14 @@ export class Asset extends Model {
             setTimeout(() => {
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(() => {
-                        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+                        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.baseURI + this.path,
                             this.element, this.pdfPage, this.pdfId);
                         this.element.setAttribute("data-loading", "true");
                         observer.disconnect();
                     });
                     observer.observe(this.element, {attributeFilter: ["class"]});
                 } else {
-                    this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+                    this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.baseURI + this.path,
                         this.element, this.pdfPage, this.pdfId);
                     this.element.setAttribute("data-loading", "true");
                 }

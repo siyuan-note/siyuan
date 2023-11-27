@@ -13,7 +13,11 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     if (graphvizElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/graphviz/viz.js?v=0.0.0`, "protyleGraphVizScript").then(() => {
+    addScript(
+        `${cdn}/js/graphviz/viz.js?v=0.0.0`,
+        Constants.ELEMENT_ID_PROTYLE_GRAPH_VIZ_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         graphvizElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
@@ -23,7 +27,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
-                const blob = new Blob([`importScripts('${(document.getElementById("protyleGraphVizScript") as HTMLScriptElement).src.replace("viz.js", "full.render.js")}');`],
+                const blob = new Blob([`importScripts('${(document.getElementById(Constants.ELEMENT_ID_PROTYLE_GRAPH_VIZ_SCRIPT) as HTMLScriptElement).src.replace("viz.js", "full.render.js")}');`],
                     {type: "application/javascript"});
                 const url = window.URL || window.webkitURL;
                 const blobUrl = url.createObjectURL(blob);

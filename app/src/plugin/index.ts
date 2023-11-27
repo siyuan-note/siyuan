@@ -14,12 +14,13 @@ import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
 
 export class Plugin {
-    private app: App;
+    protected app: App;
     public i18n: IObject;
     public eventBus: EventBus;
     public data: any = {};
     public displayName: string;
     public name: string;
+    public style: HTMLStyleElement;
     public protyleSlash: {
         filter: string[],
         html: string,
@@ -52,17 +53,20 @@ export class Plugin {
         }
         /// #endif
     } = {};
+    public loaded: Promise<boolean>;
 
     constructor(options: {
         app: App,
+        i18n: IObject,
         name: string,
         displayName: string,
-        i18n: IObject
+        style?: HTMLStyleElement,
     }) {
         this.app = options.app;
         this.i18n = options.i18n;
         this.name = options.name;
         this.displayName = options.displayName;
+        this.style = options.style;
         this.eventBus = new EventBus(options.name);
     }
 

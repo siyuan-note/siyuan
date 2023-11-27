@@ -13,7 +13,11 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     if (plantumlElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`, "protylePlantumlScript").then(() => {
+    addScript(
+        `${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`,
+        Constants.ELEMENT_ID_PROTYLE_PLANTUML_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         plantumlElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;

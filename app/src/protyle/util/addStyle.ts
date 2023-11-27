@@ -1,15 +1,21 @@
-export const addStyle = (url: string, id: string) => {
+export const addStyleElement = (element: HTMLLinkElement | HTMLStyleElement, anchorID?: string) => {
+    if (anchorID) {
+        const anchor = document.getElementById(anchorID);
+        if (anchor) {
+            anchor.before(element);
+            return;
+        }
+    }
+    document.head.append(element);
+}
+
+export const addStyle = (url: string, id: string, anchorID?: string) => {
     if (!document.getElementById(id)) {
         const styleElement = document.createElement("link");
-        styleElement.id = id;
         styleElement.rel = "stylesheet";
         styleElement.type = "text/css";
         styleElement.href = url;
-        const pluginsStyle = document.querySelector("#pluginsStyle");
-        if (pluginsStyle) {
-            pluginsStyle.before(styleElement);
-        } else {
-            document.getElementsByTagName("head")[0].appendChild(styleElement);
-        }
+        styleElement.id = id;
+        addStyleElement(styleElement, anchorID);
     }
 };

@@ -58,14 +58,24 @@ export const redirectToCheckAuth = (to: string = window.location.href) => {
     window.location.href = url.href;
 };
 
-export const addBaseURL = () => {
-    let baseURLElement = document.getElementById("baseURL");
-    if (!baseURLElement) {
-        baseURLElement = document.createElement("base");
-        baseURLElement.id = "baseURL";
+export const addBaseURL = (href: string = location.origin) => {
+    const baseURLElement = document.getElementById(Constants.ELEMENT_ID_BASE_URL);
+    if (baseURLElement) {
+        baseURLElement.setAttribute("href", href);
+    } else {
+        const baseURLElement = document.createElement("base");
+        baseURLElement.id = Constants.ELEMENT_ID_BASE_URL;
+        baseURLElement.setAttribute("href", href);
+        document.head.appendChild(baseURLElement);
     }
-    baseURLElement.setAttribute("href", location.origin);
-    document.getElementsByTagName("head")[0].appendChild(baseURLElement);
+};
+
+export const addMetaAnchor = () => {
+    Object.values(Constants.ELEMENT_ID_META_ANCHOR).forEach(id => {
+        const meta = document.createElement("meta");
+        meta.id = id;
+        document.head.append(meta);
+    });
 };
 
 export const getDisplayName = (filePath: string, basename = true, removeSY = false) => {

@@ -14,7 +14,11 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mindmapElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/echarts/echarts.min.js?v=0.0.0`, "protyleEchartsScript").then(() => {
+    addScript(
+        `${cdn}/js/echarts/echarts.min.js?v=0.0.0`,
+        Constants.ELEMENT_ID_PROTYLE_ECHARTS_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         let width: number = undefined;
         if (mindmapElements[0].firstElementChild.clientWidth === 0) {
             const tabElement = hasClosestByClassName(mindmapElements[0], "layout-tab-container", true);

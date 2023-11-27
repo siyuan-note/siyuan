@@ -7,6 +7,7 @@ import {exportLayout, resizeTopBar} from "../layout/util";
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
+import {addStyleElement} from "../protyle/util/addStyle";
 
 const getObject = (key: string) => {
     const api = {
@@ -20,62 +21,52 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
-export const loadPlugins = async (app: App) => {
-    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-    let css = "";
-    // 为加快启动速度，不进行 await
-    response.data.forEach((item: IPluginData) => {
-        loadPluginJS(app, item);
-        css += item.css || "" + "\n";
-    });
-    const pluginsStyle = document.getElementById("pluginsStyle");
-    if (pluginsStyle) {
-        pluginsStyle.innerHTML = css;
-    } else {
-        document.head.insertAdjacentHTML("beforeend", `<style id="pluginsStyle">${css}</style>`);
-    }
-};
+export class PluginLoader {
+    protected readonly ready: Promise<IPluginData[]>;
+    protected readonly plugins: Plugin[];
 
-const loadPluginJS = async (app: App, item: IPluginData) => {
-    const exportsObj: { [key: string]: any } = {};
-    const moduleObj = {exports: exportsObj};
-    try {
-        runCode(item.js, "plugin:" + encodeURIComponent(item.name))(getObject, moduleObj, exportsObj);
-    } catch (e) {
-        console.error(`plugin ${item.name} run error:`, e);
-        return;
+    constructor(
+        protected readonly app: App,
+    ) {
+        this.ready = this._loadPetals();
+        this.plugins = this.app.plugins;
     }
-    const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports;
-    if (typeof pluginClass !== "function") {
-        console.error(`plugin ${item.name} has no export`);
-        return;
+
+    public async register(): Promise<Plugin[]> {
+        await this.init();
+        await this.load();
+        await this.layoutReady();
+        return this.plugins;
     }
-    if (!(pluginClass.prototype instanceof Plugin)) {
-        console.error(`plugin ${item.name} does not extends Plugin`);
-        return;
+
+    public async init(): Promise<void> {
+        const petals = await this.ready;
+        petals.forEach(petal => {
+            this.plugins.push(initPlugin(this.app, petal));
+        });
     }
-    const plugin = new pluginClass({
-        app,
-        displayName: item.displayName,
-        name: item.name,
-        i18n: item.i18n
-    });
+
+    public async load(): Promise<boolean[]> {
+        return Promise.all(this.plugins.map(plugin => loadPlugin(plugin)));
+    }
+
+    public async layoutReady(): Promise<IMenu[][]> {
+        return Promise.all(this.plugins.map(plugin => afterLoadPlugin(plugin)));
+    }
+
+    protected async _loadPetals(): Promise<IPluginData[]> {
+        const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
+        return response.data as IPluginData[];
+    }
+}
+
+// 初始化并加载一个插件
+export const registerPlugin = async (app: App, petal: IPluginData) => {
+    const plugin = initPlugin(app, petal);
     app.plugins.push(plugin);
-    try {
-        await plugin.onload();
-    } catch (e) {
-        console.error(`plugin ${item.name} onload error:`, e);
-    }
-    return plugin;
-};
 
-// 启用插件
-export const loadPlugin = async (app: App, item: IPluginData) => {
-    const plugin = await loadPluginJS(app, item);
-    const styleElement = document.createElement("style");
-    styleElement.textContent = item.css;
-    document.head.append(styleElement);
-    afterLoadPlugin(plugin);
+    await loadPlugin(plugin);
+    await afterLoadPlugin(plugin);
     /// #if !MOBILE
     exportLayout({
         reload: false,
@@ -86,6 +77,66 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     return plugin;
 };
 
+// 添加插件样式
+const addPluginStyle = (plugin: IPluginData) => {
+    let styleElement = document.head.querySelector(`style[data-name="${plugin.name}"]`);
+    if (styleElement) {
+        if (styleElement.textContent !== plugin.css) {
+            styleElement.textContent = plugin.css;
+        }
+    } else {
+        const styleElement = document.createElement("style");
+        styleElement.dataset.name = plugin.name;
+        styleElement.dataset.displayName = plugin.displayName;
+        styleElement.textContent = plugin.css;
+        addStyleElement(styleElement, Constants.ELEMENT_ID_META_ANCHOR.PLUGIN_STYLE);
+    }
+    return styleElement;
+}
+
+// 初始化插件 constructor
+const initPlugin = (app: App, petal: IPluginData) => {
+    const exportsObj: { [key: string]: any } = {};
+    const moduleObj = { exports: exportsObj };
+    try {
+        runCode(petal.js, "plugin:" + encodeURIComponent(petal.name))(getObject, moduleObj, exportsObj);
+    } catch (e) {
+        console.error(`plugin ${petal.name} run error:`, e);
+        return;
+    }
+    const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports;
+    if (typeof pluginClass !== "function") {
+        console.error(`plugin ${petal.name} has no export`);
+        return;
+    }
+    if (!(pluginClass.prototype instanceof Plugin)) {
+        console.error(`plugin ${petal.name} does not extends Plugin`);
+        return;
+    }
+    const style = addPluginStyle(petal);
+    const plugin: Plugin = new pluginClass({
+        app,
+        i18n: petal.i18n,
+        name: petal.name,
+        displayName: petal.displayName,
+        style,
+    });
+    return plugin;
+};
+
+// 加载插件 onload
+const loadPlugin = async (plugin: Plugin) => {
+    plugin.loaded = new Promise(async (resolve) => {
+        try {
+            await plugin.onload();
+            resolve(true);
+        } catch (e) {
+            console.error(`plugin ${plugin.name} onload error:`, e);
+            resolve(false);
+        }
+    });
+    return plugin.loaded;
+}
 
 const updateDock = (dockItem: IDockTab[], index: number, plugin: Plugin, type: string) => {
     const dockKeys = Object.keys(plugin.docks);
@@ -141,9 +192,10 @@ const mergePluginHotkey = (plugin: Plugin) => {
     }
 };
 
-export const afterLoadPlugin = (plugin: Plugin) => {
+const afterLoadPlugin = async (plugin: Plugin) => {
     try {
-        plugin.onLayoutReady();
+        await plugin.loaded;
+        await plugin.onLayoutReady();
     } catch (e) {
         console.error(`plugin ${plugin.name} onLayoutReady error:`, e);
     }

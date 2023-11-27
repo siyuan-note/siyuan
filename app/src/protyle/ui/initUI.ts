@@ -6,6 +6,7 @@ import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
 import {lineNumberRender} from "../render/highlightRender";
+import { addStyleElement } from "../util/addStyle";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -149,9 +150,15 @@ export const setPadding = (protyle: IProtyle) => {
         protyle.title.element.style.margin = `16px ${left}px 0 ${right}px`;
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
-        const editorAttrElement = document.getElementById("editorAttr");
+        const editorAttrElement = document.getElementById(Constants.ELEMENT_ID_EDITOR_ATTR);
+        const style = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
         if (editorAttrElement) {
-            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
+            editorAttrElement.textContent = style;
+        } else {
+            const editorAttrElement = document.createElement("style");
+            editorAttrElement.id = Constants.ELEMENT_ID_EDITOR_ATTR;
+            editorAttrElement.textContent = style;
+            addStyleElement(editorAttrElement, Constants.ELEMENT_ID_META_ANCHOR.SIYUAN_STYLE);
         }
     }
     const oldWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");

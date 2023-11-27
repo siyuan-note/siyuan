@@ -13,7 +13,11 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=10.3.0`, "protyleMermaidScript").then(() => {
+    addScript(
+        `${cdn}/js/mermaid/mermaid.min.js?v=10.3.0`,
+        Constants.ELEMENT_ID_PROTYLE_MERMAID_SCRIPT,
+        Constants.ELEMENT_ID_META_ANCHOR.PROTYLE_SCRIPT,
+    ).then(() => {
         const config: any = {
             securityLevel: "loose", // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用该选项
             altFontFamily: "sans-serif",

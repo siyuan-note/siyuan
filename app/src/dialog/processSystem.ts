@@ -381,11 +381,10 @@ export const setTitle = (title: string) => {
     } else {
         title = title || "Untitled";
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        if (!dragElement) {
-            return;
+        if (dragElement) {
+            dragElement.setAttribute("title", title);
+            dragElement.innerHTML = escapeHtml(title);
         }
-        dragElement.setAttribute("title", title);
-        dragElement.innerHTML = escapeHtml(title);
     }
 };
 

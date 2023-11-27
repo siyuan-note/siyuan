@@ -22,6 +22,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -45,6 +46,8 @@ func echo(c *gin.Context) {
 	} else {
 		rawData = nil
 	}
+	c.Request.ParseForm()
+	c.Request.ParseMultipartForm(math.MaxInt64)
 
 	ret.Data = map[string]interface{}{
 		"Context": map[string]interface{}{

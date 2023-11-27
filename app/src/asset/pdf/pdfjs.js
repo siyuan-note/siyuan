@@ -16,7 +16,7 @@
 
 "use strict";
 
-const {addScriptSync} = require("../../protyle/util/addScript");
-const {Constants} = require("../../constants");
-addScriptSync(`${Constants.PROTYLE_CDN}/js/pdf/pdf.js?v=3.5.141`, Constants.ELEMENT_ID_PDFJS_SCRIPT);
+const {addScriptSync} = require('../../protyle/util/addScript')
+const {Constants} = require('../../constants')
+addScriptSync(`${Constants.PROTYLE_CDN}/js/pdf/pdf.js?v=3.5.141`, Constants.ELEMENT_ID_PDFJS_SCRIPT)
 module.exports = window["pdfjs-dist/build/pdf"];

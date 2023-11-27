@@ -34,7 +34,7 @@ import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath} fr
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
 import {openGlobalSearch} from "../../search/util";
-import {focusBlock, focusByRange} from "../../protyle/util/selection";
+import {focusBlock, focusByOffset, focusByRange, getSelectionOffset} from "../../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
@@ -61,7 +61,7 @@ import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";
-import {toggleDockBar} from "../../layout/dock/util";
+import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
@@ -324,6 +324,56 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     if (target.tagName !== "TABLE" && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
+        event.preventDefault();
+        if (range) {
+            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
+            if (refElement) {
+                openBacklink({
+                    app: protyle.app,
+                    blockId: refElement.dataset.id,
+                });
+                return true;
+            }
+        }
+        openBacklink({
+            app: protyle.app,
+            blockId: protyle.block.id,
+            rootId: protyle.block.rootID,
+            useBlockId: protyle.block.showAll,
+            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+        });
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
+        event.preventDefault();
+        if (range) {
+            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
+            if (refElement) {
+                openGraph({
+                    app: protyle.app,
+                    blockId: refElement.dataset.id,
+                });
+                return true;
+            }
+        }
+        openGraph({
+            app: protyle.app,
+            blockId: protyle.block.id,
+            rootId: protyle.block.rootID,
+            useBlockId: protyle.block.showAll,
+            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+        });
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
+        event.preventDefault();
+        const offset = getSelectionOffset(target);
+        openOutline(protyle);
+        // switchWnd 后，range会被清空，需要重新设置
+        focusByOffset(target, offset.start, offset.end);
+        return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
         const nodeElement = hasClosestBlock(range.startContainer);

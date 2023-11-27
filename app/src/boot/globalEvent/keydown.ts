@@ -657,12 +657,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         hasClosestByClassName(target, "protyle", true)) {
         return false;
     }
-    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        (event.code.startsWith("Arrow") || event.code === "Enter") &&
-        !event.altKey && !event.shiftKey && isNotCtrl(event)) {
-        event.preventDefault();
-        return true;
-    }
     if (event.shiftKey) {
         if (event.key === "ArrowUp") {
             const startEndElement = getStartEndElement(liElements);

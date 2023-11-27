@@ -147,9 +147,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
         if (isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (Constants.KEYCODELIST[event.keyCode] === "Slash") {
+            if (Constants.KEYCODELIST[event.keyCode] === "/") {
                 protyle.hint.enableSlash = true;
-            } else if (Constants.KEYCODELIST[event.keyCode] === "Backslash" ) {
+            } else if (Constants.KEYCODELIST[event.keyCode] === "\\") {
                 protyle.hint.enableSlash = false;
                 hideElements(["hint"], protyle);
                 // 此处不能返回，否则无法撤销 https://github.com/siyuan-note/siyuan/issues/2795
@@ -169,7 +169,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-            (event.code.startsWith("Arrow") || event.code === "Enter") &&
+            (["←", "↑", "→", "↓"].includes(Constants.KEYCODELIST[event.keyCode]) || Constants.KEYCODELIST[event.keyCode] === "↩") &&
             !event.altKey && !event.shiftKey && isNotCtrl(event)) {
             event.preventDefault();
             return;

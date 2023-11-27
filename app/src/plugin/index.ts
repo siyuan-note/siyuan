@@ -20,7 +20,7 @@ export class Plugin {
     public data: any = {};
     public displayName: string;
     public name: string;
-    public style?: HTMLStyleElement;
+    public style: HTMLStyleElement;
     public protyleSlash: {
         filter: string[],
         html: string,

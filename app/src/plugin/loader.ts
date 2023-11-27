@@ -79,12 +79,19 @@ export const registerPlugin = async (app: App, petal: IPluginData) => {
 
 // 添加插件样式
 const addPluginStyle = (plugin: IPluginData) => {
-    const style = document.createElement("style");
-    style.dataset.name = plugin.name;
-    style.dataset.displayName = plugin.displayName;
-    style.textContent = plugin.css;
-    addStyleElement(style, Constants.ELEMENT_ID_META_ANCHOR.PLUGIN_STYLE);
-    return style;
+    let styleElement = document.head.querySelector(`style[data-name="${plugin.name}"]`);
+    if (styleElement) {
+        if (styleElement.textContent !== plugin.css) {
+            styleElement.textContent = plugin.css;
+        }
+    } else {
+        const styleElement = document.createElement("style");
+        styleElement.dataset.name = plugin.name;
+        styleElement.dataset.displayName = plugin.displayName;
+        styleElement.textContent = plugin.css;
+        addStyleElement(styleElement, Constants.ELEMENT_ID_META_ANCHOR.PLUGIN_STYLE);
+    }
+    return styleElement;
 }
 
 // 初始化插件 constructor
@@ -106,9 +113,7 @@ const initPlugin = (app: App, petal: IPluginData) => {
         console.error(`plugin ${petal.name} does not extends Plugin`);
         return;
     }
-    const style = petal.css
-        ? addPluginStyle(petal)
-        : undefined;
+    const style = addPluginStyle(petal);
     const plugin: Plugin = new pluginClass({
         app,
         i18n: petal.i18n,

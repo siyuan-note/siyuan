@@ -161,7 +161,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${cellRect.height}px"`;
+    const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${cellRect.height}px"`;
     if (["text", "url", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
@@ -212,7 +212,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValue(protyle, type, cellElements);
                 if (event.key === "Tab") {
-                    protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {key: "Tab", keyCode: 9}))
+                    protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
+                        shiftKey: event.shiftKey,
+                        ctrlKey: event.ctrlKey,
+                        altKey: event.altKey,
+                        metaKey: event.metaKey,
+                        key: "Tab",
+                        keyCode: 9
+                    }));
                 }
                 event.preventDefault();
                 event.stopPropagation();

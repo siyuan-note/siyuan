@@ -3,6 +3,7 @@ import {selectRow} from "./row";
 import {cellScrollIntoView, popTextCell} from "./cell";
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {Constants} from "../../../constants";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -97,8 +98,15 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-    }
 
+        if (!Constants.KEYCODELIST[event.keyCode] ||
+            (Constants.KEYCODELIST[event.keyCode].length === 1 &&
+                !event.metaKey && !event.ctrlKey &&
+                !["⇧", "⌃", "⌥", "⌘"].includes(Constants.KEYCODELIST[event.keyCode]))) {
+            popTextCell(protyle, [selectCellElement]);
+            return true;
+        }
+    }
     const selectRowElements = nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     if (selectRowElements.length > 0) {
         if (matchHotKey("⌘/", event)) {

@@ -43,12 +43,12 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.1.4
-	github.com/open-spaced-repetition/go-fsrs v1.0.0
+	github.com/open-spaced-repetition/go-fsrs v1.1.0
 	github.com/panjf2000/ants/v2 v2.9.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
-	github.com/sashabaranov/go-openai v1.17.8
+	github.com/sashabaranov/go-openai v1.17.9
 	github.com/shirou/gopsutil/v3 v3.23.10
 	github.com/siyuan-note/dejavu v0.0.0-20231128080340-557ce2444816
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
@@ -56,7 +56,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20231107122348-6ed75b0b525a
 	github.com/siyuan-note/httpclient v0.0.0-20231120083123-750db4d28b38
 	github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff
-	github.com/siyuan-note/riff v0.0.0-20231106140614-c67ff0c69e33
+	github.com/siyuan-note/riff v0.0.0-20231128081053-0cd7a5fa0076
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1

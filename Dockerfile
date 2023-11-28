@@ -10,7 +10,7 @@ ENV GO111MODULE=on
 ENV CGO_ENABLED=1
 RUN apk add --no-cache gcc musl-dev git && \
     cd kernel && go build --tags fts5 -v -ldflags "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod" && \
-    mkdir /opt/siyuan/ && \
+    mkdir -p /opt/siyuan/workspace/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
@@ -28,6 +28,7 @@ RUN addgroup --gid 1000 siyuan && adduser --uid 1000 --ingroup siyuan --disabled
 ENV TZ=Asia/Shanghai
 ENV RUN_IN_CONTAINER=true
 EXPOSE 6806
+VOLUME ["/opt/siyuan/workspace"]
 
 USER siyuan
 ENTRYPOINT ["/opt/siyuan/kernel"]

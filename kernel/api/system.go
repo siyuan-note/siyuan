@@ -33,6 +33,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getNetwork(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	maskedConf, err := model.GetMaskedConf()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = "get conf failed: " + err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"proxy": maskedConf.System.NetworkProxy,
+	}
+}
+
 func getChangelog(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -1287,7 +1287,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "数据同步前进行数据快照如果耗时超过 7 秒会提示清理数据仓库，如果需要改动默认耗时，可通过如下两种方式"
+									"Data": "数据同步前进行数据快照如果耗时超过 12 秒会提示清理数据仓库，如果需要改动默认耗时，可通过如下两种方式"
 								}
 							]
 						},
@@ -1400,11 +1400,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "7000"
+									"TextMarkTextContent": "12000"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​（7 秒），最大值不限制；启动时会优先读取环境变量覆盖 conf 文件中的值。"
+									"Data": "​（12 秒），最大值不限制；启动时会优先读取环境变量覆盖 conf 文件中的值。"
 								}
 							]
 						}

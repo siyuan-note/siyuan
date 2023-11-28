@@ -54,6 +54,28 @@ type EmbedBlock struct {
 	BlockPaths []*BlockPath `json:"blockPaths"`
 }
 
+func UpdateEmbedBlock(id, content string) (err error) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if treenode.TypeAbbr(ast.NodeBlockQueryEmbed.String()) != bt.Type {
+		err = errors.New("not query embed block")
+		return
+	}
+
+	embedBlock := &EmbedBlock{
+		Block: &Block{
+			Markdown: content,
+		},
+	}
+
+	updateEmbedBlockContent(id, []*EmbedBlock{embedBlock})
+	return
+}
+
 func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
 }

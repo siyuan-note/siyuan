@@ -1,4 +1,8 @@
 {
+  "tempUnlock": "Déverrouiller temporairement",
+  "cancelTempUnlock": "Annuler le déverrouillage temporaire",
+  "addFilter": "Ajouter un filtre",
+  "removeFilters": "Effacer le filtre",
   "checked": "Coché",
   "unchecked": "Décoché",
   "percentChecked": "Pourcentage vérifié",
@@ -1170,7 +1174,7 @@
     "55": "Références indexées de [%d] documents",
     "56": "Réindexation, veuillez attendre que la reconstruction soit terminée avant d'essayer d'ouvrir",
     "57": "Échec de la création d'une clé temporaire",
-    "58": "Vérification de l'index...",
+    "58": "[%d/%d] Vérification de l'index...",
     "59": "Échec de la définition de la liste des ignores de synchronisation",
     "60": "Échec de la récupération du paquet de mise à jour : %s",
     "61": "⬆️ Le package d'installation de la nouvelle version est prêt, voulez-vous installer la nouvelle version maintenant ?",

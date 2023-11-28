@@ -268,3 +268,28 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 	cache.PutBlockIAL(id, ret)
 	return
 }
+
+func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
+	ret = map[string]string{}
+	if cached := cache.GetBlockIAL(id); nil != cached {
+		ret = cached
+		return
+	}
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogWarnf("block [%s] not found", id)
+		return
+	}
+
+	for _, kv := range node.KramdownIAL {
+		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
+	}
+	cache.PutBlockIAL(id, ret)
+	return
+}

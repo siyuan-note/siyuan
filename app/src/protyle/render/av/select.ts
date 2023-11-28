@@ -121,6 +121,21 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         if (name === inputElement.value || !inputElement.value) {
             return;
         }
+        let hasName = false;
+        data.view.columns.find(column => {
+            if (column.id === colId) {
+                column.options.find((item) => {
+                    if (item.name === inputElement.value) {
+                        hasName = true;
+                        return true;
+                    }
+                });
+                return true;
+            }
+        });
+        if (hasName) {
+            return;
+        }
         transaction(protyle, [{
             action: "updateAttrViewColOption",
             id: colId,

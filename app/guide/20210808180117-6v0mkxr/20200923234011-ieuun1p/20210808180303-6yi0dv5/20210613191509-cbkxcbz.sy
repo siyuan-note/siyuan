@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
-		"updated": "20211223192555"
+		"updated": "20210613191548"
 	},
 	"Children": [
 		{
@@ -282,38 +282,9 @@
 			]
 		},
 		{
-			"ID": "20210613191548-5m1tlai",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210613191548-5m1tlai",
-				"updated": "20210613191548"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Using attributes"
-				}
-			]
-		},
-		{
-			"ID": "20210613191548-r7r6xw4",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210613191548-r7r6xw4",
-				"updated": "20210824200848"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "There are two main usage scenarios for attributes: querying content blocks based on attributes and storing widget data."
-				}
-			]
-		},
-		{
 			"ID": "20210613191548-ihlwok9",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-ihlwok9",
 				"updated": "20210613191548"
@@ -385,35 +356,6 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20210613191548-cc68rcy",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210613191548-cc68rcy",
-				"updated": "20210824200759"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Store widget data"
-				}
-			]
-		},
-		{
-			"ID": "20210613191548-54xjeo6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210613191548-54xjeo6",
-				"updated": "20210824200805"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The widget can set the attributes through the interface, please refer to the development document for details."
 				}
 			]
 		}

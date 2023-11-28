@@ -331,8 +331,8 @@ func InitConf() {
 			Conf.Repo.SyncIndexTiming = int64(val)
 		}
 	}
-	if 7000 > Conf.Repo.SyncIndexTiming {
-		Conf.Repo.SyncIndexTiming = 7 * 1000
+	if 12000 > Conf.Repo.SyncIndexTiming {
+		Conf.Repo.SyncIndexTiming = 12 * 1000
 	}
 
 	if nil == Conf.Search {
@@ -501,7 +501,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	if !force {
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
-			syncData(true, false, false)
+			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
 				return

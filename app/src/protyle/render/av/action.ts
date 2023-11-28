@@ -5,7 +5,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {getTypeByCellElement, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
-import {insertAttrViewBlockAnimation, updateHeader} from "./row";
+import {insertAttrViewBlockAnimation, stickyRow, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
@@ -316,6 +316,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             rowElements.forEach(item => {
                 item.remove();
             });
+            stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
             updateHeader(blockElement.querySelector(".av__row"));
         }
     });

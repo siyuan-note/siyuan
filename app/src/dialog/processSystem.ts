@@ -49,6 +49,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
+                setTitle(response.data.name);
                 (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             });
         }
@@ -170,7 +171,9 @@ export const kernelError = () => {
 export const exitSiYuan = () => {
     hideAllElements(["util"]);
     /// #if MOBILE
-    saveScroll(window.siyuan.mobile.editor.protyle);
+    if (window.siyuan.mobile.editor) {
+        saveScroll(window.siyuan.mobile.editor.protyle);
+    }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) { // 同步执行失败

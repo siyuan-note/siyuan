@@ -91,6 +91,22 @@ id="preview"></div>
     });
     const refreshPreview = (response: IWebSocketData) => {
         previewElement.innerHTML = response.data.content;
+        // https://github.com/siyuan-note/siyuan/issues/9685
+        previewElement.querySelectorAll('[data-type~="mark"]').forEach((markItem: HTMLElement) => {
+            markItem.childNodes.forEach((item) => {
+                let spanHTML = "";
+                Array.from(item.textContent).forEach(str => {
+                    spanHTML += `<span data-type="mark">${str}</span>`;
+                });
+                const templateElement = document.createElement("template");
+                templateElement.innerHTML = spanHTML;
+                item.after(templateElement.content);
+                item.remove();
+            });
+            if (markItem.childNodes.length > 0) {
+                markItem.setAttribute("data-type", markItem.getAttribute("data-type").replace("mark", ""));
+            }
+        });
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
         if (response.data.attrs.memo) {
             previewElement.setAttribute("memo", response.data.attrs.memo);

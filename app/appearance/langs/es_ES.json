@@ -1,4 +1,8 @@
 {
+  "tempUnlock": "Desbloquear temporalmente",
+  "cancelTempUnlock": "Cancelar desbloqueo temporal",
+  "addFilter": "Agregar filtro",
+  "removeFilters": "Borrar filtro",
   "checked": "marcado",
   "unchecked": "desmarcado",
   "percentChecked": "Porcentaje comprobado",
@@ -1170,7 +1174,7 @@
     "55": "Referencias indexadas de [%d] documentos",
     "56": "Reindexando, espere hasta que se complete la reconstrucción antes de intentar abrir",
     "57": "Fallo en la creación de la clave temporal",
-    "58": "Verificando índice...",
+    "58": "[%d/%d] Verificando índice...",
     "59": " Falló la configuración de sincronización de la lista de ignorados",
     "60": "Fallo al obtener el paquete de actualización: %s",
     "61": "⬆️ El paquete de instalación de la nueva versión está listo, ¿quieres instalar la nueva versión ahora?",

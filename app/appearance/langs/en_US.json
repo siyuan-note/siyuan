@@ -1,4 +1,8 @@
 {
+  "tempUnlock": "Temporarily unlock",
+  "cancelTempUnlock": "Cancel temporary unlock",
+  "addFilter": "Add filter",
+  "removeFilters": "Clear filter",
   "checked": "Checked",
   "unchecked": "Unchecked",
   "percentChecked": "Percent checked",
@@ -1170,7 +1174,7 @@
     "55": "Indexed references of [%d] documents",
     "56": "Reindexing, please wait until rebuilding is complete before trying to open",
     "57": "Failed to create temp key",
-    "58": "Verifying index...",
+    "58": "[%d/%d] Verifying index...",
     "59": "Failed to set sync ignore list",
     "60": "Failed to get the update package: %s",
     "61": "⬆️ The new version installation package is ready, do you want to install the new version now?",

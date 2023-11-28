@@ -18,7 +18,10 @@ package model
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -27,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/Masterminds/sprig/v3"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -45,7 +49,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
 	ret = []*BlockAttributeViewKeys{}
-	attrs := GetBlockAttrs(blockID)
+	attrs := GetBlockAttrsWithoutWaitWriting(blockID)
 	avs := attrs[av.NodeAttrNameAvs]
 	if "" == avs {
 		return
@@ -102,7 +106,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated:
-				ial := GetBlockAttrs(blockID)
+				ial := GetBlockAttrsWithoutWaitWriting(blockID)
 				updatedStr := ial["updated"]
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
@@ -122,7 +126,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					ial := map[string]string{}
 					block := getRowBlockValue(keyValues)
 					if !block.IsDetached {
-						ial = GetBlockAttrs(blockID)
+						ial = GetBlockAttrsWithoutWaitWriting(blockID)
 					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
 				}
@@ -181,6 +185,92 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	return
 }
 
+func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	index, err := repo.GetIndex(indexID)
+	if nil != err {
+		return
+	}
+
+	files, err := repo.GetFiles(index)
+	if nil != err {
+		return
+	}
+	var avFile *entity.File
+	for _, f := range files {
+		if "/storage/av/"+avID+".json" == f.Path {
+			avFile = f
+			break
+		}
+	}
+
+	if nil == avFile {
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := repo.OpenFile(avFile)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
+	viewable, err = renderAttributeView(attrView)
+	return
+}
+
+func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
+	if nil != parseErr {
+		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
+		return
+	}
+
+	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
+	globPath := filepath.Join(util.HistoryDir, dirPrefix+"*")
+	matches, err := filepath.Glob(globPath)
+	if nil != err {
+		logging.LogErrorf("glob [%s] failed: %s", globPath, err)
+		return
+	}
+	if 1 > len(matches) {
+		return
+	}
+
+	historyDir := matches[0]
+	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if !gulu.File.IsExist(avJSONPath) {
+		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	}
+	if !gulu.File.IsExist(avJSONPath) {
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := os.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
+	viewable, err = renderAttributeView(attrView)
+	return
+}
+
 func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
@@ -198,12 +288,17 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		return
 	}
 
+	viewable, err = renderAttributeView(attrView)
+	return
+}
+
+func renderAttributeView(attrView *av.AttributeView) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view := av.NewView()
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
 			return
 		}
 	}
@@ -464,7 +559,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
@@ -481,7 +576,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr {

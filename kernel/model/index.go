@@ -217,7 +217,7 @@ func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
 		md := strings.TrimSpace(embedBlock.Markdown)
 		if strings.Contains(md, "//js") {
-			// js 嵌入块不支持自动索引
+			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
 			continue
 		}
 

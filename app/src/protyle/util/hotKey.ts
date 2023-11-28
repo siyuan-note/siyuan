@@ -102,6 +102,9 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
 
     // 是否匹配 ⌃[] / ⌃⌘[] / ⌃⌥[] / ⌃⇧[]/ ⌃⌥⇧[]
     if (hotKey.startsWith("⌃")) {
+        if (!isMac()) {
+            return false;
+        }
         let keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
         if (hotKeys.length === 4) {
             keyCode = hotKeys[3];

@@ -52,6 +52,15 @@ try {
     app.exit();
 }
 
+const setProxy = (proxyURL, webContents) => {
+    if (proxyURL.startsWith("://")) {
+        console.log("network proxy [system]");
+        return webContents.session.setProxy({mode: "system"});
+    }
+    console.log("network proxy [" + proxyURL + "]");
+    return webContents.session.setProxy({proxyRules: proxyURL});
+};
+
 const hotKey2Electron = (key) => {
     if (!key) {
         return key;
@@ -287,6 +296,16 @@ const boot = () => {
     windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
+    // set proxy
+    net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
+        return response.json();
+    }).then((response) => {
+        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
+            // 加载主界面
+            currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
+        });
+    });
+
     currentWindow.webContents.session.setSpellCheckerLanguages(["en-US"]);
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
@@ -350,9 +369,6 @@ const boot = () => {
             bootWindow.destroy();
         }
     });
-
-    // 加载主界面
-    currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
 
     // 菜单
     const productName = "SiYuan";
@@ -687,6 +703,9 @@ app.whenReady().then(() => {
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }
+        if (data.cmd === "setProxy") {
+            return setProxy(data.proxyURL, event.sender);
+        }
         if (data.cmd === "showSaveDialog") {
             return dialog.showSaveDialog(data);
         }
@@ -818,19 +837,6 @@ app.whenReady().then(() => {
                 } else {
                     currentWindow.hide();
                 }
-                break;
-            case "setProxy":
-                event.sender.session.closeAllConnections().then(() => {
-                    if (data.proxyURL.startsWith("://")) {
-                        event.sender.session.setProxy({mode: "system"}).then(() => {
-                            console.log("network proxy [system]");
-                        });
-                        return;
-                    }
-                    event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
-                        console.log("network proxy [" + data.proxyURL + "]");
-                    });
-                });
                 break;
         }
     });

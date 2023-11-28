@@ -1311,7 +1311,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If the data snapshot takes more than 7 seconds before data synchronization, you will be prompted to clean up the data warehouse. If you need to change the default time, you can use the following two methods."
+									"Data": "If the data snapshot takes more than 12 seconds before data synchronization, you will be prompted to clean up the data warehouse. If you need to change the default time, you can use the following two methods."
 								}
 							]
 						},
@@ -1424,11 +1424,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "7000"
+									"TextMarkTextContent": "12000"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ (7 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
+									"Data": "​ (12 seconds), and the maximum value is not limited; when starting, environment variables will be read first to overwrite the values in the conf file."
 								}
 							]
 						}

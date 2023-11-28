@@ -19,8 +19,9 @@ import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardTo
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
+import {setTitle} from "../../dialog/processSystem";
 
-export const initFramework = (app: App, isStart:boolean) => {
+export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();
@@ -162,5 +163,6 @@ const initEditorName = () => {
             path: window.siyuan.mobile.editor.protyle.path,
             title: inputElement.value,
         });
+        setTitle(inputElement.value);
     });
 };

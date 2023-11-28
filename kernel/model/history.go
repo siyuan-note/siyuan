@@ -242,6 +242,27 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return
 	}
 
+	tree, _ := loadTree(srcPath, util.NewLute())
+	if nil != tree {
+		historyDir := strings.TrimPrefix(historyPath, util.HistoryDir+string(os.PathSeparator))
+		if strings.Contains(historyDir, string(os.PathSeparator)) {
+			historyDir = historyDir[:strings.Index(historyDir, string(os.PathSeparator))]
+		}
+		historyDir = filepath.Join(util.HistoryDir, historyDir)
+
+		// 恢复包含的的属性视图 https://github.com/siyuan-note/siyuan/issues/9567
+		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+		for _, avNode := range avNodes {
+			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+			destAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+			if gulu.File.IsExist(destAvPath) {
+				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
+					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+				}
+			}
+		}
+	}
+
 	util.ReloadUI()
 	FullReindex()
 	IncSync()
@@ -394,6 +415,9 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
+
+	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
+	stmt += " AND created > '" + fmt.Sprintf("%d", ago.Unix()) + "'"
 	return
 }
 
@@ -461,6 +485,7 @@ func (box *Box) generateDocHistory0() {
 		return
 	}
 
+	luteEngine := util.NewLute()
 	for _, file := range files {
 		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
@@ -477,6 +502,23 @@ func (box *Box) generateDocHistory0() {
 		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
+		}
+
+		if strings.HasSuffix(file, ".sy") {
+			tree, loadErr := loadTree(file, luteEngine)
+			if nil != loadErr {
+				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
+			} else {
+				// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
+				avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+				for _, avNode := range avNodes {
+					srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+					destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+					if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+						logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+					}
+				}
+			}
 		}
 	}
 
@@ -497,6 +539,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 
 	now := time.Now()
+	ago := now.Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays)).Unix()
 	var removes []string
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()
@@ -504,7 +547,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
-		if Conf.Editor.HistoryRetentionDays < int(now.Sub(dirInfo.ModTime()).Hours()/24) {
+		if dirInfo.ModTime().Unix() < ago {
 			removes = append(removes, filepath.Join(historyDir, dir.Name()))
 		}
 	}
@@ -514,10 +557,10 @@ func clearOutdatedHistoryDir(historyDir string) {
 			continue
 		}
 		//logging.LogInfof("auto removed history dir [%s]", dir)
-
-		// 清理历史库
-		sql.DeleteHistoriesByPathPrefixQueue(dir)
 	}
+
+	// 清理历史库
+	sql.DeleteOutdatedHistories(fmt.Sprintf("%d", ago))
 }
 
 var boxLatestHistoryTime = map[string]time.Time{}
@@ -540,7 +583,7 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 		}
 
 		if info.ModTime().After(latestHistoryTime) {
-			ret = append(ret, filepath.Join(path))
+			ret = append(ret, path)
 		}
 		return nil
 	})

@@ -316,7 +316,7 @@ export const editor = {
                 fontFamily: fontFamilyElement.value,
                 emoji: window.siyuan.config.editor.emoji
             }, response => {
-                editor.onSetEditor(response.data);
+                editor._onSetEditor(response.data);
             });
         };
         editor.element.querySelectorAll("input.b3-switch, select.b3-select, input.b3-slider").forEach((item) => {
@@ -336,13 +336,16 @@ export const editor = {
             });
         });
     },
-    onSetEditor: (editorData: IEditor) => {
-        if (editorData.readOnly !== window.siyuan.config.editor.readOnly) {
+    _onSetEditor: (editorData: IEditor) => {
+        const changeReadonly = editorData.readOnly !== window.siyuan.config.editor.readOnly;
+        if (changeReadonly) {
             editor.setReadonly(editorData.readOnly);
         }
         window.siyuan.config.editor = editorData;
         getAllModels().editor.forEach((item) => {
-            reloadProtyle(item.editor.protyle, false);
+            if (!changeReadonly) {
+                reloadProtyle(item.editor.protyle, false);
+            }
             let isFullWidth = item.editor.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
             if (!isFullWidth) {
                 isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";

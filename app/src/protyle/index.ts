@@ -22,7 +22,7 @@ import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Background} from "./header/Background";
-import {disabledProtyle, enableProtyle, onGet} from "./util/onGet";
+import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -123,13 +123,8 @@ export class Protyle {
                             });
                             break;
                         case "readonly":
-                            if (!this.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY)) {
-                                if (data.data) {
-                                    disabledProtyle(this.protyle);
-                                } else {
-                                    enableProtyle(this.protyle);
-                                }
-                            }
+                            window.siyuan.config.editor.readOnly = data.data;
+                            reloadProtyle(this.protyle, false);
                             break;
                         case "heading2doc":
                         case "li2doc":
@@ -392,7 +387,7 @@ export class Protyle {
         insertHTML(html, this.protyle, isBlock, useProtyleRange);
     }
 
-    public transaction( doOperations: IOperation[], undoOperations?: IOperation[]) {
-        transaction(this.protyle,  doOperations, undoOperations);
+    public transaction(doOperations: IOperation[], undoOperations?: IOperation[]) {
+        transaction(this.protyle, doOperations, undoOperations);
     }
 }

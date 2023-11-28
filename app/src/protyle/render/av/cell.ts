@@ -112,7 +112,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         // 属性面板
         return;
     }
-    const avHeaderRect = blockElement.querySelector(".av__header").getBoundingClientRect();
+    const avHeaderRect = blockElement.querySelector(".av__row--header").getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {
@@ -294,9 +294,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 checked?: boolean,
             } = {};
             if (type === "number") {
-                oldValue.content = parseFloat(oldValue.content as string);
+                oldValue.content = parseFloat(item.textContent.trim());
                 oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
-                inputValue.content = parseFloat(inputValue.content as string);
+                inputValue.content = parseFloat((avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value);
                 inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
             } else if (type === "checkbox") {
                 const useElement = item.querySelector("use");

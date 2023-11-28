@@ -309,7 +309,12 @@ func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCou
 }
 
 func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
-	sort.Slice(cards, func(i, j int) bool { return cards[i].BlockID() < cards[j].BlockID() })
+	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
+	sort.Slice(cards, func(i, j int) bool {
+		due1 := cards[i].(*riff.FSRSCard).C.Due
+		due2 := cards[j].(*riff.FSRSCard).C.Due
+		return due1.Before(due2)
+	})
 
 	const pageSize = 20
 	total = len(cards)
@@ -328,13 +333,6 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		blocks = []*Block{}
 		return
 	}
-
-	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
-	sort.Slice(cards, func(i, j int) bool {
-		due1 := cards[i].(*riff.FSRSCard).C.Due
-		due2 := cards[j].(*riff.FSRSCard).C.Due
-		return due1.Before(due2)
-	})
 
 	var blockIDs []string
 	for _, card := range cards {

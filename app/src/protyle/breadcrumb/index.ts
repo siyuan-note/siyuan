@@ -20,7 +20,7 @@ import {setPanelFocus} from "../../layout/util";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {onGet} from "../util/onGet";
+import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
@@ -45,8 +45,8 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
-<span class="fn__space"></span>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
+<span class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></span>
 <button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="doc" aria-label="${isMac() ? window.siyuan.languages.gutterTip2 : window.siyuan.languages.gutterTip2.replace("⇧", "Shift+")}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <span class="fn__space"></span>
 <button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
@@ -107,10 +107,23 @@ export class Breadcrumb {
                     event.preventDefault();
                     break;
                 } else if (type === "readonly") {
-                    fetchPost("/api/attr/setBlockAttrs", {
-                        id: protyle.block.rootID,
-                        attrs: {[Constants.CUSTOM_SY_READONLY]: target.querySelector("use").getAttribute("xlink:href") === "#iconUnlock" ? "true" : "false"}
-                    });
+                    if (!window.siyuan.config.readonly) {
+                        const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock";
+                        if (window.siyuan.config.editor.readOnly) {
+                            if (isReadonly) {
+                                enableProtyle(protyle);
+                            } else {
+                                disabledProtyle(protyle);
+                            }
+                        } else {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {
+                                    [Constants.CUSTOM_SY_READONLY]: isReadonly ? "false" : "true"
+                                }
+                            });
+                        }
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -426,43 +439,35 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
-            const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.editReadonly,
-                icon: "iconLock",
-                type: "submenu",
-                submenu: [{
-                    iconHTML: "",
-                    current: isCustomReadonly === "true",
-                    label: window.siyuan.languages.enable,
-                    click() {
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {[Constants.CUSTOM_SY_READONLY]: "true"}
-                        });
-                    }
-                }, {
-                    iconHTML: "",
-                    current: isCustomReadonly === "false",
-                    label: window.siyuan.languages.disable,
-                    click() {
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {[Constants.CUSTOM_SY_READONLY]: "false"}
-                        });
-                    }
-                }, {
-                    iconHTML: "",
-                    current: !isCustomReadonly,
-                    label: window.siyuan.languages.default,
-                    click() {
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {[Constants.CUSTOM_SY_READONLY]: ""}
-                        });
-                    }
-                }]
-            }).element);
+            if (!window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
+                const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.editReadonly,
+                    icon: "iconLock",
+                    type: "submenu",
+                    submenu: [{
+                        iconHTML: "",
+                        current: !isCustomReadonly || isCustomReadonly === "true",
+                        label: window.siyuan.languages.enable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_READONLY]: "true"}
+                            });
+                        }
+                    }, {
+                        iconHTML: "",
+                        current: isCustomReadonly === "false",
+                        label: window.siyuan.languages.disable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_READONLY]: "false"}
+                            });
+                        }
+                    }]
+                }).element);
+            }
             /// #if !MOBILE
             if (!protyle.disabled) {
                 const isCustomFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

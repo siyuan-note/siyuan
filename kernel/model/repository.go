@@ -1237,7 +1237,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
-	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID
+	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID || mergeResult.DataChanged()
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
@@ -1491,6 +1491,12 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 			go func() {
 				util.WaitForUILoaded()
 				time.Sleep(3 * time.Second)
+
+				if indexCount, _ := repo.CountIndexes(); 128 > indexCount {
+					// 快照数量较少时不推送提示
+					return
+				}
+
 				util.PushMsg(Conf.language(218), 24000)
 				promotedPurgeDataRepo = true
 			}()

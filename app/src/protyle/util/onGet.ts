@@ -242,9 +242,9 @@ const setHTML = (options: {
         protyle.element.removeAttribute("disabled-forever");
         let readOnly = window.siyuan.config.readonly ? "true" : "false";
         if (readOnly === "false") {
-            readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-            if (!readOnly) {
-                readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+            readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+            if (readOnly === "false") {
+                readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
             }
         }
         if (readOnly === "true") {
@@ -339,7 +339,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.languages.unlockEdit);
+        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
     }
     hideTooltip();
 };
@@ -373,11 +373,10 @@ export const enableProtyle = (protyle: IProtyle) => {
     });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.languages.lockEdit);
+        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.cancelTempUnlock : window.siyuan.languages.lockEdit);
     }
     hideTooltip();
 };
-
 
 const focusElementById = (protyle: IProtyle, action: string[]) => {
     let focusElement: Element;

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -646,6 +647,16 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
 	content := renderBlockContentByNodes(nodes)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}
+
+	if "" != sqlBlock.IAL {
+		block.IAL = map[string]string{}
+		ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
+		ialStr = strings.TrimSuffix(ialStr, "}")
+		ial := parse.Tokens2IAL([]byte(ialStr))
+		for _, kv := range ial {
+			block.IAL[kv[0]] = kv[1]
+		}
+	}
 
 	if breadcrumb {
 		blockPaths = buildBlockBreadcrumb(def, nil)

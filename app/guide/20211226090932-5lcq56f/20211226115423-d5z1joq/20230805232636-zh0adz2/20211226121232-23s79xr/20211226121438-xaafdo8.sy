@@ -1288,7 +1288,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料同步前進行資料快照如果耗時超過 7 秒會提示清理資料倉儲，若需要變更預設耗時，可透過以下兩種方式"
+									"Data": "資料同步前進行資料快照如果耗時超過 12 秒會提示清理資料倉儲，若需要變更預設耗時，可透過以下兩種方式"
 								}
 							]
 						},
@@ -1401,11 +1401,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "7000"
+									"TextMarkTextContent": "12000"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​（7 秒），最大值不限制；啟動時會優先讀取環境變數覆蓋 conf 檔案中的值。"
+									"Data": "​（12 秒），最大值不限制；啟動時會優先讀取環境變數覆蓋 conf 檔案中的值。"
 								}
 							]
 						}

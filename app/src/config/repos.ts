@@ -10,7 +10,7 @@ const renderProvider = (provider: number) => {
     if (provider === 0) {
         if (needSubscribe("")) {
             return `<div class="b3-label b3-label--inner">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29].replace("${url}", getCloudURL("subscribe/siyuan"))}</div>
-<div class="b3-label b3-label--noborder">
+<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.cloudIntro1}
     <div class="b3-label__text">
         <ul class="fn__list">
@@ -24,7 +24,7 @@ const renderProvider = (provider: number) => {
         </ul>
     </div>
 </div>
-<div class="b3-label b3-label--noborder">
+<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.cloudIntro9}
     <div class="b3-label__text">
         <ul style="padding-left: 2em">
@@ -49,17 +49,17 @@ const renderProvider = (provider: number) => {
     <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
     <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.endpoint}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Access Key</div>
     <div class="fn__space"></div>
     <input id="accessKey" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.accessKey}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Secret Key</div>
     <div class="fn__space"></div>
     <div class="b3-form__icona fn__block">
@@ -67,22 +67,22 @@ const renderProvider = (provider: number) => {
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Bucket</div>
     <div class="fn__space"></div>
     <input id="bucket" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.bucket}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Region</div>
     <div class="fn__space"></div>
     <input id="region" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.region}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Timeout (s)</div>
     <div class="fn__space"></div>
     <input id="timeout" class="b3-text-field fn__block" type="number" min="7" max="300" value="${window.siyuan.config.sync.s3.timeout}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Addressing</div>
     <div class="fn__space"></div>
     <select class="b3-select fn__block" id="pathStyle">
@@ -90,7 +90,7 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
     </select>
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">TLS Verify</div>
     <div class="fn__space"></div>
     <select class="b3-select fn__block" id="s3SkipTlsVerify">
@@ -98,7 +98,7 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
 </label>
-<div class="b3-label fn__flex">
+<div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
         <input id="importData" class="b3-form__upload" type="file" data-type="s3">
@@ -117,17 +117,17 @@ const renderProvider = (provider: number) => {
     <div class="fn__hr"></div>    
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
     <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.endpoint}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Username</div>
     <div class="fn__space"></div>
     <input id="username" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.username}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Password</div>
     <div class="fn__space"></div>
     <div class="b3-form__icona fn__block">
@@ -135,12 +135,12 @@ const renderProvider = (provider: number) => {
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Timeout (s)</div>
     <div class="fn__space"></div>
     <input id="timeout" class="b3-text-field fn__block" type="number" min="7" max="300" value="${window.siyuan.config.sync.webdav.timeout}">
 </label>
-<label class="b3-label b3-label--noborder fn__flex config__item">
+<label class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">TLS Verify</div>
     <div class="fn__space"></div>
     <select class="b3-select fn__block" id="webdavSkipTlsVerify">
@@ -148,7 +148,7 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
 </label>
-<div class="b3-label fn__flex">
+<div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
         <input id="importData" class="b3-form__upload" type="file" data-type="webdav">

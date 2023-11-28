@@ -99,6 +99,9 @@ export const initBlockPopover = (app: App) => {
 const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     // pad 端点击后 event.target 不会更新。
     const target = document.elementFromPoint(event.clientX, event.clientY);
+    if (!target) {
+        return false;
+    }
     if (hasClosestByClassName(target, "b3-menu") ||
         (target.id && target.tagName !== "svg" && (target.id.startsWith("minder_node") || target.id.startsWith("kity_") || target.id.startsWith("node_")))
         || target.classList.contains("counter")

@@ -12,6 +12,7 @@ import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
+import {setTitle} from "../../dialog/processSystem";
 
 const forwardStack: IBackStack[] = [];
 
@@ -42,6 +43,7 @@ const focusStack = (backStack: IBackStack) => {
         fetchPost("/api/block/getDocInfo", {
             id: backStack.id,
         }, (response) => {
+            setTitle(response.data.name);
             (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
@@ -92,9 +94,9 @@ const focusStack = (backStack: IBackStack) => {
         } else {
             let readOnly = window.siyuan.config.readonly ? "true" : "false";
             if (readOnly === "false") {
-                readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-                if (!readOnly) {
-                    readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+                readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+                if (readOnly === "false") {
+                    readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
                 }
             }
             if (readOnly === "true") {

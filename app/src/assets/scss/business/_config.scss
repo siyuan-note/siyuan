@@ -6,7 +6,8 @@
     border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
     width: 100%;
     height: 100%;
-    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &__tab-container {
@@ -14,7 +15,7 @@
     box-sizing: border-box;
     height: 100%;
 
-    .b3-label {
+    .b3-label:not(.b3-label--inner) {
       padding: 16px 0;
       margin: 0 24px;
     }

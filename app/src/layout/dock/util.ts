@@ -183,6 +183,7 @@ export const toggleDockBar = (useElement: Element) => {
     } else {
         useElement.setAttribute("xlink:href", "#iconHideDock");
     }
+    window.siyuan.config.uiLayout.hideDock = dockIsShow;
     document.querySelectorAll(".dock").forEach(item => {
         if (dockIsShow) {
             item.classList.add("fn__none");

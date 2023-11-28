@@ -210,6 +210,7 @@ export const initTabMenu = (app: App, tab: Tab) => {
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.tabToWindow,
+        accelerator: window.siyuan.config.keymap.general.tabToWindow.custom,
         icon: "iconOpenWindow",
         click: () => {
             openNewWindow(tab);

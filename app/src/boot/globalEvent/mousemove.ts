@@ -79,7 +79,7 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
             }
         }
 
-        if (event.clientY > window.innerHeight - 73) {
+        if (event.clientY > window.innerHeight - (window.siyuan.config.uiLayout.hideDock ? 42 : 73)) {
             window.siyuan.layout.bottomDock.showDock();
         }
     }

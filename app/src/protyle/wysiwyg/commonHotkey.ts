@@ -3,16 +3,12 @@ import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {
     focusBlock,
-    focusByOffset,
     getSelectionOffset,
     setFirstNodeRange,
 } from "../util/selection";
 import {netImg2LocalAssets} from "../breadcrumb/action";
-/// #if !MOBILE
-import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
-/// #endif
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
-import {hasClosestByAttribute, hasClosestByMatchTag} from "../util/hasClosest";
+import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
 import {scrollCenter} from "../../util/highlightById";
@@ -21,8 +17,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 
-export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement, range?: Range) => {
-    const target = event.target as HTMLElement;
+export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
             id: protyle.block.rootID
@@ -66,60 +61,6 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         return true;
     }
     /// #if !MOBILE
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (range) {
-            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
-            if (refElement) {
-                openBacklink({
-                    app: protyle.app,
-                    blockId: refElement.dataset.id,
-                });
-                return true;
-            }
-        }
-        openBacklink({
-            app: protyle.app,
-            blockId: protyle.block.id,
-            rootId: protyle.block.rootID,
-            useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
-        });
-        return true;
-    }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (range) {
-            const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
-            if (refElement) {
-                openGraph({
-                    app: protyle.app,
-                    blockId: refElement.dataset.id,
-                });
-                return true;
-            }
-        }
-        openGraph({
-            app: protyle.app,
-            blockId: protyle.block.id,
-            rootId: protyle.block.rootID,
-            useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
-        });
-        return true;
-    }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        const offset = getSelectionOffset(target);
-        openOutline(protyle);
-        // switchWnd 后，range会被清空，需要重新设置
-        focusByOffset(target, offset.start, offset.end);
-        return true;
-    }
-
     let matchCommand = false;
     protyle.app.plugins.find(item => {
         item.commands.find(command => {

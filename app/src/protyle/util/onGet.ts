@@ -240,18 +240,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        let readOnly = window.siyuan.config.readonly ? "true" : "false";
-        if (readOnly === "false") {
-            readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
-            if (readOnly === "false") {
-                readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-            }
-        }
-        if (readOnly === "true") {
-            disabledProtyle(protyle);
-        } else {
-            enableProtyle(protyle);
-        }
+        setReadonlyByConfig(protyle);
     }
     if (options.action.includes(Constants.CB_GET_SETID)) {
         // 点击大纲后，如果需要动态加载，在定位后，需要重置 block.id https://github.com/siyuan-note/siyuan/issues/4487
@@ -411,3 +400,18 @@ const focusElementById = (protyle: IProtyle, action: string[]) => {
         /// #endif
     }
 };
+
+export const setReadonlyByConfig = (protyle: IProtyle) => {
+    let readOnly = window.siyuan.config.readonly ? "true" : "false";
+    if (readOnly === "false") {
+        readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+        if (readOnly === "false") {
+            readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
+        }
+    }
+    if (readOnly === "true") {
+        disabledProtyle(protyle);
+    } else {
+        enableProtyle(protyle);
+    }
+}

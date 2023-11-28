@@ -6,7 +6,7 @@ import {zoomOut} from "../../menus/protyle";
 import {processRender} from "../../protyle/util/processCode";
 import {highlightRender} from "../../protyle/render/highlightRender";
 import {blockRender} from "../../protyle/render/blockRender";
-import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
+import {disabledForeverProtyle, setReadonlyByConfig} from "../../protyle/util/onGet";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
@@ -92,18 +92,7 @@ const focusStack = (backStack: IBackStack) => {
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else {
-            let readOnly = window.siyuan.config.readonly ? "true" : "false";
-            if (readOnly === "false") {
-                readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
-                if (readOnly === "false") {
-                    readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-                }
-            }
-            if (readOnly === "true") {
-                disabledProtyle(protyle);
-            } else {
-                enableProtyle(protyle);
-            }
+            setReadonlyByConfig(protyle);
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
     });

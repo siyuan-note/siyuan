@@ -343,9 +343,7 @@ export const editor = {
         }
         window.siyuan.config.editor = editorData;
         getAllModels().editor.forEach((item) => {
-            if (!changeReadonly) {
-                reloadProtyle(item.editor.protyle, false);
-            }
+            reloadProtyle(item.editor.protyle, false);
             let isFullWidth = item.editor.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
             if (!isFullWidth) {
                 isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";

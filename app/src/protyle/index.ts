@@ -28,7 +28,7 @@ import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Background} from "./header/Background";
-import {onGet} from "./util/onGet";
+import {onGet, setReadonlyByConfig} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -132,7 +132,7 @@ export class Protyle {
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;
-                            reloadProtyle(this.protyle, false);
+                            setReadonlyByConfig(this.protyle);
                             break;
                         case "heading2doc":
                         case "li2doc":

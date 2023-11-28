@@ -435,7 +435,7 @@ export class Protyle {
     }
 
     public getRange(element: Element) {
-        getEditorRange(element);
+        return getEditorRange(element);
     }
 
     public hasClosestBlock(element: Node) {

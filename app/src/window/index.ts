@@ -1,11 +1,11 @@
+import {App} from "..";
 import {Constants} from "../constants";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
 import "../assets/scss/base.scss";
 import {initBlockPopover} from "../block/popover";
 import {genUUID} from "../util/genID";
-import {fetchPost} from "../util/fetch";
-import {addBaseURL, addMetaAnchor} from "../util/pathName";
+import {fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
@@ -19,15 +19,8 @@ import {initApp} from "../boot/initApp";
 import {PluginLoader} from "../plugin/loader";
 import {unregisterServiceWorker} from "../util/serviceWorker";
 
-class App {
-    public plugins: import("../plugin").Plugin[] = [];
-    public appId: string;
-
-    constructor() {
-        addBaseURL();
-        addMetaAnchor();
-
-        this.appId = Constants.SIYUAN_APPID;
+class SiyuanApp extends App {
+    protected async init(): Promise<void> {
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -124,25 +117,24 @@ class App {
             }),
         };
 
-        fetchPost("/api/system/getConf", {}, async (response) => {
-            window.siyuan.config = response.data.conf;
+        const response = await fetchSyncPost("/api/system/getConf", {});
+        window.siyuan.config = response.data.conf;
 
-            await unregisterServiceWorker();
+        await unregisterServiceWorker();
 
-            const pluginLoader = new PluginLoader(this);
+        const pluginLoader = new PluginLoader(this);
 
-            await initApp();
+        await initApp();
 
-            window.siyuan.menus = new Menus(this);
+        window.siyuan.menus = new Menus(this);
 
-            initBlockPopover(this);
+        initBlockPopover(this);
 
-            init(this);
-            initLayout(this);
+        init(this);
+        initLayout(this);
 
-            await pluginLoader.register();
-        });
+        await pluginLoader.register();
     }
 }
 
-new App();
+const siyuanApp = new SiyuanApp();

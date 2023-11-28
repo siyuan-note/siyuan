@@ -5,7 +5,7 @@ import {onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
 import {account} from "./config/account";
 import {genUUID} from "./util/genID";
-import {fetchPost} from "./util/fetch";
+import {fetchSyncPost} from "./util/fetch";
 import {addBaseURL, addMetaAnchor, getIdFromSYProtocol, isSYProtocol} from "./util/pathName";
 import {registerServiceWorker, unregisterServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
@@ -28,15 +28,27 @@ import {JSONToLayout, resetLayout} from "./layout/util";
 import {initApp} from "./boot/initApp";
 import {openChangelog} from "./boot/openChangelog";
 
-export class App {
-    public plugins: import("./plugin").Plugin[] = [];
-    public appId: string;
+export abstract class App {
+    public readonly plugins: import("./plugin").Plugin[] = [];
+    public readonly appId: string;
+    public readonly ready: Promise<void>;
 
     constructor() {
+        this.appId = Constants.SIYUAN_APPID;
+        this.ready = this.init();
+    }
+
+    protected abstract init(): Promise<void>;
+}
+
+class SiyuanApp extends App {
+    constructor() {
+        super();
         addBaseURL();
         addMetaAnchor();
+    }
 
-        this.appId = Constants.SIYUAN_APPID;
+    protected async init() {
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -132,7 +144,7 @@ export class App {
                                 }
                                 break;
                             case "openFileById":
-                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                openFileById({ app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS] });
                                 break;
                         }
                     }
@@ -140,57 +152,56 @@ export class App {
             }),
         };
 
-        fetchPost("/api/system/getConf", {}, async (response) => {
-            window.siyuan.config = response.data.conf;
-            // 历史数据兼容，202306后可删除
-            if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {
-                window.siyuan.config.uiLayout.left = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.left
-                };
-                window.siyuan.config.uiLayout.right = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.right
-                };
-                window.siyuan.config.uiLayout.bottom = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.bottom
-                };
-            }
+        const response = await fetchSyncPost("/api/system/getConf", {});
+        window.siyuan.config = response.data.conf;
+        // 历史数据兼容，202306后可删除
+        if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {
+            window.siyuan.config.uiLayout.left = {
+                pin: true,
+                data: response.data.conf.uiLayout.left
+            };
+            window.siyuan.config.uiLayout.right = {
+                pin: true,
+                data: response.data.conf.uiLayout.right
+            };
+            window.siyuan.config.uiLayout.bottom = {
+                pin: true,
+                data: response.data.conf.uiLayout.bottom
+            };
+        }
 
-            /// #if BROWSER
-            await registerServiceWorker();
-            /// #else
-            await unregisterServiceWorker();
-            /// #endif
+        /// #if BROWSER
+        await registerServiceWorker();
+        /// #else
+        await unregisterServiceWorker();
+        /// #endif
 
-            const pluginLoader = new PluginLoader(this);
+        const pluginLoader = new PluginLoader(this);
 
-            await initApp();
+        await initApp();
 
-            window.siyuan.menus = new Menus(this);
+        window.siyuan.menus = new Menus(this);
 
-            bootSync();
-            initBlockPopover(this);
+        bootSync();
+        initBlockPopover(this);
 
-            onGetConfig(this);
-            openChangelog();
-            account.onSetaccount();
+        onGetConfig(this);
+        openChangelog();
+        account.onSetaccount();
 
-            try {
-                JSONToLayout(this, response.data.start);
-            } catch (e) {
-                resetLayout();
-            }
+        try {
+            JSONToLayout(this, response.data.start);
+        } catch (e) {
+            resetLayout();
+        }
 
-            await pluginLoader.register();
+        await pluginLoader.register();
 
-            sendGlobalShortcut(this);
-        });
+        sendGlobalShortcut(this);
     }
 }
 
-const siyuanApp = new App();
+const siyuanApp = new SiyuanApp();
 
 window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {

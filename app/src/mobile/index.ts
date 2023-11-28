@@ -1,13 +1,13 @@
+import {App} from "..";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
-import {addBaseURL, addMetaAnchor, getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
-import {fetchPost} from "../util/fetch";
-import {bootSync, setTitle} from "../dialog/processSystem";
-import {initMessage} from "../dialog/message";
+import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
+import {fetchSyncPost} from "../util/fetch";
+import {bootSync} from "../dialog/processSystem";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {openMobileFileById} from "./editor";
@@ -18,15 +18,8 @@ import {PluginLoader} from "../plugin/loader";
 import {initApp} from "../boot/initApp";
 import {init, initPluginMenu} from "./init";
 
-class App {
-    public plugins: import("../plugin").Plugin[] = [];
-    public appId: string;
-
-    constructor() {
-        addBaseURL();
-        addMetaAnchor();
-
-        this.appId = Constants.SIYUAN_APPID;
+class SiyuanApp extends App {
+    protected async init(): Promise<void> {
         window.siyuan = {
             zIndex: 10,
             notebooks: [],
@@ -49,36 +42,35 @@ class App {
             })
         };
 
-        fetchPost("/api/system/getConf", {}, async (confResponse) => {
-            confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
-            window.siyuan.config = confResponse.data.conf;
+        const response = await fetchSyncPost("/api/system/getConf", {});
+        response.data.conf.keymap = Constants.SIYUAN_KEYMAP;
+        window.siyuan.config = response.data.conf;
 
-            if (!window.webkit?.messageHandlers && !window.JSAndroid) {
-                await registerServiceWorker();
-            } else {
-                await unregisterServiceWorker();
-            }
+        if (!window.webkit?.messageHandlers && !window.JSAndroid) {
+            await registerServiceWorker();
+        } else {
+            await unregisterServiceWorker();
+        }
 
-            const pluginLoader = new PluginLoader(this);
+        const pluginLoader = new PluginLoader(this);
 
-            await initApp();
+        await initApp();
 
-            window.siyuan.menus = new Menus(this);
+        window.siyuan.menus = new Menus(this);
 
-            bootSync();
+        bootSync();
 
-            init(this, confResponse.data.start);
-            openChangelog();
+        init(this, response.data.start);
+        openChangelog();
 
-            await pluginLoader.init();
-            await pluginLoader.load();
-            const menus = await pluginLoader.layoutReady();
-            initPluginMenu(menus);
-        });
+        await pluginLoader.init();
+        await pluginLoader.load();
+        const menus = await pluginLoader.layoutReady();
+        initPluginMenu(menus);
     }
 }
 
-const siyuanApp = new App();
+const siyuanApp = new SiyuanApp();
 
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {

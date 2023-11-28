@@ -4,7 +4,7 @@ import {upDownHint} from "../util/upDownHint";
 import {openSetting} from "../config";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 
-export const commandPanel = (app: App) => {
+export const commandPanel = async (app: App) => {
     const dialog = new Dialog({
         width: "80vw",
         height: "70vh",
@@ -19,6 +19,7 @@ export const commandPanel = (app: App) => {
 </div>`
     });
     const listElement = dialog.element.querySelector("#commands");
+    await app.ready;
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");

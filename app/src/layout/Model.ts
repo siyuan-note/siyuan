@@ -15,10 +15,10 @@ export class Model {
     // @ts-ignore
     public parent: any;
     /// #endif
-    public app: App;
+    public app: IApp;
 
     constructor(options: {
-        app: App,
+        app: IApp,
         id: string,
         type?: TWS,
         callback?: () => void,

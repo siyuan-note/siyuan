@@ -256,7 +256,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
     if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
     }
-    const eventCode = Constants.KEYCODELIST[event.keyCode]
+    const eventCode = Constants.KEYCODELIST[event.keyCode];
     if (eventCode === "↓" || eventCode === "↑") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         let actionMenuElement;

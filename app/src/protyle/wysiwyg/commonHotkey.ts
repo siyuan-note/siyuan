@@ -3,16 +3,12 @@ import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {
     focusBlock,
-    focusByOffset,
     getSelectionOffset,
     setFirstNodeRange,
 } from "../util/selection";
 import {netImg2LocalAssets} from "../breadcrumb/action";
-/// #if !MOBILE
-import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
-/// #endif
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
-import {hasClosestByAttribute, hasClosestByMatchTag} from "../util/hasClosest";
+import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
 import {scrollCenter} from "../../util/highlightById";
@@ -21,8 +17,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 
-export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement, range?: Range) => {
-    const target = event.target as HTMLElement;
+export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
             id: protyle.block.rootID

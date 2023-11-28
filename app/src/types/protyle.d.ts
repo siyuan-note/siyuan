@@ -8,6 +8,12 @@ interface ILuteNode {
     };
 }
 
+type TTurnIntoOne = "BlocksMergeSuperBlock" | "Blocks2ULs" | "Blocks2OLs" | "Blocks2TLs" | "Blocks2Blockquote"
+
+type TTurnIntoOneSub = "row" | "col"
+
+type TTurnInto = "Blocks2Ps" | "Blocks2Hs"
+
 type ILuteRenderCallback = (node: ILuteNode, entering: boolean) => [string, number];
 
 /** @link https://ld246.com/article/1588412297062 */

@@ -401,8 +401,8 @@ export class Gutter {
         label: string,
         protyle: IProtyle,
         selectsElement: Element[],
-        type: string,
-        level?: string
+        type: TTurnIntoOne,
+        level?: TTurnIntoOneSub
     }) {
         return {
             icon: options.icon,
@@ -419,8 +419,8 @@ export class Gutter {
         label: string,
         protyle: IProtyle,
         selectsElement: Element[],
-        type: string,
-        level?: number | string,
+        type: TTurnInto,
+        level?: number,
         isContinue?: boolean
         accelerator?: string
     }) {
@@ -896,7 +896,6 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
                 protyle,
                 selectsElement: [nodeElement],
-                level: 6,
                 type: "Blocks2Ps",
             }));
             if (subType !== "h1") {

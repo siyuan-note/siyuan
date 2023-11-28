@@ -723,8 +723,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
 export const turnsIntoOneTransaction = (options: {
     protyle: IProtyle,
     selectsElement: Element[],
-    type: string,
-    level?: string
+    type: TTurnIntoOne,
+    level?: TTurnIntoOneSub
 }) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
@@ -834,8 +834,8 @@ export const turnsIntoTransaction = (options: {
     protyle: IProtyle,
     selectsElement?: Element[],
     nodeElement?: Element,
-    type: string,
-    level?: number | string,
+    type: TTurnInto,
+    level?: number,
     isContinue?: boolean,
 }) => {
     let selectsElement: Element[] = options.selectsElement;
@@ -898,7 +898,7 @@ export const turnsIntoTransaction = (options: {
             data: item.outerHTML
         });
 
-        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") && !options.isContinue) {
+        if (!options.isContinue) {
             // @ts-ignore
             item.outerHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
         } else {

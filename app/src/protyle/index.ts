@@ -14,7 +14,13 @@ import {WYSIWYG} from "./wysiwyg";
 import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {Breadcrumb} from "./breadcrumb";
-import {onTransaction, transaction} from "./wysiwyg/transaction";
+import {
+    onTransaction,
+    transaction,
+    turnsIntoOneTransaction, turnsIntoTransaction,
+    updateBatchTransaction,
+    updateTransaction
+} from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Title} from "./header/Title";
@@ -31,6 +37,8 @@ import {getDocByScroll} from "./scroll/saveScroll";
 import {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
+import {focusBlock, getEditorRange} from "./util/selection";
+import {hasClosestBlock} from "./util/hasClosest";
 
 export class Protyle {
 
@@ -389,5 +397,52 @@ export class Protyle {
 
     public transaction(doOperations: IOperation[], undoOperations?: IOperation[]) {
         transaction(this.protyle, doOperations, undoOperations);
+    }
+
+    /**
+     * 多个块转换为一个块
+     * @param {TTurnIntoOneSub} [subType] type 为 "BlocksMergeSuperBlock" 时必传
+     */
+    public turnIntoOneTransaction(selectsElement: Element[], type: TTurnIntoOne, subType?: TTurnIntoOneSub) {
+        turnsIntoOneTransaction({
+            protyle: this.protyle,
+            selectsElement,
+            type,
+            level: subType
+        });
+    }
+
+    /**
+     * 多个块转换
+     * @param {Element} [nodeElement] 优先使用包含 protyle-wysiwyg--select 的块，否则使用 nodeElement 单块
+     * @param {number} [subType] type 为 "Blocks2Hs" 时必传
+     */
+    public turnIntoTransaction(nodeElement: Element, type: TTurnInto, subType?: number) {
+        turnsIntoTransaction({
+            protyle: this.protyle,
+            nodeElement,
+            type,
+            level: subType,
+        });
+    }
+
+    public updateTransaction(id: string, newHTML: string, html: string) {
+        updateTransaction(this.protyle, id, newHTML, html);
+    }
+
+    public updateBatchTransaction(nodeElements: Element[], cb: (e: HTMLElement) => void) {
+        updateBatchTransaction(nodeElements, this.protyle, cb);
+    }
+
+    public getRange(element: Element) {
+        getEditorRange(element);
+    }
+
+    public hasClosestBlock(element: Node) {
+        return hasClosestBlock(element);
+    }
+
+    public focusBlock(element: Element, toStart = true) {
+        return focusBlock(element, undefined, toStart);
     }
 }

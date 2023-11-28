@@ -447,7 +447,7 @@ export class Breadcrumb {
                     type: "submenu",
                     submenu: [{
                         iconHTML: "",
-                        current: !isCustomReadonly || isCustomReadonly === "true",
+                        current: isCustomReadonly === "true",
                         label: window.siyuan.languages.enable,
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
@@ -457,7 +457,7 @@ export class Breadcrumb {
                         }
                     }, {
                         iconHTML: "",
-                        current: isCustomReadonly === "false",
+                        current: !isCustomReadonly || isCustomReadonly === "false",
                         label: window.siyuan.languages.disable,
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {

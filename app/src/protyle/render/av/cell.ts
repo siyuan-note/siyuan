@@ -208,9 +208,12 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (event.isComposing) {
                 return;
             }
-            if (event.key === "Escape" ||
+            if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValue(protyle, type, cellElements);
+                if (event.key === "Tab") {
+                    protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {key: "Tab", keyCode: 9}))
+                }
                 event.preventDefault();
                 event.stopPropagation();
             }

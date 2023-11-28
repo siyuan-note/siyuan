@@ -69,7 +69,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const gutterElement = hasClosestByClassName(event.target, "ariaLabel");
+    const gutterElement = hasClosestByClassName(event.target, "av__gutter");
     if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
         const rowElement = hasClosestByClassName(gutterElement, "av__row");
         if (!rowElement) {

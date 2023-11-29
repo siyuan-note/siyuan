@@ -1459,13 +1459,8 @@ export class WYSIWYG {
                     // database 行块标
                     const rowElement = hasClosestByClassName(event.target, "av__row");
                     if (rowElement && rowElement.dataset.id) {
-                        const scrollElement = hasClosestByClassName(rowElement, "av__scroll");
-                        const guttersElement = rowElement.querySelector<HTMLElement>(".av__gutters");
-                        if (scrollElement && guttersElement) {
-                            const width = guttersElement.offsetWidth;
-                            guttersElement.style.top = `${rowElement.getBoundingClientRect().top}px`;
-                            guttersElement.style.left = `${scrollElement.getBoundingClientRect().left - width}px`;
-                        }
+                        const guttersElement = rowElement.querySelector(".av__gutters");
+                        guttersElement.setAttribute("style", `left:${rowElement.parentElement.parentElement.getBoundingClientRect().left - guttersElement.clientWidth}px;top:${rowElement.getBoundingClientRect().top}px`);
                     }
                     protyle.gutter.render(protyle, nodeElement, this.element);
                 }

@@ -70,7 +70,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
 
     const gutterElement = hasClosestByClassName(event.target, "av__gutter");
-    if (gutterElement && gutterElement.parentElement.classList.contains("av__gutters")) {
+    if (gutterElement) {
         const rowElement = hasClosestByClassName(gutterElement, "av__row");
         if (!rowElement) {
             return;

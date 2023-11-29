@@ -40,7 +40,7 @@ export class Inbox extends Model {
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
-    <span data-type="selectall" class="block__icon"><svg><use xlink:href="#iconUncheck"></use></svg></span>
+    <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
     <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
     <svg data-type="more" class="toolbar__icon"><use xlink:href='#iconMore'></use></svg>

@@ -199,7 +199,7 @@ export class Inbox extends Model {
     ${linkHTML}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px">
-${(Lute.New()).MarkdownStr("", data.shorthandContent)}
+${data.shorthandContent}
 </div>`;
         /// #else
         if (data.shorthandURL) {
@@ -214,7 +214,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     ${linkHTML}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text">
-${(Lute.New()).MarkdownStr("", data.shorthandContent)}
+${data.shorthandContent}
 </div>`;
         /// #endif
     }
@@ -332,7 +332,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                         notebook: toNotebook[0],
                         path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
                         title: replaceFileName(response.data.shorthandTitle),
-                        md: response.data.shorthandContent,
+                        md: response.data.shorthandMd,
                     }, (docResponse) => {
                         this.remove(item);
                         fetchPost("/api/format/netAssets2LocalAssets", {id: docResponse.data.id});

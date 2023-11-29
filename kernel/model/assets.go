@@ -244,15 +244,23 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 		SetProxy(httpclient.ProxyFromEnvironment)
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
+		if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a") && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type) {
 			return ast.WalkContinue
 		}
 
 		var dest []byte
 		if ast.NodeLinkDest == n.Type {
 			dest = n.Tokens
-		} else {
+		} else if n.IsTextMarkType("a") {
 			dest = []byte(n.TextMarkAHref)
+		} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+			if srcIndex := bytes.Index(n.Tokens, []byte("src=\"")); 0 < srcIndex {
+				src := n.Tokens[srcIndex+len("src=\""):]
+				if srcIndex = bytes.Index(src, []byte("\"")); 0 < srcIndex {
+					src = src[:bytes.Index(src, []byte("\""))]
+					dest = bytes.TrimSpace(src)
+				}
+			}
 		}
 
 		if util.IsAssetLinkDest(dest) {
@@ -278,8 +286,10 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 
 			if ast.NodeLinkDest == n.Type {
 				n.Tokens = []byte("assets/" + name)
-			} else {
+			} else if n.IsTextMarkType("a") {
 				n.TextMarkAHref = "assets/" + name
+			} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+				n.Tokens = bytes.ReplaceAll(n.Tokens, dest, []byte("assets/"+name))
 			}
 			files++
 			return ast.WalkContinue
@@ -360,8 +370,10 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 
 			if ast.NodeLinkDest == n.Type {
 				n.Tokens = []byte("assets/" + name)
-			} else {
+			} else if n.IsTextMarkType("a") {
 				n.TextMarkAHref = "assets/" + name
+			} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+				n.Tokens = bytes.ReplaceAll(n.Tokens, dest, []byte("assets/"+name))
 			}
 			files++
 		}
@@ -790,7 +802,7 @@ func UnusedAssets() (ret []string) {
 		}
 
 		var linkDestFolderPaths, linkDestFilePaths []string
-		for dest, _ := range dests {
+		for dest := range dests {
 			if !strings.HasPrefix(dest, "assets/") {
 				continue
 			}
@@ -812,7 +824,7 @@ func UnusedAssets() (ret []string) {
 
 		// 排除文件夹链接
 		var toRemoves []string
-		for asset, _ := range assetsPathMap {
+		for asset := range assetsPathMap {
 			for _, linkDestFolder := range linkDestFolderPaths {
 				if strings.HasPrefix(asset, linkDestFolder) {
 					toRemoves = append(toRemoves, asset)
@@ -838,7 +850,7 @@ func UnusedAssets() (ret []string) {
 	}
 
 	var toRemoves []string
-	for asset, _ := range assetsPathMap {
+	for asset := range assetsPathMap {
 		if strings.HasSuffix(asset, "ocr-texts.json") {
 			// 排除 OCR 结果文本
 			toRemoves = append(toRemoves, asset)
@@ -868,7 +880,7 @@ func UnusedAssets() (ret []string) {
 				return
 			}
 
-			for asset, _ := range assetsPathMap {
+			for asset := range assetsPathMap {
 				if bytes.Contains(data, []byte(asset)) {
 					toRemoves = append(toRemoves, asset)
 				}
@@ -946,7 +958,7 @@ func MissingAssets() (ret []string) {
 			}
 		}
 
-		for dest, _ := range dests {
+		for dest := range dests {
 			if !strings.HasPrefix(dest, "assets/") {
 				continue
 			}

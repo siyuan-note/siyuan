@@ -338,7 +338,6 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                         fetchPost("/api/format/netAssets2LocalAssets", {id: docResponse.data.id});
                     });
                 });
-
             });
         });
     }

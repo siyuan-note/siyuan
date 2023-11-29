@@ -507,10 +507,10 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
 
 		desc := shorthand["shorthandDesc"].(string)
-		desc = audioRegexp.ReplaceAllString(desc, "语音、")
-		desc = videoRegexp.ReplaceAllString(desc, "视频、")
-		desc = strings.TrimSuffix(desc, "、")
+		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
+		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
 		desc = strings.ReplaceAll(desc, "\n\n", "")
+		desc = strings.TrimSpace(desc)
 		shorthand["shorthandDesc"] = desc
 
 		md := shorthand["shorthandContent"].(string)

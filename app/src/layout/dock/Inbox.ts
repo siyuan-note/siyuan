@@ -46,7 +46,7 @@ export class Inbox extends Model {
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto"></div>
+<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;
         /// #else
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox");
@@ -71,7 +71,7 @@ export class Inbox extends Model {
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto"></div>
+<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;
         /// #endif
         const countElement = this.element.querySelector(".inboxSelectCount");
@@ -284,14 +284,19 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     private move(ids: string[]) {
         movePathTo((toPath, toNotebook) => {
             ids.forEach(item => {
-                fetchPost("/api/filetree/createDoc", {
-                    notebook: toNotebook[0],
-                    path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
-                    title: replaceFileName(this.data[item].shorthandTitle),
-                    md: this.data[item].shorthandContent,
-                }, () => {
-                    this.remove(item);
-                });
+                fetchPost("/api/inbox/getShorthand", {
+                    id: item
+                }, (response) => {
+                    fetchPost("/api/filetree/createDoc", {
+                        notebook: toNotebook[0],
+                        path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
+                        title: replaceFileName(response.data.shorthandTitle),
+                        md: response.data.shorthandContent,
+                    }, () => {
+                        this.remove(item);
+                    });
+                })
+
             });
         });
     }

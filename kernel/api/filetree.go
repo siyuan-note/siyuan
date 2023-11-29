@@ -434,6 +434,10 @@ func createDoc(c *gin.Context) {
 
 	box := model.Conf.Box(notebook)
 	pushCreate(box, p, tree.Root.ID, arg)
+
+	ret.Data = map[string]interface{}{
+		"id": tree.Root.ID,
+	}
 }
 
 func createDailyNote(c *gin.Context) {

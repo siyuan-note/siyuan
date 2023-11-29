@@ -280,9 +280,9 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 click: () => {
                     let removeTitle = ""
                     ids.forEach((id, index) => {
-                        removeTitle += "<b>" + escapeHtml(this.data[id].shorthandTitle) + "</b>" + (index === ids.length - 1 ? "" : "，")
+                        removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ")
                     })
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}？`, () => {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
                         if (itemElement) {
                             this.remove(itemElement.dataset.id);
                         } else if (detailsElement.classList.contains("fn__none")) {

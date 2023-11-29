@@ -63,12 +63,14 @@
 
   &__gutters {
     @extend .protyle-gutters;
-    position: fixed;
     top: 0;
     left: -44px;
     opacity: 0;
     display: flex;
-    z-index: 2;
+
+    &--min .av__gutter {
+      padding: 4px 0;
+    }
 
     svg {
       height: 25px;

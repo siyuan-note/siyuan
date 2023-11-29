@@ -71,7 +71,6 @@
     border: 0;
     background-color: transparent;
     padding: 4px;
-    transition: var(--b3-transition);
     cursor: pointer;
     position: relative;
 
@@ -98,7 +97,7 @@
     color: var(--b3-theme-on-surface-light);
     width: 14px;
     float: left;
-    transition: var(--b3-transition);
+    transition: var(--b3-color-transition);
   }
 }
 

@@ -1460,7 +1460,14 @@ export class WYSIWYG {
                     const rowElement = hasClosestByClassName(event.target, "av__row");
                     if (rowElement && rowElement.dataset.id) {
                         const guttersElement = rowElement.querySelector(".av__gutters");
-                        guttersElement.setAttribute("style", `left:${rowElement.parentElement.parentElement.getBoundingClientRect().left - guttersElement.clientWidth}px;top:${rowElement.getBoundingClientRect().top}px`);
+                        guttersElement.classList.remove("av__gutters--min")
+                        let guttersLeft = rowElement.parentElement.parentElement.getBoundingClientRect().left - guttersElement.clientWidth;
+                        const contentLeft = protyle.contentElement.getBoundingClientRect().left
+                        if (guttersLeft < contentLeft) {
+                            guttersLeft = contentLeft;
+                            guttersElement.classList.add("av__gutters--min")
+                        }
+                        guttersElement.setAttribute("style", `left:${guttersLeft}px;top:${rowElement.getBoundingClientRect().top}px`);
                     }
                     protyle.gutter.render(protyle, nodeElement, this.element);
                 }

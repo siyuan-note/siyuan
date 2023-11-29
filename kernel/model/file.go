@@ -1593,6 +1593,38 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
 
+	// 如果段落块中仅包含一个 mp3/mp4 超链接，则将其转换为音视频块
+	// Convert mp3 and mp4 hyperlinks to audio and video when moving cloud inbox to docs https://github.com/siyuan-note/siyuan/issues/9778
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeParagraph == n.Type {
+			link := n.FirstChild
+			if nil != link && link.IsTextMarkType("a") {
+				if strings.HasSuffix(link.TextMarkAHref, ".mp3") {
+					unlinks = append(unlinks, n)
+					audio := &ast.Node{ID: n.ID, Type: ast.NodeAudio, Tokens: []byte("<audio controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></audio>")}
+					audio.SetIALAttr("id", n.ID)
+					audio.SetIALAttr("updated", util.TimeFromID(n.ID))
+					n.InsertBefore(audio)
+				} else if strings.HasSuffix(link.TextMarkAHref, ".mp4") {
+					unlinks = append(unlinks, n)
+					video := &ast.Node{ID: n.ID, Type: ast.NodeVideo, Tokens: []byte("<video controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></video>")}
+					video.SetIALAttr("id", n.ID)
+					video.SetIALAttr("updated", util.TimeFromID(n.ID))
+					n.InsertBefore(video)
+				}
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
 	WaitForWritingFiles()

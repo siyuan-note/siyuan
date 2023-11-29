@@ -78,8 +78,7 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
                 }
             }
         }
-
-        if (event.clientY > window.innerHeight - (window.siyuan.config.uiLayout.hideDock ? 42 : 73)) {
+        if (event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - (window.siyuan.config.uiLayout.hideDock ? 0 : 42) - document.querySelector("#status").clientHeight)) {
             window.siyuan.layout.bottomDock.showDock();
         }
     }

@@ -498,6 +498,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	luteEngine := NewLute()
 	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
 	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
+	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
 	shorthands := result["data"].(map[string]interface{})["shorthands"].([]interface{})
 	for _, item := range shorthands {
 		shorthand := item.(map[string]interface{})
@@ -509,6 +510,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		desc := shorthand["shorthandDesc"].(string)
 		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
 		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
+		desc = fileRegexp.ReplaceAllString(desc, " 文件 ")
 		desc = strings.ReplaceAll(desc, "\n\n", "")
 		desc = strings.TrimSpace(desc)
 		shorthand["shorthandDesc"] = desc

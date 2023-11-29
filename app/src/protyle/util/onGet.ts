@@ -414,4 +414,4 @@ export const setReadonlyByConfig = (protyle: IProtyle) => {
     } else {
         enableProtyle(protyle);
     }
-}
+};

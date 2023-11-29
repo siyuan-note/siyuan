@@ -80,11 +80,11 @@ export class Inbox extends Model {
         const detailsElement = this.element.querySelector(".inboxDetails");
         const selectAllElement = this.element.firstElementChild.querySelector('[data-type="selectall"]');
         this.element.lastElementChild.addEventListener("contextmenu", (event: MouseEvent) => {
-            const itemElement = hasClosestByClassName(event.target as Element, "b3-list-item")
+            const itemElement = hasClosestByClassName(event.target as Element, "b3-list-item");
             if (itemElement) {
                 this.more(event, itemElement);
             }
-        })
+        });
         this.element.addEventListener("click", (event: MouseEvent) => {
             /// #if !MOBILE
             setPanelFocus(this.element);
@@ -101,34 +101,34 @@ export class Inbox extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "selectall") {
-                    const useElement = target.querySelector("use")
+                    const useElement = target.querySelector("use");
                     if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                         this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                            item.querySelector("use").setAttribute("xlink:href", "#iconCheck")
+                            item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                             this.selectIds.push(item.getAttribute("data-id"));
                             this.selectIds = [...new Set(this.selectIds)];
                         });
-                        useElement.setAttribute("xlink:href", "#iconCheck")
+                        useElement.setAttribute("xlink:href", "#iconCheck");
                     } else {
                         this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                            item.querySelector("use").setAttribute("xlink:href", "#iconUncheck")
+                            item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                             this.selectIds.splice(this.selectIds.indexOf(item.getAttribute("data-id")), 1);
                         });
-                        useElement.setAttribute("xlink:href", "#iconUncheck")
+                        useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "select") {
-                    const useElement = target.querySelector("use")
+                    const useElement = target.querySelector("use");
                     if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                         this.selectIds.push(target.parentElement.getAttribute("data-id"));
                         this.selectIds = [...new Set(this.selectIds)];
-                        useElement.setAttribute("xlink:href", "#iconCheck")
+                        useElement.setAttribute("xlink:href", "#iconCheck");
                     } else {
                         this.selectIds.splice(this.selectIds.indexOf(target.parentElement.getAttribute("data-id")), 1);
-                        useElement.setAttribute("xlink:href", "#iconUncheck")
+                        useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
                     selectAllElement.querySelector("use").setAttribute("xlink:href", this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length ? "#iconCheck" : "#iconUncheck");
@@ -227,7 +227,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     <span class="fn__space--small"></span>
     <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
     <span class="b3-list-item__meta">${item.hCreated}</span>
-</li>`
+</li>`;
     }
 
     private more(event: MouseEvent, itemElement?: HTMLElement) {
@@ -278,10 +278,10 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 label: window.siyuan.languages.remove,
                 icon: "iconTrashcan",
                 click: () => {
-                    let removeTitle = ""
+                    let removeTitle = "";
                     ids.forEach((id, index) => {
-                        removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ")
-                    })
+                        removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ");
+                    });
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
                         if (itemElement) {
                             this.remove(itemElement.dataset.id);
@@ -336,7 +336,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                     }, () => {
                         this.remove(item);
                     });
-                })
+                });
 
             });
         });

@@ -390,6 +390,10 @@
   }
 }
 
+div[contenteditable="false"] .protyle-action__table {
+  display: none;
+}
+
 div[contenteditable="true"] .protyle-action__table {
   position: absolute;
   top: 4px;

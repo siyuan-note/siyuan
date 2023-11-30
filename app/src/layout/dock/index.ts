@@ -256,6 +256,18 @@ export class Dock {
             this.layout.element.clientHeight === 0 && this.layout.element.style.height.startsWith("0")) {
             return;
         }
+        if ((
+            document.querySelector(".b3-dialog") ||
+            document.querySelector(".block__popover") ||
+            document.querySelector("#commonMenu:not(.fn__none)")
+        ) && (
+            window.siyuan.layout.leftDock?.layout.element.style.opacity === "1" ||
+            window.siyuan.layout.rightDock?.layout.element.style.opacity === "1" ||
+            window.siyuan.layout.bottomDock?.layout.element.style.opacity === "1"
+        )) {
+            return;
+        }
+
         if (!reset) {
             this.layout.element.style.opacity = "1";
         }
@@ -278,6 +290,15 @@ export class Dock {
         }
         // https://github.com/siyuan-note/siyuan/issues/7504
         if (document.activeElement && this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
+            return;
+        }
+        const dialogElement = document.querySelector(".b3-dialog") as HTMLElement
+        const blockElement = document.querySelector(".block__popover") as HTMLElement
+        const menuElement = document.querySelector("#commonMenu:not(.fn__none)") as HTMLElement
+        if ((dialogElement && dialogElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上修改 emoji 时
+            (blockElement && blockElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上弹出悬浮层
+            (menuElement && menuElement.style.zIndex > this.layout.element.style.zIndex)  // 面板上弹出菜单时
+        ) {
             return;
         }
         if (this.position === "Left") {

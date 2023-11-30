@@ -21,6 +21,18 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     if (!hasClosestByClassName(event.target, "pdf__outer")) {
         hideAllElements(["pdfutil"]);
     }
+    // dock float 时，点击空白处，隐藏 dock。场景：文档树上重命名后
+    if (!isWindow() && window.siyuan.layout.leftDock &&
+        !hasClosestByClassName(event.target, "b3-dialog--open", true) &&
+        !hasClosestByClassName(event.target, "b3-menu") &&
+        !hasClosestByClassName(event.target, "block__popover") &&
+        !hasClosestByClassName(event.target, "dock") &&
+        !hasClosestByClassName(event.target, "layout--float", true)
+    ) {
+        window.siyuan.layout.bottomDock.hideDock();
+        window.siyuan.layout.leftDock.hideDock();
+        window.siyuan.layout.rightDock.hideDock();
+    }
 
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {

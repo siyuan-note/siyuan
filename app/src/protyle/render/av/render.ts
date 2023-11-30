@@ -10,7 +10,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -56,7 +56,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
-                viewID: e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
+                viewID: viewID || e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header

@@ -262,6 +262,7 @@ interface ISnippet {
 interface IInbox {
     oId: string
     shorthandContent: string
+    shorthandMd: string
     shorthandDesc: string
     shorthandFrom: number
     shorthandTitle: string

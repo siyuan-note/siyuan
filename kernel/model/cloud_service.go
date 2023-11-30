@@ -23,11 +23,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -456,6 +458,15 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	t, _ := strconv.ParseInt(id, 10, 64)
 	hCreated := util.Millisecond2Time(t)
 	ret["hCreated"] = hCreated.Format("2006-01-02 15:04")
+
+	md := ret["shorthandContent"].(string)
+	ret["shorthandMd"] = md
+
+	luteEngine := NewLute()
+	luteEngine.SetFootnotes(true)
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	ret["shorthandContent"] = content
 	return
 }
 
@@ -483,6 +494,11 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		err = errors.New(result["msg"].(string))
 		return
 	}
+
+	luteEngine := NewLute()
+	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
+	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
+	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
 	shorthands := result["data"].(map[string]interface{})["shorthands"].([]interface{})
 	for _, item := range shorthands {
 		shorthand := item.(map[string]interface{})
@@ -490,6 +506,20 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		t, _ := strconv.ParseInt(id, 10, 64)
 		hCreated := util.Millisecond2Time(t)
 		shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
+
+		desc := shorthand["shorthandDesc"].(string)
+		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
+		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
+		desc = fileRegexp.ReplaceAllString(desc, " 文件 ")
+		desc = strings.ReplaceAll(desc, "\n\n", "")
+		desc = strings.TrimSpace(desc)
+		shorthand["shorthandDesc"] = desc
+
+		md := shorthand["shorthandContent"].(string)
+		shorthand["shorthandMd"] = md
+		tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+		content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+		shorthand["shorthandContent"] = content
 	}
 	return
 }

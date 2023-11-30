@@ -156,7 +156,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <span class="fn__space"></span>
         <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
         <span class="fn__space"></span>
-        <span class="fn__flex-1"></span>
+        <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
         <span id="searchPathInput" data-position="9bottom" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(config.hPath)}">
             ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>

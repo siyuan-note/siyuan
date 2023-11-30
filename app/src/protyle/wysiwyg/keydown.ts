@@ -935,11 +935,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 回车
-        if (!event.altKey && !event.shiftKey && isNotCtrl(event) && event.key === "Enter") {
-            event.stopPropagation();
-            event.preventDefault();
-            enter(nodeElement, range, protyle);
-            return;
+        if (!event.altKey && isNotCtrl(event) && event.key === "Enter") {
+            if (!event.shiftKey) {
+                enter(nodeElement, range, protyle);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
         }
 
         if (matchHotKey("⌘A", event)) {

@@ -233,6 +233,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     editableElement.querySelectorAll(".img--select").forEach(item => {
         item.classList.remove("img--select");
     });
+    // 数据库
+    if (blockElement.getAttribute("data-type") === "NodeAttributeView") {
+        return true;
+    }
     // 代码块
     const trimStartText = editableElement.innerHTML.trimStart();
     if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||

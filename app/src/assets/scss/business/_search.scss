@@ -5,10 +5,13 @@
     min-height: 0.1px;
     flex-direction: column;
 
+    &:not(.search__layout--row) .search__list {
+      border-top: 1px solid var(--b3-theme-surface-lighter);
+    }
+
     &--row {
       flex-direction: row;
       border-top: 1px solid var(--b3-theme-surface-lighter);
-      border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
       .search__preview {
         border-top: 0;
@@ -33,7 +36,8 @@
     display: flex;
     background: var(--b3-theme-background);
     position: relative;
-    border-bottom: 1px solid var(--b3-theme-surface-lighter);
+    border-top: 1px solid var(--b3-theme-surface-lighter);
+    min-height: 42px;
 
     .block__icon {
       opacity: 1;
@@ -114,6 +118,7 @@
     flex: 1;
     overflow: auto;
     padding: 8px 0;
+    background-color: var(--b3-theme-background);
 
     .b3-list-item__text {
       user-select: none;
@@ -144,12 +149,13 @@
   &__tip {
     font-size: 12px;
     color: var(--b3-theme-on-surface-light);
-    margin: 2px 8px;
+    padding: 2px 8px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     line-height: 22px;
+    border-top: 1px solid var(--b3-theme-surface-lighter);
 
     kbd {
       &:first-child {

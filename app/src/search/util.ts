@@ -149,6 +149,39 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     });
     const data = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}">
+    <div class="block__icons" style="overflow: auto">
+        <span data-position="9bottom" data-type="previous" class="block__icon block__icon--show ariaLabel" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-position="9bottom" data-type="next" class="block__icon block__icon--show ariaLabel" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+        <span class="fn__space"></span>
+        <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
+        <span class="fn__space"></span>
+        <span class="fn__flex-1"></span>
+        <span id="searchPathInput" data-position="9bottom" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(config.hPath)}">
+            ${escapeHtml(config.hPath)}
+            <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span data-position="9bottom" id="searchInclude" ${enableIncludeChild ? "" : "disabled"} aria-label="${window.siyuan.languages.includeChildDoc}" class="block__icon block__icon--show ariaLabel">
+            <svg${includeChild ? ' class="ft__primary"' : ""}><use xlink:href="#iconCopy"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconFolder"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span id="searchMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconMore"></use></svg>
+        </span>
+        <span class="${closeCB ? "" : "fn__none "}fn__space"></span>
+        <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconLayoutRight"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconExact"></use></svg>
+        </span>
+    </div>
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -157,33 +190,31 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
         <div class="block__icons">
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconRegex"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchFilter" aria-label="${window.siyuan.languages.type}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconFilter"></use></svg>
-            </span>
-            <span class="fn__space"></span>
-            <span id="searchMore" aria-label="${window.siyuan.languages.more}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconMore"></use></svg>
-            </span>
-            <span class="${closeCB ? "" : "fn__none "}fn__space"></span>
-            <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconLayoutRight"></use></svg>
-            </span>
-            <span class="fn__space"></span>
-            <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconExact"></use></svg>
-            </span>
+            </span> 
+            <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
+                <span class="fn__space"></span>
+                <span id="searchExpand" class="block__icon block__icon--show ariaLabel" data-position="9bottom" aria-label="${window.siyuan.languages.expand}">
+                    <svg><use xlink:href="#iconExpand"></use></svg>
+                </span>
+                <span class="fn__space"></span>
+                <span id="searchCollapse" class="block__icon block__icon--show ariaLabel" data-position="9bottom" aria-label="${window.siyuan.languages.collapse}">
+                    <svg><use xlink:href="#iconContract"></use></svg>
+                </span>
+            </div>
         </div>
     </div>
     <div class="b3-form__icon search__header${config.hasReplace ? "" : " fn__none"}">
@@ -199,36 +230,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <div class="fn__space"></div>
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
-    <div id="criteria" class="fn__flex" style="min-height:40px;background-color: var(--b3-theme-background)"></div>
-    <div class="block__icons">
-        <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-        <span class="fn__space"></span>
-        <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
-        <span class="fn__space"></span>
-        <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
-        <span class="fn__space"></span>
-        <span class="fn__flex-1"></span>
-        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(config.hPath)}">
-            ${escapeHtml(config.hPath)}
-            <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
-        </span>
-        <span class="fn__space"></span>
-        <button ${enableIncludeChild ? "" : "disabled"} id="searchInclude" class="b3-button b3-button--mid${includeChild ? "" : " b3-button--cancel"}">${window.siyuan.languages.includeChildDoc}</button>
-        <span class="fn__space"></span>
-        <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon block__icon--show b3-tooltips b3-tooltips__w">
-            <svg><use xlink:href="#iconFolder"></use></svg>
-        </span>
-        <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
-            <span class="fn__space"></span>
-            <span id="searchExpand" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.expand}">
-                <svg><use xlink:href="#iconExpand"></use></svg>
-            </span>
-            <span class="fn__space"></span>
-            <span id="searchCollapse" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.collapse}">
-                <svg><use xlink:href="#iconContract"></use></svg>
-            </span>
-        </div>
-    </div>
+    <div id="criteria" class="search__header"></div>
     <div class="search__layout${(closeCB ? data.layout === 1 : data.layoutTab === 1) ? " search__layout--row" : ""}">
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div class="search__drag"></div>
@@ -429,7 +431,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 searchPathInputElement.setAttribute("aria-label", "");
                 inputEvent(element, config, edit, true);
                 const includeElement = element.querySelector("#searchInclude");
-                includeElement.classList.remove("b3-button--cancel");
+                includeElement.firstElementChild.classList.add("ft__primary");
                 includeElement.setAttribute("disabled", "disabled");
                 event.stopPropagation();
                 event.preventDefault();
@@ -477,7 +479,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
                         searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
                         const includeElement = element.querySelector("#searchInclude");
-                        includeElement.classList.remove("b3-button--cancel");
+                        includeElement.firstElementChild.classList.add("ft__primary");
                         if (enableIncludeChild) {
                             includeElement.removeAttribute("disabled");
                         } else {
@@ -490,8 +492,9 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchInclude") {
-                target.classList.toggle("b3-button--cancel");
-                if (target.classList.contains("b3-button--cancel")) {
+                const svgElement = target.firstElementChild
+                svgElement.classList.toggle("ft__primary");
+                if (!svgElement.classList.contains("ft__primary")) {
                     config.idPath.forEach((item, index) => {
                         if (!item.endsWith(".sy") && item.split("/").length > 1) {
                             config.idPath[index] = item + ".sy";
@@ -934,9 +937,9 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     });
     const searchIncludeElement = element.querySelector("#searchInclude");
     if (includeChild) {
-        searchIncludeElement.classList.remove("b3-button--cancel");
+        searchIncludeElement.firstElementChild.classList.add("ft__primary");
     } else {
-        searchIncludeElement.classList.add("b3-button--cancel");
+        searchIncludeElement.firstElementChild.classList.remove("ft__primary");
     }
     if (enableIncludeChild) {
         searchIncludeElement.removeAttribute("disabled");

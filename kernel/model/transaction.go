@@ -295,6 +295,7 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	view := av.NewView()
+	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
 	if err = av.SaveAttributeView(attrView); nil != err {

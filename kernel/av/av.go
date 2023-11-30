@@ -59,7 +59,7 @@ func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
 	}
 
 	ret.ID = ast.NewNodeID()
-	view, err := ret.GetView()
+	view, err := ret.GetCurrentView()
 	if nil == err {
 		view.ID = ast.NewNodeID()
 		ret.ViewID = view.ID
@@ -678,7 +678,17 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) GetView() (ret *View, err error) {
+func (av *AttributeView) GetView(viewID string) (ret *View) {
+	for _, v := range av.Views {
+		if v.ID == viewID {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
+func (av *AttributeView) GetCurrentView() (ret *View, err error) {
 	for _, v := range av.Views {
 		if v.ID == av.ViewID {
 			ret = v

@@ -134,7 +134,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// Attribute Panel - Database sort attributes by view column order https://github.com/siyuan-note/siyuan/issues/9319
-		view, _ := attrView.GetView()
+		view, _ := attrView.GetCurrentView()
 		if nil != view {
 			sorts := map[string]int{}
 			for i, col := range view.Table.Columns {
@@ -224,7 +224,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView)
+	viewable, err = renderAttributeView(attrView, "")
 	return
 }
 
@@ -267,11 +267,11 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView)
+	viewable, err = renderAttributeView(attrView, "")
 	return
 }
 
-func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -288,11 +288,11 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView)
+	viewable, err = renderAttributeView(attrView, viewID)
 	return
 }
 
-func renderAttributeView(attrView *av.AttributeView) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view := av.NewView()
 		attrView.Views = append(attrView.Views, view)
@@ -304,14 +304,22 @@ func renderAttributeView(attrView *av.AttributeView) (viewable av.Viewable, err 
 	}
 
 	var view *av.View
-	if "" != attrView.ViewID {
-		for _, v := range attrView.Views {
-			if v.ID == attrView.ViewID {
-				view = v
-				break
+	if "" != viewID {
+		view = attrView.GetView(viewID)
+		if nil != view && viewID != attrView.ViewID {
+			attrView.ViewID = viewID
+			if err = av.SaveAttributeView(attrView); nil != err {
+				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+				return
 			}
 		}
 	} else {
+		if "" != attrView.ViewID {
+			view, _ = attrView.GetCurrentView()
+		}
+	}
+
+	if nil == view {
 		view = attrView.Views[0]
 	}
 
@@ -639,7 +647,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -665,7 +673,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -711,7 +719,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -747,7 +755,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -818,7 +826,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -888,7 +896,7 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -961,7 +969,7 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -994,7 +1002,7 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1027,7 +1035,7 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1060,7 +1068,7 @@ func setAttributeViewColPin(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1118,7 +1126,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1166,7 +1174,7 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1214,7 +1222,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView()
+	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}

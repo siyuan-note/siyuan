@@ -1910,7 +1910,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		view, err := attrView.GetView()
+		view, err := attrView.GetCurrentView()
 		if nil != err {
 			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue

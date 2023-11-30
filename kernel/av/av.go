@@ -64,7 +64,7 @@ func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
 		view.ID = ast.NewNodeID()
 		ret.ViewID = view.ID
 	} else {
-		view = NewView()
+		view, _ = NewView()
 		ret.ViewID = view.ID
 		ret.Views = append(ret.Views, view)
 	}
@@ -559,9 +559,9 @@ const (
 	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
 )
 
-func NewView() *View {
+func NewView() (view *View, blockKey *Key) {
 	name := "Table"
-	return &View{
+	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
 		LayoutType: LayoutTypeTable,
@@ -572,6 +572,9 @@ func NewView() *View {
 			Sorts:   []*ViewSort{},
 		},
 	}
+	blockKey = NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
+	view.Table.Columns = []*ViewTableColumn{{ID: blockKey.ID}}
+	return
 }
 
 // Viewable 描述了视图的接口。
@@ -585,16 +588,14 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
-	view := NewView()
-	key := NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
+	view, blockKey := NewView()
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
-		KeyValues: []*KeyValues{{Key: key}},
+		KeyValues: []*KeyValues{{Key: blockKey}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
 	}
-	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
 	return
 }
 

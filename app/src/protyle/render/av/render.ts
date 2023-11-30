@@ -55,7 +55,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
-                snapshot
+                snapshot,
+                viewID: e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
@@ -200,7 +201,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 });
                 let tabHTML = "";
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-id="${response.data.viewID}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div data-id="${item.id}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
     <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
     <span class="item__text">${item.name}</span>
 </div>`;

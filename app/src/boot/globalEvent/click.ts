@@ -21,23 +21,6 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     if (!hasClosestByClassName(event.target, "pdf__outer")) {
         hideAllElements(["pdfutil"]);
     }
-    // dock float 时，点击空白处，隐藏 dock
-    const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
-    if (floatDockLayoutElement && window.siyuan.layout.leftDock) {
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.bottomDock.layout.element)) {
-            window.siyuan.layout.bottomDock.hideDock();
-        }
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.leftDock.layout.element)) {
-            window.siyuan.layout.leftDock.hideDock();
-        }
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.rightDock.layout.element)) {
-            window.siyuan.layout.rightDock.hideDock();
-        }
-    } else if (!hasClosestByClassName(event.target, "dock") && !isWindow() && window.siyuan.layout.leftDock) {
-        window.siyuan.layout.bottomDock.hideDock();
-        window.siyuan.layout.leftDock.hideDock();
-        window.siyuan.layout.rightDock.hideDock();
-    }
 
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {

@@ -147,7 +147,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }
                         } else if (cell.valueType === "number") {
-                            text = `<span style="float: right" class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
+                            text = `<span style="float: right;${data.columns[index].wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
                             cell.value?.mSelect?.forEach((item) => {
                                 text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;

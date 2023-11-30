@@ -146,6 +146,24 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const addTabElement = hasClosestByAttribute(event.target, "data-type", "av-add");
+    if (addTabElement) {
+        const id = Lute.NewNodeID();
+        const avID = blockElement.getAttribute("data-av-id");
+        transaction(protyle, [{
+            action: "addAttrViewView",
+            avID,
+            id
+        }], [{
+            action: "removeAttrViewView",
+            avID,
+            id
+        }]);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
     if (linkElement) {
         let linkAddress = linkElement.textContent.trim();

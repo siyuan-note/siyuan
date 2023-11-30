@@ -42,6 +42,8 @@ type TOperation =
     | "setAttrViewColCalc"
     | "updateAttrViewColNumberFormat"
     | "replaceAttrViewBlock"
+    | "addAttrViewView"
+    | "removeAttrViewView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |

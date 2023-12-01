@@ -215,31 +215,33 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 setTimeout(() => {
                     e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
-        <div class="layout-tab-bar fn__flex">
-            ${tabHTML}
+        <div class="fn__flex">
+            <div class="layout-tab-bar fn__flex">
+                ${tabHTML}
+            </div>
             <div class="fn__space"></div>
-            <span data-type="av-add" class="block__icon">
+            <span data-type="av-add" class="block__icon fn__flex-center">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__flex-1"></div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
+            <span data-type="av-switcher" class="block__icon fn__flex-center${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-filter" class="block__icon fn__flex-center${data.filters.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-sort" class="block__icon fn__flex-center${data.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-more" class="block__icon">
+            <span data-type="av-more" class="block__icon fn__flex-center">
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <div class="fn__space"></div>
-            ${!response.data.isMirror ? ` <span class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
+            ${response.data.isMirror ? ` <span class="block__icon fn__flex-center block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
         <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>

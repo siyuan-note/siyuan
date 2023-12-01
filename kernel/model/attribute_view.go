@@ -1431,11 +1431,6 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
-	if nil != err {
-		return
-	}
-
 	keyType := av.KeyType(operation.Typ)
 	switch keyType {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox:
@@ -1446,9 +1441,11 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		key := av.NewKey(operation.ID, operation.Name, icon, keyType)
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+		for _, v := range attrView.Views {
+			switch v.LayoutType {
+			case av.LayoutTypeTable:
+				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+			}
 		}
 	}
 

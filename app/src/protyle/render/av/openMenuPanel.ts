@@ -230,7 +230,13 @@ export const openMenuPanel = (options: {
                     id: sourceId,
                     previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
                 }]);
-                // TODO
+                if (isTop) {
+                    targetElement.before(sourceElement)
+                    targetElement.classList.remove("dragover__top")
+                } else {
+                    targetElement.after(sourceElement)
+                    targetElement.classList.remove("dragover__bottom")
+                }
                 return;
             }
             if (type === "filters") {

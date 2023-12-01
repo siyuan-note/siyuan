@@ -1,7 +1,8 @@
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
+import {transaction} from "../../wysiwyg/transaction";
 
-export const openViewMenu = (element:HTMLElement) => {
+export const openViewMenu = (element: HTMLElement) => {
     const menu = new Menu("av-view", () => {
 
     });
@@ -11,14 +12,14 @@ export const openViewMenu = (element:HTMLElement) => {
     menu.addItem({
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
-        click () {
+        click() {
 
         }
     })
     menu.addItem({
         icon: "iconSettings",
         label: window.siyuan.languages.config,
-        click () {
+        click() {
 
         }
     })
@@ -26,14 +27,14 @@ export const openViewMenu = (element:HTMLElement) => {
     menu.addItem({
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
-        click () {
+        click() {
 
         }
     })
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
-        click () {
+        click() {
 
         }
     })
@@ -49,8 +50,22 @@ export const bindViewEvent = (options: {
     data: IAV,
     menuElement: HTMLElement
 }) => {
-    options.menuElement.querySelector('.b3-text-field[data-type="name"]').addEventListener("blur", (event) => {
-
+    const inputElement = options.menuElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement
+    inputElement.addEventListener("blur", () => {
+        if (inputElement.value !== inputElement.dataset.value) {
+            transaction(options.protyle, [{
+                action: "setAttrViewViewName",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: inputElement.value
+            }], [{
+                action: "setAttrViewViewName",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: inputElement.dataset.value
+            }])
+            inputElement.dataset.value = inputElement.value
+        }
     })
 }
 
@@ -62,7 +77,7 @@ export const getViewHTML = (data: IAVTable) => {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-icon="${data.icon}" data-type="update-view-icon">${data.icon ? unicode2Emoji(data.icon) : '<svg><use xlink:href="#iconTable"></use></svg>'}</span>
-    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${data.name}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${data.name}" data-value="${data.name}"></span>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="goProperties">
@@ -90,13 +105,13 @@ export const getViewHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="duplicate-view">
     <svg class="b3-menu__icon">
         <use xlink:href="#iconCopy"></use>
     </svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="delete-view">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>

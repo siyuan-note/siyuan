@@ -516,7 +516,51 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "update-view-icon") {
-                    // TODO
+                    const rect = target.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: rect.left,
+                        y: rect.bottom,
+                        h: rect.height,
+                        w: rect.width
+                    }, (unicode) => {
+                        transaction(options.protyle, [{
+                            action: "setAttrViewViewIcon",
+                            avID,
+                            id: data.viewID,
+                            data: unicode,
+                        }], [{
+                            action: "setAttrViewViewIcon",
+                            id: data.viewID,
+                            avID,
+                            data: target.dataset.icon,
+                        }]);
+                        target.innerHTML = unicode ? unicode2Emoji(unicode) : '<svg><use xlink:href="#iconTable"></use></svg>';
+                        target.dataset.icon = unicode
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "duplicate-view") {
+                    const id = Lute.NewNodeID();
+                    transaction(options.protyle, [{
+                        action: "duplicateAttrViewView",
+                        avID,
+                        previousID: data.viewID,
+                        id
+                    }], [{
+                        action: "removeAttrViewView",
+                        avID,
+                        id
+                    }]);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "delete-view") {
+                    transaction(options.protyle, [{
+                        action: "removeAttrViewView",
+                        avID,
+                        id: data.viewID
+                    }]);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -542,6 +586,7 @@ export const openMenuPanel = (options: {
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`;
                         updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
+                        target.dataset.icon = unicode
                     });
                     event.preventDefault();
                     event.stopPropagation();

@@ -644,18 +644,21 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	if 1 >= len(attrView.Views) {
+		logging.LogWarnf("can't remove last view [%s] of attribute view [%s]", operation.ID, avID)
 		return
 	}
 
 	viewID := operation.ID
+	var index int
 	for i, view := range attrView.Views {
 		if viewID == view.ID {
 			attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
+			index = i - 1
 			break
 		}
 	}
 
-	attrView.ViewID = attrView.Views[0].ID
+	attrView.ViewID = attrView.Views[index].ID
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}

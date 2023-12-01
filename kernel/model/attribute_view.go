@@ -1486,7 +1486,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
-				keyValues.Key.Name = operation.Name
+				keyValues.Key.Name = strings.TrimSpace(operation.Name)
 				keyValues.Key.Type = colType
 				break
 			}

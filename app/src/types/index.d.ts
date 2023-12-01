@@ -60,7 +60,8 @@ type TEventBus = "ws-main" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
-    "destroy-protyle"
+    "destroy-protyle" |
+    "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =
     "text"
     | "date"

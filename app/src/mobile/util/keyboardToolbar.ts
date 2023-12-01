@@ -11,6 +11,8 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
+import {input} from "../../protyle/wysiwyg/input";
+import {showMessage} from "../../dialog/message";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -474,6 +476,7 @@ export const initKeyboardToolbar = () => {
             <span class="keyboard__split"></span>
             <button class="keyboard__action" data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
             <button class="keyboard__action" data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
+            <button class="keyboard__action" data-type="softLine"><svg><use xlink:href="#iconArrowDown"></use></svg></button>
         </div>
         <div class="fn__none keyboard__dynamic">
             <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
@@ -621,6 +624,11 @@ export const initKeyboardToolbar = () => {
         } else if (type === "movedown") {
             moveToDown(protyle, nodeElement, range);
             focusByRange(range);
+            return;
+        } else if (type === "softLine") {
+            range.insertNode(document.createTextNode("\n"));
+            range.collapse(false);
+            input(protyle, nodeElement, range);
             return;
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {

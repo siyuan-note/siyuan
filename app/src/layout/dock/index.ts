@@ -366,7 +366,7 @@ export class Dock {
             }
             // 关闭 dock 后设置光标
             if (!document.querySelector(".layout__center .layout__wnd--active")) {
-                const currentElement = document.querySelector(".layout__center .layout-tab-bar .item--focus");
+                const currentElement = document.querySelector(".layout__center ul.layout-tab-bar .item--focus");
                 if (currentElement) {
                     getAllTabs().find(item => {
                         if (item.id === currentElement.getAttribute("data-id")) {

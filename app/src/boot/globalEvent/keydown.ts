@@ -491,7 +491,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
         const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
-            document.querySelector(".layout-tab-bar > .item--focus");
+            document.querySelector("ul.layout-tab-bar > .item--focus");
         if (element) {
             const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
             if (tab && tab.model instanceof Editor) {
@@ -1119,9 +1119,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
         let tabHtml = "";
-        let currentTabElement = document.querySelector(".layout__wnd--active .layout-tab-bar > .item--focus");
+        let currentTabElement = document.querySelector(".layout__wnd--active ul.layout-tab-bar > .item--focus");
         if (!currentTabElement) {
-            currentTabElement = document.querySelector(".layout-tab-bar > .item--focus");
+            currentTabElement = document.querySelector("ul.layout-tab-bar > .item--focus");
         }
         if (currentTabElement) {
             const currentId = currentTabElement.getAttribute("data-id");

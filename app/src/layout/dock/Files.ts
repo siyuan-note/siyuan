@@ -192,7 +192,7 @@ export class Files extends Model {
                     break;
                 } else if (type === "focus") {
                     const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
-                        document.querySelector(".layout-tab-bar > .item--focus");
+                        document.querySelector("ul.layout-tab-bar > .item--focus");
                     if (element) {
                         const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
                         if (tab && tab.model instanceof Editor) {

@@ -770,7 +770,7 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
 	}
 
-	view.Name = operation.Data.(string)
+	view.Name = strings.TrimSpace(operation.Data.(string))
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
@@ -816,14 +816,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
-	if nil != err {
-		return
-	}
-
-	attrView.Name = operation.Data.(string)
-	view.Name = operation.Data.(string)
-
+	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
 	return
 }

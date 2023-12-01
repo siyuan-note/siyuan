@@ -770,7 +770,7 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
 	}
 
-	view.Name = operation.Data.(string)
+	view.Name = strings.TrimSpace(operation.Data.(string))
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
@@ -816,14 +816,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
-	if nil != err {
-		return
-	}
-
-	attrView.Name = operation.Data.(string)
-	view.Name = operation.Data.(string)
-
+	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -1493,7 +1486,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
-				keyValues.Key.Name = operation.Name
+				keyValues.Key.Name = strings.TrimSpace(operation.Name)
 				keyValues.Key.Type = colType
 				break
 			}

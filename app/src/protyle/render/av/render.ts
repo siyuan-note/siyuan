@@ -329,9 +329,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
+            const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
             avRender(item, protyle, () => {
                 // https://github.com/siyuan-note/siyuan/issues/9599
-                if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached) {
+                if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
                     popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
                 }
             }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

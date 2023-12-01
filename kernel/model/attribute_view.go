@@ -643,6 +643,10 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: avID}
 	}
 
+	if 1 >= len(attrView.Views) {
+		return
+	}
+
 	viewID := operation.ID
 	for i, view := range attrView.Views {
 		if viewID == view.ID {
@@ -651,6 +655,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		}
 	}
 
+	attrView.ViewID = attrView.Views[0].ID
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}

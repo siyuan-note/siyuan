@@ -294,7 +294,7 @@ func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *a
 
 func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
-		view, _ := av.NewView(ast.NewNodeID())
+		view, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -443,6 +443,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
 		ID:      view.ID,
+		Icon:    view.Icon,
 		Name:    view.Name,
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},
@@ -657,6 +658,63 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	masterView := attrView.GetView(operation.PreviousID)
+	if nil == masterView {
+		logging.LogErrorf("get master view failed: %s", avID)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	view := av.NewTableView()
+	view.ID = operation.ID
+	attrView.Views = append(attrView.Views, view)
+	attrView.ViewID = view.ID
+
+	view.Icon = masterView.Icon
+	view.Name = masterView.Name
+	view.LayoutType = masterView.LayoutType
+
+	for _, col := range masterView.Table.Columns {
+		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
+			ID:     col.ID,
+			Wrap:   col.Wrap,
+			Hidden: col.Hidden,
+			Pin:    col.Pin,
+			Width:  col.Width,
+			Calc:   col.Calc,
+		})
+	}
+
+	for _, filter := range masterView.Table.Filters {
+		view.Table.Filters = append(view.Table.Filters, &av.ViewFilter{
+			Column:   filter.Column,
+			Operator: filter.Operator,
+			Value:    filter.Value,
+		})
+	}
+
+	for _, s := range masterView.Table.Sorts {
+		view.Table.Sorts = append(view.Table.Sorts, &av.ViewSort{
+			Column: s.Column,
+			Order:  s.Order,
+		})
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
 func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
@@ -666,16 +724,69 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	bKey := attrView.GetBlockKey()
-	if nil == bKey {
-		logging.LogErrorf("get block key failed: %s", avID)
+	firstView := attrView.Views[0]
+	if nil == firstView {
+		logging.LogErrorf("get first view failed: %s", avID)
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	view, _ := av.NewView(bKey.ID)
+	view := av.NewTableView()
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
+
+	for _, col := range firstView.Table.Columns {
+		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	viewID := operation.ID
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
+	}
+
+	view.Name = operation.Data.(string)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	viewID := operation.ID
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
+	}
+
+	view.Icon = operation.Data.(string)
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}

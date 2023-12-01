@@ -202,7 +202,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 let tabHTML = "";
                 response.data.views.forEach((item: IAVView) => {
                     tabHTML += `<div data-id="${item.id}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
-    ${response.data.view.icon ? unicode2Emoji(response.data.view.icon, "item__graphic") : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
+    ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
     <span class="item__text">${item.name}</span>
 </div>`;
                 });

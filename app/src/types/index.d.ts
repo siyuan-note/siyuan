@@ -1015,6 +1015,7 @@ interface IAVView {
     name: string
     id: string
     type: string
+    icon: string
 }
 
 interface IAVTable {

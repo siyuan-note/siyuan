@@ -3,9 +3,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 
 export const openViewMenu = (element: HTMLElement) => {
-    const menu = new Menu("av-view", () => {
-
-    });
+    const menu = new Menu("av-view");
     if (menu.isOpen) {
         return;
     }

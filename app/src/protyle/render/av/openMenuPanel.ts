@@ -22,6 +22,8 @@ import {openAsset} from "../../../editor/util";
 import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
 import {bindViewEvent, getViewHTML} from "./view";
+import {removeBlock} from "../../wysiwyg/remove";
+import {getEditorRange} from "../../util/selection";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -552,15 +554,21 @@ export const openMenuPanel = (options: {
                         avID,
                         id
                     }]);
+                    avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "delete-view") {
-                    transaction(options.protyle, [{
-                        action: "removeAttrViewView",
-                        avID,
-                        id: data.viewID
-                    }]);
+                    if (data.views.length === 1) {
+                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
+                    } else {
+                        transaction(options.protyle, [{
+                            action: "removeAttrViewView",
+                            avID,
+                            id: data.viewID
+                        }]);
+                    }
+                    avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

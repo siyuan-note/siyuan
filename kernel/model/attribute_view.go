@@ -683,6 +683,30 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	viewID := operation.ID
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
+	}
+
+	view.Name = operation.Data.(string)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	err := setAttributeViewName(operation)
 	if nil != err {

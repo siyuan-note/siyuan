@@ -634,6 +634,49 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	return
 }
 
+func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", operation.AvID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	viewID := operation.ID
+	previewViewID := operation.PreviousID
+
+	if viewID == previewViewID {
+		return
+	}
+
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID, msg: err.Error()}
+	}
+
+	if "" == previewViewID {
+		// 插入到第一个
+		attrView.Views = append([]*av.View{view}, attrView.Views...)
+	} else {
+		// 插入到 previewViewID 的后面
+		var index int
+		for i, v := range attrView.Views {
+			if v.ID == previewViewID {
+				index = i + 1
+				break
+			}
+		}
+		attrView.Views = util.InsertElem(attrView.Views, index, view)
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
+	}
+	return
+}
+
 func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
@@ -656,6 +699,9 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 			index = i - 1
 			break
 		}
+	}
+	if 0 > index {
+		index = 0
 	}
 
 	attrView.ViewID = attrView.Views[index].ID

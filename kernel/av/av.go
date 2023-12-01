@@ -64,7 +64,7 @@ func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
 		view.ID = ast.NewNodeID()
 		ret.ViewID = view.ID
 	} else {
-		view, _ = NewView()
+		view, _ = NewView(ast.NewNodeID())
 		ret.ViewID = view.ID
 		ret.Views = append(ret.Views, view)
 	}
@@ -559,7 +559,7 @@ const (
 	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
 )
 
-func NewView() (view *View, blockKey *Key) {
+func NewView(blockKeyID string) (view *View, blockKey *Key) {
 	name := "Table"
 	view = &View{
 		ID:         ast.NewNodeID(),
@@ -572,8 +572,8 @@ func NewView() (view *View, blockKey *Key) {
 			Sorts:   []*ViewSort{},
 		},
 	}
-	blockKey = NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
-	view.Table.Columns = []*ViewTableColumn{{ID: blockKey.ID}}
+	blockKey = NewKey(blockKeyID, "Block", "", KeyTypeBlock)
+	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
 	return
 }
 
@@ -588,7 +588,7 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
-	view, blockKey := NewView()
+	view, blockKey := NewView(ast.NewNodeID())
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
@@ -715,6 +715,16 @@ func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 	for _, kv := range av.KeyValues {
 		if KeyTypeBlock == kv.Key.Type {
 			ret = kv
+			return
+		}
+	}
+	return
+}
+
+func (av *AttributeView) GetBlockKey() (ret *Key) {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			ret = kv.Key
 			return
 		}
 	}

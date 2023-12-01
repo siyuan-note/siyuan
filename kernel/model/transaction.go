@@ -261,50 +261,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	return
 }
 
-func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: avID}
-	}
-
-	viewID := operation.ID
-	for i, view := range attrView.Views {
-		if viewID == view.ID {
-			attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
-			break
-		}
-	}
-
-	if err = av.SaveAttributeView(attrView); nil != err {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
-	}
-	return
-}
-
-func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: avID}
-	}
-
-	view, _ := av.NewView()
-	view.ID = operation.ID
-	attrView.Views = append(attrView.Views, view)
-	attrView.ViewID = view.ID
-	if err = av.SaveAttributeView(attrView); nil != err {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
-	}
-	return
-}
-
 func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID

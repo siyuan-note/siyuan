@@ -294,7 +294,7 @@ func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *a
 
 func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
-		view, _ := av.NewView()
+		view, _ := av.NewView(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -629,6 +629,56 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 			ret = kv.Values[0]
 			break
 		}
+	}
+	return
+}
+
+func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: avID}
+	}
+
+	viewID := operation.ID
+	for i, view := range attrView.Views {
+		if viewID == view.ID {
+			attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
+			break
+		}
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
+	}
+	return
+}
+
+func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	bKey := attrView.GetBlockKey()
+	if nil == bKey {
+		logging.LogErrorf("get block key failed: %s", avID)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	view, _ := av.NewView(bKey.ID)
+	view.ID = operation.ID
+	attrView.Views = append(attrView.Views, view)
+	attrView.ViewID = view.ID
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
 	}
 	return
 }

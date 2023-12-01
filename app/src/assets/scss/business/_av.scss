@@ -50,6 +50,7 @@
 
   &__title {
     outline: none;
+    font-weight: bold;
 
     &:empty::after {
       color: var(--b3-theme-on-surface);

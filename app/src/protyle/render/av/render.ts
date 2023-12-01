@@ -301,7 +301,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
             }
             titleElement.textContent = operation.data;
             titleElement.dataset.title = operation.data;
-            item.querySelector(".layout-tab-bar .item__text").textContent = operation.data;
         });
     }
     if (lastParentID === operation.parentID && protyle.contentElement.isSameNode(lastElement)) {

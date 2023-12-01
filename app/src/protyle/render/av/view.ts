@@ -1,8 +1,12 @@
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
+import {openMenuPanel} from "./openMenuPanel";
+import {removeBlock} from "../../wysiwyg/remove";
+import {getEditorRange} from "../../util/selection";
+import {fetchPost} from "../../../util/fetch";
 
-export const openViewMenu = (element: HTMLElement) => {
+export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     const menu = new Menu("av-view");
     if (menu.isOpen) {
         return;
@@ -11,14 +15,15 @@ export const openViewMenu = (element: HTMLElement) => {
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click() {
-
+            openMenuPanel({protyle: options.protyle, blockElement: options.blockElement, type: "config"});
+            (document.querySelector('.av__panel .b3-text-field[data-type="name"]') as HTMLInputElement).focus()
         }
     })
     menu.addItem({
         icon: "iconSettings",
         label: window.siyuan.languages.config,
         click() {
-
+            openMenuPanel({protyle: options.protyle, blockElement: options.blockElement, type: "config"});
         }
     })
     menu.addSeparator();
@@ -26,17 +31,45 @@ export const openViewMenu = (element: HTMLElement) => {
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
         click() {
-
+            fetchPost("/api/av/renderAttributeView", {
+                id: options.blockElement.dataset.avId,
+            }, (response) => {
+                const id = Lute.NewNodeID();
+                const data = response.data as IAV;
+                transaction(options.protyle, [{
+                    action: "duplicateAttrViewView",
+                    avID: data.id,
+                    previousID: data.viewID,
+                    id
+                }], [{
+                    action: "removeAttrViewView",
+                    avID: data.id,
+                    id
+                }]);
+            });
         }
     })
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-
+            fetchPost("/api/av/renderAttributeView", {
+                id: options.blockElement.dataset.avId,
+            }, (response) => {
+                const data = response.data as IAV;
+                if (data.views.length === 1) {
+                    removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
+                } else {
+                    transaction(options.protyle, [{
+                        action: "removeAttrViewView",
+                        avID: data.id,
+                        id: data.viewID
+                    }]);
+                }
+            });
         }
     })
-    const rect = element.getBoundingClientRect()
+    const rect = options.element.getBoundingClientRect()
     menu.open({
         x: rect.left,
         y: rect.bottom

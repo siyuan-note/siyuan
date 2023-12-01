@@ -56,7 +56,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (typeof viewID === "string") {
                 newViewID = viewID;
             } else if (typeof viewID === "undefined") {
-                newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
+                newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id");
             }
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),

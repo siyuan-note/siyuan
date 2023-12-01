@@ -1362,7 +1362,7 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return false;
             }
-            const avCellHeaderElement = hasClosestByClassName(target, "av__cellheader")
+            const avCellHeaderElement = hasClosestByClassName(target, "av__cellheader");
             if (avCellHeaderElement) {
                 showColMenu(protyle, nodeElement, target.parentElement);
                 event.stopPropagation();
@@ -1374,7 +1374,7 @@ export class WYSIWYG {
                 if (avTabHeaderElement.classList.contains("item--focus")) {
                     openViewMenu({protyle, blockElement:nodeElement, element:target});
                 } else {
-                    nodeElement.removeAttribute("data-render")
+                    nodeElement.removeAttribute("data-render");
                     avRender(nodeElement, protyle, () => {
                         openViewMenu({protyle, blockElement:nodeElement, element:nodeElement.querySelector(".item.item--focus")});
                     }, avTabHeaderElement.dataset.id);
@@ -1484,12 +1484,12 @@ export class WYSIWYG {
                     const rowElement = hasClosestByClassName(event.target, "av__row");
                     if (rowElement && rowElement.dataset.id) {
                         const guttersElement = rowElement.querySelector(".av__gutters");
-                        guttersElement.classList.remove("av__gutters--min")
+                        guttersElement.classList.remove("av__gutters--min");
                         let guttersLeft = rowElement.parentElement.parentElement.getBoundingClientRect().left - guttersElement.clientWidth;
-                        const contentLeft = protyle.contentElement.getBoundingClientRect().left
+                        const contentLeft = protyle.contentElement.getBoundingClientRect().left;
                         if (guttersLeft < contentLeft) {
                             guttersLeft = contentLeft;
-                            guttersElement.classList.add("av__gutters--min")
+                            guttersElement.classList.add("av__gutters--min");
                         }
                         guttersElement.setAttribute("style", `left:${guttersLeft}px;top:${rowElement.getBoundingClientRect().top}px`);
                     }

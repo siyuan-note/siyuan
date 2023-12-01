@@ -541,7 +541,7 @@ export const openMenuPanel = (options: {
                             data: target.dataset.icon,
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : '<svg><use xlink:href="#iconTable"></use></svg>';
-                        target.dataset.icon = unicode
+                        target.dataset.icon = unicode;
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -564,7 +564,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "delete-view") {
                     if (data.views.length === 1) {
-                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
+                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement));
                     } else {
                         transaction(options.protyle, [{
                             action: "removeAttrViewView",
@@ -598,7 +598,7 @@ export const openMenuPanel = (options: {
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`;
                         updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
-                        target.dataset.icon = unicode
+                        target.dataset.icon = unicode;
                     });
                     event.preventDefault();
                     event.stopPropagation();

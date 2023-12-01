@@ -292,9 +292,9 @@ export class Dock {
         if (document.activeElement && this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
             return;
         }
-        const dialogElement = document.querySelector(".b3-dialog") as HTMLElement
-        const blockElement = document.querySelector(".block__popover") as HTMLElement
-        const menuElement = document.querySelector("#commonMenu:not(.fn__none)") as HTMLElement
+        const dialogElement = document.querySelector(".b3-dialog") as HTMLElement;
+        const blockElement = document.querySelector(".block__popover") as HTMLElement;
+        const menuElement = document.querySelector("#commonMenu:not(.fn__none)") as HTMLElement;
         if ((dialogElement && dialogElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上修改 emoji 时
             (blockElement && blockElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上弹出悬浮层
             (menuElement && menuElement.style.zIndex > this.layout.element.style.zIndex)  // 面板上弹出菜单时

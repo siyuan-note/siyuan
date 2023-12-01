@@ -492,7 +492,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchInclude") {
-                const svgElement = target.firstElementChild
+                const svgElement = target.firstElementChild;
                 svgElement.classList.toggle("ft__primary");
                 if (!svgElement.classList.contains("ft__primary")) {
                     config.idPath.forEach((item, index) => {

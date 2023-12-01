@@ -58,9 +58,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return false;
     }
 
-    let target = event.target
+    let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
-        const type = target.getAttribute("data-type")
+        const type = target.getAttribute("data-type");
         if (type === "av-header-add") {
             const addMenu = addCol(protyle, blockElement);
             const addRect = target.getBoundingClientRect();
@@ -242,7 +242,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
             if (target.classList.contains("item--focus")) {
-                openViewMenu({protyle, blockElement, element:target})
+                openViewMenu({protyle, blockElement, element:target});
             } else {
                 blockElement.removeAttribute("data-render");
                 avRender(blockElement, protyle, undefined, target.dataset.id);

@@ -19,11 +19,11 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 blockElement: options.blockElement,
                 type: "config",
                 cb: (avPanelElement) => {
-                    (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).focus()
+                    (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).focus();
                 }
             });
         }
-    })
+    });
     menu.addItem({
         icon: "iconSettings",
         label: window.siyuan.languages.config,
@@ -34,7 +34,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 type: "config"
             });
         }
-    })
+    });
     menu.addSeparator();
     menu.addItem({
         icon: "iconCopy",
@@ -52,13 +52,13 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 id
             }]);
         }
-    })
+    });
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
             if (options.element.parentElement.querySelectorAll("item").length === 1) {
-                removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
+                removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement));
             } else {
                 transaction(options.protyle, [{
                     action: "removeAttrViewView",
@@ -67,20 +67,20 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 }]);
             }
         }
-    })
-    const rect = options.element.getBoundingClientRect()
+    });
+    const rect = options.element.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom
-    })
-}
+    });
+};
 
 export const bindViewEvent = (options: {
     protyle: IProtyle,
     data: IAV,
     menuElement: HTMLElement
 }) => {
-    const inputElement = options.menuElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement
+    const inputElement = options.menuElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
     inputElement.addEventListener("blur", () => {
         if (inputElement.value !== inputElement.dataset.value) {
             transaction(options.protyle, [{
@@ -93,11 +93,11 @@ export const bindViewEvent = (options: {
                 avID: options.data.id,
                 id: options.data.viewID,
                 data: inputElement.dataset.value
-            }])
-            inputElement.dataset.value = inputElement.value
+            }]);
+            inputElement.dataset.value = inputElement.value;
         }
-    })
-}
+    });
+};
 
 export const getViewHTML = (data: IAVTable) => {
     return `<div class="b3-menu__items">

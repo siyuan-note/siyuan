@@ -52,11 +52,17 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             }
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
+            let newViewID = "";
+            if (typeof viewID === "string") {
+                newViewID = viewID;
+            } else if (typeof viewID === "undefined") {
+                newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
+            }
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
-                viewID: viewID || e.querySelector(".av__header .item--focus")?.getAttribute("data-id")
+                viewID: newViewID
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
@@ -322,7 +328,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                 if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached) {
                     popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
                 }
-            });
+            }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
+                (operation.action === "removeAttrViewView" ? null : undefined));
         });
     }
 

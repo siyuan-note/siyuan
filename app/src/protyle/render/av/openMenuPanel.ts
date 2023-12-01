@@ -30,7 +30,8 @@ export const openMenuPanel = (options: {
     blockElement: Element,
     type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset",
     colId?: string, // for edit
-    cellElements?: HTMLElement[]    // for select & date
+    cellElements?: HTMLElement[],   // for select & date
+    cb?: (avPanelElement: Element) => void
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
@@ -96,6 +97,9 @@ export const openMenuPanel = (options: {
             } else if (options.type === "config") {
                 bindViewEvent({protyle: options.protyle, data, menuElement});
             }
+        }
+        if (options.cb) {
+            options.cb(avPanelElement);
         }
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             window.siyuan.dragElement = event.target as HTMLElement;

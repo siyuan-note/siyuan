@@ -15,8 +15,14 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click() {
-            openMenuPanel({protyle: options.protyle, blockElement: options.blockElement, type: "config"});
-            (document.querySelector('.av__panel .b3-text-field[data-type="name"]') as HTMLInputElement).focus()
+            openMenuPanel({
+                protyle: options.protyle,
+                blockElement: options.blockElement,
+                type: "config",
+                cb: (avPanelElement) => {
+                    (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).focus()
+                }
+            });
         }
     })
     menu.addItem({

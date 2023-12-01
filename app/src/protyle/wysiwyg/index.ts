@@ -1372,11 +1372,11 @@ export class WYSIWYG {
             const avTabHeaderElement = hasClosestByClassName(target, "item");
             if (nodeElement.classList.contains("av") && avTabHeaderElement) {
                 if (avTabHeaderElement.classList.contains("item--focus")) {
-                    openViewMenu({protyle, blockElement:nodeElement, element:target});
+                    openViewMenu({protyle, blockElement: nodeElement, element: avTabHeaderElement});
                 } else {
                     nodeElement.removeAttribute("data-render");
                     avRender(nodeElement, protyle, () => {
-                        openViewMenu({protyle, blockElement:nodeElement, element:nodeElement.querySelector(".item.item--focus")});
+                        openViewMenu({protyle, blockElement: nodeElement, element: nodeElement.querySelector(".item.item--focus")});
                     }, avTabHeaderElement.dataset.id);
                 }
                 event.stopPropagation();

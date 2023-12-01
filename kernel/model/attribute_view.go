@@ -294,7 +294,7 @@ func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *a
 
 func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
-		view, _ := av.NewView(ast.NewNodeID())
+		view, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -666,16 +666,21 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	bKey := attrView.GetBlockKey()
-	if nil == bKey {
-		logging.LogErrorf("get block key failed: %s", avID)
+	firstView := attrView.Views[0]
+	if nil == firstView {
+		logging.LogErrorf("get first view failed: %s", avID)
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	view, _ := av.NewView(bKey.ID)
+	view := av.NewTableView()
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
+
+	for _, col := range firstView.Table.Columns {
+		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
+	}
+
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}

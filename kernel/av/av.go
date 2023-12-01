@@ -64,7 +64,7 @@ func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
 		view.ID = ast.NewNodeID()
 		ret.ViewID = view.ID
 	} else {
-		view, _ = NewView(ast.NewNodeID())
+		view, _ = NewTableViewWithBlockKey(ast.NewNodeID())
 		ret.ViewID = view.ID
 		ret.Views = append(ret.Views, view)
 	}
@@ -559,7 +559,22 @@ const (
 	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
 )
 
-func NewView(blockKeyID string) (view *View, blockKey *Key) {
+func NewTableView() (ret *View) {
+	ret = &View{
+		ID:         ast.NewNodeID(),
+		Name:       "Table",
+		LayoutType: LayoutTypeTable,
+		Table: &LayoutTable{
+			Spec:    0,
+			ID:      ast.NewNodeID(),
+			Filters: []*ViewFilter{},
+			Sorts:   []*ViewSort{},
+		},
+	}
+	return
+}
+
+func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
 	name := "Table"
 	view = &View{
 		ID:         ast.NewNodeID(),
@@ -588,7 +603,7 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
-	view, blockKey := NewView(ast.NewNodeID())
+	view, blockKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,

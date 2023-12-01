@@ -77,6 +77,9 @@ import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {stickyRow, updateHeader} from "../render/av/row";
+import {showColMenu} from "../render/av/col";
+import {openViewMenu} from "../render/av/view";
+import {avRender} from "../render/av/render";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1344,7 +1347,6 @@ export class WYSIWYG {
                 });
                 return false;
             }
-            const nodeElement = hasClosestBlock(target);
 
             const avRowElement = hasClosestByClassName(target, "av__row");
             if (avRowElement && avContextmenu(protyle, avRowElement, {
@@ -1356,8 +1358,30 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
+            const nodeElement = hasClosestBlock(target);
             if (!nodeElement) {
                 return false;
+            }
+            const avCellHeaderElement = hasClosestByClassName(target, "av__cellheader")
+            if (avCellHeaderElement) {
+                showColMenu(protyle, nodeElement, target.parentElement);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            const avTabHeaderElement = hasClosestByClassName(target, "item");
+            if (nodeElement.classList.contains("av") && avTabHeaderElement) {
+                if (avTabHeaderElement.classList.contains("item--focus")) {
+                    openViewMenu({protyle, blockElement:nodeElement, element:target});
+                } else {
+                    nodeElement.removeAttribute("data-render")
+                    avRender(nodeElement, protyle, () => {
+                        openViewMenu({protyle, blockElement:nodeElement, element:nodeElement.querySelector(".item.item--focus")});
+                    }, avTabHeaderElement.dataset.id);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
             if (!isNotEditBlock(nodeElement) && !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 !hasClosestByClassName(target, "protyle-action") && // https://github.com/siyuan-note/siyuan/issues/8983

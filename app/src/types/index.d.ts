@@ -1018,15 +1018,11 @@ interface IAVView {
     icon: string
 }
 
-interface IAVTable {
+interface IAVTable extends IAVView {
     columns: IAVColumn[],
     filters: IAVFilter[],
     sorts: IAVSort[],
-    name: string,
-    type: "table"
     rows: IAVRow[],
-    id: string
-    icon: string
 }
 
 interface IAVFilter {

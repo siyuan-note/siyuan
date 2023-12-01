@@ -4,7 +4,6 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
-import {fetchPost} from "../../../util/fetch";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     const menu = new Menu("av-view");
@@ -29,7 +28,11 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconSettings",
         label: window.siyuan.languages.config,
         click() {
-            openMenuPanel({protyle: options.protyle, blockElement: options.blockElement, type: "config"});
+            openMenuPanel({
+                protyle: options.protyle,
+                blockElement: options.blockElement,
+                type: "config"
+            });
         }
     })
     menu.addSeparator();
@@ -37,42 +40,32 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
         click() {
-            fetchPost("/api/av/renderAttributeView", {
-                id: options.blockElement.dataset.avId,
-            }, (response) => {
-                const id = Lute.NewNodeID();
-                const data = response.data as IAV;
-                transaction(options.protyle, [{
-                    action: "duplicateAttrViewView",
-                    avID: data.id,
-                    previousID: data.viewID,
-                    id
-                }], [{
-                    action: "removeAttrViewView",
-                    avID: data.id,
-                    id
-                }]);
-            });
+            const id = Lute.NewNodeID();
+            transaction(options.protyle, [{
+                action: "duplicateAttrViewView",
+                avID: options.blockElement.dataset.avId,
+                previousID: options.element.dataset.id,
+                id
+            }], [{
+                action: "removeAttrViewView",
+                avID: options.blockElement.dataset.avId,
+                id
+            }]);
         }
     })
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            fetchPost("/api/av/renderAttributeView", {
-                id: options.blockElement.dataset.avId,
-            }, (response) => {
-                const data = response.data as IAV;
-                if (data.views.length === 1) {
-                    removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
-                } else {
-                    transaction(options.protyle, [{
-                        action: "removeAttrViewView",
-                        avID: data.id,
-                        id: data.viewID
-                    }]);
-                }
-            });
+            if (options.element.parentElement.querySelectorAll("item").length === 1) {
+                removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement))
+            } else {
+                transaction(options.protyle, [{
+                    action: "removeAttrViewView",
+                    avID: options.blockElement.dataset.avId,
+                    id: options.element.dataset.id
+                }]);
+            }
         }
     })
     const rect = options.element.getBoundingClientRect()

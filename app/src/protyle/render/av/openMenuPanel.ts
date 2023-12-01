@@ -932,6 +932,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "av-add") {
+                    window.siyuan.menus.menu.remove();
                     addView(options.protyle, options.blockElement);
                     avPanelElement.remove();
                     event.preventDefault();

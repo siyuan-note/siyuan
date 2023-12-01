@@ -288,6 +288,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                             focusBlock(e);
                         }
                     }
+                    e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
                     if (cb) {
                         cb();
                     }

@@ -8,13 +8,17 @@ import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 
-const getObject = (key: string) => {
-    const api = {
-        siyuan: API
-    };
-    // @ts-ignore
-    return api[key];
+const modules = {
+    siyuan: API
 };
+const requireFunc = (key: string) => {
+    // @ts-ignore
+    return modules[key]
+        ?? window.require?.(key);
+};
+if (window.require instanceof Function) {
+    requireFunc.__proto__ = window.require;
+}
 
 const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
@@ -40,7 +44,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     const exportsObj: { [key: string]: any } = {};
     const moduleObj = {exports: exportsObj};
     try {
-        runCode(item.js, "plugin:" + encodeURIComponent(item.name))(getObject, moduleObj, exportsObj);
+        runCode(item.js, "plugin:" + encodeURIComponent(item.name))(requireFunc, moduleObj, exportsObj);
     } catch (e) {
         console.error(`plugin ${item.name} run error:`, e);
         return;

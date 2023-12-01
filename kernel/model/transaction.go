@@ -252,6 +252,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewViewIcon(op)
 		case "duplicateAttrViewView":
 			ret = tx.doDuplicateAttrViewView(op)
+		case "sortAttrViewView":
+			ret = tx.doSortAttrViewView(op)
 		}
 
 		if nil != ret {

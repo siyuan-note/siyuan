@@ -4,6 +4,10 @@
   display: flex;
   max-width: 100%;
 
+  &:hover .block__icon {
+    opacity: 1;
+  }
+
   &__container {
     overflow: auto;
   }

@@ -43,6 +43,7 @@ type TOperation =
     | "updateAttrViewColNumberFormat"
     | "replaceAttrViewBlock"
     | "addAttrViewView"
+    | "setAttrViewViewName"
     | "removeAttrViewView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
@@ -1022,6 +1023,7 @@ interface IAVTable {
     type: "table"
     rows: IAVRow[],
     id: string
+    icon: string
 }
 
 interface IAVFilter {

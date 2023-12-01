@@ -21,6 +21,7 @@ import {openAsset} from "../../../editor/util";
 /// #endif
 import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
+import {bindViewEvent, getViewHTML} from "./view";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -42,7 +43,7 @@ export const openMenuPanel = (options: {
         const data = response.data as IAV;
         let html;
         if (options.type === "config") {
-            html = getConfigHTML(data.view);
+            html = getViewHTML(data.view);
         } else if (options.type === "properties") {
             html = getPropertiesHTML(data.view);
         } else if (options.type === "sorts") {
@@ -90,6 +91,8 @@ export const openMenuPanel = (options: {
                 bindSortsEvent(options.protyle, menuElement, data);
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement});
+            } else if (options.type === "config") {
+                bindViewEvent({protyle: options.protyle, data, menuElement});
             }
         }
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
@@ -345,8 +348,9 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goConfig") {
-                    menuElement.innerHTML = getConfigHTML(data.view);
+                    menuElement.innerHTML = getViewHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    bindViewEvent({protyle: options.protyle, data, menuElement});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -508,6 +512,11 @@ export const openMenuPanel = (options: {
                         h: tabRect.height,
                         isLeft: true
                     });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "update-view-icon") {
+                    // TODO
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -918,35 +927,3 @@ ${hideHTML}
 </div>`;
 };
 
-const getConfigHTML = (data: IAVTable) => {
-    return `<div class="b3-menu__items">
-<button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label ft__center">${window.siyuan.languages.config}</span>
-</button>
-<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="goProperties">
-    <svg class="b3-menu__icon"></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
-    <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item" data-type="goFilters">
-    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
-    <span class="b3-menu__accelerator">${data.filters.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item" data-type="goSorts">
-    <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
-    <span class="b3-menu__accelerator">${data.sorts.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item">
-    <svg class="b3-menu__icon"></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
-    <span class="b3-menu__accelerator">50</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-</div>`;
-};

@@ -25,6 +25,7 @@ import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
+import {openViewMenu} from "./view";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -240,7 +241,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
-            if (!target.classList.contains("item--focus")) {
+            if (target.classList.contains("item--focus")) {
+                openViewMenu(target)
+            } else {
                 blockElement.removeAttribute("data-render");
                 avRender(blockElement, protyle, undefined, target.dataset.id);
             }

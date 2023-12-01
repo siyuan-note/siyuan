@@ -747,6 +747,29 @@ func (av *AttributeView) GetBlockKey() (ret *Key) {
 	return
 }
 
+func (av *AttributeView) GetDuplicateViewName(masterViewName string) string {
+	count := 1
+	ret := masterViewName + " (" + strconv.Itoa(count) + ")"
+
+	existViewByName := func(name string) bool {
+		for _, v := range av.Views {
+			if v.Name == name {
+				return true
+			}
+		}
+		return false
+	}
+
+	for i := 0; i < 32; i++ {
+		if !existViewByName(ret) {
+			return ret
+		}
+		count++
+		ret = masterViewName + " (" + strconv.Itoa(count) + ")"
+	}
+	return ret
+}
+
 func GetAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")

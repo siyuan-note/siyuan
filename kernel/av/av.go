@@ -546,6 +546,7 @@ type ValueCheckbox struct {
 // View 描述了视图的结构。
 type View struct {
 	ID   string `json:"id"`   // 视图 ID
+	Icon string `json:"icon"` // 视图图标
 	Name string `json:"name"` // 视图名称
 
 	LayoutType LayoutType   `json:"type"`            // 当前布局类型

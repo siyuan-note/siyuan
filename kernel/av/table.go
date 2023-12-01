@@ -572,6 +572,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 // Table 描述了表格实例的结构。
 type Table struct {
 	ID      string         `json:"id"`      // 表格布局 ID
+	Icon    string         `json:icon`      // 表格图标
 	Name    string         `json:"name"`    // 表格名称
 	Filters []*ViewFilter  `json:"filters"` // 过滤规则
 	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则

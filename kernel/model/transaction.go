@@ -248,6 +248,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doRemoveAttrViewView(op)
 		case "setAttrViewViewName":
 			ret = tx.doSetAttrViewViewName(op)
+		case "setAttrViewViewIcon":
+			ret = tx.doSetAttrViewViewIcon(op)
+		case "duplicateAttrViewView":
+			ret = tx.doDuplicateAttrViewView(op)
 		}
 
 		if nil != ret {

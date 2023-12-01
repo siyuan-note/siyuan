@@ -560,6 +560,7 @@ func getAttributeViewContent(avID string) (content string) {
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
 		ID:      view.ID,
+		Icon:    view.Icon,
 		Name:    view.Name,
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},

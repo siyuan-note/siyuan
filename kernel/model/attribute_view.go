@@ -649,26 +649,27 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	view := attrView.GetView(viewID)
+	var view *av.View
+	var index, previousIndex int
+	for i, v := range attrView.Views {
+		if v.ID == viewID {
+			view = v
+			index = i
+			break
+		}
+	}
 	if nil == view {
-		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
-		return &TxErr{code: TxErrWriteAttributeView, id: viewID, msg: err.Error()}
+		return
 	}
 
-	if "" == previewViewID {
-		// 插入到第一个
-		attrView.Views = append([]*av.View{view}, attrView.Views...)
-	} else {
-		// 插入到 previewViewID 的后面
-		var index int
-		for i, v := range attrView.Views {
-			if v.ID == previewViewID {
-				index = i + 1
-				break
-			}
+	attrView.Views = append(attrView.Views[:index], attrView.Views[index+1:]...)
+	for i, v := range attrView.Views {
+		if v.ID == previewViewID {
+			previousIndex = i + 1
+			break
 		}
-		attrView.Views = util.InsertElem(attrView.Views, index, view)
 	}
+	attrView.Views = util.InsertElem(attrView.Views, previousIndex, view)
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

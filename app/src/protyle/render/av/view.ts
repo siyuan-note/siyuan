@@ -14,6 +14,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click() {
+            document.querySelector(".av__panel")?.remove();
             openMenuPanel({
                 protyle: options.protyle,
                 blockElement: options.blockElement,
@@ -28,6 +29,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconSettings",
         label: window.siyuan.languages.config,
         click() {
+            document.querySelector(".av__panel")?.remove();
             openMenuPanel({
                 protyle: options.protyle,
                 blockElement: options.blockElement,
@@ -40,6 +42,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
         click() {
+            document.querySelector(".av__panel")?.remove();
             const id = Lute.NewNodeID();
             transaction(options.protyle, [{
                 action: "duplicateAttrViewView",
@@ -57,7 +60,8 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            if (options.element.parentElement.querySelectorAll("item").length === 1) {
+            document.querySelector(".av__panel")?.remove();
+            if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length === 1) {
                 removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement));
             } else {
                 transaction(options.protyle, [{
@@ -147,3 +151,41 @@ export const getViewHTML = (data: IAVTable) => {
 </button>
 </div>`;
 };
+
+export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
+    let html = ""
+    views.forEach((item) => {
+        html += `<button draggable="true" class="b3-menu__item" data-id="${item.id}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+     <div class="fn__flex-1">
+        <span class="b3-chip${item.id === viewId ? " b3-chip--primary" : ""}">
+            ${item.icon ? unicode2Emoji(item.icon, "icon", true) : '<svg class="icon"><use xlink:href="#iconTable"></use></svg>'}
+            <span class="fn__ellipsis">${item.name}</span>
+        </span>
+    </div>
+    <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
+</button>`;
+    });
+    return `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="av-add">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+</button>
+<button class="b3-menu__separator"></button>
+${html}
+</div>`
+}
+
+export const addView = (protyle: IProtyle, blockElement: Element) => {
+    const id = Lute.NewNodeID();
+    const avID = blockElement.getAttribute("data-av-id");
+    transaction(protyle, [{
+        action: "addAttrViewView",
+        avID,
+        id
+    }], [{
+        action: "removeAttrViewView",
+        avID,
+        id
+    }]);
+}

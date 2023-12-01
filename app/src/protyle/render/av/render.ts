@@ -221,16 +221,21 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
             <span data-type="av-add" class="block__icon">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
-            <div class="fn__flex-1 fn__space"></div>
-            <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.filter}">
+            <div class="fn__flex-1"></div>
+            <div class="fn__space"></div>
+            <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
+                <svg><use xlink:href="#iconDown"></use></svg>
+            </span>
+            <div class="fn__space"></div>
+            <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.sort}">
+            <span data-type="av-sort" class="block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-more" class="block__icon" aria-label="${window.siyuan.languages.more}">
+            <span data-type="av-more" class="block__icon">
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <div class="fn__space"></div>

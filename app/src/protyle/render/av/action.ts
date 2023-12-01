@@ -25,7 +25,7 @@ import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
-import {openViewMenu} from "./view";
+import {addView, openViewMenu} from "./view";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -82,7 +82,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-sort") {
+        } else if (type === "av-switcher") {
+            openMenuPanel({protyle, blockElement, type: "switcher"});
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }  else if (type === "av-sort") {
             openMenuPanel({protyle, blockElement, type: "sorts"});
             event.preventDefault();
             event.stopPropagation();
@@ -93,17 +98,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add") {
-            const id = Lute.NewNodeID();
-            const avID = blockElement.getAttribute("data-av-id");
-            transaction(protyle, [{
-                action: "addAttrViewView",
-                avID,
-                id
-            }], [{
-                action: "removeAttrViewView",
-                avID,
-                id
-            }]);
+            addView(protyle, blockElement)
             event.preventDefault();
             event.stopPropagation();
             return true;

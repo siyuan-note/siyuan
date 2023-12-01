@@ -21,14 +21,15 @@ import {openAsset} from "../../../editor/util";
 /// #endif
 import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
-import {bindViewEvent, getViewHTML} from "./view";
+import {addView, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
 import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
+import {avRender} from "./render";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset",
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher",
     colId?: string, // for edit
     cellElements?: HTMLElement[],   // for select & date
     cb?: (avPanelElement: Element) => void
@@ -51,6 +52,8 @@ export const openMenuPanel = (options: {
             html = getPropertiesHTML(data.view);
         } else if (options.type === "sorts") {
             html = getSortsHTML(data.view.columns, data.view.sorts);
+        } else if (options.type === "switcher") {
+            html = getSwitcherHTML(data.views, data.viewID);
         } else if (options.type === "filters") {
             html = getFiltersHTML(data.view);
         } else if (options.type === "select") {
@@ -130,6 +133,8 @@ export const openMenuPanel = (options: {
                 type = "sorts";
             } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
                 type = "filters";
+            } else if (targetElement.querySelector('[data-type="av-view-edit"]')) {
+                type = "switcher";
             } else if (targetElement.querySelector('[data-type="editAssetItem"]')) {
                 type = "assets";
             } else if (targetElement.querySelector('[data-type="setColOption"]')) {
@@ -211,6 +216,21 @@ export const openMenuPanel = (options: {
                 }]);
                 menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
                 bindSortsEvent(options.protyle, menuElement, data);
+                return;
+            }
+            if (type === "switcher") {
+                transaction(options.protyle, [{
+                    action: "sortAttrViewView",
+                    avID,
+                    id: sourceId,
+                    previousID: isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")
+                }], [{
+                    action: "sortAttrViewView",
+                    avID,
+                    id: sourceId,
+                    previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
+                }]);
+                // TODO
                 return;
             }
             if (type === "filters") {
@@ -902,6 +922,34 @@ export const openMenuPanel = (options: {
                         }
                     });
                     avPanelElement.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "av-add") {
+                    addView(options.protyle, options.blockElement);
+                    avPanelElement.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "av-view-edit") {
+                    if (target.parentElement.querySelector(".b3-chip--primary")) {
+                        openViewMenu({
+                            protyle: options.protyle,
+                            blockElement: options.blockElement as HTMLElement,
+                            element: target.parentElement
+                        });
+                    } else {
+                        options.blockElement.removeAttribute("data-render");
+                        avRender(options.blockElement, options.protyle, () => {
+                            openViewMenu({
+                                protyle: options.protyle,
+                                blockElement: options.blockElement as HTMLElement,
+                                element: target.parentElement
+                            });
+                            avPanelElement.querySelector(".b3-chip--primary").classList.remove("b3-chip--primary")
+                            target.parentElement.querySelector(".b3-chip").classList.add("b3-chip--primary")
+                        }, target.parentElement.dataset.id);
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;

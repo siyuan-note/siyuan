@@ -48,6 +48,7 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	for _, v := range attrView.Views {
 		view := map[string]interface{}{
 			"id":   v.ID,
+			"icon": v.Icon,
 			"name": v.Name,
 			"type": v.LayoutType,
 		}
@@ -88,6 +89,7 @@ func renderHistoryAttributeView(c *gin.Context) {
 	for _, v := range attrView.Views {
 		view := map[string]interface{}{
 			"id":   v.ID,
+			"icon": v.Icon,
 			"name": v.Name,
 			"type": v.LayoutType,
 		}
@@ -132,6 +134,7 @@ func renderAttributeView(c *gin.Context) {
 	for _, v := range attrView.Views {
 		view := map[string]interface{}{
 			"id":   v.ID,
+			"icon": v.Icon,
 			"name": v.Name,
 			"type": v.LayoutType,
 		}

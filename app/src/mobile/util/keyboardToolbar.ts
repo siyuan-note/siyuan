@@ -12,7 +12,6 @@ import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {input} from "../../protyle/wysiwyg/input";
-import {showMessage} from "../../dialog/message";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;

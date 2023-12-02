@@ -98,7 +98,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add") {
-            addView(protyle, blockElement)
+            addView(protyle, blockElement);
             event.preventDefault();
             event.stopPropagation();
             return true;

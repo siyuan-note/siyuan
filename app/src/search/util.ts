@@ -38,51 +38,142 @@ import {
     toggleAssetHistory
 } from "./assets";
 import {resize} from "../protyle/util/resize";
+import {Menu} from "../plugin/Menu";
 
-export const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
-    if (replaceHistoryElement.classList.contains("fn__none")) {
-        const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-        if (!list.replaceKeys || list.replaceKeys.length === 0) {
-            return;
-        }
-        let html = "";
-        list.replaceKeys.forEach((s: string) => {
-            if (s !== replaceInputElement.value && s) {
-                html += `<div class="b3-list-item${html ? "" : " b3-list-item--focus"}">${escapeHtml(s)}</div>`;
-            }
-        });
-        if (html === "") {
-            return;
-        }
-        replaceHistoryElement.classList.remove("fn__none");
-        replaceHistoryElement.innerHTML = html;
-    } else {
-        replaceHistoryElement.classList.add("fn__none");
+export const toggleReplaceHistory = (searchElement: Element) => {
+    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+    if (!list.replaceKeys || list.replaceKeys.length === 0) {
+        return;
     }
-    historyElement.classList.add("fn__none");
+    const menu = new Menu("search-replace-history");
+    if (menu.isOpen) {
+        return;
+    }
+    menu.addItem({
+        iconHTML: "",
+        label: window.siyuan.languages.clearHistory,
+        click() {
+            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].replaceKeys = [];
+            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+        }
+    });
+    const separatorElement = menu.addSeparator(1);
+    let current = true;
+    const replaceInputElement = searchElement.querySelector("#replaceInput") as HTMLInputElement;
+    list.replaceKeys.forEach((s: string) => {
+        if (s !== replaceInputElement.value && s) {
+            const menuItem = menu.addItem({
+                iconHTML: "",
+                label: escapeHtml(s),
+                action: "iconCloseRound",
+                bind(element) {
+                    element.addEventListener("click", (itemEvent) => {
+                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
+                            list.replaceKeys.find((item: string, index: number) => {
+                                if (item === s) {
+                                    list.replaceKeys.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].replaceKeys = list.replaceKeys;
+                            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
+                                window.siyuan.menus.menu.remove();
+                            } else {
+                                element.remove();
+                            }
+                        } else {
+                            replaceInputElement.value = element.textContent;
+                            window.siyuan.menus.menu.remove();
+                        }
+                        itemEvent.preventDefault();
+                        itemEvent.stopPropagation();
+                    });
+                }
+            });
+            if (current) {
+                menuItem.classList.add("b3-menu__item--current");
+            }
+            current = false;
+        }
+    });
+    if (current) {
+        separatorElement.remove();
+    }
+    const rect = searchElement.querySelector("#replaceHistoryBtn").getBoundingClientRect();
+    menu.open({
+        x: rect.left,
+        y: rect.bottom
+    });
 };
 
-export const toggleSearchHistory = (historyElement: Element, replaceHistoryElement: Element, searchInputElement: HTMLInputElement) => {
-    if (historyElement.classList.contains("fn__none")) {
-        const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-        if (!list.keys || list.keys.length === 0) {
-            return;
-        }
-        let html = "";
-        list.keys.forEach((s: string) => {
-            if (s !== searchInputElement.value && s) {
-                html += `<div class="b3-list-item${html ? "" : " b3-list-item--focus"}">${escapeHtml(s)}</div>`;
-            }
-        });
-        if (html === "") {
-            return;
-        }
-        historyElement.classList.remove("fn__none");
-        historyElement.innerHTML = html;
-    } else {
-        historyElement.classList.add("fn__none");
+export const toggleSearchHistory = (searchElement: Element, config: ISearchOption, edit: Protyle) => {
+    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+    if (!list.keys || list.keys.length === 0) {
+        return;
     }
-    replaceHistoryElement.classList.add("fn__none");
+    const menu = new Menu("search-history");
+    if (menu.isOpen) {
+        return;
+    }
+    menu.addItem({
+        iconHTML: "",
+        label: window.siyuan.languages.clearHistory,
+        click() {
+            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].keys = [];
+            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+        }
+    });
+    const separatorElement = menu.addSeparator(1);
+    let current = true;
+    const searchInputElement = searchElement.querySelector("#searchInput") as HTMLInputElement;
+    list.keys.forEach((s: string) => {
+        if (s !== searchInputElement.value && s) {
+            const menuItem = menu.addItem({
+                iconHTML: "",
+                label: escapeHtml(s),
+                action: "iconCloseRound",
+                bind(element) {
+                    element.addEventListener("click", (itemEvent) => {
+                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
+                            list.keys.find((item: string, index: number) => {
+                                if (item === s) {
+                                    list.keys.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].keys = list.keys;
+                            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
+                                window.siyuan.menus.menu.remove();
+                            } else {
+                                element.remove();
+                            }
+                        } else {
+                            searchInputElement.value = element.textContent;
+                            config.page = 1;
+                            inputEvent(searchElement, config, edit, true);
+                            window.siyuan.menus.menu.remove();
+                        }
+                        itemEvent.preventDefault();
+                        itemEvent.stopPropagation();
+                    });
+                }
+            });
+            if (current) {
+                menuItem.classList.add("b3-menu__item--current");
+            }
+            current = false;
+        }
+    });
+    if (current) {
+        separatorElement.remove();
+    }
+    const rect = searchElement.querySelector("#searchHistoryBtn").getBoundingClientRect();
+    menu.open({
+        x: rect.left,
+        y: rect.bottom
+    });
 };
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
@@ -183,12 +274,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </span>
     </div>
     <div class="b3-form__icon search__header">
-        <span class="fn__a" id="searchHistoryBtn">
+        <span class="fn__a ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
         <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
-        <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
         <div class="block__icons">
             <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
@@ -218,7 +308,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </div>
     </div>
     <div class="b3-form__icon search__header${config.hasReplace ? "" : " fn__none"}">
-        <span class="fn__a" id="replaceHistoryBtn">
+        <span class="fn__a ariaLabel" id="replaceHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconReplace"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
@@ -228,7 +318,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <div class="fn__space"></div>
         <button id="replaceBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">↵ ${window.siyuan.languages.replace}</button>
         <div class="fn__space"></div>
-        <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
     <div id="criteria" class="search__header"></div>
     <div class="search__layout${(closeCB ? data.layout === 1 : data.layoutTab === 1) ? " search__layout--row" : ""}">
@@ -253,8 +342,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
-    const replaceHistoryElement = element.querySelector("#replaceHistoryList");
-    const historyElement = element.querySelector("#searchHistoryList");
 
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
@@ -706,7 +793,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
+                toggleSearchHistory(element, config, edit);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -716,7 +803,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
+                toggleReplaceHistory(element);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -743,16 +830,9 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (target.classList.contains("b3-list-item")) {
                 const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
-                if (target.parentElement.id === "searchHistoryList") {
-                    searchInputElement.value = target.textContent;
-                    config.page = 1;
-                    inputEvent(element, config, edit, true);
-                } else if (target.parentElement.id === "searchAssetHistoryList") {
+                if (target.parentElement.id === "searchAssetHistoryList") {
                     searchAssetInputElement.value = target.textContent;
                     assetInputEvent(assetsElement);
-                } else if (target.parentElement.id === "replaceHistoryList") {
-                    replaceInputElement.value = target.textContent;
-                    replaceHistoryElement.classList.add("fn__none");
                 } else if (type === "search-new") {
                     newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
@@ -846,8 +926,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             }
             target = target.parentElement;
         }
-        historyElement.classList.add("fn__none");
-        replaceHistoryElement.classList.add("fn__none");
         element.querySelector("#searchAssetHistoryList")?.classList.add("fn__none");
     }, false);
 

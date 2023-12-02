@@ -231,11 +231,11 @@ export const openMenuPanel = (options: {
                     previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
                 }]);
                 if (isTop) {
-                    targetElement.before(sourceElement)
-                    targetElement.classList.remove("dragover__top")
+                    targetElement.before(sourceElement);
+                    targetElement.classList.remove("dragover__top");
                 } else {
-                    targetElement.after(sourceElement)
-                    targetElement.classList.remove("dragover__bottom")
+                    targetElement.after(sourceElement);
+                    targetElement.classList.remove("dragover__bottom");
                 }
                 return;
             }
@@ -953,8 +953,8 @@ export const openMenuPanel = (options: {
                                 blockElement: options.blockElement as HTMLElement,
                                 element: target.parentElement
                             });
-                            avPanelElement.querySelector(".b3-chip--primary").classList.remove("b3-chip--primary")
-                            target.parentElement.querySelector(".b3-chip").classList.add("b3-chip--primary")
+                            avPanelElement.querySelector(".b3-chip--primary").classList.remove("b3-chip--primary");
+                            target.parentElement.querySelector(".b3-chip").classList.add("b3-chip--primary");
                         }, target.parentElement.dataset.id);
                     }
                     event.preventDefault();

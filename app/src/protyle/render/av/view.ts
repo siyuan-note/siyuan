@@ -153,7 +153,7 @@ export const getViewHTML = (data: IAVTable) => {
 };
 
 export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
-    let html = ""
+    let html = "";
     views.forEach((item) => {
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.id}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
@@ -173,8 +173,8 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
 </button>
 <button class="b3-menu__separator"></button>
 ${html}
-</div>`
-}
+</div>`;
+};
 
 export const addView = (protyle: IProtyle, blockElement: Element) => {
     const id = Lute.NewNodeID();
@@ -188,4 +188,4 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         avID,
         id
     }]);
-}
+};

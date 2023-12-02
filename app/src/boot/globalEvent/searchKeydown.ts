@@ -6,7 +6,6 @@ import {fetchPost} from "../../util/fetch";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {newFileByName} from "../../util/newFile";
-import {upDownHint} from "../../util/upDownHint";
 import {App} from "../../index";
 import {Dialog} from "../../dialog";
 import {getAllModels} from "../../layout/getAll";
@@ -64,71 +63,24 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     const targetId = (event.target as HTMLElement).id;
-    const historyElement = element.querySelector("#searchHistoryList");
-    const replaceHistoryElement = element.querySelector("#replaceHistoryList");
-    const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
     const assetHistoryElement = assetsElement.querySelector("#searchAssetHistoryList");
     const assetInputElement = assetsElement.querySelector("#searchAssetInput") as HTMLInputElement;
-    const assetPreviewElement = assetsElement.querySelector("#searchAssetPreview");
     if (event.key === "ArrowDown" && event.altKey) {
         if (isAsset) {
             toggleAssetHistory(assetHistoryElement, assetInputElement);
         } else {
             if (targetId === "replaceInput") {
-                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
+                toggleReplaceHistory(element);
             } else {
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
+                toggleSearchHistory(element, config, edit);
             }
         }
         return true;
     }
     const assetLocal = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
-    let history;
-    if (!historyElement.classList.contains("fn__none")) {
-        history = "history";
-    } else if (!replaceHistoryElement.classList.contains("fn__none")) {
-        history = "replaceHistory";
-    } else if (isAsset && !assetHistoryElement.classList.contains("fn__none")) {
-        history = "assetHistory";
-    }
-    if (history) {
-        if (event.key === "Escape") {
-            if (isAsset) {
-                toggleAssetHistory(assetHistoryElement, assetInputElement);
-            } else {
-                if ((event.target as HTMLElement).id === "replaceInput") {
-                    toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
-                } else {
-                    toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
-                }
-            }
-        } else if (event.key === "Enter") {
-            if (history === "replaceHistory") {
-                replaceInputElement.value = replaceHistoryElement.querySelector(".b3-list-item--focus").textContent.trim();
-                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
-            } else if (history === "assetHistory") {
-                assetInputElement.value = assetHistoryElement.querySelector(".b3-list-item--focus").textContent.trim();
-                assetInputEvent(assetsElement, assetLocal);
-                toggleAssetHistory(assetHistoryElement, assetInputElement);
-                renderPreview(assetPreviewElement, currentList.dataset.id, assetInputElement.value, assetLocal.method);
-            } else {
-                searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
-                config.page = 1;
-                inputEvent(element, config, edit, true);
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
-            }
-        } else {
-            if (history === "assetHistory") {
-                upDownHint(assetHistoryElement, event);
-            } else {
-                if (history === "replaceHistory") {
-                    upDownHint(replaceHistoryElement, event);
-                } else {
-                    upDownHint(historyElement, event);
-                }
-            }
-        }
-        return true;
+    if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+        // 不能返回 true，否则历史菜单无法使用快捷键
+        return false;
     }
     if (currentList.getAttribute("data-type") === "search-new") {
         if (event.key === "Enter") {
@@ -268,6 +220,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     const lineHeight = 28;
+    const assetPreviewElement = assetsElement.querySelector("#searchAssetPreview");
     if (event.key === "ArrowDown") {
         currentList.classList.remove("b3-list-item--focus");
         if (!currentList.nextElementSibling) {

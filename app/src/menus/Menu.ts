@@ -84,7 +84,7 @@ export class Menu {
     }
 
     public addSeparator(index?: number) {
-        this.addItem({type: "separator", index});
+       return this.addItem({type: "separator", index});
     }
 
     public addItem(option: IMenu) {

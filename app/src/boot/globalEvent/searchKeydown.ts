@@ -53,10 +53,6 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const assetsElement = element.querySelector("#searchAssets");
     const isAsset = !assetsElement.classList.contains("fn__none");
     const listElement = isAsset ? assetsElement.querySelector("#searchAssetList") : element.querySelector("#searchList");
-    let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
-    if (!currentList) {
-        return false;
-    }
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     if (!isAsset && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
         newFileByName(app, searchInputElement.value);
@@ -78,6 +74,10 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const assetLocal = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         // 不能返回 true，否则历史菜单无法使用快捷键
+        return false;
+    }
+    let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
+    if (!currentList) {
         return false;
     }
     if (currentList.getAttribute("data-type") === "search-new") {

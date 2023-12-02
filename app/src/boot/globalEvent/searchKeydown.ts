@@ -63,11 +63,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     const targetId = (event.target as HTMLElement).id;
-    const assetHistoryElement = assetsElement.querySelector("#searchAssetHistoryList");
-    const assetInputElement = assetsElement.querySelector("#searchAssetInput") as HTMLInputElement;
     if (event.key === "ArrowDown" && event.altKey) {
         if (isAsset) {
-            toggleAssetHistory(assetHistoryElement, assetInputElement);
+            toggleAssetHistory(assetsElement);
         } else {
             if (targetId === "replaceInput") {
                 toggleReplaceHistory(element);

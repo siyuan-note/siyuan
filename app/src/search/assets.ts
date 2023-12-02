@@ -1,12 +1,14 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
 import {getQueryTip} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
+import {Menu} from "../plugin/Menu";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -41,12 +43,11 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     </span>
 </div>
 <div class="b3-form__icon search__header">
-    <span class="fn__a" id="assetHistoryBtn">
+    <span class="fn__a ariaLabel" id="assetHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
         <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
     </span>
     <input id="searchAssetInput" value="${localSearch.k}" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.keyword}">
-    <div id="searchAssetHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     <div class="block__icons">
         <span data-type="assetRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
             <svg><use xlink:href="#iconRefresh"></use></svg>
@@ -219,26 +220,72 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
     }, Constants.TIMEOUT_INPUT);
 };
 
-export const toggleAssetHistory = (historyElement: Element, searchInputElement: HTMLInputElement) => {
-    if (historyElement.classList.contains("fn__none")) {
-        const keys = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
-        if (!keys || keys.length === 0) {
-            return;
-        }
-        let html = "";
-        keys.forEach((s: string) => {
-            if (s !== searchInputElement.value && s) {
-                html += `<div class="b3-list-item${html ? "" : " b3-list-item--focus"}">${escapeHtml(s)}</div>`;
-            }
-        });
-        if (html === "") {
-            return;
-        }
-        historyElement.classList.remove("fn__none");
-        historyElement.innerHTML = html;
-    } else {
-        historyElement.classList.add("fn__none");
+export const toggleAssetHistory = (assetElement: Element) => {
+    const keys = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
+    if (!keys || keys.length === 0) {
+        return;
     }
+    const menu = new Menu("search-asset-history");
+    if (menu.isOpen) {
+        return;
+    }
+    menu.addItem({
+        iconHTML: "",
+        label: window.siyuan.languages.clearHistory,
+        click() {
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = [];
+            setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+        }
+    });
+    const separatorElement = menu.addSeparator(1);
+    let current = true;
+    const assetInputElement = assetElement.querySelector("#searchAssetInput") as HTMLInputElement;
+    keys.forEach((s: string) => {
+        if (s !== assetInputElement.value && s) {
+            const menuItem = menu.addItem({
+                iconHTML: "",
+                label: escapeHtml(s),
+                action: "iconCloseRound",
+                bind(element) {
+                    element.addEventListener("click", (itemEvent) => {
+                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
+                            keys.find((item: string, index: number) => {
+                                if (item === s) {
+                                    keys.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = keys;
+                            setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
+                                window.siyuan.menus.menu.remove();
+                            } else {
+                                element.remove();
+                            }
+                        } else {
+                            assetInputElement.value = element.textContent;
+                            assetInputEvent(assetElement);
+                            window.siyuan.menus.menu.remove();
+                        }
+                        itemEvent.preventDefault();
+                        itemEvent.stopPropagation();
+                    });
+                }
+            });
+            if (current) {
+                menuItem.classList.add("b3-menu__item--current");
+            }
+            current = false;
+        }
+    });
+    if (current) {
+        separatorElement.remove();
+    }
+    const rect = assetElement.querySelector("#assetHistoryBtn").getBoundingClientRect();
+    menu.open({
+        x: rect.left,
+        y: rect.bottom
+    });
 };
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {

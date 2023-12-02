@@ -798,7 +798,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 return;
             } else if (target.id === "assetHistoryBtn") {
-                toggleAssetHistory(target.nextElementSibling.nextElementSibling, target.nextElementSibling as HTMLInputElement);
+                toggleAssetHistory(assetsElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -830,10 +830,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (target.classList.contains("b3-list-item")) {
                 const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
-                if (target.parentElement.id === "searchAssetHistoryList") {
-                    searchAssetInputElement.value = target.textContent;
-                    assetInputEvent(assetsElement);
-                } else if (type === "search-new") {
+                if (type === "search-new") {
                     newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
                     const isAsset = target.dataset.id;
@@ -926,7 +923,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             }
             target = target.parentElement;
         }
-        element.querySelector("#searchAssetHistoryList")?.classList.add("fn__none");
     }, false);
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {

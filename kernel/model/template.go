@@ -267,7 +267,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 		return ret
 	}
 	funcMap["Weekday"] = Weekday
-	funcMap["Weekday"] = WeekdayCN
+	funcMap["WeekdayCN"] = WeekdayCN
 	funcMap["ISOWeek"] = ISOWeek
 
 	goTpl := template.New("").Delims(".action{", "}")

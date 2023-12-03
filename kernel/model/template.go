@@ -57,7 +57,7 @@ func WeekdayCN(date time.Time) string {
 }
 
 // date is in `week`-th weak of this year
-func WeekOfYear(date time.Time) int {
+func ISOWeek(date time.Time) int {
 	_, week := date.ISOWeek()
 	return week
 }
@@ -68,7 +68,7 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"Weekday":     Weekday,
 		"WeekdayCN":   WeekdayCN,
-		"WeekOfYear":  WeekOfYear,
+		"ISOWeek":  ISOWeek,
 	})
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
@@ -268,7 +268,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 	}
 	funcMap["Weekday"] = Weekday
 	funcMap["Weekday"] = WeekdayCN
-	funcMap["WeekOfYear"] = WeekOfYear
+	funcMap["ISOWeek"] = ISOWeek
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tpl, err := goTpl.Funcs(funcMap).Parse(gulu.Str.FromBytes(md))

@@ -122,6 +122,8 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     });
     assetInputEvent(element, localSearch);
     addClearButton({
+        right: 8,
+        height: searchInputElement.clientHeight,
         inputElement: searchInputElement,
         clearCB() {
             assetInputEvent(element, localSearch);

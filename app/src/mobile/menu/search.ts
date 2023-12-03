@@ -721,5 +721,5 @@ const goAsset = () => {
         clearCB() {
             assetInputEvent(assetsElement, localSearch);
         }
-    })
+    });
 };

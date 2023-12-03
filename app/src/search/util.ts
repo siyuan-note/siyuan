@@ -954,13 +954,15 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     });
     addClearButton({
         inputElement: searchInputElement,
+        right: 8,
         height: searchInputElement.clientHeight,
-        clearCB () {
+        clearCB() {
             config.page = 1;
             inputEvent(element, config, edit);
         }
     });
     addClearButton({
+        right: 8,
         inputElement: replaceInputElement,
         height: searchInputElement.clientHeight,
     });
@@ -1114,7 +1116,7 @@ export const replace = (element: Element, config: ISearchOption, edit: Protyle, 
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
 
-    const loadElement = element.querySelector("#searchRefresh");
+    const loadElement = element.querySelector("svg.fn__rotate");
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }

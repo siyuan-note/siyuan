@@ -9,6 +9,7 @@ import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {addClearButton} from "../util/addClearButton";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -43,11 +44,13 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     </span>
 </div>
 <div class="b3-form__icon search__header">
-    <span class="fn__a ariaLabel" id="assetHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
-        <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
-    </span>
-    <input id="searchAssetInput" value="${localSearch.k}" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.keyword}">
+    <div class="fn__flex-1" style="position: relative">
+        <span class="fn__a ariaLabel" id="assetHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+            <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
+        </span>
+        <input id="searchAssetInput" value="${localSearch.k}" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.keyword}">
+    </div>
     <div class="block__icons">
         <span data-type="assetRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
             <svg><use xlink:href="#iconRefresh"></use></svg>
@@ -118,6 +121,9 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
     });
     assetInputEvent(element, localSearch);
+    addClearButton(searchInputElement, () => {
+        assetInputEvent(element, localSearch);
+    });
 
     const dragElement = element.querySelector(".search__drag");
     dragElement.addEventListener("mousedown", (event: MouseEvent) => {

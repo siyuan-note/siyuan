@@ -133,17 +133,7 @@
   }
 
   &__rmpath {
-    position: absolute;
-    height: 18px;
-    width: 16px;
-    opacity: 0.68;
-    transition: var(--b3-transition);
-    right: 0;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 1;
-    }
+    @extend .b3-form__icon-clear;
   }
 
   &__tip {

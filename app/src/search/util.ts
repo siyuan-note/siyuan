@@ -39,6 +39,7 @@ import {
 } from "./assets";
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
+import {addClearButton} from "../util/addClearButton";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -274,11 +275,13 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </span>
     </div>
     <div class="b3-form__icon search__header">
-        <span class="fn__a ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
-            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-            <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
-        </span>
-        <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
+        <div style="position: relative" class="fn__flex-1">
+             <span class="fn__a ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+                <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
+            </span>
+            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
+        </div>
         <div class="block__icons">
             <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
@@ -308,11 +311,13 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </div>
     </div>
     <div class="b3-form__icon search__header${config.hasReplace ? "" : " fn__none"}">
-        <span class="fn__a ariaLabel" id="replaceHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
-            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconReplace"></use></svg>
-            <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
-        </span>
-        <input id="replaceInput" class="b3-text-field b3-text-field--text">
+        <div class="fn__flex-1" style="position: relative">
+            <span class="fn__a ariaLabel" id="replaceHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+                <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconReplace"></use></svg>
+                <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
+            </span>
+            <input id="replaceInput" class="b3-text-field b3-text-field--text">
+        </div>
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;"><use xlink:href="#iconRefresh"></use></svg>
         <button id="replaceAllBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
         <div class="fn__space"></div>
@@ -602,7 +607,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchReplace") {
                 // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
-                element.querySelector("#replaceHistoryBtn").parentElement.classList.toggle("fn__none");
+                element.querySelectorAll(".search__header")[1].classList.toggle("fn__none");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -947,6 +952,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
         saveKeyList("keys", searchInputElement.value);
     });
+    addClearButton(searchInputElement, () => {
+        inputEvent(element, config, edit);
+    });
+    addClearButton(replaceInputElement, undefined, undefined, searchInputElement.clientHeight);
     inputEvent(element, config, edit);
     return edit;
 };
@@ -978,10 +987,11 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
         item.idPath = config.idPath.join(",").split(",");
     }
     if (config.hasReplace !== item.hasReplace) {
+        const replaceHeaderElement = element.querySelectorAll(".search__header")[1];
         if (item.hasReplace) {
-            element.querySelector("#replaceHistoryBtn").parentElement.classList.remove("fn__none");
+            replaceHeaderElement.classList.remove("fn__none");
         } else {
-            element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
+            replaceHeaderElement.classList.add("fn__none");
         }
     }
     const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -1096,7 +1106,7 @@ export const replace = (element: Element, config: ISearchOption, edit: Protyle, 
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
 
-    const loadElement = replaceInputElement.nextElementSibling;
+    const loadElement = element.querySelector("#searchRefresh");
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }

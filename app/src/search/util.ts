@@ -952,10 +952,18 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
         saveKeyList("keys", searchInputElement.value);
     });
-    addClearButton(searchInputElement, () => {
-        inputEvent(element, config, edit);
+    addClearButton({
+        inputElement: searchInputElement,
+        height: searchInputElement.clientHeight,
+        clearCB () {
+            config.page = 1;
+            inputEvent(element, config, edit);
+        }
     });
-    addClearButton(replaceInputElement, undefined, undefined, searchInputElement.clientHeight);
+    addClearButton({
+        inputElement: replaceInputElement,
+        height: searchInputElement.clientHeight,
+    });
     inputEvent(element, config, edit);
     return edit;
 };

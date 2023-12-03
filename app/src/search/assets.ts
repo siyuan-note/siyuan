@@ -121,8 +121,11 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
     });
     assetInputEvent(element, localSearch);
-    addClearButton(searchInputElement, () => {
-        assetInputEvent(element, localSearch);
+    addClearButton({
+        inputElement: searchInputElement,
+        clearCB() {
+            assetInputEvent(element, localSearch);
+        }
     });
 
     const dragElement = element.querySelector(".search__drag");

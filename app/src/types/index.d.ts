@@ -50,7 +50,7 @@ type TOperation =
     | "sortAttrViewView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
-type TEventBus = "ws-main" |
+type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
@@ -101,7 +101,9 @@ declare module "blueimp-md5"
 
 interface Window {
     echarts: {
-        init(element: HTMLElement, theme?: string, options?: { width: number }): {
+        init(element: HTMLElement, theme?: string, options?: {
+            width: number
+        }): {
             setOption(option: any): void;
             getZr(): any;
             on(name: string, event: (e: any) => void): any;
@@ -109,15 +111,26 @@ interface Window {
             resize(): void;
         };
         dispose(element: Element): void;
-        getInstanceById(id: string): { resize: () => void };
+        getInstanceById(id: string): {
+            resize: () => void
+        };
     }
     ABCJS: {
-        renderAbc(element: Element, text: string, options: { responsive: string }): void;
+        renderAbc(element: Element, text: string, options: {
+            responsive: string
+        }): void;
     }
     hljs: {
         listLanguages(): string[];
-        highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
-        getLanguage(text: string): { name: string };
+        highlight(text: string, options: {
+            language?: string,
+            ignoreIllegals: boolean
+        }): {
+            value: string
+        };
+        getLanguage(text: string): {
+            name: string
+        };
     };
     katex: {
         renderToString(math: string, option: {

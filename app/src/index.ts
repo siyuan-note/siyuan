@@ -121,7 +121,7 @@ export class App {
                                 transactionError();
                                 break;
                             case "syncing":
-                                processSync(data);
+                                processSync(data, this.plugins);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);

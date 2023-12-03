@@ -16,7 +16,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 progressLoading(data);
                 break;
             case"syncing":
-                processSync(data);
+                processSync(data, app.plugins);
                 if (data.code === 1) {
                     document.getElementById("toolbarSync").classList.add("fn__none");
                 }

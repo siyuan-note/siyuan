@@ -22,6 +22,7 @@ import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
+import {Plugin} from "../plugin";
 
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
@@ -411,7 +412,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData) => {
+export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
@@ -467,4 +468,13 @@ export const processSync = (data?: IWebSocketData) => {
         useElement.setAttribute("xlink:href", "#iconCloudSucc");
     }
     /// #endif
+    plugins.forEach((item) => {
+        if (data.code === 0) {
+            item.eventBus.emit("sync-start", data);
+        } else if (data.code === 1) {
+            item.eventBus.emit("sync-end", data);
+        } else if (data.code === 2) {
+            item.eventBus.emit("sync-fail", data);
+        }
+    });
 };

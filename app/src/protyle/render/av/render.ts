@@ -93,9 +93,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                         return;
                     }
                     tableHTML += `<div class="av__cell" data-col-id="${column.id}" 
-data-icon="${column.icon}" data-dtype="${column.type}"  data-pin="${column.pin}" 
-style="width: ${column.width || "200px"};
-${column.wrap ? "" : "white-space: nowrap;"}">
+data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+style="width: ${column.width || "200px"};">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
         <span class="av__celltext">${column.name}</span>
@@ -192,11 +191,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
-${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
+${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-wrap="${data.columns[index].wrap}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-white-space: ${data.columns[index].wrap ? "pre-wrap" : "nowrap"};
 ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
 
                         if (pinIndex === index) {
@@ -248,7 +246,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="float: left;">
+        <div class="av__body">
             ${tableHTML}
             <div class="av__row--add">
                 <div class="av__colsticky">

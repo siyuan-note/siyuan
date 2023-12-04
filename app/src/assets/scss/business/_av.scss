@@ -95,6 +95,10 @@
     cursor: pointer;
   }
 
+  &__body {
+    float: left;
+  }
+
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
@@ -242,6 +246,14 @@
       right: 5px;
       font-size: 85%;
       top: 5.5px;
+    }
+
+    &[data-wrap="true"] {
+      white-space: pre-wrap;
+    }
+
+    &[data-wrap="false"] {
+      white-space: nowrap;
     }
 
     &.dragover__right {

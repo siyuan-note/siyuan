@@ -45,7 +45,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 </div>
 <div class="b3-form__icon search__header">
     <div class="fn__flex-1" style="position: relative">
-        <span class="fn__a ariaLabel" id="assetHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+        <span class="search__history-icon ariaLabel" id="assetHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
@@ -293,7 +293,7 @@ export const toggleAssetHistory = (assetElement: Element) => {
     if (current) {
         separatorElement.remove();
     }
-    const rect = assetElement.querySelector("#assetHistoryBtn").getBoundingClientRect();
+    const rect = assetInputElement.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom

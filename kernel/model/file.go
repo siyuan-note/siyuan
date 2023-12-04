@@ -1119,8 +1119,21 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 	IncSync()
 
-	b := treenode.GetBlockTree(id)
-	p = b.Path
+	WaitForWritingFiles()
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		logging.LogErrorf("load tree by block id [%s] failed: %v", id, err)
+		return
+	}
+	p = tree.Path
+	date := util.TimeFromID(id)
+	date = date[:len("yyyyMMdd")]
+	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+	if err = indexWriteJSONQueue(tree); nil != err {
+		return
+	}
+
 	return
 }
 

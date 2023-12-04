@@ -77,6 +77,14 @@
     top: 17px;
   }
 
+  &__history-icon {
+    @extend .fn__a;
+    height: 42px;
+    width: 42px;
+    display: block;
+    position: absolute;
+  }
+
   &__label {
     position: absolute;
     right: 8px;

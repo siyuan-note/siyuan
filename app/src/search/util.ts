@@ -102,7 +102,7 @@ export const toggleReplaceHistory = (searchElement: Element) => {
     if (current) {
         separatorElement.remove();
     }
-    const rect = searchElement.querySelector("#replaceHistoryBtn").getBoundingClientRect();
+    const rect = replaceInputElement.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom
@@ -172,7 +172,7 @@ export const toggleSearchHistory = (searchElement: Element, config: ISearchOptio
     if (current) {
         separatorElement.remove();
     }
-    const rect = searchElement.querySelector("#searchHistoryBtn").getBoundingClientRect();
+    const rect = searchInputElement.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom
@@ -278,7 +278,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     </div>
     <div class="b3-form__icon search__header">
         <div style="position: relative" class="fn__flex-1">
-             <span class="fn__a ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+             <span class="search__history-icon ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
@@ -314,7 +314,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     </div>
     <div class="b3-form__icon search__header${config.hasReplace ? "" : " fn__none"}">
         <div class="fn__flex-1" style="position: relative">
-            <span class="fn__a ariaLabel" id="replaceHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+            <span class="search__history-icon ariaLabel" id="replaceHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconReplace"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>

@@ -318,7 +318,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             </span>
             <input id="replaceInput" class="b3-text-field b3-text-field--text">
         </div>
-        <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;"><use xlink:href="#iconRefresh"></use></svg>
+        <div class="fn__space"></div>
+        <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;margin-right: 8px"><use xlink:href="#iconRefresh"></use></svg>
         <button id="replaceAllBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
         <div class="fn__space"></div>
         <button id="replaceBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">↵ ${window.siyuan.languages.replace}</button>

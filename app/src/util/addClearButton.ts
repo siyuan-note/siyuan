@@ -19,7 +19,7 @@ export const addClearButton = (options: {
     className?: string
 }) => {
     options.inputElement.insertAdjacentHTML("afterend",
-        `<svg class="${options.className || "b3-form__icon-clear"}" style="${options.right ? "right: " + options.right + "px;" : ""}${options.height ? "height:" + options.height + "px" : ""}">
+        `<svg class="${options.className || "b3-form__icon-clear"} ariaLabel" aria-label="${window.siyuan.languages.clear}" style="${options.right ? "right: " + options.right + "px;" : ""}${options.height ? "height:" + options.height + "px" : ""}">
 <use xlink:href="#iconCloseRound"></use></svg>`);
     const clearElement = options.inputElement.nextElementSibling;
     clearElement.addEventListener("click", () => {

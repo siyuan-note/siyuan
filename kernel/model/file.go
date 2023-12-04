@@ -1076,6 +1076,20 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	if nil != existRoot {
 		existed = true
 		p = existRoot.Path
+
+		tree, loadErr := loadTreeByBlockID(existRoot.RootID)
+		if nil != loadErr {
+			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
+			return
+		}
+		p = tree.Path
+		date := time.Now().Format("20060102")
+		if tree.Root.IALAttr("custom-dailynote-"+date) == "" {
+			tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+			if err = indexWriteJSONQueue(tree); nil != err {
+				return
+			}
+		}
 		return
 	}
 
@@ -1127,8 +1141,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 	p = tree.Path
-	date := util.TimeFromID(id)
-	date = date[:len("yyyyMMdd")]
+	date := time.Now().Format("20060102")
 	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
 	if err = indexWriteJSONQueue(tree); nil != err {
 		return

@@ -8,10 +8,10 @@ import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 
-const modules = {
-    siyuan: API
-};
 const requireFunc = (key: string) => {
+    const modules = {
+        siyuan: API
+    };
     // @ts-ignore
     return modules[key]
         ?? window.require?.(key);
@@ -44,6 +44,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     const exportsObj: { [key: string]: any } = {};
     const moduleObj = {exports: exportsObj};
     try {
+        debugger
         runCode(item.js, "plugin:" + encodeURIComponent(item.name))(requireFunc, moduleObj, exportsObj);
     } catch (e) {
         console.error(`plugin ${item.name} run error:`, e);

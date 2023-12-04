@@ -898,7 +898,14 @@ ${genHintItemHTML(item)}
         this.lastIndex = -1;
         this.splitChar = "";
         extend.forEach((item) => {
-            const currentLastIndex = currentLineValue.lastIndexOf(item.key);
+            let currentLastIndex = currentLineValue.lastIndexOf(item.key);
+            // https://ld246.com/article/1701670704754
+            if (Constants.BLOCK_HINT_KEYS.includes(item.key) && currentLastIndex > -1) {
+                const thirdLastIndex = currentLineValue.lastIndexOf(item.key + item.key.substring(0, 1))
+                if (thirdLastIndex > -1) {
+                    currentLastIndex = Math.min(currentLastIndex, currentLineValue.lastIndexOf(item.key + item.key.substring(0, 1)))
+                }
+            }
             if (this.lastIndex < currentLastIndex) {
                 if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) &&
                     (item.key === ":" || item.key === "#" || item.key === "/" || item.key === "、")) {

@@ -43,32 +43,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-/**
- * [0-6] represents [Sunday - Saturday]
- */
-func Weekday(date time.Time) int {
-	return int(date.Weekday())
-}
-
-func WeekdayCN(date time.Time) string {
-	week := GetWeekday(date)
-	weekdayCN := []string{"日", "一", "二", "三", "四", "五", "六"}
-	return weekdayCN[week]
-}
-
-// date is in `week`-th weak of this year
-func ISOWeek(date time.Time) int {
-	_, week := date.ISOWeek()
-	return week
-}
-
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
 	tmpl = tmpl.Funcs(sprig.TxtFuncMap())
 	tmpl = tmpl.Funcs(template.FuncMap{
-		"Weekday":     Weekday,
-		"WeekdayCN":   WeekdayCN,
-		"ISOWeek":  ISOWeek,
+		"Weekday":   util.Weekday,
+		"WeekdayCN": util.WeekdayCN,
+		"ISOWeek":   util.ISOWeek,
 	})
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
@@ -266,9 +247,9 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 		}
 		return ret
 	}
-	funcMap["Weekday"] = Weekday
-	funcMap["WeekdayCN"] = WeekdayCN
-	funcMap["ISOWeek"] = ISOWeek
+	funcMap["Weekday"] = util.Weekday
+	funcMap["WeekdayCN"] = util.WeekdayCN
+	funcMap["ISOWeek"] = util.ISOWeek
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tpl, err := goTpl.Funcs(funcMap).Parse(gulu.Str.FromBytes(md))

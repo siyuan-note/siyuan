@@ -50,6 +50,7 @@ export const toggleReplaceHistory = (searchElement: Element) => {
     if (menu.isOpen) {
         return;
     }
+    menu.element.classList.add("b3-menu--list");
     menu.addItem({
         iconHTML: "",
         label: window.siyuan.languages.clearHistory,
@@ -117,6 +118,7 @@ export const toggleSearchHistory = (searchElement: Element, config: ISearchOptio
     if (menu.isOpen) {
         return;
     }
+    menu.element.classList.add("b3-menu--list");
     menu.addItem({
         iconHTML: "",
         label: window.siyuan.languages.clearHistory,

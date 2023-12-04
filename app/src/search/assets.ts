@@ -240,6 +240,7 @@ export const toggleAssetHistory = (assetElement: Element) => {
     if (menu.isOpen) {
         return;
     }
+    menu.element.classList.add("b3-menu--list");
     menu.addItem({
         iconHTML: "",
         label: window.siyuan.languages.clearHistory,

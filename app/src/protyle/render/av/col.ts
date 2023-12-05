@@ -386,7 +386,7 @@ export const addAttrViewColAnimation = (options: {
         }
         let html = "";
         if (index === 0) {
-            html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
+            html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
     <div draggable="true" class="av__cellheader">
         ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
         <span class="av__celltext">${options.name}</span>
@@ -642,7 +642,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     }
     menu.addItem({
         label: `<label class="fn__flex" style="margin: 4px 0"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.style.whiteSpace === "nowrap" ? "" : " checked"}></label>`,
+<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
         bind(element) {
             const inputElement = element.querySelector("input") as HTMLInputElement;
             inputElement.addEventListener("change", () => {

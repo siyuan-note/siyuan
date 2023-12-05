@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/88250/gulu"
 	"path"
 	"runtime/debug"
 	"sync"
@@ -75,14 +76,14 @@ func WaitForWritingDatabase() {
 
 func isWritingDatabase() bool {
 	time.Sleep(util.SQLFlushInterval + 50*time.Millisecond)
-	if 0 < len(operationQueue) || util.IsMutexLocked(&txLock) {
+	if 0 < len(operationQueue) || gulu.IsMutexLocked(&txLock) {
 		return true
 	}
 	return false
 }
 
 func IsEmptyQueue() bool {
-	return 1 > len(operationQueue) && !util.IsMutexLocked(&txLock)
+	return 1 > len(operationQueue) && !gulu.IsMutexLocked(&txLock)
 }
 
 func ClearQueue() {

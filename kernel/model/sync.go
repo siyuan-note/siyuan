@@ -240,7 +240,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if util.IsMutexLocked(&syncLock) {
+	if gulu.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
 		planSyncAfter(fixSyncInterval)
 		return false

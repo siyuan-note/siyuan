@@ -554,8 +554,8 @@ func copyTempAsset(absPath string) (ret string) {
 		return
 	}
 
-	filelock.RWLock.Lock()
-	defer filelock.RWLock.Unlock()
+	filelock.Lock(absPath)
+	defer filelock.Unlock(absPath)
 
 	ext := filepath.Ext(absPath)
 	ret = filepath.Join(dir, gulu.Rand.String(7)+ext)

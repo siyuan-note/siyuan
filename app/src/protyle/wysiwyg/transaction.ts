@@ -461,6 +461,11 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     updateBlock(updateElements, protyle, operation, isUndo);
                 }
             });
+        } else { // updateElements 没有包含潜入块，在悬浮层编辑潜入块时，潜入块也需要更新
+            // 更新 ws 嵌入块
+            updateEmbed(protyle, operation);
+            // 更新 ws 引用块
+            updateRef(protyle, operation.id);
         }
         return;
     }

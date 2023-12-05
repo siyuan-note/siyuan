@@ -589,7 +589,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     }
     const isPin = cellElement.dataset.pin === "true";
     menu.addItem({
-        icon: "iconPin",
+        icon: isPin ? "iconUnpin" : "iconPin",
         label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
         click() {
             transaction(protyle, [{

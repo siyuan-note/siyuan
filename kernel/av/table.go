@@ -566,7 +566,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return !value.Checkbox.Checked
 		}
 	}
-	return true
+	return false
 }
 
 // Table 描述了表格实例的结构。

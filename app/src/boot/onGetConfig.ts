@@ -445,11 +445,12 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
 </div></div>`);
         const pinElement = document.getElementById("pinWindow");
         pinElement.addEventListener("click", () => {
-            pinElement.classList.toggle("toolbar__item--active");
-            if (pinElement.classList.contains("toolbar__item--active")) {
+            if (pinElement.getAttribute("aria-label") === window.siyuan.languages.pin) {
+                pinElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");
                 pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                 ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopTrue");
             } else {
+                pinElement.querySelector("use").setAttribute("xlink:href", "#iconPin");
                 pinElement.setAttribute("aria-label", window.siyuan.languages.pin);
                 ipcRenderer.send(Constants.SIYUAN_CMD, "setAlwaysOnTopFalse");
             }

@@ -1587,7 +1587,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     }
     const isPinHead = nodeElement.getAttribute("custom-pinthead");
     menus.push({
-        icon: "iconPin",
+        icon: isPinHead ? "iconUnpin" : "iconPin",
         label: isPinHead ? window.siyuan.languages.unpinTableHead : window.siyuan.languages.pinTableHead,
         click: () => {
             const html = nodeElement.outerHTML;

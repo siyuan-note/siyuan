@@ -801,7 +801,7 @@ export class Toolbar {
         } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
         }
-        const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("block__icon--active");
+        const isPin = this.subElement.querySelector('[data-type="pin"]')?.getAttribute("aria-label") === window.siyuan.languages.unpin;
         const pinData: IObject = {};
         if (isPin) {
             const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
@@ -824,7 +824,7 @@ export class Toolbar {
     <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
     <button data-type="export" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
+    <button data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${isPin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}"><svg><use xlink:href="#icon${isPin ? "Unpin" : "Pin"}"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></button>
 </div>
@@ -859,11 +859,11 @@ export class Toolbar {
             if (!btnElement) {
                 if (event.detail === 2) {
                     const pingElement = headerElement.querySelector('[data-type="pin"]');
-                    if (pingElement.classList.contains("block__icon--active")) {
-                        pingElement.classList.remove("block__icon--active");
+                    if (pingElement.getAttribute("aria-label") === window.siyuan.languages.unpin) {
+                        pingElement.querySelector("svg use").setAttribute("xlink:href", "#iconPin");
                         pingElement.setAttribute("aria-label", window.siyuan.languages.pin);
                     } else {
-                        pingElement.classList.add("block__icon--active");
+                        pingElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
                         pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                     }
                     event.preventDefault();
@@ -874,15 +874,15 @@ export class Toolbar {
             event.stopPropagation();
             switch (btnElement.getAttribute("data-type")) {
                 case "close":
-                    this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
+                    this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
                     hideElements(["util"], protyle);
                     break;
                 case "pin":
-                    if (btnElement.classList.contains("block__icon--active")) {
-                        btnElement.classList.remove("block__icon--active");
+                    if (btnElement.getAttribute("aria-label") === window.siyuan.languages.unpin) {
+                        btnElement.querySelector("svg use").setAttribute("xlink:href", "#iconPin");
                         btnElement.setAttribute("aria-label", window.siyuan.languages.pin);
                     } else {
-                        btnElement.classList.add("block__icon--active");
+                        btnElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
                         btnElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                     }
                     break;
@@ -937,7 +937,7 @@ export class Toolbar {
         /// #if !MOBILE
         moveResize(this.subElement, () => {
             const pinElement = headerElement.querySelector('[data-type="pin"]');
-            pinElement.classList.add("block__icon--active");
+            pinElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
             pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
             this.subElement.firstElementChild.setAttribute("data-drag", "true");
         });
@@ -993,7 +993,7 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
-                this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
+                this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
                 hideElements(["util"], protyle);
             } else if (event.key === "Tab") {
                 // https://github.com/siyuan-note/siyuan/issues/5270

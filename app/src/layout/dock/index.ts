@@ -87,7 +87,7 @@ export class Dock {
         }
         if (!showDock) {
             this.element.firstElementChild.innerHTML = `<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(0)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#iconPin"></use></svg>
+    <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
 </span>`;
             this.element.classList.add("fn__none");
         } else {
@@ -125,6 +125,7 @@ export class Dock {
                 } else if (target.classList.contains("dock__item")) {
                     this.togglePin();
                     target.setAttribute("aria-label", this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin);
+                    target.querySelector("use").setAttribute("xlink:href", this.pin ? "#iconUnpin" : "#iconPin");
                     event.preventDefault();
                     break;
                 }
@@ -698,7 +699,7 @@ export class Dock {
                 }
             } else {
                 this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#iconPin"></use></svg>
+    <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
 </span>`;
             }
         } else {

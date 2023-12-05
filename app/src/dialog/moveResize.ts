@@ -44,7 +44,9 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
 
         documentSelf.ondragstart = () => false;
 
+        let hasMove = false;
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            hasMove = true;
             if (!element) {
                 return;
             }
@@ -129,7 +131,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
-            if (afterCB) {
+            if (hasMove && afterCB) {
                 afterCB(type);
             }
         };

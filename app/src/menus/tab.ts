@@ -193,7 +193,7 @@ export const initTabMenu = (app: App, tab: Tab) => {
     if (tab.headElement.classList.contains("item--pin")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.unpin,
-            icon: "iconPin",
+            icon: "iconUnpin",
             click: () => {
                 tab.unpin();
             }

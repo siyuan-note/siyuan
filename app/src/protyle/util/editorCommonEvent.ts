@@ -1062,6 +1062,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragoverElement: Element;
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        if (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+            protyle.contentElement.scroll({
+                top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
+                behavior: "smooth"
+            });
+        }
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
         if (event.dataTransfer.types.includes("Files") && event.target.classList.contains("protyle-wysiwyg")) {
             // 文档底部拖拽文件需 preventDefault，否则无法触发 drop 事件 https://github.com/siyuan-note/siyuan/issues/2665
@@ -1094,12 +1101,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
         const point = {x: event.clientX, y: event.clientY, className: ""};
         if (!targetElement) {
-            const editorRect = editorElement.getBoundingClientRect();
-            const editorPosition = {
-                left: editorRect.left + parseInt(editorElement.style.paddingLeft),
-                right: editorRect.right - parseInt(editorElement.style.paddingRight),
-                top: editorRect.top - 16,
-            };
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部
                 targetElement = editorElement.lastElementChild as HTMLElement;
@@ -1108,7 +1109,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 命中顶部
                 targetElement = editorElement.firstElementChild as HTMLElement;
                 point.className = "dragover__top";
-            } else {
+            } else if (contentRect) {
+                const editorPosition = {
+                    left: contentRect.left + parseInt(editorElement.style.paddingLeft),
+                    right: contentRect.right - parseInt(editorElement.style.paddingRight)
+                };
                 if (event.clientX < editorPosition.left) {
                     // 左侧
                     point.x = editorPosition.left;

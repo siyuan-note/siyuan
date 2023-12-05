@@ -82,7 +82,7 @@ func checkDownloadInstallPkg() {
 		return
 	}
 
-	if util.IsMutexLocked(&checkDownloadInstallPkgLock) {
+	if gulu.IsMutexLocked(&checkDownloadInstallPkgLock) {
 		return
 	}
 

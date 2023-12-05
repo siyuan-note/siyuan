@@ -87,7 +87,7 @@ var (
 
 func isWritingFiles() bool {
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	return 0 < len(txQueue) || util.IsMutexLocked(&flushLock)
+	return 0 < len(txQueue) || gulu.IsMutexLocked(&flushLock)
 }
 
 func init() {

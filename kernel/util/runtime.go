@@ -23,7 +23,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -83,11 +82,6 @@ func logBootInfo() {
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
 		Ver, runtime.GOARCH, plat, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
-}
-
-func IsMutexLocked(m *sync.Mutex) bool {
-	state := reflect.ValueOf(m).Elem().FieldByName("state")
-	return state.Int()&1 == 1
 }
 
 func RandomSleep(minMills, maxMills int) {
@@ -177,7 +171,7 @@ func CheckFileSysStatus() {
 func checkFileSysStatus() {
 	defer logging.Recover()
 
-	if IsMutexLocked(&checkFileSysStatusLock) {
+	if gulu.IsMutexLocked(&checkFileSysStatusLock) {
 		logging.LogWarnf("check file system status is locked, skip")
 		return
 	}

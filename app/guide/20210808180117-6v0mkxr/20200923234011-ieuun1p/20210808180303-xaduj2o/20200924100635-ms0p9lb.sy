@@ -6,7 +6,7 @@
 		"id": "20200924100635-ms0p9lb",
 		"title": "Bookmark and Tag",
 		"type": "doc",
-		"updated": "20230928114919"
+		"updated": "20231205225745"
 	},
 	"Children": [
 		{
@@ -208,12 +208,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230928113959-ebzf9zy",
-				"updated": "20230928114919"
+				"updated": "20231205225745"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Do not use special symbols in bookmarks or tags, otherwise renaming in the bookmark or tag panel will not be possible. The \"special symbols\" here include: "
+					"Data": "Please do not use special symbols in bookmarks or tags, otherwise you will not be able to search globally, and you will not be able to rename and delete them in the bookmarks/tags panel. The \"special symbols\" here include: "
 				},
 				{
 					"Type": "NodeTextMark",

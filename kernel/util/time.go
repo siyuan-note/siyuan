@@ -40,6 +40,14 @@ func WeekdayCN(date time.Time) string {
 	return weekdayCN[week]
 }
 
+// WeekdayCN2 returns the day of the week specified by date.
+// Sunday=天, Monday=一, ..., Saturday=六.
+func WeekdayCN2(date time.Time) string {
+	week := Weekday(date)
+	weekdayCN2 := []string{"天", "一", "二", "三", "四", "五", "六"}
+	return weekdayCN2[week]
+}
+
 // ISOWeek returns the ISO 8601 year and week number in which date occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1,
 // and Dec 29 to Dec 31 might belong to week 1 of year n+1.

@@ -49,6 +49,7 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl = tmpl.Funcs(template.FuncMap{
 		"Weekday":   util.Weekday,
 		"WeekdayCN": util.WeekdayCN,
+		"WeekdayCN2": util.WeekdayCN2,
 		"ISOWeek":   util.ISOWeek,
 	})
 	tpl, err := tmpl.Parse(templateContent)
@@ -249,6 +250,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 	}
 	funcMap["Weekday"] = util.Weekday
 	funcMap["WeekdayCN"] = util.WeekdayCN
+	funcMap["WeekdayCN2"] = util.WeekdayCN2
 	funcMap["ISOWeek"] = util.ISOWeek
 
 	goTpl := template.New("").Delims(".action{", "}")

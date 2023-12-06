@@ -2,7 +2,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
-import {fullscreen, netImg2LocalAssets} from "./action";
+import {fullscreen, netAssets2LocalAssets, netImg2LocalAssets} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
@@ -339,6 +339,13 @@ export class Breadcrumb {
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
                     click() {
                         netImg2LocalAssets(protyle);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.netAssets2LocalAssets,
+                    icon: "iconTransform",
+                    click() {
+                        netAssets2LocalAssets(protyle);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({

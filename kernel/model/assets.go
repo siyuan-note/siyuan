@@ -386,6 +386,8 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 			return
 		}
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
+	} else {
+		util.PushUpdateMsg(msgId, Conf.Language(121), 3000)
 	}
 	return
 }

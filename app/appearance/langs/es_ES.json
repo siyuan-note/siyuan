@@ -450,6 +450,7 @@
   "searchBackmention": "Menciones de backlinks (las menciones de backlinks de las que se obtienen las palabras clave de la búsqueda)",
   "searchVirtualRef": "Referencia virtual (las palabras clave de búsqueda de referencias virtuales se obtienen a partir de ellas)",
   "netImg2LocalAsset": "Convertir imágenes de red en imágenes locales",
+  "netAssets2LocalAssets": "Convertir activos de red a locales",
   "releaseDate": "Fecha de lanzamiento",
   "pkgSize": "Tamaño del paquete",
   "installSize": "Tamaño de instalación",

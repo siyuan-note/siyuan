@@ -6,7 +6,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20231030111812"
+		"updated": "20231206093734"
 	},
 	"Children": [
 		{
@@ -20,7 +20,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-pb50zx4",
-				"updated": "20231030105537"
+				"updated": "20231206093734"
 			},
 			"Children": [
 				{
@@ -94,7 +94,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -103,7 +103,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -152,7 +152,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -161,7 +161,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -170,7 +170,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -209,7 +209,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -218,7 +218,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -263,7 +263,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -272,7 +272,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -317,7 +317,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -326,7 +326,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -365,7 +365,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -374,7 +374,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -394,15 +394,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製該塊為"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "複製該塊為引用塊"
 								}
 							]
 						},
@@ -421,7 +413,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -430,7 +422,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -469,7 +461,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -478,7 +470,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -517,7 +509,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -526,7 +518,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -536,15 +528,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可將選中內容作為連結標題或塊"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "錨點"
+									"Data": "可將選中內容作為連結標題或塊引用錨點"
 								}
 							]
 						}
@@ -579,7 +563,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -588,7 +572,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -633,7 +617,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -642,7 +626,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -681,7 +665,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -690,7 +674,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -729,7 +713,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -738,7 +722,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -777,7 +761,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -797,11 +781,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用選中內容作為新建文檔的名稱並"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
+									"Data": "使用選中內容作為新建文檔的名稱並引用"
 								}
 							]
 						},
@@ -820,7 +800,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -840,11 +820,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用選中內容作為新建文檔的名稱並"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
+									"Data": "使用選中內容作為新建文檔的名稱並引用"
 								}
 							]
 						},
@@ -863,7 +839,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -872,7 +848,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -891,7 +867,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						}
@@ -926,7 +902,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -965,7 +941,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1004,7 +980,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1013,7 +989,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1052,7 +1028,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1061,7 +1037,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1100,7 +1076,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1109,7 +1085,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1148,7 +1124,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1157,7 +1133,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1196,7 +1172,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1205,7 +1181,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1244,7 +1220,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1253,7 +1229,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1292,7 +1268,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1301,7 +1277,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1340,7 +1316,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1349,7 +1325,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1388,7 +1364,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1397,7 +1373,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1436,7 +1412,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1445,7 +1421,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1484,7 +1460,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1493,7 +1469,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1532,7 +1508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1541,7 +1517,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1580,7 +1556,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1589,7 +1565,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1628,7 +1604,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1637,7 +1613,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1676,7 +1652,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1685,7 +1661,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1724,7 +1700,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1733,7 +1709,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1772,7 +1748,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1781,7 +1757,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								},
 								{
 									"Type": "NodeBr",
@@ -1824,7 +1800,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1833,7 +1809,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								},
 								{
 									"Type": "NodeBr",
@@ -1876,7 +1852,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1921,7 +1897,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -1966,7 +1942,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1975,7 +1951,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2014,7 +1990,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2023,7 +1999,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2062,7 +2038,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2071,7 +2047,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								},
 								{
 									"Type": "NodeBr",
@@ -2120,7 +2096,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2129,7 +2105,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2174,7 +2150,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2219,7 +2195,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2264,7 +2240,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2273,7 +2249,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2318,7 +2294,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2327,7 +2303,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2372,7 +2348,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2417,7 +2393,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2462,7 +2438,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2471,7 +2447,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2510,7 +2486,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2519,7 +2495,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2558,7 +2534,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2567,7 +2543,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2616,7 +2592,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2625,7 +2601,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2664,7 +2640,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2673,7 +2649,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2712,7 +2688,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2721,7 +2697,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2760,7 +2736,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2769,7 +2745,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2808,7 +2784,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2817,7 +2793,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2856,7 +2832,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2865,7 +2841,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2904,7 +2880,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2913,7 +2889,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -2952,7 +2928,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2961,7 +2937,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3000,7 +2976,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3020,11 +2996,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "引用塊"
 								}
 							]
 						},
@@ -3043,7 +3015,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3052,7 +3024,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3061,7 +3033,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3070,7 +3042,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3079,7 +3051,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3088,7 +3060,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3107,7 +3079,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3116,7 +3088,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 需選中文字內容"
+									"Data": "​ 需選中文字內容"
 								}
 							]
 						}
@@ -3151,7 +3123,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3160,7 +3132,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3199,7 +3171,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3208,7 +3180,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3247,7 +3219,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3256,7 +3228,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3309,7 +3281,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3318,7 +3290,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								},
 								{
 									"Type": "NodeBr",
@@ -3332,15 +3304,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標需停留在"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "元素內"
+									"Data": "游標需停留在引用元素內"
 								}
 							]
 						}
@@ -3379,7 +3343,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3388,7 +3352,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3398,15 +3362,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標需停留在"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "元素內"
+									"Data": "游標需停留在引用元素內"
 								}
 							]
 						}
@@ -3445,7 +3401,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3454,7 +3410,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3464,15 +3420,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標需停留在"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "元素內"
+									"Data": "游標需停留在引用元素內"
 								}
 							]
 						}
@@ -3488,15 +3436,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在下側打開"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "在下側打開引用塊"
 								}
 							]
 						},
@@ -3515,7 +3455,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3524,7 +3464,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						},
@@ -3534,15 +3474,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標需停留在"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "元素內"
+									"Data": "游標需停留在引用元素內"
 								}
 							]
 						}
@@ -3587,15 +3519,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置，游標需停留在"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "引用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "元素內"
+									"Data": "​ 中配置，游標需停留在引用元素內"
 								}
 							]
 						}
@@ -3640,7 +3564,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3685,7 +3609,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3730,7 +3654,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3753,7 +3677,7 @@
 									"Data": "span",
 									"Children": [
 										{
-											"Type": "NodeBackslashContent",
+											"Type": "NodeText",
 											"Data": "*"
 										}
 									]
@@ -3789,7 +3713,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3834,7 +3758,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3879,7 +3803,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}
@@ -3896,6 +3820,51 @@
 								{
 									"Type": "NodeText",
 									"Data": "網絡圖片轉換為本地圖片"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "網路資源檔案轉換本地"
 								}
 							]
 						},
@@ -3969,7 +3938,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 中配置"
+									"Data": "​ 中配置"
 								}
 							]
 						}

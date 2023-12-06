@@ -224,7 +224,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "")
+	viewable, err = renderAttributeView(attrView, "", 1, -1)
 	return
 }
 
@@ -267,11 +267,11 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "")
+	viewable, err = renderAttributeView(attrView, "", 1, -1)
 	return
 }
 
-func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(avID, viewID string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -288,11 +288,11 @@ func RenderAttributeView(avID, viewID string) (viewable av.Viewable, attrView *a
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, viewID)
+	viewable, err = renderAttributeView(attrView, viewID, page, pageSize)
 	return
 }
 
-func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSize int) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -372,7 +372,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string) (viewable av
 		}
 		view.Table.Sorts = tmpSorts
 
-		viewable, err = renderAttributeViewTable(attrView, view)
+		viewable, err = renderAttributeViewTable(attrView, view, page, pageSize)
 	}
 
 	viewable.FilterRows()
@@ -440,7 +440,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	return buf.String()
 }
 
-func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
+func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, page, pageSize int) (ret *av.Table, err error) {
 	ret = &av.Table{
 		ID:      view.ID,
 		Icon:    view.Icon,
@@ -621,6 +621,15 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 		return iv < jv
 	})
+
+	if 0 < pageSize {
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		if len(ret.Rows) < end {
+			end = len(ret.Rows)
+		}
+		ret.Rows = ret.Rows[start:end]
+	}
 	return
 }
 

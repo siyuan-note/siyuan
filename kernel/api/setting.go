@@ -30,6 +30,8 @@ import (
 )
 
 func refreshVirtualBlockRef(c *gin.Context) {
+	// Add internal kernel API `/api/setting/refreshVirtualBlockRef` https://github.com/siyuan-note/siyuan/issues/9829
+
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

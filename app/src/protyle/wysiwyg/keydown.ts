@@ -22,12 +22,11 @@ import {
     getNextBlock,
     getPreviousBlock,
     getTopAloneElement,
-    hasNextSibling,
     hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
-import {enter} from "./enter";
+import {enter, softEnter} from "./enter";
 import {fixTable} from "../util/table";
 import {
     turnsIntoOneTransaction, turnsIntoTransaction,
@@ -866,72 +865,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 软换行
-        if (matchHotKey("⇧↩", event) && selectText === "") {
-            let startElement = range.startContainer as HTMLElement;
-            const nextSibling = hasNextSibling(startElement) as Element;
-            // 图片之前软换行
-            if (nextSibling && nextSibling.nodeType !== 3 && nextSibling.classList.contains("img")) {
-                nextSibling.insertAdjacentHTML("beforebegin", "<wbr>");
-                const oldHTML = nodeElement.outerHTML;
-                nextSibling.previousElementSibling.remove();
-                const newlineNode = document.createTextNode("\n");
-                startElement.after(document.createTextNode(Constants.ZWSP));
-                startElement.after(newlineNode);
-                range.selectNode(newlineNode);
-                range.collapse(false);
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            // 行内元素软换行 https://github.com/siyuan-note/insider/issues/886
-            if (startElement.nodeType === 3) {
-                startElement = startElement.parentElement;
-            }
-            if (startElement && protyle.toolbar.getCurrentType(range).length > 0 &&
-                getSelectionOffset(startElement, startElement, range).end === startElement.textContent.length) {
-                startElement.insertAdjacentHTML("afterend", "<wbr>");
-                const oldHTML = nodeElement.outerHTML;
-                startElement.nextElementSibling.remove();
-                if (!hasNextSibling(startElement)) {
-                    startElement.after(document.createTextNode("\n"));
-                }
-                const newlineNode = document.createTextNode("\n");
-                startElement.after(newlineNode);
-                range.selectNode(newlineNode);
-                range.collapse(false);
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            if (window.siyuan.config.system.container === "ios") {
-                // iPad shift+enter 无效
-                startElement = range.startContainer as HTMLElement;
-                const nextSibling = hasNextSibling(startElement);
-                if (nextSibling && nextSibling.textContent.trim() !== "") {
-                    document.execCommand("insertHTML", false, "\n");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-                if (!nextSibling) {
-                    startElement.after(document.createTextNode("\n"));
-                }
-                const newlineNode = document.createTextNode("\n");
-                startElement.after(newlineNode);
-                const newlineNextSibling = hasNextSibling(newlineNode);
-                if (newlineNextSibling && newlineNextSibling.textContent === "\n") {
-                    range.setStart(newlineNextSibling, 0);
-                } else {
-                    range.setStart(newlineNode, 0);
-                }
-                range.collapse(false);
-                focusByRange(range);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
+        if (matchHotKey("⇧↩", event) && selectText === "" && softEnter(range, nodeElement, protyle)) {
+            event.stopPropagation();
+            event.preventDefault();
+            return;
         }
 
         // 回车

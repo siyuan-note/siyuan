@@ -11,7 +11,7 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
-import {input} from "../../protyle/wysiwyg/input";
+import {softEnter} from "../../protyle/wysiwyg/enter";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -634,9 +634,9 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         } else if (type === "softLine") {
-            range.insertNode(document.createTextNode("\n"));
-            range.collapse(false);
-            input(protyle, nodeElement, range);
+            range.extractContents();
+            softEnter(range, nodeElement, protyle);
+            focusByRange(range);
             return;
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {

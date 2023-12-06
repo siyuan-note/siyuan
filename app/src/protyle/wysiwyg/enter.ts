@@ -1,5 +1,5 @@
 import {genEmptyElement, insertEmptyBlock} from "../../block/util";
-import {getSelectionOffset, focusByWbr, setLastNodeRange, focusBlock} from "../util/selection";
+import {getSelectionOffset, focusByWbr, setLastNodeRange, focusBlock, focusByRange} from "../util/selection";
 import {
     getContenteditableElement,
     getTopEmptyElement,
@@ -13,8 +13,9 @@ import {highlightRender} from "../render/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
-import {setStorageVal} from "../util/compatibility";
+import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
+import {isMobile} from "../../util/functions";
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
@@ -418,3 +419,68 @@ const removeEmptyNode = (newElement: Element) => {
         }
     }
 };
+
+export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProtyle) => {
+    let startElement = range.startContainer as HTMLElement;
+    const nextSibling = hasNextSibling(startElement) as Element;
+    // 图片之前软换行
+    if (nextSibling && nextSibling.nodeType !== 3 && nextSibling.classList.contains("img")) {
+        nextSibling.insertAdjacentHTML("beforebegin", "<wbr>");
+        const oldHTML = nodeElement.outerHTML;
+        nextSibling.previousElementSibling.remove();
+        const newlineNode = document.createTextNode("\n");
+        startElement.after(document.createTextNode(Constants.ZWSP));
+        startElement.after(newlineNode);
+        range.selectNode(newlineNode);
+        range.collapse(false);
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+        return true;
+    }
+    // 行内元素末尾软换行 https://github.com/siyuan-note/insider/issues/886
+    if (startElement.nodeType === 3) {
+        startElement = startElement.parentElement;
+    }
+    if (startElement && protyle.toolbar.getCurrentType(range).length > 0 &&
+        getSelectionOffset(startElement, startElement, range).end === startElement.textContent.length) {
+        addNewLineToEnd(range, nodeElement, protyle, startElement);
+        return true;
+    }
+    if (isIPad() || isMobile()) {
+        // iPad shift+enter 无效
+        startElement = range.startContainer as HTMLElement;
+        const nextSibling = hasNextSibling(startElement);
+        if (nextSibling && nextSibling.textContent.trim() !== "") {
+            document.execCommand("insertHTML", false, "\n");
+            return true;
+        }
+        addNewLineToEnd(range, nodeElement, protyle, startElement);
+        return true;
+    }
+    return false
+}
+
+const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProtyle, startElement: Element) => {
+    const wbrElement = document.createElement("wbr");
+    if (startElement.nodeType === 3) {
+        range.insertNode(wbrElement);
+    } else {
+        startElement.insertAdjacentElement("afterend", wbrElement);
+    }
+    const oldHTML = nodeElement.outerHTML;
+    wbrElement.remove();
+    let endNewlineNode
+    if (!hasNextSibling(startElement)) {
+        endNewlineNode = document.createTextNode("\n");
+        startElement.after(endNewlineNode);
+    }
+    const newlineNode = document.createTextNode("\n");
+    startElement.after(newlineNode);
+    if (endNewlineNode) {
+        range.setStart(endNewlineNode, 0);
+    } else {
+        range.setStart(newlineNode, 1);
+    }
+    range.collapse(true);
+    focusByRange(range);
+    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+}

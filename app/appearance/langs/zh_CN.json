@@ -450,6 +450,7 @@
   "searchBackmention": "反链提及（反链提及搜索关键字从以下方式获得）",
   "searchVirtualRef": "虚拟引用（虚拟引用搜索关键字从以下方式获得）",
   "netImg2LocalAsset": "网络图片转换为本地图片",
+  "netAssets2LocalAssets": "网络资源文件转换本地",
   "releaseDate": "发布日期",
   "pkgSize": "包大小",
   "installSize": "安装大小",

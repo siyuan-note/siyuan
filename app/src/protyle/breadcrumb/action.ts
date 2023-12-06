@@ -9,6 +9,27 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
 import {resize} from "../util/resize";
 
+export const netAssets2LocalAssets = (protyle: IProtyle) => {
+    if (protyle.element.querySelector(".wysiwygLoading")) {
+        return;
+    }
+    addLoading(protyle);
+    hideElements(["toolbar"], protyle);
+    fetchPost("/api/format/netAssets2LocalAssets", {
+        id: protyle.block.rootID
+    }, () => {
+        /// #if MOBILE
+        reloadProtyle(protyle, false);
+        /// #else
+        getAllModels().editor.forEach(item => {
+            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
+            }
+        });
+        /// #endif
+    });
+};
+
 export const netImg2LocalAssets = (protyle: IProtyle) => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
         return;

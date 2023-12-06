@@ -29,6 +29,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func refreshVirtualBlockRef(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.ResetVirtualBlockRefCache()
+}
+
 func setBazaar(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

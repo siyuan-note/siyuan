@@ -6,7 +6,6 @@ import {
     getSelectionOffset,
     setFirstNodeRange,
 } from "../util/selection";
-import {netImg2LocalAssets} from "../breadcrumb/action";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
@@ -16,6 +15,7 @@ import {transaction, updateTransaction} from "./transaction";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
+import {net2LocalAssets} from "../breadcrumb/action";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
@@ -30,7 +30,14 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
-        netImg2LocalAssets(protyle);
+        net2LocalAssets(protyle, "Img");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.netAssets2LocalAssets.custom, event)) {
+        net2LocalAssets(protyle, "Assets");
         event.preventDefault();
         event.stopPropagation();
         return true;

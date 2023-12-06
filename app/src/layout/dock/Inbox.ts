@@ -335,7 +335,6 @@ ${data.shorthandContent}
                         md: response.data.shorthandMd,
                     }, (docResponse) => {
                         this.remove(item);
-                        fetchPost("/api/format/netAssets2LocalAssets", {id: docResponse.data.id});
                     });
                 });
             });

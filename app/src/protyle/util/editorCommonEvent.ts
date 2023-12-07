@@ -1062,6 +1062,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragoverElement: Element;
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+        if (protyle.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         const contentRect = protyle.contentElement.getBoundingClientRect();
         if (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
             protyle.contentElement.scroll({
@@ -1263,7 +1268,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverElement = targetElement;
         }
     });
-    editorElement.addEventListener("dragleave", () => {
+    editorElement.addEventListener("dragleave", (event) => {
+        if (protyle.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
             item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
         });

@@ -326,6 +326,9 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
         item.setAttribute("contenteditable", "false");
     });
+    protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
+        item.setAttribute("draggable", "false");
+    });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
@@ -359,6 +362,9 @@ export const enableProtyle = (protyle: IProtyle) => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
             item.setAttribute("contenteditable", "true");
         }
+    });
+    protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
+        item.setAttribute("draggable", "true");
     });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");

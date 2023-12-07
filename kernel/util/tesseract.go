@@ -52,27 +52,32 @@ func SetAssetText(asset, text string) {
 	AssetsTextsChanged = true
 }
 
-func GetAssetText(asset string, force bool) string {
+func ExistsAssetText(asset string) (ret bool) {
+	AssetsTextsLock.Lock()
+	_, ret = AssetsTexts[asset]
+	AssetsTextsLock.Unlock()
+	return
+}
+
+func GetAssetText(asset string, force bool) (ret string) {
 	if !force {
 		AssetsTextsLock.Lock()
-		ret, ok := AssetsTexts[asset]
+		ret = AssetsTexts[asset]
 		AssetsTextsLock.Unlock()
-		if ok {
-			return ret
-		}
+		return
 	}
 
 	assetsPath := GetDataAssetsAbsPath()
 	assetAbsPath := strings.TrimPrefix(asset, "assets")
 	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
-	ret := Tesseract(assetAbsPath)
+	ret = Tesseract(assetAbsPath)
 	AssetsTextsLock.Lock()
 	AssetsTexts[asset] = ret
 	AssetsTextsLock.Unlock()
 	if "" != ret {
 		AssetsTextsChanged = true
 	}
-	return ret
+	return
 }
 
 func IsTesseractExtractable(p string) bool {

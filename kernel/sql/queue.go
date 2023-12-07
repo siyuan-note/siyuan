@@ -51,6 +51,7 @@ type dbQueueOperation struct {
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename/rename_sub_tree
 	block                         *Block      // update_block_content
+	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
 }
 
@@ -191,12 +192,28 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = updateBlockContent(tx, op.block)
 	case "delete_assets":
 		err = deleteAssetsByHashes(tx, op.removeAssetHashes)
+	case "index_node":
+		err = indexNode(tx, op.id)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 	}
 	return
+}
+
+func IndexNodeQueue(id string) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{id: id, inQueueTime: time.Now(), action: "index_node"}
+	for i, op := range operationQueue {
+		if "index_node" == op.action && op.id == id {
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {

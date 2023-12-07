@@ -51,6 +51,14 @@ func RemoveAsset(path string) {
 	delete(assetsCache, path)
 }
 
+func ExistAsset(path string) (ret bool) {
+	assetsLock.Lock()
+	defer assetsLock.Unlock()
+
+	_, ret = assetsCache[path]
+	return
+}
+
 func LoadAssets() {
 	defer logging.Recover()
 

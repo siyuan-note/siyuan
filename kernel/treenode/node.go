@@ -137,6 +137,32 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 	return markdown
 }
 
+func IsNodeOCRed(node *ast.Node) (ret bool) {
+	ret = true
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeImage == n.Type {
+			linkDest := n.ChildByType(ast.NodeLinkDest)
+			if nil != linkDest {
+				linkDestStr := linkDest.TokensStr()
+				if !cache.ExistAsset(linkDestStr) {
+					return ast.WalkContinue
+				}
+
+				if !util.ExistsAssetText(linkDestStr) {
+					ret = false
+					return ast.WalkStop
+				}
+			}
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
 func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath bool) string {
 	if nil == node {
 		return ""

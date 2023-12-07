@@ -103,7 +103,11 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             (Constants.KEYCODELIST[event.keyCode].length === 1 &&
                 !event.metaKey && !event.ctrlKey &&
                 !["⇧", "⌃", "⌥", "⌘"].includes(Constants.KEYCODELIST[event.keyCode]))) {
-            popTextCell(protyle, [selectCellElement]);
+            if (!selectCellElement.style.backgroundColor) {
+                popTextCell(protyle, [selectCellElement]);
+            } else {
+                event.preventDefault();
+            }
             return true;
         }
     }

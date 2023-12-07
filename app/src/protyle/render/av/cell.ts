@@ -141,7 +141,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
-    if (type === "updated" || type === "created") {
+    if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
         return;
     }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
@@ -210,7 +210,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                updateCellValue(protyle, type, cellElements);
+                inputElement.blur();
                 if (event.key === "Tab") {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
@@ -260,7 +260,6 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (!blockElement) {
         return;
     }
-
     const avMaskElement = document.querySelector(".av__mask");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
@@ -362,7 +361,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (blockElement) {
         focusBlock(blockElement);
     }
-    setTimeout(() => {
-        avMaskElement?.remove();
+    document.querySelectorAll(".av__mask").forEach((item) => {
+        item.remove();
     });
 };

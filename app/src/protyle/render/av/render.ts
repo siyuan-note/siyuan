@@ -66,7 +66,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 viewID: newViewID
             }, (response) => {
                 const data = response.data.view as IAVTable;
-                e.dataset.pageSize = data.pageSize.toString();
+                if (!e.dataset.pageSize) {
+                    e.dataset.pageSize = data.pageSize.toString();
+                }
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                 let calcHTML = '<div style="width: 24px"></div>';

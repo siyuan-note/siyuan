@@ -145,10 +145,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
-        if (isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (Constants.KEYCODELIST[event.keyCode] === "/") {
+        if (!["⌘", "⇧", "⌥", "⌃"].includes(Constants.KEYCODELIST[event.keyCode])) {
+            if (Constants.KEYCODELIST[event.keyCode] === "/" ||
+                // 德语
+                event.key === "/" ||
+                // windows 中文
+                (event.code === "Slash" && event.key === "Process" && event.keyCode === 229)) {
                 protyle.hint.enableSlash = true;
-            } else if (Constants.KEYCODELIST[event.keyCode] === "\\") {
+            } else if (Constants.KEYCODELIST[event.keyCode] === "\\" ||
+                // 德语
+                event.key === "\\" ||
+                // windows 中文
+                (event.code === "Backslash" && event.key === "Process" && event.keyCode === 229)) {
                 protyle.hint.enableSlash = false;
                 hideElements(["hint"], protyle);
                 // 此处不能返回，否则无法撤销 https://github.com/siyuan-note/siyuan/issues/2795

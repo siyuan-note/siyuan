@@ -122,7 +122,7 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
     }
 };
 
-const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: IProtyle, avID:string) => {
+const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: IProtyle, avID: string) => {
     if (currentPageSIze === newPageSize) {
         return;
     }
@@ -135,9 +135,10 @@ const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: I
         data: currentPageSIze,
         avID,
     }]);
+    document.querySelector(".av__panel")?.remove();
 };
 
-export const setPageSize = (target: HTMLElement, protyle: IProtyle, avID:string) => {
+export const setPageSize = (target: HTMLElement, protyle: IProtyle, avID: string) => {
     const menu = new Menu("av-page-size");
     if (menu.isOpen) {
         return;

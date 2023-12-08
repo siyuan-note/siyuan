@@ -127,6 +127,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-load-more") {
+            blockElement.removeAttribute("data-render");
+            blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+            avRender(blockElement, protyle, undefined, target.getAttribute("data-id"));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "set-page-size") {
             setPageSize(target, protyle, blockElement.getAttribute("data-av-id"));
             event.preventDefault();

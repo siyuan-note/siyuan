@@ -330,7 +330,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
         item.setAttribute("draggable", "false");
     });
-    protyle.wysiwyg.element.querySelectorAll('.av').forEach((item: HTMLElement) => {
+    protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
         const headerElement = item.querySelector(".av__row--header") as HTMLElement;
         if (headerElement) {
             headerElement.style.transform = "";
@@ -375,7 +375,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         item.setAttribute("draggable", "true");
     });
     const contentRect = protyle.contentElement.getBoundingClientRect();
-    protyle.wysiwyg.element.querySelectorAll('.av').forEach((item: HTMLElement) => {
+    protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
         stickyRow(item, contentRect, "all");
     });
     if (protyle.breadcrumb) {

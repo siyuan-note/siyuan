@@ -17,6 +17,8 @@ import (
 )
 
 func OCRAssetsJob() {
+	util.WaitForTesseractInit()
+
 	if !util.TesseractEnabled {
 		return
 	}
@@ -25,6 +27,10 @@ func OCRAssetsJob() {
 }
 
 func autoOCRAssets() {
+	if !util.TesseractEnabled {
+		return
+	}
+
 	defer logging.Recover()
 
 	assetsPath := util.GetDataAssetsAbsPath()

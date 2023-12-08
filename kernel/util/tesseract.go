@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -136,9 +137,21 @@ func Tesseract(imgAbsPath string) string {
 	return ret
 }
 
+var tesseractInited = atomic.Bool{}
+
+func WaitForTesseractInit() {
+	for {
+		if tesseractInited.Load() {
+			return
+		}
+		time.Sleep(time.Second)
+	}
+}
+
 func InitTesseract() {
 	ver := getTesseractVer()
 	if "" == ver {
+		tesseractInited.Store(true)
 		return
 	}
 
@@ -146,6 +159,7 @@ func InitTesseract() {
 	if 1 > len(langs) {
 		logging.LogWarnf("no tesseract langs found")
 		TesseractEnabled = false
+		tesseractInited.Store(true)
 		return
 	}
 
@@ -162,6 +176,7 @@ func InitTesseract() {
 			TesseractEnabled = enabledBool
 			if !enabledBool {
 				logging.LogInfof("tesseract-ocr disabled by env")
+				tesseractInited.Store(true)
 				return
 			}
 		}
@@ -169,6 +184,7 @@ func InitTesseract() {
 
 	TesseractLangs = filterTesseractLangs(langs)
 	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.Bytes(TesseractMaxSize), strings.Join(TesseractLangs, "+"))
+	tesseractInited.Store(true)
 }
 
 func filterTesseractLangs(langs []string) (ret []string) {

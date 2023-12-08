@@ -127,7 +127,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
-                        tableHTML += "<div class=\"av__firstcol av__colsticky\"><svg><use xlink:href=\"#iconUncheck\"></use></svg></div>";
+                        tableHTML += '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     }
 
                     row.cells.forEach((cell, index) => {
@@ -252,14 +252,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <div class="av__scroll">
         <div class="av__body">
             ${tableHTML}
-            <div class="av__row--add">
+            <div class="av__row--util">
                 <div class="av__colsticky">
-                    <svg><use xlink:href="#iconAdd"></use></svg>
-                    ${window.siyuan.languages.addAttr}
-                    
-                    <svg><use xlink:href="#loadMore"></use></svg>
-                    ${window.siyuan.languages.nextLabel}
-                    <svg data-type="set-page-size"><use xlink:href="#iconMore"></use></svg>
+                    <button class="b3-button" data-type="av-add-bottom">
+                        <svg><use xlink:href="#iconAdd"></use></svg>
+                        ${window.siyuan.languages.addAttr}
+                    </button>
+                    <span class="fn__space"></span>
+                    <button class="b3-button">
+                        <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
+                        <span data-type="av-load-more">
+                            ${window.siyuan.languages.loadMore}
+                        </span>
+                        <svg data-type="set-page-size" data-size="50"><use xlink:href="#iconMore"></use></svg>
+                    </button>
                 </div>
             </div>
             <div class="av__row--footer">${calcHTML}</div>

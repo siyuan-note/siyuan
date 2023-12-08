@@ -205,27 +205,35 @@
       }
     }
 
-    &--add {
-      color: var(--b3-theme-on-surface);
-      transition: background 20ms ease-in 0s;
-      font-size: 87.5%;
-      align-items: center;
+    &--util {
       display: flex;
 
-      .av__colsticky {
-        align-items: center;
+      .b3-button {
+        margin: 3px 0 3px 24px;
+        color: var(--b3-theme-on-surface);
+        background-color: transparent;
+        font-size: 75%;
 
-        svg {
-          height: 14px;
-          width: 14px;
-          color: var(--b3-theme-on-surface);
-          padding: 10px 10px 10px 5px;
-          flex-shrink: 0;
+        &:hover,
+        &:focus {
+          background-color: var(--b3-av-hover);
+          box-shadow: none;
         }
       }
 
-      &:hover {
-        background-color: var(--b3-av-hover);
+      svg {
+        width: 12px;
+        height: 20px;
+
+        &[data-type="set-page-size"] {
+          margin: 0 0 0 4px;
+          border-radius: var(--b3-border-radius);
+          padding: 0 4px;
+
+          &:hover {
+            background-color: var(--b3-theme-background);
+          }
+        }
       }
     }
   }

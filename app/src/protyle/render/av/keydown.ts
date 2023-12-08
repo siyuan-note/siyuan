@@ -149,7 +149,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (event.key === "ArrowDown") {
             const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling;
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
-            if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
+            if (nextRowElement && !nextRowElement.classList.contains("av__row--util")) {
                 selectRow(nextRowElement.querySelector(".av__firstcol"), "select");
                 cellScrollIntoView(nodeElement, nextRowElement);
             } else {

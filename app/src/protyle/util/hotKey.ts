@@ -49,6 +49,10 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
 
     // https://github.com/siyuan-note/siyuan/issues/9770
     if (hotKey.startsWith("⌃") && !isMac()) {
+        if (hotKey === "⌃D") {
+            // https://github.com/siyuan-note/siyuan/issues/9841
+            return false;
+        }
         hotKey = hotKey.replace("⌘", "").replace("⌃", "⌘")
             .replace("⌘⇧", "⇧⌘")
             .replace("⌘⌥⇧", "⌥⇧⌘")

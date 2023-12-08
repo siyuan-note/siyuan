@@ -20,6 +20,7 @@ import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
 import {commandPanel} from "../plugin/commandPanel";
 import {exportLayout} from "./util";
+import {showMessage} from "../dialog/message";
 
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
@@ -116,6 +117,7 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {
+                showMessage(window.siyuan.languages["_kernel"][95]);
                 exportLayout({
                     reload: false,
                     onlyData: false,

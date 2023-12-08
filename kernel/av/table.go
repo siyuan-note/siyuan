@@ -28,10 +28,11 @@ type LayoutTable struct {
 	Spec int    `json:"spec"` // 布局格式版本
 	ID   string `json:"id"`   // 布局 ID
 
-	Columns []*ViewTableColumn `json:"columns"` // 表格列
-	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
-	Filters []*ViewFilter      `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort        `json:"sorts"`   // 排序规则
+	Columns  []*ViewTableColumn `json:"columns"`  // 表格列
+	RowIDs   []string           `json:"rowIds"`   // 行 ID，用于自定义排序
+	Filters  []*ViewFilter      `json:"filters"`  // 过滤规则
+	Sorts    []*ViewSort        `json:"sorts"`    // 排序规则
+	PageSize int                `json:"pageSize"` // 每页行数
 }
 
 type ViewTableColumn struct {
@@ -571,13 +572,14 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 
 // Table 描述了表格实例的结构。
 type Table struct {
-	ID      string         `json:"id"`      // 表格布局 ID
-	Icon    string         `json:"icon"`    // 表格图标
-	Name    string         `json:"name"`    // 表格名称
-	Filters []*ViewFilter  `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
-	Columns []*TableColumn `json:"columns"` // 表格列
-	Rows    []*TableRow    `json:"rows"`    // 表格行
+	ID       string         `json:"id"`       // 表格布局 ID
+	Icon     string         `json:"icon"`     // 表格图标
+	Name     string         `json:"name"`     // 表格名称
+	Filters  []*ViewFilter  `json:"filters"`  // 过滤规则
+	Sorts    []*ViewSort    `json:"sorts"`    // 排序规则
+	Columns  []*TableColumn `json:"columns"`  // 表格列
+	Rows     []*TableRow    `json:"rows"`     // 表格行
+	RowCount int            `json:"rowCount"` // 表格总行数
 }
 
 type TableColumn struct {

@@ -129,10 +129,10 @@ const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: I
     transaction(protyle, [{
         action: "setAttrViewPageSize",
         avID,
-        data: newPageSize,
+        data: parseInt(newPageSize),
     }], [{
         action: "setAttrViewPageSize",
-        data: currentPageSIze,
+        data: parseInt(currentPageSIze),
         avID,
     }]);
     document.querySelector(".av__panel")?.remove();

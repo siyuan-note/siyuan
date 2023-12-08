@@ -62,7 +62,7 @@ type AppConf struct {
 	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
 	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局，v2.8.0 后这个字段不再使用
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
-	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
+	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
@@ -80,6 +80,20 @@ type AppConf struct {
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
+
+	m *sync.Mutex
+}
+
+func (conf *AppConf) GetUser() *conf.User {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	return conf.User
+}
+
+func (conf *AppConf) SetUser(user *conf.User) {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	conf.User = user
 }
 
 func InitConf() {
@@ -92,7 +106,7 @@ func InitConf() {
 		}
 	}
 
-	Conf = &AppConf{LogLevel: "debug"}
+	Conf = &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		data, err := os.ReadFile(confPath)
@@ -288,7 +302,7 @@ func InitConf() {
 	Conf.System.OSPlatform = util.GetOSPlatform()
 
 	if "" != Conf.UserData {
-		Conf.User = loadUserFromConf()
+		Conf.SetUser(loadUserFromConf())
 	}
 	if nil == Conf.Account {
 		Conf.Account = conf.NewAccount()
@@ -736,14 +750,15 @@ func InitBoxes() {
 }
 
 func IsSubscriber() bool {
-	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
+	u := Conf.GetUser()
+	return nil != u && (-1 == u.UserSiYuanProExpireTime || 0 < u.UserSiYuanProExpireTime) && 0 == u.UserSiYuanSubscriptionStatus
 }
 
 func IsPaidUser() bool {
 	if IsSubscriber() {
 		return true
 	}
-	return nil != Conf.User // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
+	return nil != Conf.GetUser() // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
 	// TODO S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
 	// return nil != Conf.User && 1 == Conf.User.UserSiYuanOneTimePayStatus
 }

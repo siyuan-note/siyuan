@@ -739,7 +739,7 @@ func connectSyncWebSocket() {
 				reconnected := false
 				for retries := 0; retries < 7; retries++ {
 					time.Sleep(7 * time.Second)
-					if nil == Conf.User {
+					if nil == Conf.GetUser() {
 						return
 					}
 
@@ -794,7 +794,7 @@ func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	endpoint := util.GetCloudWebSocketServer() + "/apis/siyuan/dejavu/ws"
 	header := http.Header{
 		"User-Agent":        []string{util.UserAgent},
-		"x-siyuan-uid":      []string{Conf.User.UserId},
+		"x-siyuan-uid":      []string{Conf.GetUser().UserId},
 		"x-siyuan-kernel":   []string{KernelID},
 		"x-siyuan-ver":      []string{util.Ver},
 		"x-siyuan-os":       []string{runtime.GOOS},

@@ -84,7 +84,7 @@ func Export2Liandi(id string) (err error) {
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
 			SetSuccessResult(result).
-			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 			Get(util.GetCloudAccountServer() + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
 			logging.LogErrorf("get liandi article info failed: %s", getErr)
@@ -114,7 +114,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.User.UserId+"/", true,
+	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
 		4, 1, 0,
 		"#", "#",
 		"", "",
@@ -123,7 +123,7 @@ func Export2Liandi(id string) (err error) {
 	request := httpclient.NewCloudRequest30s()
 	request = request.
 		SetSuccessResult(result).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		SetBody(map[string]interface{}{
 			"articleTitle":   title,
 			"articleTags":    tags,
@@ -1090,7 +1090,7 @@ func ExportStdMarkdown(id string) string {
 
 	cloudAssetsBase := ""
 	if IsSubscriber() {
-		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.User.UserId + "/"
+		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
 	}
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,

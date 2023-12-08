@@ -117,7 +117,6 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {
-                showMessage(window.siyuan.languages["_kernel"][95]);
                 exportLayout({
                     reload: false,
                     onlyData: false,

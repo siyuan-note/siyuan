@@ -130,7 +130,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (type === "av-load-more") {
             blockElement.removeAttribute("data-render");
             blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
-            avRender(blockElement, protyle, undefined, target.getAttribute("data-id"));
+            avRender(blockElement, protyle);
             event.preventDefault();
             event.stopPropagation();
             return true;

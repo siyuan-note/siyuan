@@ -294,6 +294,11 @@
     }
 
     .img {
+      // 不能放在 typography 下 https://github.com/siyuan-note/siyuan/issues/9844
+      &:not([style]) {
+        display: initial;
+      }
+
       &--select {
         filter: brightness(0.68);
       }

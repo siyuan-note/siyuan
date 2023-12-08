@@ -580,6 +580,7 @@ type Table struct {
 	Columns  []*TableColumn `json:"columns"`  // 表格列
 	Rows     []*TableRow    `json:"rows"`     // 表格行
 	RowCount int            `json:"rowCount"` // 表格总行数
+	PageSize int            `json:"pageSize"` // 每页行数
 }
 
 type TableColumn struct {

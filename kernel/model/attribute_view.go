@@ -624,6 +624,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, page, p
 
 	// 分页
 	ret.RowCount = len(ret.Rows)
+	ret.PageSize = view.Table.PageSize
 	if 0 < pageSize {
 		start := (page - 1) * pageSize
 		end := start + pageSize

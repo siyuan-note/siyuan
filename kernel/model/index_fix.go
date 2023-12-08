@@ -116,7 +116,7 @@ func removeDuplicateDatabaseIndex() {
 		}
 		deletes++
 		toRemoveRootIDs = append(toRemoveRootIDs, rootID)
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 	}
@@ -335,12 +335,12 @@ func fixBlockTreeByFileSys() {
 			}
 
 			reindexTreeByPath(box.ID, p, i, size, luteEngine)
-			if util.IsExiting {
+			if util.IsExiting.Load() {
 				break
 			}
 		}
 
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 	}
@@ -371,7 +371,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	for rootID, updated := range rootUpdatedMap {
 		i++
 
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 
@@ -396,7 +396,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 			continue
 		}
 
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 	}
@@ -407,7 +407,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 			rootIDs = append(rootIDs, rootID)
 		}
 
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 	}
@@ -424,7 +424,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 		}
 
 		toRemoveRootIDs = append(toRemoveRootIDs, id)
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			break
 		}
 	}

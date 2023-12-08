@@ -477,7 +477,7 @@
   "bootSyncFailed": "Failed to synchronize data at startup",
   "use": "Use",
   "uninstallTip": "Currently in use, please switch it in [Settings - Appearance] before uninstalling",
-  "safeQuit": "Quit the application",
+  "safeQuit": "Exit the application",
   "anchor": "Anchor",
   "showMore": "Show More",
   "refPopover": "Open in popover",
@@ -1114,7 +1114,7 @@
     "cancelWindowTop": "Cancel Window top",
     "officialWebsite": "Visit official website",
     "openSource": "Visit project on GitHub",
-    "resetWindow": "Reset window and quit the program",
+    "resetWindow": "Reset window and exit",
     "quit": "Quit application"
   },
   "_kernel": {

@@ -8,7 +8,7 @@ require (
 	code.sajari.com/docconv v1.3.8
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
-	github.com/88250/gulu v1.2.3-0.20231205093500-bcc43ee27cba
+	github.com/88250/gulu v1.2.3-0.20231208041529-dafc64f2bd1d
 	github.com/88250/lute v1.7.6-0.20231205144411-36eb02d113a6
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -50,12 +50,12 @@ require (
 	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/shirou/gopsutil/v3 v3.23.11
-	github.com/siyuan-note/dejavu v0.0.0-20231206081926-c2bda200c8ab
+	github.com/siyuan-note/dejavu v0.0.0-20231208043525-6211184a4438
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20231206081043-b75b363ddb1b
 	github.com/siyuan-note/httpclient v0.0.0-20231120083123-750db4d28b38
-	github.com/siyuan-note/logging v0.0.0-20231030034701-8265764f00ff
+	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
 	github.com/siyuan-note/riff v0.0.0-20231128081053-0cd7a5fa0076
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -78,7 +78,7 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.48.13 // indirect
+	github.com/aws/aws-sdk-go v1.48.15 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -158,7 +158,7 @@ require (
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
@@ -180,3 +180,4 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/88250/gulu => D:\88250\gulu
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3
 //replace github.com/88250/epub => D:\88250\epub
+//replace github.com/siyuan-note/logging => D:\88250\logging

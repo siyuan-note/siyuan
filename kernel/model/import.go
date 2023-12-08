@@ -84,8 +84,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
@@ -550,8 +550,8 @@ func ImportData(zipPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
@@ -604,6 +604,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			err = errors.New("import from local path failed, please check kernel log for details")
 		}
 	}()
+
+	lockSync()
+	defer unlockSync()
 
 	WaitForWritingFiles()
 

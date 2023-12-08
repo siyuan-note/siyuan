@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -436,7 +437,7 @@ func InitBlockTree(force bool) {
 		return
 	}
 
-	size := int64(0)
+	size := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
 	p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
 		defer waitGroup.Done()
@@ -457,7 +458,7 @@ func InitBlockTree(force bool) {
 			os.Exit(logging.ExitCodeFileSysErr)
 			return
 		}
-		size += info.Size()
+		size.Add(info.Size())
 
 		sliceData := map[string]*BlockTree{}
 		if err = msgpack.NewDecoder(f).Decode(&sliceData); nil != err {
@@ -491,7 +492,7 @@ func InitBlockTree(force bool) {
 	p.Release()
 
 	elapsed := time.Since(start).Seconds()
-	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size)), util.BlockTreePath, elapsed)
+	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size.Load())), util.BlockTreePath, elapsed)
 	return
 }
 
@@ -514,11 +515,12 @@ func SaveBlockTree(force bool) {
 	var count int
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
+		slice.m.Lock()
 		if !force && slice.changed.IsZero() {
+			slice.m.Unlock()
 			return true
 		}
 
-		slice.m.Lock()
 		data, err := msgpack.Marshal(slice.data)
 		if nil != err {
 			logging.LogErrorf("marshal block tree failed: %s", err)
@@ -534,7 +536,9 @@ func SaveBlockTree(force bool) {
 			return false
 		}
 
+		slice.m.Lock()
 		slice.changed = time.Time{}
+		slice.m.Unlock()
 		size += uint64(len(data))
 		count++
 		return true

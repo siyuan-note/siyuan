@@ -67,7 +67,7 @@ func FlushAssetContentQueue() {
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	groupOpsCurrent := map[string]int{}
 	for i, op := range ops {
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			return
 		}
 

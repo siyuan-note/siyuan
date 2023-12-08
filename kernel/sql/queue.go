@@ -20,7 +20,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/88250/gulu"
 	"path"
 	"runtime/debug"
 	"sync"
@@ -36,8 +35,6 @@ import (
 var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
-
-	txLock = sync.Mutex{}
 )
 
 type dbQueueOperation struct {
@@ -77,14 +74,18 @@ func WaitForWritingDatabase() {
 
 func isWritingDatabase() bool {
 	time.Sleep(util.SQLFlushInterval + 50*time.Millisecond)
-	if 0 < len(operationQueue) || gulu.IsMutexLocked(&txLock) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	if 0 < len(operationQueue) {
 		return true
 	}
 	return false
 }
 
 func IsEmptyQueue() bool {
-	return 1 > len(operationQueue) && !gulu.IsMutexLocked(&txLock)
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	return 1 > len(operationQueue)
 }
 
 func ClearQueue() {
@@ -94,30 +95,30 @@ func ClearQueue() {
 }
 
 func FlushQueue() {
-	ops := mergeUpsertTrees()
-	if 1 > len(ops) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	total := len(operationQueue)
+	if 1 > total {
 		return
 	}
 
-	txLock.Lock()
-	defer txLock.Unlock()
 	start := time.Now()
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	total := len(ops)
 	if 512 < total {
 		disableCache()
 		defer enableCache()
 	}
 
 	groupOpsTotal := map[string]int{}
-	for _, op := range ops {
+	for _, op := range operationQueue {
 		groupOpsTotal[op.action]++
 	}
 
 	groupOpsCurrent := map[string]int{}
-	for i, op := range ops {
-		if util.IsExiting {
+	for i, op := range operationQueue {
+		if util.IsExiting.Load() {
 			return
 		}
 
@@ -137,7 +138,7 @@ func FlushQueue() {
 
 		if err = commitTx(tx); nil != err {
 			logging.LogErrorf("commit tx failed: %s", err)
-			return
+			continue
 		}
 
 		if 16 < i && 0 == i%128 {
@@ -145,9 +146,11 @@ func FlushQueue() {
 		}
 	}
 
-	if 128 < len(ops) {
+	if 128 < total {
 		debug.FreeOSMemory()
 	}
+
+	operationQueue = nil
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 7000 < elapsed {
@@ -414,13 +417,4 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 		}
 	}
 	operationQueue = append(operationQueue, newOp)
-}
-
-func mergeUpsertTrees() (ops []*dbQueueOperation) {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-
-	ops = operationQueue
-	operationQueue = nil
-	return
 }

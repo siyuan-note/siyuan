@@ -174,8 +174,12 @@ func IsBooted() bool {
 	return 100 <= bootProgress.Load()
 }
 
-func GetBootProgressDetails() (int32, string) {
-	return bootProgress.Load(), bootDetails
+func GetBootProgressDetails() (progress int32, details string) {
+	progress = bootProgress.Load()
+	bootDetailsLock.Lock()
+	details = bootDetails
+	bootDetailsLock.Unlock()
+	return
 }
 
 func GetBootProgress() int32 {

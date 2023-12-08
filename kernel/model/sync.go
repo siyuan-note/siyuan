@@ -676,7 +676,7 @@ func GetOnlineKernels() (ret []*OnlineKernel) {
 	return
 }
 
-var closedSyncWebSocket = false
+var closedSyncWebSocket = atomic.Bool{}
 
 func closeSyncWebSocket() {
 	defer logging.Recover()
@@ -687,7 +687,7 @@ func closeSyncWebSocket() {
 	if nil != webSocketConn {
 		webSocketConn.Close()
 		webSocketConn = nil
-		closedSyncWebSocket = true
+		closedSyncWebSocket.Store(true)
 	}
 
 	logging.LogInfof("sync websocket closed")
@@ -732,7 +732,7 @@ func connectSyncWebSocket() {
 			result := gulu.Ret.NewResult()
 			if readErr := webSocketConn.ReadJSON(&result); nil != readErr {
 				time.Sleep(1 * time.Second)
-				if closedSyncWebSocket {
+				if closedSyncWebSocket.Load() {
 					return
 				}
 
@@ -803,7 +803,7 @@ func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	}
 	c, _, err = websocket.DefaultDialer.Dial(endpoint, header)
 	if nil == err {
-		closedSyncWebSocket = false
+		closedSyncWebSocket.Store(false)
 	}
 	return
 }

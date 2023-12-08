@@ -574,7 +574,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "set-page-size") {
-                    setPageSize(target);
+                    setPageSize(target, options.protyle, avID);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

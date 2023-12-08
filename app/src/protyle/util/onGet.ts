@@ -376,7 +376,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     });
     const contentRect = protyle.contentElement.getBoundingClientRect();
     protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-        stickyRow(item, contentRect, "all");
+        if (item.querySelector(".av__title")) {
+            stickyRow(item, contentRect, "all");
+        }
     });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");

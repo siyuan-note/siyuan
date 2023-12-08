@@ -259,12 +259,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                         ${window.siyuan.languages.addAttr}
                     </button>
                     <span class="fn__space"></span>
-                    <button class="b3-button">
+                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
                         <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
                         <span data-type="av-load-more">
                             ${window.siyuan.languages.loadMore}
                         </span>
-                        <svg data-type="set-page-size" data-size="50"><use xlink:href="#iconMore"></use></svg>
+                        <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
                     </button>
                 </div>
             </div>

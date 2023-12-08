@@ -1,6 +1,7 @@
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
+import {transaction} from "../../wysiwyg/transaction";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -121,13 +122,22 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
     }
 };
 
-const updatePageSize = (currentPageSIze: string, newPageSize: string) => {
+const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: IProtyle, avID:string) => {
     if (currentPageSIze === newPageSize) {
         return;
     }
+    transaction(protyle, [{
+        action: "setAttrViewPageSize",
+        avID,
+        data: newPageSize,
+    }], [{
+        action: "setAttrViewPageSize",
+        data: currentPageSIze,
+        avID,
+    }]);
 };
 
-export const setPageSize = (target: HTMLElement) => {
+export const setPageSize = (target: HTMLElement, protyle: IProtyle, avID:string) => {
     const menu = new Menu("av-page-size");
     if (menu.isOpen) {
         return;
@@ -138,7 +148,7 @@ export const setPageSize = (target: HTMLElement) => {
         label: "10",
         accelerator: currentPageSIze === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         click() {
-            updatePageSize(currentPageSIze, "10");
+            updatePageSize(currentPageSIze, "10", protyle, avID);
         }
     });
     menu.addItem({
@@ -146,7 +156,7 @@ export const setPageSize = (target: HTMLElement) => {
         accelerator: currentPageSIze === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "25",
         click() {
-            updatePageSize(currentPageSIze, "25");
+            updatePageSize(currentPageSIze, "25", protyle, avID);
         }
     });
     menu.addItem({
@@ -154,7 +164,7 @@ export const setPageSize = (target: HTMLElement) => {
         accelerator: currentPageSIze === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "50",
         click() {
-            updatePageSize(currentPageSIze, "50");
+            updatePageSize(currentPageSIze, "50", protyle, avID);
         }
     });
     menu.addItem({
@@ -162,7 +172,7 @@ export const setPageSize = (target: HTMLElement) => {
         accelerator: currentPageSIze === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "100",
         click() {
-            updatePageSize(currentPageSIze, "100");
+            updatePageSize(currentPageSIze, "100", protyle, avID);
         }
     });
     const rect = target.getBoundingClientRect();

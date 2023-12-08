@@ -48,6 +48,7 @@ type TOperation =
     | "setAttrViewViewIcon"
     | "duplicateAttrViewView"
     | "sortAttrViewView"
+    | "setAttrViewPageSize"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -1038,6 +1039,8 @@ interface IAVTable extends IAVView {
     filters: IAVFilter[],
     sorts: IAVSort[],
     rows: IAVRow[],
+    rowCount: number,
+    pageSize: number,
 }
 
 interface IAVFilter {

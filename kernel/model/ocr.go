@@ -44,7 +44,7 @@ func autoOCRAssets() {
 			util.AssetsTexts[p] = text
 			util.AssetsTextsLock.Unlock()
 			if "" != text {
-				util.AssetsTextsChanged = true
+				util.AssetsTextsChanged.Store(true)
 			}
 			if 7 <= i { // 一次任务中最多处理 7 张图片，防止长时间占用系统资源
 				break
@@ -71,7 +71,7 @@ func cleanNotExistAssetsTexts() {
 
 	for _, asset := range toRemoves {
 		delete(util.AssetsTexts, asset)
-		util.AssetsTextsChanged = true
+		util.AssetsTextsChanged.Store(true)
 	}
 	return
 }
@@ -134,7 +134,7 @@ func LoadAssetsTexts() {
 }
 
 func SaveAssetsTexts() {
-	if !util.AssetsTextsChanged {
+	if !util.AssetsTextsChanged.Load() {
 		return
 	}
 
@@ -160,5 +160,5 @@ func SaveAssetsTexts() {
 		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
 	}
 
-	util.AssetsTextsChanged = false
+	util.AssetsTextsChanged.Store(false)
 }

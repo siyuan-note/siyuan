@@ -41,7 +41,7 @@ var (
 	TesseractMaxSize   = 2 * 1000 * uint64(1000)
 	AssetsTexts        = map[string]string{}
 	AssetsTextsLock    = sync.Mutex{}
-	AssetsTextsChanged = false
+	AssetsTextsChanged = atomic.Bool{}
 
 	TesseractLangs []string
 )
@@ -50,7 +50,7 @@ func SetAssetText(asset, text string) {
 	AssetsTextsLock.Lock()
 	AssetsTexts[asset] = text
 	AssetsTextsLock.Unlock()
-	AssetsTextsChanged = true
+	AssetsTextsChanged.Store(true)
 }
 
 func ExistsAssetText(asset string) (ret bool) {
@@ -76,7 +76,7 @@ func GetAssetText(asset string, force bool) (ret string) {
 	AssetsTexts[asset] = ret
 	AssetsTextsLock.Unlock()
 	if "" != ret {
-		AssetsTextsChanged = true
+		AssetsTextsChanged.Store(true)
 	}
 	return
 }

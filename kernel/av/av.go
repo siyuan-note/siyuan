@@ -567,10 +567,11 @@ func NewTableView() (ret *View) {
 		Name:       "Table",
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
-			Spec:    0,
-			ID:      ast.NewNodeID(),
-			Filters: []*ViewFilter{},
-			Sorts:   []*ViewSort{},
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: 50,
 		},
 	}
 	return
@@ -583,10 +584,11 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
 		Name:       name,
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
-			Spec:    0,
-			ID:      ast.NewNodeID(),
-			Filters: []*ViewFilter{},
-			Sorts:   []*ViewSort{},
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: 50,
 		},
 	}
 	blockKey = NewKey(blockKeyID, "Block", "", KeyTypeBlock)
@@ -675,10 +677,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	// 数据订正 - 行去重
+	// 数据订正
 	for _, view := range av.Views {
 		if nil != view.Table {
+			// 行去重
 			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
+			// 分页大小
+			if 1 > view.Table.PageSize {
+				view.Table.PageSize = 50
+			}
 		}
 	}
 

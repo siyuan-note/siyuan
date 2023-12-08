@@ -239,6 +239,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <div class="fn__space"></div>
+            <span data-type="av-add-more" class="block__icon">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+            </span>
+            <div class="fn__space"></div>
             ${response.data.isMirror ? ` <span class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
@@ -252,6 +256,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 <div class="av__colsticky">
                     <svg><use xlink:href="#iconAdd"></use></svg>
                     ${window.siyuan.languages.addAttr}
+                    
+                    <svg><use xlink:href="#loadMore"></use></svg>
+                    ${window.siyuan.languages.nextLabel}
+                    <svg data-type="set-page-size"><use xlink:href="#iconMore"></use></svg>
                 </div>
             </div>
             <div class="av__row--footer">${calcHTML}</div>

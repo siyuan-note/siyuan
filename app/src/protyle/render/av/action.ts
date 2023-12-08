@@ -77,6 +77,23 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-add-more") {
+            const avID = blockElement.getAttribute("data-av-id");
+            const srcIDs = [Lute.NewNodeID()];
+            transaction(protyle, [{
+                action: "insertAttrViewBlock",
+                avID,
+                srcIDs,
+                isDetached: true,
+            }], [{
+                action: "removeAttrViewBlock",
+                srcIDs,
+                avID,
+            }]);
+            insertAttrViewBlockAnimation(blockElement, 1, undefined, avID);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-more") {
             openMenuPanel({protyle, blockElement, type: "config"});
             event.preventDefault();

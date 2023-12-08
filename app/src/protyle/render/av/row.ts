@@ -126,6 +126,7 @@ const updatePageSize = (currentPageSIze: string, newPageSize: string) => {
         return;
     }
 }
+
 export const setPageSize = (target: HTMLElement) => {
     const menu = new Menu("av-page-size");
     if (menu.isOpen) {

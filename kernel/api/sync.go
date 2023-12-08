@@ -387,7 +387,7 @@ func performSync(c *gin.Context) {
 		mobileSwitch = mobileSwitchArg.(bool)
 	}
 	if mobileSwitch {
-		if nil == model.Conf.User || !model.Conf.Sync.Enabled {
+		if nil == model.Conf.GetUser() || !model.Conf.Sync.Enabled {
 			return
 		}
 	}

@@ -989,9 +989,10 @@ func syncRepoDownload() (err error) {
 		logging.LogErrorf("sync data repo download failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
-			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			u := Conf.GetUser()
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1058,9 +1059,10 @@ func syncRepoUpload() (err error) {
 		logging.LogErrorf("sync data repo upload failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
-			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			u := Conf.GetUser()
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1146,9 +1148,10 @@ func bootSyncRepo() (err error) {
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
-			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			u := Conf.GetUser()
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1220,9 +1223,10 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
-			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			u := Conf.GetUser()
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			if 2 == u.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1762,9 +1766,10 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 
 	userId, token, availableSize := "0", "", int64(1024*1024*1024*1024*2)
 	if nil != Conf.User && conf.ProviderSiYuan == Conf.Sync.Provider {
-		userId = Conf.User.UserId
-		token = Conf.User.UserToken
-		availableSize = Conf.User.GetCloudRepoAvailableSize()
+		u := Conf.GetUser()
+		userId = u.UserId
+		token = u.UserToken
+		availableSize = u.GetCloudRepoAvailableSize()
 	}
 
 	ret = &cloud.Conf{
@@ -1857,12 +1862,13 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 		b.HSize = humanize.Bytes(uint64(backupSize))
 		hAssetSize = humanize.Bytes(uint64(assetSize))
 		hSize = humanize.Bytes(uint64(totalSize))
-		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
-		hExchangeSize = humanize.Bytes(uint64(Conf.User.UserSiYuanPointExchangeRepoSize))
-		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
-		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))
-		hTrafficAPIGet = humanize.SIWithDigits(Conf.User.UserTrafficAPIGet, 2, "")
-		hTrafficAPIPut = humanize.SIWithDigits(Conf.User.UserTrafficAPIPut, 2, "")
+		u := Conf.GetUser()
+		hTotalSize = humanize.Bytes(uint64(u.UserSiYuanRepoSize))
+		hExchangeSize = humanize.Bytes(uint64(u.UserSiYuanPointExchangeRepoSize))
+		hTrafficUploadSize = humanize.Bytes(uint64(u.UserTrafficUpload))
+		hTrafficDownloadSize = humanize.Bytes(uint64(u.UserTrafficDownload))
+		hTrafficAPIGet = humanize.SIWithDigits(u.UserTrafficAPIGet, 2, "")
+		hTrafficAPIPut = humanize.SIWithDigits(u.UserTrafficAPIPut, 2, "")
 	}
 	return
 }

@@ -452,7 +452,7 @@ func getCloudUser(c *gin.Context) {
 		token = t.(string)
 	}
 	model.RefreshUser(token)
-	ret.Data = model.Conf.User
+	ret.Data = model.Conf.GetUser()
 }
 
 func logoutCloudUser(c *gin.Context) {

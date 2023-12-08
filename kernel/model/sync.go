@@ -163,11 +163,11 @@ func SyncData(byHand bool) {
 
 func lockSync() {
 	syncLock.Lock()
-	isSyncing = true
+	isSyncing.Store(true)
 }
 
 func unlockSync() {
-	isSyncing = false
+	isSyncing.Store(false)
 	syncLock.Unlock()
 }
 
@@ -178,14 +178,14 @@ func syncData(exit, byHand bool) {
 		return
 	}
 
+	lockSync()
+	defer unlockSync()
+
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if !exit && !isProviderOnline(byHand) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
-
-	lockSync()
-	defer unlockSync()
 
 	if exit {
 		ExitSyncSucc = 0
@@ -256,7 +256,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if isSyncing {
+	if isSyncing.Load() {
 		logging.LogWarnf("sync is in progress")
 		planSyncAfter(fixSyncInterval)
 		return false
@@ -431,7 +431,7 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 
 var (
 	syncLock  = sync.Mutex{}
-	isSyncing bool
+	isSyncing = atomic.Bool{}
 )
 
 func CreateCloudSyncDir(name string) (err error) {

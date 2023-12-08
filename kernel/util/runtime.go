@@ -27,6 +27,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -60,7 +61,7 @@ func HookUILoaded() {
 }
 
 // IsExiting 是否正在退出程序。
-var IsExiting = false
+var IsExiting = atomic.Bool{}
 
 // MobileOSVer 移动端操作系统版本。
 var MobileOSVer string
@@ -171,12 +172,10 @@ func CheckFileSysStatus() {
 func checkFileSysStatus() {
 	defer logging.Recover()
 
-	if gulu.IsMutexLocked(&checkFileSysStatusLock) {
+	if !checkFileSysStatusLock.TryLock() {
 		logging.LogWarnf("check file system status is locked, skip")
 		return
 	}
-
-	checkFileSysStatusLock.Lock()
 	defer checkFileSysStatusLock.Unlock()
 
 	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"

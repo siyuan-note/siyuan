@@ -24,6 +24,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -70,13 +71,12 @@ func index(boxID string) {
 	if 1 > boxLen {
 		boxLen = 1
 	}
-	bootProgressPart := 30.0 / float64(boxLen) / float64(len(files))
+	bootProgressPart := int32(30.0 / float64(boxLen) / float64(len(files)))
 
 	start := time.Now()
 	luteEngine := util.NewLute()
-	var treeCount int
-	var treeSize int64
-	i := 0
+	treeCount := atomic.Int32{}
+	treeSize := atomic.Int64{}
 	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
 	poolSize := runtime.NumCPU()
@@ -109,12 +109,12 @@ func index(boxID string) {
 		sql.IndexTreeQueue(box.ID, file.path)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
-		treeSize += file.size
-		treeCount++
+		treeSize.Add(file.size)
+		treeCount.Add(1)
+		i := treeCount.Load()
 		if 1 < i && 0 == i%64 {
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, int32(len(files))-i))
 		}
-		i++
 	})
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
@@ -130,7 +130,7 @@ func index(boxID string) {
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
-	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount.Load(), humanize.Bytes(uint64(treeSize.Load())))
 	debug.FreeOSMemory()
 	return
 }
@@ -187,7 +187,7 @@ func IndexRefs() {
 	i := 0
 	size := len(defBlockIDs)
 	if 0 < size {
-		bootProgressPart := 10.0 / float64(size)
+		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
 			defTree, loadErr := LoadTreeByID(defBlockID)

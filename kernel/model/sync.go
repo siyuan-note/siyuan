@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -55,8 +56,8 @@ func SyncDataDownload() {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
@@ -82,8 +83,8 @@ func SyncDataUpload() {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
@@ -98,9 +99,11 @@ func SyncDataUpload() {
 }
 
 var (
-	syncSameCount    = 0
+	syncSameCount    = atomic.Int32{}
 	autoSyncErrCount = 0
 	fixSyncInterval  = 5 * time.Minute
+
+	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
 
 	BootSyncSucc = -1 // -1：未执行，0：执行成功，1：执行失败
@@ -108,9 +111,12 @@ var (
 )
 
 func SyncDataJob() {
+	syncPlanTimeLock.Lock()
 	if time.Now().Before(syncPlanTime) {
+		syncPlanTimeLock.Unlock()
 		return
 	}
+	syncPlanTimeLock.Unlock()
 
 	SyncData(false)
 }
@@ -132,8 +138,8 @@ func BootSyncData() {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	util.IncBootProgress(3, "Syncing data from the cloud...")
 	BootSyncSucc = 0
@@ -155,6 +161,16 @@ func SyncData(byHand bool) {
 	syncData(false, byHand)
 }
 
+func lockSync() {
+	syncLock.Lock()
+	isSyncing.Store(true)
+}
+
+func unlockSync() {
+	isSyncing.Store(false)
+	syncLock.Unlock()
+}
+
 func syncData(exit, byHand bool) {
 	defer logging.Recover()
 
@@ -162,14 +178,14 @@ func syncData(exit, byHand bool) {
 		return
 	}
 
+	lockSync()
+	defer unlockSync()
+
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if !exit && !isProviderOnline(byHand) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
-
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	if exit {
 		ExitSyncSucc = 0
@@ -240,7 +256,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if gulu.IsMutexLocked(&syncLock) {
+	if isSyncing.Load() {
 		logging.LogWarnf("sync is in progress")
 		planSyncAfter(fixSyncInterval)
 		return false
@@ -266,7 +282,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 
 	luteEngine := util.NewLute()
 	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
-	bootProgressPart := 10 / float64(len(removes))
+	bootProgressPart := int32(10 / float64(len(removes)))
 	for _, removeFile := range removes {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
@@ -288,7 +304,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 	msg = fmt.Sprintf(Conf.Language(35))
 	util.PushStatusBar(msg)
 
-	bootProgressPart = 10 / float64(len(upserts))
+	bootProgressPart = int32(10 / float64(len(upserts)))
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
 			continue
@@ -413,7 +429,10 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	return
 }
 
-var syncLock = sync.Mutex{}
+var (
+	syncLock  = sync.Mutex{}
+	isSyncing = atomic.Bool{}
+)
 
 func CreateCloudSyncDir(name string) (err error) {
 	if conf.ProviderSiYuan != Conf.Sync.Provider {
@@ -587,12 +606,14 @@ func getIgnoreLines() (ret []string) {
 }
 
 func IncSync() {
-	syncSameCount = 0
+	syncSameCount.Store(0)
 	planSyncAfter(30 * time.Second)
 }
 
 func planSyncAfter(d time.Duration) {
+	syncPlanTimeLock.Lock()
 	syncPlanTime = time.Now().Add(d)
+	syncPlanTimeLock.Unlock()
 }
 
 func isProviderOnline(byHand bool) (ret bool) {
@@ -655,7 +676,7 @@ func GetOnlineKernels() (ret []*OnlineKernel) {
 	return
 }
 
-var closedSyncWebSocket = false
+var closedSyncWebSocket = atomic.Bool{}
 
 func closeSyncWebSocket() {
 	defer logging.Recover()
@@ -666,7 +687,7 @@ func closeSyncWebSocket() {
 	if nil != webSocketConn {
 		webSocketConn.Close()
 		webSocketConn = nil
-		closedSyncWebSocket = true
+		closedSyncWebSocket.Store(true)
 	}
 
 	logging.LogInfof("sync websocket closed")
@@ -711,7 +732,7 @@ func connectSyncWebSocket() {
 			result := gulu.Ret.NewResult()
 			if readErr := webSocketConn.ReadJSON(&result); nil != readErr {
 				time.Sleep(1 * time.Second)
-				if closedSyncWebSocket {
+				if closedSyncWebSocket.Load() {
 					return
 				}
 
@@ -782,7 +803,7 @@ func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	}
 	c, _, err = websocket.DefaultDialer.Dial(endpoint, header)
 	if nil == err {
-		closedSyncWebSocket = false
+		closedSyncWebSocket.Store(false)
 	}
 	return
 }

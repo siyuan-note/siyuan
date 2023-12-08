@@ -94,5 +94,8 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	evt.AppId = app
 	evt.SessionId = session
 	evt.Data = transactions
+	for _, tx := range transactions {
+		tx.WaitForCommit()
+	}
 	util.PushEvent(evt)
 }

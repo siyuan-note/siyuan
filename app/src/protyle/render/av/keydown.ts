@@ -103,7 +103,11 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             (Constants.KEYCODELIST[event.keyCode].length === 1 &&
                 !event.metaKey && !event.ctrlKey &&
                 !["⇧", "⌃", "⌥", "⌘"].includes(Constants.KEYCODELIST[event.keyCode]))) {
-            popTextCell(protyle, [selectCellElement]);
+            if (!selectCellElement.style.backgroundColor) {
+                popTextCell(protyle, [selectCellElement]);
+            } else {
+                event.preventDefault();
+            }
             return true;
         }
     }
@@ -145,7 +149,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (event.key === "ArrowDown") {
             const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling;
             selectRow(selectRowElements[0].querySelector(".av__check"), "unselectAll");
-            if (nextRowElement && !nextRowElement.classList.contains("av__row--add")) {
+            if (nextRowElement && !nextRowElement.classList.contains("av__row--util")) {
                 selectRow(nextRowElement.querySelector(".av__check"), "select");
                 cellScrollIntoView(nodeElement, nextRowElement);
             } else {

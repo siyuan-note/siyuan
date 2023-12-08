@@ -798,9 +798,18 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
+
+		if !treenode.IsNodeOCRed(n) {
+			IndexNodeQueue(n.ID)
+		}
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		fc := treenode.FirstLeafBlock(n)
+
+		if !treenode.IsNodeOCRed(fc) {
+			IndexNodeQueue(fc.ID)
+		}
 		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
+
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {
@@ -809,7 +818,13 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
+
+		if !treenode.IsNodeOCRed(n) {
+			IndexNodeQueue(n.ID)
+		}
+
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
+
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {

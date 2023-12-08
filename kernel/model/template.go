@@ -47,10 +47,10 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
 	tmpl = tmpl.Funcs(sprig.TxtFuncMap())
 	tmpl = tmpl.Funcs(template.FuncMap{
-		"Weekday":   util.Weekday,
-		"WeekdayCN": util.WeekdayCN,
+		"Weekday":    util.Weekday,
+		"WeekdayCN":  util.WeekdayCN,
 		"WeekdayCN2": util.WeekdayCN2,
-		"ISOWeek":   util.ISOWeek,
+		"ISOWeek":    util.ISOWeek,
 	})
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
@@ -333,7 +333,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 							return ast.WalkContinue
 						}
 
-						table, renderErr := renderAttributeViewTable(attrView, view)
+						table, renderErr := renderAttributeViewTable(attrView, view, 1, -1)
 						if nil != renderErr {
 							logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
 							return ast.WalkContinue

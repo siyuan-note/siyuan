@@ -1294,12 +1294,12 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) && 1 > len(mergeResult.Conflicts) { // 没有数据变更
-		syncSameCount++
-		if 10 < syncSameCount {
-			syncSameCount = 5
+		syncSameCount.Add(1)
+		if 10 < syncSameCount.Load() {
+			syncSameCount.Store(5)
 		}
 		if !byHand {
-			delay := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
+			delay := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount.Load()))))
 			if fixSyncInterval.Minutes() > delay.Minutes() {
 				delay = time.Minute * 8
 			}
@@ -1618,11 +1618,11 @@ func subscribeRepoEvents() {
 		}
 		coWalkDataCount++
 	})
-	var bootProgressPart float64
+	var bootProgressPart int32
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(total)
+		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	coUpsertFileCount := 0
@@ -1637,7 +1637,7 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(total)
+		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -1658,7 +1658,7 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFiles, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(total)
+		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -1672,7 +1672,7 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(total)
+		bootProgressPart = int32(10 / float64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, count, total int) {

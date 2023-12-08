@@ -82,11 +82,9 @@ func checkDownloadInstallPkg() {
 		return
 	}
 
-	if gulu.IsMutexLocked(&checkDownloadInstallPkgLock) {
+	if !checkDownloadInstallPkgLock.TryLock() {
 		return
 	}
-
-	checkDownloadInstallPkgLock.Lock()
 	defer checkDownloadInstallPkgLock.Unlock()
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()

@@ -7,7 +7,7 @@ import {getOpenNotebookCount, originalPath, pathPosix, showFileInFolder} from ".
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {isInAndroid, isInIOS, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -422,6 +422,21 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }).element);
         /// #endif
+        if (isIPad() || isInAndroid() || !isBrowser()) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.safeQuit,
+                icon: "iconQuit",
+                click: () => {
+                    exportLayout({
+                        reload: false,
+                        onlyData: false,
+                        errorExit: true,
+                        cb: exitSiYuan
+                    });
+                }
+            }).element);
+        }
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
     });
 };

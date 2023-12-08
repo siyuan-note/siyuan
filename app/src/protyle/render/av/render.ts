@@ -243,6 +243,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <div class="fn__space"></div>
+            <span data-type="av-add-more" class="block__icon">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+            </span>
+            <div class="fn__space"></div>
             ${response.data.isMirror ? ` <span class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
@@ -252,14 +256,23 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <div class="av__scroll">
         <div class="av__body">
             ${tableHTML}
-            <div class="av__row--add">
+            <div class="av__row--util">
                 <div class="av__colsticky">
                     <div class="av__firstcol">
                         <svg><use xlink:href="#iconAdd"></use></svg>
                     </div>
-                    <div class="av__cell--add">
+                    <button class="b3-button" data-type="av-add-bottom">
+                        <svg><use xlink:href="#iconAdd"></use></svg>
                         ${window.siyuan.languages.addAttr}
-                    </div>
+                    </button>
+                    <span class="fn__space"></span>
+                    <button class="b3-button">
+                        <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
+                        <span data-type="av-load-more">
+                            ${window.siyuan.languages.loadMore}
+                        </span>
+                        <svg data-type="set-page-size" data-size="50"><use xlink:href="#iconMore"></use></svg>
+                    </button>
                 </div>
             </div>
             <div class="av__row--footer">${calcHTML}</div>
@@ -284,7 +297,6 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     } else {
                         stickyRow(e, editRect, "bottom");
                     }
-
                     if (selectCellId) {
                         const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                         if (newCellElement) {
@@ -304,8 +316,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     }
 };
 
-let lastParentID: string;
-let lastElement: HTMLElement;
+let refreshTimeout: number;
 export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
@@ -317,37 +328,31 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
             titleElement.dataset.title = operation.data;
         });
     }
-    if (lastParentID === operation.parentID && protyle.contentElement.isSameNode(lastElement)) {
-        return;
-    }
-    lastElement = protyle.contentElement;
-    lastParentID = operation.parentID;
-    const avId = operation.avID;
-    if (operation.action === "setAttrViewColWidth") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-            const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-            if (!cellElement || cellElement.style.width === operation.data) {
-                return;
-            }
-            item.querySelectorAll(".av__row").forEach(rowItem => {
-                (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
-            });
-        });
-    } else {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-            item.removeAttribute("data-render");
-            const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
-            avRender(item, protyle, () => {
-                // https://github.com/siyuan-note/siyuan/issues/9599
-                if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
-                    popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
+    // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略
+    clearTimeout(refreshTimeout);
+    refreshTimeout = window.setTimeout(() => {
+        if (operation.action === "setAttrViewColWidth") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
+                if (!cellElement || cellElement.style.width === operation.data) {
+                    return;
                 }
-            }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
-                (operation.action === "removeAttrViewView" ? null : undefined));
-        });
-    }
-
-    setTimeout(() => {
-        lastParentID = null;
-    }, Constants.TIMEOUT_TRANSITION);
+                item.querySelectorAll(".av__row").forEach(rowItem => {
+                    (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+                });
+            });
+        } else {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.removeAttribute("data-render");
+                const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
+                avRender(item, protyle, () => {
+                    // https://github.com/siyuan-note/siyuan/issues/9599
+                    if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
+                        popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
+                    }
+                }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
+                    (operation.action === "removeAttrViewView" ? null : undefined));
+            });
+        }
+    }, 100);
 };

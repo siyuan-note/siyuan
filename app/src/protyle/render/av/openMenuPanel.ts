@@ -25,6 +25,7 @@ import {addView, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from
 import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
+import {setPageSize} from "./row";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -379,14 +380,14 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "goConfig") {
+                } else if (type === "go-config") {
                     menuElement.innerHTML = getViewHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindViewEvent({protyle: options.protyle, data, menuElement});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "goProperties") {
+                } else if (type === "go-properties") {
                     menuElement.innerHTML = getPropertiesHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
@@ -572,6 +573,11 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "set-page-size") {
+                    setPageSize(target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "duplicate-view") {
                     const id = Lute.NewNodeID();
                     transaction(options.protyle, [{
@@ -737,7 +743,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "hideCol") {
-                    const isEdit = menuElement.querySelector('[data-type="goProperties"]');
+                    const isEdit = menuElement.querySelector('[data-type="go-properties"]');
                     const colId = isEdit ? menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id") : target.parentElement.getAttribute("data-id");
                     transaction(options.protyle, [{
                         action: "setAttrViewColHidden",
@@ -766,7 +772,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "showCol") {
-                    const isEdit = menuElement.querySelector('[data-type="goProperties"]');
+                    const isEdit = menuElement.querySelector('[data-type="go-properties"]');
                     const colId = isEdit ? menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id") : target.parentElement.getAttribute("data-id");
                     transaction(options.protyle, [{
                         action: "setAttrViewColHidden",
@@ -1013,7 +1019,7 @@ ${hideHTML}`;
     }
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.attr}</span>

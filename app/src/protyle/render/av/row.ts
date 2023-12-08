@@ -1,5 +1,6 @@
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
+import {Menu} from "../../../plugin/Menu";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -72,7 +73,7 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
     let colHTML = '<div style="width: 24px"></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {
-        colHTML = "<div class=\"av__colsticky\"><div style=\"width: 24px\"></div>";
+        colHTML = '<div class="av__colsticky"><div style="width: 24px"></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
@@ -119,3 +120,54 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
         }
     }
 };
+
+const updatePageSize = (currentPageSIze: string, newPageSize: string) => {
+    if (currentPageSIze === newPageSize) {
+        return;
+    }
+}
+
+export const setPageSize = (target: HTMLElement) => {
+    const menu = new Menu("av-page-size");
+    if (menu.isOpen) {
+        return;
+    }
+    const currentPageSIze = target.dataset.size;
+    menu.addItem({
+        iconHTML: "",
+        label: "10",
+        accelerator: currentPageSIze === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        click() {
+            updatePageSize(currentPageSIze, "10");
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
+        accelerator: currentPageSIze === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        label: "25",
+        click() {
+            updatePageSize(currentPageSIze, "25");
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
+        accelerator: currentPageSIze === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        label: "50",
+        click() {
+            updatePageSize(currentPageSIze, "50");
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
+        accelerator: currentPageSIze === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        label: "100",
+        click() {
+            updatePageSize(currentPageSIze, "100");
+        }
+    });
+    const rect = target.getBoundingClientRect();
+    menu.open({
+        x: rect.left,
+        y: rect.bottom
+    });
+}

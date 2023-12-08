@@ -122,61 +122,97 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
     }
 };
 
-const updatePageSize = (currentPageSIze: string, newPageSize: string, protyle: IProtyle, avID: string) => {
-    if (currentPageSIze === newPageSize) {
+const updatePageSize = (options: {
+    currentPageSize: string,
+    newPageSize: string,
+    protyle: IProtyle,
+    avID: string,
+    nodeElement: Element
+}) => {
+    if (options.currentPageSize === options.newPageSize) {
         return;
     }
-    transaction(protyle, [{
+    options.nodeElement.setAttribute("data-page-size", options.newPageSize);
+    transaction(options.protyle, [{
         action: "setAttrViewPageSize",
-        avID,
-        data: parseInt(newPageSize),
+        avID: options.avID,
+        data: parseInt(options.newPageSize),
     }], [{
         action: "setAttrViewPageSize",
-        data: parseInt(currentPageSIze),
-        avID,
+        data: parseInt(options.currentPageSize),
+        avID: options.avID,
     }]);
     document.querySelector(".av__panel")?.remove();
 };
 
-export const setPageSize = (target: HTMLElement, protyle: IProtyle, avID: string) => {
+export const setPageSize = (options: {
+    target: HTMLElement,
+    protyle: IProtyle,
+    avID: string,
+    nodeElement: Element
+}) => {
     const menu = new Menu("av-page-size");
     if (menu.isOpen) {
         return;
     }
-    const currentPageSIze = target.dataset.size;
+    const currentPageSize = options.target.dataset.size;
     menu.addItem({
         iconHTML: "",
         label: "10",
-        accelerator: currentPageSIze === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        accelerator: currentPageSize === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         click() {
-            updatePageSize(currentPageSIze, "10", protyle, avID);
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "10",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
         }
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSIze === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        accelerator: currentPageSize === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "25",
         click() {
-            updatePageSize(currentPageSIze, "25", protyle, avID);
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "25",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
         }
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSIze === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        accelerator: currentPageSize === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "50",
         click() {
-            updatePageSize(currentPageSIze, "50", protyle, avID);
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "50",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
         }
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSIze === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        accelerator: currentPageSize === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
         label: "100",
         click() {
-            updatePageSize(currentPageSIze, "100", protyle, avID);
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "100",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
         }
     });
-    const rect = target.getBoundingClientRect();
+    const rect = options.target.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom

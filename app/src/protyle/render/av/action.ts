@@ -135,7 +135,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "set-page-size") {
-            setPageSize(target, protyle, blockElement.getAttribute("data-av-id"));
+            setPageSize({
+                target,
+                protyle,
+                avID: blockElement.getAttribute("data-av-id"),
+                nodeElement: blockElement
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -1602,10 +1602,8 @@ func subscribeRepoEvents() {
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]interface{}, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), count, total)
-		if 0 == count%64 {
-			util.SetBootDetails(msg)
-			util.ContextPushMsg(context, msg)
-		}
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutBeforeWalkData, func(context map[string]interface{}, path string) {
@@ -1616,7 +1614,7 @@ func subscribeRepoEvents() {
 	coWalkDataCount := 0
 	eventbus.Subscribe(eventbus.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
-		if 0 == coWalkDataCount%1024 {
+		if 0 == coWalkDataCount%512 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
@@ -1633,7 +1631,7 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == coUpsertFileCount%64 {
+		if 0 == coUpsertFileCount%32 {
 			util.ContextPushMsg(context, msg)
 		}
 		coUpsertFileCount++

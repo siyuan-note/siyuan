@@ -622,6 +622,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, page, p
 		return iv < jv
 	})
 
+	// 分页
+	ret.RowCount = len(ret.Rows)
 	if 0 < pageSize {
 		start := (page - 1) * pageSize
 		end := start + pageSize
@@ -953,6 +955,34 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Sorts); nil != err {
 			return
 		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewPageSize(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewPageSize(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewPageSize(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	view, err := attrView.GetCurrentView()
+	if nil != err {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		view.Table.PageSize = int(operation.Data.(float64))
 	}
 
 	err = av.SaveAttributeView(attrView)

@@ -114,7 +114,7 @@ export const getViewHTML = (data: IAVTable) => {
     <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${data.name}" data-value="${data.name}"></span>
 </button>
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="goProperties">
+<button class="b3-menu__item" data-type="go-properties">
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
     <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
@@ -132,7 +132,7 @@ export const getViewHTML = (data: IAVTable) => {
     <span class="b3-menu__accelerator">${data.sorts.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="set-page-size">
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
     <span class="b3-menu__accelerator">50</span>

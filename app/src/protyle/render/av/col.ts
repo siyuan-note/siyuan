@@ -99,7 +99,7 @@ export const getEditHTML = (options: {
         }
     });
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goProperties">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>

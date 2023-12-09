@@ -439,6 +439,7 @@ func ImportRepoKey(base64Key string) (err error) {
 }
 
 func ResetRepo() (err error) {
+	logging.LogInfof("resetting data repo...")
 	msgId := util.PushMsg(Conf.Language(144), 1000*60)
 
 	repo, err := newRepository()
@@ -447,8 +448,10 @@ func ResetRepo() (err error) {
 	}
 
 	if err = repo.Reset(); nil != err {
+		logging.LogErrorf("reset data repo failed: %s", err)
 		return
 	}
+	logging.LogInfof("reset data repo completed")
 
 	Conf.Repo.Key = nil
 	Conf.Sync.Enabled = false

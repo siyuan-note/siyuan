@@ -466,7 +466,7 @@ export class Wnd {
                     openFileById({
                         app: this.app,
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");

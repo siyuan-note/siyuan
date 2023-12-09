@@ -5,7 +5,7 @@ import * as path from "path";
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {openFile, openFileById} from "../editor/util";
+import {checkFold, openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
@@ -865,19 +865,18 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             } else {
                                 if (event.altKey) {
                                     const id = target.getAttribute("data-node-id");
-                                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                                    checkFold(id, (zoomIn, action) => {
                                         openFileById({
                                             app,
                                             id,
-                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                                                (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                                            zoomIn: foldResponse.data,
+                                            action,
+                                            zoomIn,
                                             position: "right"
                                         });
                                         if (closeCB) {
                                             closeCB();
                                         }
-                                    });
+                                    })
                                 } else if (!target.classList.contains("b3-list-item--focus")) {
                                     searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
@@ -906,18 +905,17 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             /// #endif
                         } else {
                             const id = target.getAttribute("data-node-id");
-                            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                            checkFold(id, (zoomIn, action) => {
                                 openFileById({
                                     app,
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                                        (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                                    zoomIn: foldResponse.data
+                                    action,
+                                    zoomIn
                                 });
                                 if (closeCB) {
                                     closeCB();
                                 }
-                            });
+                            })
                         }
                     }
                     window.siyuan.menus.menu.remove();

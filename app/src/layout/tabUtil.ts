@@ -235,7 +235,8 @@ export const copyTab = (app: App, tab: Tab) => {
                 model = new Editor({
                     app,
                     tab: newTab,
-                    blockId: tab.model.editor.protyle.block.id
+                    blockId: tab.model.editor.protyle.block.id,
+                    rootId: tab.model.editor.protyle.block.rootID
                 });
             } else if (tab.model instanceof Asset) {
                 model = new Asset({

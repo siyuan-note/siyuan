@@ -228,42 +228,20 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            const filePosition = window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.blockId] ||
-                window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId];
+
             if (this.protyle.options.mode !== "preview" &&
-                !mergedOptions.action.includes(Constants.CB_GET_ALL) &&
-                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) || mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL)) &&
-                filePosition) {
+                options.rootId && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId] &&
+                (
+                    mergedOptions.action.includes(Constants.CB_GET_SCROLL) ||
+                    (mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL) && options.rootId === options.blockId)
+                )
+            ) {
                 getDocByScroll({
                     protyle: this.protyle,
-                    scrollAttr: filePosition,
+                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId],
                     mergedOptions,
                     cb: () => {
                         this.afterOnGet(mergedOptions);
-                    }
-                });
-            } else if (this.protyle.options.mode !== "preview" &&
-                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) || mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL))) {
-                fetchPost("/api/block/getDocInfo", {
-                    id: options.blockId
-                }, (response) => {
-                    if (!mergedOptions.action.includes(Constants.CB_GET_SCROLL) &&
-                        response.data.rootID !== options.blockId && mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL)) {
-                        // 打开根文档保持上一次历史，否则按照原有 action 执行 https://github.com/siyuan-note/siyuan/issues/9082
-                        this.getDoc(mergedOptions);
-                        return;
-                    }
-                    if (window.siyuan.storage[Constants.LOCAL_FILEPOSITION][response.data.rootID]) {
-                        getDocByScroll({
-                            protyle: this.protyle,
-                            scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][response.data.rootID],
-                            mergedOptions,
-                            cb: () => {
-                                this.afterOnGet(mergedOptions);
-                            }
-                        });
-                    } else {
-                        this.getDoc(mergedOptions);
                     }
                 });
             } else {

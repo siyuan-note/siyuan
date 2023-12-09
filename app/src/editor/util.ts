@@ -28,6 +28,15 @@ import {Search} from "../search";
 import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
 
+export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) => void) => {
+    if (!id) {
+        return;
+    }
+    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL])
+    });
+}
+
 export const openFileById = async (options: {
     app: App,
     id: string,
@@ -472,6 +481,7 @@ const newTab = (options: IOpenFileOptions) => {
                         app: options.app,
                         tab,
                         blockId: options.id,
+                        rootId: options.rootID,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
                     });
                 } else {
@@ -479,6 +489,7 @@ const newTab = (options: IOpenFileOptions) => {
                         app: options.app,
                         tab,
                         blockId: options.id,
+                        rootId: options.rootID,
                         mode: options.mode,
                         action: options.action,
                     });
@@ -538,7 +549,7 @@ export const updatePanelByEditor = (options: {
         updateOutline(models, options.protyle, options.reload);
         updateBacklinkGraph(models, options.protyle);
         options.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle:options.protyle});
+            item.eventBus.emit("switch-protyle", {protyle: options.protyle});
         });
     }
 };

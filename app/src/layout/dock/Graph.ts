@@ -7,7 +7,7 @@ import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {fetchPost} from "../../util/fetch";
-import {isCurrentEditor, openFileById} from "../../editor/util";
+import {checkFold, isCurrentEditor, openFileById} from "../../editor/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {App} from "../../index";
@@ -652,19 +652,25 @@ export class Graph extends Model {
                         return;
                     }
                     if (window.siyuan.shiftIsPressed) {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            position: "bottom",
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                        });
+                        checkFold(node.id, (zoomIn, action: string[]) => {
+                            openFileById({
+                                app: this.app,
+                                id: node.id,
+                                position: "bottom",
+                                action,
+                                zoomIn
+                            });
+                        })
                     } else if (window.siyuan.altIsPressed) {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            position: "right",
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                        });
+                        checkFold(node.id, (zoomIn, action: string[]) => {
+                            openFileById({
+                                app: this.app,
+                                id: node.id,
+                                position: "right",
+                                action,
+                                zoomIn
+                            });
+                        })
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
                             app: this.app,
@@ -674,11 +680,14 @@ export class Graph extends Model {
                             nodeIds: [node.id],
                         }));
                     } else {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                        });
+                        checkFold(node.id, (zoomIn, action: string[]) => {
+                            openFileById({
+                                app: this.app,
+                                id: node.id,
+                                action,
+                                zoomIn
+                            });
+                        })
                     }
                 });
             }, 1000);

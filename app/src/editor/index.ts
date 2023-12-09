@@ -19,7 +19,7 @@ export class Editor extends Model {
         app: App,
         tab: Tab,
         blockId: string,
-        rootId?: string,    // 使用 rootId 会优先使用本地 filepositon 定位
+        rootId: string,
         mode?: TEditorMode,
         action?: string[],
     }) {
@@ -38,7 +38,7 @@ export class Editor extends Model {
     private initProtyle(options: {
         blockId: string,
         action?: string[]
-        rootId?: string,
+        rootId: string,
         mode?: TEditorMode,
     }) {
         this.editor = new Protyle(this.app, this.element, {

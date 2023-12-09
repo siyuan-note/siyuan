@@ -57,6 +57,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                         app: app,
                         tab,
                         blockId: stack.zoomId || stack.protyle.block.rootID,
+                        rootId: stack.protyle.block.rootID,
                         action: stack.zoomId ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS]
                     });
                     tab.addModel(editor);

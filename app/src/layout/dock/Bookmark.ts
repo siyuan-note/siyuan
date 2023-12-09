@@ -5,8 +5,7 @@ import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
-import {openFileById} from "../../editor/util";
-import {Constants} from "../../constants";
+import {checkFold, openFileById} from "../../editor/util";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
@@ -84,44 +83,54 @@ export class Bookmark extends Model {
                         return;
                     }
                 }
-                const id = element.getAttribute("data-node-id");
-                if (id) {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openFileById({
-                            app,
-                            id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                            zoomIn: foldResponse.data
-                        });
+                const id = element.getAttribute("data-node-id")
+                checkFold(id, (zoomIn, action: string[]) => {
+                    openFileById({
+                        app,
+                        id,
+                        action,
+                        zoomIn
                     });
-                }
+                });
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 openBookmarkMenu(element, event, this);
             },
-            ctrlClick(element: HTMLElement) {
-                openFileById({
-                    app,
-                    id: element.getAttribute("data-node-id"),
-                    keepCursor: true,
-                    action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                });
+            ctrlClick: (element: HTMLElement) => {
+                const id = element.getAttribute("data-node-id")
+                checkFold(id, (zoomIn, action: string[]) => {
+                    openFileById({
+                        app,
+                        id,
+                        keepCursor: true,
+                        action,
+                        zoomIn
+                    });
+                })
             },
-            altClick(element: HTMLElement) {
-                openFileById({
-                    app,
-                    id: element.getAttribute("data-node-id"),
-                    position: "right",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                });
+            altClick: (element: HTMLElement,) => {
+                const id = element.getAttribute("data-node-id")
+                checkFold(id, (zoomIn, action: string[]) => {
+                    openFileById({
+                        app,
+                        id,
+                        position: "bottom",
+                        action,
+                        zoomIn
+                    });
+                })
             },
-            shiftClick(element: HTMLElement) {
-                openFileById({
-                    app,
-                    id: element.getAttribute("data-node-id"),
-                    position: "bottom",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
-                });
+            shiftClick: (element: HTMLElement) => {
+                const id = element.getAttribute("data-node-id")
+                checkFold(id, (zoomIn, action: string[]) => {
+                    openFileById({
+                        app,
+                        id,
+                        position: "bottom",
+                        action,
+                        zoomIn
+                    });
+                })
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

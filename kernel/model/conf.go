@@ -947,6 +947,7 @@ func upgradeUserGuide() {
 			continue
 		}
 
+		logging.LogInfof("upgrading user guide box [%s]", boxID)
 		unindex(boxID)
 
 		if err = filelock.Remove(boxDirPath); nil != err {
@@ -958,6 +959,7 @@ func upgradeUserGuide() {
 		}
 
 		index(boxID)
+		logging.LogInfof("upgraded user guide box [%s]", boxID)
 	}
 }
 

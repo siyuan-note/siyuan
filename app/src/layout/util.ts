@@ -378,7 +378,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
         getAllTabs().forEach(item => {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id, false, false, false);
+                item.parent.removeTab(item.id, false, false);
             }
         });
     }
@@ -402,7 +402,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                     const tabId = item.getAttribute("data-id");
                     const tab = getInstanceById(tabId) as Tab;
                     if (tab) {
-                        tab.parent.removeTab(tabId, false, false, false);
+                        tab.parent.removeTab(tabId, false, false);
                     }
                 }
             }
@@ -643,10 +643,10 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
         model = new Editor({
             app,
             tab,
+            rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
             action: typeof json.action === "string" ? [json.action] : json.action,
-            scrollAttr: json.scrollAttr,
         });
     }
     return model;

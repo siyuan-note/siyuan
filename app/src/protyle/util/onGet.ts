@@ -33,7 +33,7 @@ export const onGet = (options: {
     if (options.data.code === 1) {
         // 其他报错
         if (options.protyle.model) {
-            options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id, false, false);
+            options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id, false);
         } else {
             options.protyle.element.innerHTML = `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
         }

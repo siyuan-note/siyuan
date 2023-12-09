@@ -39,6 +39,7 @@ import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
 import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
+import {setStorageVal} from "./util/compatibility";
 
 export class Protyle {
 
@@ -196,7 +197,7 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
                                 }
                                 /// #endif
                             }
@@ -207,9 +208,11 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
                                 }
                                 /// #endif
+                                delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][this.protyle.block.rootID];
+                                setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
                             }
                             break;
                     }
@@ -225,10 +228,10 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            if (options.scrollAttr) {
+            if (options.rootId) {
                 getDocByScroll({
                     protyle: this.protyle,
-                    scrollAttr: options.scrollAttr,
+                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId],
                     mergedOptions,
                     cb: () => {
                         this.afterOnGet(mergedOptions);
@@ -245,19 +248,10 @@ export class Protyle {
                         this.getDoc(mergedOptions);
                         return;
                     }
-                    let scrollObj;
-                    if (response.data.ial.scroll) {
-                        try {
-                            scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
-                        } catch (e) {
-                            scrollObj = undefined;
-                        }
-                    }
-                    if (scrollObj) {
-                        scrollObj.rootId = response.data.rootID;
+                    if (window.siyuan.storage[Constants.LOCAL_FILEPOSITION][response.data.rootID]) {
                         getDocByScroll({
                             protyle: this.protyle,
-                            scrollAttr: scrollObj,
+                            scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][response.data.rootID],
                             mergedOptions,
                             cb: () => {
                                 this.afterOnGet(mergedOptions);

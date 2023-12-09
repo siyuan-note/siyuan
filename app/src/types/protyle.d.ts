@@ -393,8 +393,8 @@ interface IOptions {
     action?: string[],
     mode?: TEditorMode,
     blockId: string
+    rootId?: string
     key?: string
-    scrollAttr?: IScrollAttr
     defId?: string
     render?: {
         background?: boolean

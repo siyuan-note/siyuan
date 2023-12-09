@@ -277,7 +277,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             createdTab = newTab(options);
             wnd.addTab(createdTab);
             if (unUpdateTab && options.removeCurrentTab) {
-                wnd.removeTab(unUpdateTab.id, false, true, false);
+                wnd.removeTab(unUpdateTab.id, false, false);
             }
         } else {
             createdTab = newTab(options);
@@ -306,7 +306,6 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 } else {
                     initObj.action = options.action;
                 }
-                delete initObj.scrollAttr;
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;

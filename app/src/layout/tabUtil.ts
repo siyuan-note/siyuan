@@ -304,10 +304,6 @@ export const copyTab = (app: App, tab: Tab) => {
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
                 if (initData) {
-                    // 历史数据兼容 2023-05-24
-                    if (initData.scrollAttr) {
-                        initData.scrollAttr.rootId = initData.rootId;
-                    }
                     model = newModelByInitData(app, newTab, initData);
                 }
             }
@@ -320,7 +316,7 @@ export const closeTabByType = async (tab: Tab, type: "closeOthers" | "closeAll" 
     if (type === "closeOthers") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             if (tab.parent.children[index].id !== tab.id && !tab.parent.children[index].headElement.classList.contains("item--pin")) {
-                await tab.parent.children[index].parent.removeTab(tab.parent.children[index].id, true, true, false);
+                await tab.parent.children[index].parent.removeTab(tab.parent.children[index].id, true, false);
                 index--;
             }
         }

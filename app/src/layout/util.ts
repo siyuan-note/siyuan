@@ -178,13 +178,12 @@ export const exportLayout = (options: {
     cb?: () => void,
     onlyData: boolean,
     errorExit: boolean,
-    dropEditScroll?: boolean
 }) => {
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},
         };
-        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
         if (options.onlyData) {
             return layoutJSON;
         }
@@ -207,7 +206,7 @@ export const exportLayout = (options: {
         left: dockToJSON(window.siyuan.layout.leftDock),
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
-    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     if (options.onlyData) {
         return layoutJSON;
     }
@@ -307,10 +306,6 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             (layout as Tab).headElement.classList.add("item--unupdate");
-        }
-        if (json.scrollAttr) {
-            // 历史数据兼容
-            json.scrollAttr.rootId = json.rootId;
         }
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
@@ -431,7 +426,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     resizeTopBar();
 };
 
-export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {
+export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
     if (layout instanceof Layout) {
         json.direction = layout.direction;
         if (layout.parent) {
@@ -480,9 +475,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";
-        if (!dropEditScroll) {
-            json.scrollAttr = saveScroll(layout.editor.protyle, true);
-        }
+        saveScroll(layout.editor.protyle);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         if (layout.pdfObject) {
@@ -549,13 +542,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 const itemJSON = {};
                 json.children.push(itemJSON);
-                layoutToJSON(item, itemJSON, dropEditScroll);
+                layoutToJSON(item, itemJSON);
             });
         }
     } else if (layout instanceof Tab) {
         if (layout.model) {
             json.children = {};
-            layoutToJSON(layout.model, json.children, dropEditScroll);
+            layoutToJSON(layout.model, json.children);
         } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
             json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");

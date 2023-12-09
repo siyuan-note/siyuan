@@ -231,11 +231,11 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
+                saveScroll(tab.model.editor.protyle);
                 model = new Editor({
                     app,
                     tab: newTab,
-                    blockId: tab.model.editor.protyle.block.id,
-                    scrollAttr: saveScroll(tab.model.editor.protyle, true)
+                    blockId: tab.model.editor.protyle.block.id
                 });
             } else if (tab.model instanceof Asset) {
                 model = new Asset({

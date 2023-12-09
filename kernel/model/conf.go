@@ -586,15 +586,13 @@ func NewLute() (ret *lute.Lute) {
 	return
 }
 
-var confSaveLock = sync.Mutex{}
-
 func (conf *AppConf) Save() {
 	if util.ReadOnly {
 		return
 	}
 
-	confSaveLock.Lock()
-	defer confSaveLock.Unlock()
+	Conf.m.Lock()
+	defer Conf.m.Unlock()
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
@@ -949,6 +947,7 @@ func upgradeUserGuide() {
 			continue
 		}
 
+		logging.LogInfof("upgrading user guide box [%s]", boxID)
 		unindex(boxID)
 
 		if err = filelock.Remove(boxDirPath); nil != err {
@@ -960,6 +959,7 @@ func upgradeUserGuide() {
 		}
 
 		index(boxID)
+		logging.LogInfof("upgraded user guide box [%s]", boxID)
 	}
 }
 

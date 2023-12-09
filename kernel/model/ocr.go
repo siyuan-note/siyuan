@@ -12,6 +12,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -53,6 +54,14 @@ func autoOCRAssets() {
 	}
 
 	cleanNotExistAssetsTexts()
+
+	// 刷新 OCR 结果到数据库
+	util.NodeOCRQueueLock.Lock()
+	defer util.NodeOCRQueueLock.Unlock()
+	for _, id := range util.NodeOCRQueue {
+		sql.IndexNodeQueue(id)
+	}
+	util.NodeOCRQueue = nil
 }
 
 func cleanNotExistAssetsTexts() {

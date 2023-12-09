@@ -13,7 +13,7 @@ import {appearance} from "../config/appearance";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
-import {openFile, openFileById} from "../editor/util";
+import {checkFold, openFile, openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {isWindow} from "../util/functions";
@@ -307,12 +307,12 @@ export const initWindow = async (app: App) => {
                 const focus = urlObj.searchParams.get("focus") === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
-                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        checkFold(id, (zoomIn) => {
                             openFileById({
                                 app,
                                 id,
-                                action: (foldResponse.data || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                                zoomIn: foldResponse.data || focus
+                                action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                                zoomIn: zoomIn || focus
                             });
                         });
                         ipcRenderer.send(Constants.SIYUAN_CMD, "show");

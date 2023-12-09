@@ -1081,7 +1081,7 @@ export const getArticle = (options: {
     edit: Protyle
     value: string,
 }) => {
-    fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
+    checkFold(options.id, (zoomIn) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/filetree/getDoc", {
@@ -1089,14 +1089,14 @@ export const getArticle = (options: {
             query: options.value,
             queryMethod: options.config.method,
             queryTypes: options.config.types,
-            mode: foldResponse.data ? 0 : 3,
-            size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-            zoom: foldResponse.data,
+            mode: zoomIn ? 0 : 3,
+            size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+            zoom: zoomIn,
         }, getResponse => {
             onGet({
                 data: getResponse,
                 protyle: options.edit.protyle,
-                action: foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+                action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
             });
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
             if (matchElement) {

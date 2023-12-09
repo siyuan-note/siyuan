@@ -7,7 +7,7 @@ import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
-import {openFileById} from "../../editor/util";
+import {checkFold, openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
@@ -123,13 +123,13 @@ export class Outline extends Model {
                         });
                     }
                 } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    checkFold(id, (zoomIn) => {
                         openFileById({
                             app: options.app,
                             id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                            action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
-                    });
+                    })
                 }
             },
             ctrlClick(element: HTMLElement) {

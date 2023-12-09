@@ -30,7 +30,7 @@ import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {pasteAsPlainText, pasteEscaped, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
-import {openFileById, updateBacklinkGraph} from "../editor/util";
+import {checkFold, openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
 import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
@@ -351,12 +351,12 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconOpen",
         accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/Click",
         click() {
-            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+            checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                    zoomIn: foldResponse.data
+                    action,
+                    zoomIn
                 });
             });
         }
@@ -366,13 +366,13 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconEyeoff",
         accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘Click",
         click() {
-            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+            checkFold(refBlockId, (zoomIn) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                    action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                     keepCursor: true,
-                    zoomIn: foldResponse.data
+                    zoomIn
                 });
             });
         }
@@ -382,13 +382,13 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconLayoutRight",
         accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥Click",
         click() {
-            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+            checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
                     position: "right",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                    zoomIn: foldResponse.data
+                    action,
+                    zoomIn
                 });
             });
         }
@@ -398,13 +398,13 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧Click",
         click() {
-            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+            checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
                     position: "bottom",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                    zoomIn: foldResponse.data
+                    action,
+                    zoomIn
                 });
             });
         }

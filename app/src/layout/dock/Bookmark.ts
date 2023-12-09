@@ -9,6 +9,7 @@ import {checkFold, openFileById} from "../../editor/util";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
+import {Constants} from "../../constants";
 
 export class Bookmark extends Model {
     private openNodes: string[];
@@ -98,12 +99,12 @@ export class Bookmark extends Model {
             },
             ctrlClick: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id")
-                checkFold(id, (zoomIn, action: string[]) => {
+                checkFold(id, (zoomIn) => {
                     openFileById({
                         app,
                         id,
                         keepCursor: true,
-                        action,
+                        action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                         zoomIn
                     });
                 })

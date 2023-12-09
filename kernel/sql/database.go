@@ -800,13 +800,13 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
 
 		if !treenode.IsNodeOCRed(n) {
-			IndexNodeQueue(n.ID)
+			util.PushNodeOCRQueue(n.ID)
 		}
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		fc := treenode.FirstLeafBlock(n)
 
 		if !treenode.IsNodeOCRed(fc) {
-			IndexNodeQueue(fc.ID)
+			util.PushNodeOCRQueue(fc.ID)
 		}
 		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
 
@@ -820,7 +820,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
 
 		if !treenode.IsNodeOCRed(n) {
-			IndexNodeQueue(n.ID)
+			util.PushNodeOCRQueue(n.ID)
 		}
 
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)

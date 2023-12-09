@@ -967,22 +967,9 @@ func writeJSONQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func writeJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTreeWithoutChangeTime(tree); nil != err {
-		return
-	}
-	sql.UpsertTreeQueue(tree)
-	return
-}
-
 func indexWriteJSONQueue(tree *parse.Tree) (err error) {
 	treenode.IndexBlockTree(tree)
 	return writeJSONQueue(tree)
-}
-
-func indexWriteJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
-	return writeJSONQueueWithoutChangeTime(tree)
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {

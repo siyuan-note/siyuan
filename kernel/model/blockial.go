@@ -122,15 +122,8 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 		return
 	}
 
-	if 1 == len(nameValues) && "" != nameValues["scroll"] {
-		// 文档滚动状态不产生同步冲突 https://github.com/siyuan-note/siyuan/issues/6076
-		if err = indexWriteJSONQueueWithoutChangeTime(tree); nil != err {
-			return
-		}
-	} else {
-		if err = indexWriteJSONQueue(tree); nil != err {
-			return
-		}
+	if err = indexWriteJSONQueue(tree); nil != err {
+		return
 	}
 
 	IncSync()

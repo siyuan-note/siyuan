@@ -228,10 +228,15 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            if (options.rootId) {
+            const filePosition = window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.blockId] ||
+                window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId];
+            if (this.protyle.options.mode !== "preview" &&
+                !mergedOptions.action.includes(Constants.CB_GET_ALL) &&
+                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) || mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL)) &&
+                filePosition) {
                 getDocByScroll({
                     protyle: this.protyle,
-                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId],
+                    scrollAttr: filePosition,
                     mergedOptions,
                     cb: () => {
                         this.afterOnGet(mergedOptions);

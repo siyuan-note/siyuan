@@ -53,6 +53,7 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
             }
         };
         if (response.data.rootID === id) {
+            json.children.action = Constants.CB_GET_SCROLL;
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                 position: options.position,

@@ -473,7 +473,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
-        json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
+        json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.instance = "Editor";
         saveScroll(layout.editor.protyle);
     } else if (layout instanceof Asset) {

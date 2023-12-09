@@ -1793,7 +1793,7 @@ export class WYSIWYG {
                         });
                     }
                     /// #endif
-                })
+                });
                 /// #if !MOBILE
                 if (protyle.model) {
                     // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
@@ -1941,7 +1941,7 @@ export class WYSIWYG {
                         }));
                     }
                     /// #endif
-                })
+                });
                 event.stopPropagation();
                 return;
             }

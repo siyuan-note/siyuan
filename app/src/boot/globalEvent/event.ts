@@ -138,7 +138,7 @@ export const initWindowEvent = (app: App) => {
                             zoomIn,
                         });
                         window.siyuan.menus.menu.remove();
-                    })
+                    });
                 }
                 event.stopImmediatePropagation();
                 event.preventDefault();

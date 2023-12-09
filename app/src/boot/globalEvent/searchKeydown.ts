@@ -101,7 +101,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 if (dialog) {
                     dialog.destroy({focus: "false"});
                 }
-            })
+            });
             return true;
         }
         const id = currentList.getAttribute("data-node-id");
@@ -206,7 +206,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     if (dialog) {
                         dialog.destroy({focus: "false"});
                     }
-                })
+                });
             }
         } else {
             /// #if !BROWSER

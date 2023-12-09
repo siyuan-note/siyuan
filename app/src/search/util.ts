@@ -876,7 +876,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                         if (closeCB) {
                                             closeCB();
                                         }
-                                    })
+                                    });
                                 } else if (!target.classList.contains("b3-list-item--focus")) {
                                     searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
@@ -915,7 +915,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 if (closeCB) {
                                     closeCB();
                                 }
-                            })
+                            });
                         }
                     }
                     window.siyuan.menus.menu.remove();

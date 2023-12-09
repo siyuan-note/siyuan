@@ -49,7 +49,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
                         action,
                         zoomIn
                     });
-                })
+                });
             }
         }
     }, {
@@ -68,7 +68,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
                         action,
                         zoomIn
                     });
-                })
+                });
             }
         }
     }];
@@ -93,7 +93,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
                             zoomIn,
                             removeCurrentTab: false
                         });
-                    })
+                    });
                 }
             }
         });

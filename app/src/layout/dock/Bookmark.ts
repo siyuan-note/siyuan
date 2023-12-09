@@ -84,7 +84,7 @@ export class Bookmark extends Model {
                         return;
                     }
                 }
-                const id = element.getAttribute("data-node-id")
+                const id = element.getAttribute("data-node-id");
                 checkFold(id, (zoomIn, action: string[]) => {
                     openFileById({
                         app,
@@ -98,7 +98,7 @@ export class Bookmark extends Model {
                 openBookmarkMenu(element, event, this);
             },
             ctrlClick: (element: HTMLElement) => {
-                const id = element.getAttribute("data-node-id")
+                const id = element.getAttribute("data-node-id");
                 checkFold(id, (zoomIn) => {
                     openFileById({
                         app,
@@ -107,10 +107,10 @@ export class Bookmark extends Model {
                         action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                         zoomIn
                     });
-                })
+                });
             },
             altClick: (element: HTMLElement,) => {
-                const id = element.getAttribute("data-node-id")
+                const id = element.getAttribute("data-node-id");
                 checkFold(id, (zoomIn, action: string[]) => {
                     openFileById({
                         app,
@@ -119,10 +119,10 @@ export class Bookmark extends Model {
                         action,
                         zoomIn
                     });
-                })
+                });
             },
             shiftClick: (element: HTMLElement) => {
-                const id = element.getAttribute("data-node-id")
+                const id = element.getAttribute("data-node-id");
                 checkFold(id, (zoomIn, action: string[]) => {
                     openFileById({
                         app,
@@ -131,7 +131,7 @@ export class Bookmark extends Model {
                         action,
                         zoomIn
                     });
-                })
+                });
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

@@ -5,7 +5,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
-import {checkFold, openFileById} from "../../editor/util";
+import {checkFold} from "../../editor/util";
 
 export class MobileBookmarks {
     public element: HTMLElement;
@@ -39,7 +39,7 @@ export class MobileBookmarks {
                         return;
                     }
                 }
-                checkFold(id, (zoomIn, action) => {
+                checkFold(id, (zoomIn) => {
                     openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                 });
             },

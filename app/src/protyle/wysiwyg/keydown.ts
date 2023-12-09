@@ -1532,7 +1532,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         action,
                         zoomIn
                     });
-                })
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

@@ -660,7 +660,7 @@ export class Graph extends Model {
                                 action,
                                 zoomIn
                             });
-                        })
+                        });
                     } else if (window.siyuan.altIsPressed) {
                         checkFold(node.id, (zoomIn, action: string[]) => {
                             openFileById({
@@ -670,7 +670,7 @@ export class Graph extends Model {
                                 action,
                                 zoomIn
                             });
-                        })
+                        });
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
                             app: this.app,
@@ -687,7 +687,7 @@ export class Graph extends Model {
                                 action,
                                 zoomIn
                             });
-                        })
+                        });
                     }
                 });
             }, 1000);

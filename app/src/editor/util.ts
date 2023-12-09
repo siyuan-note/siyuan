@@ -33,9 +33,9 @@ export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) =>
         return;
     }
     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL])
+        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
     });
-}
+};
 
 export const openFileById = async (options: {
     app: App,

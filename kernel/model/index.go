@@ -93,7 +93,6 @@ func index(boxID string) {
 		treeCount++
 		i := treeCount
 		lock.Unlock()
-		logging.LogInfof("indexing [%s, %d]", file.path, i)
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
@@ -117,17 +116,13 @@ func index(boxID string) {
 		if 1 < i && 0 == i%64 {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))
 		}
-		logging.LogInfof("indexed [%s, %d]", file.path, i)
 	})
-	i := 0
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
 		}
 
 		waitGroup.Add(1)
-		i++
-		logging.LogInfof("[%s, %d]", file.path, i)
 		invokeErr := p.Invoke(file)
 		if nil != invokeErr {
 			logging.LogErrorf("invoke [%s] failed: %s", file.path, invokeErr)

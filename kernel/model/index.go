@@ -88,6 +88,9 @@ func index(boxID string) {
 		defer waitGroup.Done()
 
 		file := arg.(*FileInfo)
+		treeSize.Add(file.size)
+		i := int(treeCount.Add(1))
+		logging.LogInfof("indexing [%s, %d]", file.path, i)
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
@@ -107,22 +110,26 @@ func index(boxID string) {
 		cache.PutDocIAL(file.path, docIAL)
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(box.ID, file.path)
-
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
-		treeSize.Add(file.size)
-		treeCount.Add(1)
-		i := treeCount.Load()
 		if 1 < i && 0 == i%64 {
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, int32(len(files))-i))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))
 		}
+		logging.LogInfof("indexed [%s, %d]", file.path, i)
 	})
+	i := 0
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
 		}
 
 		waitGroup.Add(1)
-		p.Invoke(file)
+		i++
+		logging.LogInfof("[%s, %d]", file.path, i)
+		invokeErr := p.Invoke(file)
+		if nil != invokeErr {
+			logging.LogErrorf("invoke [%s] failed: %s", file.path, invokeErr)
+			continue
+		}
 	}
 	waitGroup.Wait()
 	p.Release()
@@ -139,7 +146,6 @@ func IndexRefs() {
 	start := time.Now()
 	util.SetBootDetails("Resolving refs...")
 	util.PushStatusBar(Conf.Language(54))
-
 	util.SetBootDetails("Indexing refs...")
 
 	var defBlockIDs []string

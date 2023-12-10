@@ -60,7 +60,7 @@ type AppConf struct {
 	Editor         *conf.Editor     `json:"editor"`         // 编辑器配置
 	Export         *conf.Export     `json:"export"`         // 导出配置
 	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局，v2.8.0 后这个字段不再使用
+	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	Account        *conf.Account    `json:"account"`        // 帐号配置
@@ -82,6 +82,18 @@ type AppConf struct {
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 
 	m *sync.Mutex
+}
+
+func (conf *AppConf) GetUILayout() *conf.UILayout {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	return conf.UILayout
+}
+
+func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	conf.UILayout = uiLayout
 }
 
 func (conf *AppConf) GetUser() *conf.User {

@@ -128,6 +128,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-load-more") {
+            (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
             blockElement.removeAttribute("data-render");
             blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
             avRender(blockElement, protyle);

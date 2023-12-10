@@ -3,6 +3,7 @@ import {setPadding} from "../ui/initUI";
 import {hasClosestBlock} from "./hasClosest";
 import {Constants} from "../../constants";
 import {lineNumberRender} from "../render/highlightRender";
+import {stickyRow} from "../render/av/row";
 
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutter"], protyle);
@@ -10,6 +11,14 @@ export const resize = (protyle: IProtyle) => {
     const MIN_ABS = 4;
     // 不能 clearTimeout，否则 split 时左侧无法 resize
     setTimeout(() => {
+        if(!protyle.disabled) {
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
+                if (item.querySelector(".av__title")) {
+                    stickyRow(item, contentRect, "all");
+                }
+            });
+        }
         if (abs.width > MIN_ABS || isNaN(abs.width)) {
             if (typeof window.echarts !== "undefined") {
                 protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {

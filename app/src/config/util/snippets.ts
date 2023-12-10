@@ -139,12 +139,13 @@ const genSnippet = (options: ISnippet) => {
     return `<div data-id="${options.id || ""}" data-type="${options.type}">
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
-        <div class="fn__flex-1 fn__space"></div>
-        <input data-type="snippet" class="b3-switch fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
+        <div class="fn__flex-1"></div>
         <div class="fn__space"></div>
         <span aria-label="${window.siyuan.languages.remove}" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
+        <div class="fn__space"></div>
+        <input data-type="snippet" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
     </div>
     <div class="fn__hr"></div>
     <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical;font-family:var(--b3-font-family-code)" spellcheck="false"></textarea>

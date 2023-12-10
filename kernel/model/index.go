@@ -24,7 +24,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -75,8 +74,9 @@ func index(boxID string) {
 
 	start := time.Now()
 	luteEngine := util.NewLute()
-	treeCount := atomic.Int32{}
-	treeSize := atomic.Int64{}
+	var treeCount int
+	var treeSize int64
+	lock := sync.Mutex{}
 	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
 	poolSize := runtime.NumCPU()
@@ -88,8 +88,11 @@ func index(boxID string) {
 		defer waitGroup.Done()
 
 		file := arg.(*FileInfo)
-		treeSize.Add(file.size)
-		i := int(treeCount.Add(1))
+		lock.Lock()
+		treeSize += file.size
+		treeCount++
+		i := treeCount
+		lock.Unlock()
 		logging.LogInfof("indexing [%s, %d]", file.path, i)
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
@@ -137,7 +140,7 @@ func index(boxID string) {
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
-	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount.Load(), humanize.Bytes(uint64(treeSize.Load())))
+	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
 	debug.FreeOSMemory()
 	return
 }

@@ -44,13 +44,13 @@ require (
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.1.4
 	github.com/open-spaced-repetition/go-fsrs v1.1.0
-	github.com/panjf2000/ants/v2 v2.9.0
+	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/shirou/gopsutil/v3 v3.23.11
-	github.com/siyuan-note/dejavu v0.0.0-20231210035601-f7a267cc1f13
+	github.com/siyuan-note/dejavu v0.0.0-20231210162203-822b33543810
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20231210025112-82fdedd8e374
 	github.com/siyuan-note/filelock v0.0.0-20231209021753-ecf23a6be73b

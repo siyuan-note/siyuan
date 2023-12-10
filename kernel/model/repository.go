@@ -1605,8 +1605,10 @@ func subscribeRepoEvents() {
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]interface{}, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), count, total)
-		util.SetBootDetails(msg)
-		util.ContextPushMsg(context, msg)
+		if 0 == count%32 {
+			util.SetBootDetails(msg)
+			util.ContextPushMsg(context, msg)
+		}
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutBeforeWalkData, func(context map[string]interface{}, path string) {
@@ -1755,6 +1757,9 @@ func subscribeRepoEvents() {
 		msg := fmt.Sprintf(Conf.Language(211))
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudCorrupted, func() {
+		util.PushErrMsg(Conf.language(220), 30000)
 	})
 }
 

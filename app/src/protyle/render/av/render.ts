@@ -150,7 +150,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             }
                             text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}"${urlAttr}>${urlContent}</span>`;
                         } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext">${cell.value.block.content || ""}</span>`;
+                            text = `<span class="av__celltext${cell.value?.isDetached ? "" : " av__celltext--ref"}">${cell.value.block.content || ""}</span>`;
                             if (cell.value?.isDetached) {
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more" >${window.siyuan.languages.more}</span>`;
                             } else {

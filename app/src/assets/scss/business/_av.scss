@@ -316,6 +316,11 @@
       text-decoration: underline var(--b3-border-color);
     }
 
+    &--ref {
+      text-decoration: underline var(--b3-border-color);
+      color: var(--b3-theme-on-surface);
+    }
+
     & > .av__cellicon {
       margin: 0 5px;
       height: 10px;

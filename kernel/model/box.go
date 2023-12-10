@@ -26,7 +26,6 @@ import (
 	"runtime/debug"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -61,12 +60,9 @@ type Box struct {
 	historyGenerated int64 // 最近一次历史生成时间
 }
 
-var statLock = sync.Mutex{}
-
 func StatJob() {
-	statLock.Lock()
-	defer statLock.Unlock()
 
+	Conf.m.Lock()
 	Conf.Stat.TreeCount = treenode.CountTrees()
 	Conf.Stat.CTreeCount = treenode.CeilTreeCount(Conf.Stat.TreeCount)
 	Conf.Stat.BlockCount = treenode.CountBlocks()
@@ -74,6 +70,7 @@ func StatJob() {
 	Conf.Stat.DataSize, Conf.Stat.AssetsSize = util.DataSize()
 	Conf.Stat.CDataSize = util.CeilSize(Conf.Stat.DataSize)
 	Conf.Stat.CAssetsSize = util.CeilSize(Conf.Stat.AssetsSize)
+	Conf.m.Unlock()
 	Conf.Save()
 
 	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.Bytes(uint64(Conf.Stat.DataSize)), humanize.Bytes(uint64(Conf.Stat.AssetsSize)))

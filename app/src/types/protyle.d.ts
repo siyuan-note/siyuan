@@ -431,6 +431,8 @@ interface IOptions {
 
 interface IProtyle {
     getInstance: () => import("../protyle").Protyle,
+    observerLoad?: ResizeObserver,
+    observer?: ResizeObserver,
     app: import("../index").App,
     transactionTime: number,
     id: string,

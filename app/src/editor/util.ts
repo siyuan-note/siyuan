@@ -27,6 +27,7 @@ import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
 import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
+import {preventScroll} from "../protyle/scroll/preventScroll";
 
 export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) => void) => {
     if (!id) {
@@ -369,6 +370,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });
     } else {
+        // 点击大纲产生滚动时会动态加载内容，最终导致定位不准确
+        preventScroll(editor.editor.protyle);
         if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {

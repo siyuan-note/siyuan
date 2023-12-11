@@ -5,6 +5,8 @@ export const destroy = (protyle: IProtyle) => {
         return;
     }
     hideElements(["util"], protyle);
+    protyle.observer?.disconnect();
+    protyle.observerLoad?.disconnect();
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {

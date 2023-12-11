@@ -185,17 +185,7 @@ const setHTML = (options: {
     if (protyle.options.render.scroll) {
         protyle.scroll.update(protyle);
     }
-    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none")) {
-        // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
-        protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
-        // https://github.com/siyuan-note/siyuan/issues/8224
-        const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight &&
-            protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom < contentRect.bottom &&
-            protyle.wysiwyg.element.firstElementChild.getBoundingClientRect().top > contentRect.top) {
-            showMessage(window.siyuan.languages.scrollGetMore);
-        }
-    } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST)) {
+    if (options.action.includes(Constants.CB_GET_FOCUSFIRST)) {
         // settimeout 时间需短一点，否则定位后快速滚动无效
         const headerHeight = protyle.wysiwyg.element.offsetTop - 16;
         preventScroll(protyle, headerHeight, 256);
@@ -224,21 +214,6 @@ const setHTML = (options: {
         });
         protyle.options.defId = undefined;
     }
-    // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
-    if (!protyle.scroll.element.classList.contains("fn__none") &&
-        !protyle.element.classList.contains("block__edit") &&   // 不能为浮窗，否则悬浮为根文档无法打开整个文档 https://github.com/siyuan-note/siyuan/issues/9082
-        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
-        protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
-        !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291
-        protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
-        fetchPost("/api/filetree/getDoc", {
-            id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-            mode: 2,
-            size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
-        });
-    }
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
         protyle.app.plugins.forEach(item => {
             item.eventBus.emit("loaded-protyle-dynamic", {
@@ -255,6 +230,33 @@ const setHTML = (options: {
     }
     if (options.afterCB) {
         options.afterCB();
+    }
+    // 需等待 afterCB 执行后 resize 计算出高度后再进行计算
+    // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
+    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") &&
+        !protyle.element.classList.contains("block__edit") &&   // 不能为浮窗，否则悬浮为根文档无法打开整个文档 https://github.com/siyuan-note/siyuan/issues/9082
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
+        protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
+        !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291
+        protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+            mode: 2,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
+        });
+    }
+    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none")) {
+        // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
+        protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
+        // https://github.com/siyuan-note/siyuan/issues/8224
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight &&
+            protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom < contentRect.bottom &&
+            protyle.wysiwyg.element.firstElementChild.getBoundingClientRect().top > contentRect.top) {
+            showMessage(window.siyuan.languages.scrollGetMore);
+        }
     }
     protyle.app.plugins.forEach(item => {
         item.eventBus.emit("loaded-protyle", protyle);  // 准备废弃

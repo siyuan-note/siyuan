@@ -327,7 +327,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
             titleElement.dataset.title = operation.data;
         });
     }
-    // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略
+    // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略；必须为每一个 protyle 单独设置，否则有多个 protyle 时，其余无法被执行
     clearTimeout(refreshTimeouts[protyle.id]);
     refreshTimeouts[protyle.id] = window.setTimeout(() => {
         if (operation.action === "setAttrViewColWidth") {

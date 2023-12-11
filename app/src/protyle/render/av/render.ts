@@ -313,7 +313,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     }
 };
 
-let refreshTimeout: number;
+const refreshTimeouts: {
+    [key: string]: number;
+} = {};
 export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
@@ -326,8 +328,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
         });
     }
     // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略
-    clearTimeout(refreshTimeout);
-    refreshTimeout = window.setTimeout(() => {
+    clearTimeout(refreshTimeouts[protyle.id]);
+    refreshTimeouts[protyle.id] = window.setTimeout(() => {
         if (operation.action === "setAttrViewColWidth") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;

@@ -375,7 +375,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		}
 	}
 
-	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
+	if nil != value.MSelect && nil != other.MSelect {
 		switch operator {
 		case FilterOperatorIsEqual, FilterOperatorContains:
 			contains := false

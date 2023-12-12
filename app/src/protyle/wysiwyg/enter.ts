@@ -456,8 +456,8 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
         addNewLineToEnd(range, nodeElement, protyle, startElement);
         return true;
     }
-    return false
-}
+    return false;
+};
 
 const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProtyle, startElement: Element) => {
     const wbrElement = document.createElement("wbr");
@@ -468,7 +468,7 @@ const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProty
     }
     const oldHTML = nodeElement.outerHTML;
     wbrElement.remove();
-    let endNewlineNode
+    let endNewlineNode;
     if (!hasNextSibling(startElement)) {
         endNewlineNode = document.createTextNode("\n");
         startElement.after(endNewlineNode);
@@ -483,4 +483,4 @@ const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProty
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-}
+};

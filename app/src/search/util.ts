@@ -40,6 +40,7 @@ import {
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 import {addClearButton} from "../util/addClearButton";
+import {checkFold} from "../util/noRelyPCFunction";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -865,13 +866,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             } else {
                                 if (event.altKey) {
                                     const id = target.getAttribute("data-node-id");
-                                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                                    checkFold(id, (zoomIn, action) => {
                                         openFileById({
                                             app,
                                             id,
-                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                                                (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                                            zoomIn: foldResponse.data,
+                                            action,
+                                            zoomIn,
                                             position: "right"
                                         });
                                         if (closeCB) {
@@ -906,13 +906,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             /// #endif
                         } else {
                             const id = target.getAttribute("data-node-id");
-                            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                            checkFold(id, (zoomIn, action) => {
                                 openFileById({
                                     app,
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                                        (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                                    zoomIn: foldResponse.data
+                                    action,
+                                    zoomIn
                                 });
                                 if (closeCB) {
                                     closeCB();
@@ -1083,7 +1082,7 @@ export const getArticle = (options: {
     edit: Protyle
     value: string,
 }) => {
-    fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
+    checkFold(options.id, (zoomIn) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/filetree/getDoc", {
@@ -1091,14 +1090,14 @@ export const getArticle = (options: {
             query: options.value,
             queryMethod: options.config.method,
             queryTypes: options.config.types,
-            mode: foldResponse.data ? 0 : 3,
-            size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-            zoom: foldResponse.data,
+            mode: zoomIn ? 0 : 3,
+            size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+            zoom: zoomIn,
         }, getResponse => {
             onGet({
                 data: getResponse,
                 protyle: options.edit.protyle,
-                action: foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+                action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
             });
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
             if (matchElement) {

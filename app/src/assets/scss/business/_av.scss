@@ -330,7 +330,8 @@
   &__celltext {
     overflow: hidden;
 
-    &--url {
+    &--url,
+    &--ref {
       text-decoration: underline var(--b3-border-color);
     }
 

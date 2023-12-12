@@ -238,8 +238,8 @@ func RemoveBlockTreesByRootID(rootID string) {
 		slice := val.(*btSlice)
 		slice.m.Lock()
 		delete(slice.data, id)
-		slice.m.Unlock()
 		slice.changed = time.Now()
+		slice.m.Unlock()
 	}
 }
 
@@ -296,8 +296,8 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 		slice := val.(*btSlice)
 		slice.m.Lock()
 		delete(slice.data, id)
-		slice.m.Unlock()
 		slice.changed = time.Now()
+		slice.m.Unlock()
 	}
 }
 
@@ -338,8 +338,8 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 		slice := val.(*btSlice)
 		slice.m.Lock()
 		delete(slice.data, id)
-		slice.m.Unlock()
 		slice.changed = time.Now()
+		slice.m.Unlock()
 	}
 	return
 }
@@ -352,8 +352,8 @@ func RemoveBlockTree(id string) {
 	slice := val.(*btSlice)
 	slice.m.Lock()
 	delete(slice.data, id)
-	slice.m.Unlock()
 	slice.changed = time.Now()
+	slice.m.Unlock()
 }
 
 func IndexBlockTree(tree *parse.Tree) {

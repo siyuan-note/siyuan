@@ -127,8 +127,21 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-load-more") {
+            (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
+            blockElement.removeAttribute("data-render");
+            blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+            avRender(blockElement, protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "set-page-size") {
-            setPageSize(target);
+            setPageSize({
+                target,
+                protyle,
+                avID: blockElement.getAttribute("data-av-id"),
+                nodeElement: blockElement
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -393,8 +393,8 @@ interface IOptions {
     action?: string[],
     mode?: TEditorMode,
     blockId: string
+    rootId?: string
     key?: string
-    scrollAttr?: IScrollAttr
     defId?: string
     render?: {
         background?: boolean
@@ -431,6 +431,8 @@ interface IOptions {
 
 interface IProtyle {
     getInstance: () => import("../protyle").Protyle,
+    observerLoad?: ResizeObserver,
+    observer?: ResizeObserver,
     app: import("../index").App,
     transactionTime: number,
     id: string,

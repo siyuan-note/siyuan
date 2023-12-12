@@ -15,6 +15,7 @@ import {showFileInFolder} from "../../util/pathName";
 import {assetInputEvent, renderPreview, toggleAssetHistory} from "../../search/assets";
 import {initSearchMenu} from "../../menus/search";
 import {writeText} from "../../protyle/util/compatibility";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -90,14 +91,13 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (!isAsset) {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
             const id = currentList.getAttribute("data-node-id");
-            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+            checkFold(id, (zoomIn, action) => {
                 openFileById({
                     app,
                     id,
                     position: "right",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                        (id === currentList.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                    zoomIn: foldResponse.data
+                    action,
+                    zoomIn
                 });
                 if (dialog) {
                     dialog.destroy({focus: "false"});
@@ -197,13 +197,12 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 replace(element, config, edit, false);
             } else {
                 const id = currentList.getAttribute("data-node-id");
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                checkFold(id, (zoomIn, action) => {
                     openFileById({
                         app,
                         id,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
-                            (id === currentList.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
-                        zoomIn: foldResponse.data
+                        action,
+                        zoomIn
                     });
                     if (dialog) {
                         dialog.destroy({focus: "false"});

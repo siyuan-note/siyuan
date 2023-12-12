@@ -251,7 +251,7 @@ func setUILayout(c *gin.Context) {
 		return
 	}
 
-	model.Conf.UILayout = uiLayout
+	model.Conf.SetUILayout(uiLayout)
 	model.Conf.Save()
 }
 

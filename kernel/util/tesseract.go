@@ -273,3 +273,14 @@ func getTesseractLangs() (ret []string) {
 	}
 	return
 }
+
+var (
+	NodeOCRQueue     []string
+	NodeOCRQueueLock = sync.Mutex{}
+)
+
+func PushNodeOCRQueue(id string) {
+	NodeOCRQueueLock.Lock()
+	defer NodeOCRQueueLock.Unlock()
+	NodeOCRQueue = append(NodeOCRQueue, id)
+}

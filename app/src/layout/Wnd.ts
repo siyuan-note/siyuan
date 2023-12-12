@@ -466,7 +466,7 @@ export class Wnd {
                     openFileById({
                         app: this.app,
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");
@@ -682,7 +682,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true, animate = true) => {
+    private removeTabAction = (id: string, closeAll = false, animate = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -691,7 +691,7 @@ export class Wnd {
                         item.model.beforeDestroy();
                     }
                 }
-                if (item.model instanceof Editor && hasSaveScroll) {
+                if (item.model instanceof Editor) {
                     saveScroll(item.model.editor.protyle);
                 }
                 if (this.children.length === 1) {
@@ -787,7 +787,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, needSaveScroll = true, animate = true) {
+    public removeTab(id: string, closeAll = false, animate = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -796,9 +796,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
+                    this.removeTabAction(id, closeAll, animate);
                 } else {
-                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
+                    this.removeTabAction(id, closeAll, animate);
                 }
                 return;
             }

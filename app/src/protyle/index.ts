@@ -39,6 +39,7 @@ import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
 import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
+import {setStorageVal} from "./util/compatibility";
 
 export class Protyle {
 
@@ -196,7 +197,7 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
                                 }
                                 /// #endif
                             }
@@ -207,9 +208,11 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
                                 }
                                 /// #endif
+                                delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][this.protyle.block.rootID];
+                                setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
                             }
                             break;
                     }
@@ -225,46 +228,20 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            if (options.scrollAttr) {
+
+            if (this.protyle.options.mode !== "preview" &&
+                options.rootId && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId] &&
+                (
+                    mergedOptions.action.includes(Constants.CB_GET_SCROLL) ||
+                    (mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL) && options.rootId === options.blockId)
+                )
+            ) {
                 getDocByScroll({
                     protyle: this.protyle,
-                    scrollAttr: options.scrollAttr,
+                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.rootId],
                     mergedOptions,
                     cb: () => {
                         this.afterOnGet(mergedOptions);
-                    }
-                });
-            } else if (this.protyle.options.mode !== "preview" &&
-                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) || mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL))) {
-                fetchPost("/api/block/getDocInfo", {
-                    id: options.blockId
-                }, (response) => {
-                    if (!mergedOptions.action.includes(Constants.CB_GET_SCROLL) &&
-                        response.data.rootID !== options.blockId && mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL)) {
-                        // 打开根文档保持上一次历史，否则按照原有 action 执行 https://github.com/siyuan-note/siyuan/issues/9082
-                        this.getDoc(mergedOptions);
-                        return;
-                    }
-                    let scrollObj;
-                    if (response.data.ial.scroll) {
-                        try {
-                            scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
-                        } catch (e) {
-                            scrollObj = undefined;
-                        }
-                    }
-                    if (scrollObj) {
-                        scrollObj.rootId = response.data.rootID;
-                        getDocByScroll({
-                            protyle: this.protyle,
-                            scrollAttr: scrollObj,
-                            mergedOptions,
-                            cb: () => {
-                                this.afterOnGet(mergedOptions);
-                            }
-                        });
-                    } else {
-                        this.getDoc(mergedOptions);
                     }
                 });
             } else {

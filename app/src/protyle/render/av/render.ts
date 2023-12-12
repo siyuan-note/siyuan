@@ -62,9 +62,13 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
+                pageSize: parseInt(e.dataset.pageSize) || undefined,
                 viewID: newViewID
             }, (response) => {
                 const data = response.data.view as IAVTable;
+                if (!e.dataset.pageSize) {
+                    e.dataset.pageSize = data.pageSize.toString();
+                }
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg class="av__check"><use xlink:href="#iconUncheck"></use></svg></div>';
                 let calcHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconMath"></use></svg></div>';
@@ -150,7 +154,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             }
                             text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}"${urlAttr}>${urlContent}</span>`;
                         } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext">${cell.value.block.content || ""}</span>`;
+                            text = `<span class="av__celltext${cell.value?.isDetached ? "" : " av__celltext--ref"}">${cell.value.block.content || ""}</span>`;
                             if (cell.value?.isDetached) {
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more" >${window.siyuan.languages.more}</span>`;
                             } else {
@@ -266,12 +270,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                         ${window.siyuan.languages.addAttr}
                     </button>
                     <span class="fn__space"></span>
-                    <button class="b3-button">
+                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
                         <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
                         <span data-type="av-load-more">
                             ${window.siyuan.languages.loadMore}
                         </span>
-                        <svg data-type="set-page-size" data-size="50"><use xlink:href="#iconMore"></use></svg>
+                        <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
                     </button>
                 </div>
             </div>
@@ -316,7 +320,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     }
 };
 
-let refreshTimeout: number;
+const refreshTimeouts: {
+    [key: string]: number;
+} = {};
 export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
@@ -328,9 +334,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
             titleElement.dataset.title = operation.data;
         });
     }
-    // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略
-    clearTimeout(refreshTimeout);
-    refreshTimeout = window.setTimeout(() => {
+    // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略；必须为每一个 protyle 单独设置，否则有多个 protyle 时，其余无法被执行
+    clearTimeout(refreshTimeouts[protyle.id]);
+    refreshTimeouts[protyle.id] = window.setTimeout(() => {
         if (operation.action === "setAttrViewColWidth") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;

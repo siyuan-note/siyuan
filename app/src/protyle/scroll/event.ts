@@ -39,7 +39,11 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
             clearTimeout(getIndexTimeout);
             getIndexTimeout = window.setTimeout(() => {
-                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
+                let targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
+                if (targetElement.classList.contains("protyle-wysiwyg")) {
+                    // 恰好定位到块的中间时
+                    targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 20);
+                }
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if ((protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||

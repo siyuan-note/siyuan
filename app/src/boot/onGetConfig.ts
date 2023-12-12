@@ -28,6 +28,7 @@ import {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
+import {checkFold} from "../util/noRelyPCFunction";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -307,12 +308,12 @@ export const initWindow = async (app: App) => {
                 const focus = urlObj.searchParams.get("focus") === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
-                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        checkFold(id, (zoomIn) => {
                             openFileById({
                                 app,
                                 id,
-                                action: (foldResponse.data || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                                zoomIn: foldResponse.data || focus
+                                action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                                zoomIn: zoomIn || focus
                             });
                         });
                         ipcRenderer.send(Constants.SIYUAN_CMD, "show");

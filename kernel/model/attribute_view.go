@@ -378,6 +378,27 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 	viewable.FilterRows()
 	viewable.SortRows()
 	viewable.CalcCols()
+
+	// 分页
+	switch viewable.GetType() {
+	case av.LayoutTypeTable:
+		table := viewable.(*av.Table)
+		table.RowCount = len(table.Rows)
+		if 1 > view.Table.PageSize {
+			view.Table.PageSize = 50
+		}
+		table.PageSize = view.Table.PageSize
+		if 1 > pageSize {
+			pageSize = table.PageSize
+		}
+
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		if len(table.Rows) < end {
+			end = len(table.Rows)
+		}
+		table.Rows = table.Rows[start:end]
+	}
 	return
 }
 
@@ -621,17 +642,6 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, page, p
 		}
 		return iv < jv
 	})
-
-	// 分页
-	ret.RowCount = len(ret.Rows)
-	if 0 < pageSize {
-		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(ret.Rows) < end {
-			end = len(ret.Rows)
-		}
-		ret.Rows = ret.Rows[start:end]
-	}
 	return
 }
 
@@ -773,6 +783,8 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			Order:  s.Order,
 		})
 	}
+
+	view.Table.PageSize = masterView.Table.PageSize
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

@@ -612,7 +612,6 @@ app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");
 app.commandLine.appendSwitch("no-proxy-server");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
-app.commandLine.appendSwitch("force_high_performance_gpu"); // Force using discrete GPU when there are multiple GPUs available on the desktop https://github.com/siyuan-note/siyuan/issues/9694
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");

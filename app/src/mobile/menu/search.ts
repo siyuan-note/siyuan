@@ -24,6 +24,7 @@ import {
     renderPreview,
 } from "../../search/assets";
 import {addClearButton} from "../../util/addClearButton";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -573,8 +574,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                         if (window.siyuan.mobile.editor.protyle) {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
-                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        checkFold(id, (zoomIn) => {
+                            openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                         closePanel();
                     } else {
@@ -717,7 +718,7 @@ const goAsset = () => {
     assetInputEvent(assetsElement, localSearch);
     addClearButton({
         inputElement,
-        className:"toolbar__icon",
+        className: "toolbar__icon",
         clearCB() {
             assetInputEvent(assetsElement, localSearch);
         }

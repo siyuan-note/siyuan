@@ -20,6 +20,7 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
 import {setTitle} from "../../dialog/processSystem";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();
@@ -134,7 +135,9 @@ export const initFramework = (app: App, isStart: boolean) => {
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {
-                        openMobileFileById(app, response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        checkFold(response.data[0].id, (zoomIn) => {
+                            openMobileFileById(app, response.data[0].id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        });
                     } else {
                         setEmpty(app);
                     }

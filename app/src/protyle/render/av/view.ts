@@ -132,10 +132,10 @@ export const getViewHTML = (data: IAVTable) => {
     <span class="b3-menu__accelerator">${data.sorts.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item" data-type="set-page-size" data-size="50">
+<button class="b3-menu__item" data-type="set-page-size" data-size="${data.pageSize}">
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
-    <span class="b3-menu__accelerator">50</span>
+    <span class="b3-menu__accelerator">${data.pageSize}</span>
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>

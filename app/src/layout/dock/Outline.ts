@@ -14,6 +14,7 @@ import {unicode2Emoji} from "../../emoji";
 import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import {App} from "../../index";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -123,11 +124,11 @@ export class Outline extends Model {
                         });
                     }
                 } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    checkFold(id, (zoomIn) => {
                         openFileById({
                             app: options.app,
                             id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                            action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
                 }

@@ -21,7 +21,7 @@ import {setEmpty} from "../mobile/util/setEmpty";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
-import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
 
 const updateTitle = (rootID: string, tab: Tab) => {
@@ -65,12 +65,14 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             reloadProtyle(item.editor.protyle, false);
             updateTitle(item.editor.protyle.block.rootID, item.parent);
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
+            delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];
+            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
         }
     });
     allModels.graph.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)) {
             item.searchGraph(false);
             if (item.type === "local") {
@@ -80,7 +82,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     });
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
@@ -94,7 +96,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     });
     allModels.backlink.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else {
             item.refresh();
             if (item.type === "local") {

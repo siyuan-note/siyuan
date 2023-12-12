@@ -27,6 +27,7 @@ import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
 import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
+import {preventScroll} from "../protyle/scroll/preventScroll";
 
 export const openFileById = async (options: {
     app: App,
@@ -277,7 +278,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             createdTab = newTab(options);
             wnd.addTab(createdTab);
             if (unUpdateTab && options.removeCurrentTab) {
-                wnd.removeTab(unUpdateTab.id, false, true, false);
+                wnd.removeTab(unUpdateTab.id, false, false);
             }
         } else {
             createdTab = newTab(options);
@@ -306,7 +307,6 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 } else {
                     initObj.action = options.action;
                 }
-                delete initObj.scrollAttr;
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;
@@ -361,6 +361,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });
     } else {
+        // 点击大纲产生滚动时会动态加载内容，最终导致定位不准确
+        preventScroll(editor.editor.protyle);
         if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
@@ -473,6 +475,7 @@ const newTab = (options: IOpenFileOptions) => {
                         app: options.app,
                         tab,
                         blockId: options.id,
+                        rootId: options.rootID,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
                     });
                 } else {
@@ -480,6 +483,7 @@ const newTab = (options: IOpenFileOptions) => {
                         app: options.app,
                         tab,
                         blockId: options.id,
+                        rootId: options.rootID,
                         mode: options.mode,
                         action: options.action,
                     });
@@ -539,7 +543,7 @@ export const updatePanelByEditor = (options: {
         updateOutline(models, options.protyle, options.reload);
         updateBacklinkGraph(models, options.protyle);
         options.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle:options.protyle});
+            item.eventBus.emit("switch-protyle", {protyle: options.protyle});
         });
     }
 };

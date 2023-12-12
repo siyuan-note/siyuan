@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {fetchPost} from "./fetch";
 import {isMobile} from "./functions";
+import {Constants} from "../constants";
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
 export const renameTag = (labelName: string) => {
@@ -30,4 +31,13 @@ export const renameTag = (labelName: string) => {
 
 export const getWorkspaceName = () => {
     return window.siyuan.config.system.workspaceDir.replace(/^.*[\\\/]/, "");
+};
+
+export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) => void) => {
+    if (!id) {
+        return;
+    }
+    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+    });
 };

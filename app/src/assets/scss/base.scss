@@ -286,6 +286,7 @@ html {
       align-self: center;
       margin: 0 8px 0 4px;
       cursor: pointer;
+      flex-shrink: 0;
 
       & > div {
         background-color: var(--b3-theme-primary-light);

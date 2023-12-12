@@ -70,8 +70,8 @@ export class Gutter {
             selectElements.forEach(item => {
                 if (item.getAttribute("data-type") === "NodeIFrame") {
                     const embedElement = genEmptyElement();
-                    embedElement.classList.add("protyle-wysiwyg--select")
-                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="#iconLanguage"></use></svg> IFrame`
+                    embedElement.classList.add("protyle-wysiwyg--select");
+                    getContenteditableElement(embedElement).innerHTML = "<svg class=\"svg\"><use xlink:href=\"#iconLanguage\"></use></svg> IFrame";
                     ghostElement.append(embedElement);
                 } else {
                     ghostElement.append(item.cloneNode(true));

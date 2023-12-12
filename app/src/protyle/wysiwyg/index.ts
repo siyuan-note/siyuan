@@ -1052,7 +1052,7 @@ export class WYSIWYG {
 
     private bindEvent(protyle: IProtyle) {
         // 删除块时，av 头尾需重新计算位置
-        protyle.observer = new ResizeObserver((entries) => {
+        protyle.observer = new ResizeObserver(() => {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__title")) {

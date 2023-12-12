@@ -4,12 +4,13 @@ import * as path from "path";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {getAssetName, pathPosix, showFileInFolder} from "../util/pathName";
-import {checkFold, openFileById} from "../editor/util";
+import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import {App} from "../index";
 import {isInAndroid, updateHotkeyTip} from "../protyle/util/compatibility";
+import {checkFold} from "../util/noRelyPCFunction";
 
 export const exportAsset = (src: string) => {
     /// #if !BROWSER

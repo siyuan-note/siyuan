@@ -29,15 +29,6 @@ import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 
-export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) => void) => {
-    if (!id) {
-        return;
-    }
-    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-    });
-};
-
 export const openFileById = async (options: {
     app: App,
     id: string,

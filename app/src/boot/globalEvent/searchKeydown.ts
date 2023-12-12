@@ -3,7 +3,7 @@ import * as path from "path";
 /// #endif
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
-import {checkFold, openFileById} from "../../editor/util";
+import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {newFileByName} from "../../util/newFile";
 import {App} from "../../index";
@@ -15,6 +15,7 @@ import {showFileInFolder} from "../../util/pathName";
 import {assetInputEvent, renderPreview, toggleAssetHistory} from "../../search/assets";
 import {initSearchMenu} from "../../menus/search";
 import {writeText} from "../../protyle/util/compatibility";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {

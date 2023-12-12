@@ -24,7 +24,7 @@ import {
     renderPreview,
 } from "../../search/assets";
 import {addClearButton} from "../../util/addClearButton";
-import {checkFold} from "../../editor/util";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {

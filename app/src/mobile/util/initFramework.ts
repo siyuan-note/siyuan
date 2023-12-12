@@ -20,7 +20,7 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
 import {setTitle} from "../../dialog/processSystem";
-import {checkFold} from "../../editor/util";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();

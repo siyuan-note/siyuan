@@ -5,7 +5,7 @@ import * as path from "path";
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {checkFold, openFile, openFileById} from "../editor/util";
+import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
@@ -40,6 +40,7 @@ import {
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 import {addClearButton} from "../util/addClearButton";
+import {checkFold} from "../util/noRelyPCFunction";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];

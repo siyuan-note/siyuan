@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {getEventName} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {closePanel} from "../util/closePanel";
-import {checkFold} from "../../editor/util";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class MobileOutline {
     private tree: Tree;

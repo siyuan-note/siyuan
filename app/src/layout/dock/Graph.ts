@@ -7,10 +7,11 @@ import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {fetchPost} from "../../util/fetch";
-import {checkFold, isCurrentEditor, openFileById} from "../../editor/util";
+import {isCurrentEditor, openFileById} from "../../editor/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {App} from "../../index";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 declare const vis: any;
 

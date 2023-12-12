@@ -5,7 +5,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
-import {checkFold} from "../../editor/util";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class MobileBookmarks {
     public element: HTMLElement;

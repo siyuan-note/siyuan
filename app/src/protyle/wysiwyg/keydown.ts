@@ -39,7 +39,7 @@ import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rena
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 /// #if !MOBILE
-import {checkFold, openBy, openFileById} from "../../editor/util";
+import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {
     alignImgCenter, alignImgLeft,
@@ -68,6 +68,7 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";

@@ -30,7 +30,7 @@ import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {pasteAsPlainText, pasteEscaped, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
-import {checkFold, openFileById, updateBacklinkGraph} from "../editor/util";
+import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
 import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
@@ -45,7 +45,7 @@ import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNG, exportAsset} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
-import {renameTag} from "../util/noRelyPCFunction";
+import {checkFold, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";

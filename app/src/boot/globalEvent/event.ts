@@ -13,7 +13,8 @@ import {initTabMenu} from "../../menus/tab";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {hideTooltip} from "../../dialog/tooltip";
-import {checkFold, openFileById} from "../../editor/util";
+import {openFileById} from "../../editor/util";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {

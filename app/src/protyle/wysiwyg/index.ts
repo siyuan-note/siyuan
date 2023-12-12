@@ -58,7 +58,7 @@ import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
-import {checkFold, openAsset, openBy, openFileById} from "../../editor/util";
+import {openAsset, openBy, openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
@@ -80,6 +80,7 @@ import {stickyRow, updateHeader} from "../render/av/row";
 import {showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {avRender} from "../render/av/render";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};

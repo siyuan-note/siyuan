@@ -5,11 +5,12 @@ import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
-import {checkFold, openFileById} from "../../editor/util";
+import {openFileById} from "../../editor/util";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
 import {Constants} from "../../constants";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class Bookmark extends Model {
     private openNodes: string[];

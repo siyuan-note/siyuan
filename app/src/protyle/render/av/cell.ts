@@ -307,6 +307,10 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
                 inputValue.content = parseFloat((avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value);
                 inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
+                if (!inputValue.isNotEmpty) {
+                    // 后端仅支持传入数字，因此在为空的时候需要设置为 0
+                    inputValue.content = 0;
+                }
             } else if (type === "checkbox") {
                 const useElement = item.querySelector("use");
                 inputValue.checked = useElement.getAttribute("xlink:href") === "#iconUncheck";

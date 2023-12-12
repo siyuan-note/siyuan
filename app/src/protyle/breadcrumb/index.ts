@@ -343,6 +343,7 @@ export class Breadcrumb {
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.netAssets2LocalAssets,
+                    icon: "iconTransform",
                     accelerator: window.siyuan.config.keymap.editor.general.netAssets2LocalAssets.custom,
                     click() {
                         net2LocalAssets(protyle, "Assets");

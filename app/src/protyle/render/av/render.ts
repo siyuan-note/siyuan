@@ -214,8 +214,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <span class="item__text">${item.name}</span>
 </div>`;
                 });
-                setTimeout(() => {
-                    e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
+                e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
         <div class="fn__flex av__views">
             <div class="layout-tab-bar fn__flex">
@@ -276,48 +275,47 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         </div>
     </div>
 </div>`;
-                    e.setAttribute("data-render", "true");
-                    // 历史兼容
-                    e.style.margin = "";
-                    if (left) {
-                        e.querySelector(".av__scroll").scrollLeft = left;
-                    }
+                e.setAttribute("data-render", "true");
+                // 历史兼容
+                e.style.margin = "";
+                if (left) {
+                    e.querySelector(".av__scroll").scrollLeft = left;
+                }
 
-                    const editRect = protyle.contentElement.getBoundingClientRect();
-                    if (headerTransform) {
-                        (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                    } else {
-                        stickyRow(e, editRect, "top");
+                const editRect = protyle.contentElement.getBoundingClientRect();
+                if (headerTransform) {
+                    (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
+                } else {
+                    stickyRow(e, editRect, "top");
+                }
+                if (footerTransform) {
+                    (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
+                } else {
+                    stickyRow(e, editRect, "bottom");
+                }
+                if (selectCellId) {
+                    const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
+                    if (newCellElement) {
+                        newCellElement.classList.add("av__cell--select");
                     }
-                    if (footerTransform) {
-                        (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
-                    } else {
-                        stickyRow(e, editRect, "bottom");
+                    if (!document.querySelector(".av__panel")) {
+                        focusBlock(e);
                     }
-                    if (selectCellId) {
-                        const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
-                        if (newCellElement) {
-                            newCellElement.classList.add("av__cell--select");
-                        }
-                        if (!document.querySelector(".av__panel")) {
+                }
+                if (getSelection().rangeCount > 0) {
+                    // 修改表头后光标重新定位
+                    const range = getSelection().getRangeAt(0);
+                    if (!hasClosestByClassName(range.startContainer, "av__title")) {
+                        const blockElement = hasClosestBlock(range.startContainer);
+                        if (blockElement && e.isSameNode(blockElement)) {
                             focusBlock(e);
                         }
                     }
-                    if (getSelection().rangeCount > 0) {
-                        // 修改表头后光标重新定位
-                        const range = getSelection().getRangeAt(0);
-                        if (!hasClosestByClassName(range.startContainer, "av__title")) {
-                            const blockElement = hasClosestBlock(range.startContainer);
-                            if (blockElement && e.isSameNode(blockElement)) {
-                                focusBlock(e);
-                            }
-                        }
-                    }
-                    e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
-                    if (cb) {
-                        cb();
-                    }
-                }, time ? 256 - (new Date().getTime() - time) : 0); // 为了让动画更好看，需延时到 256ms
+                }
+                e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
+                if (cb) {
+                    cb();
+                }
             });
         });
     }

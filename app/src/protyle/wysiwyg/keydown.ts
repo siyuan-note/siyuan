@@ -796,7 +796,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextRange) {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement) {
-                                    removeBlock(protyle, nextBlockElement, nextRange);
+                                    removeBlock(protyle, nextBlockElement, nextRange, true);
                                 }
                             }
                             event.stopPropagation();

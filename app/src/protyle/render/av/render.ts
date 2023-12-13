@@ -305,9 +305,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     }
                     if (getSelection().rangeCount > 0) {
                         // 修改表头后光标重新定位
-                        const range = getSelection().getRangeAt(0)
+                        const range = getSelection().getRangeAt(0);
                         if (!hasClosestByClassName(range.startContainer, "av__title")) {
-                            const blockElement = hasClosestBlock(range.startContainer)
+                            const blockElement = hasClosestBlock(range.startContainer);
                             if (blockElement && e.isSameNode(blockElement)) {
                                 focusBlock(e);
                             }

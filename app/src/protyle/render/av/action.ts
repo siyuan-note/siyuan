@@ -243,7 +243,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (target.classList.contains("av__cell")) {
             if (!hasClosestByClassName(target, "av__row--header")) {
                 const scrollElement = hasClosestByClassName(target, "av__scroll");
-                if (!scrollElement) {
+                if (!scrollElement || target.querySelector(".av__pulse")) {
                     return;
                 }
                 const rowElement = hasClosestByClassName(target, "av__row");

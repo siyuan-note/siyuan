@@ -26,10 +26,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
-            let time: number;
             if (e.firstElementChild.innerHTML === "") {
                 e.style.alignSelf = "";
-                time = new Date().getTime();
                 let html = "";
                 [1, 2, 3].forEach(() => {
                     html += `<div class="av__row">

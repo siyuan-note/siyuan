@@ -141,7 +141,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
-    if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
+    if (type === "updated" || type === "created" || document.querySelector(".av__mask") ||
+        cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
         return;
     }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {

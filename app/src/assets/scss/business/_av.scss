@@ -312,9 +312,12 @@
   &__celltext {
     overflow: hidden;
 
-    &--url,
+    &--url {
+      border-bottom: .5px solid var(--b3-border-color);
+    }
+
     &--ref {
-      border-bottom: 1px solid var(--b3-border-color);
+      border-bottom: .5px solid var(--b3-theme-on-background);
     }
 
     & > .av__cellicon {

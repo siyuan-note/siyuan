@@ -286,7 +286,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
  * @param isDelete
  * @param deleteElement 末尾反向删除时才会传入
  */
-export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement:Element) => {
+export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
     const liElement = liItemElements[0].parentElement;
     const liId = liElement.getAttribute("data-node-id");
     if (!liId) {

@@ -515,12 +515,12 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
 
 export const moveToPrevious = (blockElement: Element, range: Range, isDelete: boolean) => {
     if (isDelete) {
-        const previousBlockElement = getPreviousBlock(blockElement)
+        const previousBlockElement = getPreviousBlock(blockElement);
         if (previousBlockElement) {
-            const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement))
+            const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement));
             if (previousEditElement) {
                 setLastNodeRange(previousEditElement, range, false);
             }
         }
     }
-}
+};

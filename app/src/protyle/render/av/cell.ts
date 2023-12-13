@@ -370,7 +370,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
     }
-    if (blockElement) {
+    if (blockElement &&
+        // 单元格编辑中 ctrl+p 光标定位
+        !document.querySelector(".b3-dialog")) {
         focusBlock(blockElement);
     }
     document.querySelectorAll(".av__mask").forEach((item) => {

@@ -138,11 +138,13 @@ export const getTypeByCellElement = (cellElement: Element) => {
 };
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
+    if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
+        return;
+    }
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
-    if (type === "updated" || type === "created" || document.querySelector(".av__mask") ||
-        cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
+    if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
         return;
     }
     if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {

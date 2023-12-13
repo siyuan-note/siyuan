@@ -785,6 +785,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	}
 
 	view.Table.PageSize = masterView.Table.PageSize
+	view.Table.RowIDs = masterView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -816,6 +817,8 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	for _, col := range firstView.Table.Columns {
 		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
 	}
+
+	view.Table.RowIDs = firstView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

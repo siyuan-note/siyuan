@@ -90,7 +90,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 srcIDs,
                 avID,
             }]);
-            insertAttrViewBlockAnimation(blockElement, 1, undefined, avID);
+            insertAttrViewBlockAnimation(blockElement, srcIDs, undefined, avID);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -160,7 +160,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 srcIDs,
                 avID,
             }]);
-            insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+            insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -184,7 +184,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     srcIDs,
                     avID,
                 }]);
-                insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+                insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
             } else {
                 const gutterRect = target.getBoundingClientRect();
                 avContextmenu(protyle, rowElement, {

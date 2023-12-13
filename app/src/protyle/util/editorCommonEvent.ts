@@ -931,7 +931,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 srcIDs: sourceIds,
                                 avID,
                             }]);
-                            insertAttrViewBlockAnimation(blockElement, sourceIds.length, previousID);
+                            insertAttrViewBlockAnimation(blockElement, sourceIds, previousID);
                         }
                     }
                 } else if (sourceElements.length > 0) {
@@ -990,7 +990,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         srcIDs: ids,
                         avID,
                     }]);
-                    insertAttrViewBlockAnimation(blockElement, ids.length, previousID);
+                    insertAttrViewBlockAnimation(blockElement, ids, previousID);
                 }
             } else {
                 for (let i = 0; i < ids.length; i++) {

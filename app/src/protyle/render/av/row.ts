@@ -69,7 +69,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
+export const insertAttrViewBlockAnimation = (blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = '<div style="width: 24px"></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
@@ -84,8 +84,8 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
     });
 
     let html = "";
-    new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row" data-avid="${avId}" data-previous-id="${previousId}">
+    srcIDs.forEach((id) => {
+        html += `<div class="av__row" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
     ${colHTML}
 </div>`;
     });

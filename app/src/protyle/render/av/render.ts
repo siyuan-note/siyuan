@@ -6,7 +6,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {isMac} from "../../util/compatibility";
-import {hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
 
@@ -301,6 +301,16 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                         }
                         if (!document.querySelector(".av__panel")) {
                             focusBlock(e);
+                        }
+                    }
+                    if (getSelection().rangeCount > 0) {
+                        // 修改表头后光标重新定位
+                        const range = getSelection().getRangeAt(0)
+                        if (!hasClosestByClassName(range.startContainer, "av__title")) {
+                            const blockElement = hasClosestBlock(range.startContainer)
+                            if (blockElement && e.isSameNode(blockElement)) {
+                                focusBlock(e);
+                            }
                         }
                     }
                     e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;

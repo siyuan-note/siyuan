@@ -354,7 +354,7 @@
   &__colsticky {
     position: sticky;
     left: 0;
-    z-index: 1;
+    z-index: 2; // 需大于 av__widthdrag，否则横行滚动后，拖拽会悬浮于 stick 列上
     display: flex;
 
     &.av__firstcol,

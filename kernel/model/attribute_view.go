@@ -1670,6 +1670,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 		}
 	}
 
+	replacedRowID := false
 	for _, v := range attrView.Views {
 		switch v.LayoutType {
 		case av.LayoutTypeTable:
@@ -1682,7 +1683,13 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 			for i, rowID := range v.Table.RowIDs {
 				if rowID == operation.PreviousID {
 					v.Table.RowIDs[i] = operation.NextID
+					replacedRowID = true
+					break
 				}
+			}
+
+			if !replacedRowID {
+				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
 			}
 		}
 	}

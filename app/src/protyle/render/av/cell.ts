@@ -250,10 +250,15 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             cellElements[0] = protyle.wysiwyg.element.querySelector(previousId ? `[data-av-id="${avid}"] .av__row[data-id="${previousId}"]` : `[data-av-id="${avid}"] .av__row--header`).nextElementSibling.querySelector('[data-detached="true"]');
         } else {
             // 修改单元格后立即修改其他单元格
-            cellElements[0] = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`);
-            if (!cellElements[0]) {
+            let tempElement = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`) as HTMLElement;
+            if (!tempElement) {
+                // 修改单元格后修改其他没有内容的单元格（id 会随机）
+                tempElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement
+            }
+            if (!tempElement) {
                 return;
             }
+            cellElements[0] = tempElement;
         }
     }
     if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !rowElement.dataset.id) {

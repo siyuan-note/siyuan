@@ -414,6 +414,10 @@ ${genHintItemHTML(item)}
             if (!cellElement) {
                 return;
             }
+            const rowElement = hasClosestByClassName(cellElement, "av__row");
+            if (!rowElement) {
+                return;
+            }
             const previousID = cellElement.dataset.blockId;
             const avID = nodeElement.getAttribute("data-av-id");
             let tempElement = document.createElement("div");
@@ -422,23 +426,26 @@ ${genHintItemHTML(item)}
             if (value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
                 const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
+                const newID = Lute.NewNodeID();
+                rowElement.dataset.id = newID;
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, realFileName),
                         parentID: protyle.block.rootID,
-                        markdown: ""
-                    }, response => {
+                        markdown: "",
+                        id: newID,
+                    }, () => {
                         transaction(protyle, [{
                             action: "replaceAttrViewBlock",
                             avID,
                             previousID,
-                            nextID: response.data,
+                            nextID: newID,
                             isDetached: false,
                         }], [{
                             action: "replaceAttrViewBlock",
                             avID,
-                            previousID: response.data,
+                            previousID: newID,
                             nextID: previousID,
                             isDetached: true,
                         }]);
@@ -446,6 +453,7 @@ ${genHintItemHTML(item)}
                 });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
+                rowElement.dataset.id = sourceId;
                 transaction(protyle, [{
                     action: "replaceAttrViewBlock",
                     avID,

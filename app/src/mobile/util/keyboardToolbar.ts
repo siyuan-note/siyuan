@@ -484,7 +484,7 @@ export const initKeyboardToolbar = () => {
             <span class="keyboard__split"></span>
             <button class="keyboard__action" data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
             <button class="keyboard__action" data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
-            <button class="keyboard__action" data-type="softLine"><svg><use xlink:href="#iconArrowDown"></use></svg></button>
+            <button class="keyboard__action" data-type="softLine"><svg><use xlink:href="#iconSoftWrap"></use></svg></button>
         </div>
         <div class="fn__none keyboard__dynamic">
             <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>

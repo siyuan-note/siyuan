@@ -1404,7 +1404,9 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		}
 	}
 	if "" == rowID {
-		return
+		rowID = operation.ID
+		view.Table.RowIDs = append(view.Table.RowIDs, rowID)
+		index = len(view.Table.RowIDs) - 1
 	}
 
 	switch view.LayoutType {

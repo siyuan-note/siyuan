@@ -364,11 +364,9 @@ const renderKeyboardToolbar = () => {
                 if (nodeElement.parentElement.classList.contains("li")) {
                     outdentElement.classList.remove("fn__none");
                     outdentElement.nextElementSibling.classList.remove("fn__none");
-                    outdentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
                 } else {
                     outdentElement.classList.add("fn__none");
                     outdentElement.nextElementSibling.classList.add("fn__none");
-                    outdentElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
                 }
             }
         }

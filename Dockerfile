@@ -1,4 +1,4 @@
-FROM node:16 as NODE_BUILD
+FROM node:21 as NODE_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
 RUN cd app && npm install -g pnpm && pnpm install && pnpm run build

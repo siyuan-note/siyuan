@@ -46,6 +46,7 @@
 
   &__views {
     align-items: center;
+    box-shadow: 0px -1px inset var(--b3-theme-background-light);
   }
 
   &__title {
@@ -61,7 +62,7 @@
   &__counter {
     position: absolute;
     bottom: 0;
-    height: 30px;
+    height: 26px;
     padding: 0 5px;
     background-color: var(--av-background);
   }

@@ -65,7 +65,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
         headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
     }
     counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} selected`;
+    counterElement.innerHTML = `${selectCount} ${window.siyuan.languages.selected}`;
     avHeadElement.style.position = "sticky";
 };
 

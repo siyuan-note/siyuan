@@ -6,7 +6,8 @@
     border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
     width: 100%;
     height: 100%;
-    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &__tab-container {
@@ -14,7 +15,7 @@
     box-sizing: border-box;
     height: 100%;
 
-    .b3-label {
+    .b3-label:not(.b3-label--inner) {
       padding: 16px 0;
       margin: 0 24px;
     }
@@ -93,6 +94,7 @@
       &--text {
         background-color: var(--b3-theme-surface);
         padding: 16px 24px;
+        overflow: auto;
 
         .b3-button--outline {
           white-space: normal;
@@ -151,6 +153,16 @@
       width: 100%;
       text-align: center;
     }
+
+    &__svg {
+      flex-wrap: wrap;
+
+      svg {
+        margin: 8px;
+        height: 16px;
+        width: 16px;
+      }
+    }
   }
 
   &-about__logo {
@@ -191,7 +203,7 @@
   &-keymap {
     &__key {
       padding: 2px 4px;
-      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
       line-height: 1;
       color: var(--b3-theme-on-surface);
       vertical-align: middle;

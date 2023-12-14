@@ -30,14 +30,15 @@ import "./assets/scss/base.scss";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
+    public appId: string;
 
     constructor() {
         /// #if BROWSER
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         /// #endif
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+
+        this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -120,7 +121,7 @@ export class App {
                                 transactionError();
                                 break;
                             case "syncing":
-                                processSync(data);
+                                processSync(data, this.plugins);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);
@@ -132,9 +133,6 @@ export class App {
                                     (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
                                 }
                                 break;
-                            case "createdailynote":
-                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
-                                break;
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
@@ -145,6 +143,8 @@ export class App {
         };
 
         fetchPost("/api/system/getConf", {}, async (response) => {
+            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             // 历史数据兼容，202306后可删除
             if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {

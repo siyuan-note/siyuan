@@ -5,6 +5,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
 import {openBookmarkMenu} from "../../menus/bookmark";
 import {App} from "../../index";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class MobileBookmarks {
     public element: HTMLElement;
@@ -38,8 +39,8 @@ export class MobileBookmarks {
                         return;
                     }
                 }
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                checkFold(id, (zoomIn) => {
+                    openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                 });
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

@@ -461,6 +461,11 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     updateBlock(updateElements, protyle, operation, isUndo);
                 }
             });
+        } else { // updateElements 没有包含嵌入块，在悬浮层编辑嵌入块时，嵌入块也需要更新
+            // 更新 ws 嵌入块
+            updateEmbed(protyle, operation);
+            // 更新 ws 引用块
+            updateRef(protyle, operation.id);
         }
         return;
     }
@@ -482,6 +487,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 aliasHTML = `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
             } else if (key === "memo") {
                 memoHTML = `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+            } else if (key === "custom-avs") {
+                memoHTML = "<div class=\"protyle-attr--av\"><svg><use xlink:href=\"#iconDatabase\"></use></svg></div>";
             }
         });
         let nodeAttrHTML = bookmarkHTML + nameHTML + aliasHTML + memoHTML;
@@ -525,7 +532,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     window.siyuan.mobile.editor.protyle.background.render(window.siyuan.mobile.editor.protyle.background.ial, window.siyuan.mobile.editor.protyle.block.rootID);
                 }
                 /// #else
-                if (protyle.background.ial.icon !== data.new.icon) {
+                if (protyle.background && protyle.background.ial.icon !== data.new.icon) {
                     protyle.background.ial.icon = data.new.icon;
                     protyle.background.render(protyle.background.ial, protyle.block.rootID);
                     protyle.model?.parent.setDocIcon(data.new.icon);
@@ -708,17 +715,23 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     } else if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewColOptions",
         "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
         "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
-        "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat",
-        "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColIcon"].includes(operation.action)) {
-        refreshAV(protyle, operation);
+        "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
+        "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColIcon", "setAttrViewColPin", "addAttrViewView",
+        "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
+        "setAttrViewPageSize"].includes(operation.action)) {
+        refreshAV(protyle, operation, isUndo);
+    } else if (operation.action === "doUpdateUpdated") {
+        updateElements.forEach(item => {
+            item.setAttribute("updated", operation.data);
+        });
     }
 };
 
 export const turnsIntoOneTransaction = (options: {
     protyle: IProtyle,
     selectsElement: Element[],
-    type: string,
-    level?: string
+    type: TTurnIntoOne,
+    level?: TTurnIntoOneSub
 }) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
@@ -828,8 +841,8 @@ export const turnsIntoTransaction = (options: {
     protyle: IProtyle,
     selectsElement?: Element[],
     nodeElement?: Element,
-    type: string,
-    level?: number | string,
+    type: TTurnInto,
+    level?: number,
     isContinue?: boolean,
 }) => {
     let selectsElement: Element[] = options.selectsElement;
@@ -892,7 +905,7 @@ export const turnsIntoTransaction = (options: {
             data: item.outerHTML
         });
 
-        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") && !options.isContinue) {
+        if (!options.isContinue) {
             // @ts-ignore
             item.outerHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
         } else {

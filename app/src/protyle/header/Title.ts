@@ -9,12 +9,9 @@ import {MenuItem} from "../../menus/Menu";
 import {
     openFileAttr,
 } from "../../menus/commonMenuItem";
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
-/// #endif
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
-import {readText, writeText} from "../util/compatibility";
+import {isMac, readText, writeText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {setPanelFocus} from "../../layout/util";
 import {openFileById, updatePanelByEditor} from "../../editor/util";
@@ -27,6 +24,7 @@ import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
+import {electronUndo} from "../undo";
 
 export class Title {
     public element: HTMLElement;
@@ -40,7 +38,7 @@ export class Title {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
         // 标题内需要一个空格，避免首次加载出现`请输入文档名`干扰
-        this.element.innerHTML = `<span aria-label="${window.siyuan.languages.gutterTip2}" data-position="right" class="protyle-title__icon ariaLabel"><svg><use xlink:href="#iconFile"></use></svg></span>
+        this.element.innerHTML = `<span aria-label="${isMac() ? window.siyuan.languages.gutterTip2 : window.siyuan.languages.gutterTip2.replace("⇧", "Shift+")}" data-position="right" class="protyle-title__icon ariaLabel"><svg><use xlink:href="#iconFile"></use></svg></span>
 <div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}" class="protyle-title__input" data-tip="${window.siyuan.languages._kernel[16]}"> </div><div class="protyle-attr"></div>`;
         this.editElement = this.element.querySelector(".protyle-title__input");
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
@@ -97,20 +95,9 @@ export class Title {
                 event.stopPropagation();
                 return;
             }
-            /// #if !BROWSER
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-                getCurrentWindow().webContents.undo();
-                event.preventDefault();
-                event.stopPropagation();
+            if (electronUndo(event)) {
                 return;
             }
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-                getCurrentWindow().webContents.redo();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            /// #endif
             if (event.key === "ArrowDown") {
                 const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                 // https://github.com/siyuan-note/siyuan/issues/4923
@@ -145,12 +132,6 @@ export class Title {
                 event.stopPropagation();
             } else if (matchHotKey("⌘A", event)) {
                 getEditorRange(this.editElement).selectNodeContents(this.editElement);
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
-                fetchPost("/api/block/getRefText", {id: protyle.block.rootID}, (response) => {
-                    writeText(`((${protyle.block.rootID} '${response.data}'))`);
-                });
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
@@ -311,6 +292,9 @@ export class Title {
         }
         if (response.data.ial.memo) {
             nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+        }
+        if (response.data.ial["custom-avs"]) {
+            nodeAttrHTML += '<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg></div>';
         }
         this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
         if (response.data.refCount !== 0) {

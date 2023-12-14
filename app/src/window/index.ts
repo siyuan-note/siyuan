@@ -7,7 +7,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {addBaseURL, setNoteBook} from "../util/pathName";
-import {openFile, openFileById} from "../editor/util";
+import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
@@ -23,11 +23,13 @@ import {loadPlugins} from "../plugin/loader";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
+    public appId: string;
 
     constructor() {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -103,7 +105,7 @@ class App {
                                 transactionError();
                                 break;
                             case "syncing":
-                                processSync(data);
+                                processSync(data, this.plugins);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);
@@ -114,9 +116,6 @@ class App {
                                 } else {
                                     (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
                                 }
-                                break;
-                            case "createdailynote":
-                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
@@ -148,8 +147,3 @@ class App {
 }
 
 new App();
-
-// 再次点击新窗口已打开的 PDF 时，需进行定位
-window.newWindow = {
-    openFile: openFile,
-};

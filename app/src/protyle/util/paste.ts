@@ -26,27 +26,27 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
         // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
 
         // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
-        // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
-        clipText = clipText.replace(/\\/g, "\\\\\\\\")
-            .replace(/\*/g, "\\\\\\*")
-            .replace(/\_/g, "\\\\\\_")
-            .replace(/\[/g, "\\\\\\[")
-            .replace(/\]/g, "\\\\\\]")
-            .replace(/\!/g, "\\\\\\!")
-            .replace(/\`/g, "\\\\\\`")
-            .replace(/\</g, "\\\\\\<")
-            .replace(/\>/g, "\\\\\\>")
-            .replace(/\&/g, "\\\\\\&")
-            .replace(/\~/g, "\\\\\\~")
-            .replace(/\{/g, "\\\\\\{")
-            .replace(/\}/g, "\\\\\\}")
-            .replace(/\(/g, "\\\\\\(")
-            .replace(/\)/g, "\\\\\\)")
-            .replace(/\=/g, "\\\\\\=")
-            .replace(/\#/g, "\\\\\\#")
-            .replace(/\$/g, "\\\\\\$")
-            .replace(/\^/g, "\\\\\\^")
-            .replace(/\|/g, "\\\\\\|");
+        // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符
+        clipText = clipText.replace(/\\/g, "\\\\")
+            .replace(/\*/g, "\\*")
+            .replace(/_/g, "\\_")
+            .replace(/\[/g, "\\[")
+            .replace(/]/g, "\\]")
+            .replace(/!/g, "\\!")
+            .replace(/`/g, "\\`")
+            .replace(/</g, "\\<")
+            .replace(/>/g, "\\>")
+            .replace(/&/g, "\\&")
+            .replace(/~/g, "\\~")
+            .replace(/\{/g, "\\{")
+            .replace(/}/g, "\\}")
+            .replace(/\(/g, "\\(")
+            .replace(/\)/g, "\\)")
+            .replace(/=/g, "\\=")
+            .replace(/#/g, "\\#")
+            .replace(/\$/g, "\\$")
+            .replace(/\^/g, "\\^")
+            .replace(/\|/g, "\\|");
         pasteText(protyle, clipText, nodeElement);
     } catch (e) {
         console.log(e);
@@ -125,10 +125,10 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
     event.stopPropagation();
     event.preventDefault();
-    let textHTML;
-    let textPlain;
-    let siyuanHTML;
-    let files;
+    let textHTML: string;
+    let textPlain: string;
+    let siyuanHTML: string;
+    let files: FileList | DataTransferItemList;
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
@@ -194,6 +194,37 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = Lute.Sanitize(textHTML);
     }
 
+    if (protyle && protyle.app && protyle.app.plugins) {
+        for (let i = 0; i < protyle.app.plugins.length; i++) {
+            const response: IObject & { files: FileList } = await new Promise((resolve) => {
+                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                    protyle,
+                    resolve,
+                    textHTML,
+                    textPlain,
+                    siyuanHTML,
+                    files
+                });
+                if (emitResult) {
+                    resolve(undefined);
+                }
+            });
+
+            if (response?.textHTML) {
+                textHTML = response.textHTML;
+            }
+            if (response?.textPlain) {
+                textPlain = response.textPlain;
+            }
+            if (response?.siyuanHTML) {
+                siyuanHTML = response.siyuanHTML;
+            }
+            if (response?.files) {
+                files = response.files as FileList;
+            }
+        }
+    }
+
     const nodeElement = hasClosestBlock(event.target);
     if (!nodeElement) {
         if (files && files.length > 0) {
@@ -212,7 +243,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 粘贴在代码位置
         // https://github.com/siyuan-note/siyuan/issues/9142
         // https://github.com/siyuan-note/siyuan/issues/9323
-        if (nodeElement.querySelector(".protyle-action").contains(range.startContainer)) {
+        // 需排除行内代码 https://github.com/siyuan-note/siyuan/issues/9369
+        if (nodeElement.querySelector(".protyle-action")?.contains(range.startContainer)) {
             range.setStart(nodeElement.querySelector(".hljs").firstChild, 0);
         }
         insertHTML(textPlain, protyle);

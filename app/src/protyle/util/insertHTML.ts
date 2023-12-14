@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -20,7 +20,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     fixTableRange(range);
     let tableInlineHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
-        tableInlineHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
+        if (hasClosestByMatchTag(range.startContainer, "TABLE")) {
+            tableInlineHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
+        } else {
+            // https://github.com/siyuan-note/siyuan/issues/9411
+            isBlock = true;
+        }
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;
     if (!blockElement) {
@@ -119,7 +124,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
             if (spanElement.tagName === "SPAN" && spanElement.isSameNode(range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
-                tempElement.content.querySelector("span") // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
+                // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
+                // emoji 图片需要切割 https://github.com/siyuan-note/siyuan/issues/9370
+                tempElement.content.querySelector("span, img")
             ) {
                 const afterElement = document.createElement("span");
                 const attributes = spanElement.attributes;

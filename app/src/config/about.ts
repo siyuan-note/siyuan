@@ -4,10 +4,10 @@ import {ipcRenderer, shell} from "electron";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {setAccessAuthCode, setProxy} from "./util/about";
+import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, isIPad, openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -16,7 +16,7 @@ import {setKey} from "../sync/syncGuide";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        return `<label class="fn__flex b3-label${isBrowser() || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
+        return `<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoLaunch}
         <div class="b3-label__text">${window.siyuan.languages.autoLaunchTip}</div>
@@ -56,7 +56,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
-<div class="b3-label${(window.siyuan.config.readonly || isBrowser()) ? " fn__none" : ""}">
+<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad())) ? " fn__none" : ""}">
     <label class="fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about5}
@@ -76,7 +76,7 @@ export const about = {
         <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
-<label class="b3-label config__item${isBrowser() ? " fn__none" : " fn__flex"}">
+<label class="b3-label config__item${(isBrowser() && !isInAndroid()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
@@ -115,7 +115,7 @@ export const about = {
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__block" id="resetRepo">
-            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.resetRepo}
+            <svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.resetRepo}
         </button>
     </div>
 </div>
@@ -126,7 +126,7 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.purge}
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
 </label>
 <label class="fn__flex b3-label config__item">
@@ -158,7 +158,7 @@ export const about = {
          <div class="b3-label__text">${window.siyuan.languages.about14}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="token" value="${window.siyuan.config.api.token}" readonly="readonly">
+    <input class="b3-text-field fn__flex-center fn__size200" id="token" value="${window.siyuan.config.api.token}">
 </label>
 <div class="b3-label${(window.siyuan.config.system.container === "std" || window.siyuan.config.system.container === "docker") ? "" : " fn__none"}">
     ${window.siyuan.languages.networkProxy}
@@ -201,6 +201,11 @@ export const about = {
         tokenElement.addEventListener("click", () => {
             tokenElement.select();
         });
+        tokenElement.addEventListener("change", () => {
+            fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
+                window.siyuan.config.api.token = tokenElement.value;
+            });
+        });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {
                 openByMobile(response.data.zip);
@@ -216,18 +221,21 @@ export const about = {
                 updateElement.innerHTML = `<svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`;
             });
         });
-        /// #if !BROWSER
         about.element.querySelectorAll('[data-type="open"]').forEach(item => {
             item.addEventListener("click", () => {
                 const url = item.getAttribute("data-url");
+                /// #if !BROWSER
                 if (url.startsWith("http")) {
                     shell.openExternal(url);
                 } else {
                     shell.openPath(url);
                 }
+                /// #else
+                window.open(url);
+                /// #endif
             });
         });
-        /// #endif
+
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
         });
@@ -351,11 +359,22 @@ export const about = {
             const scheme = (about.element.querySelector("#aboutScheme") as HTMLInputElement).value;
             const host = (about.element.querySelector("#aboutHost") as HTMLInputElement).value;
             const port = (about.element.querySelector("#aboutPort") as HTMLInputElement).value;
-            fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, () => {
+            fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, async () => {
                 window.siyuan.config.system.networkProxy.scheme = scheme;
                 window.siyuan.config.system.networkProxy.host = host;
                 window.siyuan.config.system.networkProxy.port = port;
-                setProxy();
+                /// #if !BROWSER
+                ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                    cmd: "setProxy",
+                    proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`,
+                }).then(() => {
+                    exportLayout({
+                        reload: true,
+                        onlyData: false,
+                        errorExit: false,
+                    });
+                });
+                /// #endif
             });
         });
     }

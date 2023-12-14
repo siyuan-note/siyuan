@@ -5,7 +5,6 @@ import {exportLayout} from "../layout/util";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
@@ -19,10 +18,11 @@ import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
-import {hideElements} from "../protyle/ui/hideElements";
+import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
-import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, setStorageVal} from "../protyle/util/compatibility";
+import {Plugin} from "../plugin";
 
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
@@ -50,6 +50,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
+                setTitle(response.data.name);
                 (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             });
         }
@@ -64,12 +65,14 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             reloadProtyle(item.editor.protyle, false);
             updateTitle(item.editor.protyle.block.rootID, item.parent);
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
+            delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];
+            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
         }
     });
     allModels.graph.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)) {
             item.searchGraph(false);
             if (item.type === "local") {
@@ -79,7 +82,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     });
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
@@ -93,7 +96,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     });
     allModels.backlink.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false, false);
+            item.parent.parent.removeTab(item.parent.id, false, false);
         } else {
             item.refresh();
             if (item.type === "local") {
@@ -169,8 +172,11 @@ export const kernelError = () => {
 };
 
 export const exitSiYuan = () => {
+    hideAllElements(["util"]);
     /// #if MOBILE
-    saveScroll(window.siyuan.mobile.editor.protyle);
+    if (window.siyuan.mobile.editor) {
+        saveScroll(window.siyuan.mobile.editor.protyle);
+    }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) { // 同步执行失败
@@ -200,7 +206,7 @@ export const exitSiYuan = () => {
                     // 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
                     // 这里先将主界面隐藏
                     setTimeout(() => {
-                        getCurrentWindow().hide();
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "hide");
                     }, 2000);
                     // 然后等待一段时间后再退出，避免界面主进程退出以后内核子进程被杀死
                     setTimeout(() => {
@@ -369,7 +375,7 @@ export const setTitle = (title: string) => {
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (title === window.siyuan.languages.siyuanNote) {
-        const versionTitle = `${title} - ${workspaceName} - v${Constants.SIYUAN_VERSION}`;
+        const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
         if (dragElement) {
             dragElement.textContent = versionTitle;
@@ -408,7 +414,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData) => {
+export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
@@ -464,4 +470,13 @@ export const processSync = (data?: IWebSocketData) => {
         useElement.setAttribute("xlink:href", "#iconCloudSucc");
     }
     /// #endif
+    plugins.forEach((item) => {
+        if (data.code === 0) {
+            item.eventBus.emit("sync-start", data);
+        } else if (data.code === 1) {
+            item.eventBus.emit("sync-end", data);
+        } else if (data.code === 2) {
+            item.eventBus.emit("sync-fail", data);
+        }
+    });
 };

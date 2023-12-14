@@ -54,12 +54,50 @@ type EmbedBlock struct {
 	BlockPaths []*BlockPath `json:"blockPaths"`
 }
 
+func UpdateEmbedBlock(id, content string) (err error) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if treenode.TypeAbbr(ast.NodeBlockQueryEmbed.String()) != bt.Type {
+		err = errors.New("not query embed block")
+		return
+	}
+
+	embedBlock := &EmbedBlock{
+		Block: &Block{
+			Markdown: content,
+		},
+	}
+
+	updateEmbedBlockContent(id, []*EmbedBlock{embedBlock})
+	return
+}
+
+func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+	return getEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+}
+
+func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+	stmt := "SELECT * FROM `blocks` WHERE `id` IN ('" + strings.Join(includeIDs, "','") + "')"
+	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 1024)
+	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, sqlBlocks)
+	return
+}
+
 func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	return searchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
 }
 
 func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, sqlBlocks)
+	return
+}
+
+func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, breadcrumb bool, sqlBlocks []*sql.Block) (ret []*EmbedBlock) {
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
 		if "query_embed" == b.Type { // 嵌入块不再嵌入
@@ -91,7 +129,7 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	}
 
 	for _, sb := range sqlBlocks {
-		block, blockPaths := getEmbeddedBlock(embedBlockID, trees, sb, headingMode, breadcrumb)
+		block, blockPaths := getEmbeddedBlock(trees, sb, headingMode, breadcrumb)
 		if nil == block {
 			continue
 		}
@@ -161,6 +199,9 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 		if 1 > len(ret) {
 			ret = []*Block{}
 		}
+
+		// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
+		prependNotebookNameInHPath(ret)
 		return
 	}
 
@@ -205,7 +246,23 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 			newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
 		}
 	}
+
+	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
+	prependNotebookNameInHPath(ret)
 	return
+}
+
+func prependNotebookNameInHPath(blocks []*Block) {
+	var boxIDs []string
+	for _, b := range blocks {
+		boxIDs = append(boxIDs, b.Box)
+	}
+	boxIDs = gulu.Str.RemoveDuplicatedElem(boxIDs)
+	boxNames := Conf.BoxNames(boxIDs)
+	for _, b := range blocks {
+		name := boxNames[b.Box]
+		b.HPath = util.EscapeHTML(name) + b.HPath
+	}
 }
 
 func FindReplace(keyword, replacement string, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
@@ -315,7 +372,7 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 				}
 
 				switch n.Type {
-				case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+				case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 					if 0 == method {
 						if bytes.Contains(n.Tokens, []byte(keyword)) {
 							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
@@ -1045,7 +1102,12 @@ func stringQuery(query string) string {
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
 	text := n.Content()
 	if ast.NodeText == n.Type {
-		text = search.EncloseHighlighting(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		text = util.EscapeHTML(text)
+		escapedKeywords := make([]string, len(keywords))
+		for i, keyword := range keywords {
+			escapedKeywords[i] = util.EscapeHTML(keyword)
+		}
+		text = search.EncloseHighlighting(text, escapedKeywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
 		n.Tokens = gulu.Str.ToBytes(text)
 		if bytes.Contains(n.Tokens, []byte(search.MarkDataType)) {
 			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)

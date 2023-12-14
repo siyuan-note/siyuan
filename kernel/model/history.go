@@ -142,6 +142,7 @@ func ClearWorkspaceHistory() (err error) {
 
 func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content string, isLargeDoc bool, err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
 	}
 
@@ -214,6 +215,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 func RollbackDocHistory(boxID, historyPath string) (err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
 	}
 
@@ -238,6 +240,27 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	if err = filelock.CopyNewtimes(srcPath, destPath); nil != err {
 		return
+	}
+
+	tree, _ := loadTree(srcPath, util.NewLute())
+	if nil != tree {
+		historyDir := strings.TrimPrefix(historyPath, util.HistoryDir+string(os.PathSeparator))
+		if strings.Contains(historyDir, string(os.PathSeparator)) {
+			historyDir = historyDir[:strings.Index(historyDir, string(os.PathSeparator))]
+		}
+		historyDir = filepath.Join(util.HistoryDir, historyDir)
+
+		// 恢复包含的的属性视图 https://github.com/siyuan-note/siyuan/issues/9567
+		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+		for _, avNode := range avNodes {
+			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+			destAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+			if gulu.File.IsExist(destAvPath) {
+				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
+					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+				}
+			}
+		}
 	}
 
 	util.ReloadUI()
@@ -268,6 +291,7 @@ func getRollbackDockPath(boxID, historyPath string) (destPath string, err error)
 func RollbackAssetsHistory(historyPath string) (err error) {
 	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("assets history [%s] not exist", historyPath)
 		return
 	}
 
@@ -285,6 +309,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 
 func RollbackNotebookHistory(historyPath string) (err error) {
 	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("notebook history [%s] not exist", historyPath)
 		return
 	}
 
@@ -390,6 +415,9 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
+
+	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
+	stmt += " AND created > '" + fmt.Sprintf("%d", ago.Unix()) + "'"
 	return
 }
 
@@ -457,6 +485,7 @@ func (box *Box) generateDocHistory0() {
 		return
 	}
 
+	luteEngine := util.NewLute()
 	for _, file := range files {
 		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
@@ -474,6 +503,23 @@ func (box *Box) generateDocHistory0() {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
+
+		if strings.HasSuffix(file, ".sy") {
+			tree, loadErr := loadTree(file, luteEngine)
+			if nil != loadErr {
+				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
+			} else {
+				// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
+				avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+				for _, avNode := range avNodes {
+					srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+					destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+					if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+						logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+					}
+				}
+			}
+		}
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
@@ -482,6 +528,7 @@ func (box *Box) generateDocHistory0() {
 
 func clearOutdatedHistoryDir(historyDir string) {
 	if !gulu.File.IsExist(historyDir) {
+		logging.LogWarnf("history dir [%s] not exist", historyDir)
 		return
 	}
 
@@ -492,6 +539,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 
 	now := time.Now()
+	ago := now.Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays)).Unix()
 	var removes []string
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()
@@ -499,7 +547,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
-		if Conf.Editor.HistoryRetentionDays < int(now.Sub(dirInfo.ModTime()).Hours()/24) {
+		if dirInfo.ModTime().Unix() < ago {
 			removes = append(removes, filepath.Join(historyDir, dir.Name()))
 		}
 	}
@@ -509,10 +557,10 @@ func clearOutdatedHistoryDir(historyDir string) {
 			continue
 		}
 		//logging.LogInfof("auto removed history dir [%s]", dir)
-
-		// 清理历史库
-		sql.DeleteHistoriesByPathPrefixQueue(dir)
 	}
+
+	// 清理历史库
+	sql.DeleteOutdatedHistories(fmt.Sprintf("%d", ago))
 }
 
 var boxLatestHistoryTime = map[string]time.Time{}
@@ -535,7 +583,7 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 		}
 
 		if info.ModTime().After(latestHistoryTime) {
-			ret = append(ret, filepath.Join(path))
+			ret = append(ret, path)
 		}
 		return nil
 	})

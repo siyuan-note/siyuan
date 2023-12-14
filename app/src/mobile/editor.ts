@@ -60,6 +60,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         } else {
             window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), {
                 blockId: id,
+                rootId: data.data.rootID,
                 action,
                 render: {
                     scroll: true,

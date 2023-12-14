@@ -475,6 +475,12 @@ export const focusByRange = (range: Range) => {
     if (!range) {
         return;
     }
+
+    const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
+    if (startNode && startNode.nodeType !== 3 && ["INPUT", "TEXTAREA"].includes(startNode.tagName)) {
+        startNode.focus();
+        return;
+    }
     const selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
@@ -534,7 +540,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             return false;
         }
     } else if (element.classList.contains("av")) {
-        const avTitleElement = element.querySelector(".av__title")
+        const avTitleElement = element.querySelector(".av__title");
         if (avTitleElement) {
             const range = document.createRange();
             range.selectNodeContents(avTitleElement);

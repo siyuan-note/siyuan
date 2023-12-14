@@ -71,8 +71,8 @@
     border: 0;
     background-color: transparent;
     padding: 4px;
-    transition: var(--b3-transition);
     cursor: pointer;
+    position: relative;
 
     &:hover svg {
       color: var(--b3-theme-on-surface);
@@ -81,6 +81,15 @@
     &:active {
       cursor: grabbing;
     }
+
+    span {
+      z-index: 2;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+    }
   }
 
   svg {
@@ -88,7 +97,7 @@
     color: var(--b3-theme-on-surface-light);
     width: 14px;
     float: left;
-    transition: var(--b3-transition);
+    transition: var(--b3-color-transition);
   }
 }
 
@@ -324,6 +333,7 @@
   position: relative;
   font-size: 16px;
   border-radius: var(--b3-border-radius);
+  font-family: var(--b3-font-family-protyle);
 
   &:hover .protyle-title__icon {
     opacity: 1;
@@ -379,7 +389,11 @@
   }
 }
 
-.protyle-action__table {
+table[contenteditable="false"] + .protyle-action__table {
+  display: none;
+}
+
+table[contenteditable="true"] + .protyle-action__table {
   position: absolute;
   top: 4px;
   height: 0;

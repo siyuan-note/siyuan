@@ -316,7 +316,7 @@ export const editor = {
                 fontFamily: fontFamilyElement.value,
                 emoji: window.siyuan.config.editor.emoji
             }, response => {
-                editor.onSetEditor(response.data);
+                editor._onSetEditor(response.data);
             });
         };
         editor.element.querySelectorAll("input.b3-switch, select.b3-select, input.b3-slider").forEach((item) => {
@@ -336,8 +336,9 @@ export const editor = {
             });
         });
     },
-    onSetEditor: (editorData: IEditor) => {
-        if (editorData.readOnly !== window.siyuan.config.editor.readOnly) {
+    _onSetEditor: (editorData: IEditor) => {
+        const changeReadonly = editorData.readOnly !== window.siyuan.config.editor.readOnly;
+        if (changeReadonly) {
             editor.setReadonly(editorData.readOnly);
         }
         window.siyuan.config.editor = editorData;

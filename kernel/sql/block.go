@@ -20,6 +20,9 @@ import (
 	"database/sql"
 
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Block struct {
@@ -86,5 +89,43 @@ func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 	}
 
 	putBlockCache(block)
+	return
+}
+
+func indexNode(tx *sql.Tx, id string) (err error) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	luteEngine := util.NewLute()
+	tree, _ := filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	if nil == tree {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	content := treenode.NodeStaticContent(node, nil, true, indexAssetPath)
+	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, id); nil != err {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, id); nil != err {
+		tx.Rollback()
+		return
+	}
+	if !caseSensitive {
+		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
+		if err = execStmtTx(tx, stmt, content, id); nil != err {
+			tx.Rollback()
+			return
+		}
+	}
 	return
 }

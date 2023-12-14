@@ -1,7 +1,7 @@
 import {showMessage} from "../dialog/message";
 import {getAllModels} from "../layout/getAll";
 import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {getDockByType} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
 import {openFileById} from "../editor/util";
@@ -48,6 +48,15 @@ export const getNewFilePath = (useSavePath: boolean) => {
                     currentPath = pathPosix().dirname(selectPath);
                 }
             }
+        }
+    }
+    /// #else
+    if (window.siyuan.mobile.editor && document.getElementById("empty").classList.contains("fn__none")) {
+        notebookId = window.siyuan.mobile.editor.protyle.notebookId;
+        if (useSavePath) {
+            currentPath = window.siyuan.mobile.editor.protyle.path;
+        } else {
+            currentPath = pathPosix().dirname(window.siyuan.mobile.editor.protyle.path);
         }
     }
     /// #endif

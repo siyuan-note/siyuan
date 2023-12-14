@@ -5,8 +5,10 @@ import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
 import {App} from "../../index";
+import {setTitle} from "../../dialog/processSystem";
 
 export const setEmpty = (app: App) => {
+    setTitle(window.siyuan.languages.siyuanNote);
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
     const emptyElement = document.getElementById("empty");
@@ -51,26 +53,10 @@ export const setEmpty = (app: App) => {
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyNewFile") {
-                if (window.siyuan.mobile.editor) {
-                    newFile({
-                        app,
-                        notebookId: window.siyuan.mobile.editor.protyle.notebookId,
-                        currentPath: window.siyuan.mobile.editor.protyle.path,
-                        useSavePath: true
-                    });
-                } else {
-                    window.siyuan.notebooks.find(item => {
-                        if (!item.closed) {
-                            newFile({
-                                app,
-                                notebookId: item.id,
-                                currentPath: "/",
-                                useSavePath: true
-                            });
-                            return true;
-                        }
-                    });
-                }
+                newFile({
+                    app,
+                    useSavePath: true
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -91,7 +77,9 @@ export const setEmpty = (app: App) => {
 };
 
 export const setEditor = () => {
-    document.getElementById("toolbarName").classList.remove("fn__hidden");
+    const toolbarNameElement =  document.getElementById("toolbarName") as HTMLInputElement;
+    setTitle(toolbarNameElement.value);
+    toolbarNameElement.classList.remove("fn__hidden");
     document.getElementById("editor").classList.remove("fn__none");
     document.getElementById("empty").classList.add("fn__none");
 };

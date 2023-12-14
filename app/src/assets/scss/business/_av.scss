@@ -1,10 +1,21 @@
 .av {
   user-select: none;
   box-sizing: border-box;
+  display: flex;
+  max-width: 100%;
+
+  &:hover .av__views .block__icon {
+    opacity: 1;
+  }
+
+  &__container {
+    overflow: auto;
+  }
 
   &__pulse {
     width: 70%;
-    height: 26px;
+    height: 23px;
+    display: block;
     position: relative;
     overflow: hidden;
     background: var(--b3-border-color);
@@ -23,10 +34,6 @@
     }
   }
 
-  &:hover .av__row--footer > .av__calc--show {
-    opacity: 1;
-  }
-
   &__header {
     top: -43px;
     z-index: 2;
@@ -34,15 +41,17 @@
     .layout-tab-bar {
       background-color: transparent;
       font-size: 87.5%;
-
-      .item {
-        line-height: normal;
-      }
     }
+  }
+
+  &__views {
+    align-items: center;
+    box-shadow: 0px -1px inset var(--b3-theme-background-light);
   }
 
   &__title {
     outline: none;
+    font-weight: bold;
 
     &:empty::after {
       color: var(--b3-theme-on-surface);
@@ -53,18 +62,26 @@
   &__counter {
     position: absolute;
     bottom: 0;
-    height: 30px;
+    height: 26px;
     padding: 0 5px;
-    background-color: var(--b3-theme-background);
+    background-color: var(--av-background);
+    font-size: 87.5%;
   }
 
   &__gutters {
     @extend .protyle-gutters;
-    position: absolute;
-    top: 5px;
-    left: -26px;
+    top: 0;
+    left: -44px;
     opacity: 0;
-    padding-right: 4px;
+    display: flex;
+
+    &--min .av__gutter {
+      padding: 4px 0;
+    }
+
+    svg {
+      height: 25px;
+    }
   }
 
   &__mask {
@@ -77,7 +94,10 @@
 
   &__scroll {
     overflow: auto hidden;
-    cursor: pointer;
+  }
+
+  &__body {
+    float: left;
   }
 
   &__row {
@@ -85,6 +105,14 @@
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
     position: relative;
     font-size: 87.5%;
+
+    &.dragover__bottom {
+      border-bottom-color: var(--b3-theme-primary-lighter);
+    }
+
+    &.dragover__top {
+      box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
+    }
 
     &:hover {
       [data-type="block-ref"],
@@ -98,7 +126,10 @@
     }
 
     &--select {
-      background-color: var(--b3-theme-primary-lightest);
+      &:not(.av__row--header) .av__cell,
+      &:not(.av__row--header) .av__firstcol {
+        background-color: var(--b3-av-background-hl);
+      }
 
       .av__firstcol svg {
         opacity: 1;
@@ -106,44 +137,53 @@
     }
 
     &--header {
-      z-index: 1;
+      z-index: 3;
 
       .av__cell {
         padding: 0;
         transition: background 20ms ease-in 0s;
+        display: flex;
+        overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
 
         &:hover {
-          background-color: var(--b3-list-icon-hover);
+          background-color: var(--b3-av-hover);
         }
       }
     }
 
     &--header,
     &--footer {
-      background-color: var(--b3-theme-background);
+      background-color: var(--av-background);
     }
 
     &--footer {
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
+      position: relative;
+      z-index: 2;
 
-      &:hover > .av__calc,
-      &.av__row--show > .av__calc {
+      &:hover .av__calc,
+      &.av__row--show .av__calc {
         opacity: 1;
       }
 
-      & > .av__calc {
-        transition: opacity 150ms linear, background 20ms ease-in 0s;
+      .av__colsticky {
+        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+      }
+
+      .av__calc {
         display: flex;
         align-items: center;
-        padding: 5px 5px 5px 7px;
+        padding: 5px;
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
         opacity: 0;
         overflow: hidden;
         font-size: 75%;
+        white-space: nowrap;
+        cursor: pointer;
 
         &.av__calc--ashow {
           opacity: 1;
@@ -162,29 +202,40 @@
         }
 
         &:hover {
-          background-color: var(--b3-list-icon-hover);
+          background-color: var(--b3-av-hover);
         }
       }
     }
 
-    &--add {
-      color: var(--b3-theme-on-surface);
-      padding: 5px 5px 5px 7px;
+    &--util {
       display: flex;
-      align-items: center;
-      transition: background 20ms ease-in 0s;
-      font-size: 87.5%;
 
-      svg {
-        height: 12px;
-        width: 12px;
+      .b3-button {
+        margin: 3px 0 3px 24px;
         color: var(--b3-theme-on-surface);
-        margin-right: 5px;
-        flex-shrink: 0;
+        background-color: transparent;
+        font-size: 75%;
+
+        &:hover,
+        &:focus {
+          background-color: var(--b3-av-hover);
+          box-shadow: none;
+        }
       }
 
-      &:hover {
-        background-color: var(--b3-list-icon-hover);
+      svg {
+        width: 12px;
+        height: 20px;
+
+        &[data-type="set-page-size"] {
+          margin: 0 0 0 4px;
+          border-radius: var(--b3-border-radius);
+          padding: 0 4px;
+
+          &:hover {
+            background-color: var(--b3-theme-background);
+          }
+        }
       }
     }
   }
@@ -195,9 +246,9 @@
     padding: 5px;
     flex-shrink: 0;
     border-right: 1px solid var(--b3-theme-surface-lighter);
-    display: flex;
-    align-items: center;
-    transition: var(--b3-transition);
+    overflow: hidden;
+    cursor: pointer;
+    //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
     [data-type="block-ref"],
     [data-type="block-more"] {
@@ -205,16 +256,41 @@
       position: absolute;
       right: 5px;
       font-size: 85%;
+      top: 5.5px;
+    }
+
+    &[data-wrap="true"] {
+      white-space: pre-wrap;
+    }
+
+    &[data-wrap="false"] {
+      white-space: nowrap;
+    }
+
+    &.dragover__right {
+      border-right-color: var(--b3-theme-primary-lighter);
+    }
+
+    &--select {
+      background-color: var(--b3-theme-primary-lightest);
+      box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;
+      border-radius: var(--b3-border-radius);
     }
 
     .block__icon {
       position: absolute;
       right: 5px;
+      top: 5px;
     }
 
     &:hover .block__icon {
       opacity: 1;
       background-color: var(--b3-theme-background-light) !important;
+    }
+
+    .b3-chip {
+      margin: 1px 2px;
+      padding: 2px 6px;
     }
   }
 
@@ -225,53 +301,65 @@
     flex: 1;
     overflow: hidden;
 
-    & > .av__cellicon {
+    .av__cellheadericon {
       height: 1em;
       width: 1em;
       color: var(--b3-theme-on-surface);
       margin: 0 5px 0 0;
       flex-shrink: 0;
       line-height: 1em;
+      font-size: inherit;
     }
   }
 
   &__celltext {
     overflow: hidden;
 
-    .b3-chip {
-      margin: 1px 2px;
+    &--url,
+    &--ref {
+      border-bottom: .5px solid var(--b3-border-color);
     }
 
-    &--url {
-      text-decoration: underline var(--b3-border-color);
+    & > .av__cellicon {
+      margin: 0 5px;
+      height: 10px;
+      width: 10px;
     }
+  }
 
-    &--date {
-      display: flex;
-      align-items: center;
+  &__checkbox {
+    color: var(--b3-theme-on-surface);
+    height: 14px;
+    width: 14px;
+    float: left;
+    padding: 4.5px 0;
 
-      svg {
-        margin: 0 5px;
-        height: 10px;
-        width: 10px;
-        flex-shrink: 0;
-      }
+    &:hover {
+      color: var(--b3-theme-on-background);
     }
   }
 
   &__firstcol {
     svg {
-      color: var(--b3-theme-on-surface);
-      height: 36px;
-      width: 24px;
+      @extend .av__checkbox;
       opacity: 0;
-      padding: 5px;
-      box-sizing: border-box;
-      float: left;
+      padding: 9.5px 5px;
     }
 
     &:hover svg {
       opacity: 1;
+    }
+  }
+
+  &__colsticky {
+    position: sticky;
+    left: 0;
+    z-index: 2; // 需大于 av__widthdrag，否则横行滚动后，拖拽会悬浮于 stick 列上
+    display: flex;
+
+    &.av__firstcol,
+    & > div {
+      background-color: var(--av-background);
     }
   }
 
@@ -302,9 +390,11 @@
         padding-bottom: 4px;
         float: left;
 
-        svg {
+        .icon {
           width: 12px;
           flex-shrink: 0;
+          margin-right: 6px;
+          margin-left: -5px;
         }
       }
 
@@ -335,16 +425,6 @@
 
       &__item {
         transition: margin .2s cubic-bezier(0, 0, .2, 1) 0ms;
-
-        &.dragover__bottom {
-          background-color: var(--b3-theme-primary-lightest);
-          box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter) inset;
-        }
-
-        &.dragover__top {
-          background-color: var(--b3-theme-primary-lightest);
-          box-shadow: 0 2px 0 var(--b3-theme-primary-lighter) inset;
-        }
       }
 
       &__item:hover .b3-menu__action {
@@ -360,20 +440,51 @@
       }
     }
   }
+}
 
-  &.protyle-wysiwyg--select,
-  &.protyle-wysiwyg--hl {
-    .av__row--header,
-    .av__row--footer {
+.protyle-wysiwyg--select,
+.protyle-wysiwyg--hl {
+  .av__row--header,
+  .av__row--footer,
+  .av__row--footer .av__colsticky,
+  .av__row--select .av__cell,
+  .av__colsticky.av__firstcol,
+  .av__colsticky > div,
+  .av__counter {
+    background-color: var(--b3-av-background-hl);
+  }
+}
+
+.dragover__top,
+.dragover__bottom {
+  .av__colsticky {
+    z-index: 0;
+
+    & > div {
       background-color: transparent;
     }
   }
 }
 
+.dragover__bottom + .av__row,
+.av__row:has(+ .dragover__top) {
+  .av__colsticky > div {
+    background-color: transparent;
+  }
+}
+
 img.av__cellassetimg {
-  max-height: 24px;
+  max-height: 20px;
   border-radius: var(--b3-border-radius);
   margin: 1px 2px;
   max-width: none;
+  vertical-align: top;
 }
 
+html[data-theme-mode="dark"] .av__panel .b3-menu__item[draggable="true"] {
+  mix-blend-mode: lighten;
+}
+
+html[data-theme-mode="light"] .av__panel .b3-menu__item[draggable="true"] {
+  mix-blend-mode: darken;
+}

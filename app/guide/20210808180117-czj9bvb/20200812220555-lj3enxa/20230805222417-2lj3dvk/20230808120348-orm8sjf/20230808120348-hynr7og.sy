@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230808120348-hynr7og",
 		"title": "收集箱",
-		"updated": "20230802115243"
+		"updated": "20231205211419"
 	},
 	"Children": [
 		{
@@ -374,12 +374,74 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230808120348-4sudh2q",
-				"updated": "20221022010553"
+				"updated": "20231205211419"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "支持的消息类型为文本、图片、语音、视频和文件，单个图片、语音、视频和文件的大小不超过 10M。"
+					"Data": "支持的消息类型为文本、图片、语音、视频和文件，单个图片、语音、视频和文件的大小不超过 20MB。"
+				}
+			]
+		},
+		{
+			"ID": "20231129102819-rqksxav",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20231129102819-rqksxav",
+				"updated": "20231129102825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20231129102826-1m9j1ih",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20231129102826-1m9j1ih",
+				"updated": "20231129102919"
+			},
+			"Children": [
+				{
+					"ID": "20231129102829-s580zzl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231129102829-s580zzl",
+						"updated": "20231129102919"
+					},
+					"Children": [
+						{
+							"ID": "20231129102829-sux4bg1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231129102829-sux4bg1",
+								"updated": "20231129102919"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅限订阅会员使用，未订阅或者订阅过期后联系人关系会被删除"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

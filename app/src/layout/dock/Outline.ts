@@ -1,7 +1,8 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
-import {getDockByType, getInstanceById, setPanelFocus} from "../util";
+import {getInstanceById, setPanelFocus} from "../util";
+import {getDockByType} from "../tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
@@ -13,6 +14,7 @@ import {unicode2Emoji} from "../../emoji";
 import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import {App} from "../../index";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -122,14 +124,23 @@ export class Outline extends Model {
                         });
                     }
                 } else {
-                    fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
+                    checkFold(id, (zoomIn) => {
                         openFileById({
                             app: options.app,
                             id,
-                            action: attrResponse.data["heading-fold"] === "1" ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                            action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
                 }
+            },
+            ctrlClick(element: HTMLElement) {
+                const id = element.getAttribute("data-node-id");
+                openFileById({
+                    app: options.app,
+                    id,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                    zoomIn: true,
+                });
             }
         });
         // 为了快捷键的 dispatch

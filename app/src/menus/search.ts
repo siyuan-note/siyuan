@@ -6,7 +6,7 @@ export const initSearchMenu = (id: string) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.copy,
         type: "submenu",
-        submenu: copySubMenu(id,false)
+        submenu: copySubMenu(id)
     }).element);
     return window.siyuan.menus.menu;
 };

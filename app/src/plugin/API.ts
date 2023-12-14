@@ -15,6 +15,7 @@ import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
+import {openMobileFileById} from "../mobile/editor";
 
 let openTab;
 let openWindow;
@@ -177,5 +178,7 @@ export const API = {
     Plugin,
     Dialog,
     Menu,
-    Setting
+    Setting,
+    Constants,
+    openMobileFileById
 };

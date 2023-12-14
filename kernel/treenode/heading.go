@@ -62,20 +62,6 @@ func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
 		return false
 	}
 
-	if ast.NodeSuperBlock == node.Type {
-		// The super block below the folded heading contains headings of the same level and cannot be loaded https://github.com/siyuan-note/siyuan/issues/9162
-		if nil == currentHeading {
-			return false
-		}
-
-		sbChildHeading := SuperBlockHeading(node)
-		if nil != sbChildHeading {
-			if sbChildHeading.HeadingLevel <= currentHeading.HeadingLevel {
-				return false
-			}
-		}
-	}
-
 	heading := HeadingParent(node)
 	if nil == heading {
 		return false
@@ -114,34 +100,10 @@ func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 			if currentLevel >= n.HeadingLevel {
 				break
 			}
-		} else if ast.NodeSuperBlock == n.Type {
-			if h := SuperBlockHeading(n); nil != h {
-				if currentLevel >= h.HeadingLevel {
-					break
-				}
-			}
-		} else if ast.NodeSuperBlockCloseMarker == n.Type {
-			continue
 		}
 		ret = append(ret, n)
 	}
 	return
-}
-
-func SuperBlockHeading(sb *ast.Node) *ast.Node {
-	c := sb.FirstChild.Next.Next
-	if nil == c {
-		return nil
-	}
-
-	if ast.NodeHeading == c.Type {
-		return c
-	}
-
-	if ast.NodeSuperBlock == c.Type {
-		return SuperBlockHeading(c)
-	}
-	return nil
 }
 
 func SuperBlockLastHeading(sb *ast.Node) *ast.Node {

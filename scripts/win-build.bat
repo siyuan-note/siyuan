@@ -39,4 +39,3 @@ echo 'Building Appx'
 echo 'Building Appx should be disabled if you do not need it. Not configured correctly will lead to build failures'
 cd . > app\build\win-unpacked\resources\ms-store
 electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
-

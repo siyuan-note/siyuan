@@ -23,6 +23,8 @@ import {
     renderNextAssetMark,
     renderPreview,
 } from "../../search/assets";
+import {addClearButton} from "../../util/addClearButton";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -32,7 +34,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     const searchListElement = element.querySelector("#searchList");
     const replaceInputElement = element.querySelector("#toolbarReplace") as HTMLInputElement;
 
-    const loadElement = replaceInputElement.nextElementSibling;
+    const loadElement = replaceInputElement.parentElement.querySelector(".fn__rotate");
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
@@ -281,9 +283,20 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
     });
+    addClearButton({
+        inputElement: searchInputElement,
+        className: "toolbar__icon",
+        clearCB() {
+            config.page = 1;
+            updateSearchResult(config, element);
+        }
+    });
     const replaceInputElement = element.querySelector(".toolbar .toolbar__title") as HTMLInputElement;
     replaceInputElement.value = config.r || "";
-
+    addClearButton({
+        inputElement: replaceInputElement,
+        className: "toolbar__icon",
+    });
     const criteriaData: ISearchOption[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
@@ -561,8 +574,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                         if (window.siyuan.mobile.editor.protyle) {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
-                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        checkFold(id, (zoomIn) => {
+                            openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                         closePanel();
                     } else {
@@ -602,7 +615,10 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
     });
 
     openModel({
-        title: `<input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">`,
+        title: `<div class="fn__flex">
+    <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">
+    <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconFile"></use></svg>
+</div>`,
         icon: "iconSearch",
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">
@@ -645,10 +661,7 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
      <div class="fn__none fn__flex-column" style="position: fixed;top: 0;width: 100%;background: var(--b3-theme-surface);height: 100%;" id="searchAssetsPanel">
         <div class="toolbar toolbar--border">
             <svg class="toolbar__icon"><use xlink:href="#iconSearch"></use></svg>
-            <span class="toolbar__text"><input id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block"></span>
-            <svg class="toolbar__icon" data-type="goSearch">
-                <use xlink:href="#iconCloseRound"></use>
-            </svg>
+            <input id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block">
         </div>
         <div class="toolbar">
             <span class="fn__space"></span>
@@ -671,6 +684,9 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
      <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
+            document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
+                newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
+            });
             initSearchEvent(app, element.firstElementChild, config);
             updateSearchResult(config, element);
         }
@@ -700,4 +716,11 @@ const goAsset = () => {
         assetInputEvent(assetsElement, localSearch);
     });
     assetInputEvent(assetsElement, localSearch);
+    addClearButton({
+        inputElement,
+        className: "toolbar__icon",
+        clearCB() {
+            assetInputEvent(assetsElement, localSearch);
+        }
+    });
 };

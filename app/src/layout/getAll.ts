@@ -11,6 +11,7 @@ import {Bookmark} from "./dock/Bookmark";
 import {Tag} from "./dock/Tag";
 import {Custom} from "./dock/Custom";
 import {Protyle} from "../protyle";
+import {Wnd} from "./Wnd";
 
 export const getAllEditor = () => {
     const models = getAllModels();
@@ -94,6 +95,17 @@ export const getAllModels = () => {
         getTabs(window.siyuan.layout.layout);
     }
     return models;
+};
+
+export const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
+    for (let i = 0; i < layout.children.length; i++) {
+        const item = layout.children[i];
+        if (item instanceof Wnd) {
+            wnds.push(item);
+        } else if (item instanceof Layout) {
+            getAllWnds(item, wnds);
+        }
+    }
 };
 
 export const getAllTabs = () => {

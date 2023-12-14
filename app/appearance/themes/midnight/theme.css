@@ -22,7 +22,8 @@
 
     /* 字体 */
     --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
-    --b3-font-family-code: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+    --b3-font-family-protyle: var(--b3-font-family);
+    --b3-font-family-code: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: mononoki;
     --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
     --b3-font-family-math: KaTeX_Math;
@@ -53,6 +54,10 @@
     --b3-tooltips-background: #030303;
     --b3-tooltips-color: var(--b3-theme-on-surface-light);
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+
+    /* av */
+    --b3-av-hover: #2a2a2a;
+    --b3-av-background-hl: #28324e;
 
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface);
@@ -101,6 +106,7 @@
     /* 动画效果 */
     --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
+    --b3-color-transition: color .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 下拉菜单 */
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
@@ -159,11 +165,11 @@
     --b3-pdf-offset: 0;
     --b3-pdf-background1: var(--b3-theme-error);
     --b3-pdf-background2: #f5822e;
-    --b3-pdf-background3: var(--b3-theme-secondary);
-    --b3-pdf-background4: #65b84d;
-    --b3-pdf-background5: #f5539e;
-    --b3-pdf-background6: var(--b3-theme-primary);
-    --b3-pdf-background7: #944194;
+    --b3-pdf-background3: #FACA5A;
+    --b3-pdf-background4: #7CC868;
+    --b3-pdf-background5: #FC5C88;
+    --b3-pdf-background6: #69B0F2;
+    --b3-pdf-background7: #C885DA;
     --b3-pdf-dark: #212224;
 }
 

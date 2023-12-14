@@ -27,6 +27,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/emirpasic/gods/sets/hashset"
+	sqlparser2 "github.com/rqlite/sql"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -384,24 +385,48 @@ func QueryNoLimit(stmt string) (ret []map[string]interface{}, err error) {
 }
 
 func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
-	parsedStmt, err := sqlparser.Parse(stmt)
+	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
+	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226
+	// 考虑到 UNION 的使用场景不多，这里还是以支持 || 操作符为主
+	p := sqlparser2.NewParser(strings.NewReader(stmt))
+	parsedStmt2, err := p.ParseStatement()
 	if nil != err {
-		return queryRawStmt(stmt, limit)
-	}
+		if !strings.Contains(stmt, "||") {
+			// 这个解析器无法处理 || 连接字符串操作符
+			parsedStmt, err2 := sqlparser.Parse(stmt)
+			if nil != err2 {
+				return queryRawStmt(stmt, limit)
+			}
 
-	switch parsedStmt.(type) {
-	case *sqlparser.Select:
-		limitClause := getLimitClause(parsedStmt, limit)
-		slct := parsedStmt.(*sqlparser.Select)
-		slct.Limit = limitClause
-		stmt = sqlparser.String(slct)
-	case *sqlparser.Union:
-		limitClause := getLimitClause(parsedStmt, limit)
-		union := parsedStmt.(*sqlparser.Union)
-		union.Limit = limitClause
-		stmt = sqlparser.String(union)
-	default:
-		return queryRawStmt(stmt, limit)
+			switch parsedStmt.(type) {
+			case *sqlparser.Select:
+				limitClause := getLimitClause(parsedStmt, limit)
+				slct := parsedStmt.(*sqlparser.Select)
+				slct.Limit = limitClause
+				stmt = sqlparser.String(slct)
+			case *sqlparser.Union:
+				// Kernel API `/api/query/sql` support `UNION` statement https://github.com/siyuan-note/siyuan/issues/8226
+				limitClause := getLimitClause(parsedStmt, limit)
+				union := parsedStmt.(*sqlparser.Union)
+				union.Limit = limitClause
+				stmt = sqlparser.String(union)
+			default:
+				return queryRawStmt(stmt, limit)
+			}
+		} else {
+			return queryRawStmt(stmt, limit)
+		}
+	} else {
+		switch parsedStmt2.(type) {
+		case *sqlparser2.SelectStatement:
+			slct := parsedStmt2.(*sqlparser2.SelectStatement)
+			if nil == slct.LimitExpr {
+				slct.LimitExpr = &sqlparser2.NumberLit{Value: strconv.Itoa(limit)}
+			}
+			stmt = slct.String()
+		default:
+			return queryRawStmt(stmt, limit)
+		}
 	}
 
 	ret = []map[string]interface{}{}
@@ -478,7 +503,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 		return
 	}
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
@@ -584,7 +609,7 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 	}
 	defer rows.Close()
 
-	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	noLimit := !containsLimitClause(stmt)
 	var count, errCount int
 	for rows.Next() {
 		count++
@@ -810,4 +835,10 @@ func GetContainerText(container *ast.Node) string {
 		return ast.WalkContinue
 	})
 	return buf.String()
+}
+
+func containsLimitClause(stmt string) bool {
+	return strings.Contains(strings.ToLower(stmt), " limit ") ||
+		strings.Contains(strings.ToLower(stmt), "\nlimit ") ||
+		strings.Contains(strings.ToLower(stmt), "\tlimit ")
 }

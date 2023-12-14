@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -87,7 +88,7 @@ var (
 
 func isWritingFiles() bool {
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	return 0 < len(txQueue) || util.IsMutexLocked(&flushLock)
+	return 0 < len(txQueue)
 }
 
 func init() {
@@ -128,6 +129,7 @@ func flushTx(tx *Transaction) {
 
 func PerformTransactions(transactions *[]*Transaction) {
 	for _, tx := range *transactions {
+		tx.m = &sync.Mutex{}
 		txQueue <- tx
 	}
 	return
@@ -190,6 +192,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUnfoldHeading(op)
 		case "setAttrs":
 			ret = tx.doSetAttrs(op)
+		case "doUpdateUpdated":
+			ret = tx.doUpdateUpdated(op)
 		case "addFlashcards":
 			ret = tx.doAddFlashcards(op)
 		case "removeFlashcards":
@@ -200,12 +204,16 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewFilters(op)
 		case "setAttrViewSorts":
 			ret = tx.doSetAttrViewSorts(op)
+		case "setAttrViewPageSize":
+			ret = tx.doSetAttrViewPageSize(op)
 		case "setAttrViewColWidth":
 			ret = tx.doSetAttrViewColumnWidth(op)
 		case "setAttrViewColWrap":
 			ret = tx.doSetAttrViewColumnWrap(op)
 		case "setAttrViewColHidden":
 			ret = tx.doSetAttrViewColumnHidden(op)
+		case "setAttrViewColPin":
+			ret = tx.doSetAttrViewColumnPin(op)
 		case "setAttrViewColIcon":
 			ret = tx.doSetAttrViewColumnIcon(op)
 		case "insertAttrViewBlock":
@@ -238,6 +246,18 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doReplaceAttrViewBlock(op)
 		case "updateAttrViewColTemplate":
 			ret = tx.doUpdateAttrViewColTemplate(op)
+		case "addAttrViewView":
+			ret = tx.doAddAttrViewView(op)
+		case "removeAttrViewView":
+			ret = tx.doRemoveAttrViewView(op)
+		case "setAttrViewViewName":
+			ret = tx.doSetAttrViewViewName(op)
+		case "setAttrViewViewIcon":
+			ret = tx.doSetAttrViewViewIcon(op)
+		case "duplicateAttrViewView":
+			ret = tx.doDuplicateAttrViewView(op)
+		case "sortAttrViewView":
+			ret = tx.doSortAttrViewView(op)
 		}
 
 		if nil != ret {
@@ -710,7 +730,22 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	syncDelete2AttributeView(node)
+	removeAvBlockRel(node)
 	return
+}
+
+func removeAvBlockRel(node *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView == n.Type {
+			avID := n.AttributeViewID
+			av.RemoveBlockRel(avID, n.ID)
+		}
+		return ast.WalkContinue
+	})
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
@@ -797,7 +832,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 				// 只有全局 assets 才移动到相对 assets
 				targetP := filepath.Join(assets, filepath.Base(assetPath))
-				if e = filelock.Move(assetPath, targetP); nil != err {
+				if e = filelock.Rename(assetPath, targetP); nil != err {
 					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
 				}
@@ -896,8 +931,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
+	upsertAvBlockRel(insertedNode)
+
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
+
+	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -984,12 +1023,60 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
+
+	upsertAvBlockRel(updatedNode)
+
+	checkUpsertInUserGuide(tree)
+	return
+}
+
+func upsertAvBlockRel(node *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView == n.Type {
+			avID := n.AttributeViewID
+			av.UpsertBlockRel(avID, n.ID)
+		}
+		return ast.WalkContinue
+	})
+}
+
+func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
+	id := operation.ID
+	tree, err := tx.loadTree(id)
+	if nil != err {
+		if errors.Is(err, ErrBlockNotFound) {
+			logging.LogWarnf("not found block [%s]", id)
+			return
+		}
+
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
+		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
+	}
+
+	node.SetIALAttr("updated", operation.Data.(string))
+	createdUpdated(node)
+	tx.nodes[node.ID] = node
+	if err = tx.writeTree(tree); nil != err {
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
+	}
 	return
 }
 
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	tx.writeTree(tree)
+
+	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1085,8 +1172,6 @@ type Operation struct {
 	Format     string   `json:"format"`     // 属性视图列格式化
 	KeyID      string   `json:"keyID"`      // 属性视列 ID
 	RowID      string   `json:"rowID"`      // 属性视图行 ID
-
-	discard bool // 用于标识是否在事务合并中丢弃
 }
 
 type Transaction struct {
@@ -1098,6 +1183,18 @@ type Transaction struct {
 	nodes map[string]*ast.Node
 
 	luteEngine *lute.Lute
+	m          *sync.Mutex
+	state      atomic.Int32 // 0: 未提交，1: 已提交，2: 已回滚
+}
+
+func (tx *Transaction) WaitForCommit() {
+	for {
+		if 0 == tx.state.Load() {
+			time.Sleep(10 * time.Millisecond)
+			continue
+		}
+		return
+	}
 }
 
 func (tx *Transaction) begin() (err error) {
@@ -1107,6 +1204,8 @@ func (tx *Transaction) begin() (err error) {
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.luteEngine = util.NewLute()
+	tx.m.Lock()
+	tx.state.Store(0)
 	return
 }
 
@@ -1119,11 +1218,15 @@ func (tx *Transaction) commit() (err error) {
 	refreshDynamicRefTexts(tx.nodes, tx.trees)
 	IncSync()
 	tx.trees = nil
+	tx.state.Store(1)
+	tx.m.Unlock()
 	return
 }
 
 func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes = nil, nil
+	tx.state.Store(2)
+	tx.m.Unlock()
 	return
 }
 
@@ -1323,4 +1426,11 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		return ast.WalkContinue
 	})
 	return
+}
+
+func checkUpsertInUserGuide(tree *parse.Tree) {
+	// In production mode, data reset warning pops up when editing data in the user guide https://github.com/siyuan-note/siyuan/issues/9757
+	if "prod" == util.Mode && IsUserGuide(tree.Box) {
+		util.PushErrMsg(Conf.Language(52), 7000)
+	}
 }

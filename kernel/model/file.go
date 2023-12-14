@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -374,11 +375,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	switch sortMode {
 	case util.SortModeNameASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmoji(docs[i].Name), util.RemoveEmoji(docs[j].Name))
+			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmoji(docs[j].Name), util.RemoveEmoji(docs[i].Name))
+			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
@@ -386,11 +387,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
 	case util.SortModeAlphanumASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmoji(docs[i].Name), util.RemoveEmoji(docs[j].Name))
+			return natsort.Compare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
 		})
 	case util.SortModeAlphanumDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmoji(docs[j].Name), util.RemoveEmoji(docs[i].Name))
+			return natsort.Compare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
 		})
 	case util.SortModeCustom:
 		fileTreeFiles := docs
@@ -722,8 +723,12 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			}
 
 			if "1" == n.IALAttr("heading-fold") {
-				unlinks = append(unlinks, n)
-				return ast.WalkContinue
+				// 折叠标题下被引用的块无法悬浮查看
+				// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
+				if (0 != mode && id != n.ID) || isDoc {
+					unlinks = append(unlinks, n)
+					return ast.WalkContinue
+				}
 			}
 
 			if "" != n.ID {
@@ -848,12 +853,6 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 					if n.HeadingLevel <= level {
 						break
 					}
-				} else if ast.NodeSuperBlock == n.Type {
-					if h := treenode.SuperBlockHeading(n); nil != h {
-						if level >= h.HeadingLevel {
-							break
-						}
-					}
 				}
 				nodes = append(nodes, n)
 				count++
@@ -968,22 +967,9 @@ func writeJSONQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func writeJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTreeWithoutChangeTime(tree); nil != err {
-		return
-	}
-	sql.UpsertTreeQueue(tree)
-	return
-}
-
 func indexWriteJSONQueue(tree *parse.Tree) (err error) {
 	treenode.IndexBlockTree(tree)
 	return writeJSONQueue(tree)
-}
-
-func indexWriteJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
-	return writeJSONQueueWithoutChangeTime(tree)
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
@@ -1010,7 +996,12 @@ func createTreeTx(tree *parse.Tree) {
 	PerformTransactions(&[]*Transaction{transaction})
 }
 
+var createDocLock = sync.Mutex{}
+
 func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1029,6 +1020,9 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 }
 
 func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1039,6 +1033,107 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	return
+}
+
+func CreateDailyNote(boxID string) (p string, existed bool, err error) {
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+
+	box := Conf.Box(boxID)
+	if nil == box {
+		err = ErrBoxNotFound
+		return
+	}
+
+	boxConf := box.GetConf()
+	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
+		err = errors.New(Conf.Language(49))
+		return
+	}
+
+	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
+	if nil != err {
+		return
+	}
+
+	WaitForWritingFiles()
+
+	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
+	if nil != existRoot {
+		existed = true
+		p = existRoot.Path
+
+		tree, loadErr := loadTreeByBlockID(existRoot.RootID)
+		if nil != loadErr {
+			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
+			return
+		}
+		p = tree.Path
+		date := time.Now().Format("20060102")
+		if tree.Root.IALAttr("custom-dailynote-"+date) == "" {
+			tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+			if err = indexWriteJSONQueue(tree); nil != err {
+				return
+			}
+		}
+		return
+	}
+
+	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
+	if nil != err {
+		return
+	}
+
+	var dom string
+	if "" != boxConf.DailyNoteTemplatePath {
+		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
+		if !filelock.IsExist(tplPath) {
+			logging.LogWarnf("not found daily note template [%s]", tplPath)
+		} else {
+			dom, err = renderTemplate(tplPath, id, false)
+			if nil != err {
+				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
+			}
+		}
+	}
+	if "" != dom {
+		var tree *parse.Tree
+		tree, err = loadTreeByBlockID(id)
+		if nil == err {
+			tree.Root.FirstChild.Unlink()
+
+			luteEngine := util.NewLute()
+			newTree := luteEngine.BlockDOM2Tree(dom)
+			var children []*ast.Node
+			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
+				children = append(children, c)
+			}
+			for _, c := range children {
+				tree.Root.AppendChild(c)
+			}
+			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+			if err = indexWriteJSONQueue(tree); nil != err {
+				return
+			}
+		}
+	}
+	IncSync()
+
+	WaitForWritingFiles()
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		logging.LogErrorf("load tree by block id [%s] failed: %v", id, err)
+		return
+	}
+	p = tree.Path
+	date := time.Now().Format("20060102")
+	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+	if err = indexWriteJSONQueue(tree); nil != err {
+		return
+	}
+
 	return
 }
 
@@ -1098,6 +1193,19 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 		boxName = box.Name
 	}
 	hPath = boxName + tree.HPath
+	return
+}
+
+func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
+	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)
+	if 1 > len(roots) {
+		return
+	}
+
+	for _, root := range roots {
+		ret = append(ret, root.ID)
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 
@@ -1211,10 +1319,10 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		} else {
 			absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromFolder)
 			absToPath := filepath.Join(util.DataDir, toBox.ID, newFolder)
-			if gulu.File.IsExist(absToPath) {
+			if filelock.IsExist(absToPath) {
 				filelock.Remove(absToPath)
 			}
-			if err = filelock.Move(absFromPath, absToPath); nil != err {
+			if err = filelock.Rename(absFromPath, absToPath); nil != err {
 				msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
 				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 				err = errors.New(msg)
@@ -1239,7 +1347,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	} else {
 		absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromPath)
 		absToPath := filepath.Join(util.DataDir, toBox.ID, newPath)
-		if err = filelock.Move(absFromPath, absToPath); nil != err {
+		if err = filelock.Rename(absFromPath, absToPath); nil != err {
 			msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
 			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 			err = errors.New(msg)
@@ -1312,6 +1420,16 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	if err = filelock.Copy(absPath, historyPath); nil != err {
 		logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absPath, historyPath, err)
 		return
+	}
+
+	// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
+	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+	for _, avNode := range avNodes {
+		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+			logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+		}
 	}
 
 	copyDocAssetsToDataAssets(box.ID, p)
@@ -1416,78 +1534,6 @@ func RenameDoc(boxID, p, title string) (err error) {
 	return
 }
 
-func CreateDailyNote(boxID string) (p string, existed bool, err error) {
-	box := Conf.Box(boxID)
-	if nil == box {
-		err = ErrBoxNotFound
-		return
-	}
-
-	boxConf := box.GetConf()
-	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
-		err = errors.New(Conf.Language(49))
-		return
-	}
-
-	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
-	if nil != err {
-		return
-	}
-
-	WaitForWritingFiles()
-
-	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
-	if nil != existRoot {
-		existed = true
-		p = existRoot.Path
-		return
-	}
-
-	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
-	if nil != err {
-		return
-	}
-
-	var dom string
-	if "" != boxConf.DailyNoteTemplatePath {
-		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
-		if !gulu.File.IsExist(tplPath) {
-			logging.LogWarnf("not found daily note template [%s]", tplPath)
-		} else {
-			dom, err = renderTemplate(tplPath, id)
-			if nil != err {
-				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
-			}
-		}
-	}
-	if "" != dom {
-		var tree *parse.Tree
-		tree, err = loadTreeByBlockID(id)
-		if nil == err {
-			tree.Root.FirstChild.Unlink()
-
-			luteEngine := util.NewLute()
-			newTree := luteEngine.BlockDOM2Tree(dom)
-			var children []*ast.Node
-			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
-				children = append(children, c)
-			}
-			for _, c := range children {
-				tree.Root.AppendChild(c)
-			}
-			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-			if err = indexWriteJSONQueue(tree); nil != err {
-				return
-			}
-		}
-	}
-	IncSync()
-
-	b := treenode.GetBlockTree(id)
-	p = b.Path
-	return
-}
-
 func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = gulu.Str.RemoveInvisible(title)
 	if 512 < utf8.RuneCountInString(title) {
@@ -1560,6 +1606,38 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
 
+	// 如果段落块中仅包含一个 mp3/mp4 超链接，则将其转换为音视频块
+	// Convert mp3 and mp4 hyperlinks to audio and video when moving cloud inbox to docs https://github.com/siyuan-note/siyuan/issues/9778
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeParagraph == n.Type {
+			link := n.FirstChild
+			if nil != link && link.IsTextMarkType("a") {
+				if strings.HasSuffix(link.TextMarkAHref, ".mp3") {
+					unlinks = append(unlinks, n)
+					audio := &ast.Node{ID: n.ID, Type: ast.NodeAudio, Tokens: []byte("<audio controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></audio>")}
+					audio.SetIALAttr("id", n.ID)
+					audio.SetIALAttr("updated", util.TimeFromID(n.ID))
+					n.InsertBefore(audio)
+				} else if strings.HasSuffix(link.TextMarkAHref, ".mp4") {
+					unlinks = append(unlinks, n)
+					video := &ast.Node{ID: n.ID, Type: ast.NodeVideo, Tokens: []byte("<video controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></video>")}
+					video.SetIALAttr("id", n.ID)
+					video.SetIALAttr("updated", util.TimeFromID(n.ID))
+					n.InsertBefore(video)
+				}
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
 	WaitForWritingFiles()
@@ -1576,7 +1654,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	ids := treenode.RootChildIDs(rootID)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
-	if gulu.File.IsExist(fromConfPath) {
+	if filelock.IsExist(fromConfPath) {
 		data, err := filelock.ReadFile(fromConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1593,7 +1671,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 
 	toConfPath := filepath.Join(util.DataDir, toBox, ".siyuan", "sort.json")
 	toFullSortIDs := map[string]int{}
-	if gulu.File.IsExist(toConfPath) {
+	if filelock.IsExist(toConfPath) {
 		data, err := filelock.ReadFile(toConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1669,7 +1747,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	confPath := filepath.Join(confDir, "sort.json")
 	fullSortIDs := map[string]int{}
 	var data []byte
-	if gulu.File.IsExist(confPath) {
+	if filelock.IsExist(confPath) {
 		data, err = filelock.ReadFile(confPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
@@ -1700,7 +1778,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 func (box *Box) fillSort(files *[]*File) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		return
 	}
 
@@ -1724,7 +1802,7 @@ func (box *Box) fillSort(files *[]*File) {
 
 func (box *Box) removeSort(ids []string) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
-	if !gulu.File.IsExist(confPath) {
+	if !filelock.IsExist(confPath) {
 		return
 	}
 
@@ -1743,6 +1821,51 @@ func (box *Box) removeSort(ids []string) {
 	for _, toRemove := range ids {
 		delete(fullSortIDs, toRemove)
 	}
+
+	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
+	if nil != err {
+		logging.LogErrorf("marshal sort conf failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(confPath, data); nil != err {
+		logging.LogErrorf("write sort conf failed: %s", err)
+		return
+	}
+}
+
+func (box *Box) addMinSort(parentPath, id string) {
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, 1)
+	if nil != err {
+		logging.LogErrorf("list doc tree failed: %s", err)
+		return
+	}
+
+	sortVal := 0
+	if 0 < len(docs) {
+		sortVal = docs[0].Sort - 1
+	}
+
+	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
+	if err = os.MkdirAll(confDir, 0755); nil != err {
+		logging.LogErrorf("create conf dir failed: %s", err)
+		return
+	}
+	confPath := filepath.Join(confDir, "sort.json")
+	fullSortIDs := map[string]int{}
+	var data []byte
+	if filelock.IsExist(confPath) {
+		data, err = filelock.ReadFile(confPath)
+		if nil != err {
+			logging.LogErrorf("read sort conf failed: %s", err)
+			return
+		}
+
+		if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); nil != err {
+			logging.LogErrorf("unmarshal sort conf failed: %s", err)
+		}
+	}
+
+	fullSortIDs[id] = sortVal
 
 	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
 	if nil != err {

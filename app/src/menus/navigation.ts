@@ -1,7 +1,6 @@
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
-import {FileFilter, shell} from "electron";
-import {dialog as remoteDialog} from "@electron/remote";
+import {FileFilter, ipcRenderer, shell} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
@@ -19,7 +18,7 @@ import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
-import {getDockByType} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {openCardByData} from "../card/openCard";
 import {viewCards} from "../card/viewCards";
@@ -298,6 +297,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click: () => {
             shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));
@@ -643,7 +643,8 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
                     if (isDoc) {
                         filters = [{name: "Markdown", extensions: ["md", "markdown"]}];
                     }
-                    const localPath = await remoteDialog.showOpenDialog({
+                    const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                        cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
                         filters,
                         properties: [isDoc ? "openFile" : "openDirectory"],

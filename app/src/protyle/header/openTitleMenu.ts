@@ -27,6 +27,7 @@ import {openDocHistory} from "../../history/doc";
 import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
+import {saveScroll} from "../scroll/saveScroll";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -57,33 +58,43 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }).element);
         }
         /// #if !MOBILE
-        if (protyle.model) {
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAlignCenter",
-                label: window.siyuan.languages.outline,
-                accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
-                click: () => {
-                    openOutline(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconLink",
-                label: window.siyuan.languages.backlinks,
-                accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
-                click: () => {
-                    openBacklink(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconGraph",
-                label: window.siyuan.languages.graphView,
-                accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
-                click: () => {
-                    openGraph(protyle);
-                }
-            }).element);
-        }
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconAlignCenter",
+            label: window.siyuan.languages.outline,
+            accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
+            click: () => {
+                openOutline(protyle);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconLink",
+            label: window.siyuan.languages.backlinks,
+            accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
+            click: () => {
+                openBacklink({
+                    app: protyle.app,
+                    blockId: protyle.block.id,
+                    rootId: protyle.block.rootID,
+                    useBlockId: protyle.block.showAll,
+                    title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null
+                });
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconGraph",
+            label: window.siyuan.languages.graphView,
+            accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
+            click: () => {
+                openGraph({
+                    app: protyle.app,
+                    blockId: protyle.block.id,
+                    rootId: protyle.block.rootID,
+                    useBlockId: protyle.block.showAll,
+                    title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null
+                });
+            }
+        }).element);
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -194,10 +205,12 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             label: window.siyuan.languages.openByNewWindow,
             icon: "iconOpenWindow",
             click() {
+                saveScroll(protyle);
                 openNewWindowById(protyle.block.rootID);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click: () => {
                 showFileInFolder(path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));
@@ -209,7 +222,12 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 label: window.siyuan.languages.fileHistory,
                 icon: "iconHistory",
                 click() {
-                    openDocHistory({app: protyle.app, id: protyle.block.rootID, notebookId: protyle.notebookId, pathString: response.data.name});
+                    openDocHistory({
+                        app: protyle.app,
+                        id: protyle.block.rootID,
+                        notebookId: protyle.notebookId,
+                        pathString: response.data.name
+                    });
                 }
             }).element);
         }

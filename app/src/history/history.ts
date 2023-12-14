@@ -442,6 +442,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     renderDoc(firstPanelElement, 1);
     historyEditor = new Protyle(app, docElement, {
         blockId: "",
+        history: {
+            created: ""
+        },
         action: [Constants.CB_GET_HISTORY],
         render: {
             background: false,
@@ -533,17 +536,18 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         const opElement = firstPanelElement.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
                         const typeElement = firstPanelElement.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
                         const notebookElement = firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
+                       const created = target.getAttribute("data-created");
                         fetchPost("/api/history/getHistoryItems", {
                             notebook: notebookElement.value,
                             query: inputElement.value,
                             op: opElement.value,
                             type: parseInt(typeElement.value),
-                            created: target.getAttribute("data-created")
+                            created
                         }, (response) => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
                             response.data.items.forEach((docItem: { title: string, path: string }) => {
-                                html += `<li title="${escapeAttr(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 40px">
+                                html += `<li title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 40px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -611,6 +615,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         } else {
                             mdElement.classList.add("fn__none");
                             docElement.classList.remove("fn__none");
+                            historyEditor.protyle.options.history.created = target.dataset.created;
                             onGet({
                                 data: response,
                                 protyle: historyEditor.protyle,

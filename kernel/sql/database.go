@@ -354,7 +354,9 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 
 		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
-			refs = append(refs, ref)
+			if !isRepeatedRef(refs, ref) {
+				refs = append(refs, ref)
+			}
 		} else if treenode.IsFileAnnotationRef(n) {
 			pathID := n.TextMarkFileAnnotationRefID
 			idx := strings.LastIndex(pathID, "/")
@@ -385,15 +387,32 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		} else if treenode.IsEmbedBlockRef(n) {
 			ref := buildEmbedRef(tree, n)
-			refs = append(refs, ref)
+			if !isRepeatedRef(refs, ref) {
+				refs = append(refs, ref)
+			}
 		}
 		return ast.WalkContinue
 	})
 	return
 }
 
+func isRepeatedRef(refs []*Ref, ref *Ref) bool {
+	// Repeated references to the same block within a block only count as one reference https://github.com/siyuan-note/siyuan/issues/9670
+	for _, r := range refs {
+		if r.DefBlockID == ref.DefBlockID && r.BlockID == ref.BlockID {
+			return true
+		}
+	}
+	return false
+}
+
 func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
+	// 多个类型可能会导致渲染的 Markdown 不正确，所以这里只保留 block-ref 类型
+	tmpTyp := refNode.TextMarkType
+	refNode.TextMarkType = "block-ref"
 	markdown := treenode.ExportNodeStdMd(refNode, luteEngine)
+	refNode.TextMarkType = tmpTyp
+
 	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)
@@ -779,9 +798,18 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
+
+		if !treenode.IsNodeOCRed(n) {
+			util.PushNodeOCRQueue(n.ID)
+		}
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		fc := treenode.FirstLeafBlock(n)
+
+		if !treenode.IsNodeOCRed(fc) {
+			util.PushNodeOCRQueue(fc.ID)
+		}
 		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
+
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {
@@ -790,7 +818,13 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
+
+		if !treenode.IsNodeOCRed(n) {
+			util.PushNodeOCRQueue(n.ID)
+		}
+
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
+
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {
@@ -881,12 +915,6 @@ func heading(node *ast.Node) *ast.Node {
 	currentLevel := 16
 	if ast.NodeHeading == node.Type {
 		currentLevel = node.HeadingLevel
-	} else if ast.NodeSuperBlock == node.Type {
-		superBlockHeading := treenode.SuperBlockHeading(node)
-		if nil != superBlockHeading {
-			node = superBlockHeading
-			currentLevel = node.HeadingLevel
-		}
 	}
 
 	for prev := node.Previous; nil != prev; prev = prev.Previous {

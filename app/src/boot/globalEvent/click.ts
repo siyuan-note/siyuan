@@ -21,19 +21,14 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     if (!hasClosestByClassName(event.target, "pdf__outer")) {
         hideAllElements(["pdfutil"]);
     }
-    // dock float 时，点击空白处，隐藏 dock
-    const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
-    if (floatDockLayoutElement && window.siyuan.layout.leftDock) {
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.bottomDock.layout.element)) {
-            window.siyuan.layout.bottomDock.hideDock();
-        }
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.leftDock.layout.element)) {
-            window.siyuan.layout.leftDock.hideDock();
-        }
-        if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.rightDock.layout.element)) {
-            window.siyuan.layout.rightDock.hideDock();
-        }
-    } else if (!hasClosestByClassName(event.target, "dock") && !isWindow() && window.siyuan.layout.leftDock) {
+    // dock float 时，点击空白处，隐藏 dock。场景：文档树上重命名后
+    if (!isWindow() && window.siyuan.layout.leftDock &&
+        !hasClosestByClassName(event.target, "b3-dialog--open", true) &&
+        !hasClosestByClassName(event.target, "b3-menu") &&
+        !hasClosestByClassName(event.target, "block__popover") &&
+        !hasClosestByClassName(event.target, "dock") &&
+        !hasClosestByClassName(event.target, "layout--float", true)
+    ) {
         window.siyuan.layout.bottomDock.hideDock();
         window.siyuan.layout.leftDock.hideDock();
         window.siyuan.layout.rightDock.hideDock();
@@ -41,7 +36,9 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
 
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
-        writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
+        let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd();
+        text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+        writeText(text);
         showMessage(window.siyuan.languages.copied, 2000);
         event.preventDefault();
         return;

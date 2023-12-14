@@ -8,7 +8,7 @@ import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
-import {globalTouchEnd} from "../../boot/globalEvent/touch";
+import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
 
 let clientX: number;
 let clientY: number;
@@ -145,6 +145,9 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
+    if (globalTouchStart(event)) {
+        return;
+    }
     firstDirection = null;
     xDiff = undefined;
     yDiff = undefined;
@@ -161,7 +164,6 @@ export const handleTouchStart = (event: TouchEvent) => {
         event.stopImmediatePropagation();
     }
 };
-
 
 let previousClientX: number;
 export const handleTouchMove = (event: TouchEvent) => {

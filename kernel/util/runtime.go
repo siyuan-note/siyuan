@@ -23,11 +23,11 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -61,7 +61,7 @@ func HookUILoaded() {
 }
 
 // IsExiting 是否正在退出程序。
-var IsExiting = false
+var IsExiting = atomic.Bool{}
 
 // MobileOSVer 移动端操作系统版本。
 var MobileOSVer string
@@ -83,11 +83,6 @@ func logBootInfo() {
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
 		Ver, runtime.GOARCH, plat, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
-}
-
-func IsMutexLocked(m *sync.Mutex) bool {
-	state := reflect.ValueOf(m).Elem().FieldByName("state")
-	return state.Int()&1 == 1
 }
 
 func RandomSleep(minMills, maxMills int) {
@@ -143,6 +138,8 @@ var (
 	Langs           = map[string]map[int]string{}
 	TimeLangs       = map[string]map[string]interface{}{}
 	TaskActionLangs = map[string]map[string]interface{}{}
+	TrayMenuLangs   = map[string]map[string]interface{}{}
+	AttrViewLangs   = map[string]map[string]interface{}{}
 )
 
 var (
@@ -176,12 +173,10 @@ func CheckFileSysStatus() {
 func checkFileSysStatus() {
 	defer logging.Recover()
 
-	if IsMutexLocked(&checkFileSysStatusLock) {
+	if !checkFileSysStatusLock.TryLock() {
 		logging.LogWarnf("check file system status is locked, skip")
 		return
 	}
-
-	checkFileSysStatusLock.Lock()
 	defer checkFileSysStatusLock.Unlock()
 
 	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"

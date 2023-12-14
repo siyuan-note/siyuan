@@ -24,7 +24,10 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程
-    public static readonly SIYUAN_SHOW: string = "siyuan-show";
+    public static readonly SIYUAN_CMD: string = "siyuan-cmd";
+    public static readonly SIYUAN_GET: string = "siyuan-get";
+    public static readonly SIYUAN_EVENT: string = "siyuan-event";
+
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
@@ -37,10 +40,10 @@ export abstract class Constants {
     public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
     public static readonly SIYUAN_OPEN_WINDOW: string = "siyuan-open-window";
     public static readonly SIYUAN_OPEN_FOLDER: string = "siyuan-open-folder";
+    public static readonly SIYUAN_OPEN_FILE: string = "siyuan-open-file";
 
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
-    public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";
-    public static readonly SIYUAN_EXPORT_PREVENT: string = "siyuan-export-prevent";
+    public static readonly SIYUAN_EXPORT_NEWWINDOW: string = "siyuan-export-newwindow";
 
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
@@ -49,6 +52,8 @@ export abstract class Constants {
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
 
     // size
+    public static readonly SIZE_SCROLL_TB: number = 24;
+    public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 24;
     public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 32;
     public static readonly SIZE_GET_MAX = 102400;
@@ -70,9 +75,9 @@ export abstract class Constants {
     public static readonly CB_GET_ALL = "cb-get-all"; // 获取所有块
     public static readonly CB_GET_BACKLINK = "cb-get-backlink"; // 悬浮窗为传递型需展示上下文
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史
-    public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置
+    public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置，用于直接打开文档，必有 rootID
     public static readonly CB_GET_CONTEXT = "cb-get-context"; // 包含上下文
-    public static readonly CB_GET_ROOTSCROLL = "cb-get-rootscroll"; // 如果为 rootID 就滚动到指定位置
+    public static readonly CB_GET_ROOTSCROLL = "cb-get-rootscroll"; // 如果为 rootID 就滚动到指定位置，必有 rootID
     public static readonly CB_GET_HTML = "cb-get-html"; // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
     public static readonly CB_GET_HISTORY = "cb-get-history"; // 历史渲染
 
@@ -94,6 +99,8 @@ export abstract class Constants {
     public static readonly LOCAL_LAYOUTS = "local-layouts";
     public static readonly LOCAL_AI = "local-ai";
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
+    public static readonly LOCAL_FLASHCARD = "local-flashcard";
+    public static readonly LOCAL_FILEPOSITION = "local-fileposition";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;
@@ -116,7 +123,7 @@ export abstract class Constants {
         9: "⇥",
         13: "↩",
         16: "⇧",
-        17: "⌘",
+        17: "⌃",
         18: "⌥",
         19: "Pause",
         20: "CapsLock",
@@ -217,7 +224,7 @@ export abstract class Constants {
     };
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
@@ -250,9 +257,32 @@ export abstract class Constants {
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             recentDocs: {default: "⌘E", custom: "⌘E"},
+            goToTab1: {default: "⌘1", custom: "⌘1"},
+            goToTab2: {default: "⌘2", custom: "⌘2"},
+            goToTab3: {default: "⌘3", custom: "⌘3"},
+            goToTab4: {default: "⌘4", custom: "⌘4"},
+            goToTab5: {default: "⌘5", custom: "⌘5"},
+            goToTab6: {default: "⌘6", custom: "⌘6"},
+            goToTab7: {default: "⌘7", custom: "⌘7"},
+            goToTab8: {default: "⌘8", custom: "⌘8"},
+            goToTab9: {default: "⌘9", custom: "⌘9"},
+            goToTabNext: {default: "⇧⌘]", custom: "⇧⌘]"},
+            goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
+            goToEditTabNext: {default: "⌃⇥", custom: "⌃⇥"},
+            goToEditTabPrev: {default: "⌃⇧⇥", custom: "⌃⇧⇥"},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},
+            splitLR: {default: "", custom: ""},
+            splitMoveR: {default: "", custom: ""},
+            splitTB: {default: "", custom: ""},
+            splitMoveB: {default: "", custom: ""},
+            closeOthers: {default: "", custom: ""},
+            closeAll: {default: "", custom: ""},
+            closeUnmodified: {default: "", custom: ""},
+            closeLeft: {default: "", custom: ""},
+            closeRight: {default: "", custom: ""},
+            tabToWindow: {default: "", custom: ""},
         },
         editor: {
             general: {
@@ -261,7 +291,9 @@ export abstract class Constants {
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
+                copyProtocolInMd: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
+                netAssets2LocalAssets: {default: "", custom: ""},
                 optimizeTypography: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},
@@ -542,7 +574,7 @@ export abstract class Constants {
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: IObject = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};
     // common: "bash", "c", "csharp", "cpp", "css", "diff", "go", "xml", "json", "java", "javascript", "kotlin", "less", "lua", "makefile", "markdown", "objectivec", "php", "php-template", "perl", "plaintext", "python", "python-repl", "r", "ruby", "rust", "scss", "sql", "shell", "swift", "ini", "typescript", "vbnet", "yaml", "properties", "1c", "armasm", "avrasm", "actionscript", "ada", "angelscript", "accesslog", "apache", "applescript", "arcade", "arduino", "asciidoc", "aspectj", "abnf", "autohotkey", "autoit", "awk", "basic", "bnf", "dos", "brainfuck", "cal", "cmake", "csp", "cos", "capnproto", "ceylon", "clean", "clojure", "clojure-repl", "coffeescript", "coq", "crystal", "d", "dns", "dart", "delphi", "dts", "django", "dockerfile", "dust", "erb", "elixir", "elm", "erlang", "erlang-repl", "excel", "ebnf", "fsharp", "fix", "flix", "fortran", "gcode", "gams", "gauss", "glsl", "gml", "gherkin", "golo", "gradle", "groovy", "haml", "hsp", "http", "handlebars", "haskell", "haxe", "hy", "irpf90", "isbl", "inform7", "x86asm", "jboss-cli", "julia", "julia-repl", "ldif", "llvm", "lsl", "latex", "lasso", "leaf", "lisp", "livecodeserver", "livescript", "mel", "mipsasm", "matlab", "maxima", "mercury", "axapta", "routeros", "mizar", "mojolicious", "monkey", "moonscript", "n1ql", "nsis", "nestedtext", "nginx", "nim", "nix", "node-repl", "ocaml", "openscad", "ruleslanguage", "oxygene", "pf", "parser3", "pony", "pgsql", "powershell", "processing", "prolog", "protobuf", "puppet", "purebasic", "profile", "q", "qml", "reasonml", "rib", "rsl", "roboconf", "sas", "sml", "sqf", "step21", "scala", "scheme", "scilab", "smali", "smalltalk", "stan", "stata", "stylus", "subunit", "tp", "taggerscript", "tcl", "tap", "thrift", "twig", "vbscript", "vbscript-html", "vhdl", "vala", "verilog", "vim", "wasm", "mathematica", "wren", "xl", "xquery", "zephir", "crmsh", "dsconfig", "graphql",
-    // third: "yul", "solidity", "abap", "hlsl"
+    // third: "yul", "solidity", "abap", "hlsl", "gdscript"
     public static readonly ALIAS_CODE_LANGUAGES: string[] = [
         "js", "ts", "html", "toml", "c#", "bat",
     ];

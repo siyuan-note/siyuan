@@ -200,7 +200,7 @@ const bindLoginEvent = (modelMainElement: HTMLElement, deactive = false) => {
         });
     }
     captchaImgElement.addEventListener("click", () => {
-        captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
+        captchaImgElement.setAttribute("src", getCloudURL("captcha") + `/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
     });
 
     const cloudRegionElement = modelMainElement.querySelector("#cloudRegion") as HTMLSelectElement;
@@ -226,7 +226,7 @@ const bindLoginEvent = (modelMainElement: HTMLElement, deactive = false) => {
                     needCaptcha = data.data.needCaptcha;
                     captchaElement.parentElement.classList.remove("fn__none");
                     captchaElement.previousElementSibling.setAttribute("src",
-                        `https://ld246.com/captcha/login?needCaptcha=${data.data.needCaptcha}`);
+                        getCloudURL("captcha") + `/login?needCaptcha=${data.data.needCaptcha}`);
                     captchaElement.value = "";
                     return;
                 }

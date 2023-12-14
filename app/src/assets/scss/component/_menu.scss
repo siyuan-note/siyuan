@@ -210,7 +210,7 @@
       color: var(--b3-theme-primary);
     }
 
-    &--current {
+    &--current:not(.b3-menu__item--readonly) {
       background-color: var(--b3-list-hover);
 
       & > .b3-menu__action {
@@ -296,7 +296,7 @@
     font-size: 0.75rem;
     margin-left: 16px;
     color: var(--b3-theme-on-surface);
-    font-family: Consolas, Monaco, monospace;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
   }
 
   // for protyle hint
@@ -325,7 +325,7 @@
 
   &__item {
     font-size: 24px;
-    line-height: 28px;
+    line-height: 0.9em; // windows 需要这样设置
     font-family: var(--b3-font-family-emoji);
     text-align: center;
     height: 28px;

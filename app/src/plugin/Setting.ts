@@ -70,7 +70,7 @@ export class Setting {
                 if (["INPUT", "TEXTAREA"].includes(actionElement.tagName)) {
                     dialog.bindInput(actionElement as HTMLInputElement, () => {
                         btnsElement[1].dispatchEvent(new CustomEvent("click"));
-                    });
+                    }, actionElement.tagName === "INPUT");
                 }
                 if (actionElement.tagName === "TEXTAREA") {
                     contentElement.lastElementChild.lastElementChild.insertAdjacentElement("beforeend", actionElement);

@@ -82,11 +82,9 @@ func checkDownloadInstallPkg() {
 		return
 	}
 
-	if util.IsMutexLocked(&checkDownloadInstallPkgLock) {
+	if !checkDownloadInstallPkgLock.TryLock() {
 		return
 	}
-
-	checkDownloadInstallPkgLock.Lock()
 	defer checkDownloadInstallPkgLock.Unlock()
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()
@@ -136,7 +134,7 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	b3logURL := "https://release.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, b3logURL)
 	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
-	ghproxyURL := "https://ghproxy.com/" + githubURL
+	ghproxyURL := "https://mirror.ghproxy.com/" + githubURL
 	downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
 	downloadPkgURLs = append(downloadPkgURLs, githubURL)
 

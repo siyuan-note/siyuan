@@ -33,6 +33,8 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     if (position === "right") {
         // block icon
         left = targetRect.right - messageElement.clientWidth;
+    } else if (position?.endsWith("bottom")) {
+        top += parseInt(position);
     } else if (position === "parentE") {
         // file tree and outline、backlink
         top = parentRect.top;

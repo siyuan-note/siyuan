@@ -1,7 +1,6 @@
 import {layoutToJSON} from "../layout/util";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {Constants} from "../constants";
 import {Tab} from "../layout/Tab";
@@ -25,7 +24,6 @@ export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
         position: options.position,
         width: options.width,
         height: options.height,
-        id: getCurrentWindow().id,
         // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
         url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
     });
@@ -55,33 +53,22 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
             }
         };
         if (response.data.rootID === id) {
-            fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
-                if (attrResponse.data.scroll) {
-                    json.children.scrollAttr = JSON.parse(attrResponse.data.scroll);
-                    // 历史数据兼容
-                    json.children.scrollAttr.rootId = response.data.rootID;
-                }
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
-                    position: options.position,
-                    width: options.width,
-                    height: options.height,
-                    id: getCurrentWindow().id,
-                    url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
-                });
-                /// #endif
-            });
-        } else {
-            json.children.action = Constants.CB_GET_ALL;
-            json.children.scrollAttr = {
-                zoomInId: id,
-            };
+            json.children.action = Constants.CB_GET_SCROLL;
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                 position: options.position,
                 width: options.width,
                 height: options.height,
-                id: getCurrentWindow().id,
+                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+            });
+            /// #endif
+        } else {
+            json.children.action = Constants.CB_GET_ALL;
+            /// #if !BROWSER
+            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+                position: options.position,
+                width: options.width,
+                height: options.height,
                 url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
             });
             /// #endif

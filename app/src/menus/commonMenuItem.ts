@@ -36,7 +36,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     const reminder = nodeElement.getAttribute(Constants.CUSTOM_REMINDER_WECHAT);
     let reminderFormat = "";
     if (reminder) {
-        reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+        reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "50vw",
@@ -45,7 +45,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     <div class="fn__flex">
         <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" value="${reminderFormat}">
+        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
@@ -101,7 +101,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
         const reminder = response.data.ial[Constants.CUSTOM_REMINDER_WECHAT];
         let reminderFormat = "";
         if (reminder) {
-            reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
+            reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new Dialog({
             width: isMobile() ? "92vw" : "50vw",
@@ -110,7 +110,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     <div class="fn__flex">
         <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.notifyTime}</span>
         <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" value="${reminderFormat}">
+        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
@@ -162,7 +162,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
+    <input class="b3-text-field fn__block" type="datetime-local" max="9999-12-31 23:59" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DD HH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
             hasAV = true;
@@ -225,7 +225,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             </label>
             ${notifyHTML}
         </div>
-        <div data-type="NodeAttributeView" class="fn__none custom-attr" data-av-id="${attrs["custom-avs"]}" data-node-id="${attrs.id}"></div>
+        <div data-type="NodeAttributeView" class="fn__none custom-attr"></div>
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">
@@ -245,6 +245,9 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     (dialog.element.querySelector('.b3-text-field[data-name="alias"]') as HTMLInputElement).value = attrs.alias || "";
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
+        if (typeof event.detail === "string") {
+            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]');
+        }
         while (!target.isSameNode(dialog.element)) {
             const type = target.dataset.action;
             if (target.classList.contains("item--full")) {
@@ -342,11 +345,14 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         }
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        if (focusName === item.getAttribute("data-name")) {
+        if (focusName !== "av" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
+    if (focusName === "av") {
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "av"}));
+    }
 };
 
 export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?: IProtyle) => {
@@ -394,6 +400,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         }
     }, {
         label: window.siyuan.languages.copyProtocolInMd,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
         click: () => {
             fetchPost("/api/block/getRefText", {id}, (response) => {
                 writeText(`[${response.data}](siyuan://blocks/${id})`);
@@ -739,6 +746,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
+        icon: "iconOpen",
         submenu
     }).element);
 };
@@ -751,6 +759,7 @@ export const renameMenu = (options: {
 }) => {
     return new MenuItem({
         accelerator: window.siyuan.config.keymap.editor.general.rename.custom,
+        icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click: () => {
             rename(options);

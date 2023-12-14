@@ -25,9 +25,11 @@ import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
+import {Menu} from "../plugin/Menu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
+    public appId: string;
 
     constructor() {
         if (!window.webkit?.messageHandlers && !window.JSAndroid) {
@@ -36,6 +38,7 @@ class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
             notebooks: [],
@@ -64,7 +67,9 @@ class App {
             }
             const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
             if (copyElement) {
-                writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
+                let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd();
+                text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                writeText(text);
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();
             }
@@ -93,12 +98,32 @@ class App {
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             setNoteBook(() => {
-                                initFramework(this);
+                                initFramework(this, confResponse.data.start);
                                 initRightMenu(this);
                                 openChangelog();
+                                const unPinsMenu: IMenu[] = [];
                                 this.plugins.forEach(item => {
-                                    afterLoadPlugin(item);
+                                    const unPinMenu = afterLoadPlugin(item);
+                                    if (unPinMenu) {
+                                        unPinMenu.forEach(unpinItem => {
+                                            unPinsMenu.push(unpinItem);
+                                        });
+                                    }
                                 });
+                                if (unPinsMenu.length > 0) {
+                                    const pluginElement = document.createElement("div");
+                                    pluginElement.classList.add("b3-menu__item");
+                                    pluginElement.setAttribute("data-menu", "true");
+                                    pluginElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>`;
+                                    pluginElement.addEventListener("click", () => {
+                                        const menu = new Menu();
+                                        unPinsMenu.forEach(item => {
+                                            menu.addItem(item);
+                                        });
+                                        menu.fullscreen();
+                                    });
+                                    document.querySelector("#menuAbout").after(pluginElement);
+                                }
                             });
                         });
                     });

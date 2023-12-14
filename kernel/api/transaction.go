@@ -83,8 +83,10 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
 		model.WaitForWritingFiles()
-		if strings.Contains(strings.ToLower(transactions[0].DoOperations[0].Action), "attrview") {
-			pushMode = util.PushModeBroadcast
+		if action := transactions[0].DoOperations[0].Action; strings.Contains(strings.ToLower(action), "attrview") {
+			if "setAttrViewName" != action {
+				pushMode = util.PushModeBroadcast
+			}
 		}
 	}
 
@@ -92,5 +94,8 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	evt.AppId = app
 	evt.SessionId = session
 	evt.Data = transactions
+	for _, tx := range transactions {
+		tx.WaitForCommit()
+	}
 	util.PushEvent(evt)
 }

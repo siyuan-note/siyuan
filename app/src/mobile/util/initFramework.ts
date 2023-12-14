@@ -19,8 +19,10 @@ import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardTo
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
+import {setTitle} from "../../dialog/processSystem";
+import {checkFold} from "../../util/noRelyPCFunction";
 
-export const initFramework = (app: App) => {
+export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();
@@ -122,6 +124,10 @@ export const initFramework = (app: App) => {
                 idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
             return;
         }
+        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
+            setEmpty(app);
+            return;
+        }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
@@ -129,7 +135,9 @@ export const initFramework = (app: App) => {
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {
-                        openMobileFileById(app, response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        checkFold(response.data[0].id, (zoomIn) => {
+                            openMobileFileById(app, response.data[0].id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        });
                     } else {
                         setEmpty(app);
                     }
@@ -158,5 +166,6 @@ const initEditorName = () => {
             path: window.siyuan.mobile.editor.protyle.path,
             title: inputElement.value,
         });
+        setTitle(inputElement.value);
     });
 };

@@ -19,9 +19,9 @@ export class Editor extends Model {
         app: App,
         tab: Tab,
         blockId: string,
+        rootId: string,
         mode?: TEditorMode,
         action?: string[],
-        scrollAttr?: IScrollAttr
     }) {
         super({
             app: options.app,
@@ -38,19 +38,19 @@ export class Editor extends Model {
     private initProtyle(options: {
         blockId: string,
         action?: string[]
+        rootId: string,
         mode?: TEditorMode,
-        scrollAttr?: IScrollAttr
     }) {
         this.editor = new Protyle(this.app, this.element, {
             action: options.action || [],
             blockId: options.blockId,
+            rootId: options.rootId,
             mode: options.mode,
             render: {
                 title: true,
                 background: true,
                 scroll: true,
             },
-            scrollAttr: options.scrollAttr,
             typewriterMode: true,
             after: (editor) => {
                 if (window.siyuan.editorIsFullscreen) {

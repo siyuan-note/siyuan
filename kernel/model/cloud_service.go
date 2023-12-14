@@ -23,11 +23,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -37,7 +39,7 @@ import (
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
 func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err error) {
-	if nil == Conf.User {
+	if nil == Conf.GetUser() {
 		return
 	}
 
@@ -59,7 +61,7 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err 
 	request := httpclient.NewCloudRequest30s()
 	_, err = request.
 		SetSuccessResult(requestResult).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		SetBody(payload).
 		Post(util.GetCloudServer() + "/apis/siyuan/ai/chatGPT")
 	if nil != err {
@@ -97,7 +99,7 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err 
 }
 
 func StartFreeTrial() (err error) {
-	if nil == Conf.User {
+	if nil == Conf.GetUser() {
 		return errors.New(Conf.Language(31))
 	}
 
@@ -105,7 +107,7 @@ func StartFreeTrial() (err error) {
 	request := httpclient.NewCloudRequest30s()
 	_, err = request.
 		SetSuccessResult(requestResult).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/user/startFreeTrial")
 	if nil != err {
 		logging.LogErrorf("start free trial failed: %s", err)
@@ -122,7 +124,7 @@ func DeactivateUser() (err error) {
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(requestResult).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/user/deactivate")
 	if nil != err {
 		logging.LogErrorf("deactivate user failed: %s", err)
@@ -148,7 +150,7 @@ func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	resp, err := request.
 		SetSuccessResult(requestResult).
 		SetBody(payload).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/calendar/setBlockReminder")
 	if nil != err {
 		logging.LogErrorf("set block reminder failed: %s", err)
@@ -180,7 +182,7 @@ func LoadUploadToken() (err error) {
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(requestResult).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/upload/token")
 	if nil != err {
 		logging.LogErrorf("get upload token failed: %s", err)
@@ -226,8 +228,8 @@ func refreshSubscriptionExpirationRemind() {
 
 	defer logging.Recover()
 
-	if IsSubscriber() && -1 != Conf.User.UserSiYuanProExpireTime {
-		expired := int64(Conf.User.UserSiYuanProExpireTime)
+	if IsSubscriber() && -1 != Conf.GetUser().UserSiYuanProExpireTime {
+		expired := int64(Conf.GetUser().UserSiYuanProExpireTime)
 		now := time.Now().UnixMilli()
 		if now >= expired { // 已经过期
 			if now-expired <= 1000*60*60*24*2 { // 2 天内提醒 https://github.com/siyuan-note/siyuan/issues/7816
@@ -238,7 +240,7 @@ func refreshSubscriptionExpirationRemind() {
 		}
 		remains := int((expired - now) / 1000 / 60 / 60 / 24)
 		expireDay := 15 // 付费订阅提前 15 天提醒
-		if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+		if 2 == Conf.GetUser().UserSiYuanSubscriptionPlan {
 			expireDay = 3 // 试用订阅提前 3 天提醒
 		}
 
@@ -254,10 +256,10 @@ func refreshSubscriptionExpirationRemind() {
 func refreshUser() {
 	defer logging.Recover()
 
-	if nil != Conf.User {
+	if nil != Conf.GetUser() {
 		time.Sleep(2 * time.Minute)
-		if nil != Conf.User {
-			RefreshUser(Conf.User.UserToken)
+		if nil != Conf.GetUser() {
+			RefreshUser(Conf.GetUser().UserToken)
 		}
 		subscriptionExpirationReminded = false
 	}
@@ -327,22 +329,22 @@ func RefreshUser(token string) {
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
 	if "" == token {
 		if "" != Conf.UserData {
-			Conf.User = loadUserFromConf()
+			Conf.SetUser(loadUserFromConf())
 		}
-		if nil == Conf.User {
+		if nil == Conf.GetUser() {
 			return
 		}
 
 		var tokenExpireTime int64
-		tokenExpireTime, err := strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
+		tokenExpireTime, err := strconv.ParseInt(Conf.GetUser().UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
-			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
+			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.GetUser().UserTokenExpireTime, err)
 			util.PushErrMsg(Conf.Language(19), 5000)
 			return
 		}
 
 		if threeDaysAfter > tokenExpireTime {
-			token = Conf.User.UserToken
+			token = Conf.GetUser().UserToken
 			goto Net
 		}
 		return
@@ -352,15 +354,15 @@ Net:
 	start := time.Now()
 	user, err := getUser(token)
 	if err != nil {
-		if nil == Conf.User || errInvalidUser == err {
+		if nil == Conf.GetUser() || errInvalidUser == err {
 			util.PushErrMsg(Conf.Language(19), 5000)
 			return
 		}
 
 		var tokenExpireTime int64
-		tokenExpireTime, err = strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
+		tokenExpireTime, err = strconv.ParseInt(Conf.GetUser().UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
-			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
+			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.GetUser().UserTokenExpireTime, err)
 			util.PushErrMsg(Conf.Language(19), 5000)
 			return
 		}
@@ -372,7 +374,7 @@ Net:
 		return
 	}
 
-	Conf.User = user
+	Conf.SetUser(user)
 	data, _ := gulu.JSON.MarshalJSON(user)
 	Conf.UserData = util.AESEncrypt(string(data))
 	Conf.Save()
@@ -405,7 +407,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 	}
 	resp, err := request.
 		SetSuccessResult(&result).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		SetBody(body).
 		Post(util.GetCloudServer() + "/apis/siyuan/inbox/removeCloudShorthands")
 	if nil != err {
@@ -433,7 +435,7 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/inbox/getCloudShorthand?id=" + id)
 	if nil != err {
 		logging.LogErrorf("get cloud shorthand failed: %s", err)
@@ -456,6 +458,15 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	t, _ := strconv.ParseInt(id, 10, 64)
 	hCreated := util.Millisecond2Time(t)
 	ret["hCreated"] = hCreated.Format("2006-01-02 15:04")
+
+	md := ret["shorthandContent"].(string)
+	ret["shorthandMd"] = md
+
+	luteEngine := NewLute()
+	luteEngine.SetFootnotes(true)
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	ret["shorthandContent"] = content
 	return
 }
 
@@ -464,7 +475,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/inbox/getCloudShorthands?p=" + strconv.Itoa(page))
 	if nil != err {
 		logging.LogErrorf("get cloud shorthands failed: %s", err)
@@ -483,6 +494,11 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		err = errors.New(result["msg"].(string))
 		return
 	}
+
+	luteEngine := NewLute()
+	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
+	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
+	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
 	shorthands := result["data"].(map[string]interface{})["shorthands"].([]interface{})
 	for _, item := range shorthands {
 		shorthand := item.(map[string]interface{})
@@ -490,6 +506,20 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		t, _ := strconv.ParseInt(id, 10, 64)
 		hCreated := util.Millisecond2Time(t)
 		shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
+
+		desc := shorthand["shorthandDesc"].(string)
+		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
+		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
+		desc = fileRegexp.ReplaceAllString(desc, " 文件 ")
+		desc = strings.ReplaceAll(desc, "\n\n", "")
+		desc = strings.TrimSpace(desc)
+		shorthand["shorthandDesc"] = desc
+
+		md := shorthand["shorthandContent"].(string)
+		shorthand["shorthandMd"] = md
+		tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+		content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+		shorthand["shorthandContent"] = content
 	}
 	return
 }
@@ -535,7 +565,7 @@ func UseActivationcode(code string) (err error) {
 	_, err = request.
 		SetSuccessResult(requestResult).
 		SetBody(map[string]string{"data": code}).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/useActivationcode")
 	if nil != err {
 		logging.LogErrorf("check activation code failed: %s", err)
@@ -556,7 +586,7 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 	_, err := request.
 		SetSuccessResult(requestResult).
 		SetBody(map[string]string{"data": code}).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		Post(util.GetCloudServer() + "/apis/siyuan/checkActivationcode")
 	if nil != err {
 		logging.LogErrorf("check activation code failed: %s", err)
@@ -620,6 +650,6 @@ func Login2fa(token, code string) (map[string]interface{}, error) {
 
 func LogoutUser() {
 	Conf.UserData = ""
-	Conf.User = nil
+	Conf.SetUser(nil)
 	Conf.Save()
 }

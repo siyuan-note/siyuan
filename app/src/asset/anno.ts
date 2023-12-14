@@ -553,12 +553,12 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     if (!textLayerElement.lastElementChild) {
         return;
     }
-    const viewport = page.viewport;
+
+    const viewport = page.viewport.clone({rotation: 0}); // rotation https://github.com/siyuan-note/siyuan/issues/9831
     if (textLayerElement.lastElementChild.classList.contains("endOfContent")) {
         textLayerElement.insertAdjacentHTML("beforeend", "<div></div>");
     }
     textLayerElement = textLayerElement.lastElementChild;
-
     let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-mode="${selected.mode}">`;
     selected.coords.forEach((rect) => {
         const bounds = viewport.convertToViewportRectangle(rect);

@@ -3,6 +3,7 @@ import {addStyle} from "../util/addStyle";
 import {Constants} from "../../constants";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestBlock} from "../util/hasClosest";
+import {looseJsonParse} from "../../util/functions";
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
     let mathElements: Element[] = [];
@@ -29,7 +30,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 }
                 let macros = {};
                 try {
-                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}");
+                    macros = looseJsonParse(window.siyuan.config.editor.katexMacros || "{}");
                 } catch (e) {
                     console.warn("KaTex macros is not JSON", e);
                 }
@@ -46,7 +47,8 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     if (mathElement.tagName === "DIV") {
                         renderElement.firstElementChild.setAttribute("contenteditable", "false");
                         if (renderElement.childElementCount < 2) {
-                            renderElement.insertAdjacentHTML("beforeend", `<span style="position: absolute">${Constants.ZWSP}</span>`);
+                            // 不能使用 contenteditable="false"，否则光标无法移动到该块
+                            renderElement.insertAdjacentHTML("beforeend", `<span style="position: absolute;right: 0;top: 0;">${Constants.ZWSP}</span>`);
                         }
                         // https://github.com/siyuan-note/siyuan/issues/3541
                         const baseElements = renderElement.querySelectorAll(".base");

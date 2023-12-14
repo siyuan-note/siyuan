@@ -12,6 +12,41 @@ import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {hideTooltip} from "../../dialog/tooltip";
 
+export const globalTouchStart = (event: TouchEvent) => {
+    // 文档背景位置调整
+    const target = event.target as HTMLElement;
+    const backgroundElement = hasClosestByClassName(target, "protyle-background");
+    if (backgroundElement && target.tagName === "IMG" && backgroundElement.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
+        const contentElement = hasClosestByClassName(target, "protyle-content", true);
+        if (!contentElement) {
+            return false;
+        }
+        contentElement.style.overflow = "hidden";
+        const y = event.touches[0].clientY;
+        const height = (target as HTMLImageElement).naturalHeight * target.clientWidth / (target as HTMLImageElement).naturalWidth - target.clientHeight;
+        let originalPositionY = parseFloat(target.style.objectPosition.substring(7)) || 50;
+        if (target.style.objectPosition.endsWith("px")) {
+            originalPositionY = -parseInt(target.style.objectPosition.substring(7)) / height * 100;
+        }
+
+        const documentSelf = document;
+        documentSelf.ontouchmove = (moveEvent) => {
+            target.style.objectPosition = `center ${((y - moveEvent.touches[0].clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
+        };
+        documentSelf.ontouchend = () => {
+            contentElement.style.overflow = "";
+            documentSelf.ontouchmove = null;
+            documentSelf.ontouchstart = null;
+            documentSelf.ondragstart = null;
+            documentSelf.onselectstart = null;
+            documentSelf.onselect = null;
+        };
+        event.stopImmediatePropagation();
+        return true;
+    }
+    return false;
+};
+
 export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, app: App) => {
     const target = event.target as HTMLElement;
     const isIPadBoolean = isIPad();

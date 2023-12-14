@@ -3,12 +3,13 @@ WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
 RUN cd app && npm install -g pnpm && pnpm install && pnpm run build
 
-FROM golang:latest as GO_BUILD
+FROM golang:alpine as GO_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 COPY --from=NODE_BUILD /go/src/github.com/siyuan-note/siyuan/ /go/src/github.com/siyuan-note/siyuan/
 ENV GO111MODULE=on
 ENV CGO_ENABLED=1
-RUN cd kernel && go build --tags fts5 -v -ldflags "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod" && \
+RUN apk add --no-cache gcc musl-dev && \
+    cd kernel && go build --tags fts5 -v -ldflags "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod" && \
     mkdir /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \

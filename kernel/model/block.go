@@ -546,6 +546,60 @@ func GetChildBlocks(id string) (ret []*ChildBlock) {
 	return
 }
 
+func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
+	ret = []*ChildBlock{}
+	if "" == id {
+		return
+	}
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	if ast.NodeHeading == node.Type {
+		children := treenode.HeadingChildren(node)
+		for i := len(children) - 1; 0 <= i; i-- {
+			c := children[i]
+			ret = append(ret, &ChildBlock{
+				ID:      c.ID,
+				Type:    treenode.TypeAbbr(c.Type.String()),
+				SubType: treenode.SubTypeAbbr(c),
+			})
+			if n == len(ret) {
+				return
+			}
+		}
+		return
+	}
+
+	if !node.IsContainerBlock() {
+		return
+	}
+
+	for c := node.LastChild; nil != c; c = c.Previous {
+		if !c.IsBlock() {
+			continue
+		}
+
+		ret = append(ret, &ChildBlock{
+			ID:      c.ID,
+			Type:    treenode.TypeAbbr(c.Type.String()),
+			SubType: treenode.SubTypeAbbr(c),
+		})
+
+		if n == len(ret) {
+			return
+		}
+	}
+	return
+}
+
 func GetBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 	ret, err = getBlock(id, tree)
 	return

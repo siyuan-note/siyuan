@@ -533,3 +533,29 @@ func getChildBlocks(c *gin.Context) {
 
 	ret.Data = model.GetChildBlocks(id)
 }
+
+func getTailChildBlocks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	var n int
+	nArg := arg["n"]
+	if nil != nArg {
+		n = int(nArg.(float64))
+	}
+	if 1 > n {
+		n = 7
+	}
+
+	ret.Data = model.GetTailChildBlocks(id, n)
+}

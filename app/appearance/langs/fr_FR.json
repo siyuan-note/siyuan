@@ -1117,6 +1117,10 @@
     "resetWindow": "Réinitialiser la fenêtre et quitter le programme",
     "quit": "Quitter le programme"
   },
+  "_attrView": {
+    "table": "Tableau",
+    "key": "Clé primaire"
+  },
   "_kernel": {
     "0": "Échec du cahier de requêtes",
     "1": "Nom de fichier dupliqué",

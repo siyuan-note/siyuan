@@ -564,7 +564,7 @@ const (
 func NewTableView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
-		Name:       "Table",
+		Name:       getI18nName("table"),
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
 			Spec:     0,
@@ -578,7 +578,7 @@ func NewTableView() (ret *View) {
 }
 
 func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
-	name := "Table"
+	name := getI18nName("table")
 	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
@@ -591,7 +591,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
 			PageSize: 50,
 		},
 	}
-	blockKey = NewKey(blockKeyID, "Block", "", KeyTypeBlock)
+	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
 	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
 	return
 }
@@ -779,6 +779,10 @@ func GetAttributeViewDataPath(avID string) (ret string) {
 		}
 	}
 	return
+}
+
+func getI18nName(name string) string {
+	return util.AttrViewLangs[util.Lang][name].(string)
 }
 
 var (

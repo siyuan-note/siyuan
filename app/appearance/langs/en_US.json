@@ -1117,6 +1117,10 @@
     "resetWindow": "Reset window and exit",
     "quit": "Quit application"
   },
+  "_attrView": {
+    "table": "Table",
+    "key": "Primary Key"
+  },
   "_kernel": {
     "0": "Query notebook failed",
     "1": "Duplicated filename",

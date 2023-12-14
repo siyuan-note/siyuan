@@ -296,7 +296,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     if (newCellElement) {
                         newCellElement.classList.add("av__cell--select");
                     }
-                    if (!document.querySelector(".av__panel")) {
+                    const avMaskElement = document.querySelector(".av__mask");
+                    if (avMaskElement) {
+                        (avMaskElement.querySelector(" textarea") as HTMLTextAreaElement).focus();
+                    } else if (!document.querySelector(".av__panel")) {
                         focusBlock(e);
                     }
                 }

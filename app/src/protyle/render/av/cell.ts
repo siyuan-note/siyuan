@@ -204,16 +204,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 });
             });
         }
-        inputElement.addEventListener("blur", () => {
-            updateCellValue(protyle, type, cellElements);
-        });
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
                 return;
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                inputElement.blur();
+                updateCellValue(protyle, type, cellElements);
                 if (event.key === "Tab") {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
@@ -231,6 +228,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     avMaskElement.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")) {
+            updateCellValue(protyle, type, cellElements);
             avMaskElement?.remove();
         }
     });

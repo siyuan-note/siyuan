@@ -213,13 +213,7 @@ export const initWindow = async (app: App) => {
     ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
         if (cmd === "focus") {
             if (getSelection().rangeCount > 0) {
-                const range = getSelection().getRangeAt(0);
-                const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
-                if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
-                    startNode.focus();
-                } else {
-                    focusByRange(getSelection().getRangeAt(0));
-                }
+                focusByRange(getSelection().getRangeAt(0));
             }
             exportLayout({
                 reload: false,

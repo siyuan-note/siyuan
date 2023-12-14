@@ -253,7 +253,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         return false;
     }
     const target = event.target as HTMLElement;
-    if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+    if (window.siyuan.menus.menu.element.contains(target) && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
     }
     const eventCode = Constants.KEYCODELIST[event.keyCode];

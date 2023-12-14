@@ -308,8 +308,7 @@ const renderKeyboardToolbar = () => {
             window.screen.height - window.innerHeight < 160 ||  // reloadSync 会导致 selectionchange，从而导致键盘没有弹起的情况下出现工具栏
             !document.activeElement || (
                 document.activeElement &&
-                document.activeElement.tagName !== "INPUT" &&
-                document.activeElement.tagName !== "TEXTAREA" &&
+                !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) &&
                 !document.activeElement.classList.contains("protyle-wysiwyg") &&
                 document.activeElement.getAttribute("contenteditable") !== "true"
             )) {
@@ -318,8 +317,7 @@ const renderKeyboardToolbar = () => {
         }
         // 编辑器设置界面点击空白或关闭，焦点不知何故会飘移到编辑器上
         if (document.activeElement &&
-            document.activeElement.tagName !== "INPUT" &&
-            document.activeElement.tagName !== "TEXTAREA" && (
+            !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) && (
                 document.getElementById("menu").style.transform === "translateX(0px)" ||
                 document.getElementById("model").style.transform === "translateY(0px)"
             )) {

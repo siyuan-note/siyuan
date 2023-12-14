@@ -492,6 +492,7 @@ func initLang() {
 		util.TimeLangs[name] = langMap["_time"].(map[string]interface{})
 		util.TaskActionLangs[name] = langMap["_taskAction"].(map[string]interface{})
 		util.TrayMenuLangs[name] = langMap["_trayMenu"].(map[string]interface{})
+		util.AttrViewLangs[name] = langMap["_attrView"].(map[string]interface{})
 	}
 }
 

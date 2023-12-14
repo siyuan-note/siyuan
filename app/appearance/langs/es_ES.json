@@ -1117,6 +1117,10 @@
     "resetWindow": "Restablecer ventana y salir del programa",
     "quit": "Salir de la aplicación"
   },
+  "_attrView": {
+    "tabla": "Tabla",
+    "clave": "Clave principal"
+  },
   "_kernel": {
     "0": "Consulta al cuaderno de notas fallido",
     "1": "Nombre de archivo duplicado",

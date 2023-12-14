@@ -1,4 +1,5 @@
 {
+  "selected": "Sélectionné",
   "loadMore": "Charger plus",
   "tempUnlock": "Déverrouiller temporairement",
   "cancelTempUnlock": "Annuler le déverrouillage temporaire",
@@ -1116,6 +1117,10 @@
     "openSource": "Visitez le projet sur GitHub",
     "resetWindow": "Réinitialiser la fenêtre et quitter le programme",
     "quit": "Quitter le programme"
+  },
+  "_attrView": {
+    "table": "Tableau",
+    "key": "Clé primaire"
   },
   "_kernel": {
     "0": "Échec du cahier de requêtes",

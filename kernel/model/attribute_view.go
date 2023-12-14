@@ -785,6 +785,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	}
 
 	view.Table.PageSize = masterView.Table.PageSize
+	view.Table.RowIDs = masterView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -816,6 +817,8 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	for _, col := range firstView.Table.Columns {
 		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
 	}
+
+	view.Table.RowIDs = firstView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -1086,11 +1089,6 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
-	if nil != err {
-		return
-	}
-
 	// 不允许重复添加相同的块到属性视图中
 	blockValues := attrView.GetBlockKeyValues()
 	for _, blockValue := range blockValues.Values {
@@ -1124,17 +1122,24 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		if "" != operation.PreviousID {
-			for i, id := range view.Table.RowIDs {
-				if id == operation.PreviousID {
-					view.Table.RowIDs = append(view.Table.RowIDs[:i+1], append([]string{blockID}, view.Table.RowIDs[i+1:]...)...)
-					break
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			if "" != operation.PreviousID {
+				changed := false
+				for i, id := range view.Table.RowIDs {
+					if id == operation.PreviousID {
+						view.Table.RowIDs = append(view.Table.RowIDs[:i+1], append([]string{blockID}, view.Table.RowIDs[i+1:]...)...)
+						changed = true
+						break
+					}
 				}
+				if !changed {
+					view.Table.RowIDs = append(view.Table.RowIDs, blockID)
+				}
+			} else {
+				view.Table.RowIDs = append([]string{blockID}, view.Table.RowIDs...)
 			}
-		} else {
-			view.Table.RowIDs = append([]string{blockID}, view.Table.RowIDs...)
 		}
 	}
 
@@ -1152,11 +1157,6 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
-	if nil != err {
-		return
-	}
-
-	view, err := attrView.GetCurrentView()
 	if nil != err {
 		return
 	}
@@ -1207,8 +1207,10 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 		keyValues.Values = tmp
 	}
 
-	for _, blockID := range operation.SrcIDs {
-		view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+	for _, view := range attrView.Views {
+		for _, blockID := range operation.SrcIDs {
+			view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1401,7 +1403,9 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		}
 	}
 	if "" == rowID {
-		return
+		rowID = operation.ID
+		view.Table.RowIDs = append(view.Table.RowIDs, rowID)
+		index = len(view.Table.RowIDs) - 1
 	}
 
 	switch view.LayoutType {
@@ -1667,6 +1671,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 		}
 	}
 
+	replacedRowID := false
 	for _, v := range attrView.Views {
 		switch v.LayoutType {
 		case av.LayoutTypeTable:
@@ -1679,7 +1684,13 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 			for i, rowID := range v.Table.RowIDs {
 				if rowID == operation.PreviousID {
 					v.Table.RowIDs[i] = operation.NextID
+					replacedRowID = true
+					break
 				}
+			}
+
+			if !replacedRowID {
+				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
 			}
 		}
 	}

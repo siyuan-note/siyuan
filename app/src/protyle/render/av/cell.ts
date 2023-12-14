@@ -138,6 +138,9 @@ export const getTypeByCellElement = (cellElement: Element) => {
 };
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
+    if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
+        return;
+    }
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
@@ -201,16 +204,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 });
             });
         }
-        inputElement.addEventListener("blur", () => {
-            updateCellValue(protyle, type, cellElements);
-        });
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
                 return;
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                inputElement.blur();
+                updateCellValue(protyle, type, cellElements);
                 if (event.key === "Tab") {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
@@ -228,6 +228,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     avMaskElement.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")) {
+            updateCellValue(protyle, type, cellElements);
             avMaskElement?.remove();
         }
     });
@@ -247,10 +248,15 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             cellElements[0] = protyle.wysiwyg.element.querySelector(previousId ? `[data-av-id="${avid}"] .av__row[data-id="${previousId}"]` : `[data-av-id="${avid}"] .av__row--header`).nextElementSibling.querySelector('[data-detached="true"]');
         } else {
             // 修改单元格后立即修改其他单元格
-            cellElements[0] = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`);
-            if (!cellElements[0]) {
+            let tempElement = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`) as HTMLElement;
+            if (!tempElement) {
+                // 修改单元格后修改其他没有内容的单元格（id 会随机）
+                tempElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement
+            }
+            if (!tempElement) {
                 return;
             }
+            cellElements[0] = tempElement;
         }
     }
     if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !rowElement.dataset.id) {
@@ -307,6 +313,10 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
                 inputValue.content = parseFloat((avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value);
                 inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
+                if (!inputValue.isNotEmpty) {
+                    // 后端仅支持传入数字，因此在为空的时候需要设置为 0
+                    inputValue.content = 0;
+                }
             } else if (type === "checkbox") {
                 const useElement = item.querySelector("use");
                 inputValue.checked = useElement.getAttribute("xlink:href") === "#iconUncheck";
@@ -358,7 +368,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
     if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
     }
-    if (blockElement) {
+    if (blockElement &&
+        // 单元格编辑中 ctrl+p 光标定位
+        !document.querySelector(".b3-dialog")) {
         focusBlock(blockElement);
     }
     document.querySelectorAll(".av__mask").forEach((item) => {

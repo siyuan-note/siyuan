@@ -23,9 +23,9 @@ import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 
-const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
+const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
-        listOutdent(protyle, [blockElement.parentElement], range);
+        listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
         return;
     }
     // 第一个子列表合并到上一个块的末尾
@@ -67,6 +67,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
         if (blockElement.parentElement.parentElement.classList.contains("protyle-wysiwyg")) {
             return;
         }
+        moveToPrevious(blockElement, range, isDelete);
         range.insertNode(document.createElement("wbr"));
         const listElement = blockElement.parentElement.parentElement;
         const listHTML = listElement.outerHTML;
@@ -116,6 +117,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     }
     const listItemId = listItemElement.getAttribute("data-node-id");
     const listElement = listItemElement.parentElement;
+    moveToPrevious(blockElement, range, isDelete);
     range.insertNode(document.createElement("wbr"));
     const html = listElement.outerHTML;
     const doOperations: IOperation[] = [];
@@ -184,7 +186,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     focusByWbr(previousLastElement.parentElement, range);
 };
 
-export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range) => {
+export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
     // 删除后，防止滚动条滚动后调用 get 请求，因为返回的请求已查找不到内容块了
     preventScroll(protyle);
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -362,7 +364,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     }
 
     if (blockElement.parentElement.classList.contains("li") && blockElement.previousElementSibling.classList.contains("protyle-action")) {
-        removeLi(protyle, blockElement, range);
+        removeLi(protyle, blockElement, range, isDelete);
         return;
     }
 
@@ -509,4 +511,16 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         transaction(protyle, doOperations, undoOperations);
     }
     focusByWbr(protyle.wysiwyg.element, range);
+};
+
+export const moveToPrevious = (blockElement: Element, range: Range, isDelete: boolean) => {
+    if (isDelete) {
+        const previousBlockElement = getPreviousBlock(blockElement);
+        if (previousBlockElement) {
+            const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement));
+            if (previousEditElement) {
+                setLastNodeRange(previousEditElement, range, false);
+            }
+        }
+    }
 };

@@ -46,6 +46,7 @@
 
   &__views {
     align-items: center;
+    box-shadow: 0px -1px inset var(--b3-theme-background-light);
   }
 
   &__title {
@@ -61,9 +62,10 @@
   &__counter {
     position: absolute;
     bottom: 0;
-    height: 30px;
+    height: 26px;
     padding: 0 5px;
     background-color: var(--av-background);
+    font-size: 87.5%;
   }
 
   &__gutters {
@@ -92,7 +94,6 @@
 
   &__scroll {
     overflow: auto hidden;
-    cursor: pointer;
   }
 
   &__body {
@@ -182,6 +183,7 @@
         overflow: hidden;
         font-size: 75%;
         white-space: nowrap;
+        cursor: pointer;
 
         &.av__calc--ashow {
           opacity: 1;
@@ -258,6 +260,7 @@
     flex-shrink: 0;
     border-right: 1px solid var(--b3-theme-surface-lighter);
     overflow: hidden;
+    cursor: pointer;
     //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
     [data-type="block-ref"],
@@ -331,7 +334,7 @@
 
     &--url,
     &--ref {
-      text-decoration: underline var(--b3-border-color);
+      border-bottom: .5px solid var(--b3-border-color);
     }
 
     & > .av__cellicon {
@@ -366,7 +369,7 @@
   &__colsticky {
     position: sticky;
     left: 0;
-    z-index: 1;
+    z-index: 2; // 需大于 av__widthdrag，否则横行滚动后，拖拽会悬浮于 stick 列上
     display: flex;
 
     &.av__firstcol,

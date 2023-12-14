@@ -7,6 +7,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
+import {focusBlock} from "../../util/selection";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -426,6 +427,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             type,
         }]);
         updateAttrViewCellAnimation(cellElement);
+        // https://github.com/siyuan-note/siyuan/issues/9862
+        focusBlock(blockElement);
     });
     menu.addItem({
         iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
@@ -466,6 +469,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 }
                 if (event.key === "Enter") {
                     menu.close();
+                    event.preventDefault();
                 }
             });
         }

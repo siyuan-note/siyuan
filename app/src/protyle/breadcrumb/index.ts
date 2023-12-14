@@ -335,7 +335,7 @@ export class Breadcrumb {
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.netImg2LocalAsset,
-                    icon: "iconTransform",
+                    icon: "iconImgDown",
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
                     click() {
                         net2LocalAssets(protyle, "Img");

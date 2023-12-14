@@ -133,7 +133,9 @@
       opacity: 0.38;
     }
 
-    &--active {
+    &--active,
+    &:focus,
+    &:hover {
       background-color: var(--b3-list-hover);
     }
   }

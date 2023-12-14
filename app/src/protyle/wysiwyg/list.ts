@@ -3,6 +3,7 @@ import {transaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
+import {moveToPrevious} from "./remove";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
@@ -277,7 +278,15 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
     focusByWbr(protyle.wysiwyg.element, range);
 };
 
-export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {
+/**
+ * 缩进列表
+ * @param protyle
+ * @param liItemElements
+ * @param range
+ * @param isDelete
+ * @param deleteElement 末尾反向删除时才会传入
+ */
+export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
     const liElement = liItemElements[0].parentElement;
     const liId = liElement.getAttribute("data-node-id");
     if (!liId) {
@@ -295,6 +304,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         const doOperations: IOperation[] = [];
         const undoOperations: IOperation[] = [];
         range.collapse(false);
+        moveToPrevious(deleteElement, range, isDelete);
         range.insertNode(document.createElement("wbr"));
         let startIndex;
         if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {
@@ -446,6 +456,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     if (liElement.childElementCount === 2 && parentLiItemElement.childElementCount === 3) {
         // 列表项里仅有包含一个列表项的列表，如 1. 1. 1 https://github.com/siyuan-note/insider/issues/494
         range.collapse(false);
+        moveToPrevious(deleteElement, range, isDelete);
         range.insertNode(document.createElement("wbr"));
         const html = parentLiItemElement.outerHTML;
         liItemElements[0].firstElementChild.remove();
@@ -457,6 +468,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     }
 
     range.collapse(false);
+    moveToPrevious(deleteElement, range, isDelete);
     range.insertNode(document.createElement("wbr"));
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];

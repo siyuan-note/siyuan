@@ -1,4 +1,5 @@
 {
+  "selected": "已选中",
   "loadMore": "加载更多",
   "tempUnlock": "临时解锁",
   "cancelTempUnlock": "取消临时解锁",
@@ -1116,6 +1117,10 @@
     "openSource": "访问 GitHub 项目",
     "resetWindow": "重置窗口并退出程序",
     "quit": "退出程序"
+  },
+  "_attrView": {
+    "table": "表格",
+    "key": "主键"
   },
   "_kernel": {
     "0": "查询笔记本失败",

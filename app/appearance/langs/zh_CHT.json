@@ -1,4 +1,5 @@
 {
+  "selected": "已選擇",
   "loadMore": "載入更多",
   "tempUnlock": "暫時解鎖",
   "cancelTempUnlock": "取消暫時解鎖",
@@ -1116,6 +1117,10 @@
     "openSource": "訪問 GitHub 項目",
     "resetWindow": "重置窗口並退出程序",
     "quit": "退出程序"
+  },
+  "_attrView": {
+    "table": "表格",
+    "key": "主鍵"
   },
   "_kernel": {
     "0": "查詢筆記本失敗",

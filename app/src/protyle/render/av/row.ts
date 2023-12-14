@@ -65,11 +65,11 @@ export const updateHeader = (rowElement: HTMLElement) => {
         headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
     }
     counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} selected`;
+    counterElement.innerHTML = `${selectCount} ${window.siyuan.languages.selected}`;
     avHeadElement.style.position = "sticky";
 };
 
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?: string) => {
+export const insertAttrViewBlockAnimation = (blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = '<div style="width: 24px"></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
@@ -84,12 +84,19 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
     });
 
     let html = "";
-    new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row" data-avid="${avId}" data-previous-id="${previousId}">
+    srcIDs.forEach((id) => {
+        html += `<div class="av__row" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
     ${colHTML}
 </div>`;
     });
     previousElement.insertAdjacentHTML("afterend", html);
+    const pageSize = parseInt(blockElement.getAttribute("data-page-size"))
+    if (pageSize) {
+        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length
+        if (pageSize < currentCount) {
+            blockElement.setAttribute("data-page-size", currentCount.toString());
+        }
+    }
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {

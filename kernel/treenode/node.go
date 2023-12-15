@@ -863,6 +863,8 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 			v := rowValue.Values[0]
 			if av.KeyTypeNumber == v.Type {
 				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else if av.KeyTypeDate == v.Type {
+				dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 			} else {
 				dataModel[rowValue.Key.Name] = v.String()
 			}

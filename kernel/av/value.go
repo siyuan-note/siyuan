@@ -50,6 +50,8 @@ type Value struct {
 	Created  *ValueCreated  `json:"created,omitempty"`
 	Updated  *ValueUpdated  `json:"updated,omitempty"`
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
+	Relation *ValueRelation `json:"relation,omitempty"`
+	Rollup   *ValueRollup   `json:"rollup,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -135,6 +137,16 @@ func (value *Value) String() string {
 			return "√"
 		}
 		return ""
+	case KeyTypeRelation:
+		if nil == value.Relation {
+			return ""
+		}
+		return value.Relation.Content
+	case KeyTypeRollup:
+		if nil == value.Rollup {
+			return ""
+		}
+		return strings.Join(value.Rollup.Contents, " ")
 	default:
 		return ""
 	}
@@ -432,4 +444,13 @@ func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (re
 
 type ValueCheckbox struct {
 	Checked bool `json:"checked"`
+}
+
+type ValueRelation struct {
+	Content  string   `json:"content"`
+	BlockIDs []string `json:"blockIDs"`
+}
+
+type ValueRollup struct {
+	Contents []string `json:"contents"`
 }

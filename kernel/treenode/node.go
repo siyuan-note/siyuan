@@ -812,6 +812,14 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 		if nil == tableCell.Value.Checkbox {
 			tableCell.Value.Checkbox = &av.ValueCheckbox{}
 		}
+	case av.KeyTypeRelation:
+		if nil == tableCell.Value.Relation {
+			tableCell.Value.Relation = &av.ValueRelation{}
+		}
+	case av.KeyTypeRollup:
+		if nil == tableCell.Value.Rollup {
+			tableCell.Value.Rollup = &av.ValueRollup{}
+		}
 	}
 }
 

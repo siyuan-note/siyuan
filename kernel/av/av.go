@@ -66,6 +66,8 @@ const (
 	KeyTypeCreated  KeyType = "created"
 	KeyTypeUpdated  KeyType = "updated"
 	KeyTypeCheckbox KeyType = "checkbox"
+	KeyTypeRelation KeyType = "relation"
+	KeyTypeRollup   KeyType = "rollup"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -77,9 +79,23 @@ type Key struct {
 
 	// 以下是某些列类型的特有属性
 
-	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
-	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
-	Template     string             `json:"template"`          // 模板内容
+	// 单选/多选列
+	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
+
+	// 数字列
+	NumberFormat NumberFormat `json:"numberFormat"` // 列数字格式化
+
+	// 模板列
+	Template string `json:"template"` // 模板内容
+
+	// 关联列
+	RelationAvID      string `json:"relationAvID"`      // 关联的属性视图 ID
+	RelationKeyID     string `json:"relationKeyID"`     // 关联列 ID
+	IsBiRelation      bool   `json:"isBiRelation"`      // 是否双向关联
+	BackRelationKeyID string `json:"backRelationKeyID"` // 双向关联时回链关联列的 ID
+
+	// 汇总列
+	RollupKeyID string `json:"rollupKeyID"` // 汇总列 ID
 }
 
 func NewKey(id, name, icon string, keyType KeyType) *Key {

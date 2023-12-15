@@ -1,5 +1,5 @@
 import {matchHotKey} from "../../util/hotKey";
-import {selectRow} from "./row";
+import {deleteRow, selectRow} from "./row";
 import {cellScrollIntoView, popTextCell, updateCellsValue} from "./cell";
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
@@ -130,6 +130,11 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (event.key === "Escape") {
             event.preventDefault();
             selectRow(selectRowElements[0].querySelector(".av__firstcol"), "unselectAll");
+            return true;
+        }
+        if (event.key === "Backspace") {
+            event.preventDefault();
+            deleteRow(nodeElement, protyle);
             return true;
         }
         if (event.key === "Enter") {

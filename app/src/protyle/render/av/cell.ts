@@ -2,7 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
-import {isNotCtrl, writeText} from "../../util/compatibility";
+import {isNotCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
@@ -10,19 +10,21 @@ import * as dayjs from "dayjs";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
-        return
+        return "";
     }
+    let cellText = ""
     const textElement = cellElement.querySelector(".av__celltext");
     if (textElement) {
         if (textElement.querySelector(".av__cellicon")) {
-            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
+            cellText = `${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`;
         } else {
-            writeText(textElement.textContent);
+            cellText = textElement.textContent;
         }
     } else {
-        writeText(cellElement.textContent);
+        cellText = cellElement.textContent;
     }
-}
+    return cellText;
+};
 
 const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
     let cellValue: IAVCellValue;
@@ -55,7 +57,6 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
             mSelect
         };
     } else if (["date", "created", "updated"].includes(colType)) {
-        debugger;
         cellValue = {
             type: colType,
             [colType]: JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
@@ -97,7 +98,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 mSelect: [{
                     content: value,
-                    color: ""
+                    color: value ? "1" : ""
                 }]
             };
         } else if (["date", "created", "updated"].includes(colType) && value === "") {
@@ -435,7 +436,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement) => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value = "") => {
     const doOperations: IOperation[] = []
     const undoOperations: IOperation[] = []
 
@@ -471,7 +472,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement) =>
             avID,
             keyID: colId,
             rowID,
-            data: genCellValue(type, "")
+            data: genCellValue(type, value)
         });
         undoOperations.push({
             action: "updateAttrViewCell",

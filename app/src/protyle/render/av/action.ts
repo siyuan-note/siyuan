@@ -25,6 +25,7 @@ import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
+import {writeText} from "../../util/compatibility";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -41,7 +42,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
-        getCellText(hasClosestByClassName(copyElement, "av__cell"));
+        writeText(getCellText(hasClosestByClassName(copyElement, "av__cell")));
         showMessage(window.siyuan.languages.copied);
         event.preventDefault();
         event.stopPropagation();

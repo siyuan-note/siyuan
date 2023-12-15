@@ -331,7 +331,7 @@ export class Background {
                         title: window.siyuan.languages.link,
                         width: isMobile() ? "92vw" : "520px",
                         content: `<div class="b3-dialog__content">
-        <input class="b3-text-field fn__block">
+        <input class="b3-text-field fn__block" value="${this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src")}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

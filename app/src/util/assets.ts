@@ -218,14 +218,19 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg .h5 img.emoji, .b3-typography h5 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.13 * 1.25)}px}
 .protyle-wysiwyg .h6 img.emoji, .b3-typography h6 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.25)}px}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title, .protyle-title__input{font-family: "${window.siyuan.config.editor.fontFamily}", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols" !important;}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";
     }
     if (set) {
-        document.getElementById("editorFontSize").innerHTML = style;
+        const siyuanStyle = document.getElementById("siyuanStyle");
+        if (siyuanStyle) {
+            siyuanStyle.innerHTML = style;
+        } else {
+            document.querySelector("#pluginsStyle").insertAdjacentHTML("beforebegin", `<style id="siyuanStyle">${style}</style>`);
+        }
     }
     return style;
 };

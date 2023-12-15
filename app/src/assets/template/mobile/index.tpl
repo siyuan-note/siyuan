@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifest.webmanifest">
-    <style id="editorFontSize" type="text/css"></style>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

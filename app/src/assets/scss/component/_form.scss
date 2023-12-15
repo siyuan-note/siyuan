@@ -37,6 +37,21 @@
     }
   }
 
+  &__icon-clear {
+    position: absolute;
+    height: 18px;
+    width: 16px;
+    opacity: 0.68;
+    transition: var(--b3-transition);
+    right: 0;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  // repo password
   &__icona {
     position: relative;
     color: var(--b3-theme-on-surface);
@@ -113,7 +128,11 @@
 
   &--inner {
     border-bottom: 0;
-    padding: 0 !important;
+    padding: 0 0 16px 0;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
   }
 
   &:last-child,
@@ -123,5 +142,27 @@
 
   &--bordr {
     border-bottom: 1px solid var(--b3-border-color) !important;
+  }
+}
+
+
+@media screen and (max-width: 750px) {
+  .b3-label--inner {
+    flex-wrap: wrap;
+
+    & > .b3-text-field,
+    & > .b3-select,
+    & > .b3-form__icona {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    & > .b3-button {
+      width: 100%;
+
+      &:last-child {
+        margin-top: 16px;
+      }
+    }
   }
 }

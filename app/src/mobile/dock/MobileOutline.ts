@@ -5,6 +5,7 @@ import {Constants} from "../../constants";
 import {getEventName} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {closePanel} from "../util/closePanel";
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class MobileOutline {
     private tree: Tree;
@@ -33,8 +34,8 @@ export class MobileOutline {
                     closePanel();
                     document.getElementById(id)?.scrollIntoView();
                 } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                    checkFold(id, (zoomIn) => {
+                        openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                     });
                 }
             }

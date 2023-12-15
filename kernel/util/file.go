@@ -190,6 +190,10 @@ func IsSubPath(absPath, toCheckPath string) bool {
 	if 1 > len(absPath) || 1 > len(toCheckPath) {
 		return false
 	}
+	if absPath == toCheckPath { // 相同路径时不认为是子路径
+		return false
+	}
+
 	if gulu.OS.IsWindows() {
 		if filepath.IsAbs(absPath) && filepath.IsAbs(toCheckPath) {
 			if strings.ToLower(absPath)[0] != strings.ToLower(toCheckPath)[0] {

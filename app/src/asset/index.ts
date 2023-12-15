@@ -14,7 +14,6 @@ import {webViewerPageNumberChanged} from "./pdf/app";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {App} from "../index";
-import {showMessage} from "../dialog/message";
 
 export class Asset extends Model {
     public path: string;
@@ -59,8 +58,6 @@ export class Asset extends Model {
                 } else {
                     this.pdfPage = undefined;
                 }
-            } else {
-                showMessage(window.siyuan.languages.emptyContent);
             }
             cb();
         });

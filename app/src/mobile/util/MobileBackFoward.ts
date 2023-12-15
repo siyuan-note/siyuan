@@ -6,12 +6,13 @@ import {zoomOut} from "../../menus/protyle";
 import {processRender} from "../../protyle/util/processCode";
 import {highlightRender} from "../../protyle/render/highlightRender";
 import {blockRender} from "../../protyle/render/blockRender";
-import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
+import {disabledForeverProtyle, setReadonlyByConfig} from "../../protyle/util/onGet";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
+import {setTitle} from "../../dialog/processSystem";
 
 const forwardStack: IBackStack[] = [];
 
@@ -42,6 +43,7 @@ const focusStack = (backStack: IBackStack) => {
         fetchPost("/api/block/getDocInfo", {
             id: backStack.id,
         }, (response) => {
+            setTitle(response.data.name);
             (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
@@ -90,18 +92,7 @@ const focusStack = (backStack: IBackStack) => {
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else {
-            let readOnly = window.siyuan.config.readonly ? "true" : "false";
-            if (readOnly === "false") {
-                readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-                if (!readOnly) {
-                    readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
-                }
-            }
-            if (readOnly === "true") {
-                disabledProtyle(protyle);
-            } else {
-                enableProtyle(protyle);
-            }
+            setReadonlyByConfig(protyle);
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
     });
@@ -109,18 +100,20 @@ const focusStack = (backStack: IBackStack) => {
 
 export const pushBack = () => {
     const protyle = getCurrentEditor().protyle;
-    window.siyuan.backStack.push({
-        id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-        data: {
-            startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-            endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-            notebookId: protyle.notebookId,
-            path: protyle.path,
-        },
-        scrollTop: protyle.contentElement.scrollTop,
-        callback: protyle.block.action,
-        zoomId: protyle.block.showAll ? protyle.block.id : undefined
-    });
+    if (protyle.wysiwyg.element.firstElementChild) {
+        window.siyuan.backStack.push({
+            id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
+            data: {
+                startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+                endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                notebookId: protyle.notebookId,
+                path: protyle.path,
+            },
+            scrollTop: protyle.contentElement.scrollTop,
+            callback: protyle.block.action,
+            zoomId: protyle.block.showAll ? protyle.block.id : undefined
+        });
+    }
 };
 
 export const goBack = () => {

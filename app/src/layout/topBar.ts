@@ -296,10 +296,10 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
 
 const openPlugin = (app: App, target: Element) => {
     const menu = new Menu("topBarPlugin");
-    if(!isHuawei()) {
+    if (!isHuawei()) {
         menu.addItem({
             icon: "iconSettings",
-            label: window.siyuan.languages.config,
+            label: window.siyuan.languages.manage,
             click() {
                 openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
             }
@@ -322,7 +322,7 @@ const openPlugin = (app: App, target: Element) => {
         plugin.topBarIcons.forEach(item => {
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
-                icon: "iconPin",
+                icon: hasUnpin ? "iconPin" : "iconUnpin",
                 label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
                 click() {
                     if (hasUnpin) {

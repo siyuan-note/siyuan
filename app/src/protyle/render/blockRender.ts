@@ -1,5 +1,5 @@
 import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
@@ -41,53 +41,102 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         if (sbElement) {
             breadcrumb = false;
         }
-        fetchPost("/api/search/searchEmbedBlock", {
-            embedBlockID: item.getAttribute("data-node-id"),
-            stmt: content,
-            headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
-            excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
-            breadcrumb
-        }, (response) => {
-            const rotateElement = item.querySelector(".fn__rotate");
-            if (rotateElement) {
-                rotateElement.classList.remove("fn__rotate");
-            }
-            let html = "";
-            response.data.blocks.forEach((blocksItem: { block: IBlock, blockPaths: IBreadcrumb[] }) => {
-                let breadcrumbHTML = "";
-                if (blocksItem.blockPaths.length !== 0) {
-                    breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
+        if (content.startsWith("//!js")) {
+            try {
+                const includeIDs = new Function(
+                    "fetchSyncPost",
+                    "item",
+                    "protyle",
+                    "top",
+                    content)(fetchSyncPost,item,protyle,top);
+                if (includeIDs instanceof Promise) {
+                    includeIDs.then((promiseIds) => {
+                        if (Array.isArray(promiseIds)) {
+                            fetchPost("/api/search/getEmbedBlock", {
+                                embedBlockID: item.getAttribute("data-node-id"),
+                                includeIDs: promiseIds,
+                                headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                                breadcrumb
+                            }, (response) => {
+                                renderEmbed(response.data.blocks || [], protyle, item, top);
+                            });
+                        } else {
+                            return;
+                        }
+                    }).catch(() => {
+                        renderEmbed([], protyle, item, top);
+                    });
+                } else if (Array.isArray(includeIDs)) {
+                    fetchPost("/api/search/getEmbedBlock", {
+                        embedBlockID: item.getAttribute("data-node-id"),
+                        includeIDs,
+                        headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                        breadcrumb
+                    }, (response) => {
+                        renderEmbed(response.data.blocks || [], protyle, item, top);
+                    });
+                } else {
+                    return;
                 }
-                html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
+            } catch (e) {
+                renderEmbed([], protyle, item, top);
+            }
+        } else {
+            fetchPost("/api/search/searchEmbedBlock", {
+                embedBlockID: item.getAttribute("data-node-id"),
+                stmt: content,
+                headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
+                breadcrumb
+            }, (response) => {
+                renderEmbed(response.data.blocks, protyle, item, top);
             });
-            if (response.data.blocks.length > 0) {
-                item.lastElementChild.insertAdjacentHTML("beforebegin", html +
-                    // 辅助上下移动时进行选中
-                    `<div style="position: absolute;">${Constants.ZWSP}</div>`);
-            } else {
-                item.lastElementChild.insertAdjacentHTML("beforebegin", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>
-<div style="position: absolute;">${Constants.ZWSP}</div>`);
-            }
-
-            processRender(item);
-            highlightRender(item);
-            avRender(item, protyle);
-            if (top) {
-                // 前进后退定位 https://ld246.com/article/1667652729995
-                protyle.contentElement.scrollTop = top;
-            }
-            let maxDeep = 0;
-            let deepEmbedElement: false | HTMLElement = item;
-            while (maxDeep < 4 && deepEmbedElement) {
-                deepEmbedElement = hasClosestByAttribute(deepEmbedElement.parentElement, "data-type", "NodeBlockQueryEmbed");
-                maxDeep++;
-            }
-            if (maxDeep < 4) {
-                item.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(embedElement => {
-                    blockRender(protyle, embedElement);
-                });
-            }
-            item.style.height = "";
-        });
+        }
     });
+};
+
+const renderEmbed = (blocks: {
+    block: IBlock,
+    blockPaths: IBreadcrumb[]
+}[], protyle: IProtyle, item: HTMLElement, top?: number) => {
+    const rotateElement = item.querySelector(".fn__rotate");
+    if (rotateElement) {
+        rotateElement.classList.remove("fn__rotate");
+    }
+    let html = "";
+    blocks.forEach((blocksItem) => {
+        let breadcrumbHTML = "";
+        if (blocksItem.blockPaths.length !== 0) {
+            breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
+        }
+        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
+    });
+    if (blocks.length > 0) {
+        item.lastElementChild.insertAdjacentHTML("beforebegin", html +
+            // 辅助上下移动时进行选中
+            `<div style="position: absolute;">${Constants.ZWSP}</div>`);
+    } else {
+        item.lastElementChild.insertAdjacentHTML("beforebegin", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>
+<div style="position: absolute;">${Constants.ZWSP}</div>`);
+    }
+
+    processRender(item);
+    highlightRender(item);
+    avRender(item, protyle);
+    if (top) {
+        // 前进后退定位 https://ld246.com/article/1667652729995
+        protyle.contentElement.scrollTop = top;
+    }
+    let maxDeep = 0;
+    let deepEmbedElement: false | HTMLElement = item;
+    while (maxDeep < 4 && deepEmbedElement) {
+        deepEmbedElement = hasClosestByAttribute(deepEmbedElement.parentElement, "data-type", "NodeBlockQueryEmbed");
+        maxDeep++;
+    }
+    if (maxDeep < 4) {
+        item.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(embedElement => {
+            blockRender(protyle, embedElement);
+        });
+    }
+    item.style.height = "";
 };

@@ -239,7 +239,7 @@ export const saveCriterion = (config: ISearchOption,
         saveDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        const value = saveDialog.element.querySelector("input").value;
+        const value = saveDialog.element.querySelector("input").value.trim();
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);
             return;
@@ -553,7 +553,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[], co
 <span class="fn__flex-1"></span>
 <button data-type="saveCriterion" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.saveCriterion}</button>
 <span class="fn__space"></span>
-<button data-type="removeCriterion" aria-label="${window.siyuan.languages.useCriterion}" class="b3-tooltips b3-tooltips__nw b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.removeCriterion}</button>
+<button data-type="removeCriterion" aria-label="${window.siyuan.languages.useCriterion}" class="ariaLabel b3-button b3-button--small b3-button--outline fn__flex-center fn__flex-shrink" data-position="9bottom">${window.siyuan.languages.removeCriterion}</button>
 <span class="fn__space"></span>`;
         /// #endif
     });

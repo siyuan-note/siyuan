@@ -249,6 +249,36 @@ func getFullHPathByID(c *gin.Context) {
 	ret.Data = hPath
 }
 
+func getIDsByHPath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	if nil == arg["path"] {
+		return
+	}
+	if nil == arg["notebook"] {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	p := arg["path"].(string)
+	ids, err := model.GetIDsByHPath(p, notebook)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = ids
+}
+
 func moveDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -404,6 +434,10 @@ func createDoc(c *gin.Context) {
 
 	box := model.Conf.Box(notebook)
 	pushCreate(box, p, tree.Root.ID, arg)
+
+	ret.Data = map[string]interface{}{
+		"id": tree.Root.ID,
+	}
 }
 
 func createDailyNote(c *gin.Context) {
@@ -460,6 +494,10 @@ func createDailyNote(c *gin.Context) {
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
+
+	ret.Data = map[string]interface{}{
+		"id": tree.Root.ID,
+	}
 }
 
 func createDocWithMd(c *gin.Context) {

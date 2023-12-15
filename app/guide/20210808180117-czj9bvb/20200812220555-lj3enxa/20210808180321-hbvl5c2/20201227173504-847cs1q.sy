@@ -6,7 +6,7 @@
 		"id": "20201227173504-847cs1q",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20230406105236"
+		"updated": "20231108220452"
 	},
 	"Children": [
 		{
@@ -396,7 +396,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210301201353-sffb1m7",
-				"updated": "20210824203629"
+				"updated": "20231108220447"
 			},
 			"Children": [
 				{
@@ -417,7 +417,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -523,7 +527,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201227194509-hdnzkry",
-				"updated": "20211112103117"
+				"updated": "20231108220452"
 			},
 			"Children": [
 				{
@@ -537,7 +541,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": "​ 和 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -546,7 +550,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 都配置为 "
+					"Data": "​ 都配置为 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -555,16 +559,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，对应的启动命令示例："
+					"Data": "​，对应的启动命令示例："
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
 				}
 			]
 		},

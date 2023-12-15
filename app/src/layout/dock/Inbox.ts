@@ -1,6 +1,7 @@
 /// #if !MOBILE
 import {Tab} from "../Tab";
-import {getDockByType, setPanelFocus} from "../util";
+import {setPanelFocus} from "../util";
+import {getDockByType} from "../tabUtil";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
@@ -12,6 +13,8 @@ import {replaceFileName} from "../../editor/rename";
 import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
 import {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {escapeHtml} from "../../util/escape";
 
 export class Inbox extends Model {
     private element: Element;
@@ -37,7 +40,7 @@ export class Inbox extends Model {
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
-    <input class="toolbar__icon" data-type="selectall" type="checkbox">  
+    <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
     <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
     <svg data-type="more" class="toolbar__icon"><use xlink:href='#iconMore'></use></svg>
@@ -45,7 +48,7 @@ export class Inbox extends Model {
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto"></div>
+<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;
         /// #else
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox");
@@ -57,25 +60,31 @@ export class Inbox extends Model {
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
-    <input class="block__icon" data-type="selectall" type="checkbox">  
+    <span data-type="selectall" class="block__icon"><svg><use xlink:href="#iconUncheck"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+    <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="next" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+    <span data-type="next" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href="#iconRight"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="more" data-menu="true" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href='#iconMore'></use></svg></span>
+    <span data-type="more" data-menu="true" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="min" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
+    <span data-type="min" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href="#iconMin"></use></svg></span>
 </div>
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto"></div>
+<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
 <div class="fn__flex-1"></div>`;
         /// #endif
         const countElement = this.element.querySelector(".inboxSelectCount");
         const detailsElement = this.element.querySelector(".inboxDetails");
-        const selectAllElement = this.element.firstElementChild.querySelector("input");
+        const selectAllElement = this.element.firstElementChild.querySelector('[data-type="selectall"]');
+        this.element.lastElementChild.addEventListener("contextmenu", (event: MouseEvent) => {
+            const itemElement = hasClosestByClassName(event.target as Element, "b3-list-item");
+            if (itemElement) {
+                this.more(event, itemElement);
+            }
+        });
         this.element.addEventListener("click", (event: MouseEvent) => {
             /// #if !MOBILE
             setPanelFocus(this.element);
@@ -92,31 +101,37 @@ export class Inbox extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "selectall") {
-                    if ((target as HTMLInputElement).checked) {
+                    const useElement = target.querySelector("use");
+                    if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                         this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                            item.querySelector("input").checked = true;
+                            item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                             this.selectIds.push(item.getAttribute("data-id"));
                             this.selectIds = [...new Set(this.selectIds)];
                         });
+                        useElement.setAttribute("xlink:href", "#iconCheck");
                     } else {
                         this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                            item.querySelector("input").checked = false;
+                            item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                             this.selectIds.splice(this.selectIds.indexOf(item.getAttribute("data-id")), 1);
                         });
+                        useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "select") {
-                    if ((target.firstElementChild.nextElementSibling as HTMLInputElement).checked) {
+                    const useElement = target.querySelector("use");
+                    if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                         this.selectIds.push(target.parentElement.getAttribute("data-id"));
                         this.selectIds = [...new Set(this.selectIds)];
+                        useElement.setAttribute("xlink:href", "#iconCheck");
                     } else {
                         this.selectIds.splice(this.selectIds.indexOf(target.parentElement.getAttribute("data-id")), 1);
+                        useElement.setAttribute("xlink:href", "#iconUncheck");
                     }
                     countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
-                    selectAllElement.checked = this.element.lastElementChild.querySelectorAll("input:checked").length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
+                    selectAllElement.querySelector("use").setAttribute("xlink:href", this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length ? "#iconCheck" : "#iconUncheck");
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
@@ -163,7 +178,7 @@ export class Inbox extends Model {
     }
 
     private back() {
-        this.element.firstElementChild.querySelector("input").classList.remove("fn__none");
+        this.element.firstElementChild.querySelector('[data-type="selectall"]').classList.remove("fn__none");
         this.element.firstElementChild.querySelector('[data-type="previous"]').classList.remove("fn__none");
         this.element.firstElementChild.querySelector('[data-type="next"]').classList.remove("fn__none");
         this.element.querySelector(".inboxDetails").classList.add("fn__none");
@@ -178,13 +193,13 @@ export class Inbox extends Model {
         <svg class="toolbar__icon" style="float: left"><use xlink:href="#iconLink"></use></svg>
     </a>`;
         }
-        return `<div class="toolbar toolbar--dark">
+        return `<div class="toolbar">
     <svg data-type="back" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
     <span data-type="back" class="toolbar__text fn__flex-1">${data.shorthandTitle}</span>
     ${linkHTML}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px">
-${(Lute.New()).MarkdownStr("", data.shorthandContent)}
+${data.shorthandContent}
 </div>`;
         /// #else
         if (data.shorthandURL) {
@@ -199,25 +214,44 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     ${linkHTML}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text">
-${(Lute.New()).MarkdownStr("", data.shorthandContent)}
+${data.shorthandContent}
 </div>`;
         /// #endif
     }
 
-    private more(event: MouseEvent) {
+    private genItemHTML(item: IInbox) {
+        return `<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
+    <span data-type="select" class="b3-list-item__action">
+        <svg><use xlink:href="#icon${this.selectIds.includes(item.oId) ? "Check" : "Uncheck"}"></use></svg> 
+    </span>
+    <span class="fn__space--small"></span>
+    <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
+    <span class="b3-list-item__meta">${item.hCreated}</span>
+</li>`;
+    }
+
+    private more(event: MouseEvent, itemElement?: HTMLElement) {
         const detailsElement = this.element.querySelector(".inboxDetails");
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.refresh,
             icon: "iconRefresh",
             click: () => {
-                if (detailsElement.classList.contains("fn__none")) {
+                if (itemElement) {
+                    fetchPost("/api/inbox/getShorthand", {
+                        id: itemElement.dataset.id
+                    }, (response) => {
+                        this.data[response.data.oId] = response.data;
+                        itemElement.outerHTML = this.genItemHTML(response.data);
+                    });
+                } else if (detailsElement.classList.contains("fn__none")) {
                     this.currentPage = 1;
                     this.update();
                 } else {
                     fetchPost("/api/inbox/getShorthand", {
                         id: detailsElement.getAttribute("data-id")
                     }, (response) => {
+                        this.data[response.data.oId] = response.data;
                         detailsElement.innerHTML = this.genDetail(response.data);
                         detailsElement.scrollTop = 0;
                     });
@@ -225,7 +259,9 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
         }).element);
         let ids: string[] = [];
-        if (detailsElement.classList.contains("fn__none")) {
+        if (itemElement) {
+            ids = [itemElement.dataset.id];
+        } else if (detailsElement.classList.contains("fn__none")) {
             ids = this.selectIds;
         } else {
             ids = [detailsElement.getAttribute("data-id")];
@@ -242,8 +278,14 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 label: window.siyuan.languages.remove,
                 icon: "iconTrashcan",
                 click: () => {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
-                        if (detailsElement.classList.contains("fn__none")) {
+                    let removeTitle = "";
+                    ids.forEach((id, index) => {
+                        removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ");
+                    });
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
+                        if (itemElement) {
+                            this.remove(itemElement.dataset.id);
+                        } else if (detailsElement.classList.contains("fn__none")) {
                             this.remove();
                         } else {
                             this.remove(detailsElement.getAttribute("data-id"));
@@ -252,7 +294,6 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 }
             }).element);
         }
-
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
     }
 
@@ -283,13 +324,18 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     private move(ids: string[]) {
         movePathTo((toPath, toNotebook) => {
             ids.forEach(item => {
-                fetchPost("/api/filetree/createDoc", {
-                    notebook: toNotebook[0],
-                    path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
-                    title: replaceFileName(this.data[item].shorthandTitle),
-                    md: this.data[item].shorthandContent,
-                }, () => {
-                    this.remove(item);
+                fetchPost("/api/inbox/getShorthand", {
+                    id: item
+                }, (response) => {
+                    this.data[response.data.oId] = response.data;
+                    fetchPost("/api/filetree/createDoc", {
+                        notebook: toNotebook[0],
+                        path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
+                        title: replaceFileName(response.data.shorthandTitle),
+                        md: response.data.shorthandMd,
+                    }, () => {
+                        this.remove(item);
+                    });
                 });
             });
         });
@@ -321,15 +367,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             } else {
                 html = '<ul style="padding: 8px 0" class="b3-list b3-list--background">';
                 response.data.data.shorthands.forEach((item: IInbox) => {
-                    html += `<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
-    <label data-type="select" class="fn__flex">
-        <span class="fn__space"></span>
-        <input class="fn__flex-center" type="checkbox"${this.selectIds.includes(item.oId) ? " checked" : ""}>
-        <span class="fn__space"></span>
-    </label>
-    <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
-    <span class="b3-list-item__meta">${item.hCreated}</span>
-</li>`;
+                    html += this.genItemHTML(item);
                     this.data[item.oId] = item;
                 });
                 html += "</ul>";
@@ -352,7 +390,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 previousElement.removeAttribute("disabled");
             }
             const selectCount = this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
-            this.element.firstElementChild.querySelector("input").checked = this.element.lastElementChild.querySelectorAll("input:checked").length === selectCount && selectCount !== 0;
+            this.element.firstElementChild.querySelector('[data-type="selectall"] use').setAttribute("xlink:href", (this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === selectCount && selectCount !== 0) ? "#iconCheck" : "#iconUncheck");
             this.element.lastElementChild.scrollTop = 0;
         });
     }

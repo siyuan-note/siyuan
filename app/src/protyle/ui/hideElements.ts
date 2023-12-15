@@ -33,7 +33,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     if (protyle.toolbar && panels.includes("util")) {
         const pinElement = protyle.toolbar.subElement.querySelector('[data-type="pin"]');
-        if (focusHide || !pinElement || (pinElement && !pinElement.classList.contains("block__icon--active"))) {
+        if (focusHide || !pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin)) {
             protyle.toolbar.subElement.classList.add("fn__none");
             if (protyle.toolbar.subElementCloseCB) {
                 protyle.toolbar.subElementCloseCB();
@@ -61,10 +61,12 @@ export const hideAllElements = (types: string[]) => {
     if (types.includes("util")) {
         /// #if MOBILE
         const editor = getCurrentEditor();
-        editor.protyle.toolbar.subElement.classList.add("fn__none");
-        if (editor.protyle.toolbar.subElementCloseCB) {
-            editor.protyle.toolbar.subElementCloseCB();
-            editor.protyle.toolbar.subElementCloseCB = undefined;
+        if (editor) {
+            editor.protyle.toolbar.subElement.classList.add("fn__none");
+            if (editor.protyle.toolbar.subElementCloseCB) {
+                editor.protyle.toolbar.subElementCloseCB();
+                editor.protyle.toolbar.subElementCloseCB = undefined;
+            }
         }
         /// #else
         getAllEditor().forEach(item => {

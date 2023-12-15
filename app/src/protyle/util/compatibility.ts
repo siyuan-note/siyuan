@@ -73,8 +73,7 @@ export const getEventName = () => {
     }
 };
 
-// 区别 mac 上的 ctrl 和 meta
-export const isCtrl = (event: KeyboardEvent | MouseEvent) => {
+export const isOnlyMeta = (event: KeyboardEvent | MouseEvent) => {
     if (isMac()) {
         // mac
         if (event.metaKey && !event.ctrlKey) {
@@ -87,6 +86,13 @@ export const isCtrl = (event: KeyboardEvent | MouseEvent) => {
         }
         return false;
     }
+};
+
+export const isNotCtrl = (event: KeyboardEvent | MouseEvent) => {
+    if (!event.metaKey && !event.ctrlKey) {
+        return true;
+    }
+    return false;
 };
 
 export const isHuawei = () => {
@@ -115,7 +121,7 @@ export const isInIOS = () => {
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
-    if (/Mac/.test(navigator.platform) || navigator.platform === "iPhone") {
+    if (isMac()) {
         return hotkey;
     }
 
@@ -132,12 +138,12 @@ export const updateHotkeyTip = (hotkey: string) => {
 
     const keys = [];
 
-    if (hotkey.indexOf("⌘") > -1) keys.push(KEY_MAP.get("⌘"));
+    if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push(KEY_MAP.get("⌘"));
     if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
     if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
 
     // 不能去最后一个，需匹配 F2
-    const lastKey = hotkey.replace(/⌘|⇧|⌥/g, "");
+    const lastKey = hotkey.replace(/⌘|⇧|⌥|⌃/g, "");
     if (lastKey) {
         keys.push(KEY_MAP.get(lastKey) || lastKey);
     }
@@ -181,6 +187,10 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
+        defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
+        defaultStorage[Constants.LOCAL_FLASHCARD] = {
+            fullscreen: false
+        };
         defaultStorage[Constants.LOCAL_BAZAAR] = {
             theme: "0",
             template: "0",
@@ -227,6 +237,7 @@ export const getLocalStorage = (cb: () => void) => {
                 superBlock: window.siyuan.config.search.superBlock,
                 paragraph: window.siyuan.config.search.paragraph,
                 embedBlock: window.siyuan.config.search.embedBlock,
+                databaseBlock: window.siyuan.config.search.databaseBlock,
             }
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
@@ -234,7 +245,8 @@ export const getLocalStorage = (cb: () => void) => {
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
-            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET].forEach((key) => {
+            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
+            Constants.LOCAL_FILEPOSITION].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);
@@ -252,12 +264,6 @@ export const getLocalStorage = (cb: () => void) => {
             }
         });
         cb();
-
-        // 数据兼容，移除历史数据，3.8.4 移除
-        fetchPost("/api/storage/removeLocalStorageVals", {
-            app: Constants.SIYUAN_APPID,
-            keys: ["leftColumn", "local-searchkey", "local-searchedata", "local-searchekeys", "local-searchetabdata", "rightColumn", "topBar"]
-        });
     });
 };
 

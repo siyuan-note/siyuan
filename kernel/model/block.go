@@ -20,10 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/open-spaced-repetition/go-fsrs"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -60,8 +62,25 @@ type Block struct {
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
 
-	RiffCardID   string `json:"riffCardID"`
-	RiffCardReps uint64 `json:"riffCardReps"`
+	RiffCardID string    `json:"riffCardID"`
+	RiffCard   *RiffCard `json:"riffCard"`
+}
+
+type RiffCard struct {
+	Due  time.Time `json:"due"`
+	Reps uint64    `json:"reps"`
+}
+
+func getRiffCard(card *fsrs.Card) *RiffCard {
+	due := card.Due
+	if due.IsZero() {
+		due = time.Now()
+	}
+
+	return &RiffCard{
+		Due:  due,
+		Reps: card.Reps,
+	}
 }
 
 func (block *Block) IsContainerBlock() bool {
@@ -87,6 +106,35 @@ type Path struct {
 
 	Updated string `json:"updated"` // 更新时间
 	Created string `json:"created"` // 创建时间
+}
+
+func GetParentNextChildID(id string) string {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return ""
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return ""
+	}
+
+	for p := node.Parent; nil != p; p = p.Parent {
+		if ast.NodeDocument == p.Type {
+			if nil != node.Next {
+				return node.Next.ID
+			}
+			return ""
+		}
+
+		for f := p.Next; nil != f; f = f.Next {
+			// 遍历取下一个块级元素（比如跳过超级块 Close 节点）
+			if f.IsBlock() {
+				return f.ID
+			}
+		}
+	}
+	return ""
 }
 
 func IsBlockFolded(id string) bool {
@@ -533,7 +581,7 @@ func getBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 	return
 }
 
-func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int, breadcrumb bool) (block *Block, blockPaths []*BlockPath) {
+func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int, breadcrumb bool) (block *Block, blockPaths []*BlockPath) {
 	tree, _ := trees[sqlBlock.RootID]
 	if nil == tree {
 		tree, _ = loadTreeByBlockID(sqlBlock.RootID)
@@ -599,6 +647,16 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
 	content := renderBlockContentByNodes(nodes)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}
+
+	if "" != sqlBlock.IAL {
+		block.IAL = map[string]string{}
+		ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
+		ialStr = strings.TrimSuffix(ialStr, "}")
+		ial := parse.Tokens2IAL([]byte(ialStr))
+		for _, kv := range ial {
+			block.IAL[kv[0]] = kv[1]
+		}
+	}
 
 	if breadcrumb {
 		blockPaths = buildBlockBreadcrumb(def, nil)

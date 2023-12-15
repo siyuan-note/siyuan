@@ -23,6 +23,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -44,6 +45,45 @@ type AttributeView struct {
 	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性列值
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
 	Views     []*View      `json:"views"`     // 视图
+}
+
+func ShallowCloneAttributeView(av *AttributeView) (ret *AttributeView) {
+	ret = &AttributeView{}
+	data, err := gulu.JSON.MarshalJSON(av)
+	if nil != err {
+		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
+		return nil
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", av.ID, err)
+		return nil
+	}
+
+	ret.ID = ast.NewNodeID()
+	view, err := ret.GetCurrentView()
+	if nil == err {
+		view.ID = ast.NewNodeID()
+		ret.ViewID = view.ID
+	} else {
+		view, _ = NewTableViewWithBlockKey(ast.NewNodeID())
+		ret.ViewID = view.ID
+		ret.Views = append(ret.Views, view)
+	}
+
+	keyIDMap := map[string]string{}
+	for _, kv := range ret.KeyValues {
+		newID := ast.NewNodeID()
+		keyIDMap[kv.Key.ID] = newID
+		kv.Key.ID = newID
+		kv.Values = []*Value{}
+	}
+
+	view.Table.ID = ast.NewNodeID()
+	for _, column := range view.Table.Columns {
+		column.ID = keyIDMap[column.ID]
+	}
+	view.Table.RowIDs = []string{}
+	return
 }
 
 // KeyValues 描述了属性视图属性列值的结构。
@@ -68,6 +108,7 @@ const (
 	KeyTypeTemplate KeyType = "template"
 	KeyTypeCreated  KeyType = "created"
 	KeyTypeUpdated  KeyType = "updated"
+	KeyTypeCheckbox KeyType = "checkbox"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -118,42 +159,92 @@ type Value struct {
 	Template *ValueTemplate `json:"template,omitempty"`
 	Created  *ValueCreated  `json:"created,omitempty"`
 	Updated  *ValueUpdated  `json:"updated,omitempty"`
+	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 }
 
 func (value *Value) String() string {
 	switch value.Type {
 	case KeyTypeBlock:
+		if nil == value.Block {
+			return ""
+		}
 		return value.Block.Content
 	case KeyTypeText:
+		if nil == value.Text {
+			return ""
+		}
 		return value.Text.Content
 	case KeyTypeNumber:
+		if nil == value.Number {
+			return ""
+		}
 		return value.Number.FormattedContent
 	case KeyTypeDate:
+		if nil == value.Date {
+			return ""
+		}
 		return value.Date.FormattedContent
+	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return ""
+		}
+		return value.MSelect[0].Content
 	case KeyTypeMSelect:
+		if 1 > len(value.MSelect) {
+			return ""
+		}
 		var ret []string
 		for _, v := range value.MSelect {
 			ret = append(ret, v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeURL:
+		if nil == value.URL {
+			return ""
+		}
 		return value.URL.Content
 	case KeyTypeEmail:
+		if nil == value.Email {
+			return ""
+		}
 		return value.Email.Content
 	case KeyTypePhone:
+		if nil == value.Phone {
+			return ""
+		}
 		return value.Phone.Content
 	case KeyTypeMAsset:
+		if 1 > len(value.MAsset) {
+			return ""
+		}
 		var ret []string
 		for _, v := range value.MAsset {
 			ret = append(ret, v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:
+		if nil == value.Template {
+			return ""
+		}
 		return value.Template.Content
 	case KeyTypeCreated:
+		if nil == value.Created {
+			return ""
+		}
 		return value.Created.FormattedContent
 	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return ""
+		}
 		return value.Updated.FormattedContent
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return ""
+		}
+		if value.Checkbox.Checked {
+			return "√"
+		}
+		return ""
 	default:
 		return ""
 	}
@@ -284,6 +375,7 @@ type ValueDate struct {
 	Content          int64  `json:"content"`
 	IsNotEmpty       bool   `json:"isNotEmpty"`
 	HasEndDate       bool   `json:"hasEndDate"`
+	IsNotTime        bool   `json:"isNotTime"`
 	Content2         int64  `json:"content2"`
 	IsNotEmpty2      bool   `json:"isNotEmpty2"`
 	FormattedContent string `json:"formattedContent"`
@@ -296,10 +388,21 @@ const (
 	DateFormatDuration DateFormat = "duration"
 )
 
-func NewFormattedValueDate(content, content2 int64, format DateFormat) (ret *ValueDate) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime bool) (ret *ValueDate) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
 	if 0 < content2 {
-		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
+		var formattedContent2 string
+		if isNotTime {
+			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02")
+		} else {
+			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02 15:04")
+		}
+		formatted += " → " + formattedContent2
 	}
 	switch format {
 	case DateFormatNone:
@@ -312,6 +415,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat) (ret *Val
 		Content:          content,
 		Content2:         content2,
 		HasEndDate:       false,
+		IsNotTime:        true,
 		FormattedContent: formatted,
 	}
 	return
@@ -436,9 +540,14 @@ func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (re
 	return
 }
 
+type ValueCheckbox struct {
+	Checked bool `json:"checked"`
+}
+
 // View 描述了视图的结构。
 type View struct {
 	ID   string `json:"id"`   // 视图 ID
+	Icon string `json:"icon"` // 视图图标
 	Name string `json:"name"` // 视图名称
 
 	LayoutType LayoutType   `json:"type"`            // 当前布局类型
@@ -452,19 +561,39 @@ const (
 	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
 )
 
-func NewView() *View {
-	name := "Table"
-	return &View{
+func NewTableView() (ret *View) {
+	ret = &View{
+		ID:         ast.NewNodeID(),
+		Name:       getI18nName("table"),
+		LayoutType: LayoutTypeTable,
+		Table: &LayoutTable{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: 50,
+		},
+	}
+	return
+}
+
+func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
+	name := getI18nName("table")
+	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
-			Spec:    0,
-			ID:      ast.NewNodeID(),
-			Filters: []*ViewFilter{},
-			Sorts:   []*ViewSort{},
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: 50,
 		},
 	}
+	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
+	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
+	return
 }
 
 // Viewable 描述了视图的接口。
@@ -478,22 +607,20 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
-	view := NewView()
-	key := NewKey(ast.NewNodeID(), "Block", "", KeyTypeBlock)
+	view, blockKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
-		KeyValues: []*KeyValues{{Key: key}},
+		KeyValues: []*KeyValues{{Key: blockKey}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
 	}
-	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
 	return
 }
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := GetAttributeViewDataPath(avID)
-	if !gulu.File.IsExist(avJSONPath) {
+	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
 	}
@@ -513,13 +640,22 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
-	// 做一些数据兼容处理
+	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {
-		if KeyTypeBlock == kv.Key.Type {
+		switch kv.Key.Type {
+		case KeyTypeBlock:
 			// 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
+					if "" == v.Block.ID {
+						v.Block.ID = v.BlockID
+						if "" == v.Block.ID {
+							v.Block.ID = ast.NewNodeID()
+							v.BlockID = v.Block.ID
+						}
+					}
+
 					createdStr := v.Block.ID[:len("20060102150405")]
 					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 					if nil == parseErr {
@@ -531,6 +667,24 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				if 0 == v.Block.Updated {
 					v.Block.Updated = now
 				}
+			}
+		case KeyTypeNumber:
+			for _, v := range kv.Values {
+				if 0 != v.Number.Content && !v.Number.IsNotEmpty {
+					v.Number.IsNotEmpty = true
+				}
+			}
+		}
+	}
+
+	// 数据订正
+	for _, view := range av.Views {
+		if nil != view.Table {
+			// 行去重
+			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
+			// 分页大小
+			if 1 > view.Table.PageSize {
+				view.Table.PageSize = 50
 			}
 		}
 	}
@@ -549,7 +703,17 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) GetView() (ret *View, err error) {
+func (av *AttributeView) GetView(viewID string) (ret *View) {
+	for _, v := range av.Views {
+		if v.ID == viewID {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
+func (av *AttributeView) GetCurrentView() (ret *View, err error) {
 	for _, v := range av.Views {
 		if v.ID == av.ViewID {
 			ret = v
@@ -581,6 +745,30 @@ func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 	return
 }
 
+func (av *AttributeView) GetBlockKey() (ret *Key) {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			ret = kv.Key
+			return
+		}
+	}
+	return
+}
+
+func (av *AttributeView) GetDuplicateViewName(masterViewName string) (ret string) {
+	ret = masterViewName + " (1)"
+	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
+	m := r.FindStringSubmatch(masterViewName)
+	if nil == m || 3 > len(m) {
+		return
+	}
+
+	num, _ := strconv.Atoi(m[2])
+	num++
+	ret = fmt.Sprintf("%s (%d)", m[1], num)
+	return
+}
+
 func GetAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")
@@ -591,6 +779,10 @@ func GetAttributeViewDataPath(avID string) (ret string) {
 		}
 	}
 	return
+}
+
+func getI18nName(name string) string {
+	return util.AttrViewLangs[util.Lang][name].(string)
 }
 
 var (

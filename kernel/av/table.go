@@ -19,6 +19,7 @@ package av
 import (
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -27,10 +28,11 @@ type LayoutTable struct {
 	Spec int    `json:"spec"` // 布局格式版本
 	ID   string `json:"id"`   // 布局 ID
 
-	Columns []*ViewTableColumn `json:"columns"` // 表格列
-	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
-	Filters []*ViewFilter      `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort        `json:"sorts"`   // 排序规则
+	Columns  []*ViewTableColumn `json:"columns"`  // 表格列
+	RowIDs   []string           `json:"rowIds"`   // 行 ID，用于自定义排序
+	Filters  []*ViewFilter      `json:"filters"`  // 过滤规则
+	Sorts    []*ViewSort        `json:"sorts"`    // 排序规则
+	PageSize int                `json:"pageSize"` // 每页行数
 }
 
 type ViewTableColumn struct {
@@ -38,6 +40,7 @@ type ViewTableColumn struct {
 
 	Wrap   bool        `json:"wrap"`           // 是否换行
 	Hidden bool        `json:"hidden"`         // 是否隐藏
+	Pin    bool        `json:"pin"`            // 是否固定
 	Width  string      `json:"width"`          // 列宽度
 	Calc   *ColumnCalc `json:"calc,omitempty"` // 计算
 }
@@ -70,15 +73,11 @@ const (
 	CalcOperatorRange             CalcOperator = "Range"
 	CalcOperatorEarliest          CalcOperator = "Earliest"
 	CalcOperatorLatest            CalcOperator = "Latest"
+	CalcOperatorChecked           CalcOperator = "Checked"
+	CalcOperatorUnchecked         CalcOperator = "Unchecked"
+	CalcOperatorPercentChecked    CalcOperator = "Percent checked"
+	CalcOperatorPercentUnchecked  CalcOperator = "Percent unchecked"
 )
-
-type TableCell struct {
-	ID        string  `json:"id"`
-	Value     *Value  `json:"value"`
-	ValueType KeyType `json:"valueType"`
-	Color     string  `json:"color"`
-	BgColor   string  `json:"bgColor"`
-}
 
 func (value *Value) Compare(other *Value) int {
 	if nil == value {
@@ -87,79 +86,106 @@ func (value *Value) Compare(other *Value) int {
 	if nil == other {
 		return 1
 	}
-	if nil != value.Block && nil != other.Block {
-		return strings.Compare(value.Block.Content, other.Block.Content)
-	}
-	if nil != value.Text && nil != other.Text {
-		return strings.Compare(value.Text.Content, other.Text.Content)
-	}
-	if nil != value.Number && nil != other.Number {
-		if value.Number.Content > other.Number.Content {
-			return 1
-		} else if value.Number.Content < other.Number.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Date && nil != other.Date {
-		if value.Date.Content > other.Date.Content {
-			return 1
-		} else if value.Date.Content < other.Date.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Created && nil != other.Created {
-		if value.Created.Content > other.Created.Content {
-			return 1
-		} else if value.Created.Content < other.Created.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
-	if nil != value.Updated && nil != other.Updated {
-		if value.Updated.Content > other.Updated.Content {
-			return 1
-		} else if value.Updated.Content < other.Updated.Content {
-			return -1
-		} else {
-			return 0
-		}
-	}
 
-	if nil != value.MSelect && nil != other.MSelect {
-		var v1 string
-		for _, v := range value.MSelect {
-			v1 += v.Content
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil != value.Block && nil != other.Block {
+			return strings.Compare(value.Block.Content, other.Block.Content)
 		}
-		var v2 string
-		for _, v := range other.MSelect {
-			v2 += v.Content
+	case KeyTypeText:
+		if nil != value.Text && nil != other.Text {
+			return strings.Compare(value.Text.Content, other.Text.Content)
 		}
-		return strings.Compare(v1, v2)
-	}
-	if nil != value.URL && nil != other.URL {
-		return strings.Compare(value.URL.Content, other.URL.Content)
-	}
-	if nil != value.Email && nil != other.Email {
-		return strings.Compare(value.Email.Content, other.Email.Content)
-	}
-	if nil != value.Phone && nil != other.Phone {
-		return strings.Compare(value.Phone.Content, other.Phone.Content)
-	}
-	if nil != value.MAsset && nil != other.MAsset {
-		var v1 string
-		for _, v := range value.MAsset {
-			v1 += v.Content
+	case KeyTypeNumber:
+		if nil != value.Number && nil != other.Number {
+			if value.Number.Content > other.Number.Content {
+				return 1
+			} else if value.Number.Content < other.Number.Content {
+				return -1
+			} else {
+				return 0
+			}
 		}
-		var v2 string
-		for _, v := range other.MAsset {
-			v2 += v.Content
+	case KeyTypeDate:
+		if nil != value.Date && nil != other.Date {
+			if value.Date.Content > other.Date.Content {
+				return 1
+			} else if value.Date.Content < other.Date.Content {
+				return -1
+			} else {
+				return 0
+			}
 		}
-		return strings.Compare(v1, v2)
+	case KeyTypeCreated:
+		if nil != value.Created && nil != other.Created {
+			if value.Created.Content > other.Created.Content {
+				return 1
+			} else if value.Created.Content < other.Created.Content {
+				return -1
+			} else {
+				return 0
+			}
+		}
+	case KeyTypeUpdated:
+		if nil != value.Updated && nil != other.Updated {
+			if value.Updated.Content > other.Updated.Content {
+				return 1
+			} else if value.Updated.Content < other.Updated.Content {
+				return -1
+			} else {
+				return 0
+			}
+		}
+	case KeyTypeSelect, KeyTypeMSelect:
+		if nil != value.MSelect && nil != other.MSelect {
+			var v1 string
+			for _, v := range value.MSelect {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MSelect {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeURL:
+		if nil != value.URL && nil != other.URL {
+			return strings.Compare(value.URL.Content, other.URL.Content)
+		}
+	case KeyTypeEmail:
+		if nil != value.Email && nil != other.Email {
+			return strings.Compare(value.Email.Content, other.Email.Content)
+		}
+	case KeyTypePhone:
+		if nil != value.Phone && nil != other.Phone {
+			return strings.Compare(value.Phone.Content, other.Phone.Content)
+		}
+	case KeyTypeMAsset:
+		if nil != value.MAsset && nil != other.MAsset {
+			var v1 string
+			for _, v := range value.MAsset {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MAsset {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeTemplate:
+		if nil != value.Template && nil != other.Template {
+			return strings.Compare(value.Template.Content, other.Template.Content)
+		}
+	case KeyTypeCheckbox:
+		if nil != value.Checkbox && nil != other.Checkbox {
+			if value.Checkbox.Checked && !other.Checkbox.Checked {
+				return 1
+			}
+			if !value.Checkbox.Checked && other.Checkbox.Checked {
+				return -1
+			}
+			return 0
+		}
 	}
 	return 0
 }
@@ -349,7 +375,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		}
 	}
 
-	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
+	if nil != value.MSelect && nil != other.MSelect {
 		switch operator {
 		case FilterOperatorIsEqual, FilterOperatorContains:
 			contains := false
@@ -473,17 +499,88 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return 0 != len(value.MAsset) && !(1 == len(value.MAsset) && "" == value.MAsset[0].Content)
 		}
 	}
-	return true
+
+	if nil != value.Template && nil != other.Template {
+		switch operator {
+		case FilterOperatorIsEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content == other.Template.Content
+		case FilterOperatorIsNotEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content != other.Template.Content
+		case FilterOperatorIsGreater:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content > other.Template.Content
+		case FilterOperatorIsGreaterOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content >= other.Template.Content
+		case FilterOperatorIsLess:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content < other.Template.Content
+		case FilterOperatorIsLessOrEqual:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return value.Template.Content <= other.Template.Content
+		case FilterOperatorContains:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorDoesNotContain:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return !strings.Contains(value.Template.Content, other.Template.Content)
+		case FilterOperatorStartsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasPrefix(value.Template.Content, other.Template.Content)
+		case FilterOperatorEndsWith:
+			if "" == strings.TrimSpace(other.Template.Content) {
+				return true
+			}
+			return strings.HasSuffix(value.Template.Content, other.Template.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Template.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Template.Content)
+		}
+	}
+
+	if nil != value.Checkbox {
+		switch operator {
+		case FilterOperatorIsTrue:
+			return value.Checkbox.Checked
+		case FilterOperatorIsFalse:
+			return !value.Checkbox.Checked
+		}
+	}
+	return false
 }
 
 // Table 描述了表格实例的结构。
 type Table struct {
-	ID      string         `json:"id"`      // 表格布局 ID
-	Name    string         `json:"name"`    // 表格名称
-	Filters []*ViewFilter  `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
-	Columns []*TableColumn `json:"columns"` // 表格列
-	Rows    []*TableRow    `json:"rows"`    // 表格行
+	ID       string         `json:"id"`       // 表格布局 ID
+	Icon     string         `json:"icon"`     // 表格图标
+	Name     string         `json:"name"`     // 表格名称
+	Filters  []*ViewFilter  `json:"filters"`  // 过滤规则
+	Sorts    []*ViewSort    `json:"sorts"`    // 排序规则
+	Columns  []*TableColumn `json:"columns"`  // 表格列
+	Rows     []*TableRow    `json:"rows"`     // 表格行
+	RowCount int            `json:"rowCount"` // 表格总行数
+	PageSize int            `json:"pageSize"` // 每页行数
 }
 
 type TableColumn struct {
@@ -493,6 +590,7 @@ type TableColumn struct {
 	Icon   string      `json:"icon"`   // 列图标
 	Wrap   bool        `json:"wrap"`   // 是否换行
 	Hidden bool        `json:"hidden"` // 是否隐藏
+	Pin    bool        `json:"pin"`    // 是否固定
 	Width  string      `json:"width"`  // 列宽度
 	Calc   *ColumnCalc `json:"calc"`   // 计算
 
@@ -501,6 +599,14 @@ type TableColumn struct {
 	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
 	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
 	Template     string             `json:"template"`          // 模板内容
+}
+
+type TableCell struct {
+	ID        string  `json:"id"`
+	Value     *Value  `json:"value"`
+	ValueType KeyType `json:"valueType"`
+	Color     string  `json:"color"`
+	BgColor   string  `json:"bgColor"`
 }
 
 type TableRow struct {
@@ -590,9 +696,11 @@ func (table *Table) FilterRows() {
 			operator := table.Filters[j].Operator
 
 			if nil == row.Cells[index].Value {
-				switch operator {
-				case FilterOperatorIsNotEmpty:
+				if FilterOperatorIsNotEmpty == operator {
 					pass = false
+				} else if FilterOperatorIsEmpty == operator {
+					pass = true
+					break
 				}
 
 				if KeyTypeText != row.Cells[index].ValueType {
@@ -650,6 +758,8 @@ func (table *Table) CalcCols() {
 			table.calcColCreated(col, i)
 		case KeyTypeUpdated:
 			table.calcColUpdated(col, i)
+		case KeyTypeCheckbox:
+			table.calcColCheckbox(col, i)
 		}
 	}
 }
@@ -713,6 +823,87 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorSum:
+		sum := 0.0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				sum += val
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum, col.NumberFormat)}
+	case CalcOperatorAverage:
+		sum := 0.0
+		count := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				sum += val
+				count++
+			}
+		}
+		if 0 != count {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum/float64(count), col.NumberFormat)}
+		}
+	case CalcOperatorMedian:
+		values := []float64{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				values = append(values, val)
+			}
+		}
+		sort.Float64s(values)
+		if len(values) > 0 {
+			if len(values)%2 == 0 {
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber((values[len(values)/2-1]+values[len(values)/2])/2, col.NumberFormat)}
+			} else {
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber(values[len(values)/2], col.NumberFormat)}
+			}
+		}
+	case CalcOperatorMin:
+		minVal := math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val < minVal {
+					minVal = val
+				}
+			}
+		}
+		if math.MaxFloat64 != minVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(minVal, col.NumberFormat)}
+		}
+	case CalcOperatorMax:
+		maxVal := -math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val > maxVal {
+					maxVal = val
+				}
+			}
+		}
+		if -math.MaxFloat64 != maxVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(maxVal, col.NumberFormat)}
+		}
+	case CalcOperatorRange:
+		minVal := math.MaxFloat64
+		maxVal := -math.MaxFloat64
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				if val < minVal {
+					minVal = val
+				}
+				if val > maxVal {
+					maxVal = val
+				}
+			}
+		}
+		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(maxVal-minVal, col.NumberFormat)}
 		}
 	}
 }
@@ -972,43 +1163,50 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
+		var isNotTime bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == earliest || earliest > row.Cells[colIndex].Value.Date.Content {
 					earliest = row.Cells[colIndex].Value.Date.Content
+					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
 				}
 			}
 		}
 		if 0 != earliest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, 0, DateFormatNone)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime)}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
+		var isNotTime bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == latest || latest < row.Cells[colIndex].Value.Date.Content {
 					latest = row.Cells[colIndex].Value.Date.Content
+					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
 				}
 			}
 		}
 		if 0 != latest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest, 0, DateFormatNone)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime)}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
 		latest := int64(0)
+		var isNotTime bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == earliest || earliest > row.Cells[colIndex].Value.Date.Content {
 					earliest = row.Cells[colIndex].Value.Date.Content
+					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
 				}
 				if 0 == latest || latest < row.Cells[colIndex].Value.Date.Content {
 					latest = row.Cells[colIndex].Value.Date.Content
+					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
 				}
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime)}
 		}
 	}
 }
@@ -1668,6 +1866,49 @@ func (table *Table) calcColUpdated(col *TableColumn, colIndex int) {
 		}
 		if 0 != earliest && 0 != latest {
 			col.Calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}
+		}
+	}
+}
+
+func (table *Table) calcColCheckbox(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorChecked:
+		countChecked := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Checkbox && row.Cells[colIndex].Value.Checkbox.Checked {
+				countChecked++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countChecked), NumberFormatNone)}
+	case CalcOperatorUnchecked:
+		countUnchecked := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Checkbox && !row.Cells[colIndex].Value.Checkbox.Checked {
+				countUnchecked++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUnchecked), NumberFormatNone)}
+	case CalcOperatorPercentChecked:
+		countChecked := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Checkbox && row.Cells[colIndex].Value.Checkbox.Checked {
+				countChecked++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countChecked)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUnchecked:
+		countUnchecked := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Checkbox && !row.Cells[colIndex].Value.Checkbox.Checked {
+				countUnchecked++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUnchecked)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	}
 }

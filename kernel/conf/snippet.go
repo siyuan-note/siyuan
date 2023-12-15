@@ -19,7 +19,6 @@ package conf
 type Snippet struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Memo    string `json:"memo"`
 	Type    string `json:"type"` // js/css
 	Enabled bool   `json:"enabled"`
 	Content string `json:"content"`

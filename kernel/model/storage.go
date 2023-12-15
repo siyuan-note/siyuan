@@ -129,7 +129,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 func getRecentDocs() (ret []*RecentDoc, err error) {
 	tmp := []*RecentDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
-	if !gulu.File.IsExist(dataPath) {
+	if !filelock.IsExist(dataPath) {
 		return
 	}
 
@@ -270,7 +270,7 @@ func setCriteria(criteria []*Criterion) (err error) {
 func getCriteria() (ret []*Criterion, err error) {
 	ret = []*Criterion{}
 	dataPath := filepath.Join(util.DataDir, "storage/criteria.json")
-	if !gulu.File.IsExist(dataPath) {
+	if !filelock.IsExist(dataPath) {
 		return
 	}
 
@@ -351,7 +351,7 @@ func getLocalStorage() (ret map[string]interface{}) {
 	// When local.json is corrupted, clear the file to avoid being unable to enter the main interface https://github.com/siyuan-note/siyuan/issues/7911
 	ret = map[string]interface{}{}
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
-	if !gulu.File.IsExist(lsPath) {
+	if !filelock.IsExist(lsPath) {
 		return
 	}
 

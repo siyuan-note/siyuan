@@ -22,7 +22,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"strings"
 	"time"
@@ -30,8 +32,123 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+type File struct {
+	Filename string
+	Header   textproto.MIMEHeader
+	Size     int64
+	Content  string
+}
+
+type MultipartForm struct {
+	Value map[string][]string
+	File  map[string][]File
+}
+
+func echo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	var (
+		password      string
+		passwordSet   bool
+		multipartForm *MultipartForm
+		rawData       any
+	)
+
+	password, passwordSet = c.Request.URL.User.Password()
+
+	if form, err := c.MultipartForm(); nil != err || nil == form {
+		multipartForm = nil
+	} else {
+		multipartForm = &MultipartForm{
+			Value: form.Value,
+			File:  map[string][]File{},
+		}
+		for k, handlers := range form.File {
+			files := make([]File, len(handlers))
+			multipartForm.File[k] = files
+			for i, handler := range handlers {
+				files[i].Filename = handler.Filename
+				files[i].Header = handler.Header
+				files[i].Size = handler.Size
+				if file, err := handler.Open(); nil != err {
+					logging.LogWarnf("echo open form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
+				} else {
+					content := make([]byte, handler.Size)
+					if _, err := file.Read(content); nil != err {
+						logging.LogWarnf("echo read form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
+					} else {
+						files[i].Content = base64.StdEncoding.EncodeToString(content)
+					}
+				}
+			}
+		}
+	}
+
+	if data, err := c.GetRawData(); nil == err {
+		rawData = base64.StdEncoding.EncodeToString(data)
+	} else {
+		logging.LogWarnf("echo get raw data error: %s", err.Error())
+		rawData = nil
+	}
+	c.Request.ParseForm()
+	c.Request.ParseMultipartForm(math.MaxInt64)
+
+	ret.Data = map[string]interface{}{
+		"Context": map[string]interface{}{
+			"Params":       c.Params,
+			"HandlerNames": c.HandlerNames(),
+			"FullPath":     c.FullPath(),
+			"ClientIP":     c.ClientIP(),
+			"RemoteIP":     c.RemoteIP(),
+			"ContentType":  c.ContentType(),
+			"IsWebsocket":  c.IsWebsocket(),
+			"RawData":      rawData,
+		},
+		"Request": map[string]interface{}{
+			"Method":           c.Request.Method,
+			"URL":              c.Request.URL,
+			"Proto":            c.Request.Proto,
+			"ProtoMajor":       c.Request.ProtoMajor,
+			"ProtoMinor":       c.Request.ProtoMinor,
+			"Header":           c.Request.Header,
+			"ContentLength":    c.Request.ContentLength,
+			"TransferEncoding": c.Request.TransferEncoding,
+			"Close":            c.Request.Close,
+			"Host":             c.Request.Host,
+			"Form":             c.Request.Form,
+			"PostForm":         c.Request.PostForm,
+			"MultipartForm":    multipartForm,
+			"Trailer":          c.Request.Trailer,
+			"RemoteAddr":       c.Request.RemoteAddr,
+			"TLS":              c.Request.TLS,
+			"UserAgent":        c.Request.UserAgent(),
+			"Cookies":          c.Request.Cookies(),
+			"Referer":          c.Request.Referer(),
+		},
+		"URL": map[string]interface{}{
+			"EscapedPath":     c.Request.URL.EscapedPath(),
+			"EscapedFragment": c.Request.URL.EscapedFragment(),
+			"String":          c.Request.URL.String(),
+			"Redacted":        c.Request.URL.Redacted(),
+			"IsAbs":           c.Request.URL.IsAbs(),
+			"Query":           c.Request.URL.Query(),
+			"RequestURI":      c.Request.URL.RequestURI(),
+			"Hostname":        c.Request.URL.Hostname(),
+			"Port":            c.Request.URL.Port(),
+		},
+		"User": map[string]interface{}{
+			"Username":    c.Request.URL.User.Username(),
+			"Password":    password,
+			"PasswordSet": passwordSet,
+			"String":      c.Request.URL.User.String(),
+		},
+	}
+}
 
 func forwardProxy(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

@@ -9,7 +9,7 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
-    if (type === "number" || type === "select") {
+    if (["select", "number"].includes(type)) {
         return "=";
     }
     if (["text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
@@ -67,15 +67,18 @@ export const setFilter = (options: {
                 cellValue = genCellValue(colData.type, {
                     isNotEmpty2: textElements[1].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: new Date(textElements[0].value).getTime(),
-                    content2: new Date(textElements[1].value).getTime(),
+                    content: new Date(textElements[0].value + " 00:00").getTime(),
+                    content2: new Date(textElements[1].value + " 00:00").getTime(),
                     hasEndDate: operator === "Is between"
                 });
             } else {
                 cellValue = genCellValue(colData.type, textElements[0].value);
             }
         } else {
-            const mSelect: { color: string, content: string }[] = [];
+            const mSelect: {
+                color: string,
+                content: string
+            }[] = [];
             window.siyuan.menus.menu.element.querySelectorAll("svg").forEach(item => {
                 if (item.firstElementChild.getAttribute("xlink:href") === "#iconCheck") {
                     const chipElement = item.nextElementSibling.firstElementChild as HTMLElement;
@@ -137,11 +140,14 @@ export const setFilter = (options: {
         }
     });
     switch (colData.type) {
+        case "checkbox":
+            selectHTML = `<option ${"Is true" === options.filter.operator ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
+<option ${"Is false" === options.filter.operator ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            break;
         case "block":
         case "text":
         case "url":
         case "phone":
-        case "template":
         case "email":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -151,6 +157,20 @@ export const setFilter = (options: {
 <option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
+            break;
+        case "template":
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
+<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+<option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
+<option ${"Starts with" === options.filter.operator ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
+<option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
+<option ${">" === options.filter.operator ? "selected" : ""} value=">">&gt;</option>
+<option ${"<" === options.filter.operator ? "selected" : ""} value="<">&lt;</option>
+<option ${">=" === options.filter.operator ? "selected" : ""} value=">=">&GreaterEqual;</option>
+<option ${"<=" === options.filter.operator ? "selected" : ""} value="<=">&le;</option>`;
             break;
         case "date":
         case "created":
@@ -232,16 +252,16 @@ export const setFilter = (options: {
         const dateValue = options.filter.value ? options.filter.value[colData.type as "date"] : null;
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({
         icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
+        label: window.siyuan.languages.removeFilters,
         click() {
             const oldFilters = Object.assign([], options.data.view.filters);
             options.data.view.filters.find((item: IAVFilter, index: number) => {
@@ -309,7 +329,7 @@ export const addFilter = (options: {
         if (!hasFilter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
-                iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${column.icon ? unicode2Emoji(column.icon) : `<svg><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}</span>`,
+                iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
                     const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = genCellValue(column.type, "");
@@ -362,17 +382,21 @@ export const getFiltersHTML = (data: IAVTable) => {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
+                } else if (filter.operator === "Is false") {
+                    filterValue = ": " + window.siyuan.languages.unchecked;
+                } else if (filter.operator === "Is true") {
+                    filterValue = ": " + window.siyuan.languages.checked;
                 } else if (filter.value?.date?.content) {
                     if (filter.value?.date?.content2 && filter.operator === "Is between") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD")}`;
                     } else if ("=" === filter.operator) {
-                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if ([">", "<"].includes(filter.operator)) {
-                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if (">=" === filter.operator) {
-                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     } else if ("<=" === filter.operator) {
-                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
                     }
                 } else if (filter.value?.mSelect?.length > 0) {
                     let selectContent = "";
@@ -430,7 +454,7 @@ export const getFiltersHTML = (data: IAVTable) => {
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.filter}</span>
@@ -439,11 +463,11 @@ export const getFiltersHTML = (data: IAVTable) => {
 ${html}
 <button class="b3-menu__item${data.filters.length === data.columns.length ? " fn__none" : ""}" data-type="addFilter">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
 </button>
 <button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.removeFilters}</span>
 </button>
 </div>`;
 };

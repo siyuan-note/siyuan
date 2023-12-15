@@ -120,7 +120,9 @@ export const exportConfig = {
         <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
     </div>
     <span class="fn__space"></span>
-    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportData"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}</button>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportData">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
 </label>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1 fn__flex-center">
@@ -213,7 +215,7 @@ export const exportConfig = {
             const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                 cmd: "showOpenDialog",
                 defaultPath: window.siyuan.config.system.homeDir,
-                properties: ["openFile"],
+                properties: ["openFile", "showHiddenFiles"],
             });
             if (localPath.filePaths.length === 0) {
                 pandocBinElement.value = window.siyuan.config.export.pandocBin;

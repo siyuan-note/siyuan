@@ -108,6 +108,9 @@ export const openDocHistory = (options: {
     renderDoc(dialog.element, 1, options.id);
     historyEditor = new Protyle(options.app, docElement, {
         blockId: "",
+        history: {
+            created: ""
+        },
         action: [Constants.CB_GET_HISTORY],
         render: {
             background: false,
@@ -183,11 +186,13 @@ const getHistoryPath = (target: Element, op: string, id: string, cb: (path: stri
     if (path) {
         cb(path);
     }
+    const created = target.getAttribute("data-created");
+    historyEditor.protyle.options.history.created = created;
     fetchPost("/api/history/getHistoryItems", {
         query: id,
         op,
         type: 3,
-        created: target.getAttribute("data-created")
+        created
     }, (response) => {
         cb(response.data.items[0].path);
     });

@@ -60,9 +60,9 @@ type AppConf struct {
 	Editor         *conf.Editor     `json:"editor"`         // 编辑器配置
 	Export         *conf.Export     `json:"export"`         // 导出配置
 	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局，v2.8.0 后这个字段不再使用
+	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
-	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
+	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
@@ -80,6 +80,32 @@ type AppConf struct {
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
+
+	m *sync.Mutex
+}
+
+func (conf *AppConf) GetUILayout() *conf.UILayout {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	return conf.UILayout
+}
+
+func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	conf.UILayout = uiLayout
+}
+
+func (conf *AppConf) GetUser() *conf.User {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	return conf.User
+}
+
+func (conf *AppConf) SetUser(user *conf.User) {
+	conf.m.Lock()
+	defer conf.m.Unlock()
+	conf.User = user
 }
 
 func InitConf() {
@@ -92,7 +118,7 @@ func InitConf() {
 		}
 	}
 
-	Conf = &AppConf{LogLevel: "debug"}
+	Conf = &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		data, err := os.ReadFile(confPath)
@@ -192,11 +218,18 @@ func InitConf() {
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
 	}
+
 	if nil == Conf.Editor {
 		Conf.Editor = conf.NewEditor()
 	}
 	if 1 > len(Conf.Editor.Emoji) {
 		Conf.Editor.Emoji = []string{}
+	}
+	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
+		Conf.Editor.FontSize = 16
+	}
+	if "" == Conf.Editor.PlantUMLServePath {
+		Conf.Editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
 	}
 	if 1 > Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
 		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 64
@@ -204,6 +237,25 @@ func InitConf() {
 	if 5120 < Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
 		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 5120
 	}
+	if 1440 < Conf.Editor.GenerateHistoryInterval {
+		Conf.Editor.GenerateHistoryInterval = 1440
+	}
+	if 1 > Conf.Editor.HistoryRetentionDays {
+		Conf.Editor.HistoryRetentionDays = 30
+	}
+	if 48 > Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = 48
+	}
+	if 1024 < Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = 1024
+	}
+	if 0 > Conf.Editor.BacklinkExpandCount {
+		Conf.Editor.BacklinkExpandCount = 0
+	}
+	if 0 > Conf.Editor.BackmentionExpandCount {
+		Conf.Editor.BackmentionExpandCount = 0
+	}
+
 	if nil == Conf.Export {
 		Conf.Export = conf.NewExport()
 	}
@@ -214,16 +266,11 @@ func InitConf() {
 	if "" == Conf.Export.PandocBin {
 		Conf.Export.PandocBin = util.PandocBinPath
 	}
-	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
-		Conf.Editor.FontSize = 16
-	}
-	if "" == Conf.Editor.PlantUMLServePath {
-		Conf.Editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
-	}
 
 	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
 		Conf.Graph = conf.NewGraph()
 	}
+
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
 		Conf.OpenHelp = true
@@ -267,7 +314,7 @@ func InitConf() {
 	Conf.System.OSPlatform = util.GetOSPlatform()
 
 	if "" != Conf.UserData {
-		Conf.User = loadUserFromConf()
+		Conf.SetUser(loadUserFromConf())
 	}
 	if nil == Conf.Account {
 		Conf.Account = conf.NewAccount()
@@ -304,24 +351,14 @@ func InitConf() {
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()
 	}
-
-	if 1440 < Conf.Editor.GenerateHistoryInterval {
-		Conf.Editor.GenerateHistoryInterval = 1440
+	if timingEnv := os.Getenv("SIYUAN_SYNC_INDEX_TIMING"); "" != timingEnv {
+		val, err := strconv.Atoi(timingEnv)
+		if nil == err {
+			Conf.Repo.SyncIndexTiming = int64(val)
+		}
 	}
-	if 1 > Conf.Editor.HistoryRetentionDays {
-		Conf.Editor.HistoryRetentionDays = 7
-	}
-	if 48 > Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = 48
-	}
-	if 1024 < Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = 1024
-	}
-	if 0 > Conf.Editor.BacklinkExpandCount {
-		Conf.Editor.BacklinkExpandCount = 0
-	}
-	if 0 > Conf.Editor.BackmentionExpandCount {
-		Conf.Editor.BackmentionExpandCount = 0
+	if 12000 > Conf.Repo.SyncIndexTiming {
+		Conf.Repo.SyncIndexTiming = 12 * 1000
 	}
 
 	if nil == Conf.Search {
@@ -454,6 +491,8 @@ func initLang() {
 
 		util.TimeLangs[name] = langMap["_time"].(map[string]interface{})
 		util.TaskActionLangs[name] = langMap["_taskAction"].(map[string]interface{})
+		util.TrayMenuLangs[name] = langMap["_trayMenu"].(map[string]interface{})
+		util.AttrViewLangs[name] = langMap["_attrView"].(map[string]interface{})
 	}
 }
 
@@ -480,7 +519,7 @@ var exitLock = sync.Mutex{}
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
-	util.IsExiting = true
+	util.IsExiting.Store(true)
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 	util.PushMsg(Conf.Language(95), 10000*60)
@@ -489,7 +528,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	if !force {
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
-			syncData(true, false, false)
+			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
 				return
@@ -560,15 +599,13 @@ func NewLute() (ret *lute.Lute) {
 	return
 }
 
-var confSaveLock = sync.Mutex{}
-
 func (conf *AppConf) Save() {
 	if util.ReadOnly {
 		return
 	}
 
-	confSaveLock.Lock()
-	defer confSaveLock.Unlock()
+	Conf.m.Lock()
+	defer Conf.m.Unlock()
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
@@ -724,7 +761,8 @@ func InitBoxes() {
 }
 
 func IsSubscriber() bool {
-	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
+	u := Conf.GetUser()
+	return nil != u && (-1 == u.UserSiYuanProExpireTime || 0 < u.UserSiYuanProExpireTime) && 0 == u.UserSiYuanSubscriptionStatus
 }
 
 func IsPaidUser() bool {
@@ -813,7 +851,7 @@ func clearCorruptedNotebooks() {
 
 		boxDirPath := filepath.Join(util.DataDir, dir.Name())
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
-		if !gulu.File.IsExist(boxConfPath) {
+		if !filelock.IsExist(boxConfPath) {
 			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
 			continue
 		}
@@ -899,8 +937,13 @@ func upgradeUserGuide() {
 		boxDirPath := filepath.Join(util.DataDir, boxID)
 		boxConf := conf.NewBoxConf()
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
-		if !gulu.File.IsExist(boxConfPath) {
-			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+		if !filelock.IsExist(boxConfPath) {
+			logging.LogWarnf("found a corrupted user guide box [%s]", boxDirPath)
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
+			} else {
+				logging.LogInfof("removed corrupted user guide box [%s]", boxDirPath)
+			}
 			continue
 		}
 
@@ -918,6 +961,7 @@ func upgradeUserGuide() {
 			continue
 		}
 
+		logging.LogInfof("upgrading user guide box [%s]", boxID)
 		unindex(boxID)
 
 		if err = filelock.Remove(boxDirPath); nil != err {
@@ -929,6 +973,7 @@ func upgradeUserGuide() {
 		}
 
 		index(boxID)
+		logging.LogInfof("upgraded user guide box [%s]", boxID)
 	}
 }
 

@@ -53,26 +53,17 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
             }
         };
         if (response.data.rootID === id) {
-            fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
-                if (attrResponse.data.scroll) {
-                    json.children.scrollAttr = JSON.parse(attrResponse.data.scroll);
-                    // 历史数据兼容
-                    json.children.scrollAttr.rootId = response.data.rootID;
-                }
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
-                    position: options.position,
-                    width: options.width,
-                    height: options.height,
-                    url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
-                });
-                /// #endif
+            json.children.action = Constants.CB_GET_SCROLL;
+            /// #if !BROWSER
+            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+                position: options.position,
+                width: options.width,
+                height: options.height,
+                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
             });
+            /// #endif
         } else {
             json.children.action = Constants.CB_GET_ALL;
-            json.children.scrollAttr = {
-                zoomInId: id,
-            };
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                 position: options.position,

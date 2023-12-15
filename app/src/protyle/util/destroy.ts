@@ -1,7 +1,12 @@
+import {hideElements} from "../ui/hideElements";
+
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    hideElements(["util"], protyle);
+    protyle.observer?.disconnect();
+    protyle.observerLoad?.disconnect();
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {

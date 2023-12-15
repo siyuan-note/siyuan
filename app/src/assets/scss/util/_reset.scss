@@ -38,7 +38,7 @@ body {
       }
 
       &__tab--active {
-        .b3-list--background .b3-list-item--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+        .b3-list--background .b3-list-item--focus:not(.dragover) {
           background-color: var(--b3-list-hover);
         }
 
@@ -67,6 +67,10 @@ body {
       & > .block__icons {
         padding-left: 10px;
         padding-right: 108px;
+      }
+
+      & > .block__icons > .search__label {
+        right: 108px;
       }
     }
   }

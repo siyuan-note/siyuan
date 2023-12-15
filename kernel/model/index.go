@@ -70,13 +70,13 @@ func index(boxID string) {
 	if 1 > boxLen {
 		boxLen = 1
 	}
-	bootProgressPart := 30.0 / float64(boxLen) / float64(len(files))
+	bootProgressPart := int32(30.0 / float64(boxLen) / float64(len(files)))
 
 	start := time.Now()
 	luteEngine := util.NewLute()
 	var treeCount int
 	var treeSize int64
-	i := 0
+	lock := sync.Mutex{}
 	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
 	poolSize := runtime.NumCPU()
@@ -88,6 +88,11 @@ func index(boxID string) {
 		defer waitGroup.Done()
 
 		file := arg.(*FileInfo)
+		lock.Lock()
+		treeSize += file.size
+		treeCount++
+		i := treeCount
+		lock.Unlock()
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
@@ -107,14 +112,10 @@ func index(boxID string) {
 		cache.PutDocIAL(file.path, docIAL)
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(box.ID, file.path)
-
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
-		treeSize += file.size
-		treeCount++
 		if 1 < i && 0 == i%64 {
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))
 		}
-		i++
 	})
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
@@ -122,7 +123,11 @@ func index(boxID string) {
 		}
 
 		waitGroup.Add(1)
-		p.Invoke(file)
+		invokeErr := p.Invoke(file)
+		if nil != invokeErr {
+			logging.LogErrorf("invoke [%s] failed: %s", file.path, invokeErr)
+			continue
+		}
 	}
 	waitGroup.Wait()
 	p.Release()
@@ -139,7 +144,6 @@ func IndexRefs() {
 	start := time.Now()
 	util.SetBootDetails("Resolving refs...")
 	util.PushStatusBar(Conf.Language(54))
-
 	util.SetBootDetails("Indexing refs...")
 
 	var defBlockIDs []string
@@ -187,7 +191,7 @@ func IndexRefs() {
 	i := 0
 	size := len(defBlockIDs)
 	if 0 < size {
-		bootProgressPart := 10.0 / float64(size)
+		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
 			defTree, loadErr := LoadTreeByID(defBlockID)
@@ -215,7 +219,13 @@ func IndexEmbedBlockJob() {
 
 func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
-		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
+		md := strings.TrimSpace(embedBlock.Markdown)
+		if strings.Contains(md, "//js") {
+			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
+			continue
+		}
+
+		stmt := strings.TrimPrefix(md, "{{")
 		stmt = strings.TrimSuffix(stmt, "}}")
 		if !strings.Contains(strings.ToLower(stmt), "select") {
 			continue

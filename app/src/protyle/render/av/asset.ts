@@ -11,6 +11,9 @@ import {exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewImage} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
+import {hideMessage, showMessage} from "../../../dialog/message";
+import {fetchPost} from "../../../util/fetch";
+import {hasClosestByClassName} from "../../util/hasClosest";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -47,7 +50,7 @@ export const bindAssetEvent = (options: {
 
 export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     const cellId = cellElements[0].dataset.id;
-    const rowId = cellElements[0].parentElement.dataset.id;
+    const rowId = (hasClosestByClassName(cellElements[0], "av__row") as HTMLElement).dataset.id;
     let cellData: IAVCell;
     data.rows.find(row => {
         if (row.id === rowId) {
@@ -68,11 +71,11 @@ export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
             }
             let contentHTML;
             if (item.type === "image") {
-                contentHTML = `<span class="fn__flex-1">
+                contentHTML = `<span data-type="openAssetItem" class="fn__flex-1">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
             } else {
-                contentHTML = `<span class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
+                contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
             }
 
             html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
@@ -110,7 +113,7 @@ export const updateAssetCell = (options: {
     removeContent?: string
 }) => {
     let cellIndex: number;
-    Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
+    Array.from((hasClosestByClassName(options.cellElements[0], "av__row") as HTMLElement).querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === options.cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
@@ -122,7 +125,7 @@ export const updateAssetCell = (options: {
     let newValue: IAVCellAssetValue[] = [];
     options.cellElements.forEach((item, elementIndex) => {
         let cellData: IAVCell;
-        const rowID = item.parentElement.dataset.id;
+        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
                 if (typeof cellIndex === "number") {
@@ -321,5 +324,45 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
         y: rect.bottom,
         w: target.parentElement.clientWidth + 8,
         h: rect.height,
+    });
+};
+
+export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string) => {
+    const msgId = showMessage(window.siyuan.languages.uploading, 0);
+    fetchPost("/api/asset/insertLocalAssets", {
+        assetPaths: files,
+        isUpload: true,
+        id: protyle.block.rootID
+    }, (response) => {
+        hideMessage(msgId);
+        const addUpdateValue: IAVCellAssetValue[] = [];
+        Object.keys(response.data.succMap).forEach(key => {
+            const type = pathPosix().extname(key).toLowerCase();
+            const name = key.substring(0, key.length - type.length);
+            if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+                addUpdateValue.push({
+                    type: "image",
+                    name,
+                    content: response.data.succMap[key],
+                });
+            } else {
+                addUpdateValue.push({
+                    type: "file",
+                    name,
+                    content: response.data.succMap[key],
+                });
+            }
+        });
+        fetchPost("/api/av/renderAttributeView", {
+            id: avID,
+        }, (response) => {
+            updateAssetCell({
+                protyle,
+                data: response.data as IAV,
+                cellElements: [cellElement],
+                type: "addUpdate",
+                addUpdateValue
+            });
+        });
     });
 };

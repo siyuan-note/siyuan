@@ -14,6 +14,7 @@
 @import "business/graph";
 @import "business/layout";
 @import "business/block";
+@import "business/drag";
 @import "util/reset";
 @import "util/function";
 @import "business/history";
@@ -132,7 +133,9 @@
       opacity: 0.38;
     }
 
-    &--active {
+    &--active,
+    &:focus,
+    &:hover {
       background-color: var(--b3-list-hover);
     }
   }
@@ -276,6 +279,7 @@
   border-top: 1px solid var(--b3-theme-surface-lighter);
   overflow: hidden;
   flex-direction: column;
+  z-index: 1;
 
   &__dynamic {
     overflow: auto;
@@ -370,9 +374,8 @@
     &-icon {
       height: 20px;
       width: 20px;
-      padding: 6px;
+      margin: 6px;
       flex-shrink: 0;
-      margin: 8px 0 8px 8px;
       font-size: 20px;
       text-align: center;
       line-height: 20px;
@@ -380,7 +383,7 @@
 
     &-text {
       line-height: 48px;
-      margin-left: 8px;
+      margin-left: 6px;
     }
   }
 }
@@ -480,7 +483,6 @@ html .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="tr
 html[lang="zh_CN"] .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="true"]:empty:before {
   content: "键入文字";
 }
-
 
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {

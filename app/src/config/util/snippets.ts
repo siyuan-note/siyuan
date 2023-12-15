@@ -1,6 +1,8 @@
 import {fetchPost} from "../../util/fetch";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
+import {objEquals} from "../../util/functions";
+import {confirmDialog} from "../../dialog/confirmDialog";
 
 export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
@@ -73,7 +75,13 @@ export const openSnippets = () => {
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`
+</div>`,
+            destroyCallback: (options) => {
+                if (options?.cancel === "true") {
+                    return;
+                }
+                setSnippet(dialog, response.data.snippets, removeIds, true);
+            }
         });
         response.data.snippets.forEach((item: ISnippet) => {
             const nameElement = (dialog.element.querySelector(`[data-id="${item.id}"] input`) as HTMLInputElement);
@@ -94,30 +102,11 @@ export const openSnippets = () => {
                 return;
             }
             if (target.classList.contains("b3-button--cancel")) {
-                dialog.destroy();
+                dialog.destroy({cancel: "true"});
                 return;
             }
             if (target.classList.contains("b3-button--text")) {
-                const snippets: ISnippet[] = [];
-                dialog.element.querySelectorAll("[data-id]").forEach((item) => {
-                    snippets.push({
-                        id: item.getAttribute("data-id"),
-                        name: item.querySelector("input").value,
-                        type: item.getAttribute("data-type"),
-                        content: item.querySelector("textarea").value,
-                        enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
-                    });
-                });
-                fetchPost("/api/snippet/setSnippet", {snippets}, () => {
-                    removeIds.forEach(item => {
-                        const rmElement = document.querySelector(item);
-                        if (rmElement) {
-                            rmElement.remove();
-                        }
-                    });
-                    renderSnippet();
-                    dialog.destroy();
-                });
+                setSnippet(dialog, response.data.snippets, removeIds);
                 return;
             }
             const tabElement = hasClosestByClassName(target, "item");
@@ -150,14 +139,52 @@ const genSnippet = (options: ISnippet) => {
     return `<div data-id="${options.id || ""}" data-type="${options.type}">
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
-        <div class="fn__flex-1 fn__space"></div>
-        <input data-type="snippet" class="b3-switch fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
+        <div class="fn__flex-1"></div>
         <div class="fn__space"></div>
         <span aria-label="${window.siyuan.languages.remove}" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
+        <div class="fn__space"></div>
+        <input data-type="snippet" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
     </div>
     <div class="fn__hr"></div>
     <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical;font-family:var(--b3-font-family-code)" spellcheck="false"></textarea>
 </div><div class="fn__hr--b"></div>`;
+};
+
+const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[]) => {
+    fetchPost("/api/snippet/setSnippet", {snippets}, () => {
+        removeIds.forEach(item => {
+            const rmElement = document.querySelector(item);
+            if (rmElement) {
+                rmElement.remove();
+            }
+        });
+        renderSnippet();
+        dialog.destroy({cancel: "true"});
+    });
+};
+
+const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[], confirm = false) => {
+    const snippets: ISnippet[] = [];
+    dialog.element.querySelectorAll("[data-id]").forEach((item) => {
+        snippets.push({
+            id: item.getAttribute("data-id"),
+            name: item.querySelector("input").value,
+            type: item.getAttribute("data-type"),
+            content: item.querySelector("textarea").value,
+            enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
+        });
+    });
+    if (objEquals(oldSnippets, snippets)) {
+        dialog.destroy({cancel: "true"});
+    } else {
+        if (confirm) {
+            confirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
+                setSnippetPost(dialog, snippets, removeIds);
+            });
+        } else {
+            setSnippetPost(dialog, snippets, removeIds);
+        }
+    }
 };

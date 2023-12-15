@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="../../icon.png">
-    <style id="editorFontSize" type="text/css"></style>
     <style id="editorAttr" type="text/css"></style>
 </head>
 <body class="fn__flex-column">

@@ -27,6 +27,7 @@ type TOperation =
     | "updateAttrViewColTemplate"
     | "sortAttrViewRow"
     | "sortAttrViewCol"
+    | "setAttrViewColPin"
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
@@ -34,23 +35,34 @@ type TOperation =
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
     | "setAttrViewName"
+    | "doUpdateUpdated"
     | "setAttrViewColIcon"
     | "setAttrViewFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"
     | "updateAttrViewColNumberFormat"
     | "replaceAttrViewBlock"
+    | "addAttrViewView"
+    | "setAttrViewViewName"
+    | "removeAttrViewView"
+    | "setAttrViewViewIcon"
+    | "duplicateAttrViewView"
+    | "sortAttrViewView"
+    | "setAttrViewPageSize"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
-type TEventBus = "ws-main" |
+type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
+    "paste" |
     "input-search" |
-    "loaded-protyle" | "loaded-protyle-dynamic" |
-    "destroy-protyle"
+    "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
+    "switch-protyle" |
+    "destroy-protyle" |
+    "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =
     "text"
     | "date"
@@ -67,6 +79,7 @@ type TAVCol =
     | "template"
     | "created"
     | "updated"
+    | "checkbox"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -83,11 +96,15 @@ type TAVFilterOperator =
     | "Ends with"
     | "Is between"
     | "Is relative to today"
+    | "Is true"
+    | "Is false"
 declare module "blueimp-md5"
 
 interface Window {
     echarts: {
-        init(element: HTMLElement, theme?: string, options?: { width: number }): {
+        init(element: HTMLElement, theme?: string, options?: {
+            width: number
+        }): {
             setOption(option: any): void;
             getZr(): any;
             on(name: string, event: (e: any) => void): any;
@@ -95,15 +112,26 @@ interface Window {
             resize(): void;
         };
         dispose(element: Element): void;
-        getInstanceById(id: string): { resize: () => void };
+        getInstanceById(id: string): {
+            resize: () => void
+        };
     }
     ABCJS: {
-        renderAbc(element: Element, text: string, options: { responsive: string }): void;
+        renderAbc(element: Element, text: string, options: {
+            responsive: string
+        }): void;
     }
     hljs: {
         listLanguages(): string[];
-        highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
-        getLanguage(text: string): { name: string };
+        highlight(text: string, options: {
+            language?: string,
+            ignoreIllegals: boolean
+        }): {
+            value: string
+        };
+        getLanguage(text: string): {
+            name: string
+        };
     };
     katex: {
         renderToString(math: string, option: {
@@ -255,6 +283,7 @@ interface ISnippet {
 interface IInbox {
     oId: string
     shorthandContent: string
+    shorthandMd: string
     shorthandDesc: string
     shorthandFrom: number
     shorthandTitle: string
@@ -494,6 +523,11 @@ interface IPluginDockTab {
     title: string,
     index?: number
     show?: boolean
+}
+
+interface IExportOptions {
+    type: string,
+    id: string,
 }
 
 interface IOpenFileOptions {
@@ -895,7 +929,7 @@ interface IBlockTree {
 }
 
 interface IBlock {
-    riffCardReps?: number   // 闪卡复习次数
+    riffCard?: IRiffCard,
     depth?: number,
     box?: string;
     path?: string;
@@ -915,6 +949,11 @@ interface IBlock {
     children?: IBlock[]
     length?: number
     ial: IObject
+}
+
+interface IRiffCard {
+    due?: string;
+    reps?: number; // 闪卡复习次数
 }
 
 interface IModels {
@@ -992,16 +1031,16 @@ interface IAVView {
     name: string
     id: string
     type: string
+    icon: string
 }
 
-interface IAVTable {
+interface IAVTable extends IAVView {
     columns: IAVColumn[],
     filters: IAVFilter[],
     sorts: IAVSort[],
-    name: string,
-    type: "table"
     rows: IAVRow[],
-    id: string
+    rowCount: number,
+    pageSize: number,
 }
 
 interface IAVFilter {
@@ -1016,11 +1055,12 @@ interface IAVSort {
 }
 
 interface IAVColumn {
-    width: number,
+    width: string,
     icon: string,
     id: string,
     name: string,
     wrap: boolean,
+    pin: boolean,
     hidden: boolean,
     type: TAVCol,
     numberFormat: string,
@@ -1050,6 +1090,7 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
+    id?: string,
     type?: TAVCol,
     isDetached?: boolean,
     text?: {
@@ -1078,6 +1119,9 @@ interface IAVCellValue {
     }
     template?: {
         content: string
+    },
+    checkbox?: {
+        checked: boolean
     }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
@@ -1090,6 +1134,7 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+    isNotTime?: boolean // 默认 true
 }
 
 interface IAVCellSelectValue {

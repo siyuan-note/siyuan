@@ -6,8 +6,24 @@ import {Dialog} from "../dialog";
 import {getOpenNotebookCount} from "./pathName";
 import {validateName} from "../editor/rename";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {openFileById} from "../editor/util";
+import {openMobileFileById} from "../mobile/editor";
+import {App} from "../index";
 
-export const newDailyNote = () => {
+export const fetchNewDailyNote = (app: App, notebook: string) => {
+    fetchPost("/api/filetree/createDailyNote", {
+        notebook,
+        app: Constants.SIYUAN_APPID,
+    }, (response) => {
+        /// #if MOBILE
+        openMobileFileById(app, response.data.id);
+        /// #else
+        openFileById({app, id: response.data.id, action: [Constants.CB_GET_FOCUS]});
+        /// #endif
+    });
+};
+
+export const newDailyNote = (app: App) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.dailyNote.custom) {
             item.destroy();
@@ -29,10 +45,7 @@ export const newDailyNote = () => {
                 notebookId = item.id;
             }
         });
-        fetchPost("/api/filetree/createDailyNote", {
-            notebook: notebookId,
-            app: Constants.SIYUAN_APPID,
-        });
+        fetchNewDailyNote(app, notebookId);
         return;
     }
     const localNotebookId = window.siyuan.storage[Constants.LOCAL_DAILYNOTEID];
@@ -42,10 +55,7 @@ export const newDailyNote = () => {
         }
     });
     if (localNotebookId && localNotebookIsOpen && !isMobile()) {
-        fetchPost("/api/filetree/createDailyNote", {
-            notebook: localNotebookId,
-            app: Constants.SIYUAN_APPID,
-        });
+        fetchNewDailyNote(app, localNotebookId);
     } else {
         let optionsHTML = "";
         window.siyuan.notebooks.forEach(item => {
@@ -75,10 +85,7 @@ export const newDailyNote = () => {
             const notebook = selectElement.value;
             window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
             setStorageVal(Constants.LOCAL_DAILYNOTEID, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
-            fetchPost("/api/filetree/createDailyNote", {
-                notebook,
-                app: Constants.SIYUAN_APPID,
-            });
+            fetchNewDailyNote(app, notebook);
             dialog.destroy();
         });
     }

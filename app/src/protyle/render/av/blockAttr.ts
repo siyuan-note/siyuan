@@ -8,6 +8,9 @@ import {popTextCell} from "./cell";
 export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
+        case "block":
+            html = `<div class="fn__flex-1">${value.block.content}</div>`;
+            break;
         case "text":
             html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
@@ -30,13 +33,17 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
+            if (value[value.type].isNotEmpty) {
+                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            }
+            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
+                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            }
+            break;
         case "created":
         case "updated":
             if (value[value.type].isNotEmpty) {
                 html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format("YYYY-MM-DD HH:mm")}</span>`;
-            }
-            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             break;
         case "url":
@@ -48,6 +55,9 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1">
 <span class="fn__space"></span>
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
+            break;
+        case "checkbox":
+            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked?"Check":"Uncheck"}"></use></svg>`;
             break;
         case "template":
             html = `<div class="fn__flex-1">${value.template.content}</div>`;
@@ -69,19 +79,29 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                 key: {
                     type: TAVCol,
                     name: string,
-                    options?: { name: string, color: string }[]
+                    options?: {
+                        name: string,
+                        color: string
+                    }[]
                 },
-                values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
+                values: {
+                    keyID: string,
+                    id: string,
+                    blockID: string,
+                    type?: TAVCol & IAVCellValue
+                }  []
             }[],
+            blockIDs: string[],
             avID: string
             avName: string
         }) => {
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView"><div class="block__logo custom-attr__avheader">
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
+<div class="block__logo custom-attr__avheader popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
     <svg><use xlink:href="#iconDatabase"></use></svg>
     <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons" data-id="${id}">
+                html += `<div class="block__icons av__row" data-id="${id}">
     <div class="block__logo">
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
@@ -115,6 +135,13 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             const mAssetElement = hasClosestByAttribute(target, "data-type", "mAsset");
             if (mAssetElement) {
                 popTextCell(protyle, [mAssetElement], "mAsset");
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            const checkboxElement = hasClosestByAttribute(target, "data-type", "checkbox");
+            if (checkboxElement) {
+                popTextCell(protyle, [checkboxElement], "checkbox");
                 event.stopPropagation();
                 event.preventDefault();
                 return;

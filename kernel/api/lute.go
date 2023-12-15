@@ -84,6 +84,32 @@ func html2BlockDOM(c *gin.Context) {
 		n.Unlink()
 	}
 
+	// 表格只包含一个单元格时，将其转换为段落
+	// Copy one cell from Excel/HTML table and paste it using the cell's content https://github.com/siyuan-note/siyuan/issues/9614
+	unlinks = nil
+	if nil != tree.Root.FirstChild && ast.NodeTable == tree.Root.FirstChild.Type && (nil == tree.Root.FirstChild.Next ||
+		(ast.NodeKramdownBlockIAL == tree.Root.FirstChild.Next.Type && nil == tree.Root.FirstChild.Next.Next)) {
+		if nil != tree.Root.FirstChild.FirstChild && ast.NodeTableHead == tree.Root.FirstChild.FirstChild.Type {
+			head := tree.Root.FirstChild.FirstChild
+			if nil == head.Next && nil != head.FirstChild && nil == head.FirstChild.Next {
+				row := head.FirstChild
+				if nil != row.FirstChild && nil == row.FirstChild.Next {
+					cell := row.FirstChild
+					p := treenode.NewParagraph()
+					var contents []*ast.Node
+					for c := cell.FirstChild; nil != c; c = c.Next {
+						contents = append(contents, c)
+					}
+					for _, c := range contents {
+						p.AppendChild(c)
+					}
+					tree.Root.FirstChild.Unlink()
+					tree.Root.PrependChild(p)
+				}
+			}
+		}
+	}
+
 	if util.ContainerStd == model.Conf.System.Container {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

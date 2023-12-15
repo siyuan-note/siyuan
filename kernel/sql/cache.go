@@ -38,8 +38,8 @@ func disableCache() {
 }
 
 var blockCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 10240,
-	MaxCost:     1024,
+	NumCounters: 102400,
+	MaxCost:     10240,
 	BufferItems: 64,
 })
 

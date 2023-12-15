@@ -5,6 +5,11 @@ export const addStyle = (url: string, id: string) => {
         styleElement.rel = "stylesheet";
         styleElement.type = "text/css";
         styleElement.href = url;
-        document.getElementsByTagName("head")[0].appendChild(styleElement);
+        const pluginsStyle = document.querySelector("#pluginsStyle");
+        if (pluginsStyle) {
+            pluginsStyle.before(styleElement);
+        } else {
+            document.getElementsByTagName("head")[0].appendChild(styleElement);
+        }
     }
 };

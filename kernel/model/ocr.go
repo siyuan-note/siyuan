@@ -1,7 +1,6 @@
 package model
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -10,21 +9,29 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func OCRAssetsJob() {
+	util.WaitForTesseractInit()
+
 	if !util.TesseractEnabled {
 		return
 	}
 
-	task.AppendTaskWithTimeout(task.OCRImage, 7*time.Second, autoOCRAssets)
+	task.AppendTaskWithTimeout(task.OCRImage, 30*time.Second, autoOCRAssets)
 }
 
 func autoOCRAssets() {
+	if !util.TesseractEnabled {
+		return
+	}
+
 	defer logging.Recover()
 
 	assetsPath := util.GetDataAssetsAbsPath()
@@ -37,15 +44,24 @@ func autoOCRAssets() {
 			util.AssetsTextsLock.Lock()
 			util.AssetsTexts[p] = text
 			util.AssetsTextsLock.Unlock()
-			util.AssetsTextsChanged = true
-
-			if 4 <= i { // 一次任务中最多处理 4 张图片，防止卡顿
+			if "" != text {
+				util.AssetsTextsChanged.Store(true)
+			}
+			if 7 <= i { // 一次任务中最多处理 7 张图片，防止长时间占用系统资源
 				break
 			}
 		}
 	}
 
 	cleanNotExistAssetsTexts()
+
+	// 刷新 OCR 结果到数据库
+	util.NodeOCRQueueLock.Lock()
+	defer util.NodeOCRQueueLock.Unlock()
+	for _, id := range util.NodeOCRQueue {
+		sql.IndexNodeQueue(id)
+	}
+	util.NodeOCRQueue = nil
 }
 
 func cleanNotExistAssetsTexts() {
@@ -57,14 +73,14 @@ func cleanNotExistAssetsTexts() {
 	for asset, _ := range util.AssetsTexts {
 		assetAbsPath := strings.TrimPrefix(asset, "assets")
 		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
-		if !gulu.File.IsExist(assetAbsPath) {
+		if !filelock.IsExist(assetAbsPath) {
 			toRemoves = append(toRemoves, asset)
 		}
 	}
 
 	for _, asset := range toRemoves {
 		delete(util.AssetsTexts, asset)
-		util.AssetsTextsChanged = true
+		util.AssetsTextsChanged.Store(true)
 	}
 	return
 }
@@ -98,20 +114,12 @@ func FlushAssetsTextsJob() {
 func LoadAssetsTexts() {
 	assetsPath := util.GetDataAssetsAbsPath()
 	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
-	if !gulu.File.IsExist(assetsTextsPath) {
+	if !filelock.IsExist(assetsTextsPath) {
 		return
 	}
 
 	start := time.Now()
-	var err error
-	fh, err := os.OpenFile(assetsTextsPath, os.O_RDWR, 0644)
-	if nil != err {
-		logging.LogErrorf("open assets texts failed: %s", err)
-		return
-	}
-	defer fh.Close()
-
-	data, err := io.ReadAll(fh)
+	data, err := filelock.ReadFile(assetsTextsPath)
 	if nil != err {
 		logging.LogErrorf("read assets texts failed: %s", err)
 		return
@@ -135,7 +143,7 @@ func LoadAssetsTexts() {
 }
 
 func SaveAssetsTexts() {
-	if !util.AssetsTextsChanged {
+	if !util.AssetsTextsChanged.Load() {
 		return
 	}
 
@@ -151,7 +159,7 @@ func SaveAssetsTexts() {
 
 	assetsPath := util.GetDataAssetsAbsPath()
 	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
-	if err = gulu.File.WriteFileSafer(assetsTextsPath, data, 0644); nil != err {
+	if err = filelock.WriteFile(assetsTextsPath, data); nil != err {
 		logging.LogErrorf("write assets texts failed: %s", err)
 		return
 	}
@@ -161,5 +169,5 @@ func SaveAssetsTexts() {
 		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
 	}
 
-	util.AssetsTextsChanged = false
+	util.AssetsTextsChanged.Store(false)
 }

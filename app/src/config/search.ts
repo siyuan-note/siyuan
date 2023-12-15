@@ -61,7 +61,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 搜索
         getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias", "keywordsLimit",
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph",
-            "indexAssetPath", "embedBlock", "database"]),
+            "indexAssetPath", "embedBlock", "database", "searchBackmention", "searchVirtualRef", "searchBlockAttr",
+            "searchBlockType", "searchCaseSensitive"]),
 
         // 快捷键
         getLang(["keymap", "keymapTip2"].concat(Object.keys(Constants.SIYUAN_KEYMAP.general))

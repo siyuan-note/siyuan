@@ -18,7 +18,7 @@ import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
-import {getDockByType} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {openCardByData} from "../card/openCard";
 import {viewCards} from "../card/viewCards";
@@ -297,6 +297,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click: () => {
             shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));

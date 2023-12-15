@@ -3,8 +3,7 @@ import {genUUID} from "../util/genID";
 import {
     getInstanceById,
     getWndByLayout, JSONToCenter,
-    newCenterEmptyTab, newModelByInitData, pdfIsLoading,
-    resizeTabs,
+    newModelByInitData, pdfIsLoading,
     setPanelFocus,
     switchWnd
 } from "./util";
@@ -36,6 +35,8 @@ import {Custom} from "./dock/Custom";
 import {App} from "../index";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
+import {setTitle} from "../dialog/processSystem";
+import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 
 export class Wnd {
     private app: App;
@@ -402,7 +403,6 @@ export class Wnd {
     }
 
     public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true) {
-        setPanelFocus(this.headersElement.parentElement.parentElement);
         let currentTab: Tab;
         this.children.forEach((item) => {
             if (target === item.headElement) {
@@ -424,6 +424,7 @@ export class Wnd {
                 }
             }
         });
+        setPanelFocus(this.headersElement.parentElement.parentElement);
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {
@@ -465,7 +466,7 @@ export class Wnd {
                     openFileById({
                         app: this.app,
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");
@@ -681,7 +682,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true, animate = true) => {
+    private removeTabAction = (id: string, closeAll = false, animate = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -690,7 +691,7 @@ export class Wnd {
                         item.model.beforeDestroy();
                     }
                 }
-                if (item.model instanceof Editor && hasSaveScroll) {
+                if (item.model instanceof Editor) {
                     saveScroll(item.model.editor.protyle);
                 }
                 if (this.children.length === 1) {
@@ -744,6 +745,7 @@ export class Wnd {
                         });
                         if (latestHeadElement && !closeAll) {
                             this.switchTab(latestHeadElement, true, true, false);
+                            this.showHeading();
                         }
                     }
                     if (animate) {
@@ -775,6 +777,7 @@ export class Wnd {
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app));
+                setTitle(window.siyuan.languages.siyuanNote);
             }
         }
         /// #if !BROWSER
@@ -784,7 +787,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, needSaveScroll = true, animate = true) {
+    public removeTab(id: string, closeAll = false, animate = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -793,9 +796,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
+                    this.removeTabAction(id, closeAll, animate);
                 } else {
-                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
+                    this.removeTabAction(id, closeAll, animate);
                 }
                 return;
             }
@@ -871,6 +874,9 @@ export class Wnd {
         }
         tab.parent = this;
         hideAllElements(["toolbar"]);
+        /// #if !BROWSER
+        setTabPosition();
+        /// #endif
     }
 
     public split(direction: TDirection) {

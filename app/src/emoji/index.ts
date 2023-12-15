@@ -4,7 +4,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
-import {getDockByType} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {setNoteBook} from "../util/pathName";

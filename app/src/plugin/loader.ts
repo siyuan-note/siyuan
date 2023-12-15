@@ -2,20 +2,23 @@ import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {exportLayout, resizeTopbar} from "../layout/util";
+import {exportLayout, resizeTopBar} from "../layout/util";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
-import {Menu} from "./Menu";
 
-const getObject = (key: string) => {
-    const api = {
+const requireFunc = (key: string) => {
+    const modules = {
         siyuan: API
     };
     // @ts-ignore
-    return api[key];
+    return modules[key]
+        ?? window.require?.(key);
 };
+if (window.require instanceof Function) {
+    requireFunc.__proto__ = window.require;
+}
 
 const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
@@ -29,17 +32,19 @@ export const loadPlugins = async (app: App) => {
         loadPluginJS(app, item);
         css += item.css || "" + "\n";
     });
-    const styleElement = document.createElement("style");
-    styleElement.id = "pluginsStyle";
-    styleElement.textContent = css;
-    document.head.append(styleElement);
+    const pluginsStyle = document.getElementById("pluginsStyle");
+    if (pluginsStyle) {
+        pluginsStyle.innerHTML = css;
+    } else {
+        document.head.insertAdjacentHTML("beforeend", `<style id="pluginsStyle">${css}</style>`);
+    }
 };
 
 const loadPluginJS = async (app: App, item: IPluginData) => {
     const exportsObj: { [key: string]: any } = {};
     const moduleObj = {exports: exportsObj};
     try {
-        runCode(item.js, "plugin:" + encodeURIComponent(item.name))(getObject, moduleObj, exportsObj);
+        runCode(item.js, "plugin:" + encodeURIComponent(item.name))(requireFunc, moduleObj, exportsObj);
     } catch (e) {
         console.error(`plugin ${item.name} run error:`, e);
         return;
@@ -108,7 +113,8 @@ const mergePluginHotkey = (plugin: Plugin) => {
     if (!window.siyuan.config.keymap.plugin) {
         window.siyuan.config.keymap.plugin = {};
     }
-    plugin.commands.forEach(command => {
+    for (let i = 0; i < plugin.commands.length; i++) {
+        const command = plugin.commands[i];
         if (!window.siyuan.config.keymap.plugin[plugin.name]) {
             command.customHotkey = command.hotkey;
             window.siyuan.config.keymap.plugin[plugin.name] = {
@@ -117,21 +123,26 @@ const mergePluginHotkey = (plugin: Plugin) => {
                     custom: command.hotkey,
                 }
             };
-            return;
-        }
-        if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
+        } else if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
             command.customHotkey = command.hotkey;
             window.siyuan.config.keymap.plugin[plugin.name][command.langKey] = {
                 default: command.hotkey,
                 custom: command.hotkey,
             };
-            return;
-        }
-        if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
-            command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom || command.hotkey;
+        } else if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
+            if (typeof window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom === "string") {
+                command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom;
+            } else {
+                command.customHotkey = command.hotkey;
+            }
             window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey;
         }
-    });
+        if (typeof command.customHotkey !== "string") {
+            console.error(`${plugin.name} - commands data is error and has been removed.`);
+            plugin.commands.splice(i, 1);
+            i--;
+        }
+    }
 };
 
 export const afterLoadPlugin = (plugin: Plugin) => {
@@ -142,11 +153,11 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     }
 
     if (!isWindow() || isMobile()) {
-        const pluginMenu: IMenu[] = [];
+        const unPinMenu: IMenu[] = [];
         plugin.topBarIcons.forEach(element => {
             if (isMobile()) {
                 if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
-                    pluginMenu.push({
+                    unPinMenu.push({
                         iconHTML: element.firstElementChild.outerHTML,
                         label: element.textContent.trim(),
                         click() {
@@ -163,23 +174,12 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
-        if (isMobile() && pluginMenu.length > 0) {
-            const pluginElement = document.createElement("div");
-            pluginElement.classList.add("b3-menu__item");
-            pluginElement.setAttribute("data-menu", "true");
-            pluginElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>`;
-            pluginElement.addEventListener("click", () => {
-                const menu = new Menu();
-                pluginMenu.forEach(item => {
-                    menu.addItem(item);
-                });
-                menu.fullscreen();
-            });
-            document.querySelector("#menuAbout").after(pluginElement);
+        if (isMobile() && unPinMenu.length > 0) {
+            return unPinMenu;
         }
     }
     /// #if !MOBILE
-    resizeTopbar();
+    resizeTopBar();
     mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status");

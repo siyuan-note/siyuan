@@ -10,6 +10,7 @@ import {Constants} from "../constants";
 import {ipcRenderer} from "electron";
 /// #endif
 import {showMessage} from "../dialog/message";
+import {isOnlyMeta} from "../protyle/util/compatibility";
 
 export const showFileInFolder = (filePath: string) => {
     /// #if !BROWSER
@@ -448,7 +449,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 if (currentItemElements.length === 0) {
                     return;
                 }
-                if (title === window.siyuan.languages.specifyPath && (event.ctrlKey || event.metaKey)) {
+                if (title === window.siyuan.languages.specifyPath && isOnlyMeta(event)) {
                     if (currentItemElements.length === 1 && currentItemElements[0].isSameNode(target)) {
                         // 至少需选中一个
                     } else {

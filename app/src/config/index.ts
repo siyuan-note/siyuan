@@ -96,7 +96,7 @@ export const openSetting = (app: App) => {
     const dialog = new Dialog({
         content: `<div class="fn__flex-1 fn__flex config__panel" style="overflow: hidden;position: relative">
   <ul class="b3-tab-bar b3-list b3-list--background">
-    <div class="config__tab-title">
+    <div class="config__tab-title resize__move">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
         <span class="b3-list-item__text">${window.siyuan.languages.config}</span>
     </div>
@@ -116,7 +116,8 @@ export const openSetting = (app: App) => {
     <li data-name="repos" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span></li>
     <li data-name="about" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span></li>
   </ul>
-  <div class="config__tab-wrap"> 
+  <div class="config__tab-wrap">
+      <div class="fn__hr--b resize__move"></div>
       <div class="config__tab-container" data-name="editor">${editor.genHTML()}</div>
       <div class="config__tab-container fn__none" data-name="filetree"></div>
       <div class="config__tab-container fn__none" data-name="card"></div>
@@ -130,6 +131,7 @@ export const openSetting = (app: App) => {
       <div class="config__tab-container config__tab-container--full fn__none" data-name="account"></div>
       <div class="config__tab-container fn__none" data-name="repos"></div>
       <div class="config__tab-container fn__none" data-name="about"></div>
+      <div class="fn__hr--b"></div>
   </div>
 </div>`,
         width: "90vw",

@@ -4,19 +4,16 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+import {stickyRow} from "../render/av/row";
 
 let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
-    let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
+        const elementRect = element.getBoundingClientRect();
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
             const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
-            if (elementRect.width === 0) {
-                elementRect = element.getBoundingClientRect();
-            }
-            const toolbarHeight = 29;
-            if (top < elementRect.top - toolbarHeight || top > elementRect.bottom - toolbarHeight) {
+            if (top < elementRect.top - protyle.toolbar.toolbarHeight || top > elementRect.bottom - protyle.toolbar.toolbarHeight) {
                 protyle.toolbar.element.style.display = "none";
             } else {
                 protyle.toolbar.element.style.top = top + "px";
@@ -25,27 +22,10 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-            if (item.parentElement.classList.contains("protyle-wysiwyg")) {
-                const headerTop = item.offsetTop + 48;
-                const headerElement = item.querySelector(".av__row--header") as HTMLElement;
-                if (headerElement) {
-                    if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {
-                        headerElement.style.transform = `translateY(${element.scrollTop - headerTop}px)`;
-                    } else {
-                        headerElement.style.transform = "";
-                    }
-                }
-                const footerElement = item.querySelector(".av__row--footer") as HTMLElement;
-                if (footerElement) {
-                    const footerBottom = headerTop + footerElement.parentElement.clientHeight;
-                    const scrollBottom = element.scrollTop + element.clientHeight;
-                    if (headerTop + 42 + 36 * 2 < scrollBottom && footerBottom > scrollBottom) {
-                        footerElement.style.transform = `translateY(${scrollBottom - footerBottom}px)`;
-                    } else {
-                        footerElement.style.transform = "";
-                    }
-                }
+            if (item.dataset.render !== "true") {
+                return;
             }
+            stickyRow(item, elementRect, "all");
         });
 
         if (!protyle.element.classList.contains("block__edit") && !isMobile()) {
@@ -59,12 +39,15 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
             clearTimeout(getIndexTimeout);
             getIndexTimeout = window.setTimeout(() => {
-                elementRect = element.getBoundingClientRect();
-                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
+                let targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
+                if (targetElement.classList.contains("protyle-wysiwyg")) {
+                    // 恰好定位到块的中间时
+                    targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 20);
+                }
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if ((protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
-                        // goHome 时 data-eof 不为 1
+                            // goHome 时 data-eof 不为 1
                             protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0") &&
                         (hasClosestByClassName(targetElement, "protyle-background") || hasClosestByClassName(targetElement, "protyle-title"))) {
                         const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;

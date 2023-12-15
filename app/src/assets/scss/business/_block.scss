@@ -14,6 +14,7 @@
     min-height: 197px;
     z-index: -1;
     border: 1px solid var(--b3-theme-surface-lighter);
+    max-width: 1024px;
 
     &--open {
       opacity: 1;

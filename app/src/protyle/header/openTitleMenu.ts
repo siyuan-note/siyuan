@@ -27,6 +27,7 @@ import {openDocHistory} from "../../history/doc";
 import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
+import {saveScroll} from "../scroll/saveScroll";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -204,10 +205,12 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             label: window.siyuan.languages.openByNewWindow,
             icon: "iconOpenWindow",
             click() {
+                saveScroll(protyle);
                 openNewWindowById(protyle.block.rootID);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click: () => {
                 showFileInFolder(path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));

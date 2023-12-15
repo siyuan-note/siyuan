@@ -39,10 +39,10 @@ var (
 
 type historyDBQueueOperation struct {
 	inQueueTime time.Time
-	action      string // index/deletePathPrefix
+	action      string // index/deleteOutdated
 
-	histories  []*History // index
-	pathPrefix string     // deletePathPrefix
+	histories []*History // index
+	before    string     // deleteOutdated
 }
 
 func FlushHistoryTxJob() {
@@ -67,7 +67,7 @@ func FlushHistoryQueue() {
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	groupOpsCurrent := map[string]int{}
 	for i, op := range ops {
-		if util.IsExiting {
+		if util.IsExiting.Load() {
 			return
 		}
 
@@ -111,8 +111,8 @@ func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]i
 	switch op.action {
 	case "index":
 		err = insertHistories(tx, op.histories, context)
-	case "deletePathPrefix":
-		err = deleteHistoriesByPathPrefix(tx, op.pathPrefix, context)
+	case "deleteOutdated":
+		err = deleteOutdatedHistories(tx, op.before, context)
 	default:
 		msg := fmt.Sprintf("unknown history operation [%s]", op.action)
 		logging.LogErrorf(msg)
@@ -121,11 +121,11 @@ func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]i
 	return
 }
 
-func DeleteHistoriesByPathPrefixQueue(pathPrefix string) {
+func DeleteOutdatedHistories(before string) {
 	historyDBQueueLock.Lock()
 	defer historyDBQueueLock.Unlock()
 
-	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "deletePathPrefix", pathPrefix: pathPrefix}
+	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "deleteOutdated", before: before}
 	historyOperationQueue = append(historyOperationQueue, newOp)
 }
 

@@ -1,5 +1,5 @@
 /// #if !MOBILE
-import {getDockByType} from "./util";
+import {getDockByType} from "./tabUtil";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
@@ -195,6 +195,9 @@ export const renderStatusbarCounter = (stat: {
     imageCount: number,
     refCount: number
 }) => {
+    if(!stat) {
+        return;
+    }
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
 <span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
     if (0 < stat.linkCount) {

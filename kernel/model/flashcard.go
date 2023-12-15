@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/open-spaced-repetition/go-fsrs"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -37,6 +38,99 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
+	// Support resetting the learning progress of flashcards https://github.com/siyuan-note/siyuan/issues/9564
+
+	if 0 < len(blockIDs) {
+		if "" == deckID {
+			// 从全局管理进入时不会指定卡包 ID，这时需要遍历所有卡包
+			for _, deck := range Decks {
+				allBlockIDs := deck.GetBlockIDs()
+				for _, blockID := range blockIDs {
+					if gulu.Str.Contains(blockID, allBlockIDs) {
+						deckID = deck.ID
+						break
+					}
+				}
+				if "" == deckID {
+					logging.LogWarnf("deck not found for blocks [%s]", strings.Join(blockIDs, ","))
+					continue
+				}
+				resetFlashcards(deckID, blockIDs)
+			}
+			return
+		}
+
+		resetFlashcards(deckID, blockIDs)
+		return
+	}
+
+	var blocks []*Block
+	switch typ {
+	case "notebook":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
+			if 1 > len(pagedBlocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+		for _, block := range blocks {
+			blockIDs = append(blockIDs, block.ID)
+		}
+	case "tree":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
+			if 1 > len(pagedBlocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+		for _, block := range blocks {
+			blockIDs = append(blockIDs, block.ID)
+		}
+	case "deck":
+		for i := 1; ; i++ {
+			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
+			if 1 > len(pagedBlocks) {
+				break
+			}
+			blocks = append(blocks, pagedBlocks...)
+		}
+	default:
+		logging.LogErrorf("invalid type [%s]", typ)
+	}
+
+	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+	resetFlashcards(deckID, blockIDs)
+}
+
+func resetFlashcards(deckID string, blockIDs []string) {
+	transactions := []*Transaction{
+		{
+			DoOperations: []*Operation{
+				{
+					Action:   "removeFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
+		{
+			DoOperations: []*Operation{
+				{
+					Action:   "addFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
+	}
+
+	PerformTransactions(&transactions)
+	WaitForWritingFiles()
+}
 
 func GetFlashcardNotebooks() (ret []*Box) {
 	deck := Decks[builtinDeckID]
@@ -192,7 +286,7 @@ func getTreeFlashcards(rootID string) (ret []riff.Card) {
 	return
 }
 
-func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
+func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	var cards []riff.Card
 	if "" == deckID {
@@ -215,7 +309,12 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 }
 
 func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
-	sort.Slice(cards, func(i, j int) bool { return cards[i].BlockID() < cards[j].BlockID() })
+	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
+	sort.Slice(cards, func(i, j int) bool {
+		due1 := cards[i].(*riff.FSRSCard).C.Due
+		due2 := cards[j].(*riff.FSRSCard).C.Due
+		return due1.Before(due2)
+	})
 
 	const pageSize = 20
 	total = len(cards)
@@ -239,7 +338,6 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 	for _, card := range cards {
 		blockIDs = append(blockIDs, card.BlockID())
 	}
-	sort.Strings(blockIDs)
 
 	sqlBlocks := sql.GetBlocks(blockIDs)
 	blocks = fromSQLBlocks(&sqlBlocks, "", 36)
@@ -259,7 +357,7 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		}
 
 		b.RiffCardID = cards[i].ID()
-		b.RiffCardReps = cards[i].(*riff.FSRSCard).C.Reps
+		b.RiffCard = getRiffCard(cards[i].(*riff.FSRSCard).C)
 	}
 	return
 }
@@ -814,15 +912,15 @@ func RemoveDeck(deckID string) (err error) {
 
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
-	if gulu.File.IsExist(deckPath) {
-		if err = os.Remove(deckPath); nil != err {
+	if filelock.IsExist(deckPath) {
+		if err = filelock.Remove(deckPath); nil != err {
 			return
 		}
 	}
 
 	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
-	if gulu.File.IsExist(cardsPath) {
-		if err = os.Remove(cardsPath); nil != err {
+	if filelock.IsExist(cardsPath) {
+		if err = filelock.Remove(cardsPath); nil != err {
 			return
 		}
 	}

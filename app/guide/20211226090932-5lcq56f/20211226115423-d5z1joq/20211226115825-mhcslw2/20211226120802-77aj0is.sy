@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120802-77aj0is",
 		"title": "内容塊屬性",
-		"updated": "20230630095210"
+		"updated": "20211226120833"
 	},
 	"Children": [
 		{
@@ -283,38 +283,9 @@
 			]
 		},
 		{
-			"ID": "20211226120833-16hxsdz",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226120833-16hxsdz",
-				"updated": "20211226000642"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用屬性"
-				}
-			]
-		},
-		{
-			"ID": "20211226120833-txlspf2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226120833-txlspf2",
-				"updated": "20211228141553"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "屬性主要有兩個使用場景：根據屬性查詢內容塊和存儲小工具資料。"
-				}
-			]
-		},
-		{
 			"ID": "20211226120833-srr6kys",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-srr6kys",
 				"updated": "20211226000642"
@@ -386,35 +357,6 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20211226120833-6qo8iwk",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20211226120833-6qo8iwk",
-				"updated": "20211228141304"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "存儲小工具資料"
-				}
-			]
-		},
-		{
-			"ID": "20211226120833-1jgzrnn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226120833-1jgzrnn",
-				"updated": "20211226000803"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "小工具可以通過接口來設置屬性，具體請參考開發文檔。"
 				}
 			]
 		}

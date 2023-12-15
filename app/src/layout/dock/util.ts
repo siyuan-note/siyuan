@@ -2,7 +2,8 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {getInstanceById, getWndByLayout, resizeTabs, switchWnd} from "../util";
+import {getInstanceById, getWndByLayout, switchWnd} from "../util";
+import {resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
 import {Wnd} from "../Wnd";
@@ -32,16 +33,22 @@ export const openBacklink = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.rootId = response.data.rootID;
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.title = response.data.name || "Untitled";
     }
+    const newWnd = wnd.split("lr");
     newWnd.addTab(new Tab({
         icon: "iconLink",
         title: options.title,
@@ -82,16 +89,22 @@ export const openGraph = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr");
     if (!options.rootId) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.rootId = response.data.rootID;
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || "Untitled";
     } else if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        if (response.code === -1) {
+            return;
+        }
         options.title = response.data.name || "Untitled";
     }
+    const newWnd = wnd.split("lr");
     newWnd.addTab(new Tab({
         icon: "iconGraph",
         title: options.title,
@@ -170,6 +183,7 @@ export const toggleDockBar = (useElement: Element) => {
     } else {
         useElement.setAttribute("xlink:href", "#iconHideDock");
     }
+    window.siyuan.config.uiLayout.hideDock = dockIsShow;
     document.querySelectorAll(".dock").forEach(item => {
         if (dockIsShow) {
             item.classList.add("fn__none");

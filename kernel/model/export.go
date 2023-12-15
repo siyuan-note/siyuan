@@ -84,7 +84,7 @@ func Export2Liandi(id string) (err error) {
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
 			SetSuccessResult(result).
-			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 			Get(util.GetCloudAccountServer() + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
 			logging.LogErrorf("get liandi article info failed: %s", getErr)
@@ -114,7 +114,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.User.UserId+"/", true,
+	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
 		4, 1, 0,
 		"#", "#",
 		"", "",
@@ -123,7 +123,7 @@ func Export2Liandi(id string) (err error) {
 	request := httpclient.NewCloudRequest30s()
 	request = request.
 		SetSuccessResult(result).
-		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
 		SetBody(map[string]interface{}{
 			"articleTitle":   title,
 			"articleTags":    tags,
@@ -585,7 +585,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	return
 }
 
-func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string, node *ast.Node) {
 	savePath = strings.TrimSpace(savePath)
 
 	bt := treenode.GetBlockTree(id)
@@ -594,6 +594,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	}
 
 	tree := prepareExportTree(bt)
+	node = treenode.GetNodeInTree(tree, id)
 
 	if merge {
 		var mergeErr error
@@ -1089,7 +1090,7 @@ func ExportStdMarkdown(id string) string {
 
 	cloudAssetsBase := ""
 	if IsSubscriber() {
-		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.User.UserId + "/"
+		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
 	}
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -1346,7 +1347,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			if !gulu.File.IsDir(srcPath) && strings.HasSuffix(strings.ToLower(srcPath), ".pdf") {
 				sya := srcPath + ".sya"
-				if gulu.File.IsExist(sya) {
+				if filelock.IsExist(sya) {
 					// Related PDF annotation information is not exported when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/7836
 					if syaErr := filelock.Copy(sya, destPath+".sya"); nil != syaErr {
 						logging.LogErrorf("copy sya from [%s] to [%s] failed: %s", sya, destPath+".sya", syaErr)
@@ -1372,7 +1373,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			avID := n.AttributeViewID
 			avJSONPath := av.GetAttributeViewDataPath(avID)
-			if !gulu.File.IsExist(avJSONPath) {
+			if !filelock.IsExist(avJSONPath) {
 				return ast.WalkContinue
 			}
 
@@ -1409,7 +1410,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	sortIDs := map[string]int{}
 	var sortData []byte
 	var sortErr error
-	if gulu.File.IsExist(sortPath) {
+	if filelock.IsExist(sortPath) {
 		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read sort conf failed: %s", sortErr)
@@ -1522,6 +1523,25 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 			}
 			return ast.WalkContinue
 		})
+	}
+
+	// When exporting Markdown, `<br />` nodes in non-tables are replaced with `\n` text nodes https://github.com/siyuan-note/siyuan/issues/9509
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeBr == n.Type {
+			if !n.ParentIs(ast.NodeTableCell) {
+				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte("\n")})
+				unlinks = append(unlinks, n)
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
 	}
 
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
@@ -1880,7 +1900,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 		}
 
 		avID := n.AttributeViewID
-		if avJSONPath := av.GetAttributeViewDataPath(avID); !gulu.File.IsExist(avJSONPath) {
+		if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
 			return ast.WalkContinue
 		}
 
@@ -1890,19 +1910,13 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		var view *av.View
-		if "" != attrView.ViewID {
-			for _, v := range attrView.Views {
-				if v.ID == attrView.ViewID {
-					view = v
-					break
-				}
-			}
-		} else {
-			view = attrView.Views[0]
+		view, err := attrView.GetCurrentView()
+		if nil != err {
+			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
+			return ast.WalkContinue
 		}
 
-		table, err := renderAttributeViewTable(attrView, view)
+		table, err := renderAttributeViewTable(attrView, view, 1, -1)
 		if nil != err {
 			logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
 			return ast.WalkContinue
@@ -1932,7 +1946,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 				if nil != cell.Value {
 					if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
-							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone)
+							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime)
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {
@@ -1941,6 +1955,18 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 					} else if av.KeyTypeUpdated == cell.Value.Type {
 						if nil != cell.Value.Updated {
 							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
+						}
+					} else if av.KeyTypeMAsset == cell.Value.Type {
+						if nil != cell.Value.MAsset {
+							buf := &bytes.Buffer{}
+							for _, a := range cell.Value.MAsset {
+								buf.WriteString("![](")
+								buf.WriteString(a.Content)
+								buf.WriteString(") ")
+							}
+							val = strings.TrimSpace(buf.String())
+							mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+							continue
 						}
 					}
 

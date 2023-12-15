@@ -52,6 +52,15 @@ try {
     app.exit();
 }
 
+const setProxy = (proxyURL, webContents) => {
+    if (proxyURL.startsWith("://")) {
+        console.log("network proxy [system]");
+        return webContents.session.setProxy({mode: "system"});
+    }
+    console.log("network proxy [" + proxyURL + "]");
+    return webContents.session.setProxy({proxyRules: proxyURL});
+};
+
 const hotKey2Electron = (key) => {
     if (!key) {
         return key;
@@ -287,6 +296,16 @@ const boot = () => {
     windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
+    // set proxy
+    net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
+        return response.json();
+    }).then((response) => {
+        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
+            // 加载主界面
+            currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
+        });
+    });
+
     currentWindow.webContents.session.setSpellCheckerLanguages(["en-US"]);
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
@@ -350,8 +369,6 @@ const boot = () => {
             bootWindow.destroy();
         }
     });
-    // 加载主界面
-    currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
 
     // 菜单
     const productName = "SiYuan";
@@ -589,13 +606,29 @@ const initKernel = (workspace, port, lang) => {
 };
 
 app.setAsDefaultProtocolClient("siyuan");
+app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 
 app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");
 app.commandLine.appendSwitch("no-proxy-server");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 
-app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
+// Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
+writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
+let argStart = 1;
+if (!app.isPackaged) {
+    argStart = 2;
+}
+for (let i = argStart; i < process.argv.length; i++) {
+    let arg = process.argv[i];
+    if (arg.startsWith("--workspace=") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
+        // 跳过内置参数
+        continue;
+    }
+
+    app.commandLine.appendSwitch(arg);
+    writeLog("command line switch [" + arg + "]");
+}
 
 app.whenReady().then(() => {
     const resetTrayMenu = (tray, lang, mainWindow) => {
@@ -669,6 +702,9 @@ app.whenReady().then(() => {
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }
+        if (data.cmd === "setProxy") {
+            return setProxy(data.proxyURL, event.sender);
+        }
         if (data.cmd === "showSaveDialog") {
             return dialog.showSaveDialog(data);
         }
@@ -694,9 +730,10 @@ app.whenReady().then(() => {
                     return;
                 }
                 const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split("\u200b");
-                if (ids.includes(data.options.rootID) || ids.includes(data.options.assetPath)) {
+                const options = JSON.parse(data.options);
+                if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
                     item.focus();
-                    item.webContents.send("siyuan-open-file", data.options);
+                    item.webContents.send("siyuan-open-file", options);
                     hasMatch = true;
                     return true;
                 }
@@ -704,7 +741,13 @@ app.whenReady().then(() => {
             return hasMatch;
         }
     });
-    ipcMain.once("siyuan-event", (event) => {
+
+    const initEventId = [];
+    ipcMain.on("siyuan-event", (event) => {
+        if (initEventId.includes(event.sender.id)) {
+            return;
+        }
+        initEventId.push(event.sender.id);
         const currentWindow = getWindowByContentId(event.sender.id);
         currentWindow.on("focus", () => {
             event.sender.send("siyuan-event", "focus");
@@ -740,6 +783,9 @@ app.whenReady().then(() => {
         switch (cmd) {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
+                break;
+            case "unregisterAll":
+                globalShortcut.unregisterAll();
                 break;
             case "show":
                 showWindow(currentWindow);
@@ -790,19 +836,6 @@ app.whenReady().then(() => {
                 } else {
                     currentWindow.hide();
                 }
-                break;
-            case "setProxy":
-                event.sender.session.closeAllConnections().then(() => {
-                    if (data.proxyURL.startsWith("://")) {
-                        event.sender.session.setProxy({mode: "system"}).then(() => {
-                            console.log("network proxy [system]");
-                        });
-                        return;
-                    }
-                    event.sender.session.setProxy({proxyRules: data.proxyURL}).then(() => {
-                        console.log("network proxy [" + data.proxyURL + "]");
-                    });
-                });
                 break;
         }
     });

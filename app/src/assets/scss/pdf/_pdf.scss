@@ -329,10 +329,6 @@
   #findInput {
     width: 120px;
   }
-
-  #findInput[data-status="notFound"] {
-    background-color: var(--b3-theme-error);
-  }
 }
 
 .secondaryToolbar {

@@ -17,6 +17,7 @@
 @import "business/graph";
 @import "business/layout";
 @import "business/block";
+@import "business/drag";
 @import "util/reset";
 @import "component/card";
 @import "component/menu";
@@ -83,6 +84,8 @@ html {
   & > .block__icons > .fn__flex-1 {
     -webkit-app-region: drag;
     min-width: 32px;
+    height: 100%;
+    box-sizing: border-box;
 
     &:hover {
       border-radius: var(--b3-border-radius-b);
@@ -194,6 +197,7 @@ html {
       margin: 0;
       height: 31.5px;
       border-radius: 0;
+
       svg {
         width: 10px !important;
       }
@@ -282,6 +286,7 @@ html {
       align-self: center;
       margin: 0 8px 0 4px;
       cursor: pointer;
+      flex-shrink: 0;
 
       & > div {
         background-color: var(--b3-theme-primary-light);
@@ -314,26 +319,30 @@ html {
 }
 
 .file-tree {
-  .dragover {
-    background-color: var(--b3-theme-primary-lightest);
-
-    &__top {
-      background-color: var(--b3-theme-primary-lightest);
-      box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter);
-    }
-
-    &__bottom {
-      background-color: var(--b3-theme-primary-lightest);
-      box-shadow: 0 2px 0 var(--b3-theme-primary-lighter), inset 0px -2px 0 var(--b3-theme-primary-lighter);
-    }
-  }
-
-  &:hover .block__icons .block__icon:not([disabled]) {
+  &:hover .block__icons .block__icon:not([disabled]),
+  &.fullscreen .block__icons .block__icon:not([disabled]) {
     opacity: 1;
   }
 
   &:hover .block__icons .block__icon[disabled] {
     opacity: .38;
+  }
+
+  .dragover__top:after,
+  .dragover__bottom:after {
+    content: "";
+    width: var(--file-toggle-width);
+    height: 4px;
+    background-color: var(--b3-theme-surface);
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    z-index: 1;
+  }
+
+  .dragover__top:after {
+    top: -3px;
+    bottom: auto;
   }
 
   &__close {
@@ -383,6 +392,10 @@ html {
   max-height: 70vh;
   max-width: 100%;
   min-width: 426px;
+
+  .b3-list {
+    padding: 8px 0;
+  }
 
   .b3-list:last-child {
     border-left: 1px solid var(--b3-theme-surface-lighter);

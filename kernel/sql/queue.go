@@ -35,8 +35,6 @@ import (
 var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
-
-	txLock = sync.Mutex{}
 )
 
 type dbQueueOperation struct {
@@ -50,6 +48,7 @@ type dbQueueOperation struct {
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename/rename_sub_tree
 	block                         *Block      // update_block_content
+	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
 }
 
@@ -75,14 +74,18 @@ func WaitForWritingDatabase() {
 
 func isWritingDatabase() bool {
 	time.Sleep(util.SQLFlushInterval + 50*time.Millisecond)
-	if 0 < len(operationQueue) || util.IsMutexLocked(&txLock) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	if 0 < len(operationQueue) {
 		return true
 	}
 	return false
 }
 
 func IsEmptyQueue() bool {
-	return 1 > len(operationQueue) && !util.IsMutexLocked(&txLock)
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	return 1 > len(operationQueue)
 }
 
 func ClearQueue() {
@@ -92,30 +95,30 @@ func ClearQueue() {
 }
 
 func FlushQueue() {
-	ops := mergeUpsertTrees()
-	if 1 > len(ops) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	total := len(operationQueue)
+	if 1 > total {
 		return
 	}
 
-	txLock.Lock()
-	defer txLock.Unlock()
 	start := time.Now()
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	total := len(ops)
 	if 512 < total {
 		disableCache()
 		defer enableCache()
 	}
 
 	groupOpsTotal := map[string]int{}
-	for _, op := range ops {
+	for _, op := range operationQueue {
 		groupOpsTotal[op.action]++
 	}
 
 	groupOpsCurrent := map[string]int{}
-	for i, op := range ops {
-		if util.IsExiting {
+	for i, op := range operationQueue {
+		if util.IsExiting.Load() {
 			return
 		}
 
@@ -135,7 +138,7 @@ func FlushQueue() {
 
 		if err = commitTx(tx); nil != err {
 			logging.LogErrorf("commit tx failed: %s", err)
-			return
+			continue
 		}
 
 		if 16 < i && 0 == i%128 {
@@ -143,9 +146,11 @@ func FlushQueue() {
 		}
 	}
 
-	if 128 < len(ops) {
+	if 128 < total {
 		debug.FreeOSMemory()
 	}
+
+	operationQueue = nil
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 7000 < elapsed {
@@ -190,12 +195,28 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = updateBlockContent(tx, op.block)
 	case "delete_assets":
 		err = deleteAssetsByHashes(tx, op.removeAssetHashes)
+	case "index_node":
+		err = indexNode(tx, op.id)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 	}
 	return
+}
+
+func IndexNodeQueue(id string) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{id: id, inQueueTime: time.Now(), action: "index_node"}
+	for i, op := range operationQueue {
+		if "index_node" == op.action && op.id == id {
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {
@@ -396,13 +417,4 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 		}
 	}
 	operationQueue = append(operationQueue, newOp)
-}
-
-func mergeUpsertTrees() (ops []*dbQueueOperation) {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-
-	ops = operationQueue
-	operationQueue = nil
-	return
 }

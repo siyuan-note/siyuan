@@ -84,8 +84,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
@@ -337,7 +337,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return
 		}
 		newSyPath := filepath.Join(filepath.Dir(syPath), tree.ID+".sy")
-		if err = filelock.Move(syPath, newSyPath); nil != err {
+		if err = filelock.Rename(syPath, newSyPath); nil != err {
 			logging.LogErrorf("rename .sy from [%s] to [%s] failed: %s", syPath, newSyPath, err)
 			return
 		}
@@ -349,7 +349,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	var sortData []byte
 	var sortErr error
 	sortPath := filepath.Join(unzipRootPath, ".siyuan", "sort.json")
-	if gulu.File.IsExist(sortPath) {
+	if filelock.IsExist(sortPath) {
 		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read import sort conf failed: %s", sortErr)
@@ -360,7 +360,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		boxSortPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
-		if gulu.File.IsExist(boxSortPath) {
+		if filelock.IsExist(boxSortPath) {
 			sortData, sortErr = filelock.ReadFile(boxSortPath)
 			if nil != sortErr {
 				logging.LogErrorf("read box sort conf failed: %s", sortErr)
@@ -437,7 +437,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	})
 	for i, oldPath := range oldPaths {
 		newPath := renamePaths[oldPath]
-		if err = filelock.Move(oldPath, newPath); nil != err {
+		if err = filelock.Rename(oldPath, newPath); nil != err {
 			logging.LogErrorf("rename path from [%s] to [%s] failed: %s", oldPath, renamePaths[oldPath], err)
 			return errors.New("rename path failed")
 		}
@@ -550,8 +550,8 @@ func ImportData(zipPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	lockSync()
+	defer unlockSync()
 
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
@@ -604,6 +604,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			err = errors.New("import from local path failed, please check kernel log for details")
 		}
 	}()
+
+	lockSync()
+	defer unlockSync()
 
 	WaitForWritingFiles()
 
@@ -717,11 +720,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 			currentDir := filepath.Dir(currentPath)
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || ast.NodeLinkDest != n.Type {
+				if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
 					return ast.WalkContinue
 				}
 
-				dest := n.TokensStr()
+				var dest string
+				if ast.NodeLinkDest == n.Type {
+					dest = n.TokensStr()
+				} else {
+					dest = n.TextMarkAHref
+				}
+
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
 					processBase64Img(n, dest, assetDirPath, err)
 					return ast.WalkContinue
@@ -729,7 +738,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 				dest = strings.ReplaceAll(dest, "%20", " ")
 				dest = strings.ReplaceAll(dest, "%5C", "/")
-				n.Tokens = []byte(dest)
+				if ast.NodeLinkDest == n.Type {
+					n.Tokens = []byte(dest)
+				} else {
+					n.TextMarkAHref = dest
+				}
 				if !util.IsRelativePath(dest) {
 					return ast.WalkContinue
 				}
@@ -759,7 +772,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					} else {
 						name = existName
 					}
-					n.Tokens = []byte("assets/" + name)
+					if ast.NodeLinkDest == n.Type {
+						n.Tokens = []byte("assets/" + name)
+					} else {
+						n.TextMarkAHref = "assets/" + name
+					}
 				}
 				return ast.WalkContinue
 			})
@@ -803,11 +820,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || ast.NodeLinkDest != n.Type {
+			if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
 				return ast.WalkContinue
 			}
 
-			dest := n.TokensStr()
+			var dest string
+			if ast.NodeLinkDest == n.Type {
+				dest = n.TokensStr()
+			} else {
+				dest = n.TextMarkAHref
+			}
+
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
 				processBase64Img(n, dest, assetDirPath, err)
 				return ast.WalkContinue
@@ -815,7 +838,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			dest = strings.ReplaceAll(dest, "%20", " ")
 			dest = strings.ReplaceAll(dest, "%5C", "/")
-			n.Tokens = []byte(dest)
+			if ast.NodeLinkDest == n.Type {
+				n.Tokens = []byte(dest)
+			} else {
+				n.TextMarkAHref = dest
+			}
 			if !util.IsRelativePath(dest) {
 				return ast.WalkContinue
 			}
@@ -838,7 +865,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
 					return ast.WalkContinue
 				}
-				n.Tokens = []byte("assets/" + name)
+				if ast.NodeLinkDest == n.Type {
+					n.Tokens = []byte("assets/" + name)
+				} else {
+					n.TextMarkAHref = "assets/" + name
+				}
 			}
 			return ast.WalkContinue
 		})

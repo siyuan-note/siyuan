@@ -7,7 +7,8 @@ import {Custom} from "../layout/dock/Custom";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {Tab} from "../layout/Tab";
-import {getDockByType, setPanelFocus} from "../layout/util";
+import {setPanelFocus} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";

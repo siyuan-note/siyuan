@@ -76,12 +76,12 @@
         .b3-button--white {
             color: var(--b3-theme-primary);
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
-            background-color: transparent;
+            background-color: #fff;
         }
 
         .b3-button--white:hover,
         .b3-button--white:focus {
-            background-color: var(--b3-theme-primary-lightest);
+            background-color: #e8eefc;
             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
         }
 
@@ -135,6 +135,7 @@
 
         .b3-snackbar--show .b3-snackbar__content {
             transform: none;
+            text-align: center;
         }
 
         .b3-snackbar__content {
@@ -151,6 +152,10 @@
             word-break: break-word;
             color: var(--b3-theme-on-primary);
             box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
+        }
+
+        .b3-snackbar__content .b3-button {
+            margin: 8px 0 0 0;
         }
 
         a {
@@ -418,120 +423,136 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
-  if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} === 1) {
-    document.body.classList.add('dark')
-  }
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    document.querySelector('.b3-button--white').remove()
-  }
-
-  try {
-    const {ipcRenderer} = require('electron')
-    ipcRenderer.on('siyuan-save-close', (event, close) => {
-      exitSiYuan()
-    })
-  } catch (e) {
-    // console.log(e)
-  }
-
-  const exitApp = () => {
-    try {
-      const {ipcRenderer} = require('electron')
-      ipcRenderer.send('siyuan-quit', window.location.port)
-    } catch (e) {
-      if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
-        window.location.href = 'siyuan://api/system/exit'
-      } else {
-        window.location.reload()
-      }
-    }
-  }
-  const exitSiYuan = () => {
-    try {
-      fetch('/api/system/exit', {
-        method: 'POST',
-        body: JSON.stringify({force: false}),
-      }).then((response) => {
-        return response.json()
-      }).then((response) => {
-        if (response.code === 1) {
-          document.querySelector('#message').classList.add('b3-snackbar--show')
-          document.querySelector('#message').firstElementChild.textContent = response.msg
-          const buttonElement = document.querySelector(`#message button`)
-          if (buttonElement) {
-            buttonElement.addEventListener('click', () => {
-              fetch('/api/system/exit', {
-                method: 'POST',
-                body: JSON.stringify({force: true}),
-              }).then((response) => {
-                return response.json()
-              }).then(() => {
-                exitApp()
-              })
-            })
-          }
-        } else {
-          exitApp()
+    const exitApp = () => {
+        try {
+            const {ipcRenderer} = require('electron')
+            ipcRenderer.send('siyuan-quit', window.location.port)
+        } catch (e) {
+            if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
+                window.location.href = 'siyuan://api/system/exit'
+            } else {
+                window.location.reload()
+            }
         }
-      }).catch(() => {
-        exitApp()
-      })
-    } catch (e) {
-      exitApp()
     }
-  }
 
-  const inputElement = document.getElementById('authCode')
-  const captchaElement = document.getElementById('captcha')
-  inputElement.focus()
-  inputElement.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      submitAuth()
+    const exitSiYuan = () => {
+        document.querySelector('#message').classList.add('b3-snackbar--show')
+        document.querySelector('#message').firstElementChild.innerHTML = "{{.l8}}"
+        try {
+            fetch('/api/system/exit', {
+                method: 'POST',
+                body: JSON.stringify({force: false}),
+            }).then((response) => {
+                return response.json()
+            }).then((response) => {
+                if (response.code === 1) {
+                    document.querySelector('#message').firstElementChild.innerHTML = response.msg
+                    const buttonElement = document.querySelector(`#message button`)
+                    if (buttonElement) {
+                        buttonElement.addEventListener('click', () => {
+                            fetch('/api/system/exit', {
+                                method: 'POST',
+                                body: JSON.stringify({force: true}),
+                            }).then((response) => {
+                                return response.json()
+                            }).then(() => {
+                                exitApp()
+                            })
+                        })
+                    }
+                } else {
+                    exitApp()
+                }
+            }).catch(() => {
+                exitApp()
+            })
+        } catch (e) {
+            exitApp()
+        }
     }
-  })
 
-  captchaElement.previousElementSibling.addEventListener('click', function () {
-    this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
-  })
+    const submitAuth = () => {
+        const inputElement = document.getElementById('authCode')
+        const captchaElement = document.getElementById('captcha')
+        fetch('/api/system/loginAuth', {
+            method: 'POST',
+            body: JSON.stringify({
+                authCode: inputElement.value,
+                captcha: captchaElement.value,
+            }),
+        }).then((response) => {
+            return response.json()
+        }).then((response) => {
+            if (0 === response.code) {
+                const url = new URL(window.location)
+                window.location.href = url.searchParams.get("to") || "/"
+                return
+            }
 
-  const submitAuth = () => {
-    fetch('/api/system/loginAuth', {
-      method: 'POST',
-      body: JSON.stringify({
-        authCode: inputElement.value,
-        captcha: captchaElement.value,
-      }),
-    }).then((response) => {
-      return response.json()
-    }).then((response) => {
-      if (0 === response.code) {
-        const url = new URL(window.location)
-        window.location.href = url.searchParams.get("to") || "/"
-        return
-      }
+            if (response.code === 1) {
+                captchaElement.previousElementSibling.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
+                captchaElement.parentElement.style.display = 'block'
+            } else {
+                captchaElement.parentElement.style.display = 'none'
+                captchaElement.previousElementSibling.src = ''
+            }
 
-      if (response.code === 1) {
-        captchaElement.previousElementSibling.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
-        captchaElement.parentElement.style.display = 'block'
-      } else {
-        captchaElement.parentElement.style.display = 'none'
-        captchaElement.previousElementSibling.src = ''
-      }
+            document.querySelector('#message').classList.add('b3-snackbar--show')
+            document.querySelector('#message').firstElementChild.textContent = response.msg
+            inputElement.value = ''
+            captchaElement.value = ''
+            inputElement.focus()
+            setTimeout(() => {
+                document.querySelector('#message').classList.remove('b3-snackbar--show')
+                document.querySelector('#message').firstElementChild.textContent = ''
+            }, 6000)
+        })
+    }
 
-      document.querySelector('#message').classList.add('b3-snackbar--show')
-      document.querySelector('#message').firstElementChild.textContent = response.msg
-      inputElement.value = ''
-      captchaElement.value = ''
-      inputElement.focus()
-      setTimeout(() => {
-        document.querySelector('#message').classList.remove('b3-snackbar--show')
-        document.querySelector('#message').firstElementChild.textContent = ''
-      }, 6000)
-    })
-  }
+    const init = async () => {
+        if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
+            document.body.classList.add('dark')
+        }
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            document.querySelector('.b3-button--white').remove()
+        }
 
-  // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-  new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
+        try {
+            const {ipcRenderer} = require('electron')
+            ipcRenderer.on('siyuan-save-close', (event, close) => {
+                exitSiYuan()
+            })
+            await ipcRenderer.invoke("siyuan-init", {
+                languages: {{.trayMenuLangs}},
+                workspaceDir: '{{.workspaceDir}}',
+                port: location.port
+            });
+            ipcRenderer.send("siyuan-hotkey", {
+                languages: {{.trayMenuLangs}},
+                hotkeys: ['{{.keymapGeneralToggleWin}}']
+            });
+        } catch (e) {
+            // console.log(e)
+        }
+
+        const inputElement = document.getElementById('authCode')
+        const captchaElement = document.getElementById('captcha')
+        inputElement.focus()
+        inputElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                submitAuth()
+            }
+        })
+
+        captchaElement.previousElementSibling.addEventListener('click', function () {
+            this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
+        })
+
+        // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
+        new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
+    }
+    init();
 </script>
 </body>
 </html>

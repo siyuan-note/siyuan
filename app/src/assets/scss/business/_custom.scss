@@ -19,17 +19,27 @@
     }
 
     &.custom-attr__avheader {
+      color: var(--b3-protyle-inline-blockref-color);
+      opacity: .86;
+      transition: var(--b3-transition);
       width: 100%;
       align-items: center;
       justify-content: center;
       border-bottom: 1px solid var(--b3-border-color);
       padding: 8px 0;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 
   .block__icons {
     min-height: auto;
     padding: 4px 8px;
+    font-size: 100%;
+    border-bottom: 0;
   }
 
   .b3-text-field--text {
@@ -68,5 +78,9 @@
 
   .b3-chip {
     margin: 1px 2px;
+  }
+
+  .av__cellassetimg {
+    max-height: 24px;
   }
 }

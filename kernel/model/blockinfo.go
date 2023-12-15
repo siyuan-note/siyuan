@@ -304,6 +304,8 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 		name := util.EscapeHTML(parent.IALAttr("name"))
 		if ast.NodeDocument == parent.Type {
 			name = util.EscapeHTML(box.Name) + util.EscapeHTML(hPath)
+		} else if ast.NodeAttributeView == parent.Type {
+			name = treenode.GetAttributeViewName(parent.AttributeViewID)
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {

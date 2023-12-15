@@ -12,6 +12,12 @@
     width: 8px;
     display: inline-block;
     flex-shrink: 0;
+
+    &--small {
+      width: 4px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
   }
 
   &__hr {

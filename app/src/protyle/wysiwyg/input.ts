@@ -45,12 +45,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         focusByWbr(blockElement, range);
         return;
     }
+    blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const id = blockElement.getAttribute("data-node-id");
     if (type !== "NodeCodeBlock" && (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
-        updateTransaction(protyle, id, blockElement.outerHTML, blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
+        updateTransaction(protyle, id, blockElement.outerHTML, protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
         wbrElement.remove();
         return;
     }
@@ -69,7 +70,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         brElement.remove();
     }
 
-    blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     if (editElement.innerHTML === "》<wbr>" || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
         editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
     }
@@ -145,7 +145,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = getContenteditableElement(blockElement).scrollLeft;
         }
-        if (/<span data-type="backslash"><span>\\<\/span>.<\/span><wbr>/.test(html)) {
+        if (/<span data-type="backslash">.<\/span><wbr>/.test(html)) {
             // 转义不需要添加 zwsp
             blockElement.outerHTML = html;
         } else {

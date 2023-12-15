@@ -100,4 +100,3 @@ export const fetchGet = (url: string, cb: (response: IWebSocketData | IEmoji[]) 
         cb(response);
     });
 };
-

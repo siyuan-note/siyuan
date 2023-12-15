@@ -82,9 +82,15 @@ export const commandPanel = (app: App) => {
 
 const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
     const inputValue = inputElement.value.toLowerCase();
+    listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+    let hasFocus = false;
     Array.from(listElement.children).forEach((element: HTMLElement) => {
         const elementValue = element.querySelector(".b3-list-item__text").textContent.toLowerCase();
         if (inputValue.indexOf(elementValue) > -1 || elementValue.indexOf(inputValue) > -1) {
+            if (!hasFocus) {
+                element.classList.add("b3-list-item--focus");
+            }
+            hasFocus = true;
             element.classList.remove("fn__none");
         } else {
             element.classList.add("fn__none");

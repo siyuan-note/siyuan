@@ -1,7 +1,8 @@
-import {getEventName, isCtrl, updateHotkeyTip} from "../protyle/util/compatibility";
+import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
+import {Constants} from "../constants";
 
 export class Menu {
     public element: HTMLElement;
@@ -83,7 +84,7 @@ export class Menu {
     }
 
     public addSeparator(index?: number) {
-        this.addItem({type: "separator", index});
+       return this.addItem({type: "separator", index});
     }
 
     public addItem(option: IMenu) {
@@ -234,6 +235,9 @@ export class MenuItem {
 const getActionMenu = (element: Element, next: boolean) => {
     let actionMenuElement = element;
     while (actionMenuElement && (actionMenuElement.classList.contains("b3-menu__separator") || actionMenuElement.classList.contains("b3-menu__item--readonly"))) {
+        if (actionMenuElement.querySelector(".b3-text-field")) {
+            break;
+        }
         if (next) {
             actionMenuElement = actionMenuElement.nextElementSibling;
         } else {
@@ -245,25 +249,26 @@ const getActionMenu = (element: Element, next: boolean) => {
 
 export const bindMenuKeydown = (event: KeyboardEvent) => {
     if (window.siyuan.menus.menu.element.classList.contains("fn__none")
-        || event.altKey || event.shiftKey || isCtrl(event)) {
+        || event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
         return false;
     }
     const target = event.target as HTMLElement;
-    if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+    if (window.siyuan.menus.menu.element.contains(target) && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
     }
-    if (event.code === "ArrowDown" || event.code === "ArrowUp") {
+    const eventCode = Constants.KEYCODELIST[event.keyCode];
+    if (eventCode === "↓" || eventCode === "↑") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         let actionMenuElement;
         if (!currentElement) {
-            if (event.code === "ArrowUp") {
+            if (eventCode === "↑") {
                 actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild.lastElementChild, false);
             } else {
                 actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild.firstElementChild, true);
             }
         } else {
             currentElement.classList.remove("b3-menu__item--current", "b3-menu__item--show");
-            if (event.code === "ArrowUp") {
+            if (eventCode === "↑") {
                 actionMenuElement = getActionMenu(currentElement.previousElementSibling, false);
                 if (!actionMenuElement) {
                     actionMenuElement = getActionMenu(currentElement.parentElement.lastElementChild, false);
@@ -278,7 +283,6 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (actionMenuElement) {
             actionMenuElement.classList.add("b3-menu__item--current");
             actionMenuElement.classList.remove("b3-menu__item--show");
-
             const parentRect = actionMenuElement.parentElement.getBoundingClientRect();
             const actionMenuRect = actionMenuElement.getBoundingClientRect();
             if (parentRect.top > actionMenuRect.top || parentRect.bottom < actionMenuRect.bottom) {
@@ -286,7 +290,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
             }
         }
         return true;
-    } else if (event.code === "ArrowRight") {
+    } else if (eventCode === "→") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         if (!currentElement) {
             return true;
@@ -304,7 +308,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         }
         window.siyuan.menus.menu.showSubMenu(subMenuElement);
         return true;
-    } else if (event.code === "ArrowLeft") {
+    } else if (eventCode === "←") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__submenu .b3-menu__item--current");
         if (!currentElement) {
             return true;
@@ -316,7 +320,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
             currentElement.classList.remove("b3-menu__item--current");
         }
         return true;
-    } else if (event.code === "Enter") {
+    } else if (eventCode === "↩") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         if (!currentElement) {
             return false;

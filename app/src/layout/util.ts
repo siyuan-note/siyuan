@@ -1,29 +1,24 @@
 import {Layout} from "./index";
 import {Wnd} from "./Wnd";
-import {mountHelp, newNotebook} from "../util/mount";
 import {Tab} from "./Tab";
 import {Model} from "./Model";
 import {Graph} from "./dock/Graph";
 import {Editor} from "../editor";
 import {Files} from "./dock/Files";
-import {newFile} from "../util/newFile";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Tag} from "./dock/Tag";
 import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
 import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
-import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
+import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
-import {openSearch} from "../search/spread";
 import {saveScroll} from "../protyle/scroll/saveScroll";
-import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {isWindow} from "../util/functions";
@@ -32,14 +27,17 @@ import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {getIdZoomInByPath} from "../util/pathName";
-import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
-import {openRecentDocs} from "../business/openRecentDocs";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
+import {setTitle} from "../dialog/processSystem";
+import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 
 export const setPanelFocus = (element: Element) => {
+    if (element.getAttribute("data-type") === "wnd") {
+        setTitle(element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || window.siyuan.languages.siyuanNote);
+    }
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
         return;
     }
@@ -69,21 +67,6 @@ export const setPanelFocus = (element: Element) => {
                 editElement.blur();
             }
         }
-    }
-};
-
-export const getDockByType = (type: string) => {
-    if (!window.siyuan.layout.leftDock) {
-        return undefined;
-    }
-    if (window.siyuan.layout.leftDock.data[type]) {
-        return window.siyuan.layout.leftDock;
-    }
-    if (window.siyuan.layout.rightDock.data[type]) {
-        return window.siyuan.layout.rightDock;
-    }
-    if (window.siyuan.layout.bottomDock.data[type]) {
-        return window.siyuan.layout.bottomDock;
     }
 };
 
@@ -195,13 +178,12 @@ export const exportLayout = (options: {
     cb?: () => void,
     onlyData: boolean,
     errorExit: boolean,
-    dropEditScroll?: boolean
 }) => {
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},
         };
-        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
         if (options.onlyData) {
             return layoutJSON;
         }
@@ -224,7 +206,7 @@ export const exportLayout = (options: {
         left: dockToJSON(window.siyuan.layout.leftDock),
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
-    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     if (options.onlyData) {
         return layoutJSON;
     }
@@ -325,10 +307,6 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             (layout as Tab).headElement.classList.add("item--unupdate");
         }
-        if (json.scrollAttr) {
-            // 历史数据兼容
-            json.scrollAttr.rootId = json.rootId;
-        }
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
@@ -400,7 +378,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
         getAllTabs().forEach(item => {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id, false, false, false);
+                item.parent.removeTab(item.id, false, false);
             }
         });
     }
@@ -424,7 +402,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                     const tabId = item.getAttribute("data-id");
                     const tab = getInstanceById(tabId) as Tab;
                     if (tab) {
-                        tab.parent.removeTab(tabId, false, false, false);
+                        tab.parent.removeTab(tabId, false, false);
                     }
                 }
             }
@@ -445,10 +423,10 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             tab.parent.switchTab(item, false, false);
         });
     }
-    resizeTopbar();
+    resizeTopBar();
 };
 
-export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {
+export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
     if (layout instanceof Layout) {
         json.direction = layout.direction;
         if (layout.parent) {
@@ -495,11 +473,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
-        json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
+        json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.instance = "Editor";
-        if (!dropEditScroll) {
-            json.scrollAttr = saveScroll(layout.editor.protyle, true);
-        }
+        saveScroll(layout.editor.protyle);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         if (layout.pdfObject) {
@@ -566,13 +542,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 const itemJSON = {};
                 json.children.push(itemJSON);
-                layoutToJSON(item, itemJSON, dropEditScroll);
+                layoutToJSON(item, itemJSON);
             });
         }
     } else if (layout instanceof Tab) {
         if (layout.model) {
             json.children = {};
-            layoutToJSON(layout.model, json.children, dropEditScroll);
+            layoutToJSON(layout.model, json.children);
         } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
             json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");
@@ -583,7 +559,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
     }
 };
 
-export const resizeTopbar = () => {
+export const resizeTopBar = () => {
     const toolbarElement = document.querySelector("#toolbar");
     if (!toolbarElement) {
         return;
@@ -643,136 +619,6 @@ export const resizeTopbar = () => {
     });
 };
 
-let resizeTimeout: number;
-export const resizeTabs = () => {
-    clearTimeout(resizeTimeout);
-    //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
-    // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
-    resizeTimeout = window.setTimeout(() => {
-        const models = getAllModels();
-        models.editor.forEach((item) => {
-            if (item.editor && item.editor.protyle &&
-                item.element.parentElement && !item.element.classList.contains("fn__none")) {
-                item.editor.resize();
-            }
-        });
-        // https://github.com/siyuan-note/siyuan/issues/6250
-        models.backlink.forEach(item => {
-            const mTreeElement = item.element.querySelector(".backlinkMList") as HTMLElement;
-            if (mTreeElement.style.height && mTreeElement.style.height !== "0px" && item.element.clientHeight !== 0) {
-                mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px";
-            }
-            item.editors.forEach(editorItem => {
-                hideElements(["gutter"], editorItem.protyle);
-                editorItem.resize();
-            });
-        });
-        models.search.forEach(item => {
-            item.edit.resize();
-        });
-        models.custom.forEach(item => {
-            if (item.resize) {
-                item.resize();
-            }
-        });
-        pdfResize();
-        hideAllElements(["gutter"]);
-    }, 200);
-};
-
-export const copyTab = (app: App, tab: Tab) => {
-    return new Tab({
-        icon: tab.icon,
-        docIcon: tab.docIcon,
-        title: tab.title,
-        callback(newTab: Tab) {
-            let model: Model;
-            if (tab.model instanceof Editor) {
-                model = new Editor({
-                    app,
-                    tab: newTab,
-                    blockId: tab.model.editor.protyle.block.id,
-                    scrollAttr: saveScroll(tab.model.editor.protyle, true)
-                });
-            } else if (tab.model instanceof Asset) {
-                model = new Asset({
-                    app,
-                    tab: newTab,
-                    path: tab.model.path
-                });
-            } else if (tab.model instanceof Graph) {
-                model = new Graph({
-                    app,
-                    tab: newTab,
-                    blockId: tab.model.blockId,
-                    rootId: tab.model.rootId,
-                    type: tab.model.type,
-                });
-            } else if (tab.model instanceof Files) {
-                model = new Files({
-                    app,
-                    tab: newTab
-                });
-            } else if (tab.model instanceof Outline) {
-                model = new Outline({
-                    app,
-                    tab: newTab,
-                    blockId: tab.model.blockId,
-                    type: tab.model.type,
-                    isPreview: tab.model.isPreview
-                });
-            } else if (tab.model instanceof Backlink) {
-                model = new Backlink({
-                    app,
-                    tab: newTab,
-                    blockId: tab.model.blockId,
-                    rootId: tab.model.rootId,
-                    type: tab.model.type
-                });
-            } else if (tab.model instanceof Bookmark) {
-                model = new Bookmark(app, newTab);
-            } else if (tab.model instanceof Tag) {
-                model = new Tag(app, newTab);
-            } else if (tab.model instanceof Search) {
-                model = new Search({
-                    app,
-                    tab: newTab,
-                    config: tab.model.config
-                });
-            } else if (tab.model instanceof Custom) {
-                const custom = tab.model as Custom;
-                if (custom.type === "siyuan-card") {
-                    model = newCardModel({
-                        app,
-                        tab: newTab,
-                        data: custom.data
-                    });
-                } else {
-                    app.plugins.find(item => {
-                        if (item.models[custom.type]) {
-                            model = item.models[custom.type]({
-                                tab: newTab,
-                                data: custom.data
-                            });
-                            return true;
-                        }
-                    });
-                }
-            } else if (!tab.model && tab.headElement) {
-                const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
-                if (initData) {
-                    // 历史数据兼容 2023-05-24
-                    if (initData.scrollAttr) {
-                        initData.scrollAttr.rootId = initData.rootId;
-                    }
-                    model = newModelByInitData(app, newTab, initData);
-                }
-            }
-            newTab.addModel(model);
-        }
-    });
-};
-
 export const newModelByInitData = (app: App, tab: Tab, json: any) => {
     let model: Model;
     if (json.instance === "Custom") {
@@ -797,10 +643,10 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
         model = new Editor({
             app,
             tab,
+            rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
             action: typeof json.action === "string" ? [json.action] : json.action,
-            scrollAttr: json.scrollAttr,
         });
     }
     return model;
@@ -954,101 +800,4 @@ export const addResize = (obj: Layout | Wnd) => {
     resizeElement.classList.add("layout__resize");
     obj.element.insertAdjacentElement("beforebegin", resizeElement);
     resizeWnd(resizeElement, obj.resize);
-};
-
-export const newCenterEmptyTab = (app: App) => {
-    return new Tab({
-        panel: `<div class="layout__empty b3-list">
-    <div class="${!window.siyuan.config.readonly ? " fn__none" : ""}">
-        <div class="config-about__logo">
-            <img src="/stage/icon.png">
-            ${window.siyuan.languages.siyuanNote}
-        </div>
-        <div class="b3-label__text">${window.siyuan.languages.slogan}</div>
-    </div>
-    <div class="fn__hr"></div>
-    <div class="b3-list-item" id="editorEmptySearch">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg>
-        <span>${window.siyuan.languages.search}</span>
-        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}</span>
-    </div>
-    <div id="editorEmptyRecent" class="b3-list-item">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg>
-        <span>${window.siyuan.languages.recentDocs}</span>
-        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.recentDocs.custom)}</span>
-    </div>
-    <div id="editorEmptyHistory" class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg>
-        <span>${window.siyuan.languages.dataHistory}</span>
-        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}</span>
-    </div>
-    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyFile">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
-        <span>${window.siyuan.languages.newFile}</span>
-        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span>
-    </div>
-    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyNewNotebook">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg>
-        <span>${window.siyuan.languages.newNotebook}</span>
-    </div>
-    <div class="b3-list-item" id="editorEmptyHelp">
-        <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg>
-        <span>${window.siyuan.languages.help}</span>
-    </div>
-</div>`,
-        callback(tab: Tab) {
-            tab.panelElement.addEventListener("click", (event) => {
-                let target = event.target as HTMLElement;
-                while (target && !target.isEqualNode(tab.panelElement)) {
-                    if (target.id === "editorEmptySearch") {
-                        openSearch({
-                            app,
-                            hotkey: window.siyuan.config.keymap.general.globalSearch.custom,
-                        });
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (target.id === "editorEmptyRecent") {
-                        const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
-                            if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
-                                return true;
-                            }
-                        });
-                        if (openRecentDocsDialog) {
-                            hideElements(["dialog"]);
-                            return;
-                        }
-                        openRecentDocs();
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (target.id === "editorEmptyHistory") {
-                        openHistory(app);
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (target.id === "editorEmptyFile") {
-                        newFile({
-                            app,
-                            useSavePath: true
-                        });
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (target.id === "editorEmptyNewNotebook") {
-                        newNotebook();
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (target.id === "editorEmptyHelp") {
-                        mountHelp();
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    }
-                    target = target.parentElement;
-                }
-            });
-        }
-    });
 };

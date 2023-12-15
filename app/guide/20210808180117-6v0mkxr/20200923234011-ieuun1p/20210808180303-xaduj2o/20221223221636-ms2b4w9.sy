@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20230820185231"
+		"updated": "20231013104018"
 	},
 	"Children": [
 		{
@@ -87,7 +87,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092249-yzjjb1o",
-				"updated": "20230219092854"
+				"updated": "20231013104018"
 			},
 			"Children": [
 				{
@@ -132,7 +132,7 @@
 					},
 					"Properties": {
 						"id": "20230219092249-xdxmusm",
-						"updated": "20230219092407"
+						"updated": "20231013103949"
 					},
 					"Children": [
 						{
@@ -140,12 +140,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230219092249-04pxvxk",
-								"updated": "20230219092407"
+								"updated": "20231013103949"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If the super block is set as a flashcard, the first sub-block of the super block will be regarded as a question, and the rest of the sub-blocks will be regarded as an answer"
+									"Data": "If a super block is set as a flashcard, the first sub-block of the super block will be regarded as a question, and the rest of the sub-blocks will be regarded as an answer"
 								}
 							]
 						}
@@ -174,6 +174,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "If a list or list item is set as a flashcard, non-sublists will be treated as questions and sublists will be treated as answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231013103926-u4hxd38",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231013103926-u4hxd38",
+						"updated": "20231013104018"
+					},
+					"Children": [
+						{
+							"ID": "20231013103926-o3y1n5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231013103926-o3y1n5a",
+								"updated": "20231013104018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a heading block is set as an flashcard, the heading block will be treated as a question and the blocks below it will be treated answers"
 								}
 							]
 						}

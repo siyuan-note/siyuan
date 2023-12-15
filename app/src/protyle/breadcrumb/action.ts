@@ -9,13 +9,13 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
 import {resize} from "../util/resize";
 
-export const netImg2LocalAssets = (protyle: IProtyle) => {
+export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
         return;
     }
     addLoading(protyle);
     hideElements(["toolbar"], protyle);
-    fetchPost("/api/format/netImg2LocalAssets", {
+    fetchPost(`/api/format/net${type}2LocalAssets`, {
         id: protyle.block.rootID
     }, () => {
         /// #if MOBILE
@@ -38,14 +38,10 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
     const isFullscreen = element.className.includes("fullscreen");
     if (isFullscreen) {
         element.classList.remove("fullscreen");
-        if (document.querySelector("body").classList.contains("body--win32")) {
-            document.getElementById("drag")?.classList.remove("fn__hidden");
-        }
+        document.getElementById("drag")?.classList.remove("fn__hidden");
     } else {
         element.classList.add("fullscreen");
-        if (document.querySelector("body").classList.contains("body--win32")) {
-            document.getElementById("drag")?.classList.add("fn__hidden");
-        }
+        document.getElementById("drag")?.classList.add("fn__hidden");
     }
 
     if (btnElement) {

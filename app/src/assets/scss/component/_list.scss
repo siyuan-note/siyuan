@@ -8,7 +8,7 @@
     border-radius: var(--b3-border-radius);
 
     &:hover:not(.b3-list-item--focus),
-    &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+    &--focus:not(.dragover) {
       background-color: var(--b3-list-hover);
     }
   }
@@ -133,6 +133,12 @@
         background-color: var(--b3-list-icon-hover);
         border-radius: var(--b3-border-radius);
       }
+    }
+
+    &__hinttext {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     &__hinticon {

@@ -17,6 +17,7 @@
 package util
 
 import (
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -30,6 +31,46 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
+
+func ValidOptionalPort(port string) bool {
+	if port == "" {
+		return true
+	}
+	if port[0] != ':' {
+		return false
+	}
+	for _, b := range port[1:] {
+		if b < '0' || b > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func IsLocalHostname(hostname string) bool {
+	if "localhost" == hostname || strings.HasSuffix(hostname, ".localhost") {
+		return true
+	}
+	if ip := net.ParseIP(hostname); nil != ip {
+		return ip.IsLoopback()
+	}
+	return false
+}
+
+func IsLocalHost(host string) bool {
+	if hostname, _, err := net.SplitHostPort(strings.TrimSpace(host)); nil != err {
+		return false
+	} else {
+		return IsLocalHostname(hostname)
+	}
+}
+
+func IsLocalOrigin(origin string) bool {
+	if url, err := url.Parse(origin); nil == err {
+		return IsLocalHostname(url.Hostname())
+	}
+	return false
+}
 
 func IsOnline(checkURL string, skipTlsVerify bool) bool {
 	_, err := url.Parse(checkURL)

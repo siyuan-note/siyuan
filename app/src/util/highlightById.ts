@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {getEditorRange, getSelectionPosition} from "../protyle/util/selection";
 
-const bgFade = (element: HTMLElement) => {
+export const bgFade = (element: Element) => {
     element.classList.add("protyle-wysiwyg--hl");
     setTimeout(function () {
         element.classList.remove("protyle-wysiwyg--hl");

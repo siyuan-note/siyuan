@@ -257,14 +257,6 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 		if util.IsReservedFilename(name) {
 			continue
 		}
-		if strings.HasSuffix(name, ".tmp") {
-			// 移除写入失败时产生的临时文件
-			removePath := filepath.Join(util.DataDir, box.ID, p, name)
-			if removeErr := os.Remove(removePath); nil != removeErr {
-				logging.LogWarnf("remove tmp file [%s] failed: %s", removePath, removeErr)
-			}
-			continue
-		}
 
 		totals += 1
 		fi := &FileInfo{}

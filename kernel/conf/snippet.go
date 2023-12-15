@@ -16,6 +16,18 @@
 
 package conf
 
+type Snpt struct {
+	EnabledCSS bool `json:"enabledCSS"`
+	EnabledJS  bool `json:"enabledJS"`
+}
+
+func NewSnpt() *Snpt {
+	return &Snpt{
+		EnabledCSS: true,
+		EnabledJS:  true,
+	}
+}
+
 type Snippet struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`

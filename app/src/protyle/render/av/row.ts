@@ -225,3 +225,32 @@ export const setPageSize = (options: {
         y: rect.bottom
     });
 };
+
+export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const undoOperations: IOperation[] = [];
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    const blockIds:string[] = [];
+    rowElements.forEach(item => {
+        blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));
+    });
+    rowElements.forEach(item => {
+        undoOperations.push({
+            action: "insertAttrViewBlock",
+            avID,
+            previousID: item.previousElementSibling?.getAttribute("data-id") || "",
+            srcIDs: [item.getAttribute("data-id")],
+            isDetached: item.querySelector('.av__cell[data-detached="true"]') ? true : false,
+        });
+    });
+    transaction(protyle, [{
+        action: "removeAttrViewBlock",
+        srcIDs: blockIds,
+        avID,
+    }], undoOperations);
+    rowElements.forEach(item => {
+        item.remove();
+    });
+    stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
+    updateHeader(blockElement.querySelector(".av__row"));
+}

@@ -73,7 +73,7 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
             (p)
         </button>
         <span class="fn__space"></span>
-        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space})</button>
+        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space} / Enter)</button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
@@ -99,7 +99,7 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
         </div>
         <div>
             <span></span>
-            <button data-type="3" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
+            <button data-type="3" aria-label="3 / l / ${window.siyuan.languages.space} / Enter" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
                 <div>😊</div>
                 ${window.siyuan.languages.cardRatingGood} (3)
             </button>
@@ -201,7 +201,7 @@ export const bindCardEvent = (options: {
                 type = "3";
             } else if (event.detail === "4" || event.detail === ";") {
                 type = "4";
-            } else if (event.detail === " ") {
+            } else if (event.detail === " " || event.detail === "enter") {
                 type = "-1";
             } else if (event.detail === "p") {
                 type = "-2";
@@ -336,17 +336,17 @@ export const bindCardEvent = (options: {
         hideElements(["toolbar", "hint", "util"], editor.protyle);
         if (type === "-1") {    // 显示答案
             if (actionElements[0].classList.contains("fn__none")) {
+                type = "3"
+            } else {
+                editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
+                actionElements[0].classList.add("fn__none");
+                actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
+                    element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
+                });
+                actionElements[1].classList.remove("fn__none");
                 return;
             }
-            editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
-            actionElements[0].classList.add("fn__none");
-            actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
-            });
-            actionElements[1].classList.remove("fn__none");
-            return;
-        }
-        if (type === "-2") {    // 上一步
+        } else if (type === "-2") {    // 上一步
             if (actionElements[0].classList.contains("fn__none")) {
                 return;
             }

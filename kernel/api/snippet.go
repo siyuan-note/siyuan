@@ -37,7 +37,7 @@ func serveSnippets(c *gin.Context) {
 	name := strings.TrimSuffix(filePath, ext)
 	confSnippets, err := model.LoadSnippets()
 	if nil != err {
-		logging.LogErrorf("load snippets failed: %s", name, err)
+		logging.LogErrorf("load snippets failed: %s", err)
 		c.Status(404)
 		return
 	}

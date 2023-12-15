@@ -395,6 +395,9 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         focusElement.scrollIntoView();
     } else if (scrollAttr && scrollAttr.scrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+    } else {
+        protyle.observerLoad?.disconnect();
+        return;
     }
     // 加强定位
     protyle.observerLoad = new ResizeObserver(() => {
@@ -409,7 +412,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     setTimeout(() => {
         protyle.observerLoad.disconnect();
         protyle.observer.observe(protyle.wysiwyg.element);
-    }, 1000 * 16);
+    }, 1000 * 3);
 
     if (focusElement.isSameNode(protyle.wysiwyg.element.firstElementChild)) {
         protyle.observerLoad.disconnect();

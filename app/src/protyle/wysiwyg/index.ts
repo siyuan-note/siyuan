@@ -81,6 +81,7 @@ import {showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {avRender} from "../render/av/render";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {getCellText, updateCellsValue} from "../render/av/cell";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -241,9 +242,10 @@ export class WYSIWYG {
                 return;
             }
             const selectImgElement = nodeElement.querySelector(".img--select");
+            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
-                !selectImgElement) {
+                !selectImgElement && !selectAVElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 countBlockWord([nodeElement.getAttribute("data-node-id")]);
                 selectElements = [nodeElement];
@@ -282,6 +284,20 @@ export class WYSIWYG {
                         }
                     });
                 }
+            } else if (selectAVElement) {
+                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
+                if (cellElements.length === 0) {
+                    nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
+                        rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
+                            cellElements.push(cellElement)
+                        })
+                    });
+                }
+                cellElements.forEach((item: HTMLElement) => {
+                    const cellText = getCellText(item);
+                    html += cellText;
+                    textPlain += cellText;
+                });
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
@@ -1091,18 +1107,14 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-            if (nodeElement.classList.contains("av")) {
-                updateAVName(protyle, nodeElement);
-                event.stopPropagation();
-                return;
-            }
 
             event.stopPropagation();
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
+            const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
-                !selectImgElement) {
+                !selectImgElement && !selectAVElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 selectElements = [nodeElement];
             }
@@ -1131,6 +1143,8 @@ export class WYSIWYG {
                     // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                     focusBlock(nextElement);
                 }
+            } else if (selectAVElement) {
+                html = updateCellsValue(protyle, nodeElement);
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
                 const oldHTML = nodeElement.outerHTML;
@@ -1234,7 +1248,9 @@ export class WYSIWYG {
                             tempElement.append(range.extractContents());
                             let parentElement: Element | false;
                             // https://ld246.com/article/1647689760545
-                            if (nodeElement.classList.contains("table")) {
+                            if (nodeElement.classList.contains("av")) {
+                                updateAVName(protyle, nodeElement);
+                            } else if (nodeElement.classList.contains("table")) {
                                 parentElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
                             } else {
                                 parentElement = getContenteditableElement(nodeElement);
@@ -1267,7 +1283,7 @@ export class WYSIWYG {
                     getContenteditableElement(nodeElement).removeAttribute("data-render");
                     highlightRender(nodeElement);
                 }
-                if (nodeElement.parentElement.parentElement && !isFoldHeading) {
+                if (nodeElement.parentElement.parentElement && !isFoldHeading && !nodeElement.classList.contains("av")) {
                     // 选中 heading 时，使用删除的 transaction
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 }

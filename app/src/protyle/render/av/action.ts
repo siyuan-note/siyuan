@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getTypeByCellElement, popTextCell} from "./cell";
+import {getCellText, getTypeByCellElement, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {insertAttrViewBlockAnimation, setPageSize, stickyRow, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -11,7 +11,6 @@ import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
-import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
@@ -42,12 +41,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
-        const textElement = copyElement.previousElementSibling;
-        if (textElement.querySelector(".av__cellicon")) {
-            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
-        } else {
-            writeText(textElement.textContent);
-        }
+        getCellText(hasClosestByClassName(copyElement, "av__cell"));
         showMessage(window.siyuan.languages.copied);
         event.preventDefault();
         event.stopPropagation();

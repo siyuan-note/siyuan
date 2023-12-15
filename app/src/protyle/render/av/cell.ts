@@ -2,11 +2,67 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
-import {isNotCtrl} from "../../util/compatibility";
+import {isNotCtrl, writeText} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
 import * as dayjs from "dayjs";
+
+export const getCellText = (cellElement: HTMLElement | false) => {
+    if (!cellElement) {
+        return
+    }
+    const textElement = cellElement.querySelector(".av__celltext");
+    if (textElement) {
+        if (textElement.querySelector(".av__cellicon")) {
+            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
+        } else {
+            writeText(textElement.textContent);
+        }
+    } else {
+        writeText(cellElement.textContent);
+    }
+}
+
+const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
+    let cellValue: IAVCellValue;
+    if (colType === "number") {
+        const value = cellElement.querySelector(".av__celltext").getAttribute("data-content")
+        cellValue = {
+            type: colType,
+            number: {
+                content: parseFloat(value) || 0,
+                isNotEmpty: !!value
+            }
+        };
+    } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+        cellValue = {
+            type: colType,
+            [colType]: {
+                content: cellElement.querySelector(".av__celltext").textContent.trim()
+            }
+        };
+    } else if (colType === "mSelect" || colType === "select") {
+        const mSelect: IAVCellSelectValue[] = []
+        cellElement.querySelectorAll(".b3-chip").forEach((item: HTMLElement) => {
+            mSelect.push({
+                content: item.textContent.trim(),
+                color: item.style.color.replace("var(--b3-font-color", "").replace(")", "")
+            })
+        })
+        cellValue = {
+            type: colType,
+            mSelect
+        };
+    } else if (["date", "created", "updated"].includes(colType)) {
+        debugger;
+        cellValue = {
+            type: colType,
+            [colType]: JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
+        };
+    }
+    return cellValue;
+}
 
 export const genCellValue = (colType: TAVCol, value: string | any) => {
     let cellValue: IAVCellValue;
@@ -24,6 +80,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 cellValue = {
                     type: colType,
                     number: {
+                        content: 0,
                         isNotEmpty: false
                     }
                 };
@@ -177,7 +234,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         } else if (type === "date") {
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {
-            updateCellValue(protyle, type, cellElements);
+            updateCellValueByInput(protyle, type, cellElements);
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -210,7 +267,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                updateCellValue(protyle, type, cellElements);
+                updateCellValueByInput(protyle, type, cellElements);
                 if (event.key === "Tab") {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
@@ -228,13 +285,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     avMaskElement.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")) {
-            updateCellValue(protyle, type, cellElements);
+            updateCellValueByInput(protyle, type, cellElements);
             avMaskElement?.remove();
         }
     });
 };
 
-const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
+const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
     const rowElement = hasClosestByClassName(cellElements[0], "av__row");
     if (!rowElement) {
         return;
@@ -377,3 +434,69 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         item.remove();
     });
 };
+
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement) => {
+    const doOperations: IOperation[] = []
+    const undoOperations: IOperation[] = []
+
+    const avID = nodeElement.dataset.avId
+    const id = nodeElement.dataset.nodeId
+    let text = ''
+    const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
+    if (cellElements.length === 0) {
+        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
+            rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
+                cellElements.push(cellElement)
+            })
+        });
+    }
+    cellElements.forEach((item: HTMLElement) => {
+        const rowElement = hasClosestByClassName(item, "av__row");
+        if (!rowElement) {
+            return;
+        }
+        const type = getTypeByCellElement(item);
+        if (["created", "updated", "template"].includes(type)) {
+            return;
+        }
+        const rowID = rowElement.getAttribute("data-id");
+        const cellId = item.getAttribute("data-id");
+        const colId = item.getAttribute("data-col-id");
+
+        text += getCellText(item);
+
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: genCellValue(type, "")
+        });
+        undoOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: genCellValueByElement(type, item)
+        });
+        if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+            updateAttrViewCellAnimation(item);
+        }
+    })
+    if (doOperations.length > 0) {
+        doOperations.push({
+            action: "doUpdateUpdated",
+            id,
+            data: dayjs().format("YYYYMMDDHHmmss"),
+        })
+        undoOperations.push({
+            action: "doUpdateUpdated",
+            id,
+            data: nodeElement.getAttribute("updated"),
+        })
+        transaction(protyle, doOperations, undoOperations);
+    }
+    return text;
+}

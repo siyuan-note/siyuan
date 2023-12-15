@@ -3,15 +3,14 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getTypeByCellElement, popTextCell} from "./cell";
+import {getCellText, getTypeByCellElement, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
-import {insertAttrViewBlockAnimation, setPageSize, stickyRow, updateHeader} from "./row";
+import {deleteRow, insertAttrViewBlockAnimation, setPageSize, stickyRow, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
-import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
@@ -26,6 +25,7 @@ import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
+import {writeText} from "../../util/compatibility";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -42,12 +42,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
-        const textElement = copyElement.previousElementSibling;
-        if (textElement.querySelector(".av__cellicon")) {
-            writeText(`${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`);
-        } else {
-            writeText(textElement.textContent);
-        }
+        writeText(getCellText(hasClosestByClassName(copyElement, "av__cell")));
         showMessage(window.siyuan.languages.copied);
         event.preventDefault();
         event.stopPropagation();
@@ -309,49 +304,23 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     }
     rowElement.classList.add("av__row--select");
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
-    const rowIds: string[] = [];
-    const blockIds: string[] = [];
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
-    rowElements.forEach(item => {
-        rowIds.push(item.getAttribute("data-id"));
-        blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));
-    });
     updateHeader(rowElement);
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            const avID = blockElement.getAttribute("data-av-id");
-            const undoOperations: IOperation[] = [];
-            rowElements.forEach(item => {
-                undoOperations.push({
-                    action: "insertAttrViewBlock",
-                    avID,
-                    previousID: item.previousElementSibling?.getAttribute("data-id") || "",
-                    srcIDs: [item.getAttribute("data-id")],
-                    isDetached: item.querySelector('.av__cell[data-detached="true"]') ? true : false,
-                });
-            });
-            transaction(protyle, [{
-                action: "removeAttrViewBlock",
-                srcIDs: blockIds,
-                avID,
-            }], undoOperations);
-            rowElements.forEach(item => {
-                item.remove();
-            });
-            stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
-            updateHeader(blockElement.querySelector(".av__row"));
+            deleteRow(blockElement, protyle);
         }
     });
-    if (rowIds.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
+    if (rowElements.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
         menu.addSeparator();
-        openEditorTab(protyle.app, rowIds[0]);
+        openEditorTab(protyle.app, rowElements[0].getAttribute("data-id"));
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu(rowIds[0])
+            submenu: copySubMenu(rowElements[0].getAttribute("data-id"))
         });
     }
     menu.addSeparator();

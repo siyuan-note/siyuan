@@ -1398,19 +1398,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        // 支持非编辑块复制 https://ld246.com/article/1695353747104
-        if ((matchHotKey("⌘X", event) || matchHotKey("⌘C", event)) &&
-            selectText === "" &&
-            !nodeElement.querySelector(".img--select")) {
-            if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length === 0) {
-                if (nodeElement.dataset.type !== "NodeHTMLBlock") {
-                    // html 块不需要选中 https://github.com/siyuan-note/siyuan/issues/8706
-                    nodeElement.classList.add("protyle-wysiwyg--select");
-                }
-            }
-            // 复制块不能单纯的 BlockDOM2StdMd，否则 https://github.com/siyuan-note/siyuan/issues/9362
-        }
-
         if (matchHotKey(window.siyuan.config.keymap.editor.general.vLayout.custom, event)) {
             event.preventDefault();
             event.stopPropagation();

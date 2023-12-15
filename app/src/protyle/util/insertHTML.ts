@@ -9,6 +9,17 @@ import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAVName} from "../render/av/action";
 import {readText} from "./compatibility";
+import {updateCellsValue} from "../render/av/cell";
+
+const processAV = (range: Range, text: string, protyle: IProtyle, blockElement: Element) => {
+    if (blockElement.querySelector(".av__cell--select, .av__row--select")) {
+        updateCellsValue(protyle, blockElement as HTMLElement, text);
+    } else {
+        range.insertNode(document.createTextNode(text));
+        range.collapse(false);
+        updateAVName(protyle, blockElement);
+    }
+};
 
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
@@ -43,14 +54,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         range.deleteContents();
         const text = readText();
         if (typeof text === "string") {
-            range.insertNode(document.createTextNode(text));
-            range.collapse(false);
-            updateAVName(protyle, blockElement);
+            processAV(range, text, protyle, blockElement)
         } else {
             text.then((t) => {
-                range.insertNode(document.createTextNode(t));
-                range.collapse(false);
-                updateAVName(protyle, blockElement);
+                processAV(range, t, protyle, blockElement)
             });
         }
         return;

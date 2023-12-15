@@ -812,6 +812,14 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 		if nil == tableCell.Value.Checkbox {
 			tableCell.Value.Checkbox = &av.ValueCheckbox{}
 		}
+	case av.KeyTypeRelation:
+		if nil == tableCell.Value.Relation {
+			tableCell.Value.Relation = &av.ValueRelation{}
+		}
+	case av.KeyTypeRollup:
+		if nil == tableCell.Value.Rollup {
+			tableCell.Value.Rollup = &av.ValueRollup{}
+		}
 	}
 }
 
@@ -863,6 +871,8 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 			v := rowValue.Values[0]
 			if av.KeyTypeNumber == v.Type {
 				dataModel[rowValue.Key.Name] = v.Number.Content
+			} else if av.KeyTypeDate == v.Type {
+				dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 			} else {
 				dataModel[rowValue.Key.Name] = v.String()
 			}

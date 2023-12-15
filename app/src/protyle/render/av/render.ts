@@ -161,8 +161,8 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
                             });
                         } else if (cell.valueType === "date") {
-                            text = '<span class="av__celltext">';
                             const dataValue = cell.value ? cell.value.date : null;
+                            text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
                             if (dataValue && dataValue.isNotEmpty) {
                                 text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
                             }
@@ -171,8 +171,8 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             }
                             text += "</span>";
                         } else if (["created", "updated"].includes(cell.valueType)) {
-                            text = '<span class="av__celltext">';
                             const dataValue = cell.value ? cell.value[cell.valueType as "date"] : null;
+                            text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
                             if (dataValue && dataValue.isNotEmpty) {
                                 text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
                             }

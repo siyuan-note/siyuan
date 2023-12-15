@@ -364,11 +364,9 @@ const renderKeyboardToolbar = () => {
                 if (nodeElement.parentElement.classList.contains("li")) {
                     outdentElement.classList.remove("fn__none");
                     outdentElement.nextElementSibling.classList.remove("fn__none");
-                    outdentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
                 } else {
                     outdentElement.classList.add("fn__none");
                     outdentElement.nextElementSibling.classList.add("fn__none");
-                    outdentElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
                 }
             }
         }
@@ -470,6 +468,7 @@ export const initKeyboardToolbar = () => {
     <div class="fn__flex-1">
         <div class="fn__none keyboard__dynamic">
             <button class="keyboard__action" data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
+            <button class="keyboard__action" data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
             <button class="keyboard__action" data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
             <button class="keyboard__action" data-type="softLine"><svg><use xlink:href="#iconSoftWrap"></use></svg></button>
             <span class="keyboard__split"></span>
@@ -480,7 +479,6 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
             <button class="keyboard__action" data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
             <button class="keyboard__action" data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
-            <button class="keyboard__action" data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
         </div>
         <div class="fn__none keyboard__dynamic">
             <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>

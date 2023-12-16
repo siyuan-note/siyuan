@@ -134,8 +134,8 @@
     }
 
     &--active,
-    &:focus,
-    &:hover {
+    &:not(.toolbar__icon-deactivate):focus,
+    &:not(.toolbar__icon-deactivate):hover {
       background-color: var(--b3-list-hover);
     }
   }

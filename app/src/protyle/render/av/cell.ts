@@ -61,6 +61,13 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
             type: colType,
             [colType]: JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
         };
+    } else if (colType === "checkbox") {
+        cellValue = {
+            type: colType,
+            checkbox: {
+                checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
+            }
+        };
     }
     return cellValue;
 }
@@ -111,6 +118,13 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     isNotEmpty2: false,
                     hasEndDate: false,
                     isNotTime: true,
+                }
+            };
+        } else if (colType === "checkbox") {
+            cellValue = {
+                type: colType,
+                checkbox: {
+                    checked: value ? true : false
                 }
             };
         }

@@ -375,12 +375,25 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined);
     JSONToDock(window.siyuan.config.uiLayout, app);
     // 启动时不打开页签，需要移除没有钉住的页签
-    if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
-        getAllTabs().forEach(item => {
-            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id, false, false);
-            }
-        });
+    if (window.siyuan.config.fileTree.closeTabsOnStart) {
+        /// #if BROWSER
+        if (!sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD)) {
+            getAllTabs().forEach(item => {
+                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                    item.parent.removeTab(item.id, false, false);
+                }
+            });
+            sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
+        }
+        /// #else
+        if (isStart) {
+            getAllTabs().forEach(item => {
+                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                    item.parent.removeTab(item.id, false, false);
+                }
+            });
+        }
+        /// #endif
     }
     app.plugins.forEach(item => {
         afterLoadPlugin(item);

@@ -81,7 +81,18 @@ func findReplace(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	err := model.FindReplace(k, r, ids, paths, boxes, types, method, orderBy, groupBy)
+
+	replaceTypes := map[string]bool{}
+	// text, img-text, img-title, img-src, a-text, a-title, a-href, code, em, strong, inline-math, inline-memo, kbd, mark, s, sub, sup, tag, u
+	// doc-title, code-block, math-block, html-block
+	if nil != arg["replaceTypes"] {
+		replaceTypesArg := arg["replaceTypes"].(map[string]interface{})
+		for t, b := range replaceTypesArg {
+			replaceTypes[t] = b.(bool)
+		}
+	}
+
+	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, method, orderBy, groupBy)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

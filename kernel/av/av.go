@@ -313,6 +313,17 @@ func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 	return
 }
 
+func (av *AttributeView) GetKeyValues(keyID string) (ret *KeyValues, err error) {
+	for _, kv := range av.KeyValues {
+		if kv.Key.ID == keyID {
+			ret = kv
+			return
+		}
+	}
+	err = ErrKeyNotFound
+	return
+}
+
 func (av *AttributeView) GetBlockKey() (ret *Key) {
 	for _, kv := range av.KeyValues {
 		if KeyTypeBlock == kv.Key.Type {

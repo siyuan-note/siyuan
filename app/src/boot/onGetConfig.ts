@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeTopBar, saveLayout} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
@@ -170,19 +170,6 @@ const winOnMaxRestore = async () => {
         maxBtnElement.style.display = "flex";
     }
     /// #endif
-};
-
-const saveUI = () => {
-    exportLayout({
-        reload: false,
-        onlyData: false,
-        errorExit: false
-    });
-};
-
-export const unbindSaveUI = () => {
-    window.removeEventListener("beforeunload", saveUI);
-    window.removeEventListener("pagehide", saveUI);
 };
 
 export const initWindow = async (app: App) => {
@@ -514,7 +501,5 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
     }
-    window.addEventListener("beforeunload", saveUI, false);
-    window.addEventListener("pagehide", saveUI, false);
     /// #endif
 };

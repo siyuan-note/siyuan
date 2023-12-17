@@ -1,10 +1,9 @@
 import {Layout} from "./index";
 import {genUUID} from "../util/genID";
 import {
-    exportLayout,
     getInstanceById,
     getWndByLayout, JSONToCenter,
-    newModelByInitData, pdfIsLoading,
+    newModelByInitData, pdfIsLoading, saveLayout,
     setPanelFocus,
     switchWnd
 } from "./util";
@@ -280,11 +279,7 @@ export class Wnd {
             } else {
                 oldTab.parent.children.push(tempTab);
             }
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
+            saveLayout()
         });
 
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
@@ -498,7 +493,7 @@ export class Wnd {
         }
     }
 
-    public addTab(tab: Tab, keepCursor = false, saveLayout = true) {
+    public addTab(tab: Tab, keepCursor = false, isSaveLayout = true) {
         if (keepCursor) {
             tab.headElement?.classList.remove("item--focus");
             tab.panelElement.classList.add("fn__none");
@@ -566,12 +561,8 @@ export class Wnd {
         setTabPosition();
         setModelsHash();
         /// #endif
-        if (saveLayout) {
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
+        if (isSaveLayout) {
+            saveLayout();
         }
     }
 
@@ -773,7 +764,7 @@ export class Wnd {
                 item.panelElement.remove();
                 this.destroyModel(item.model);
                 this.children.splice(index, 1);
-                resizeTabs();
+                resizeTabs(item.headElement ? true : false);
                 return true;
             }
         });
@@ -789,7 +780,7 @@ export class Wnd {
                 /// #endif
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
-                wnd.addTab(newCenterEmptyTab(this.app));
+                wnd.addTab(newCenterEmptyTab(this.app), false, false);
                 setTitle(window.siyuan.languages.siyuanNote);
             }
         }

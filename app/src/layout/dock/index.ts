@@ -720,7 +720,7 @@ export class Dock {
                 this.element.classList.remove("fn__none");
             }
             if (data[0].show) {
-                this.toggleModel(data[0].type, true);
+                this.toggleModel(data[0].type, true, false, false, false);
             }
         }
     }

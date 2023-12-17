@@ -173,6 +173,47 @@ export const resetLayout = () => {
     });
 };
 
+let saveCount = 0;
+export const saveLayout = () => {
+    const breakObj = {}
+    let layoutJSON: any = {};
+    if (isWindow()) {
+        layoutJSON = {
+            layout: {},
+        };
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
+    } else {
+        const useElement = document.querySelector("#barDock use");
+        if (useElement) {
+            layoutJSON = {
+                hideDock: useElement.getAttribute("xlink:href") === "#iconDock",
+                layout: {},
+                bottom: dockToJSON(window.siyuan.layout.bottomDock),
+                left: dockToJSON(window.siyuan.layout.leftDock),
+                right: dockToJSON(window.siyuan.layout.rightDock),
+            };
+            layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
+        }
+    }
+
+    if (Object.keys(breakObj).length > 0 && saveCount < 10) {
+        saveCount++;
+        setTimeout(() => {
+            saveLayout();
+        }, Constants.TIMEOUT_LOAD);
+    } else {
+        saveCount = 0;
+        if (isWindow()) {
+            sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
+        } else {
+            fetchPost("/api/system/setUILayout", {
+                layout: layoutJSON,
+                errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
+            });
+        }
+    }
+};
+
 export const exportLayout = (options: {
     reload: boolean,
     cb?: () => void,
@@ -439,7 +480,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     resizeTopBar();
 };
 
-export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
+export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {
     if (layout instanceof Layout) {
         json.direction = layout.direction;
         if (layout.parent) {
@@ -482,6 +523,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         }
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
+        if (!layout.editor.protyle.notebookId && breakObj) {
+            breakObj.editor = "true";
+        }
         json.notebookId = layout.editor.protyle.notebookId;
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
@@ -555,13 +599,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 const itemJSON = {};
                 json.children.push(itemJSON);
-                layoutToJSON(item, itemJSON);
+                layoutToJSON(item, itemJSON, breakObj);
             });
         }
     } else if (layout instanceof Tab) {
         if (layout.model) {
             json.children = {};
-            layoutToJSON(layout.model, json.children);
+            layoutToJSON(layout.model, json.children, breakObj);
         } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
             json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");

@@ -303,7 +303,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             return;
                         }
                         fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
-                            unbindSaveUI();
                             window.location.reload();
                         });
                     });

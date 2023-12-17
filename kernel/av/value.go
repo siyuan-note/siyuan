@@ -160,6 +160,18 @@ func (value *Value) ToJSONString() string {
 	return string(data)
 }
 
+func (value *Value) Clone() (ret *Value) {
+	data, err := gulu.JSON.MarshalJSON(value)
+	if nil != err {
+		return
+	}
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	if nil != err {
+		return
+	}
+	return
+}
+
 type ValueBlock struct {
 	ID      string `json:"id"`
 	Content string `json:"content"`

@@ -372,7 +372,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		}
 		view.Table.Sorts = tmpSorts
 
-		viewable, err = renderAttributeViewTable(attrView, view, page, pageSize)
+		viewable, err = renderAttributeViewTable(attrView, view)
 	}
 
 	viewable.FilterRows()
@@ -463,7 +463,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	return buf.String()
 }
 
-func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, page, pageSize int) (ret *av.Table, err error) {
+func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
 		ID:      view.ID,
 		Icon:    view.Icon,
@@ -1104,8 +1104,38 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		content = getNodeRefText(node)
 	}
 	now := time.Now().UnixMilli()
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
-	blockValues.Values = append(blockValues.Values, value)
+	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
+	blockValues.Values = append(blockValues.Values, blockValue)
+
+	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
+	view, _ := attrView.GetCurrentView()
+	if nil != view && 0 < len(view.Table.Filters) {
+		viewable, _ := renderAttributeViewTable(attrView, view)
+		viewable.FilterRows()
+		viewable.SortRows()
+
+		if 0 < len(viewable.Rows) {
+			row := viewable.Rows[len(viewable.Rows)-1]
+			for _, filter := range view.Table.Filters {
+				for _, cell := range row.Cells {
+					if nil != cell.Value && cell.Value.KeyID == filter.Column {
+						if av.KeyTypeBlock == cell.ValueType {
+							blockValue.Block.Content = cell.Value.Block.Content
+							continue
+						}
+
+						newValue := cell.Value.Clone()
+						newValue.ID = ast.NewNodeID()
+						newValue.BlockID = blockID
+						newValue.IsDetached = operation.IsDetached
+						newValue.IsInitialized = false
+						values, _ := attrView.GetKeyValues(filter.Column)
+						values.Values = append(values.Values, newValue)
+					}
+				}
+			}
+		}
+	}
 
 	if !operation.IsDetached {
 		attrs := parse.IAL2Map(node.KramdownIAL)

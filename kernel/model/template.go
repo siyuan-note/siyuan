@@ -333,7 +333,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 							return ast.WalkContinue
 						}
 
-						table, renderErr := renderAttributeViewTable(attrView, view, 1, -1)
+						table, renderErr := renderAttributeViewTable(attrView, view)
 						if nil != renderErr {
 							logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
 							return ast.WalkContinue

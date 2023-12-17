@@ -332,7 +332,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </div>
         <div class="fn__space"></div>
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;margin-right: 8px"><use xlink:href="#iconRefresh"></use></svg>
-        <span class="fn__space"></span>
         <span id="replaceFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel fn__flex-center" data-position="9bottom">
             <svg><use xlink:href="#iconFilter"></use></svg>
         </span>

@@ -47,6 +47,7 @@ func addVirtualBlockRefExclude(c *gin.Context) {
 	}
 
 	model.AddVirtualBlockRefExclude(keywords)
+	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
 }
 
 func addVirtualBlockRefInclude(c *gin.Context) {
@@ -67,6 +68,7 @@ func addVirtualBlockRefInclude(c *gin.Context) {
 	}
 
 	model.AddVirtualBlockRefInclude(keywords)
+	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
 }
 
 func refreshVirtualBlockRef(c *gin.Context) {
@@ -76,6 +78,7 @@ func refreshVirtualBlockRef(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	model.ResetVirtualBlockRefCache()
+	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
 }
 
 func setBazaar(c *gin.Context) {

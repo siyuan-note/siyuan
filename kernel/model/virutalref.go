@@ -118,9 +118,6 @@ func AddVirtualBlockRefInclude(keyword []string) {
 		return
 	}
 
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
-
 	include := strings.ReplaceAll(Conf.Editor.VirtualBlockRefInclude, "\\,", "__comma@sep__")
 	includes := strings.Split(include, ",")
 	includes = append(includes, keyword...)
@@ -135,9 +132,6 @@ func AddVirtualBlockRefExclude(keyword []string) {
 	if 1 > len(keyword) {
 		return
 	}
-
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
 
 	exclude := strings.ReplaceAll(Conf.Editor.VirtualBlockRefExclude, "\\,", "__comma@sep__")
 	excludes := strings.Split(exclude, ",")

@@ -523,14 +523,14 @@ export abstract class Constants {
         "text": true,
         "img-text": true,
         "img-title": true,
-        "img-src": true,
+        "img-src": false,
         "a-text": true,
         "a-title": true,
-        "a-href": true,
-        "code": true,
+        "a-href": false,
+        "code": false,
         "em": true,
         "strong": true,
-        "inline-math": true,
+        "inline-math": false,
         "inline-memo": true,
         "kbd": true,
         "mark": true,
@@ -540,9 +540,9 @@ export abstract class Constants {
         "tag": true,
         "u": true,
         "doc-title": true,
-        "code-block": true,
-        "math-block": true,
-        "html-block": true
+        "code-block": false,
+        "math-block": false,
+        "html-block": false
     };
 
     // image

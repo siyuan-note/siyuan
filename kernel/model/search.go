@@ -353,7 +353,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		}
 
 		if ast.NodeDocument == node.Type {
-			if !replaceTypes["doc-title"] {
+			if !replaceTypes["docTitle"] {
 				continue
 			}
 
@@ -383,37 +383,37 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeLinkDest:
-					if !replaceTypes["img-src"] {
+					if !replaceTypes["imgSrc"] {
 						return ast.WalkContinue
 					}
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeLinkText:
-					if !replaceTypes["img-text"] {
+					if !replaceTypes["imgText"] {
 						return ast.WalkContinue
 					}
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeLinkTitle:
-					if !replaceTypes["img-title"] {
+					if !replaceTypes["imgTitle"] {
 						return ast.WalkContinue
 					}
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeCodeBlockCode:
-					if !replaceTypes["code-block"] {
+					if !replaceTypes["codeBlock"] {
 						return ast.WalkContinue
 					}
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeMathBlockContent:
-					if !replaceTypes["math-block"] {
+					if !replaceTypes["mathBlock"] {
 						return ast.WalkContinue
 					}
 
 					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeHTMLBlock:
-					if !replaceTypes["html-block"] {
+					if !replaceTypes["htmlBlock"] {
 						return ast.WalkContinue
 					}
 
@@ -434,7 +434,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							}
 						}
 					} else if n.IsTextMarkType("a") {
-						if replaceTypes["a-text"] {
+						if replaceTypes["aText"] {
 							if 0 == method {
 								if bytes.Contains(n.Tokens, []byte(keyword)) {
 									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
@@ -446,7 +446,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							}
 						}
 
-						if replaceTypes["a-title"] {
+						if replaceTypes["aTitle"] {
 							if 0 == method {
 								if strings.Contains(n.TextMarkATitle, keyword) {
 									n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
@@ -458,7 +458,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							}
 						}
 
-						if replaceTypes["a-href"] {
+						if replaceTypes["aHref"] {
 							if 0 == method {
 								if strings.Contains(n.TextMarkAHref, keyword) {
 									n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
@@ -524,8 +524,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
-					} else if n.IsTextMarkType("inline-math") {
-						if !replaceTypes["inline-math"] {
+					} else if n.IsTextMarkType("inlineMath") {
+						if !replaceTypes["inlineMath"] {
 							return ast.WalkContinue
 						}
 
@@ -538,8 +538,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
 							}
 						}
-					} else if n.IsTextMarkType("inline-memo") {
-						if !replaceTypes["inline-memo"] {
+					} else if n.IsTextMarkType("inlineMemo") {
+						if !replaceTypes["inlineMemo"] {
 							return ast.WalkContinue
 						}
 

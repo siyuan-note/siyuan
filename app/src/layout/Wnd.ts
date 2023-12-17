@@ -1,6 +1,7 @@
 import {Layout} from "./index";
 import {genUUID} from "../util/genID";
 import {
+    exportLayout,
     getInstanceById,
     getWndByLayout, JSONToCenter,
     newModelByInitData, pdfIsLoading,
@@ -279,6 +280,11 @@ export class Wnd {
             } else {
                 oldTab.parent.children.push(tempTab);
             }
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false
+            });
         });
 
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
@@ -492,7 +498,7 @@ export class Wnd {
         }
     }
 
-    public addTab(tab: Tab, keepCursor = false) {
+    public addTab(tab: Tab, keepCursor = false, saveLayout = true) {
         if (keepCursor) {
             tab.headElement?.classList.remove("item--focus");
             tab.panelElement.classList.add("fn__none");
@@ -560,6 +566,13 @@ export class Wnd {
         setTabPosition();
         setModelsHash();
         /// #endif
+        if (saveLayout) {
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false
+            });
+        }
     }
 
     private renderTabList(target: HTMLElement) {

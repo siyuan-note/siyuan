@@ -301,7 +301,7 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
         if (json.active) {
             child.headElement.setAttribute("data-init-active", "true");
         }
-        (layout as Wnd).addTab(child);
+        (layout as Wnd).addTab(child, false, false);
         (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {

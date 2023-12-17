@@ -215,11 +215,6 @@ export const initWindow = async (app: App) => {
             if (getSelection().rangeCount > 0) {
                 focusByRange(getSelection().getRangeAt(0));
             }
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
             window.siyuan.altIsPressed = false;
             window.siyuan.ctrlIsPressed = false;
             window.siyuan.shiftIsPressed = false;

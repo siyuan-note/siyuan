@@ -157,7 +157,7 @@ export const replaceFilterMenu = (config: ISearchOption) => {
         html += `<label class="fn__flex b3-label">
     <span class="fn__space"></span>
     <div class="fn__flex-1 fn__flex-center">
-        ${window.siyuan.languages[key]}
+        ${window.siyuan.languages.replaceTypes[key]}
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" data-type="${key}" type="checkbox"${config.replaceTypes[key] ? " checked" : ""}>

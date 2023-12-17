@@ -190,17 +190,17 @@ type CriterionTypes struct {
 
 type CriterionReplaceTypes struct {
 	Text       bool `json:"text"`
-	ImgText    bool `json:"img-text"`
-	ImgTitle   bool `json:"img-title"`
-	ImgSrc     bool `json:"img-src"`
-	AText      bool `json:"a-text"`
-	ATitle     bool `json:"a-title"`
-	AHref      bool `json:"a-href"`
+	ImgText    bool `json:"imgText"`
+	ImgTitle   bool `json:"imgTitle"`
+	ImgSrc     bool `json:"imgSrc"`
+	AText      bool `json:"aText"`
+	ATitle     bool `json:"aTitle"`
+	AHref      bool `json:"aHref"`
 	Code       bool `json:"code"`
 	Em         bool `json:"em"`
 	Strong     bool `json:"strong"`
-	InlineMath bool `json:"inline-math"`
-	InlineMemo bool `json:"inline-memo"`
+	InlineMath bool `json:"inlineMath"`
+	InlineMemo bool `json:"inlineMemo"`
 	Kbd        bool `json:"kbd"`
 	Mark       bool `json:"mark"`
 	S          bool `json:"s"`
@@ -208,10 +208,10 @@ type CriterionReplaceTypes struct {
 	Sup        bool `json:"sup"`
 	Tag        bool `json:"tag"`
 	U          bool `json:"u"`
-	DocTitle   bool `json:"doc-title"`
-	CodeBlock  bool `json:"code-block"`
-	MathBlock  bool `json:"math-block"`
-	HtmlBlock  bool `json:"html-block"`
+	DocTitle   bool `json:"docTitle"`
+	CodeBlock  bool `json:"codeBlock"`
+	MathBlock  bool `json:"mathBlock"`
+	HtmlBlock  bool `json:"htmlBlock"`
 }
 
 var criteriaLock = sync.Mutex{}

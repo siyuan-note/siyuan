@@ -521,17 +521,17 @@ export abstract class Constants {
         [key: string]: boolean;
     } = {
         "text": true,
-        "img-text": true,
-        "img-title": true,
-        "img-src": false,
-        "a-text": true,
-        "a-title": true,
-        "a-href": false,
+        "imgText": true,
+        "imgTitle": true,
+        "imgSrc": false,
+        "aText": true,
+        "aTitle": true,
+        "aHref": false,
         "code": false,
         "em": true,
         "strong": true,
-        "inline-math": false,
-        "inline-memo": true,
+        "inlineMath": false,
+        "inlineMemo": true,
         "kbd": true,
         "mark": true,
         "s": true,
@@ -539,11 +539,11 @@ export abstract class Constants {
         "sup": true,
         "tag": true,
         "u": true,
-        "doc-title": true,
-        "code-block": false,
-        "math-block": false,
-        "html-block": false
-    };
+        "docTitle": true,
+        "codeBlock": false,
+        "mathBlock": false,
+        "htmlBlock": false
+    }
 
     // image
     public static readonly SIYUAN_IMAGE_VIP: string = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">

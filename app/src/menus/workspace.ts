@@ -24,7 +24,6 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
 import {isBrowser} from "../util/functions";
-import {unbindSaveUI} from "../boot/onGetConfig";
 import {openRecentDocs} from "../business/openRecentDocs";
 
 const togglePinDock = (dock: Dock, icon: string) => {

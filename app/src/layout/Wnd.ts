@@ -279,7 +279,7 @@ export class Wnd {
             } else {
                 oldTab.parent.children.push(tempTab);
             }
-            saveLayout()
+            saveLayout();
         });
 
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {

@@ -2,7 +2,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {exportLayout, resizeTopBar, saveLayout} from "../layout/util";
+import {resizeTopBar} from "../layout/util";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";

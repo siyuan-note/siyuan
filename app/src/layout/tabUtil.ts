@@ -1,5 +1,5 @@
 import {Tab} from "./Tab";
-import {exportLayout, getInstanceById, newModelByInitData, saveLayout} from "./util";
+import {getInstanceById, newModelByInitData, saveLayout} from "./util";
 import {getAllModels, getAllTabs} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";

@@ -1,8 +1,7 @@
 import {App} from "../index";
 import {Plugin} from "../plugin";
 import {getAllModels} from "../layout/getAll";
-import {exportLayout, resizeTopBar, saveLayout} from "../layout/util";
-import {Constants} from "../constants";
+import {resizeTopBar} from "../layout/util";
 
 export const uninstall = (app: App, name: string) => {
     app.plugins.find((plugin: Plugin, index) => {

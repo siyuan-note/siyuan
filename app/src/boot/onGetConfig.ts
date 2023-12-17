@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopBar, saveLayout} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER

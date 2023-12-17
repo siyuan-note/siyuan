@@ -175,7 +175,7 @@ export const resetLayout = () => {
 
 let saveCount = 0;
 export const saveLayout = () => {
-    const breakObj = {}
+    const breakObj = {};
     let layoutJSON: any = {};
     if (isWindow()) {
         layoutJSON = {

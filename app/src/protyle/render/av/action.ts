@@ -5,7 +5,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {getCellText, getTypeByCellElement, popTextCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
-import {deleteRow, insertAttrViewBlockAnimation, setPageSize, stickyRow, updateHeader} from "./row";
+import {deleteRow, insertAttrViewBlockAnimation, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";

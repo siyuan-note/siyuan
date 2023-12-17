@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232018-hgrq0ju",
 		"title": "Connect with third-party cloud storage",
-		"updated": "20230805234114"
+		"updated": "20231217111119"
 	},
 	"Children": [
 		{
@@ -212,7 +212,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805233729-3jx41zo",
-				"updated": "20230805234114"
+				"updated": "20231217111119"
 			},
 			"Children": [
 				{
@@ -266,6 +266,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "The network is stable (For example, in mainland China, please do not use services in non-mainland China)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231217111116-w4yackk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231217111116-w4yackk",
+						"updated": "20231217111119"
+					},
+					"Children": [
+						{
+							"ID": "20231217111116-z71t0d2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231217111116-z71t0d2",
+								"updated": "20231217111119"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not enable CDN"
 								}
 							]
 						}

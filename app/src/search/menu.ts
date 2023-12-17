@@ -379,6 +379,13 @@ export const moreMenu = async (config: ISearchOption,
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
+        label: window.siyuan.languages.replaceType,
+        click() {
+            replaceFilterMenu(config);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
         label: window.siyuan.languages.searchMethod,
         type: "submenu",
         submenu: [{

@@ -239,7 +239,7 @@ export const getLocalStorage = (cb: () => void) => {
                 embedBlock: window.siyuan.config.search.embedBlock,
                 databaseBlock: window.siyuan.config.search.databaseBlock,
             },
-            replaceTypes: Constants.SIYUAN_DEFAULT_REPLACETYPES,
+            replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
 
@@ -267,7 +267,7 @@ export const getLocalStorage = (cb: () => void) => {
         // 搜索数据添加 replaceTypes 兼容
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
-            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Constants.SIYUAN_DEFAULT_REPLACETYPES;
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES);
         }
         cb();
     });

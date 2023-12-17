@@ -445,6 +445,7 @@
   "cancelMerged": "拆分單元格",
   "useDefaultWidth": "使用預設列寬",
   "type": "類型",
+  "replaceType": "替換類型",
   "searchBlockType": "塊級類型（在以下啟用的類型中進行搜索，全域搜索中的過濾選項會覆蓋該設置）",
   "searchBlockAttr": "塊級屬性（不僅在內容中進行搜索，同時也會在以下啟用的屬性中搜索）",
   "searchIndex": "索引",

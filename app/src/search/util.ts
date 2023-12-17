@@ -477,7 +477,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         embedBlock: window.siyuan.config.search.embedBlock,
                         databaseBlock: window.siyuan.config.search.databaseBlock,
                     },
-                    replaceTypes: Constants.SIYUAN_DEFAULT_REPLACETYPES,
+                    replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                 }, config, edit);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
                 event.stopPropagation();
@@ -693,7 +693,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             embedBlock: window.siyuan.config.search.embedBlock,
                             databaseBlock: window.siyuan.config.search.databaseBlock,
                         },
-                        replaceTypes: Constants.SIYUAN_DEFAULT_REPLACETYPES,
+                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 }, () => {

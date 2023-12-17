@@ -339,7 +339,7 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
                 child.headElement.querySelector(".item__text").classList.add("fn__none");
             }
         }
-        if (json.active) {
+        if (json.active && child.headElement) {
             child.headElement.setAttribute("data-init-active", "true");
         }
         (layout as Wnd).addTab(child, false, false);

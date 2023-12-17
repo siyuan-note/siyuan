@@ -9,6 +9,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "syncMergeResult":
                 reloadSync(app, data.data);
                 break;
+            case "setConf":
+                window.siyuan.config = data.data;
+                break;
             case "readonly":
                 window.siyuan.config.editor.readOnly = data.data;
                 break;

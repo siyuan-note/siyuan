@@ -29,6 +29,46 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func addVirtualBlockRefExclude(c *gin.Context) {
+	// Add internal kernel API `/api/setting/addVirtualBlockRefExclude` https://github.com/siyuan-note/siyuan/issues/9909
+
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	keywordsArg := arg["keywords"]
+	var keywords []string
+	for _, k := range keywordsArg.([]interface{}) {
+		keywords = append(keywords, k.(string))
+	}
+
+	model.AddVirtualBlockRefExclude(keywords)
+}
+
+func addVirtualBlockRefInclude(c *gin.Context) {
+	// Add internal kernel API `/api/setting/addVirtualBlockRefInclude` https://github.com/siyuan-note/siyuan/issues/9909
+
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	keywordsArg := arg["keywords"]
+	var keywords []string
+	for _, k := range keywordsArg.([]interface{}) {
+		keywords = append(keywords, k.(string))
+	}
+
+	model.AddVirtualBlockRefInclude(keywords)
+}
+
 func refreshVirtualBlockRef(c *gin.Context) {
 	// Add internal kernel API `/api/setting/refreshVirtualBlockRef` https://github.com/siyuan-note/siyuan/issues/9829
 

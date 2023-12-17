@@ -53,7 +53,8 @@ export class MobileTags {
                     k: `#${labelName}#`,
                     r: "",
                     page: 1,
-                    types: Object.assign({}, searchOption.types)
+                    types: Object.assign({}, searchOption.types),
+                    replaceTypes: Object.assign({}, searchOption.replaceTypes)
                 });
             },
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

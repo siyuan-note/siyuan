@@ -517,6 +517,34 @@ export abstract class Constants {
         }
     };
 
+    public static readonly SIYUAN_DEFAULT_REPLACETYPES: {
+        [key: string]: boolean;
+    } = {
+        "text": true,
+        "img-text": true,
+        "img-title": true,
+        "img-src": true,
+        "a-text": true,
+        "a-title": true,
+        "a-href": true,
+        "code": true,
+        "em": true,
+        "strong": true,
+        "inline-math": true,
+        "inline-memo": true,
+        "kbd": true,
+        "mark": true,
+        "s": true,
+        "sub": true,
+        "sup": true,
+        "tag": true,
+        "u": true,
+        "doc-title": true,
+        "code-block": true,
+        "math-block": true,
+        "html-block": true
+    }
+
     // image
     public static readonly SIYUAN_IMAGE_VIP: string = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
 <path fill="#ffd00f" d="M2.288 12.643l23.487 12.853c0.286 0.153 0.477 0.45 0.477 0.791 0 0.082-0.011 0.161-0.032 0.237l0.001-0.006c-0.119 0.395-0.479 0.678-0.905 0.678-0.004 0-0.009-0-0.013-0h-19.439c-0.958 0-1.766-0.684-1.885-1.595l-1.691-12.956z"></path>

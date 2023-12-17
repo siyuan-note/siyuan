@@ -264,7 +264,10 @@ interface ISearchOption {
         htmlBlock: boolean
         embedBlock: boolean
         databaseBlock: boolean
-    }
+    },
+    replaceTypes: {
+        [key: string]: boolean;
+    },
 }
 
 interface ITextOption {

@@ -238,7 +238,8 @@ export const getLocalStorage = (cb: () => void) => {
                 paragraph: window.siyuan.config.search.paragraph,
                 embedBlock: window.siyuan.config.search.embedBlock,
                 databaseBlock: window.siyuan.config.search.databaseBlock,
-            }
+            },
+            replaceTypes: Constants.SIYUAN_DEFAULT_REPLACETYPES,
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
 
@@ -261,6 +262,9 @@ export const getLocalStorage = (cb: () => void) => {
                 }
             } else if (typeof response.data[key] === "undefined") {
                 window.siyuan.storage[key] = defaultStorage[key];
+            }
+            if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes) {
+                window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Constants.SIYUAN_DEFAULT_REPLACETYPES;
             }
         });
         cb();

@@ -151,6 +151,40 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
     });
 };
 
+export const replaceFilterMenu = (config: ISearchOption) => {
+    let html = "";
+    Object.keys(Constants.SIYUAN_DEFAULT_REPLACETYPES).forEach((key) => {
+        html += `<label class="fn__flex b3-label">
+    <span class="fn__space"></span>
+    <div class="fn__flex-1 fn__flex-center">
+        ${window.siyuan.languages[key]}
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" data-type="${key}" type="checkbox"${config.replaceTypes[key] ? " checked" : ""}>
+</label>`;
+    })
+    const filterDialog = new Dialog({
+        title: window.siyuan.languages.type,
+        content: `<div class="b3-dialog__content">${html}</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+        height: "70vh",
+    });
+    const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
+    btnsElement[0].addEventListener("click", () => {
+        filterDialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
+            config.replaceTypes[item.getAttribute("data-type") as TSearchFilter] = item.checked;
+        });
+        filterDialog.destroy();
+    });
+};
+
 export const queryMenu = (config: ISearchOption, cb: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {

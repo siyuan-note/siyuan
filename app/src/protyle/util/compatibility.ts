@@ -263,10 +263,12 @@ export const getLocalStorage = (cb: () => void) => {
             } else if (typeof response.data[key] === "undefined") {
                 window.siyuan.storage[key] = defaultStorage[key];
             }
-            if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes) {
-                window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Constants.SIYUAN_DEFAULT_REPLACETYPES;
-            }
         });
+        // 搜索数据添加 replaceTypes 兼容
+        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
+            Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Constants.SIYUAN_DEFAULT_REPLACETYPES;
+        }
         cb();
     });
 };

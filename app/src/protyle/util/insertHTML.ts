@@ -54,10 +54,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         range.deleteContents();
         const text = readText();
         if (typeof text === "string") {
-            processAV(range, text, protyle, blockElement)
+            processAV(range, text, protyle, blockElement);
         } else {
             text.then((t) => {
-                processAV(range, t, protyle, blockElement)
+                processAV(range, t, protyle, blockElement);
             });
         }
         return;

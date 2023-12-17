@@ -543,7 +543,7 @@ export abstract class Constants {
         "code-block": true,
         "math-block": true,
         "html-block": true
-    }
+    };
 
     // image
     public static readonly SIYUAN_IMAGE_VIP: string = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">

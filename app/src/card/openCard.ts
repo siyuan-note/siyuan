@@ -336,7 +336,7 @@ export const bindCardEvent = (options: {
         hideElements(["toolbar", "hint", "util"], editor.protyle);
         if (type === "-1") {    // 显示答案
             if (actionElements[0].classList.contains("fn__none")) {
-                type = "3"
+                type = "3";
             } else {
                 editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
                 actionElements[0].classList.add("fn__none");

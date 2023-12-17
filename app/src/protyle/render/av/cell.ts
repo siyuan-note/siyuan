@@ -12,7 +12,7 @@ export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
         return "";
     }
-    let cellText = ""
+    let cellText = "";
     const textElement = cellElement.querySelector(".av__celltext");
     if (textElement) {
         if (textElement.querySelector(".av__cellicon")) {
@@ -29,7 +29,7 @@ export const getCellText = (cellElement: HTMLElement | false) => {
 const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
     let cellValue: IAVCellValue;
     if (colType === "number") {
-        const value = cellElement.querySelector(".av__celltext").getAttribute("data-content")
+        const value = cellElement.querySelector(".av__celltext").getAttribute("data-content");
         cellValue = {
             type: colType,
             number: {
@@ -45,13 +45,13 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
             }
         };
     } else if (colType === "mSelect" || colType === "select") {
-        const mSelect: IAVCellSelectValue[] = []
+        const mSelect: IAVCellSelectValue[] = [];
         cellElement.querySelectorAll(".b3-chip").forEach((item: HTMLElement) => {
             mSelect.push({
                 content: item.textContent.trim(),
                 color: item.style.color.replace("var(--b3-font-color", "").replace(")", "")
-            })
-        })
+            });
+        });
         cellValue = {
             type: colType,
             mSelect
@@ -70,7 +70,7 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
         };
     }
     return cellValue;
-}
+};
 
 export const genCellValue = (colType: TAVCol, value: string | any) => {
     let cellValue: IAVCellValue;
@@ -323,7 +323,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
             let tempElement = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`) as HTMLElement;
             if (!tempElement) {
                 // 修改单元格后修改其他没有内容的单元格（id 会随机）
-                tempElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement
+                tempElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
             }
             if (!tempElement) {
                 return;
@@ -451,18 +451,18 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
 };
 
 export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value = "") => {
-    const doOperations: IOperation[] = []
-    const undoOperations: IOperation[] = []
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
 
-    const avID = nodeElement.dataset.avId
-    const id = nodeElement.dataset.nodeId
-    let text = ''
+    const avID = nodeElement.dataset.avId;
+    const id = nodeElement.dataset.nodeId;
+    let text = "";
     const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
     if (cellElements.length === 0) {
         nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
             rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
-                cellElements.push(cellElement)
-            })
+                cellElements.push(cellElement);
+            });
         });
     }
     cellElements.forEach((item: HTMLElement) => {
@@ -499,19 +499,19 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item);
         }
-    })
+    });
     if (doOperations.length > 0) {
         doOperations.push({
             action: "doUpdateUpdated",
             id,
             data: dayjs().format("YYYYMMDDHHmmss"),
-        })
+        });
         undoOperations.push({
             action: "doUpdateUpdated",
             id,
             data: nodeElement.getAttribute("updated"),
-        })
+        });
         transaction(protyle, doOperations, undoOperations);
     }
     return text;
-}
+};

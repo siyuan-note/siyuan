@@ -162,7 +162,7 @@ export const replaceFilterMenu = (config: ISearchOption) => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" data-type="${key}" type="checkbox"${config.replaceTypes[key] ? " checked" : ""}>
 </label>`;
-    })
+    });
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content">${html}</div>

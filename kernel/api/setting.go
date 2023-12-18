@@ -29,6 +29,35 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setConfSnippet(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	snippet := &conf.Snpt{}
+	if err = gulu.JSON.UnmarshalJSON(param, snippet); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.Conf.Snippet = snippet
+	model.Conf.Save()
+
+	ret.Data = snippet
+}
+
 func addVirtualBlockRefExclude(c *gin.Context) {
 	// Add internal kernel API `/api/setting/addVirtualBlockRefExclude` https://github.com/siyuan-note/siyuan/issues/9909
 

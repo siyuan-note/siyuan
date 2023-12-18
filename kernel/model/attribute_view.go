@@ -1690,6 +1690,11 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
 			if value.BlockID == operation.PreviousID {
+				if value.BlockID != operation.NextID {
+					// 换绑
+					unbindBlockAv(tx, operation.AvID, value.BlockID)
+				}
+
 				value.BlockID = operation.NextID
 				if nil != value.Block {
 					value.Block.ID = operation.NextID

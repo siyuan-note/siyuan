@@ -676,6 +676,10 @@ interface IAccount {
 }
 
 interface IConfig {
+    snippet: {
+        enabledCSS: boolean
+        enabledJS: boolean
+    }
     cloudRegion: number
     bazaar: {
         trust: boolean

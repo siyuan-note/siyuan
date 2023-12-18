@@ -257,6 +257,10 @@
       top: 5.5px;
     }
 
+    .popover__block {
+      color: var(--b3-protyle-inline-blockref-color);
+    }
+
     &[data-wrap="true"] {
       white-space: pre-wrap;
     }

@@ -551,7 +551,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 <span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
-        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || ""}</span>`;
+        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
         cellValue?.mSelect?.forEach((item) => {
             text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;

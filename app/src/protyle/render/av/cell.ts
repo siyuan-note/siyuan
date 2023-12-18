@@ -69,6 +69,9 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
             }
         };
     }
+    if (colType === "block") {
+        cellValue.isDetached = cellElement.dataset.detached === "true";
+    }
     return cellValue;
 };
 
@@ -411,7 +414,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
                 keyID: colId,
                 rowID,
                 data: {
-                    [type]: inputValue
+                    [type]: inputValue,
+                    isDetached: true,
                 }
             }, {
                 action: "doUpdateUpdated",
@@ -425,7 +429,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
                 keyID: colId,
                 rowID,
                 data: {
-                    [type]: oldValue
+                    [type]: oldValue,
+                    isDetached: true,
                 }
             }, {
                 action: "doUpdateUpdated",

@@ -1776,6 +1776,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	oldIsDetached := val.IsDetached
+	oldBoundBlockID := val.BlockID
 
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
@@ -1785,9 +1786,25 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
-	if oldIsDetached && !val.IsDetached {
-		// 将游离行绑定到新建的块上
-		bindBlockAv(tx, avID, rowID)
+	if oldIsDetached { // 之前是游离行
+		if !val.IsDetached { // 现在绑定了块
+			// 将游离行绑定到新建的块上
+			bindBlockAv(tx, avID, rowID)
+		}
+	} else { // 之前绑定了块
+		if val.IsDetached { // 现在是游离行
+			// 将绑定的块从属性视图中移除
+			unbindBlockAv(tx, avID, rowID)
+		} else { // 现在绑定了块
+			if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
+				// 换绑块
+				unbindBlockAv(tx, avID, oldBoundBlockID)
+				bindBlockAv(tx, avID, val.BlockID)
+			} else { // 之前绑定的块和现在绑定的块一样
+				// 直接返回，因为锚文本不允许更改
+				return
+			}
+		}
 	}
 
 	for _, kv := range attrView.KeyValues {
@@ -1804,6 +1821,39 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+	return
+}
+
+func unbindBlockAv(tx *Transaction, avID, blockID string) {
+	node, tree, err := getNodeByBlockID(tx, blockID)
+	if nil != err {
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	if "" == attrs[av.NodeAttrNameAvs] {
+		return
+	}
+
+	avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
+	avIDs = gulu.Str.RemoveElem(avIDs, avID)
+	if 0 == len(avIDs) {
+		delete(attrs, av.NodeAttrNameAvs)
+		node.RemoveIALAttr(av.NodeAttrNameAvs)
+	} else {
+		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+		node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
+	}
+
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
+	} else {
+		err = setNodeAttrs(node, tree, attrs)
+	}
+	if nil != err {
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
 		return
 	}
 	return

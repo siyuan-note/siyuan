@@ -589,7 +589,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				keyValues := rows[row.ID]
 				ial := map[string]string{}
 				block := row.GetBlockValue()
-				if !block.IsDetached {
+				if nil != block && !block.IsDetached {
 					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
@@ -606,12 +606,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := map[string]string{}
 				block := row.GetBlockValue()
-				if !block.IsDetached {
+				if nil != block && !block.IsDetached {
 					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
 				updatedStr := ial["updated"]
-				if "" == updatedStr {
-					block := row.GetBlockValue()
+				if "" == updatedStr && nil != block {
 					cell.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
 					cell.Value.Updated.IsNotEmpty = true
 				} else {
@@ -1184,7 +1183,7 @@ func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
 		block := row.GetBlockValue()
-		if !block.NotAffectFilter() {
+		if nil != block && !block.NotAffectFilter() {
 			return row
 		}
 	}

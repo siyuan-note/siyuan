@@ -238,7 +238,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 		case KeyTypeNumber:
 			for _, v := range kv.Values {
-				if 0 != v.Number.Content && !v.Number.IsNotEmpty {
+				if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
 					v.Number.IsNotEmpty = true
 				}
 			}

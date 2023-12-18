@@ -412,7 +412,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	goTpl = goTpl.Funcs(builtInTemplateFuncs())
+	goTpl = goTpl.Funcs(util.BuiltInTemplateFuncs())
 	tpl, tplErr := goTpl.Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
@@ -1710,12 +1710,6 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	for _, v := range attrView.Views {
 		switch v.LayoutType {
 		case av.LayoutTypeTable:
-			for _, rowID := range v.Table.RowIDs {
-				if rowID == operation.NextID {
-					return
-				}
-			}
-
 			for i, rowID := range v.Table.RowIDs {
 				if rowID == operation.PreviousID {
 					v.Table.RowIDs[i] = operation.NextID
@@ -1753,7 +1747,21 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
+	var blockVal *av.Value
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if rowID == v.Block.ID {
+					blockVal = v
+					break
+				}
+			}
+			break
+		}
+	}
+
 	var val *av.Value
+	oldIsDetached := blockVal.IsDetached
 	for _, keyValues := range attrView.KeyValues {
 		if keyID != keyValues.Key.ID {
 			continue
@@ -1774,9 +1782,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		break
 	}
 
-	oldIsDetached := val.IsDetached
 	oldBoundBlockID := val.BlockID
-
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return
@@ -1800,23 +1806,18 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 				unbindBlockAv(tx, avID, oldBoundBlockID)
 				bindBlockAv(tx, avID, val.BlockID)
 			} else { // 之前绑定的块和现在绑定的块一样
-				// 直接返回，因为锚文本不允许更改
-				return
+				if av.KeyTypeBlock == val.Type && nil != val.Block {
+					// 直接返回，因为锚文本不允许更改
+					return
+				}
 			}
 		}
 	}
 
-	for _, kv := range attrView.KeyValues {
-		if av.KeyTypeBlock == kv.Key.Type {
-			for _, v := range kv.Values {
-				if rowID == v.Block.ID {
-					v.Block.Updated = time.Now().UnixMilli()
-					v.IsInitialized = true
-					break
-				}
-			}
-			break
-		}
+	if nil != blockVal {
+		blockVal.Block.Updated = time.Now().UnixMilli()
+		blockVal.IsInitialized = true
+		blockVal.IsDetached = val.IsDetached
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

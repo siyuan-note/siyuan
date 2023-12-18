@@ -1747,7 +1747,21 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
+	var blockVal *av.Value
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if rowID == v.Block.ID {
+					blockVal = v
+					break
+				}
+			}
+			break
+		}
+	}
+
 	var val *av.Value
+	oldIsDetached := blockVal.IsDetached
 	for _, keyValues := range attrView.KeyValues {
 		if keyID != keyValues.Key.ID {
 			continue
@@ -1768,9 +1782,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		break
 	}
 
-	oldIsDetached := val.IsDetached
 	oldBoundBlockID := val.BlockID
-
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return
@@ -1802,18 +1814,10 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 
-	for _, kv := range attrView.KeyValues {
-		if av.KeyTypeBlock == kv.Key.Type {
-			for _, v := range kv.Values {
-				if rowID == v.Block.ID {
-					v.Block.Updated = time.Now().UnixMilli()
-					v.IsInitialized = true
-					v.IsDetached = val.IsDetached
-					break
-				}
-			}
-			break
-		}
+	if nil != blockVal {
+		blockVal.Block.Updated = time.Now().UnixMilli()
+		blockVal.IsInitialized = true
+		blockVal.IsDetached = val.IsDetached
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

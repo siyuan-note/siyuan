@@ -1710,12 +1710,6 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	for _, v := range attrView.Views {
 		switch v.LayoutType {
 		case av.LayoutTypeTable:
-			for _, rowID := range v.Table.RowIDs {
-				if rowID == operation.NextID {
-					return
-				}
-			}
-
 			for i, rowID := range v.Table.RowIDs {
 				if rowID == operation.PreviousID {
 					v.Table.RowIDs[i] = operation.NextID
@@ -1800,7 +1794,10 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 				unbindBlockAv(tx, avID, oldBoundBlockID)
 				bindBlockAv(tx, avID, val.BlockID)
 			} else { // 之前绑定的块和现在绑定的块一样
-				// 直接返回，因为锚文本不允许更改
+				if av.KeyTypeBlock == val.Type && nil != val.Block {
+					// 直接返回，因为锚文本不允许更改
+					return
+				}
 			}
 		}
 	}
@@ -1811,6 +1808,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 				if rowID == v.Block.ID {
 					v.Block.Updated = time.Now().UnixMilli()
 					v.IsInitialized = true
+					v.IsDetached = val.IsDetached
 					break
 				}
 			}

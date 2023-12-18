@@ -115,7 +115,6 @@
     }
 
     &:hover {
-      [data-type="block-ref"],
       [data-type="block-more"] {
         display: block;
       }
@@ -250,7 +249,6 @@
     cursor: pointer;
     //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
-    [data-type="block-ref"],
     [data-type="block-more"] {
       display: none;
       position: absolute;

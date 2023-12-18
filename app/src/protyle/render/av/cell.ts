@@ -153,6 +153,9 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             };
         }
     }
+    if (colType === "block") {
+        cellValue.isDetached = true;
+    }
     return cellValue;
 };
 

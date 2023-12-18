@@ -9,6 +9,13 @@ export const renderSnippet = () => {
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
             let exitElement = document.getElementById(id) as HTMLScriptElement;
+            if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||
+                (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
+                if (exitElement) {
+                    exitElement.remove();
+                }
+                return;
+            }
             if (!item.enabled) {
                 if (exitElement) {
                     exitElement.remove();
@@ -94,14 +101,6 @@ export const openSnippets = () => {
             contentElement.textContent = item.content;
         });
         const removeIds: string[] = [];
-        const toggleCSSElement = dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement;
-        const toggleJSElement = dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement;
-        toggleCSSElement.addEventListener("change", (event) => {
-            toggleSnippet(toggleCSSElement, toggleJSElement);
-        });
-        toggleJSElement.addEventListener("change", (event) => {
-            toggleSnippet(toggleCSSElement, toggleJSElement);
-        });
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {
@@ -181,6 +180,11 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
                 rmElement.remove();
             }
         });
+        const toggleCSSElement = dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement;
+        const toggleJSElement = dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement;
+        window.siyuan.config.snippet.enabledCSS = toggleCSSElement.checked;
+        window.siyuan.config.snippet.enabledJS = toggleJSElement.checked;
+        fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
         renderSnippet();
         dialog.destroy({cancel: "true"});
     });
@@ -209,9 +213,3 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
         }
     }
 };
-
-const toggleSnippet = (toggleCSSElement: HTMLInputElement, toggleJSElement: HTMLInputElement) => {
-    window.siyuan.config.snippet.enabledCSS = toggleCSSElement.checked;
-    window.siyuan.config.snippet.enabledJS = toggleJSElement.checked;
-    fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet)
-}

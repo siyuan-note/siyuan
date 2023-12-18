@@ -18,7 +18,6 @@ package treenode
 
 import (
 	"bytes"
-	"github.com/Masterminds/sprig/v3"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"strings"
@@ -834,7 +833,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
 	}
 
-	funcMap := sprig.TxtFuncMap()
+	funcMap := util.BuiltInTemplateFuncs()
 	goTpl := template.New("").Delims(".action{", "}")
 	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
 	if nil != tplErr {

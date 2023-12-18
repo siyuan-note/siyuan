@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -33,7 +32,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -42,12 +40,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"github.com/spf13/cast"
 )
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
-	tmpl = tmpl.Funcs(builtInTemplateFuncs())
+	tmpl = tmpl.Funcs(util.BuiltInTemplateFuncs())
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
@@ -220,7 +217,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 		dataModel["alias"] = block.Alias
 	}
 
-	funcMap := builtInTemplateFuncs()
+	funcMap := util.BuiltInTemplateFuncs()
 	funcMap["queryBlocks"] = func(stmt string, args ...string) (ret []*sql.Block) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)
@@ -417,23 +414,3 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
 	}
 }
-
-func builtInTemplateFuncs() (ret template.FuncMap) {
-	ret = sprig.TxtFuncMap()
-	ret["Weekday"] = util.Weekday
-	ret["WeekdayCN"] = util.WeekdayCN
-	ret["WeekdayCN2"] = util.WeekdayCN2
-	ret["ISOWeek"] = util.ISOWeek
-	ret["pow"] = pow
-	ret["powf"] = powf
-	ret["log"] = log
-	ret["logf"] = logf
-	return
-}
-
-func pow(a, b interface{}) int64    { return int64(math.Pow(cast.ToFloat64(a), cast.ToFloat64(b))) }
-func powf(a, b interface{}) float64 { return math.Pow(cast.ToFloat64(a), cast.ToFloat64(b)) }
-func log(a, b interface{}) int64 {
-	return int64(math.Log(cast.ToFloat64(a)) / math.Log(cast.ToFloat64(b)))
-}
-func logf(a, b interface{}) float64 { return math.Log(cast.ToFloat64(a)) / math.Log(cast.ToFloat64(b)) }

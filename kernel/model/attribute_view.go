@@ -412,7 +412,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	goTpl = goTpl.Funcs(builtInTemplateFuncs())
+	goTpl = goTpl.Funcs(util.BuiltInTemplateFuncs())
 	tpl, tplErr := goTpl.Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
@@ -1801,7 +1801,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 				bindBlockAv(tx, avID, val.BlockID)
 			} else { // 之前绑定的块和现在绑定的块一样
 				// 直接返回，因为锚文本不允许更改
-				return
 			}
 		}
 	}

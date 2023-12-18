@@ -153,7 +153,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
 <span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
                             } else {
                                 text = `<span data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s" class="av__celltext${cell.value?.isDetached ? "" : " av__celltext--ref"}">${cell.value.block.content || ""}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
+<span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cell.value.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
                             }
                         } else if (cell.valueType === "number") {
                             text = `<span style="float: right;${data.columns[index].wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;

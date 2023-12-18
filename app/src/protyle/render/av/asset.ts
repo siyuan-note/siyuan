@@ -133,7 +133,7 @@ export const updateAssetCell = (options: {
                     // 为空时 cellId 每次请求都不一致
                     cellData.id = item.dataset.id;
                     if (!cellData.value || !cellData.value.mAsset) {
-                        cellData.value = {mAsset: []} as IAVCellValue;
+                        cellData.value = {type: "mAsset", mAsset: []} as IAVCellValue;
                     }
                 } else {
                     cellData = row.cells.find(cellItem => {
@@ -206,7 +206,7 @@ export const updateAssetCell = (options: {
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellData.value);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellData.value);
         }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);

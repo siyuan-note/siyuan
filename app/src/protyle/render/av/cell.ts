@@ -7,6 +7,8 @@ import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock} from "../../util/selection";
 import * as dayjs from "dayjs";
+import {unicode2Emoji} from "../../../emoji";
+import {getColIconByType} from "./col";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
@@ -438,7 +440,11 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
                 data: blockElement.getAttribute("updated"),
             });
             if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
-                updateAttrViewCellAnimation(item);
+                updateAttrViewCellAnimation(item, {
+                    [type]: inputValue,
+                    isDetached: true,
+                    type
+                });
             }
         });
     }
@@ -487,14 +493,14 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const colId = item.getAttribute("data-col-id");
 
         text += getCellText(item);
-
+        const cellValue = genCellValue(type, value);
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
             avID,
             keyID: colId,
             rowID,
-            data: genCellValue(type, value)
+            data: cellValue
         });
         undoOperations.push({
             action: "updateAttrViewCell",
@@ -505,7 +511,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             data: genCellValueByElement(type, item)
         });
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     if (doOperations.length > 0) {
@@ -523,3 +529,91 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     }
     return text;
 };
+
+export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
+    let text = "";
+    if (["text", "template"].includes(cellValue.type)) {
+        text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
+    } else if (["url", "email", "phone"].includes(cellValue.type)) {
+        const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
+        // https://github.com/siyuan-note/siyuan/issues/9291
+        let urlAttr = "";
+        if (cellValue.type === "url") {
+            urlAttr = ` data-href="${urlContent}"`;
+        }
+        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
+    } else if (cellValue.type === "block") {
+        if (cellValue?.isDetached) {
+            text = `<span class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+        } else {
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+<span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
+        }
+    } else if (cellValue.type === "number") {
+        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || ""}</span>`;
+    } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
+        cellValue?.mSelect?.forEach((item) => {
+            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+        });
+    } else if (cellValue.type === "date") {
+        const dataValue = cellValue ? cellValue.date : null;
+        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
+        if (dataValue && dataValue.isNotEmpty) {
+            text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+        }
+        if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+        }
+        text += "</span>";
+    } else if (["created", "updated"].includes(cellValue.type)) {
+        const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
+        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
+        if (dataValue && dataValue.isNotEmpty) {
+            text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
+        }
+        text += "</span>";
+    } else if (cellValue.type === "mAsset") {
+        cellValue?.mAsset?.forEach((item) => {
+            if (item.type === "image") {
+                text += `<img class="av__cellassetimg" src="${item.content}">`;
+            } else {
+                text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
+            }
+        });
+    } else if (cellValue.type === "checkbox") {
+        text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    }
+    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
+        cellValue && cellValue[cellValue.type as "url"].content) {
+        text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+    }
+    return text;
+}
+
+export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
+    icon?: string,
+    name?: string,
+    pin?: boolean,
+}) => {
+    if (typeof headerValue.icon !== "undefined") {
+        cellElement.dataset.icon = headerValue.icon;
+        cellElement.querySelector(".av__cellheadericon").outerHTML = headerValue.icon ? unicode2Emoji(headerValue.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(cellElement.dataset.dtype as TAVCol)}"></use></svg>`
+    }
+    if (typeof headerValue.name !== "undefined") {
+        cellElement.querySelector(".av__celltext").textContent = headerValue.name;
+    }
+    if (typeof headerValue.pin !== "undefined") {
+        const textElement = cellElement.querySelector(".av__celltext")
+        if (headerValue.pin) {
+            if (!textElement.nextElementSibling) {
+                textElement.insertAdjacentHTML("afterend", '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>')
+            }
+        } else {
+            if (textElement.nextElementSibling) {
+                textElement.nextElementSibling.nextElementSibling.remove();
+                textElement.nextElementSibling.remove();
+            }
+        }
+    }
+}

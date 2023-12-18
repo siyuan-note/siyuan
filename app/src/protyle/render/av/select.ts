@@ -102,7 +102,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellData.value);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellData.value);
         }
     });
     transaction(protyle, doOperations, undoOperations);
@@ -184,7 +184,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (cellElement.classList.contains("custom-attr__avvalue")) {
                                     cellElement.innerHTML = genAVValueHTML(cell.value);
                                 } else {
-                                    updateAttrViewCellAnimation(cellElement);
+                                    updateAttrViewCellAnimation(cellElement, cell.value);
                                 }
                                 return true;
                             }
@@ -262,7 +262,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                         if (cellElement.classList.contains("custom-attr__avvalue")) {
                                             cellElement.innerHTML = genAVValueHTML(cell.value);
                                         } else {
-                                            updateAttrViewCellAnimation(cellElement);
+                                            updateAttrViewCellAnimation(cellElement, cell.value);
                                         }
                                         return true;
                                     }
@@ -342,7 +342,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                         if (cellElement.classList.contains("custom-attr__avvalue")) {
                                             cellElement.innerHTML = genAVValueHTML(cell.value);
                                         } else {
-                                            updateAttrViewCellAnimation(cellElement);
+                                            updateAttrViewCellAnimation(cellElement, cell.value);
                                         }
                                         return true;
                                     }
@@ -531,7 +531,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellData.value);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellData.value);
         }
     });
 

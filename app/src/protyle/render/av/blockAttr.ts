@@ -88,7 +88,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                     keyID: string,
                     id: string,
                     blockID: string,
-                    type?: TAVCol & IAVCellValue
+                    type: TAVCol & IAVCellValue
                 }  []
             }[],
             blockIDs: string[],

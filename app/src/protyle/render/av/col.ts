@@ -216,7 +216,7 @@ export const bindEditEvent = (options: {
             type: colData.type,
         }]);
         colData.name = newValue;
-        updateAttrViewCellAnimation(options.protyle.wysiwyg.element.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`));
+        updateAttrViewCellAnimation(options.protyle.wysiwyg.element.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
     });
     nameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -426,7 +426,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             name: oldValue,
             type,
         }]);
-        updateAttrViewCellAnimation(cellElement);
+        updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
         // https://github.com/siyuan-note/siyuan/issues/9862
         focusBlock(blockElement);
     });
@@ -458,7 +458,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     }]);
                     iconElement.setAttribute("data-icon", unicode);
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
-                    updateAttrViewCellAnimation(cellElement);
+                    updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -607,6 +607,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 avID,
                 data: isPin
             }]);
+            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
         }
     });
     if (type !== "block") {

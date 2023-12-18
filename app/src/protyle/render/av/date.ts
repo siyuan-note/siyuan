@@ -162,7 +162,9 @@ export const setDateValue = (options: {
                     // 为空时 cellId 每次请求都不一致
                     cellData.id = item.dataset.id;
                     if (!cellData.value) {
-                        cellData.value = {};
+                        cellData.value = {
+                            type: cellData.valueType
+                        };
                     } else {
                         cellData.value.id = item.dataset.id;
                     }
@@ -203,7 +205,7 @@ export const setDateValue = (options: {
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellData.value);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item,  cellData.value);
         }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);

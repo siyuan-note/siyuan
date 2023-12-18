@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -81,4 +82,9 @@ func RemoveRedundantSpace(str string) string {
 		}
 	}
 	return buf.String()
+}
+
+func IsNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }

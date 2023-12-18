@@ -54,6 +54,10 @@ type Value struct {
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
 }
 
+func (value *Value) NotAffectFilter() bool {
+	return !value.IsInitialized && nil != value.Block && "" == value.Block.Content && value.IsDetached
+}
+
 func (value *Value) String() string {
 	switch value.Type {
 	case KeyTypeBlock:

@@ -708,7 +708,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				keyValues := rows[row.ID]
 				ial := map[string]string{}
 				block := row.GetBlockValue()
-				if !block.IsDetached {
+				if nil != block && !block.IsDetached {
 					ial = cache.GetBlockIAL(row.ID)
 					if nil == ial {
 						ial = map[string]string{}
@@ -728,15 +728,14 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := map[string]string{}
 				block := row.GetBlockValue()
-				if !block.IsDetached {
+				if nil != block && !block.IsDetached {
 					ial = cache.GetBlockIAL(row.ID)
 					if nil == ial {
 						ial = map[string]string{}
 					}
 				}
 				updatedStr := ial["updated"]
-				if "" == updatedStr {
-					block := row.GetBlockValue()
+				if "" == updatedStr && nil != block {
 					cell.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
 					cell.Value.Updated.IsNotEmpty = true
 				} else {

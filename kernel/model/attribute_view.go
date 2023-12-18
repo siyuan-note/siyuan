@@ -1880,10 +1880,6 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 		attrs[av.NodeAttrNameAvs] = avID
 	} else {
 		avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
-		if gulu.Str.Contains(avID, avIDs) {
-			return
-		}
-
 		avIDs = append(avIDs, avID)
 		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")

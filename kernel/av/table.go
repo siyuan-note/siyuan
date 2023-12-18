@@ -727,7 +727,7 @@ func (table *Table) FilterRows() {
 	rows := []*TableRow{}
 	for _, row := range table.Rows {
 		block := row.GetBlockValue()
-		if !block.IsInitialized && nil != block.Block && "" == block.Block.Content && block.IsDetached {
+		if block.NotAffectFilter() {
 			rows = append(rows, row)
 			continue
 		}

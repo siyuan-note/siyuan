@@ -1114,22 +1114,24 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		viewable.SortRows()
 
 		if 0 < len(viewable.Rows) {
-			row := viewable.Rows[len(viewable.Rows)-1]
-			for _, filter := range view.Table.Filters {
-				for _, cell := range row.Cells {
-					if nil != cell.Value && cell.Value.KeyID == filter.Column {
-						if av.KeyTypeBlock == cell.ValueType {
-							blockValue.Block.Content = cell.Value.Block.Content
-							continue
-						}
+			row := GetLastSortRow(viewable.Rows)
+			if nil != row {
+				for _, filter := range view.Table.Filters {
+					for _, cell := range row.Cells {
+						if nil != cell.Value && cell.Value.KeyID == filter.Column {
+							if av.KeyTypeBlock == cell.ValueType {
+								blockValue.Block.Content = cell.Value.Block.Content
+								continue
+							}
 
-						newValue := cell.Value.Clone()
-						newValue.ID = ast.NewNodeID()
-						newValue.BlockID = blockID
-						newValue.IsDetached = operation.IsDetached
-						newValue.IsInitialized = false
-						values, _ := attrView.GetKeyValues(filter.Column)
-						values.Values = append(values.Values, newValue)
+							newValue := cell.Value.Clone()
+							newValue.ID = ast.NewNodeID()
+							newValue.BlockID = blockID
+							newValue.IsDetached = operation.IsDetached
+							newValue.IsInitialized = false
+							values, _ := attrView.GetKeyValues(filter.Column)
+							values.Values = append(values.Values, newValue)
+						}
 					}
 				}
 			}
@@ -1176,6 +1178,17 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
+	for i := len(rows) - 1; i >= 0; i-- {
+		row := rows[i]
+		block := row.GetBlockValue()
+		if !block.NotAffectFilter() {
+			return row
+		}
+	}
+	return nil
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {

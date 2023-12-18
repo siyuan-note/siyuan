@@ -1766,7 +1766,10 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	var val *av.Value
-	oldIsDetached := blockVal.IsDetached
+	oldIsDetached := true
+	if nil != blockVal {
+		oldIsDetached = blockVal.IsDetached
+	}
 	for _, keyValues := range attrView.KeyValues {
 		if keyID != keyValues.Key.ID {
 			continue

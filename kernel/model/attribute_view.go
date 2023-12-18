@@ -1690,6 +1690,11 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
 			if value.BlockID == operation.PreviousID {
+				if value.BlockID != operation.NextID {
+					// 换绑
+					unbindBlockAv(tx, operation.AvID, value.BlockID)
+				}
+
 				value.BlockID = operation.NextID
 				if nil != value.Block {
 					value.Block.ID = operation.NextID
@@ -1782,6 +1787,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		break
 	}
 
+	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
 	oldBoundBlockID := val.BlockID
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
@@ -1791,22 +1797,24 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
+	// val.IsDetached 只有更新主键的时候才会传入，所以下面需要结合 isUpdatingBlockKey 来判断
+
 	if oldIsDetached { // 之前是游离行
 		if !val.IsDetached { // 现在绑定了块
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
 	} else { // 之前绑定了块
-		if val.IsDetached { // 现在是游离行
-			// 将绑定的块从属性视图中移除
-			unbindBlockAv(tx, avID, rowID)
-		} else { // 现在绑定了块
-			if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
-				// 换绑块
-				unbindBlockAv(tx, avID, oldBoundBlockID)
-				bindBlockAv(tx, avID, val.BlockID)
-			} else { // 之前绑定的块和现在绑定的块一样
-				if av.KeyTypeBlock == val.Type && nil != val.Block {
+		if isUpdatingBlockKey { // 正在更新主键
+			if val.IsDetached { // 现在是游离行
+				// 将绑定的块从属性视图中移除
+				unbindBlockAv(tx, avID, rowID)
+			} else { // 现在绑定了块
+				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
+					// 换绑块
+					unbindBlockAv(tx, avID, oldBoundBlockID)
+					bindBlockAv(tx, avID, val.BlockID)
+				} else { // 之前绑定的块和现在绑定的块一样
 					// 直接返回，因为锚文本不允许更改
 					return
 				}
@@ -1817,7 +1825,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if nil != blockVal {
 		blockVal.Block.Updated = time.Now().UnixMilli()
 		blockVal.IsInitialized = true
-		blockVal.IsDetached = val.IsDetached
+		if isUpdatingBlockKey {
+			blockVal.IsDetached = val.IsDetached
+		}
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

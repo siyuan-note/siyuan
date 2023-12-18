@@ -375,7 +375,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     newElement.querySelector('[contenteditable="true"]').appendChild(range.extractContents());
     // https://github.com/siyuan-note/insider/issues/480
     newElement.innerHTML = protyle.lute.SpinBlockDOM(newElement.innerHTML);
-    const newId = newElement.firstElementChild.getAttribute("data-node-id");
 
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
@@ -386,25 +385,34 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     editableElement.innerHTML = enterElement.querySelector('[contenteditable="true"]').innerHTML;
     mathRender(editableElement);
 
-    transaction(protyle, [{
+    const doOperation: IOperation[] = [{
         action: "update",
         data: blockElement.outerHTML,
         id: id,
-    }, {
-        action: "insert",
-        data: newElement.innerHTML,
-        id: newId,
-        previousID: id,
-    }], [{
-        action: "delete",
-        id: newId,
-    }, {
+    }]
+    const undoOperation: IOperation[] = [{
         action: "update",
         data: html,
         id: id,
-    }]);
-    blockElement.insertAdjacentElement("afterend", newElement.firstElementChild);
-    mathRender(blockElement.nextElementSibling);
+    }]
+    let previousElement = blockElement;
+    Array.from(newElement.children).forEach((item: HTMLElement) => {
+        const newId = item.getAttribute("data-node-id");
+        doOperation.push({
+            action: "insert",
+            data: item.outerHTML,
+            id: newId,
+            previousID: previousElement.getAttribute("data-node-id"),
+        })
+        undoOperation.push({
+            action: "delete",
+            id: newId,
+        })
+        previousElement.insertAdjacentElement("afterend", item);
+        mathRender(previousElement.nextElementSibling);
+        previousElement = item;
+    })
+    transaction(protyle, doOperation, undoOperation);
     focusBlock(blockElement.nextElementSibling);
     scrollCenter(protyle);
     return true;

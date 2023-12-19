@@ -138,7 +138,7 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 
 func IsNodeOCRed(node *ast.Node) (ret bool) {
 	if !util.TesseractEnabled || nil == node {
-		return
+		return true
 	}
 
 	ret = true

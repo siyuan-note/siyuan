@@ -12,6 +12,9 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number"].includes(type)) {
         return "=";
     }
+    if (["checkbox"].includes(type)) {
+        return "Is false";
+    }
     if (["text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
         return "Contains";
     }

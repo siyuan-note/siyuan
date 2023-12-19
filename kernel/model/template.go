@@ -32,7 +32,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -45,13 +44,7 @@ import (
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
-	tmpl = tmpl.Funcs(sprig.TxtFuncMap())
-	tmpl = tmpl.Funcs(template.FuncMap{
-		"Weekday":    util.Weekday,
-		"WeekdayCN":  util.WeekdayCN,
-		"WeekdayCN2": util.WeekdayCN2,
-		"ISOWeek":    util.ISOWeek,
-	})
+	tmpl = tmpl.Funcs(util.BuiltInTemplateFuncs())
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
@@ -224,7 +217,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 		dataModel["alias"] = block.Alias
 	}
 
-	funcMap := sprig.TxtFuncMap()
+	funcMap := util.BuiltInTemplateFuncs()
 	funcMap["queryBlocks"] = func(stmt string, args ...string) (ret []*sql.Block) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)
@@ -248,10 +241,6 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 		}
 		return ret
 	}
-	funcMap["Weekday"] = util.Weekday
-	funcMap["WeekdayCN"] = util.WeekdayCN
-	funcMap["WeekdayCN2"] = util.WeekdayCN2
-	funcMap["ISOWeek"] = util.ISOWeek
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tpl, err := goTpl.Funcs(funcMap).Parse(gulu.Str.FromBytes(md))
@@ -333,7 +322,7 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 							return ast.WalkContinue
 						}
 
-						table, renderErr := renderAttributeViewTable(attrView, view, 1, -1)
+						table, renderErr := renderAttributeViewTable(attrView, view)
 						if nil != renderErr {
 							logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
 							return ast.WalkContinue

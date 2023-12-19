@@ -289,8 +289,8 @@ export class WYSIWYG {
                 if (cellElements.length === 0) {
                     nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                         rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
-                            cellElements.push(cellElement)
-                        })
+                            cellElements.push(cellElement);
+                        });
                     });
                 }
                 cellElements.forEach((item: HTMLElement) => {
@@ -1922,7 +1922,8 @@ export class WYSIWYG {
                     k: `#${tagElement.textContent}#`,
                     r: "",
                     page: 1,
-                    types: Object.assign({}, searchOption.types)
+                    types: Object.assign({}, searchOption.types),
+                    replaceTypes: Object.assign({}, searchOption.replaceTypes)
                 });
                 /// #endif
                 return;

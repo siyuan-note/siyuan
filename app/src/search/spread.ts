@@ -109,6 +109,7 @@ export const openSearch = async (options: {
         group: localData.group,
         sort: localData.sort,
         types: Object.assign({}, localData.types),
+        replaceTypes: Object.assign({}, localData.replaceTypes),
         page: options.key ? 1 : localData.page
     };
     const edit = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {

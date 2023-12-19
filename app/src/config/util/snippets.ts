@@ -9,6 +9,13 @@ export const renderSnippet = () => {
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
             let exitElement = document.getElementById(id) as HTMLScriptElement;
+            if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||
+                (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
+                if (exitElement) {
+                    exitElement.remove();
+                }
+                return;
+            }
             if (!item.enabled) {
                 if (exitElement) {
                     exitElement.remove();
@@ -54,22 +61,26 @@ export const openSnippets = () => {
 </div>
 <div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
     <div>
-        ${cssHTML}
         <div class="fn__flex">
             <div class="fn__flex-1"></div>
-            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetCSS">
-                <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} CSS
-            </button>
+            <span aria-label="${window.siyuan.languages.addAttr} CSS" id="addCodeSnippetCSS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+            </span>
+            <div class="fn__space"></div>
+            <input data-action="toggleCSS" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledCSS ? " checked" : ""}>
         </div>
+        ${cssHTML}
     </div>
     <div class="fn__none">
-        ${jsHTML}
         <div class="fn__flex">
             <div class="fn__flex-1"></div>
-            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetJS">
-                <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} JS
-            </button>
+            <span aria-label="${window.siyuan.languages.addAttr} JS" id="addCodeSnippetJS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+            </span>
+            <div class="fn__space"></div>
+            <input data-action="toggleJS" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledJS ? " checked" : ""}>
         </div>
+        ${jsHTML}
     </div>
 </div>
 <div class="b3-dialog__action">
@@ -91,57 +102,66 @@ export const openSnippets = () => {
         });
         const removeIds: string[] = [];
         dialog.element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-            if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
-                target.parentElement.insertAdjacentHTML("beforebegin", genSnippet({
-                    type: target.id === "addCodeSnippetCSS" ? "css" : "js",
-                    name: "",
-                    content: "",
-                    enabled: false
-                }));
-                return;
-            }
-            if (target.classList.contains("b3-button--cancel")) {
-                dialog.destroy({cancel: "true"});
-                return;
-            }
-            if (target.classList.contains("b3-button--text")) {
-                setSnippet(dialog, response.data.snippets, removeIds);
-                return;
-            }
-            const tabElement = hasClosestByClassName(target, "item");
-            if (tabElement) {
-                if (tabElement.getAttribute("data-type") === "css") {
-                    tabElement.classList.add("item--focus");
-                    tabElement.nextElementSibling.classList.remove("item--focus");
-                    tabElement.parentElement.nextElementSibling.firstElementChild.classList.remove("fn__none");
-                    tabElement.parentElement.nextElementSibling.lastElementChild.classList.add("fn__none");
-                } else {
-                    tabElement.classList.add("item--focus");
-                    tabElement.previousElementSibling.classList.remove("item--focus");
-                    tabElement.parentElement.nextElementSibling.firstElementChild.classList.add("fn__none");
-                    tabElement.parentElement.nextElementSibling.lastElementChild.classList.remove("fn__none");
+            let target = event.target as HTMLElement;
+            while (target && !target.isSameNode(dialog.element)) {
+                if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
+                    target.parentElement.parentElement.insertAdjacentHTML("beforeend", genSnippet({
+                        type: target.id === "addCodeSnippetCSS" ? "css" : "js",
+                        name: "",
+                        content: "",
+                        enabled: false
+                    }));
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.classList.contains("b3-button--cancel")) {
+                    dialog.destroy({cancel: "true"});
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.classList.contains("b3-button--text")) {
+                    setSnippet(dialog, response.data.snippets, removeIds);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.classList.contains("item")) {
+                    if (target.getAttribute("data-type") === "css") {
+                        target.classList.add("item--focus");
+                        target.nextElementSibling.classList.remove("item--focus");
+                        target.parentElement.nextElementSibling.firstElementChild.classList.remove("fn__none");
+                        target.parentElement.nextElementSibling.lastElementChild.classList.add("fn__none");
+                    } else {
+                        target.classList.add("item--focus");
+                        target.previousElementSibling.classList.remove("item--focus");
+                        target.parentElement.nextElementSibling.firstElementChild.classList.add("fn__none");
+                        target.parentElement.nextElementSibling.lastElementChild.classList.remove("fn__none");
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.dataset.action === "remove") {
+                    const itemElement = target.parentElement.parentElement;
+                    removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
+                    itemElement.nextElementSibling.remove();
+                    itemElement.remove();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
                 }
-                return;
-            }
-            const removeElement = hasClosestByClassName(target, "b3-tooltips");
-            if (removeElement) {
-                const itemElement = removeElement.parentElement.parentElement;
-                removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
-                itemElement.nextElementSibling.remove();
-                itemElement.remove();
+                target = target.parentElement;
             }
         });
     });
 };
 
 const genSnippet = (options: ISnippet) => {
-    return `<div data-id="${options.id || ""}" data-type="${options.type}">
+    return `<div class="fn__hr--b"></div>
+<div data-id="${options.id || ""}" data-type="${options.type}">
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
         <div class="fn__flex-1"></div>
         <div class="fn__space"></div>
-        <span aria-label="${window.siyuan.languages.remove}" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
+        <span aria-label="${window.siyuan.languages.remove}" data-action="remove" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
         <div class="fn__space"></div>
@@ -160,6 +180,9 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
                 rmElement.remove();
             }
         });
+        window.siyuan.config.snippet.enabledCSS = (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked;
+        window.siyuan.config.snippet.enabledJS = (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked;
+        fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
         renderSnippet();
         dialog.destroy({cancel: "true"});
     });
@@ -176,7 +199,9 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
             enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
         });
     });
-    if (objEquals(oldSnippets, snippets)) {
+    if (objEquals(oldSnippets, snippets) &&
+        window.siyuan.config.snippet.enabledCSS === (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked &&
+        window.siyuan.config.snippet.enabledJS === (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked) {
         dialog.destroy({cancel: "true"});
     } else {
         if (confirm) {

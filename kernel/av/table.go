@@ -21,6 +21,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // LayoutTable 描述了表格布局的结构。
@@ -174,6 +176,18 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeTemplate:
 		if nil != value.Template && nil != other.Template {
+			if util.IsNumeric(value.Template.Content) && util.IsNumeric(other.Template.Content) {
+				v1, _ := strconv.ParseFloat(value.Template.Content, 64)
+				v2, _ := strconv.ParseFloat(other.Template.Content, 64)
+				if v1 > v2 {
+					return 1
+				}
+
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
 			return strings.Compare(value.Template.Content, other.Template.Content)
 		}
 	case KeyTypeCheckbox:
@@ -713,7 +727,7 @@ func (table *Table) FilterRows() {
 	rows := []*TableRow{}
 	for _, row := range table.Rows {
 		block := row.GetBlockValue()
-		if !block.IsInitialized && nil != block.Block && "" == block.Block.Content && block.IsDetached {
+		if nil != block && block.NotAffectFilter() {
 			rows = append(rows, row)
 			continue
 		}

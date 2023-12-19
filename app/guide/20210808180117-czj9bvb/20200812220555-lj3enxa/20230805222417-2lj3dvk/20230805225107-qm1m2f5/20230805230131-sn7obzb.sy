@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805230131-sn7obzb",
 		"title": "对接第三方云端存储",
-		"updated": "20230828111951"
+		"updated": "20231217111041"
 	},
 	"Children": [
 		{
@@ -202,7 +202,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805233629-cefelxe",
-				"updated": "20230805233629"
+				"updated": "20231217111041"
 			},
 			"Children": [
 				{
@@ -256,6 +256,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "网络稳定（比如中国大陆地区请勿使用非中大陆地区的服务）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231217110937-uwz2itr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231217110937-uwz2itr",
+						"updated": "20231217111041"
+					},
+					"Children": [
+						{
+							"ID": "20231217110937-wnrtb66",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231217110937-wnrtb66",
+								"updated": "20231217111041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要启用 CDN"
 								}
 							]
 						}

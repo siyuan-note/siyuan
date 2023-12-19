@@ -25,7 +25,15 @@ import {unicode2Emoji} from "../emoji";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
-import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
+import {
+    filterMenu,
+    getKeyByLiElement,
+    initCriteriaMenu,
+    moreMenu,
+    queryMenu,
+    replaceFilterMenu,
+    saveCriterion
+} from "./menu";
 import {App} from "../index";
 import {
     assetFilterMenu,
@@ -215,6 +223,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
             group: localData.group,
             sort: localData.sort,
             types: Object.assign({}, localData.types),
+            replaceTypes: Object.assign({}, localData.replaceTypes),
             removed: localData.removed,
             page: 1
         },
@@ -323,9 +332,13 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         </div>
         <div class="fn__space"></div>
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;margin-right: 8px"><use xlink:href="#iconRefresh"></use></svg>
-        <button id="replaceAllBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
-        <div class="fn__space"></div>
+        <span id="replaceFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel fn__flex-center" data-position="9bottom">
+            <svg><use xlink:href="#iconFilter"></use></svg>
+        </span>
+        <span class="fn__space"></span>
         <button id="replaceBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">↵ ${window.siyuan.languages.replace}</button>
+        <div class="fn__space"></div>
+        <button id="replaceAllBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
         <div class="fn__space"></div>
     </div>
     <div id="criteria" class="search__header"></div>
@@ -462,7 +475,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         paragraph: window.siyuan.config.search.paragraph,
                         embedBlock: window.siyuan.config.search.embedBlock,
                         databaseBlock: window.siyuan.config.search.databaseBlock,
-                    }
+                    },
+                    replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                 }, config, edit);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
                 event.stopPropagation();
@@ -677,7 +691,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
                             databaseBlock: window.siyuan.config.search.databaseBlock,
-                        }
+                        },
+                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 }, () => {
@@ -743,6 +758,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     config.page = 1;
                     inputEvent(element, config, edit, true);
                 });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "replaceFilter") {
+                window.siyuan.menus.menu.remove();
+                replaceFilterMenu(config);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -1137,7 +1158,8 @@ export const replace = (element: Element, config: ISearchOption, edit: Protyle, 
         groupBy: config.group,
         orderBy: config.sort,
         page: config.page,
-        ids: isAll ? [] : [currentList.getAttribute("data-node-id")]
+        ids: isAll ? [] : [currentList.getAttribute("data-node-id")],
+        replaceTypes: config.replaceTypes
     }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {

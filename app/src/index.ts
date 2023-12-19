@@ -66,6 +66,9 @@ export class App {
                                 window.siyuan.config.editor.readOnly = data.data;
                                 hideAllElements(["util"]);
                                 break;
+                            case "setConf":
+                                window.siyuan.config = data.data;
+                                break;
                             case "progress":
                                 progressLoading(data);
                                 break;

@@ -1,5 +1,5 @@
 import {Tab} from "./Tab";
-import {getInstanceById, newModelByInitData} from "./util";
+import {getInstanceById, newModelByInitData, saveLayout} from "./util";
 import {getAllModels, getAllTabs} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";
@@ -84,7 +84,7 @@ export const switchTabByIndex = (index: number) => {
 };
 
 let resizeTimeout: number;
-export const resizeTabs = () => {
+export const resizeTabs = (isSaveLayout = true) => {
     clearTimeout(resizeTimeout);
     //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
     // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
@@ -117,6 +117,9 @@ export const resizeTabs = () => {
         });
         pdfResize();
         hideAllElements(["gutter"]);
+        if (isSaveLayout) {
+            saveLayout();
+        }
     }, 200);
 };
 

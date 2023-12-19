@@ -172,19 +172,6 @@ const winOnMaxRestore = async () => {
     /// #endif
 };
 
-const saveUI = () => {
-    exportLayout({
-        reload: false,
-        onlyData: false,
-        errorExit: false
-    });
-};
-
-export const unbindSaveUI = () => {
-    window.removeEventListener("beforeunload", saveUI);
-    window.removeEventListener("pagehide", saveUI);
-};
-
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
     const winOnClose = (close = false) => {
@@ -215,11 +202,6 @@ export const initWindow = async (app: App) => {
             if (getSelection().rangeCount > 0) {
                 focusByRange(getSelection().getRangeAt(0));
             }
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
             window.siyuan.altIsPressed = false;
             window.siyuan.ctrlIsPressed = false;
             window.siyuan.shiftIsPressed = false;
@@ -519,7 +501,5 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
     }
-    window.addEventListener("beforeunload", saveUI, false);
-    window.addEventListener("pagehide", saveUI, false);
     /// #endif
 };

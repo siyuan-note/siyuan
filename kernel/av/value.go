@@ -54,6 +54,10 @@ type Value struct {
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
 }
 
+func (value *Value) NotAffectFilter() bool {
+	return !value.IsInitialized && nil != value.Block && "" == value.Block.Content && value.IsDetached
+}
+
 func (value *Value) String() string {
 	switch value.Type {
 	case KeyTypeBlock:
@@ -158,6 +162,18 @@ func (value *Value) ToJSONString() string {
 		return ""
 	}
 	return string(data)
+}
+
+func (value *Value) Clone() (ret *Value) {
+	data, err := gulu.JSON.MarshalJSON(value)
+	if nil != err {
+		return
+	}
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	if nil != err {
+		return
+	}
+	return
 }
 
 type ValueBlock struct {

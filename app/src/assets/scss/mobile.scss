@@ -35,10 +35,6 @@
 .fn__flex-column[data-type="sidebar-file"] {
   .b3-list-item {
     -webkit-user-select: none;
-
-    &:hover {
-      background-color: transparent;
-    }
   }
 }
 
@@ -134,8 +130,8 @@
     }
 
     &--active,
-    &:focus,
-    &:hover {
+    &:not(.toolbar__icon-deactivate):focus,
+    &:not(.toolbar__icon-deactivate):hover {
       background-color: var(--b3-list-hover);
     }
   }

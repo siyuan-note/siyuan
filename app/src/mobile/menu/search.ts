@@ -497,7 +497,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
                             databaseBlock: window.siyuan.config.search.databaseBlock,
-                        }
+                        },
+                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                 });
                 window.siyuan.menus.menu.fullscreen();

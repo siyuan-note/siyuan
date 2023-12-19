@@ -15,7 +15,7 @@
         <use xlink:href="#iconMenu"></use>
     </svg>
     <input class="toolbar__title fn__hidden" id="toolbarName">
-    <svg id="toolbarSync" class="toolbar__icon fn__none">
+    <svg id="toolbarSync" class="toolbar__icon toolbar__icon-deactivate fn__none">
         <use xlink:href="#iconCloudSucc"></use>
     </svg>
     <svg id="toolbarMore" class="toolbar__icon">

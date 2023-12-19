@@ -102,8 +102,8 @@ export class Dock {
         // 初始化文件树
         this.element.querySelectorAll(".dock__item").forEach(item => {
             if (item.getAttribute("data-type") === "file" && !item.classList.contains("dock__item--active")) {
-                this.toggleModel("file", true);
-                this.toggleModel("file");
+                this.toggleModel("file", true, false, false, false);
+                this.toggleModel("file", false, false, false, false);
             }
         });
 
@@ -111,7 +111,7 @@ export class Dock {
             this.resizeElement.classList.add("fn__none");
         } else {
             activeElements.forEach(item => {
-                this.toggleModel(item.getAttribute("data-type"), true);
+                this.toggleModel(item.getAttribute("data-type"), true, false, false, false);
             });
         }
         this.element.addEventListener("click", (event) => {
@@ -320,7 +320,7 @@ export class Dock {
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: string, show = false, close = false, hide = false) {
+    public toggleModel(type: string, show = false, close = false, hide = false, saveLayout = true) {
         if (!type) {
             return;
         }
@@ -490,7 +490,7 @@ export class Dock {
                         });
                         break;
                 }
-                wnd.addTab(tab);
+                wnd.addTab(tab, false, false);
                 target.setAttribute("data-id", tab.id);
                 this.data[type] = tab.model;
                 setPanelFocus(tab.panelElement);
@@ -578,7 +578,7 @@ export class Dock {
             anotherWnd.element.style.height = "";
             anotherWnd.element.style.width = "";
         }
-        resizeTabs();
+        resizeTabs(saveLayout);
         this.showDock();
     }
 
@@ -720,7 +720,7 @@ export class Dock {
                 this.element.classList.remove("fn__none");
             }
             if (data[0].show) {
-                this.toggleModel(data[0].type, true);
+                this.toggleModel(data[0].type, true, false, false, false);
             }
         }
     }

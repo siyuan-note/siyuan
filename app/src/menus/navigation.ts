@@ -232,7 +232,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 k: localData.k,
                 r: localData.r,
                 page: 1,
-                types: Object.assign({}, localData.types)
+                types: Object.assign({}, localData.types),
+                replaceTypes: Object.assign({}, localData.replaceTypes)
             });
             /// #else
             openSearch({
@@ -262,7 +263,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({
@@ -556,7 +558,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({
@@ -591,7 +594,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({

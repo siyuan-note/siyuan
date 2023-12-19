@@ -962,6 +962,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         blockRender(protyle, targetElement);
                     }
                 }
+                dragoverElement = undefined;
             }
         } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1
             && targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
@@ -1117,7 +1118,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (contentRect) {
                 const editorPosition = {
                     left: contentRect.left + parseInt(editorElement.style.paddingLeft),
-                    right: contentRect.right - parseInt(editorElement.style.paddingRight)
+                    right: contentRect.left + protyle.contentElement.clientWidth - parseInt(editorElement.style.paddingRight)
                 };
                 if (event.clientX < editorPosition.left) {
                     // 左侧

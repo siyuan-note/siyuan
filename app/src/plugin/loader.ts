@@ -2,7 +2,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {exportLayout, resizeTopBar} from "../layout/util";
+import {resizeTopBar} from "../layout/util";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
@@ -80,13 +80,6 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     styleElement.textContent = item.css;
     document.head.append(styleElement);
     afterLoadPlugin(plugin);
-    /// #if !MOBILE
-    exportLayout({
-        reload: false,
-        onlyData: false,
-        errorExit: false
-    });
-    /// #endif
     return plugin;
 };
 

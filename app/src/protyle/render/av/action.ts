@@ -3,9 +3,9 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getCellText, getTypeByCellElement, popTextCell} from "./cell";
+import {getCellText, getTypeByCellElement, popTextCell, renderCell, updateHeaderCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
-import {deleteRow, insertAttrViewBlockAnimation, setPageSize, stickyRow, updateHeader} from "./row";
+import {deleteRow, insertAttrViewBlockAnimation, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
@@ -413,8 +413,17 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     });
 };
 
-export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
-    cellElement.style.backgroundColor = "var(--b3-av-hover)";
+export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAVCellValue, headerValue?: {
+    icon?: string,
+    name?: string,
+    pin?: boolean,
+    type?: TAVCol
+}) => {
+    if (headerValue) {
+        updateHeaderCell(cellElement, headerValue);
+    } else {
+        cellElement.innerHTML = renderCell(value, cellElement.dataset.wrap === "true");
+    }
 };
 
 export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {

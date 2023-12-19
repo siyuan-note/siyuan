@@ -113,6 +113,36 @@ func ResetVirtualBlockRefCache() {
 	CacheVirtualBlockRefJob()
 }
 
+func AddVirtualBlockRefInclude(keyword []string) {
+	if 1 > len(keyword) {
+		return
+	}
+
+	include := strings.ReplaceAll(Conf.Editor.VirtualBlockRefInclude, "\\,", "__comma@sep__")
+	includes := strings.Split(include, ",")
+	includes = append(includes, keyword...)
+	includes = gulu.Str.RemoveDuplicatedElem(includes)
+	Conf.Editor.VirtualBlockRefInclude = strings.Join(includes, ",")
+	Conf.Save()
+
+	ResetVirtualBlockRefCache()
+}
+
+func AddVirtualBlockRefExclude(keyword []string) {
+	if 1 > len(keyword) {
+		return
+	}
+
+	exclude := strings.ReplaceAll(Conf.Editor.VirtualBlockRefExclude, "\\,", "__comma@sep__")
+	excludes := strings.Split(exclude, ",")
+	excludes = append(excludes, keyword...)
+	excludes = gulu.Str.RemoveDuplicatedElem(excludes)
+	Conf.Editor.VirtualBlockRefExclude = strings.Join(excludes, ",")
+	Conf.Save()
+
+	ResetVirtualBlockRefCache()
+}
+
 func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {
 	if !Conf.Editor.VirtualBlockRef {
 		return false

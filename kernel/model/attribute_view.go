@@ -1694,8 +1694,6 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 		return
 	}
 
-	WaitForWritingFiles()
-
 	var node *ast.Node
 	if !operation.IsDetached {
 		node, _, _ = getNodeByBlockID(tx, operation.NextID)

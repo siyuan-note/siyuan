@@ -215,7 +215,10 @@ export class BlockPanel {
         this.element = undefined;
         this.targetElement = undefined;
         // 移除弹出上使用右键菜单
-        window.siyuan.menus.menu.remove();
+        if (window.siyuan.menus.menu.element.dataset.from !== "app") {
+            // https://github.com/siyuan-note/siyuan/issues/9854 右键菜单不是从浮窗中弹出的则不进行移除
+            window.siyuan.menus.menu.remove();
+        }
     }
 
     private render() {

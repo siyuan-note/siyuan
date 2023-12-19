@@ -84,7 +84,7 @@ export class Menu {
     }
 
     public addSeparator(index?: number) {
-       return this.addItem({type: "separator", index});
+        return this.addItem({type: "separator", index});
     }
 
     public addItem(option: IMenu) {
@@ -109,6 +109,7 @@ export class Menu {
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
+        window.siyuan.menus.menu.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
     }
 
     public append(element?: HTMLElement, index?: number) {

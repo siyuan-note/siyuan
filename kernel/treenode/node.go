@@ -137,6 +137,10 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 }
 
 func IsNodeOCRed(node *ast.Node) (ret bool) {
+	if !util.TesseractEnabled || nil == node {
+		return
+	}
+
 	ret = true
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -145,16 +149,18 @@ func IsNodeOCRed(node *ast.Node) (ret bool) {
 
 		if ast.NodeImage == n.Type {
 			linkDest := n.ChildByType(ast.NodeLinkDest)
-			if nil != linkDest {
-				linkDestStr := linkDest.TokensStr()
-				if !cache.ExistAsset(linkDestStr) {
-					return ast.WalkContinue
-				}
+			if nil == linkDest {
+				return ast.WalkContinue
+			}
 
-				if !util.ExistsAssetText(linkDestStr) {
-					ret = false
-					return ast.WalkStop
-				}
+			linkDestStr := linkDest.TokensStr()
+			if !cache.ExistAsset(linkDestStr) {
+				return ast.WalkContinue
+			}
+
+			if !util.ExistsAssetText(linkDestStr) {
+				ret = false
+				return ast.WalkStop
 			}
 		}
 		return ast.WalkContinue

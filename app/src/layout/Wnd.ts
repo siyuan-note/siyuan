@@ -431,6 +431,7 @@ export class Wnd {
             if (initData) {
                 currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)));
                 currentTab.headElement.removeAttribute("data-initdata");
+                saveLayout();
                 return;
             }
         }
@@ -491,6 +492,7 @@ export class Wnd {
                 resize,
             });
         }
+        saveLayout();
     }
 
     public addTab(tab: Tab, keepCursor = false, isSaveLayout = true) {

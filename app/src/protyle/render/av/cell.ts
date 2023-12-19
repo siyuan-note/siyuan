@@ -589,7 +589,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
     return text;
-}
+};
 
 export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     icon?: string,
@@ -598,16 +598,16 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
 }) => {
     if (typeof headerValue.icon !== "undefined") {
         cellElement.dataset.icon = headerValue.icon;
-        cellElement.querySelector(".av__cellheadericon").outerHTML = headerValue.icon ? unicode2Emoji(headerValue.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(cellElement.dataset.dtype as TAVCol)}"></use></svg>`
+        cellElement.querySelector(".av__cellheadericon").outerHTML = headerValue.icon ? unicode2Emoji(headerValue.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(cellElement.dataset.dtype as TAVCol)}"></use></svg>`;
     }
     if (typeof headerValue.name !== "undefined") {
         cellElement.querySelector(".av__celltext").textContent = headerValue.name;
     }
     if (typeof headerValue.pin !== "undefined") {
-        const textElement = cellElement.querySelector(".av__celltext")
+        const textElement = cellElement.querySelector(".av__celltext");
         if (headerValue.pin) {
             if (!textElement.nextElementSibling) {
-                textElement.insertAdjacentHTML("afterend", '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>')
+                textElement.insertAdjacentHTML("afterend", '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>');
             }
         } else {
             if (textElement.nextElementSibling) {
@@ -616,4 +616,4 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
             }
         }
     }
-}
+};

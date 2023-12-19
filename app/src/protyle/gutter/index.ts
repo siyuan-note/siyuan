@@ -247,7 +247,7 @@ export class Gutter {
                     window.siyuan.menus.menu.fullscreen();
                 } else {
                     window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16, isLeft: true});
-                    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+                    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
                     focusByRange(protyle.toolbar.range);
                 }
             }
@@ -260,7 +260,7 @@ export class Gutter {
             if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
                 this.renderMenu(protyle, buttonElement);
                 window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16, isLeft: true});
-                window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+                window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
             }
             event.preventDefault();
             event.stopPropagation();

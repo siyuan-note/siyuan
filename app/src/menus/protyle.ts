@@ -583,7 +583,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
     if (!protyle.disabled) {
         window.siyuan.menus.menu.element.querySelector("input").select();
         window.siyuan.menus.menu.removeCB = () => {
@@ -1063,7 +1063,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }
 
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
     if (!protyle.disabled) {
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
         textElements[0].focus();
@@ -1250,7 +1250,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         textElements[1].select();
@@ -1387,7 +1387,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app")
+    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 

@@ -1,5 +1,4 @@
 import {fetchPost} from "../../util/fetch";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
 import {objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";

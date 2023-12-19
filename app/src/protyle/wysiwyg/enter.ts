@@ -389,12 +389,12 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         action: "update",
         data: blockElement.outerHTML,
         id: id,
-    }]
+    }];
     const undoOperation: IOperation[] = [{
         action: "update",
         data: html,
         id: id,
-    }]
+    }];
     let previousElement = blockElement;
     Array.from(newElement.children).forEach((item: HTMLElement) => {
         const newId = item.getAttribute("data-node-id");
@@ -403,15 +403,15 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: item.outerHTML,
             id: newId,
             previousID: previousElement.getAttribute("data-node-id"),
-        })
+        });
         undoOperation.push({
             action: "delete",
             id: newId,
-        })
+        });
         previousElement.insertAdjacentElement("afterend", item);
         mathRender(previousElement.nextElementSibling);
         previousElement = item;
-    })
+    });
     transaction(protyle, doOperation, undoOperation);
     focusBlock(blockElement.nextElementSibling);
     scrollCenter(protyle);

@@ -432,6 +432,7 @@ func createDoc(c *gin.Context) {
 		return
 	}
 
+	model.WaitForWritingFiles()
 	box := model.Conf.Box(notebook)
 	pushCreate(box, p, tree.Root.ID, arg)
 
@@ -461,8 +462,8 @@ func createDailyNote(c *gin.Context) {
 		return
 	}
 
-	box := model.Conf.Box(notebook)
 	model.WaitForWritingFiles()
+	box := model.Conf.Box(notebook)
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 	if nil != err {
@@ -549,6 +550,7 @@ func createDocWithMd(c *gin.Context) {
 	}
 	ret.Data = id
 
+	model.WaitForWritingFiles()
 	box := model.Conf.Box(notebook)
 	b, _ := model.GetBlock(id, nil)
 	p := b.Path

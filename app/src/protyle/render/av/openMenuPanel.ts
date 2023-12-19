@@ -44,6 +44,7 @@ export const openMenuPanel = (options: {
     const avID = options.blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
+        pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
     }, (response) => {
         const data = response.data as IAV;
         let html;

@@ -154,82 +154,82 @@ export const initEditor = () => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="virtualBlockRef" type="checkbox"${window.siyuan.config.editor.virtualBlockRef ? " checked" : ""}/>
 </label>
-<label class="b3-label fn__displayblock">
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.md9}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="virtualBlockRefInclude" value="${window.siyuan.config.editor.virtualBlockRefInclude}" />
     <div class="b3-label__text">${window.siyuan.languages.md36}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.md35}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />
     <div class="b3-label__text">${window.siyuan.languages.md36}</div>
     <div class="b3-label__text">${window.siyuan.languages.md41}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.md39}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
     <div class="b3-label__text">${window.siyuan.languages.md40}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.dynamicLoadBlocks}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="dynamicLoadBlocks" type="number" min="48" max="1024" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
     <div class="b3-label__text">${window.siyuan.languages.dynamicLoadBlocksTip}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.md37}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="blockRefDynamicAnchorTextMaxLen" type="number" min="1" max="5120" value="${window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen}"/>
     <div class="b3-label__text">${window.siyuan.languages.md38}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.backlinkExpand}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="backlinkExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backlinkExpandCount}"/>
     <div class="b3-label__text">${window.siyuan.languages.backlinkExpandTip}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.backmentionExpand}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="backmentionExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
     <div class="b3-label__text">${window.siyuan.languages.backmentionExpandTip}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.generateHistory}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="generateHistoryInterval" type="number" min="0" max="120" value="${window.siyuan.config.editor.generateHistoryInterval}"/>
     <div class="b3-label__text">${window.siyuan.languages.generateHistoryInterval}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.historyRetentionDays} 
     <a href="javascript:void(0)" id="clearHistory">${window.siyuan.languages.clearHistory}</a>
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="historyRetentionDays" type="number" min="0" value="${window.siyuan.config.editor.historyRetentionDays}"/>
     <div class="b3-label__text">${window.siyuan.languages.historyRetentionDaysTip}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.fontSize} 
     <span class="ft__on-surface">${window.siyuan.config.editor.fontSize}</span>
     <div class="fn__hr"></div>
     <input id="fontSize" class="b3-slider fn__block" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
     <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.md29} 
     <span class="ft__on-surface">${window.siyuan.config.editor.codeTabSpaces}</span>
     <div class="fn__hr"></div>
     <input class="b3-slider fn__block" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
     <div class="b3-label__text">${window.siyuan.languages.md30}</div>
-</label>
-<label class="b3-label fn__displayblock">
+</div>
+<div class="b3-label fn__displayblock">
     ${window.siyuan.languages.katexMacros}
     <div class="fn__hr"></div>
     <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
     <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
-</label>`,
+</div>`,
         bindEvent(modelMainElement: HTMLElement) {
             modelMainElement.querySelector("#clearHistory").addEventListener("click", () => {
                 confirmDialog(window.siyuan.languages.clearHistory, window.siyuan.languages.confirmClearHistory, () => {

@@ -21,14 +21,14 @@ export const initAbout = () => {
         title: window.siyuan.languages.about,
         icon: "iconInfo",
         html: `<div>
-<div class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
+<label class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>
     </div>
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
-</div>
+</label>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>

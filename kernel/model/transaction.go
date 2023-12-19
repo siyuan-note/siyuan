@@ -87,7 +87,7 @@ var (
 )
 
 func isWritingFiles() bool {
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(time.Duration(50) * time.Millisecond)
 	return 0 < len(txQueue)
 }
 

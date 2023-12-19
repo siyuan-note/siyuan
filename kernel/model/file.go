@@ -1015,6 +1015,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 		return
 	}
 
+	WaitForWritingFiles()
 	ChangeFileTreeSort(box.ID, sorts)
 	return
 }
@@ -1033,6 +1034,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	WaitForWritingFiles()
 	return
 }
 

@@ -1919,7 +1919,6 @@ func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *pa
 		tree, err = loadTreeByBlockID(blockID)
 	}
 	if nil != err {
-		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, err)
 		return
 	}
 	node = treenode.GetNodeInTree(tree, blockID)

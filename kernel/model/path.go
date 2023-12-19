@@ -95,7 +95,9 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数�
 		root = hpathBtMap[hp]
 		isNotLast := i < len(parts)-1
 		if nil == root {
-			retID = ast.NewNodeID()
+			if "" == retID {
+				retID = ast.NewNodeID()
+			}
 			pathBuilder.WriteString(retID)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
@@ -116,7 +118,9 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string /* id 参数�
 				}
 			}
 		} else {
-			retID = root.ID
+			if "" == retID {
+				retID = root.ID
+			}
 			pathBuilder.WriteString(root.ID)
 			if !isNotLast {
 				pathBuilder.WriteString(".sy")

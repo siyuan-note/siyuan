@@ -305,5 +305,5 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                     (operation.action === "removeAttrViewView" ? null : undefined));
             });
         }
-    }, 100);
+    }, ["insertAttrViewBlock", "addAttrViewCol"].includes(operation.action) ? 2 : 100);
 };

@@ -68,22 +68,6 @@
     font-size: 87.5%;
   }
 
-  &__gutters {
-    @extend .protyle-gutters;
-    top: 0;
-    left: -44px;
-    opacity: 0;
-    display: flex;
-
-    &--min .av__gutter {
-      padding: 4px 0;
-    }
-
-    svg {
-      height: 25px;
-    }
-  }
-
   &__mask {
     position: fixed;
     top: 0;
@@ -114,14 +98,8 @@
       box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
     }
 
-    &:hover {
-      [data-type="block-more"] {
-        display: block;
-      }
-
-      .av__gutters {
-        opacity: 1;
-      }
+    &:hover [data-type="block-more"] {
+      display: block;
     }
 
     &--select {

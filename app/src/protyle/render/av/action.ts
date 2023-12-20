@@ -159,39 +159,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__gutter")) {
-            const rowElement = hasClosestByClassName(target, "av__row");
-            if (!rowElement) {
-                return;
-            }
-            if (target.dataset.action === "add") {
-                const avID = blockElement.getAttribute("data-av-id");
-                const srcIDs = [Lute.NewNodeID()];
-                const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : rowElement.getAttribute("data-id");
-                transaction(protyle, [{
-                    action: "insertAttrViewBlock",
-                    avID,
-                    previousID,
-                    srcIDs,
-                    isDetached: true,
-                }], [{
-                    action: "removeAttrViewBlock",
-                    srcIDs,
-                    avID,
-                }]);
-                insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
-            } else {
-                const gutterRect = target.getBoundingClientRect();
-                avContextmenu(protyle, rowElement, {
-                    x: gutterRect.left,
-                    y: gutterRect.bottom,
-                    w: gutterRect.width,
-                    h: gutterRect.height
-                });
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
         } else if (target.classList.contains("av__firstcol")) {
             window.siyuan.menus.menu.remove();
             selectRow(target, "toggle");

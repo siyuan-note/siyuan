@@ -379,7 +379,6 @@ export class WYSIWYG {
             }
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-action") ||
-                hasClosestByClassName(target, "av__gutters") ||
                 hasClosestByClassName(target, "av__cellheader")) {
                 return;
             }
@@ -1511,22 +1510,7 @@ export class WYSIWYG {
                 if (embedElement) {
                     protyle.gutter.render(protyle, embedElement, this.element);
                 } else {
-                    // database 行块标
-                    const rowElement = hasClosestByClassName(event.target, "av__row");
-                    if (rowElement && rowElement.dataset.id) {
-                        const guttersElement = rowElement.querySelector(".av__gutters");
-                        if (guttersElement) {
-                            guttersElement.classList.remove("av__gutters--min");
-                            let guttersLeft = rowElement.parentElement.parentElement.getBoundingClientRect().left - guttersElement.clientWidth;
-                            const contentLeft = protyle.contentElement.getBoundingClientRect().left;
-                            if (guttersLeft < contentLeft) {
-                                guttersLeft = contentLeft;
-                                guttersElement.classList.add("av__gutters--min");
-                            }
-                            guttersElement.setAttribute("style", `left:${guttersLeft}px;top:${rowElement.getBoundingClientRect().top}px`);
-                        }
-                    }
-                    protyle.gutter.render(protyle, nodeElement, this.element);
+                    protyle.gutter.render(protyle, nodeElement, this.element, event.target);
                 }
             }
         });

@@ -44,6 +44,8 @@ import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
+import {insertAttrViewBlockAnimation} from "../render/av/row";
+import {avContextmenu} from "../render/av/action";
 
 export class Gutter {
     public element: HTMLElement;
@@ -181,6 +183,43 @@ export class Gutter {
                 }
                 hideElements(["select"], protyle);
                 window.siyuan.menus.menu.remove();
+                return;
+            }
+            if (buttonElement.dataset.type === "NodeAttributeViewRowMenu" || buttonElement.dataset.type === "NodeAttributeViewRow") {
+                const rowElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${buttonElement.dataset.nodeId}"]`) as HTMLElement;
+                if (!rowElement) {
+                    return;
+                }
+                const blockElement = hasClosestBlock(rowElement)
+                if (!blockElement) {
+                    return;
+                }
+                blockElement.querySelector(".av__cell--select")?.classList.remove("av__cell--select");
+                if (buttonElement.dataset.type === "NodeAttributeViewRow") {
+                    const avID = blockElement.getAttribute("data-av-id");
+                    const srcIDs = [Lute.NewNodeID()];
+                    const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.nodeId;
+                    transaction(protyle, [{
+                        action: "insertAttrViewBlock",
+                        avID,
+                        previousID,
+                        srcIDs,
+                        isDetached: true,
+                    }], [{
+                        action: "removeAttrViewBlock",
+                        srcIDs,
+                        avID,
+                    }]);
+                    insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
+                } else {
+                    const gutterRect = buttonElement.getBoundingClientRect();
+                    avContextmenu(protyle, rowElement, {
+                        x: gutterRect.left,
+                        y: gutterRect.bottom,
+                        w: gutterRect.width,
+                        h: gutterRect.height
+                    });
+                }
                 return;
             }
             if (isOnlyMeta(event)) {
@@ -1805,7 +1844,7 @@ export class Gutter {
         };
     }
 
-    public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement) {
+    public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement, target?: Element) {
         // https://github.com/siyuan-note/siyuan/issues/4659
         const titleElement = wysiwyg.parentElement.querySelector(".protyle-title__input");
         if (titleElement && titleElement.getAttribute("data-render") !== "true") {
@@ -1829,6 +1868,15 @@ export class Gutter {
                 let type;
                 if (isShow) {
                     type = nodeElement.getAttribute("data-type");
+                }
+                if (type === "NodeAttributeView" && target) {
+                    const rowElement = hasClosestByClassName(target, "av__row");
+                    if (rowElement && !rowElement.classList.contains("av__row--header")) {
+                        element = rowElement;
+                        html = `<button data-type="NodeAttributeViewRow" data-node-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+<button data-type="NodeAttributeViewRowMenu" data-node-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true"'}></span></button>`
+                        break;
+                    }
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
@@ -1924,8 +1972,9 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         } else if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
             (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
             marginHeight = (rect.height - this.element.clientHeight) / 2;
-        } else if ((nodeElement.getAttribute("data-type") === "NodeAttributeView" ||
-            element.getAttribute("data-type") === "NodeAttributeView") && contentTop < rect.top) {
+        } else if (!element.classList.contains("av__row") &&
+            (nodeElement.getAttribute("data-type") === "NodeAttributeView" || element.getAttribute("data-type") === "NodeAttributeView") &&
+            contentTop < rect.top) {
             marginHeight = 8;
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;

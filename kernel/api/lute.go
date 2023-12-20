@@ -17,8 +17,8 @@
 package api
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -129,6 +130,12 @@ func html2BlockDOM(c *gin.Context) {
 			localPath = strings.TrimPrefix(localPath, "file://")
 			if gulu.OS.IsWindows() {
 				localPath = strings.TrimPrefix(localPath, "/")
+			}
+
+			unescaped, _ := url.PathUnescape(localPath)
+			if unescaped != localPath {
+				// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
+				localPath = unescaped
 			}
 
 			if !filepath.IsAbs(localPath) {

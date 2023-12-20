@@ -492,8 +492,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 	cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
 	now := time.Now()
 	for _, card := range cards {
-		blockID := card.BlockID()
-		ret = append(ret, newFlashcard(card, blockID, builtinDeckID, now))
+		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -536,8 +535,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 	cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit)
 	now := time.Now()
 	for _, card := range cards {
-		blockID := card.BlockID()
-		ret = append(ret, newFlashcard(card, blockID, builtinDeckID, now))
+		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -606,13 +604,7 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 	cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
 	now := time.Now()
 	for _, card := range cards {
-		blockID := card.BlockID()
-
-		if nil == treenode.GetBlockTree(blockID) {
-			continue
-		}
-
-		ret = append(ret, newFlashcard(card, blockID, deckID, now))
+		ret = append(ret, newFlashcard(card, card.BlockID(), deckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -627,12 +619,7 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 		cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
 		unreviewedCount += unreviewedCnt
 		for _, card := range cards {
-			blockID := card.BlockID()
-			if nil == treenode.GetBlockTree(blockID) {
-				continue
-			}
-
-			ret = append(ret, newFlashcard(card, blockID, deck.ID, now))
+			ret = append(ret, newFlashcard(card, card.BlockID(), deck.ID, now))
 		}
 	}
 	if 1 > len(ret) {
@@ -997,6 +984,14 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 	dues := deck.Dues()
 
 	var tmp []riff.Card
+	for _, c := range dues {
+		if nil == treenode.GetBlockTree(c.BlockID()) {
+			continue
+		}
+		tmp = append(tmp, c)
+	}
+	dues = tmp
+
 	for _, c := range dues {
 		if 0 < len(blockIDs) && !gulu.Str.Contains(c.BlockID(), blockIDs) {
 			continue

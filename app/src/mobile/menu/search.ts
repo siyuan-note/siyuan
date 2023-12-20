@@ -59,6 +59,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
         ids,
         types: config.types,
         method: config.method,
+        replaceTypes: config.replaceTypes
     }, (response) => {
         loadElement.classList.add("fn__none");
         loadElement.nextElementSibling.classList.remove("fn__none");

@@ -4,7 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
-import {bgFade} from "../../util/highlightById";
+import {bgFade, scrollCenter} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";
 /// #endif
@@ -391,20 +391,30 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         }
         /// #endif
     }
-    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-        focusElement.scrollIntoView();
-    } else if (scrollAttr && scrollAttr.scrollTop) {
+    if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+    }
+    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        const focusRect = focusElement.getBoundingClientRect();
+        if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
+            scrollCenter(protyle, focusElement);
+        }
     } else {
         protyle.observerLoad?.disconnect();
         return;
     }
     // 加强定位
     protyle.observerLoad = new ResizeObserver(() => {
-        if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-            focusElement.scrollIntoView();
-        } else if (scrollAttr && scrollAttr.scrollTop) {
+        if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
             protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+        }
+        if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            const focusRect = focusElement.getBoundingClientRect();
+            if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
+                scrollCenter(protyle, focusElement);
+            }
         }
     });
     protyle.observerLoad.observe(protyle.wysiwyg.element);

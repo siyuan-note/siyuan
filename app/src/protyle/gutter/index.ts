@@ -471,7 +471,7 @@ export class Gutter {
                 isList = true;
                 return true;
             }
-            if (item.classList.contains("bq") || item.classList.contains("sb") || item.classList.contains("p")) {
+            if (item.classList.contains("sb") || item.classList.contains("p")) {
                 hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&

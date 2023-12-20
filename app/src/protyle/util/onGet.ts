@@ -247,7 +247,7 @@ const setHTML = (options: {
             onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
         });
     }
-    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none")) {
+    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") && !protyle.element.classList.contains("fn__none")) {
         // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
         protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
         // https://github.com/siyuan-note/siyuan/issues/8224

@@ -474,7 +474,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
             item.removeAttribute("data-init-active");
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
-            tab.parent.switchTab(item, false, false);
+            tab.parent.switchTab(item, false, false, true, false);
         });
     }
     resizeTopBar();

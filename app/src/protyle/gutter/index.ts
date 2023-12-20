@@ -62,15 +62,30 @@ export class Gutter {
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
             const buttonElement = event.target.parentElement;
-            let selectIds: string[] = [buttonElement.getAttribute("data-node-id")];
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length > 0) {
-                selectIds = [];
-                selectElements.forEach(item => {
-                    selectIds.push(item.getAttribute("data-node-id"));
+            let selectIds: string[] = []
+            let selectElements: Element[] = []
+            if (buttonElement.dataset.rowId) {
+                const avElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"]`)).find((item: HTMLElement) => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        return true;
+                    }
                 });
+                avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`).classList.add("av__row--select");
+                avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
+                    selectIds.push(item.getAttribute("data-id"));
+                    selectElements.push(item);
+                })
             } else {
-                selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)];
+                selectIds = [buttonElement.getAttribute("data-node-id")];
+                selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectElements.length > 0) {
+                    selectIds = [];
+                    selectElements.forEach(item => {
+                        selectIds.push(item.getAttribute("data-node-id"));
+                    });
+                } else {
+                    selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)];
+                }
             }
 
             const ghostElement = document.createElement("div");
@@ -110,6 +125,7 @@ export class Gutter {
             }
             event.preventDefault();
             event.stopPropagation();
+            hideTooltip();
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
                 if (buttonElement.getAttribute("disabled")) {
@@ -301,6 +317,7 @@ export class Gutter {
                 return;
             }
             if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
+                hideTooltip();
                 const gutterRect = buttonElement.getBoundingClientRect();
                 if (buttonElement.dataset.type === "NodeAttributeViewRowMenu") {
                     const rowElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"] .av__row[data-id="${buttonElement.dataset.rowId}"]`)).find((item: HTMLElement) => {

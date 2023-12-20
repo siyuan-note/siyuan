@@ -276,15 +276,19 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     updateHeader(rowElement);
-    menu.addItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
-        click() {
-            deleteRow(blockElement, protyle);
-        }
-    });
+    if (!protyle.disabled) {
+        menu.addItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            click() {
+                deleteRow(blockElement, protyle);
+            }
+        });
+    }
     if (rowElements.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
-        menu.addSeparator();
+        if (!protyle.disabled) {
+            menu.addSeparator();
+        }
         openEditorTab(protyle.app, rowElements[0].getAttribute("data-id"));
         menu.addItem({
             label: window.siyuan.languages.copy,
@@ -293,37 +297,39 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             submenu: copySubMenu(rowElements[0].getAttribute("data-id"))
         });
     }
-    menu.addSeparator();
-    const editAttrSubmenu: IMenu[] = [];
-    rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
-        let hideBlock = false;
-        const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
-        if (cellElement.dataset.dtype === "block") {
-            selectElements.find(item => {
-                if (!item.dataset.detached) {
-                    hideBlock = true;
-                    return true;
-                }
-            });
-        }
-        const type = cellElement.getAttribute("data-dtype") as TAVCol;
-        if (!hideBlock && !["updated", "created"].includes(type)) {
-            const icon = cellElement.dataset.icon;
-            editAttrSubmenu.push({
-                iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
-                label: cellElement.querySelector(".av__celltext").textContent.trim(),
-                click() {
-                    popTextCell(protyle, selectElements);
-                }
-            });
-        }
-    });
-    menu.addItem({
-        icon: "iconAttr",
-        label: window.siyuan.languages.attr,
-        type: "submenu",
-        submenu: editAttrSubmenu
-    });
+    if (!protyle.disabled) {
+        menu.addSeparator();
+        const editAttrSubmenu: IMenu[] = [];
+        rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
+            let hideBlock = false;
+            const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
+            if (cellElement.dataset.dtype === "block") {
+                selectElements.find(item => {
+                    if (!item.dataset.detached) {
+                        hideBlock = true;
+                        return true;
+                    }
+                });
+            }
+            const type = cellElement.getAttribute("data-dtype") as TAVCol;
+            if (!hideBlock && !["updated", "created"].includes(type)) {
+                const icon = cellElement.dataset.icon;
+                editAttrSubmenu.push({
+                    iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
+                    label: cellElement.querySelector(".av__celltext").textContent.trim(),
+                    click() {
+                        popTextCell(protyle, selectElements);
+                    }
+                });
+            }
+        });
+        menu.addItem({
+            icon: "iconAttr",
+            label: window.siyuan.languages.attr,
+            type: "submenu",
+            submenu: editAttrSubmenu
+        });
+    }
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,

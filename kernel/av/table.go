@@ -176,9 +176,11 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeTemplate:
 		if nil != value.Template && nil != other.Template {
-			if util.IsNumeric(value.Template.Content) && util.IsNumeric(other.Template.Content) {
-				v1, _ := strconv.ParseFloat(value.Template.Content, 64)
-				v2, _ := strconv.ParseFloat(other.Template.Content, 64)
+			vContent := strings.TrimSpace(value.Template.Content)
+			oContent := strings.TrimSpace(other.Template.Content)
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
 				if v1 > v2 {
 					return 1
 				}

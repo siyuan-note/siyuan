@@ -81,7 +81,7 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 			BlockID: root.ID,
 			RootID:  root.ID,
 			Box:     root.Box,
-			DocPath: p,
+			DocPath: root.Path,
 			Path:    p,
 			Name:    name,
 			Title:   "title-img",

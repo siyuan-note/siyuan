@@ -62,7 +62,7 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 	return
 }
 
-func docTitleImgAsset(root *ast.Node) *Asset {
+func docTitleImgAsset(root *ast.Node, boxLocalPath, docDirLocalPath string) *Asset {
 	if p := treenode.GetDocTitleImgPath(root); "" != p {
 		if !util.IsAssetLinkDest([]byte(p)) {
 			return nil
@@ -70,11 +70,14 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 
 		var hash string
 		var err error
-		absPath := filepath.Join(util.DataDir, p)
-		if hash, err = util.GetEtag(absPath); nil != err {
-			logging.LogErrorf("read asset [%s] data failed: %s", absPath, err)
-			return nil
+		if lp := assetLocalPath(p, boxLocalPath, docDirLocalPath); "" != lp {
+			hash, err = util.GetEtag(lp)
+			if nil != err {
+				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, err)
+				return nil
+			}
 		}
+
 		name, _ := util.LastID(p)
 		asset := &Asset{
 			ID:      ast.NewNodeID(),

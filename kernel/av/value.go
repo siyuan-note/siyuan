@@ -69,7 +69,7 @@ func (value *Value) String() string {
 		if nil == value.Text {
 			return ""
 		}
-		return value.Text.Content
+		return strings.TrimSpace(value.Text.Content)
 	case KeyTypeNumber:
 		if nil == value.Number {
 			return ""
@@ -122,7 +122,7 @@ func (value *Value) String() string {
 		if nil == value.Template {
 			return ""
 		}
-		return value.Template.Content
+		return strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
 		if nil == value.Created {
 			return ""

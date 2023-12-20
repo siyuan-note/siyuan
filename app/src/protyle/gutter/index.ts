@@ -185,8 +185,13 @@ export class Gutter {
                 window.siyuan.menus.menu.remove();
                 return;
             }
+            const gutterRect = buttonElement.getBoundingClientRect();
             if (buttonElement.dataset.type === "NodeAttributeViewRowMenu" || buttonElement.dataset.type === "NodeAttributeViewRow") {
-                const rowElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${buttonElement.dataset.nodeId}"]`) as HTMLElement;
+                const rowElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"] .av__row[data-id="${buttonElement.dataset.rowId}"]`)).find((item: HTMLElement) => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        return true;
+                    }
+                });
                 if (!rowElement) {
                     return;
                 }
@@ -194,11 +199,10 @@ export class Gutter {
                 if (!blockElement) {
                     return;
                 }
-                blockElement.querySelector(".av__cell--select")?.classList.remove("av__cell--select");
                 if (buttonElement.dataset.type === "NodeAttributeViewRow") {
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
-                    const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.nodeId;
+                    const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
@@ -212,19 +216,19 @@ export class Gutter {
                     }]);
                     insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
                 } else {
-                    const gutterRect = buttonElement.getBoundingClientRect();
-                    avContextmenu(protyle, rowElement, {
+                    avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
                         y: gutterRect.bottom,
                         w: gutterRect.width,
-                        h: gutterRect.height
+                        h: gutterRect.height,
+                        isLeft: true
                     });
                 }
                 return;
             }
             if (isOnlyMeta(event)) {
                 zoomOut({protyle, id});
-            } else if (event.altKey) {
+            } else if (event.altKey && !protyle.disabled) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
@@ -276,7 +280,7 @@ export class Gutter {
                 foldElement.classList.remove("protyle-wysiwyg--hl");
             } else if (window.siyuan.shiftIsPressed && !protyle.disabled) {
                 openAttr(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`), "bookmark", protyle);
-            } else {
+            } else if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
                 this.renderMenu(protyle, buttonElement);
                 // https://ld246.com/article/1648433751993
                 if (!protyle.toolbar.range) {
@@ -285,7 +289,7 @@ export class Gutter {
                 if (isMobile()) {
                     window.siyuan.menus.menu.fullscreen();
                 } else {
-                    window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16, isLeft: true});
+                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
                     window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
                     focusByRange(protyle.toolbar.range);
                 }
@@ -293,13 +297,31 @@ export class Gutter {
         });
         this.element.addEventListener("contextmenu", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement || protyle.disabled || buttonElement.getAttribute("data-type") === "fold") {
+            if (!buttonElement || buttonElement.getAttribute("data-type") === "fold") {
                 return;
             }
             if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
-                this.renderMenu(protyle, buttonElement);
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16, isLeft: true});
-                window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+                const gutterRect = buttonElement.getBoundingClientRect();
+                if (buttonElement.dataset.type === "NodeAttributeViewRowMenu") {
+                    const rowElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"] .av__row[data-id="${buttonElement.dataset.rowId}"]`)).find((item: HTMLElement) => {
+                        if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                            return true;
+                        }
+                    });
+                    if (rowElement) {
+                        avContextmenu(protyle, rowElement as HTMLElement, {
+                            x: gutterRect.left,
+                            y: gutterRect.bottom,
+                            w: gutterRect.width,
+                            h: gutterRect.height,
+                            isLeft: true
+                        });
+                    }
+                } else if (buttonElement.dataset.type !== "NodeAttributeViewRow") {
+                    this.renderMenu(protyle, buttonElement);
+                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+                }
             }
             event.preventDefault();
             event.stopPropagation();
@@ -309,28 +331,37 @@ export class Gutter {
             if (!buttonElement) {
                 return;
             }
-            if (buttonElement.getAttribute("data-type") === "fold") {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
-                    hlItem.classList.remove("protyle-wysiwyg--hl");
+            const type = buttonElement.getAttribute("data-type");
+            if (type === "fold" || type === "NodeAttributeViewRow") {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
                 });
                 return;
             }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") && this.isMatchNode(item)) {
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
+                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`)
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, av__row--hl")).forEach(hlItem => {
                         if (!item.isSameNode(hlItem)) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
                         }
+                        if (rowItem && !rowItem.isSameNode(hlItem)) {
+                            rowItem.classList.remove("av__row--hl");
+                        }
                     });
-                    item.classList.add("protyle-wysiwyg--hl");
+                    if (type === "NodeAttributeViewRowMenu") {
+                        rowItem.classList.add("av__row--hl");
+                    } else {
+                        item.classList.add("protyle-wysiwyg--hl");
+                    }
                     return true;
                 }
             });
             event.preventDefault();
         });
         this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(item => {
-                item.classList.remove("protyle-wysiwyg--hl");
+            Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
+                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             });
             event.preventDefault();
             event.stopPropagation();
@@ -1869,12 +1900,13 @@ export class Gutter {
                 if (isShow) {
                     type = nodeElement.getAttribute("data-type");
                 }
+                const dataNodeId = nodeElement.getAttribute("data-node-id")
                 if (type === "NodeAttributeView" && target) {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header")) {
                         element = rowElement;
-                        html = `<button data-type="NodeAttributeViewRow" data-node-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
-<button data-type="NodeAttributeViewRowMenu" data-node-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true"'}></span></button>`
+                        html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true"'}></span></button>`
                         break;
                     }
                 }
@@ -1901,7 +1933,7 @@ export class Gutter {
                 }
                 index += 1;
                 const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${this.gutterTip}" 
-data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
+data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;
@@ -1945,10 +1977,16 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         if (buttonsElement.length !== html.split("</button>").length - 1) {
             match = false;
         } else {
-            buttonsElement.forEach(item => {
+            Array.from(buttonsElement).find(item => {
                 const id = item.getAttribute("data-node-id");
                 if (id && html.indexOf(id) === -1) {
                     match = false;
+                    return true
+                }
+                const rowId = item.getAttribute("data-row-id");
+                if (rowId && html.indexOf(rowId) === -1) {
+                    match = false;
+                    return true;
                 }
             });
         }

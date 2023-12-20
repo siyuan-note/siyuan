@@ -297,6 +297,11 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                     if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
                         popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
                     }
+                    if (operation.action === "insertAttrViewBlock") {
+                        item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
+                            cellElement.classList.remove("av__cell--select");
+                        });
+                    }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
                     (operation.action === "removeAttrViewView" ? null : undefined));
             });

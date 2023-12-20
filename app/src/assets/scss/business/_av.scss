@@ -102,7 +102,8 @@
       display: block;
     }
 
-    &--select {
+    &--select,
+    &--hl {
       &:not(.av__row--header) .av__cell,
       &:not(.av__row--header) .av__firstcol {
         background-color: var(--b3-av-background-hl);
@@ -324,6 +325,7 @@
       @extend .av__checkbox;
       opacity: 0;
       padding: 9.5px 5px;
+      cursor: pointer;
     }
 
     &:hover svg {

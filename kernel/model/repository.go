@@ -980,7 +980,7 @@ func syncRepoDownload() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			mergeResult, trafficStat, err = repo.SyncDownload(syncContext)
@@ -1050,7 +1050,7 @@ func syncRepoUpload() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	trafficStat, err := repo.SyncUpload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			trafficStat, err = repo.SyncUpload(syncContext)
@@ -1122,7 +1122,7 @@ func bootSyncRepo() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			fetchedFiles, err = repo.GetSyncCloudFiles(syncContext)
@@ -1213,7 +1213,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			mergeResult, trafficStat, err = repo.Sync(syncContext)

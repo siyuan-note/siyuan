@@ -31,6 +31,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -934,10 +935,10 @@ func IndexRepo(memo string) (err error) {
 }
 
 var syncingFiles = sync.Map{}
-var syncingStorages = false
+var syncingStorages = atomic.Bool{}
 
 func waitForSyncingStorages() {
-	for syncingStorages {
+	for syncingStorages.Load() {
 		time.Sleep(time.Second)
 	}
 }
@@ -1129,7 +1130,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	syncingFiles = sync.Map{}
-	syncingStorages = false
+	syncingStorages.Store(false)
 	for _, fetchedFile := range fetchedFiles {
 		name := path.Base(fetchedFile.Path)
 		if strings.HasSuffix(name, ".sy") {
@@ -1138,7 +1139,7 @@ func bootSyncRepo() (err error) {
 			continue
 		}
 		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
-			syncingStorages = true
+			syncingStorages.Store(true)
 		}
 	}
 
@@ -1362,7 +1363,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	syncingFiles = sync.Map{}
-	syncingStorages = false
+	syncingStorages.Store(false)
 
 	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764

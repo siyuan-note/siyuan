@@ -21,7 +21,7 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any = {};
     public displayName: string;
-    public name: string;
+    public readonly name: string;
     public protyleSlash: {
         filter: string[],
         html: string,

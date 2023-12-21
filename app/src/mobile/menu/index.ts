@@ -18,6 +18,9 @@ import {initEditor} from "../settings/editor";
 import {App} from "../../index";
 import {isHuawei, isInAndroid, isInIOS} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
+import {afterLoadPlugin} from "../../plugin/loader";
+import {Menu} from "../../plugin/Menu";
+import {commandPanel} from "../../plugin/commandPanel";
 
 export const popMenu = () => {
     activeBlur();
@@ -101,6 +104,9 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item" id="menuAbout">
         <svg class="b3-menu__icon"><use xlink:href="#iconInfo"></use></svg><span class="b3-menu__label">${window.siyuan.languages.about}</span>
     </div>
+    <div class="b3-menu__item" id="menuPlugin">
+        <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
+    </div>
     <div class="b3-menu__separator"></div>
     <div class="b3-menu__item" id="menuHelp">
         <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span>
@@ -111,6 +117,15 @@ export const initRightMenu = (app: App) => {
     </a>
 </div>`;
     processSync();
+    const unPinsMenu: IMenu[] = [];
+    app.plugins.forEach(item => {
+        const unPinMenu = afterLoadPlugin(item);
+        if (unPinMenu) {
+            unPinMenu.forEach(unpinItem => {
+                unPinsMenu.push(unpinItem);
+            });
+        }
+    });
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
     menuElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
@@ -157,6 +172,25 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuAbout") {
                 initAbout();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuPlugin") {
+                const menu = new Menu();
+                menu.addItem({
+                    icon: "iconLayoutBottom",
+                    label: window.siyuan.languages.commandPanel,
+                    click() {
+                        commandPanel(app);
+                    }
+                });
+                if (unPinsMenu.length > 0) {
+                    menu.addSeparator();
+                }
+                unPinsMenu.forEach(item => {
+                    menu.addItem(item);
+                });
+                menu.fullscreen();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

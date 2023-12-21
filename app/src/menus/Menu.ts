@@ -137,6 +137,9 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
+        if (this.element.lastElementChild.innerHTML === "") {
+            return;
+        }
         this.element.classList.add("b3-menu--fullscreen");
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");

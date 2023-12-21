@@ -943,10 +943,10 @@ export const turnsIntoTransaction = (options: {
         let find = false;
         undoOperations.find(undoItem => {
             if (itemId === undoItem.id) {
-                find = true
+                find = true;
                 return true;
             }
-        })
+        });
         if (!find) {
             doOperations.push({
                 action: "insert",
@@ -958,9 +958,9 @@ export const turnsIntoTransaction = (options: {
             undoOperations.splice(0, 0, {
                 action: "delete",
                 id: itemId,
-            })
+            });
         }
-    })
+    });
     transaction(options.protyle, doOperations, undoOperations);
     processRender(options.protyle.wysiwyg.element);
     highlightRender(options.protyle.wysiwyg.element);

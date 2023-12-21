@@ -4,7 +4,6 @@ import {Constants} from "../../../constants";
 import {popTextCell, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {isMac} from "../../util/compatibility";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";

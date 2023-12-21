@@ -62,8 +62,8 @@ export class Gutter {
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
             const buttonElement = event.target.parentElement;
-            let selectIds: string[] = []
-            let selectElements: Element[] = []
+            let selectIds: string[] = [];
+            let selectElements: Element[] = [];
             let avElement: Element;
             if (buttonElement.dataset.rowId) {
                 avElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"]`)).find((item: HTMLElement) => {
@@ -75,7 +75,7 @@ export class Gutter {
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
                     selectIds.push(item.getAttribute("data-id"));
                     selectElements.push(item);
-                })
+                });
             } else {
                 selectIds = [buttonElement.getAttribute("data-node-id")];
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -212,7 +212,7 @@ export class Gutter {
                 if (!rowElement) {
                     return;
                 }
-                const blockElement = hasClosestBlock(rowElement)
+                const blockElement = hasClosestBlock(rowElement);
                 if (!blockElement) {
                     return;
                 }
@@ -358,7 +358,7 @@ export class Gutter {
             }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") && this.isMatchNode(item)) {
-                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`)
+                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                     Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, av__row--hl")).forEach(hlItem => {
                         if (!item.isSameNode(hlItem)) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
@@ -1918,14 +1918,14 @@ export class Gutter {
                 if (isShow) {
                     type = nodeElement.getAttribute("data-type");
                 }
-                const dataNodeId = nodeElement.getAttribute("data-node-id")
+                const dataNodeId = nodeElement.getAttribute("data-node-id");
                 if (type === "NodeAttributeView" && target) {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header")) {
                         element = rowElement;
-                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true"'}></span></button>`
+                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true"'}></span></button>`;
                         if (!protyle.disabled) {
-                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`
+                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
                         }
                         break;
                     }
@@ -2001,7 +2001,7 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
                 const id = item.getAttribute("data-node-id");
                 if (id && html.indexOf(id) === -1) {
                     match = false;
-                    return true
+                    return true;
                 }
                 const rowId = item.getAttribute("data-row-id");
                 if ((rowId && html.indexOf(rowId) === -1) || (!rowId && html.indexOf("NodeAttributeViewRowMenu") > -1)) {

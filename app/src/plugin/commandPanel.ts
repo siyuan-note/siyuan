@@ -47,7 +47,7 @@ export const commandPanel = (app: App) => {
     if (listElement.childElementCount === 0) {
         const liElement = document.createElement("li");
         liElement.classList.add("b3-list-item", "b3-list-item--focus");
-        liElement.innerHTML = `<span class="b3-list-item__text">${isMobile() ? window.siyuan.languages.emptyContent : window.siyuan.languages.commandEmpty}</span>`;
+        liElement.innerHTML = `<span class="b3-list-item__text" style="-webkit-line-clamp: inherit;">${isMobile() ? window.siyuan.languages._kernel[122] : window.siyuan.languages.commandEmpty}</span>`;
         liElement.addEventListener("click", () => {
             dialog.destroy();
             /// #if !MOBILE

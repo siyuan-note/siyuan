@@ -158,7 +158,7 @@ func getNotebookRiffDueCards(c *gin.Context) {
 
 	notebookID := arg["notebook"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
+	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -166,8 +166,10 @@ func getNotebookRiffDueCards(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"cards":           cards,
-		"unreviewedCount": unreviewedCount,
+		"cards":                  cards,
+		"unreviewedCount":        unreviewedCount,
+		"unreviewedNewCardCount": unreviewedNewCardCount,
+		"unreviewedOldCardCount": unreviewedOldCardCount,
 	}
 }
 
@@ -182,7 +184,7 @@ func getTreeRiffDueCards(c *gin.Context) {
 
 	rootID := arg["rootID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
+	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -190,8 +192,10 @@ func getTreeRiffDueCards(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"cards":           cards,
-		"unreviewedCount": unreviewedCount,
+		"cards":                  cards,
+		"unreviewedCount":        unreviewedCount,
+		"unreviewedNewCardCount": unreviewedNewCardCount,
+		"unreviewedOldCardCount": unreviewedOldCardCount,
 	}
 }
 
@@ -206,7 +210,7 @@ func getRiffDueCards(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
+	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -214,8 +218,10 @@ func getRiffDueCards(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"cards":           cards,
-		"unreviewedCount": unreviewedCount,
+		"cards":                  cards,
+		"unreviewedCount":        unreviewedCount,
+		"unreviewedNewCardCount": unreviewedNewCardCount,
+		"unreviewedOldCardCount": unreviewedOldCardCount,
 	}
 }
 

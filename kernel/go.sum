@@ -49,8 +49,8 @@ github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de h1:FxWPpzIjnTlhP
 github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de/go.mod h1:DCaWoUhZrYW9p1lxo/cm8EmUOOzAPSEZNGF2DK1dJgw=
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef h1:2JGTg6JapxP9/R33ZaagQtAM4EkkSYnIAlOG5EI8gkM=
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef/go.mod h1:JS7hed4L1fj0hXcyEejnW57/7LCetXggd+vwrRnYeII=
-github.com/aws/aws-sdk-go v1.49.6 h1:yNldzF5kzLBRvKlKz1S0bkvc2+04R1kt13KfBWQBfFA=
-github.com/aws/aws-sdk-go v1.49.6/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
+github.com/aws/aws-sdk-go v1.49.7 h1:qQAOWYajSCRQQUFt+OZZ4pgDg2Uf3h4bBQmYzPyyka8=
+github.com/aws/aws-sdk-go v1.49.7/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.10.2 h1:GQebETVBxYB7JGWJtLBi07OVzWwt+8dWA00gEVW2ZFE=
@@ -354,8 +354,8 @@ github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFR
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20231220154646-d62db122ee10 h1:WydcXHHasC+X/JrvzxFeCaY/tGW58wVn7LC7heceGow=
-github.com/siyuan-note/dejavu v0.0.0-20231220154646-d62db122ee10/go.mod h1:E6TeWfaZYEOKIXN7L04BL2jfIH74as+XDS9/O0qIiLQ=
+github.com/siyuan-note/dejavu v0.0.0-20231221144323-86aba7fc891e h1:vto8rhxvaM5umJlM7kIikiDJ3y1HsX0EMRf+CsM2BP4=
+github.com/siyuan-note/dejavu v0.0.0-20231221144323-86aba7fc891e/go.mod h1:Zpo0p/Z5dSebzbxMiGJKp0X4OeJ4kBrLOJO6a0txDQs=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4 h1:kJaw5L/evyW6LcB9IQT8PR4ppx8JVqOFP9Ix3rfwSrc=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4/go.mod h1:UYcCCY+0wh+GmUoDOaO63j1sV5lgy7laLAk1XhEiUis=
 github.com/siyuan-note/eventbus v0.0.0-20231210025112-82fdedd8e374 h1:haPIOZBOAEQaXsUPUpyZeOeMgw6g/9O7RBbS3d39Ta8=
@@ -431,8 +431,8 @@ github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05/go.mod h1:WwHg+CVyzlv/TX9
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yusufpapurcu/wmi v1.2.3 h1:E1ctvB7uKFMOJw3fdOW32DwGE9I7t++CRUEMKvFoFiw=
 github.com/yusufpapurcu/wmi v1.2.3/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
-go.uber.org/mock v0.3.0 h1:3mUxI1No2/60yUYax92Pt8eNOEecx2D3lcXZh2NEZJo=
-go.uber.org/mock v0.3.0/go.mod h1:a6FSlNadKUHUa9IP5Vyt1zh4fC7uAwxMutEAscFbkZc=
+go.uber.org/mock v0.4.0 h1:VcM4ZOtdbR4f6VXfiOpwpVJDL6lCReaZ6mw31wqh7KU=
+go.uber.org/mock v0.4.0/go.mod h1:a6FSlNadKUHUa9IP5Vyt1zh4fC7uAwxMutEAscFbkZc=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.6.0 h1:S0JTfE48HbRj80+4tbvZDYsJ3tGv6BUU3XxyZ7CirAc=
 golang.org/x/arch v0.6.0/go.mod h1:FEVrYAQjsQXMVJ1nsMoVVXPZg6p2JE2mx8psSWTDQys=

@@ -12,7 +12,7 @@ import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 /// #endif
-import {layoutToJSON} from "./util";
+import {layoutToJSON, saveLayout} from "./util";
 
 export class Tab {
     public parent: Wnd;
@@ -164,6 +164,7 @@ export class Tab {
         if (this.docIcon || this.icon) {
             this.headElement.querySelector(".item__text").classList.add("fn__none");
         }
+        saveLayout();
     }
 
     public setDocIcon(icon: string) {
@@ -208,6 +209,7 @@ export class Tab {
         if (this.docIcon || this.icon) {
             this.headElement.querySelector(".item__text").classList.remove("fn__none");
         }
+        saveLayout();
     }
 
     public close() {

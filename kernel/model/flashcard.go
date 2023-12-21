@@ -434,6 +434,7 @@ type Flashcard struct {
 	DeckID   string                 `json:"deckID"`
 	CardID   string                 `json:"cardID"`
 	BlockID  string                 `json:"blockID"`
+	State    riff.State             `json:"state"`
 	NextDues map[riff.Rating]string `json:"nextDues"`
 }
 
@@ -447,6 +448,7 @@ func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashc
 		DeckID:   deckID,
 		CardID:   card.ID(),
 		BlockID:  blockID,
+		State:    card.GetState(),
 		NextDues: nextDues,
 	}
 }
@@ -632,7 +634,7 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
+	if syncingStorages.Load() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}
@@ -744,7 +746,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
+	if syncingStorages.Load() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}
@@ -991,6 +993,7 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 		tmp = append(tmp, c)
 	}
 	dues = tmp
+	tmp = nil
 
 	for _, c := range dues {
 		if 0 < len(blockIDs) && !gulu.Str.Contains(c.BlockID(), blockIDs) {

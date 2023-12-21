@@ -336,7 +336,12 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
     updateElements.forEach(item => {
-        item.outerHTML = operation.data;
+        // 图标撤销后无法渲染
+        if (item.getAttribute("data-subtype") === "echarts") {
+            item.outerHTML = protyle.lute.SpinBlockDOM(operation.data);
+        } else {
+            item.outerHTML = operation.data;
+        }
     });
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).find(item => {
         if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" // 引用转换为块嵌入，undo、redo 后也需要更新 updateElement

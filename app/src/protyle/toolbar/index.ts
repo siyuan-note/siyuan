@@ -759,7 +759,7 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const types = (renderElement.getAttribute("data-type") || "").split(" ");
-        const html = oldHTML || protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+        const html = oldHTML || nodeElement.outerHTML;
         let title = "HTML";
         let placeholder = "";
         const isInlineMemo = types.includes("inline-memo");
@@ -1009,16 +1009,16 @@ export class Toolbar {
             }
             let inlineLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
-                let html = textElement.value;
-                if (html) {
+                let htmlText = textElement.value;
+                if (htmlText) {
                     // 需移除首尾的空白字符与连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
-                    html = html.trim().replace(/\n+/g, "\n");
+                    htmlText = htmlText.trim().replace(/\n+/g, "\n");
                     // 需一对 div 标签包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
-                    if (!(html.startsWith("<div>") && html.endsWith("</div>"))) {
-                        html = `<div>\n${html}\n</div>`;
+                    if (!(htmlText.startsWith("<div>") && htmlText.endsWith("</div>"))) {
+                        htmlText = `<div>\n${htmlText}\n</div>`;
                     }
                 }
-                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
+                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(htmlText));
             } else if (isInlineMemo) {
                 let inlineMemoElements;
                 if (updateElements) {
@@ -1100,16 +1100,15 @@ export class Toolbar {
             }
 
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
             // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
             if (types.includes("NodeHTMLBlock")) {
                 const tempElement = document.createElement("template");
-                tempElement.innerHTML = newHTML;
+                tempElement.innerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                 if (tempElement.content.childElementCount > 1) {
                     showMessage(window.siyuan.languages.htmlBlockTip);
                 }
             }
-            updateTransaction(protyle, id, newHTML, html);
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
         };
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");

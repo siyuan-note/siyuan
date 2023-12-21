@@ -382,19 +382,39 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
     const enterElement = document.createElement("div");
     enterElement.innerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
-    editableElement.innerHTML = enterElement.querySelector('[contenteditable="true"]').innerHTML;
-    mathRender(editableElement);
+    const doOperation: IOperation[] = [];
+    const undoOperation: IOperation[] = [];
+    // 回车之前的块为 1\n\n2 时会产生多个块
+    Array.from(enterElement.children).forEach((item: HTMLElement) => {
+        if (item.dataset.nodeId === id) {
+            editableElement.innerHTML = item.querySelector('[contenteditable="true"]').innerHTML;
+            doOperation.push({
+                action: "update",
+                data: blockElement.outerHTML,
+                id,
+            })
+            undoOperation.push({
+                action: "update",
+                data: html,
+                id,
+            })
+            mathRender(editableElement);
+        } else {
+            doOperation.push({
+                action: "insert",
+                data: item.outerHTML,
+                id: item.dataset.nodeId,
+                nextID: id,
+            })
+            blockElement.insertAdjacentElement("beforebegin", item);
+            undoOperation.push({
+                action: "delete",
+                id: item.dataset.nodeId,
+            })
+            mathRender(item);
+        }
+    })
 
-    const doOperation: IOperation[] = [{
-        action: "update",
-        data: blockElement.outerHTML,
-        id: id,
-    }];
-    const undoOperation: IOperation[] = [{
-        action: "update",
-        data: html,
-        id: id,
-    }];
     let previousElement = blockElement;
     Array.from(newElement.children).forEach((item: HTMLElement) => {
         const newId = item.getAttribute("data-node-id");

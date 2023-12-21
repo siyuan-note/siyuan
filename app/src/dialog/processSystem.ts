@@ -24,11 +24,14 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
 
-const updateTitle = (rootID: string, tab: Tab) => {
+const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {
         id: rootID
     }, (response) => {
         tab.updateTitle(response.data.name);
+        if (protyle && protyle.title) {
+            protyle.title.setTitle(response.data.name);
+        }
     });
 };
 
@@ -63,7 +66,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
             reloadProtyle(item.editor.protyle, false);
-            updateTitle(item.editor.protyle.block.rootID, item.parent);
+            updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
             delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];

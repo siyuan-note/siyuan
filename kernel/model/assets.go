@@ -422,11 +422,19 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 			}
 		}
 
-		if !strings.Contains(strings.ToLower(asset.HName), strings.ToLower(keyword)) {
+		lowerHName := strings.ToLower(asset.HName)
+		lowerPath := strings.ToLower(asset.Path)
+		lowerKeyword := strings.ToLower(keyword)
+		hitName := strings.Contains(lowerHName, lowerKeyword)
+		hitPath := strings.Contains(lowerPath, lowerKeyword)
+		if !hitName && !hitPath {
 			continue
 		}
 
-		_, hName := search.MarkText(asset.HName, keyword, 64, Conf.Search.CaseSensitive)
+		hName := asset.HName
+		if hitName {
+			_, hName = search.MarkText(asset.HName, keyword, 64, Conf.Search.CaseSensitive)
+		}
 		ret = append(ret, &cache.Asset{
 			HName:   hName,
 			Path:    asset.Path,

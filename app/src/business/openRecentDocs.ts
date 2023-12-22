@@ -69,7 +69,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
 
 export const openRecentDocs = () => {
     const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
+        if (item.element.getAttribute("data-key") === Constants.DIALOG_RECENTDOCS) {
             return true;
         }
     });
@@ -113,7 +113,7 @@ export const openRecentDocs = () => {
             }
             getHTML(response.data, dialog.element, searchElement.value);
         });
-        dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom);
+        dialog.element.setAttribute("data-key", Constants.DIALOG_RECENTDOCS);
         dialog.element.addEventListener("click", (event) => {
             const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
             if (liElement) {

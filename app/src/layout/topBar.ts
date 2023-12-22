@@ -173,7 +173,7 @@ export const initBar = (app: App) => {
             } else if (targetId === "barSearch") {
                 openSearch({
                     app,
-                    hotkey: window.siyuan.config.keymap.general.globalSearch.custom
+                    hotkey: Constants.DIALOG_GLOBALSEARCH
                 });
                 event.stopPropagation();
                 break;

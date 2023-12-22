@@ -33,6 +33,7 @@ import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -169,6 +170,10 @@ const dockToJSON = (dock: Dock) => {
 
 export const resetLayout = () => {
     fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+        window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+        setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
+        window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
+        setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
         window.location.reload();
     });
 };

@@ -178,7 +178,7 @@ export const bindCardEvent = (options: {
             });
         });
     }
-    options.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
+    options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
     const countElement = options.element.querySelector('[data-type="count"] span');
     countElement.innerHTML = (index + 1).toString();
     const actionElements = options.element.querySelectorAll(".card__action");
@@ -456,7 +456,7 @@ export const openCardByData = (app: App, cardsData: {
     unreviewedOldCardCount: number
 }, cardType: TCardType, id?: string, title?: string) => {
     const exit = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+        if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {
             item.destroy();
             return true;
         }
@@ -464,11 +464,13 @@ export const openCardByData = (app: App, cardsData: {
     if (exit) {
         return;
     }
-
+    const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][Constants.DIALOG_OPENCARD];
     const dialog = new Dialog({
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
-        width: isMobile() ? "100vw" : "80vw",
-        height: isMobile() ? "100vh" : "70vh",
+        width: dialogPosition ? dialogPosition.width + "px" : (isMobile() ? "100vw" : "80vw"),
+        height: dialogPosition ? dialogPosition.height + "px" : (isMobile() ? "100vh" : "70vh"),
+        left: dialogPosition?.left,
+        top: dialogPosition?.top,
         destroyCallback() {
             if (editor) {
                 editor.destroy();

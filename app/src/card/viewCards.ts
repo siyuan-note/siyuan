@@ -78,7 +78,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
-        dialog.element.setAttribute("data-key", "viewCards");
+        dialog.element.setAttribute("data-key", Constants.DIALOG_VIEWCARDS);
         dialog.element.addEventListener("click", (event) => {
             if (typeof event.detail === "string") {
                 let currentElement = listElement.querySelector(".b3-list-item--focus");

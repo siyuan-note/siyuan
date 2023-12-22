@@ -1014,7 +1014,7 @@ export const getQueryTip = (method: number) => {
 
 const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
-    if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
+    if (dialogElement && dialogElement.getAttribute("data-key") === Constants.DIALOG_SEARCH) {
         // https://github.com/siyuan-note/siyuan/issues/6828
         item.hPath = config.hPath;
         item.idPath = config.idPath.join(",").split(",");

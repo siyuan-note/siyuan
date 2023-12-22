@@ -55,8 +55,10 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const isAsset = !assetsElement.classList.contains("fn__none");
     const listElement = isAsset ? assetsElement.querySelector("#searchAssetList") : element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-    if (!isAsset && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event) && config.method === 0) {
-        newFileByName(app, searchInputElement.value);
+    if (!isAsset && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
+        if (config.method === 0) {
+            newFileByName(app, searchInputElement.value);
+        }
         return true;
     }
     const targetId = (event.target as HTMLElement).id;

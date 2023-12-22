@@ -29,7 +29,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/open-spaced-repetition/go-fsrs"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -1020,17 +1019,18 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			continue
 		}
 
-		fsrsCard := c.Impl().(*fsrs.Card)
-		if fsrs.New == fsrsCard.State {
-			newCount++
+		if riff.New == c.GetState() {
 			if newCount > newCardLimit {
 				continue
 			}
+
+			newCount++
 		} else {
-			reviewCount++
 			if reviewCount > reviewCardLimit {
 				continue
 			}
+
+			reviewCount++
 		}
 
 		if 0 < len(reviewedCardIDs) {

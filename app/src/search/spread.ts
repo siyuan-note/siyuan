@@ -80,6 +80,7 @@ export const openSearch = async (options: {
         range = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
+        positionId: options.hotkey,
         content: "",
         width: "80vw",
         height: "90vh",

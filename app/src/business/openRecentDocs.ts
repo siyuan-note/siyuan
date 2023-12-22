@@ -83,6 +83,7 @@ export const openRecentDocs = () => {
             range = getSelection().getRangeAt(0);
         }
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_RECENTDOCS,
             title: `<div class="fn__flex">
 <div class="fn__flex-center">${window.siyuan.languages.recentDocs}</div>
 <div class="fn__flex-1"></div>

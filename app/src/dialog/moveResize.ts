@@ -137,10 +137,10 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             const dialogElement = hasClosestByClassName(element, "b3-dialog--open")
             if (dialogElement) {
                 const dialogId = dialogElement.dataset.key;
-                if (dialogId) {
+                if (dialogId && element.offsetWidth) {
                     window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][dialogId] = {
-                        width: parseInt(element.style.width),
-                        height: parseInt(element.style.height),
+                        width: element.offsetWidth,
+                        height: element.offsetHeight,
                         left: parseInt(element.style.left),
                         top: parseInt(element.style.top),
                     }

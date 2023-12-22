@@ -5,6 +5,7 @@ import {moveResize} from "./moveResize";
 import {isMobile} from "../util/functions";
 import {isNotCtrl} from "../protyle/util/compatibility";
 import {Protyle} from "../protyle";
+import {Constants} from "../constants";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
@@ -15,11 +16,10 @@ export class Dialog {
     public data: any;
 
     constructor(options: {
+        positionId?: string,
         title?: string,
         transparent?: boolean,
         content: string,
-        left?: number,
-        top?: number,
         width?: string,
         height?: string,
         destroyCallback?: (options?: IObject) => void,
@@ -33,10 +33,20 @@ export class Dialog {
         window.siyuan.dialogs.push(this);
         this.destroyCallback = options.destroyCallback;
         this.element = document.createElement("div") as HTMLElement;
-
-        this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof options.left === "number" ? "display:block" : ""}">
+        let left
+        let top
+        if (!isMobile() && options.positionId) {
+            const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][options.positionId];
+            if (dialogPosition) {
+                left = dialogPosition.left + "px";
+                top = dialogPosition.top + "px";
+                options.width = dialogPosition.width + "px";
+                options.height = dialogPosition.height + "px";
+            }
+        }
+        this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">
 <div class="b3-dialog__scrim"${options.transparent ? 'style="background-color:transparent"' : ""}></div>
-<div class="b3-dialog__container" style="width:${options.width || "auto"};height:${options.height || "auto"};left:${options.left}px;top:${options.top}px">
+<div class="b3-dialog__container" style="width:${options.width || "auto"};height:${options.height || "auto"};left:${left};top:${top}">
   <svg ${(isMobile() && options.title) ? 'style="top:0;right:0;"' : ""} class="b3-dialog__close${(this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
   <div class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" onselectstart="return false;">${options.title || ""}</div>
   <div class="b3-dialog__body">${options.content}</div>

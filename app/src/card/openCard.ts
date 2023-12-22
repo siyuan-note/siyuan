@@ -464,13 +464,11 @@ export const openCardByData = (app: App, cardsData: {
     if (exit) {
         return;
     }
-    const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][Constants.DIALOG_OPENCARD];
     const dialog = new Dialog({
+        positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
-        width: dialogPosition ? dialogPosition.width + "px" : (isMobile() ? "100vw" : "80vw"),
-        height: dialogPosition ? dialogPosition.height + "px" : (isMobile() ? "100vh" : "70vh"),
-        left: dialogPosition?.left,
-        top: dialogPosition?.top,
+        width: isMobile() ? "100vw" : "80vw",
+        height: isMobile() ? "100vh" : "70vh",
         destroyCallback() {
             if (editor) {
                 editor.destroy();

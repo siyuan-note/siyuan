@@ -48,6 +48,7 @@ export const makeCard = (app: App, ids: string[]) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_MAKECARD,
             width: isMobile() ? "92vw" : "50vw",
             height: "70vh",
             title: window.siyuan.languages.riffCard,

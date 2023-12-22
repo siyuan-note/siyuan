@@ -64,6 +64,7 @@ export const newDailyNote = (app: App) => {
             }
         });
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_DIALYNOTE,
             title: window.siyuan.languages.plsChoose,
             content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${optionsHTML}</select>

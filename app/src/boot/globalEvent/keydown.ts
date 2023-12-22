@@ -1164,6 +1164,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
         hideElements(["dialog"]);
         switchDialog = new Dialog({
+            positionId: Constants.DIALOG_SWITCHTAB,
             title: window.siyuan.languages.switchTab,
             content: `<div class="fn__flex-column switch-doc">
     <input style="opacity: 0;height: 0.1px;box-sizing: border-box;margin: 0;padding: 0;border: 0;">

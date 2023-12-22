@@ -1953,7 +1953,7 @@ export class Gutter {
                 }
                 index += 1;
                 const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${this.gutterTip}" 
-data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
+data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;

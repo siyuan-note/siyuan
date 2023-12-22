@@ -23,6 +23,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -316,4 +317,23 @@ func Recover(c *gin.Context) {
 	}()
 
 	c.Next()
+}
+
+var (
+	requestingLock = sync.Mutex{}
+	requesting     = map[string]*sync.Mutex{}
+)
+
+func ControlConcurrency(c *gin.Context) {
+	requestingLock.Lock()
+	mutex := requesting[c.Request.URL.Path]
+	if nil == mutex {
+		mutex = &sync.Mutex{}
+		requesting[c.Request.URL.Path] = mutex
+	}
+	requestingLock.Unlock()
+
+	mutex.Lock()
+	c.Next()
+	mutex.Unlock()
 }

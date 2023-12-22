@@ -50,7 +50,7 @@ require (
 	github.com/rqlite/sql v0.0.0-20221103124402-8f9ff0ceb8f0
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/shirou/gopsutil/v3 v3.23.11
-	github.com/siyuan-note/dejavu v0.0.0-20231221144323-86aba7fc891e
+	github.com/siyuan-note/dejavu v0.0.0-20231222001002-f9ee1c8562bf
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20231210025112-82fdedd8e374
 	github.com/siyuan-note/filelock v0.0.0-20231211015131-3b3dfabdce9c

@@ -182,6 +182,11 @@ export const bindCardEvent = (options: {
     const countElement = options.element.querySelector('[data-type="count"] span');
     countElement.innerHTML = (index + 1).toString();
     const actionElements = options.element.querySelectorAll(".card__action");
+    if (options.index === 0) {
+        actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
+    } else {
+        actionElements[0].firstElementChild.removeAttribute("disabled");
+    }
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
@@ -248,7 +253,7 @@ export const bindCardEvent = (options: {
                         icon: "iconRiffCard",
                         title: window.siyuan.languages.spaceRepetition,
                         data: {
-                            blocks: options.cardsData.cards,
+                            cardsData: options.cardsData,
                             index,
                             cardType: filterElement.getAttribute("data-cardtype") as TCardType,
                             id: filterElement.getAttribute("data-id"),
@@ -351,7 +356,7 @@ export const bindCardEvent = (options: {
         }
         event.preventDefault();
         event.stopPropagation();
-        hideElements(["toolbar", "hint", "util"], editor.protyle);
+        hideElements(["toolbar", "hint", "util", "gutter"], editor.protyle);
         if (type === "-1") {    // 显示答案
             if (actionElements[0].classList.contains("fn__none")) {
                 type = "3";

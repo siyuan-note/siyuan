@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/steambap/captcha"
@@ -325,6 +326,11 @@ var (
 )
 
 func ControlConcurrency(c *gin.Context) {
+	if websocket.IsWebSocketUpgrade(c.Request) {
+		c.Next()
+		return
+	}
+
 	requestingLock.Lock()
 	mutex := requesting[c.Request.URL.Path]
 	if nil == mutex {

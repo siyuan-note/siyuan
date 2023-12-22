@@ -626,8 +626,8 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 	for _, deck := range Decks {
 		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
 		unreviewedCount += unreviewedCnt
-		unreviewedNewCardCnt += unreviewedNewCardCnt
-		unreviewedOldCardCnt += unreviewedOldCardCnt
+		unreviewedNewCardCount += unreviewedNewCardCnt
+		unreviewedOldCardCount += unreviewedOldCardCnt
 		for _, card := range cards {
 			ret = append(ret, newFlashcard(card, card.BlockID(), deck.ID, now))
 		}
@@ -995,37 +995,15 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 
 	var tmp []riff.Card
 	for _, c := range dues {
-		if nil == treenode.GetBlockTree(c.BlockID()) {
-			continue
-		}
-		tmp = append(tmp, c)
-	}
-	dues = tmp
-	tmp = nil
-
-	for _, c := range dues {
 		if 0 < len(blockIDs) && !gulu.Str.Contains(c.BlockID(), blockIDs) {
 			continue
 		}
-		tmp = append(tmp, c)
 
-		if 0 < len(reviewedCardIDs) {
-			if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
-				unreviewedCount++
-				if riff.New == c.GetState() {
-					unreviewedNewCardCount++
-				} else {
-					unreviewedOldCardCount++
-				}
-			}
-		} else {
-			unreviewedCount++
-			if riff.New == c.GetState() {
-				unreviewedNewCardCount++
-			} else {
-				unreviewedOldCardCount++
-			}
+		if nil == treenode.GetBlockTree(c.BlockID()) {
+			continue
 		}
+
+		tmp = append(tmp, c)
 	}
 	dues = tmp
 
@@ -1055,8 +1033,22 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			}
 		}
 
-		if 0 < len(reviewedCardIDs) && !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
-			continue
+		if 0 < len(reviewedCardIDs) {
+			if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
+				unreviewedCount++
+				if riff.New == c.GetState() {
+					unreviewedNewCardCount++
+				} else {
+					unreviewedOldCardCount++
+				}
+			}
+		} else {
+			unreviewedCount++
+			if riff.New == c.GetState() {
+				unreviewedNewCardCount++
+			} else {
+				unreviewedOldCardCount++
+			}
 		}
 
 		ret = append(ret, c)

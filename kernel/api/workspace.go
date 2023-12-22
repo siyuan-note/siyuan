@@ -160,10 +160,6 @@ func removeWorkspaceDir(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-
-	if util.WorkspaceDir == path && (util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container) {
-		os.Exit(logging.ExitCodeOk)
-	}
 }
 
 func removeWorkspaceDirPhysically(c *gin.Context) {

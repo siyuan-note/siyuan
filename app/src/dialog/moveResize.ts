@@ -1,5 +1,6 @@
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
+import {hideAllElements} from "../protyle/ui/hideElements";
 
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
@@ -131,6 +132,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
+            hideAllElements(["gutter"])
             if (hasMove && afterCB) {
                 afterCB(type);
             }

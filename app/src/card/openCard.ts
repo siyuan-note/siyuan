@@ -19,7 +19,11 @@ import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 
 const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: number,) => {
-    return `<span>${unreviewedNewCardCount}</span> + <span>${unreviewedOldCardCount}</span>`;
+    return `<span class="ft__error">1</span>
+<span class="fn__space"></span>/<span class="fn__space"></span>
+<span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${unreviewedNewCardCount}</span>
+<span class="fn__space"></span>+<span class="fn__space"></span>
+<span class="ariaLabel ft__success" aria-label="${window.siyuan.languages.flashcardReviewCard}">${unreviewedOldCardCount}</span>`;
 }
 
 export const genCardHTML = (options: {
@@ -38,7 +42,7 @@ export const genCardHTML = (options: {
     iconsHTML = `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
-    <div data-type="count" class="${options.cardsData.unreviewedCount === 0 ? "fn__none" : ""}"><span>1</span>/${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+    <div data-type="count" class="${options.cardsData.unreviewedCount === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
@@ -50,7 +54,7 @@ export const genCardHTML = (options: {
         <span class="fn__space"></span>
         <span class="fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space fn__flex-1 resize__move" style="min-height: 100%"></span>
-        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.unreviewedCount === 0 ? " fn__none" : ""}"><span>1</span>/${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.unreviewedCount === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
         <div class="fn__space"></div>
         <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -507,8 +511,8 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.firstElementChild.innerHTML = (options.index + 1).toString();
-    options.countElement.classList.remove("fn__none");
+    options.countElement.innerHTML = (options.index + 1).toString();
+    options.countElement.parentElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
     } else {

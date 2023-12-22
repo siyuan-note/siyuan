@@ -1020,13 +1020,13 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 		}
 
 		if riff.New == c.GetState() {
-			if newCount > newCardLimit {
+			if newCount >= newCardLimit {
 				continue
 			}
 
 			newCount++
 		} else {
-			if reviewCount > reviewCardLimit {
+			if reviewCount >= reviewCardLimit {
 				continue
 			}
 

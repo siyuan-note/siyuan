@@ -680,6 +680,15 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
     let model: Model;
     if (json.instance === "Custom") {
         if (json.customModelType === "siyuan-card") {
+            // https://github.com/siyuan-note/siyuan/issues/9377 历史数据兼容
+            if (!json.customModelData.cardsData) {
+                json.customModelData.cardsData = {
+                    cards: json.customModelData.blocks,
+                    unreviewedCount: json.customModelData.blocks.length,
+                    unreviewedNewCardCount: 0,
+                    unreviewedOldCardCount: json.customModelData.blocks.length
+                }
+            }
             model = newCardModel({
                 app,
                 tab: tab,

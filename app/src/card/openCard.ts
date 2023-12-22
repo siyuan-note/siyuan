@@ -18,10 +18,19 @@ import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 
+const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: number,) => {
+    return `<span>${unreviewedNewCardCount}</span> + <span>${unreviewedOldCardCount}</span>`;
+}
+
 export const genCardHTML = (options: {
     id: string,
     cardType: TCardType,
-    blocks: ICard[],
+    cardsData: {
+        cards: ICard[],
+        unreviewedCount: number
+        unreviewedNewCardCount: number
+        unreviewedOldCardCount: number
+    },
     isTab: boolean
 }) => {
     let iconsHTML: string;
@@ -29,7 +38,7 @@ export const genCardHTML = (options: {
     iconsHTML = `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
-    <div data-type="count" class="${options.blocks.length === 0 ? "fn__none" : ""}">1/${options.blocks.length}</span></div>
+    <div data-type="count" class="${options.cardsData.unreviewedCount === 0 ? "fn__none" : ""}"><span>1</span>/${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
@@ -41,7 +50,7 @@ export const genCardHTML = (options: {
         <span class="fn__space"></span>
         <span class="fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space fn__flex-1 resize__move" style="min-height: 100%"></span>
-        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.blocks.length === 0 ? " fn__none" : ""}">1/${options.blocks.length}</span></div>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.unreviewedCount === 0 ? " fn__none" : ""}"><span>1</span>/${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
         <div class="fn__space"></div>
         <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -58,16 +67,16 @@ export const genCardHTML = (options: {
     /// #endif
     return `<div class="card__main">
     ${iconsHTML}
-    <div class="card__block fn__flex-1 ${options.blocks.length === 0 ? "fn__none" : ""} 
+    <div class="card__block fn__flex-1 ${options.cardsData.unreviewedCount === 0 ? "fn__none" : ""} 
 ${window.siyuan.config.flashcard.mark ? "card__block--hidemark" : ""} 
 ${window.siyuan.config.flashcard.superBlock ? "card__block--hidesb" : ""} 
 ${window.siyuan.config.flashcard.heading ? "card__block--hideh" : ""} 
 ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="render"></div>
-    <div class="card__empty card__empty--space${options.blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
+    <div class="card__empty card__empty--space${options.cardsData.unreviewedCount === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
-    <div class="fn__flex card__action${options.blocks.length === 0 ? " fn__none" : ""}">
+    <div class="fn__flex card__action${options.cardsData.unreviewedCount === 0 ? " fn__none" : ""}">
         <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
             <svg><use xlink:href="#iconLeft"></use></svg>
             (p)
@@ -119,7 +128,12 @@ export const bindCardEvent = (options: {
     app: App,
     element: Element,
     title?: string,
-    blocks: ICard[],
+    cardsData: {
+        cards: ICard[],
+        unreviewedCount: number
+        unreviewedNewCardCount: number
+        unreviewedOldCardCount: number
+    }
     cardType: TCardType,
     id?: string,
     dialog?: Dialog,
@@ -147,9 +161,9 @@ export const bindCardEvent = (options: {
     if (window.siyuan.mobile) {
         window.siyuan.mobile.popEditor = editor;
     }
-    if (options.blocks.length > 0) {
+    if (options.cardsData.unreviewedCount > 0) {
         fetchPost("/api/filetree/getDoc", {
-            id: options.blocks[index].blockID,
+            id: options.cardsData.cards[index].blockID,
             mode: 0,
             size: Constants.SIZE_GET_MAX
         }, (response) => {
@@ -161,8 +175,8 @@ export const bindCardEvent = (options: {
         });
     }
     options.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
-    const countElement = options.element.querySelector('[data-type="count"]');
-    countElement.innerHTML = `${index + 1}/${options.blocks.length}`;
+    const countElement = options.element.querySelector('[data-type="count"] span');
+    countElement.innerHTML = (index + 1).toString();
     const actionElements = options.element.querySelectorAll(".card__action");
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
@@ -174,14 +188,14 @@ export const bindCardEvent = (options: {
             notebook: filterElement.getAttribute("data-id"),
         }, (treeCards) => {
             index = 0;
-            options.blocks = treeCards.data.cards;
-            if (options.blocks.length > 0) {
+            options.cardsData.cards = treeCards.data.cards;
+            if (options.cardsData.unreviewedCount > 0) {
                 nextCard({
                     countElement,
                     editor,
                     actionElements,
                     index,
-                    blocks: options.blocks
+                    blocks: options.cardsData.cards
                 });
             } else {
                 allDone(countElement, editor, actionElements);
@@ -230,7 +244,7 @@ export const bindCardEvent = (options: {
                         icon: "iconRiffCard",
                         title: window.siyuan.languages.spaceRepetition,
                         data: {
-                            blocks: options.blocks,
+                            blocks: options.cardsData.cards,
                             index,
                             cardType: filterElement.getAttribute("data-cardtype") as TCardType,
                             id: filterElement.getAttribute("data-id"),
@@ -328,7 +342,7 @@ export const bindCardEvent = (options: {
                 type = buttonElement.getAttribute("data-type");
             }
         }
-        if (!type || !options.blocks[index]) {
+        if (!type || !options.cardsData.cards[index]) {
             return;
         }
         event.preventDefault();
@@ -341,7 +355,7 @@ export const bindCardEvent = (options: {
                 editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
                 actionElements[0].classList.add("fn__none");
                 actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                    element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
+                    element.previousElementSibling.textContent = options.cardsData.cards[index].nextDues[btnIndex];
                 });
                 actionElements[1].classList.remove("fn__none");
                 return;
@@ -357,17 +371,17 @@ export const bindCardEvent = (options: {
                     editor,
                     actionElements,
                     index,
-                    blocks: options.blocks
+                    blocks: options.cardsData.cards
                 });
             }
             return;
         }
         if (["1", "2", "3", "4", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
-                deckID: options.blocks[index].deckID,
-                cardID: options.blocks[index].cardID,
+                deckID: options.cardsData.cards[index].deckID,
+                cardID: options.cardsData.cards[index].cardID,
                 rating: parseInt(type),
-                reviewedCards: options.blocks
+                reviewedCards: options.cardsData.cards
             }, () => {
                 /// #if MOBILE
                 if (type !== "-3" &&
@@ -378,18 +392,18 @@ export const bindCardEvent = (options: {
                 }
                 /// #endif
                 index++;
-                if (index > options.blocks.length - 1) {
+                if (index > options.cardsData.unreviewedCount - 1) {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
                     fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
                         (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
                         rootID: filterElement.getAttribute("data-id"),
                         deckID: filterElement.getAttribute("data-id"),
                         notebook: filterElement.getAttribute("data-id"),
-                        reviewedCards: options.blocks
+                        reviewedCards: options.cardsData.cards
                     }, (result) => {
                         index = 0;
-                        options.blocks = result.data.cards;
-                        if (options.blocks.length === 0) {
+                        options.cardsData.cards = result.data.cards;
+                        if (options.cardsData.unreviewedCount === 0) {
                             if (result.data.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);
                             } else {
@@ -401,7 +415,7 @@ export const bindCardEvent = (options: {
                                 editor,
                                 actionElements,
                                 index,
-                                blocks: options.blocks
+                                blocks: options.cardsData.cards
                             });
                         }
                     });
@@ -412,7 +426,7 @@ export const bindCardEvent = (options: {
                     editor,
                     actionElements,
                     index,
-                    blocks: options.blocks
+                    blocks: options.cardsData.cards
                 });
             });
         }
@@ -429,6 +443,8 @@ export const openCard = (app: App) => {
 export const openCardByData = (app: App, cardsData: {
     cards: ICard[],
     unreviewedCount: number
+    unreviewedNewCardCount: number
+    unreviewedOldCardCount: number
 }, cardType: TCardType, id?: string, title?: string) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
@@ -441,7 +457,7 @@ export const openCardByData = (app: App, cardsData: {
     }
 
     const dialog = new Dialog({
-        content: genCardHTML({id, cardType, blocks: cardsData.cards, isTab: false}),
+        content: genCardHTML({id, cardType, cardsData, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100vh" : "70vh",
         destroyCallback() {
@@ -458,7 +474,7 @@ export const openCardByData = (app: App, cardsData: {
     const editor = bindCardEvent({
         app,
         element: dialog.element,
-        blocks: cardsData.cards,
+        cardsData,
         title,
         id,
         cardType,
@@ -491,7 +507,7 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.innerHTML = `${options.index + 1}/${options.blocks.length}`;
+    options.countElement.firstElementChild.innerHTML = (options.index + 1).toString();
     options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");

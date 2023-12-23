@@ -109,6 +109,10 @@ func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchA
 		if nil != baseBlock {
 			hPath = baseBlock.HPath
 		}
+		box := Conf.Box(node.Box)
+		if nil != box {
+			hPath = box.Name + hPath
+		}
 
 		if !exist {
 			ret = append(ret, &SearchAttributeViewResult{

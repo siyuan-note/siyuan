@@ -591,19 +591,31 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	if nil != value.Relation && nil != other.Relation {
 		switch operator {
 		case FilterOperatorContains:
-			if "" == strings.TrimSpace(other.Relation.Content) {
-				return true
+			contains := false
+			for _, c := range value.Relation.Contents {
+				for _, c1 := range other.Relation.Contents {
+					if c == c1 {
+						contains = true
+						break
+					}
+				}
 			}
-			return strings.Contains(value.Relation.Content, other.Relation.Content)
+			return contains
 		case FilterOperatorDoesNotContain:
-			if "" == strings.TrimSpace(other.Relation.Content) {
-				return true
+			contains := false
+			for _, c := range value.Relation.Contents {
+				for _, c2 := range other.Relation.Contents {
+					if c == c2 {
+						contains = true
+						break
+					}
+				}
 			}
-			return !strings.Contains(value.Relation.Content, other.Relation.Content)
+			return !contains
 		case FilterOperatorIsEmpty:
-			return "" == strings.TrimSpace(value.Relation.Content)
+			return 0 == len(value.Relation.Contents) || 1 == len(value.Relation.Contents) && "" == value.Relation.Contents[0]
 		case FilterOperatorIsNotEmpty:
-			return "" != strings.TrimSpace(value.Relation.Content)
+			return 0 != len(value.Relation.Contents) && !(1 == len(value.Relation.Contents) && "" == value.Relation.Contents[0])
 		}
 	}
 

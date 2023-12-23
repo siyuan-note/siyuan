@@ -785,17 +785,16 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	destAdded := false
-	for _, keyValues := range destAv.KeyValues {
-		if keyValues.Key.ID == operation.BackRelationKeyID {
-			keyValues.Key.Relation = &av.Relation{
-				AvID:      operation.AvID,
-				IsTwoWay:  operation.IsTwoWay,
-				BackKeyID: operation.KeyID,
-			}
-			destAdded = true
-			break
+	backRelKey, _ := destAv.GetKey(operation.BackRelationKeyID)
+	if nil != backRelKey {
+		backRelKey.Relation = &av.Relation{
+			AvID:      operation.AvID,
+			IsTwoWay:  operation.IsTwoWay,
+			BackKeyID: operation.KeyID,
 		}
+		destAdded = true
 	}
+
 	if !destAdded {
 		destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
 			Key: &av.Key{
@@ -813,6 +812,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 	if !isSameAv {
 		err = av.SaveAttributeView(destAv)
+		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 	}
 	return
 }

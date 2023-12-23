@@ -49,6 +49,7 @@ type SearchAttributeViewResult struct {
 	AvID    string `json:"avID"`
 	AvName  string `json:"avName"`
 	BlockID string `json:"blockID"`
+	HPath   string `json:"hPath"`
 }
 
 func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
@@ -102,11 +103,19 @@ func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchA
 				break
 			}
 		}
+
+		var hPath string
+		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
+		if nil != baseBlock {
+			hPath = baseBlock.HPath
+		}
+
 		if !exist {
 			ret = append(ret, &SearchAttributeViewResult{
 				AvID:    avID,
 				AvName:  attrView.Name,
 				BlockID: block.ID,
+				HPath:   hPath,
 			})
 		}
 	}

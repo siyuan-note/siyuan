@@ -115,7 +115,7 @@ export const getEditHTML = (options: {
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
     <span class="b3-menu__accelerator" style="margin-left: 0">${getColNameByType(colData.type)}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
     if (colData.options && colData.options.length > 0) {
         html += `<button class="b3-menu__separator"></button>
@@ -147,6 +147,24 @@ export const getEditHTML = (options: {
 <button class="b3-menu__item">
     <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
+    } else if (colData.type === "relation") {
+        const databaseName = "TODO"
+        html += `<button class="b3-menu__item" data-type="goUpdateColType">
+    <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
+    <span class="fn__space"></span>
+    <svg class="b3-menu__icon"><use xlink:href="#iconDatabase"></use></svg>
+    <span class="b3-menu__accelerator" style="margin-left: 0">${databaseName}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${databaseName}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconHelp"></use></svg>
+    <span class="fn__space fn__flex-1"></span>
+    <input type="checkbox" class="b3-switch b3-switch--menu">
+</label>
+<label class="b3-menu__item" data-type="nobg">
+    <input class="b3-text-field fn__block" style="margin: 4px" placeholder="todo">
+</label>`;
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -155,7 +173,7 @@ export const getEditHTML = (options: {
         <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
         <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
     </button>
-    <button class="b3-menu__item" data-type="duplicateCol">
+    <button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
         <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
     </button>
@@ -621,20 +639,22 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         }
     });
     if (type !== "block") {
-        menu.addItem({
-            icon: "iconCopy",
-            label: window.siyuan.languages.duplicate,
-            click() {
-                duplicateCol({
-                    protyle,
-                    type,
-                    avID,
-                    colId,
-                    icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
-                    newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
-                });
-            }
-        });
+        if (type !== "relation") {
+            menu.addItem({
+                icon: "iconCopy",
+                label: window.siyuan.languages.duplicate,
+                click() {
+                    duplicateCol({
+                        protyle,
+                        type,
+                        avID,
+                        colId,
+                        icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
+                        newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                    });
+                }
+            });
+        }
         menu.addItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
@@ -656,7 +676,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         menu.addSeparator();
     }
     menu.addItem({
-        label: `<label class="fn__flex" style="margin: 4px 0"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+        label: `<label class="fn__flex" style="margin: 4px 0;padding-right: 6px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
         bind(element) {
             const inputElement = element.querySelector("input") as HTMLInputElement;

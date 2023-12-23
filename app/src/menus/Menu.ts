@@ -230,7 +230,7 @@ export class MenuItem {
             options.submenu.forEach((item) => {
                 submenuElement.firstElementChild.append(new MenuItem(item).element);
             });
-            this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>');
+            this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);
         }
     }

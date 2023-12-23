@@ -23,10 +23,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/steambap/captcha"
@@ -316,4 +318,28 @@ func Recover(c *gin.Context) {
 	}()
 
 	c.Next()
+}
+
+var (
+	requestingLock = sync.Mutex{}
+	requesting     = map[string]*sync.Mutex{}
+)
+
+func ControlConcurrency(c *gin.Context) {
+	if websocket.IsWebSocketUpgrade(c.Request) {
+		c.Next()
+		return
+	}
+
+	requestingLock.Lock()
+	mutex := requesting[c.Request.URL.Path]
+	if nil == mutex {
+		mutex = &sync.Mutex{}
+		requesting[c.Request.URL.Path] = mutex
+	}
+	requestingLock.Unlock()
+
+	mutex.Lock()
+	c.Next()
+	mutex.Unlock()
 }

@@ -23,6 +23,7 @@ import {openRecentDocs} from "../business/openRecentDocs";
 import {openHistory} from "../history/history";
 import {newFile} from "../util/newFile";
 import {mountHelp, newNotebook} from "../util/mount";
+import {Constants} from "../constants";
 
 export const getActiveTab = (wndActive = true) => {
     const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
@@ -185,7 +186,7 @@ export const newCenterEmptyTab = (app: App) => {
                     if (target.id === "editorEmptySearch") {
                         openSearch({
                             app,
-                            hotkey: window.siyuan.config.keymap.general.globalSearch.custom,
+                            hotkey: Constants.DIALOG_GLOBALSEARCH,
                         });
                         event.stopPropagation();
                         event.preventDefault();

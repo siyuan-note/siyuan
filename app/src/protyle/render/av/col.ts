@@ -24,7 +24,7 @@ export const duplicateCol = (options: {
     } else {
         options.newValue = `${options.newValue} (1)`;
     }
-    if (["select", "mSelect"].includes(options.type)) {
+    if (["select", "mSelect", "rollup"].includes(options.type)) {
         fetchPost("/api/av/renderAttributeView", {id: options.avID}, (response) => {
             const data = response.data as IAV;
             let colOptions;
@@ -115,7 +115,7 @@ export const getEditHTML = (options: {
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
     <span class="b3-menu__accelerator" style="margin-left: 0">${getColNameByType(colData.type)}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
     if (colData.options && colData.options.length > 0) {
         html += `<button class="b3-menu__separator"></button>
@@ -147,6 +147,23 @@ export const getEditHTML = (options: {
 <button class="b3-menu__item">
     <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
+    } else if (colData.type === "relation") {
+        const isSelf = colData.relation?.avID === options.data.id;
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-av-id="${colData.relation?.avID}" data-old-col-id="${colData.relation?.backKeyID}">
+    <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
+    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : "TODO"}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<label class="b3-menu__item${isSelf ? " fn__none" : ""}">
+    <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
+    <span class="fn__space fn__flex-1"></span>
+    <input type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+</label>
+<div class="b3-menu__item fn__flex-column" data-type="nobg">
+    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+    <button style="margin: 8px 0" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+</div>`;
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -155,7 +172,7 @@ export const getEditHTML = (options: {
         <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
         <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
     </button>
-    <button class="b3-menu__item" data-type="duplicateCol">
+    <button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
         <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
     </button>
@@ -183,6 +200,8 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("email", colData.type, colData.name)}
     ${genUpdateColItem("phone", colData.type, colData.name)}
     ${genUpdateColItem("template", colData.type, colData.name)}
+    ${genUpdateColItem("relation", colData.type, colData.name)}
+    ${genUpdateColItem("rollup", colData.type, colData.name)}
     ${genUpdateColItem("created", colData.type, colData.name)}
     ${genUpdateColItem("updated", colData.type, colData.name)}
 </div>`;
@@ -321,6 +340,10 @@ export const getColNameByType = (type: TAVCol) => {
             return window.siyuan.languages[type];
         case "mSelect":
             return window.siyuan.languages.multiSelect;
+        case "relation":
+            return window.siyuan.languages.relation;
+        case "rollup":
+            return window.siyuan.languages.rollup;
         case "updated":
             return window.siyuan.languages.updatedTime;
         case "created":
@@ -346,6 +369,10 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconListItem";
         case "mSelect":
             return "iconList";
+        case "relation":
+            return "iconOpen";
+        case "rollup":
+            return "iconSearch";
         case "date":
             return "iconCalendar";
         case "updated":
@@ -611,20 +638,22 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         }
     });
     if (type !== "block") {
-        menu.addItem({
-            icon: "iconCopy",
-            label: window.siyuan.languages.duplicate,
-            click() {
-                duplicateCol({
-                    protyle,
-                    type,
-                    avID,
-                    colId,
-                    icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
-                    newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
-                });
-            }
-        });
+        if (type !== "relation") {
+            menu.addItem({
+                icon: "iconCopy",
+                label: window.siyuan.languages.duplicate,
+                click() {
+                    duplicateCol({
+                        protyle,
+                        type,
+                        avID,
+                        colId,
+                        icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
+                        newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                    });
+                }
+            });
+        }
         menu.addItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
@@ -646,7 +675,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         menu.addSeparator();
     }
     menu.addItem({
-        label: `<label class="fn__flex" style="margin: 4px 0"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+        label: `<label class="fn__flex" style="margin: 4px 0;padding-right: 6px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
         bind(element) {
             const inputElement = element.querySelector("input") as HTMLInputElement;
@@ -960,6 +989,56 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 protyle: protyle,
                 type: "template",
                 name: window.siyuan.languages.template,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconOpen",
+        label: window.siyuan.languages.relation,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.relation,
+                avID,
+                type: "relation",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "relation",
+                name: window.siyuan.languages.relation,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconSearch",
+        label: window.siyuan.languages.rollup,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.rollup,
+                avID,
+                type: "rollup",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "rollup",
+                name: window.siyuan.languages.rollup,
                 id
             });
         }

@@ -3,7 +3,7 @@ import {
     hasClosestByClassName,
     hasTopClosestByClassName,
 } from "../../protyle/util/hasClosest";
-import {closePanel} from "./closePanel";
+import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
@@ -41,8 +41,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "viewer-container") ||
         hasClosestByClassName(target, "keyboard") ||
-        hasClosestByAttribute(target, "id", "commonMenu") ||
-        hasClosestByAttribute(target, "id", "model", true)
+        hasClosestByAttribute(target, "id", "commonMenu")
     ) {
         return;
     }
@@ -82,6 +81,13 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     }
 
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
+    const modelElement = hasClosestByAttribute(target, "id", "model");
+    if (modelElement) {
+        if (isXScroll && firstDirection === "toRight" && !lastClientX) {
+            closeModel();
+        }
+        return;
+    }
     const menuElement = hasClosestByAttribute(target, "id", "menu");
     if (menuElement) {
         if (isXScroll) {
@@ -174,8 +180,8 @@ export const handleTouchMove = (event: TouchEvent) => {
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByClassName(target, "viewer-container") ||
-        hasClosestByAttribute(target, "id", "commonMenu") ||
-        hasClosestByAttribute(target, "id", "model", true)) {
+        hasClosestByAttribute(target, "id", "commonMenu")
+    ) {
         return;
     }
     if (getSelection().rangeCount > 0) {
@@ -208,6 +214,9 @@ export const handleTouchMove = (event: TouchEvent) => {
     }
     previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (hasClosestByAttribute(target, "id", "model", true)) {
+            return;
+        }
         let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
             hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
             hasClosestByAttribute(target, "data-type", "NodeTable") ||

@@ -365,8 +365,8 @@ export class Dock {
             if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag")?.classList.remove("fn__hidden");
             }
-            // 关闭 dock 后设置光标
-            if (!document.querySelector(".layout__center .layout__wnd--active")) {
+            // 关闭 dock 后设置光标，初始化的时候不能设置，否则关闭文档树且多页签时会请求两次 getDoc
+            if (saveLayout && !document.querySelector(".layout__center .layout__wnd--active")) {
                 const currentElement = document.querySelector(".layout__center ul.layout-tab-bar .item--focus");
                 if (currentElement) {
                     getAllTabs().find(item => {

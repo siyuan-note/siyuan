@@ -403,7 +403,7 @@ export class Wnd {
         }
     }
 
-    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true) {
+    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true, isSaveLayout = true) {
         let currentTab: Tab;
         this.children.forEach((item) => {
             if (target === item.headElement) {
@@ -431,7 +431,9 @@ export class Wnd {
             if (initData) {
                 currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)));
                 currentTab.headElement.removeAttribute("data-initdata");
-                saveLayout();
+                if (isSaveLayout) {
+                    saveLayout();
+                }
                 return;
             }
         }
@@ -492,7 +494,9 @@ export class Wnd {
                 resize,
             });
         }
-        saveLayout();
+        if (isSaveLayout) {
+            saveLayout();
+        }
     }
 
     public addTab(tab: Tab, keepCursor = false, isSaveLayout = true) {

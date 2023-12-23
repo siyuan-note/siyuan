@@ -31,6 +31,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -934,10 +935,10 @@ func IndexRepo(memo string) (err error) {
 }
 
 var syncingFiles = sync.Map{}
-var syncingStorages = false
+var syncingStorages = atomic.Bool{}
 
 func waitForSyncingStorages() {
-	for syncingStorages {
+	for syncingStorages.Load() {
 		time.Sleep(time.Second)
 	}
 }
@@ -979,7 +980,7 @@ func syncRepoDownload() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			mergeResult, trafficStat, err = repo.SyncDownload(syncContext)
@@ -1049,7 +1050,7 @@ func syncRepoUpload() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	trafficStat, err := repo.SyncUpload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			trafficStat, err = repo.SyncUpload(syncContext)
@@ -1121,7 +1122,7 @@ func bootSyncRepo() (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			fetchedFiles, err = repo.GetSyncCloudFiles(syncContext)
@@ -1129,7 +1130,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	syncingFiles = sync.Map{}
-	syncingStorages = false
+	syncingStorages.Store(false)
 	for _, fetchedFile := range fetchedFiles {
 		name := path.Base(fetchedFile.Path)
 		if strings.HasSuffix(name, ".sy") {
@@ -1138,7 +1139,7 @@ func bootSyncRepo() (err error) {
 			continue
 		}
 		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
-			syncingStorages = true
+			syncingStorages.Store(true)
 		}
 	}
 
@@ -1212,7 +1213,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	if errors.Is(err, dejavu.ErrRepoFatal) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
 			mergeResult, trafficStat, err = repo.Sync(syncContext)
@@ -1362,7 +1363,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	syncingFiles = sync.Map{}
-	syncingStorages = false
+	syncingStorages.Store(false)
 
 	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764

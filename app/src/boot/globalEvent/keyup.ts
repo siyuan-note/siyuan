@@ -12,7 +12,7 @@ export const windowKeyUp = (app: App, event: KeyboardEvent) => {
     window.siyuan.shiftIsPressed = false;
     window.siyuan.altIsPressed = false;
     const switchDialog = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.goToEditTabNext.custom) {
+        if (item.element.getAttribute("data-key") === Constants.DIALOG_SWITCHTAB) {
             return true;
         }
     });

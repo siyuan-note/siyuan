@@ -101,29 +101,6 @@ class App {
                                 initFramework(this, confResponse.data.start);
                                 initRightMenu(this);
                                 openChangelog();
-                                const unPinsMenu: IMenu[] = [];
-                                this.plugins.forEach(item => {
-                                    const unPinMenu = afterLoadPlugin(item);
-                                    if (unPinMenu) {
-                                        unPinMenu.forEach(unpinItem => {
-                                            unPinsMenu.push(unpinItem);
-                                        });
-                                    }
-                                });
-                                if (unPinsMenu.length > 0) {
-                                    const pluginElement = document.createElement("div");
-                                    pluginElement.classList.add("b3-menu__item");
-                                    pluginElement.setAttribute("data-menu", "true");
-                                    pluginElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>`;
-                                    pluginElement.addEventListener("click", () => {
-                                        const menu = new Menu();
-                                        unPinsMenu.forEach(item => {
-                                            menu.addItem(item);
-                                        });
-                                        menu.fullscreen();
-                                    });
-                                    document.querySelector("#menuAbout").after(pluginElement);
-                                }
                             });
                         });
                     });

@@ -5,10 +5,12 @@ import {isMobile, isWindow} from "../util/functions";
 /// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
 import {getAllModels} from "../layout/getAll";
-/// #endif
 import {Tab} from "../layout/Tab";
 import {setPanelFocus} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
+///#else
+import {MobileCustom} from "../mobile/dock/MobileCustom";
+/// #endif
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
@@ -19,7 +21,7 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any = {};
     public displayName: string;
-    public name: string;
+    public readonly name: string;
     public protyleSlash: {
         filter: string[],
         html: string,
@@ -45,12 +47,14 @@ export class Plugin {
         /// #endif
     } = {};
     public docks: {
-        /// #if !MOBILE
         [key: string]: {
             config: IPluginDockTab,
+            /// #if !MOBILE
             model: (options: { tab: Tab }) => Custom
+            /// #else
+            mobileModel: (element: Element) => MobileCustom
+            /// #endif
         }
-        /// #endif
     } = {};
 
     constructor(options: {
@@ -238,13 +242,25 @@ export class Plugin {
         update?: () => void,
         init: () => void
     }) {
-        /// #if !MOBILE
         const type2 = this.name + options.type;
         if (typeof options.config.index === "undefined") {
             options.config.index = 1000;
         }
         this.docks[type2] = {
             config: options.config,
+            /// #if MOBILE
+            mobileModel: (element) => {
+                const customObj = new MobileCustom({
+                    element,
+                    type: type2,
+                    data: options.data,
+                    init: options.init,
+                    update: options.update,
+                    destroy: options.destroy,
+                });
+                return customObj;
+            },
+            /// #else
             model: (arg: { tab: Tab }) => {
                 const customObj = new Custom({
                     app: this.app,
@@ -265,9 +281,9 @@ export class Plugin {
                 customObj.element.classList.add("sy__" + type2);
                 return customObj;
             }
+            /// #endif
         };
         return this.docks[type2];
-        /// #endif
     }
 
     public addFloatLayer = (options: {

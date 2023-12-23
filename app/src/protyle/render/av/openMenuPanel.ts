@@ -26,6 +26,7 @@ import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
+import {openSearchAV, updateRelation} from "./relation";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -44,6 +45,7 @@ export const openMenuPanel = (options: {
     const avID = options.blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
+        pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
     }, (response) => {
         const data = response.data as IAV;
         let html;
@@ -734,6 +736,20 @@ export const openMenuPanel = (options: {
                         editMenuElement.lastElementChild.classList.remove("fn__none");
                     }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchAV") {
+                    openSearchAV(avID, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "updateRelation") {
+                    updateRelation({
+                        protyle: options.protyle,
+                        avElement: avPanelElement,
+                        avID
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

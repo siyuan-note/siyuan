@@ -1380,6 +1380,39 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
 				logging.LogErrorf("copy av json failed: %s", copyErr)
 			}
+
+			attrView, err := av.ParseAttributeView(avID)
+			if nil != err {
+				logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+				return ast.WalkContinue
+			}
+
+			// 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeMAsset != keyValues.Key.Type {
+					continue
+				}
+
+				for _, value := range keyValues.Values {
+					for _, asset := range value.MAsset {
+						if !isRelativePath([]byte(asset.Content)) {
+							continue
+						}
+
+						destPath := filepath.Join(exportFolder, asset.Content)
+						srcPath, assetErr := GetAssetAbsPath(asset.Content)
+						if nil != assetErr {
+							logging.LogWarnf("get asset [%s] abs path failed: %s", asset.Content, assetErr)
+							continue
+						}
+
+						if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
+							logging.LogErrorf("copy asset failed: %s", copyErr)
+						}
+					}
+				}
+			}
+
 			return ast.WalkContinue
 		})
 	}

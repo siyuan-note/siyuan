@@ -147,7 +147,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return ast.WalkContinue
 			}
 
-			newNodeID := ast.NewNodeID()
+			// 新 ID 保留时间部分，仅修改随机值，避免时间变化导致更新时间早于创建时间
+			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
+			newNodeID := util.TimeFromID(n.ID) + "-" + gulu.Rand.String(7)
 			blockIDs[n.ID] = newNodeID
 			oldNodeID := n.ID
 			n.ID = newNodeID

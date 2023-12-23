@@ -25,7 +25,7 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
 
 export const newDailyNote = (app: App) => {
     const exit = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.dailyNote.custom) {
+        if (item.element.getAttribute("data-key") === Constants.DIALOG_DIALYNOTE) {
             item.destroy();
             return true;
         }
@@ -64,6 +64,7 @@ export const newDailyNote = (app: App) => {
             }
         });
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_DIALYNOTE,
             title: window.siyuan.languages.plsChoose,
             content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${optionsHTML}</select>
@@ -74,7 +75,7 @@ export const newDailyNote = (app: App) => {
 </div>`,
             width: isMobile() ? "92vw" : "520px",
         });
-        dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.dailyNote.custom);
+        dialog.element.setAttribute("data-key", Constants.DIALOG_DIALYNOTE);
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
         const selectElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
         selectElement.value = localNotebookId;

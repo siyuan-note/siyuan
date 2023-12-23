@@ -20,6 +20,10 @@
     margin-left: 14px;
   }
 
+  &--menu {
+   margin: 13px 6px 13px 0;
+  }
+
   &:after {
     border: 1px solid var(--b3-theme-surface-lighter);
     box-shadow: var(--b3-point-shadow);

@@ -190,7 +190,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 /// #else
                 openSearch({
                     app: protyle.app,
-                    hotkey: window.siyuan.config.keymap.general.search.custom,
+                    hotkey: Constants.DIALOG_SEARCH,
                     notebookId: protyle.notebookId,
                     searchPath
                 });

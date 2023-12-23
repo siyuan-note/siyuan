@@ -350,7 +350,7 @@ export const genHintItemHTML = (item: IBlock) => {
     ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`;
+<div class="b3-list-item__meta b3-list-item__showall">${item.hPath}</div>`;
 };
 
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {

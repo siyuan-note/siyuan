@@ -33,9 +33,98 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func GetAttributeView(avID string) (ret *av.AttributeView) {
+	waitForSyncingStorages()
+
+	ret, _ = av.ParseAttributeView(avID)
+	return
+}
+
+type SearchAttributeViewResult struct {
+	AvID    string `json:"avID"`
+	AvName  string `json:"avName"`
+	BlockID string `json:"blockID"`
+	HPath   string `json:"hPath"`
+}
+
+func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
+	waitForSyncingStorages()
+	ret = []*SearchAttributeViewResult{}
+
+	var blocks []*Block
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'av' ORDER BY updated DESC LIMIT 10", page, pageSize)
+		blocks = fromSQLBlocks(&sqlBlocks, "", 36)
+		pageCount = 1
+	} else {
+		var matchedBlockCount int
+		blocks, matchedBlockCount, _ = fullTextSearchByKeyword(keyword, "", "", "('av')", "", 36, page, pageSize)
+		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	}
+
+	trees := map[string]*parse.Tree{}
+	for _, block := range blocks {
+		tree := trees[block.RootID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(block.ID)
+			if nil != tree {
+				trees[block.RootID] = tree
+			}
+		}
+		if nil == tree {
+			continue
+		}
+
+		node := treenode.GetNodeInTree(tree, block.ID)
+		if nil == node {
+			continue
+		}
+
+		if "" == node.AttributeViewID {
+			continue
+		}
+
+		avID := node.AttributeViewID
+		attrView, _ := av.ParseAttributeView(avID)
+		if nil == attrView {
+			continue
+		}
+
+		exist := false
+		for _, result := range ret {
+			if result.AvID == avID {
+				exist = true
+				break
+			}
+		}
+
+		var hPath string
+		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
+		if nil != baseBlock {
+			hPath = baseBlock.HPath
+		}
+		box := Conf.Box(node.Box)
+		if nil != box {
+			hPath = box.Name + hPath
+		}
+
+		if !exist {
+			ret = append(ret, &SearchAttributeViewResult{
+				AvID:    avID,
+				AvName:  attrView.Name,
+				BlockID: block.ID,
+				HPath:   hPath,
+			})
+		}
+	}
+	return
+}
 
 type BlockAttributeViewKeys struct {
 	AvID      string          `json:"avID"`
@@ -90,10 +179,24 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+		// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
 		// 先处理创建时间和更新时间
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
+			case av.KeyTypeRelation:
+				relKey, _ := attrView.GetKey(kv.Values[0].KeyID)
+				if nil != relKey && nil != relKey.Relation {
+					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						blocks := map[string]string{}
+						for _, blockValue := range destAv.GetBlockKeyValues().Values {
+							blocks[blockValue.BlockID] = blockValue.Block.Content
+						}
+						for _, blockID := range kv.Values[0].Relation.BlockIDs {
+							kv.Values[0].Relation.Contents = append(kv.Values[0].Relation.Contents, blocks[blockID])
+						}
+					}
+				}
 			case av.KeyTypeCreated:
 				createdStr := blockID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
@@ -489,6 +592,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
 			Template:     key.Template,
+			Relation:     key.Relation,
+			Rollup:       key.Rollup,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,
@@ -581,7 +686,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
-	// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+	// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
@@ -594,6 +699,20 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
+			case av.KeyTypeRelation: // 渲染关联列
+				relKey, _ := attrView.GetKey(cell.Value.KeyID)
+				if nil != relKey && nil != relKey.Relation {
+					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						blocks := map[string]string{}
+						for _, blockValue := range destAv.GetBlockKeyValues().Values {
+							blocks[blockValue.BlockID] = blockValue.Block.Content
+						}
+						for _, blockID := range cell.Value.Relation.BlockIDs {
+							cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, blocks[blockID])
+						}
+					}
+				}
 			case av.KeyTypeCreated: // 渲染创建时间
 				createdStr := row.ID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
@@ -651,6 +770,102 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 			ret = kv.Values[0]
 			break
 		}
+	}
+	return
+}
+
+func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColRelation(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColRelation(operation *Operation) (err error) {
+	// operation.AvID 源 avID
+	// operation.ID 目标 avID
+	// operation.KeyID 源 av 关联列 ID
+	// operation.IsTwoWay 是否双向关联
+	// operation.BackRelationKeyID 双向关联的目标关联列 ID
+	// operation.Name 双向关联的目标关联列名称
+
+	srcAv, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	destAv, err := av.ParseAttributeView(operation.ID)
+	if nil != err {
+		return
+	}
+
+	isSameAv := srcAv.ID == destAv.ID
+
+	for _, keyValues := range srcAv.KeyValues {
+		if keyValues.Key.ID == operation.KeyID {
+			// 已经设置过双向关联的话需要先断开双向关联
+			if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
+				oldDestAv, parseErr := av.ParseAttributeView(keyValues.Key.Relation.AvID)
+				if nil == parseErr {
+					isOldSameAv := oldDestAv.ID == destAv.ID
+					if isOldSameAv {
+						oldDestAv = destAv
+					}
+
+					oldDestKey, _ := oldDestAv.GetKey(keyValues.Key.Relation.BackKeyID)
+					if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
+						oldDestKey.Relation.IsTwoWay = false
+						oldDestKey.Relation.BackKeyID = ""
+					}
+
+					if !isOldSameAv {
+						err = av.SaveAttributeView(oldDestAv)
+						if nil != err {
+							return
+						}
+					}
+				}
+			}
+
+			keyValues.Key.Relation = &av.Relation{
+				AvID:      operation.ID,
+				IsTwoWay:  operation.IsTwoWay,
+				BackKeyID: operation.BackRelationKeyID,
+			}
+			break
+		}
+	}
+
+	destAdded := false
+	backRelKey, _ := destAv.GetKey(operation.BackRelationKeyID)
+	if nil != backRelKey {
+		backRelKey.Relation = &av.Relation{
+			AvID:      operation.AvID,
+			IsTwoWay:  operation.IsTwoWay,
+			BackKeyID: operation.KeyID,
+		}
+		destAdded = true
+	}
+
+	if !destAdded {
+		destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
+			Key: &av.Key{
+				ID:       operation.BackRelationKeyID,
+				Name:     operation.Name,
+				Type:     av.KeyTypeRelation,
+				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+			},
+		})
+	}
+
+	err = av.SaveAttributeView(srcAv)
+	if nil != err {
+		return
+	}
+	if !isSameAv {
+		err = av.SaveAttributeView(destAv)
+		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 	}
 	return
 }
@@ -1919,7 +2134,6 @@ func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *pa
 		tree, err = loadTreeByBlockID(blockID)
 	}
 	if nil != err {
-		logging.LogWarnf("load tree by block id [%s] failed: %s", blockID, err)
 		return
 	}
 	node = treenode.GetNodeInTree(tree, blockID)
@@ -1949,7 +2163,7 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		return
 	}
 
-	options := []*av.KeySelectOption{}
+	options := []*av.SelectOption{}
 	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
 		return
 	}

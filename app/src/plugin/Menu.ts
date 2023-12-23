@@ -41,7 +41,7 @@ export class Menu {
         return this.menu.addSeparator(index);
     }
 
-    open(options:IPosition) {
+    open(options: IPosition) {
         if (this.isOpen) {
             return;
         }

@@ -4,7 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
-import {bgFade} from "../../util/highlightById";
+import {bgFade, scrollCenter} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";
 /// #endif
@@ -247,7 +247,7 @@ const setHTML = (options: {
             onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
         });
     }
-    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none")) {
+    if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") && !protyle.element.classList.contains("fn__none")) {
         // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
         protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
         // https://github.com/siyuan-note/siyuan/issues/8224
@@ -391,20 +391,30 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         }
         /// #endif
     }
-    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-        focusElement.scrollIntoView();
-    } else if (scrollAttr && scrollAttr.scrollTop) {
+    if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+    }
+    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        const focusRect = focusElement.getBoundingClientRect();
+        if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
+            scrollCenter(protyle, focusElement);
+        }
     } else {
         protyle.observerLoad?.disconnect();
         return;
     }
     // 加强定位
     protyle.observerLoad = new ResizeObserver(() => {
-        if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-            focusElement.scrollIntoView();
-        } else if (scrollAttr && scrollAttr.scrollTop) {
+        if (scrollAttr && typeof scrollAttr.scrollTop === "number") {
             protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+        }
+        if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            const focusRect = focusElement.getBoundingClientRect();
+            if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
+                scrollCenter(protyle, focusElement);
+            }
         }
     });
     protyle.observerLoad.observe(protyle.wysiwyg.element);

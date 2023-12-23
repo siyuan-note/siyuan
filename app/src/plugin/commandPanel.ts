@@ -1,15 +1,19 @@
 import {Dialog} from "../dialog";
 import {App} from "../index";
 import {upDownHint} from "../util/upDownHint";
+/// #if !MOBILE
 import {openSetting} from "../config";
+/// #endif
 import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {isMobile} from "../util/functions";
 
 export const commandPanel = (app: App) => {
     const dialog = new Dialog({
-        width: "80vw",
-        height: "70vh",
-        content: `<div class="fn__flex-column" style="border-radius: var(--b3-border-radius-b);overflow:hidden;">
-    <div class="b3-form__icon search__header">
+        width: isMobile() ? "92vw" : "80vw",
+        height: isMobile() ? "80vh" : "70vh",
+        title: window.siyuan.languages.commandPanel,
+        content: `<div class="fn__flex-column">
+    <div class="b3-form__icon search__header" style="border-top: 0;border-bottom: 1px solid var(--b3-theme-surface-lighter);">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
     </div>
@@ -23,8 +27,11 @@ export const commandPanel = (app: App) => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item");
+            if (listElement.childElementCount === 0) {
+                liElement.classList.add("b3-list-item--focus");
+            }
             liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
-<span class="b3-list-item__meta">${updateHotkeyTip(command.customHotkey)}</span>`;
+<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
                 if (command.callback) {
                     command.callback();
@@ -39,11 +46,13 @@ export const commandPanel = (app: App) => {
 
     if (listElement.childElementCount === 0) {
         const liElement = document.createElement("li");
-        liElement.classList.add("b3-list-item");
-        liElement.innerHTML = `<span class="b3-list-item__text">${window.siyuan.languages.commandEmpty}</span>`;
+        liElement.classList.add("b3-list-item", "b3-list-item--focus");
+        liElement.innerHTML = `<span class="b3-list-item__text" style="-webkit-line-clamp: inherit;">${isMobile() ? window.siyuan.languages._kernel[122] : window.siyuan.languages.commandEmpty}</span>`;
         liElement.addEventListener("click", () => {
             dialog.destroy();
+            /// #if !MOBILE
             openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+            /// #endif
         });
         listElement.insertAdjacentElement("beforeend", liElement);
     } else {

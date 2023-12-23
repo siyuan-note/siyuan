@@ -1,4 +1,7 @@
 export const escapeHtml = (html: string) => {
+    if (!html) {
+        return html;
+    }
     return html.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 };
 

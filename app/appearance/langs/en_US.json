@@ -1,4 +1,6 @@
 {
+  "relation": "Relation",
+  "rollup": "Rollup",
   "replaceTypes": {
     "text": "Normal text",
     "imgText": "Image alt text",

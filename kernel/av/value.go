@@ -69,7 +69,7 @@ func (value *Value) String() string {
 		if nil == value.Text {
 			return ""
 		}
-		return value.Text.Content
+		return strings.TrimSpace(value.Text.Content)
 	case KeyTypeNumber:
 		if nil == value.Number {
 			return ""
@@ -122,7 +122,7 @@ func (value *Value) String() string {
 		if nil == value.Template {
 			return ""
 		}
-		return value.Template.Content
+		return strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
 		if nil == value.Created {
 			return ""
@@ -142,10 +142,14 @@ func (value *Value) String() string {
 		}
 		return ""
 	case KeyTypeRelation:
-		if nil == value.Relation {
+		if 1 > len(value.Relation.Contents) {
 			return ""
 		}
-		return value.Relation.Content
+		var ret []string
+		for _, v := range value.Relation.Contents {
+			ret = append(ret, v)
+		}
+		return strings.Join(ret, " ")
 	case KeyTypeRollup:
 		if nil == value.Rollup {
 			return ""
@@ -463,7 +467,7 @@ type ValueCheckbox struct {
 }
 
 type ValueRelation struct {
-	Content  string   `json:"content"`
+	Contents []string `json:"contents"`
 	BlockIDs []string `json:"blockIDs"`
 }
 

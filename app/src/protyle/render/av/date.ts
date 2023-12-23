@@ -37,18 +37,18 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200"><br>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${value ? dayjs(cellValue.value.date.content).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field fn__size200" style="margin-top: 4px;"><br>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${value2 ? dayjs(cellValue.value.date.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px;margin-bottom: 4px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
-        <span>${window.siyuan.languages.endDate}</span>
+        <span class="fn__flex-center">${window.siyuan.languages.endDate}</span>
         <span class="fn__space fn__flex-1"></span>
-        <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
+        <input type="checkbox" class="b3-switch b3-switch--menu"${hasEndDate ? " checked" : ""}>
     </label>
     <label class="b3-menu__item">
-        <span>${window.siyuan.languages.includeTime}</span>
+        <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
         <span class="fn__space fn__flex-1"></span>
-        <input type="checkbox" class="b3-switch fn__flex-center"${isNotTime ? "" : " checked"}>
+        <input type="checkbox" class="b3-switch b3-switch--menu"${isNotTime ? "" : " checked"}>
     </label>
     <button class="b3-menu__separator"></button>
     <button class="b3-menu__item" data-type="clearDate">

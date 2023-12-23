@@ -1,4 +1,6 @@
 {
+  "relation": "關聯",
+  "rollup": "查詢引用",
   "replaceTypes": {
     "text": "普通文字",
     "imgText": "圖片提示文字",

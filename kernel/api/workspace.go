@@ -138,8 +138,11 @@ func removeWorkspaceDir(c *gin.Context) {
 
 	path := arg["path"].(string)
 
-	if util.IsWorkspaceLocked(path) {
-		logging.LogWarnf("skip remove workspace [%s] because it is locked", path)
+	if util.IsWorkspaceLocked(path) || util.WorkspaceDir == path {
+		msg := "Cannot remove current workspace"
+		ret.Code = -1
+		ret.Msg = msg
+		ret.Data = map[string]interface{}{"closeTimeout": 3000}
 		return
 	}
 
@@ -156,10 +159,6 @@ func removeWorkspaceDir(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
-	}
-
-	if util.WorkspaceDir == path && (util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container) {
-		os.Exit(logging.ExitCodeOk)
 	}
 }
 

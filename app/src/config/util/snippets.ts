@@ -1,5 +1,4 @@
 import {fetchPost} from "../../util/fetch";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Dialog} from "../../dialog";
 import {objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -105,7 +104,7 @@ export const openSnippets = () => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {
                 if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
-                    target.parentElement.parentElement.insertAdjacentHTML("beforeend", genSnippet({
+                    target.parentElement.insertAdjacentHTML("afterend", genSnippet({
                         type: target.id === "addCodeSnippetCSS" ? "css" : "js",
                         name: "",
                         content: "",
@@ -142,7 +141,6 @@ export const openSnippets = () => {
                 } else if (target.dataset.action === "remove") {
                     const itemElement = target.parentElement.parentElement;
                     removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
-                    itemElement.nextElementSibling.remove();
                     itemElement.remove();
                     event.stopPropagation();
                     event.preventDefault();
@@ -155,8 +153,8 @@ export const openSnippets = () => {
 };
 
 const genSnippet = (options: ISnippet) => {
-    return `<div class="fn__hr--b"></div>
-<div data-id="${options.id || ""}" data-type="${options.type}">
+    return `<div data-id="${options.id || ""}" data-type="${options.type}">
+    <div class="fn__hr--b"></div>
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
         <div class="fn__flex-1"></div>
@@ -169,7 +167,8 @@ const genSnippet = (options: ISnippet) => {
     </div>
     <div class="fn__hr"></div>
     <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical;font-family:var(--b3-font-family-code)" spellcheck="false"></textarea>
-</div><div class="fn__hr--b"></div>`;
+    <div class="fn__hr--b"></div>
+</div>`;
 };
 
 const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[]) => {

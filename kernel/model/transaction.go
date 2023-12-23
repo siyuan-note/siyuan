@@ -87,7 +87,7 @@ var (
 )
 
 func isWritingFiles() bool {
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(time.Duration(50) * time.Millisecond)
 	return 0 < len(txQueue)
 }
 
@@ -258,6 +258,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doDuplicateAttrViewView(op)
 		case "sortAttrViewView":
 			ret = tx.doSortAttrViewView(op)
+		case "updateAttrViewColRelation":
+			ret = tx.doUpdateAttrViewColRelation(op)
 		}
 
 		if nil != ret {
@@ -577,7 +579,24 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	for i := 0; i < len(toInserts); i++ {
 		toInsert := toInserts[i]
 		if isContainer {
-			if ast.NodeSuperBlock == node.Type {
+			if ast.NodeList == node.Type {
+				// 列表下只能挂列表项，所以这里需要分情况处理 https://github.com/siyuan-note/siyuan/issues/9955
+				if ast.NodeList == toInsert.Type {
+					var childLis []*ast.Node
+					for childLi := toInsert.FirstChild; nil != childLi; childLi = childLi.Next {
+						childLis = append(childLis, childLi)
+					}
+					for _, childLi := range childLis {
+						node.AppendChild(childLi)
+					}
+				} else {
+					newLiID := ast.NewNodeID()
+					newLi := &ast.Node{ID: newLiID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: node.ListData.Typ}}
+					newLi.SetIALAttr("id", newLiID)
+					node.AppendChild(newLi)
+					newLi.AppendChild(toInsert)
+				}
+			} else if ast.NodeSuperBlock == node.Type {
 				node.LastChild.InsertBefore(toInsert)
 			} else {
 				node.AppendChild(toInsert)
@@ -1164,14 +1183,16 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID       string   `json:"avID"`       // 属性视图 ID
-	SrcIDs     []string `json:"srcIDs"`     // 用于将块拖拽到属性视图中
-	IsDetached bool     `json:"isDetached"` // 用于标识是否是脱离块，仅存在于属性视图中
-	Name       string   `json:"name"`       // 属性视图列名
-	Typ        string   `json:"type"`       // 属性视图列类型
-	Format     string   `json:"format"`     // 属性视图列格式化
-	KeyID      string   `json:"keyID"`      // 属性视列 ID
-	RowID      string   `json:"rowID"`      // 属性视图行 ID
+	AvID              string   `json:"avID"`              // 属性视图 ID
+	SrcIDs            []string `json:"srcIDs"`            // 用于将块拖拽到属性视图中
+	IsDetached        bool     `json:"isDetached"`        // 用于标识是否是脱离块，仅存在于属性视图中
+	Name              string   `json:"name"`              // 属性视图列名
+	Typ               string   `json:"type"`              // 属性视图列类型
+	Format            string   `json:"format"`            // 属性视图列格式化
+	KeyID             string   `json:"keyID"`             // 属性视列 ID
+	RowID             string   `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay          bool     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID string   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
 }
 
 type Transaction struct {

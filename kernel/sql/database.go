@@ -683,7 +683,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeDocument:
-		if asset := docTitleImgAsset(n); nil != asset {
+		if asset := docTitleImgAsset(n, boxLocalPath, docDirLocalPath); nil != asset {
 			assets = append(assets, asset)
 		}
 		if tags := docTagSpans(n); 0 < len(tags) {
@@ -798,15 +798,14 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-
 		if !treenode.IsNodeOCRed(n) {
-			util.PushNodeOCRQueue(n.ID)
+			util.PushNodeOCRQueue(n)
 		}
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
-		fc := treenode.FirstLeafBlock(n)
 
+		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
-			util.PushNodeOCRQueue(fc.ID)
+			util.PushNodeOCRQueue(fc)
 		}
 		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
 
@@ -818,11 +817,9 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-
 		if !treenode.IsNodeOCRed(n) {
-			util.PushNodeOCRQueue(n.ID)
+			util.PushNodeOCRQueue(n)
 		}
-
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 
 		parentID = n.Parent.ID

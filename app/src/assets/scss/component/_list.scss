@@ -56,7 +56,7 @@
     }
 
     &--narrow {
-      margin: 0;
+      margin: 1px 0;
     }
 
     &--big {
@@ -79,6 +79,7 @@
 
       .b3-list-item__meta {
         margin-left: 0;
+        line-height: 18px;
       }
     }
 

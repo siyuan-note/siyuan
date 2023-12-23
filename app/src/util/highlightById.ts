@@ -63,7 +63,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
 
     let offsetTop = 0;
     let parentNodeElement = nodeElement;
-    while (!parentNodeElement.classList.contains("protyle-wysiwyg")) {
+    while (parentNodeElement && !parentNodeElement.classList.contains("protyle-wysiwyg")) {
         offsetTop += (parentNodeElement as HTMLElement).offsetTop;
         parentNodeElement = parentNodeElement.parentElement;
     }

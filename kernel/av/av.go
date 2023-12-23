@@ -90,7 +90,6 @@ type Key struct {
 
 	// 关联列
 	RelationAvID      string `json:"relationAvID"`      // 关联的属性视图 ID
-	RelationKeyID     string `json:"relationKeyID"`     // 关联列 ID
 	IsBiRelation      bool   `json:"isBiRelation"`      // 是否双向关联
 	BackRelationKeyID string `json:"backRelationKeyID"` // 双向关联时回链关联列的 ID
 

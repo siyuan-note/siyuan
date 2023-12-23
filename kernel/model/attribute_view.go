@@ -655,6 +655,44 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColRelation(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColRelation(operation *Operation) (err error) {
+	err = updateAttributeViewColRelation0(operation.AvID, operation.KeyID, operation.ID, operation.IsBiRelation, operation.BackRelationKeyID)
+	if nil != err {
+		return
+	}
+
+	if operation.IsBiRelation {
+		err = updateAttributeViewColRelation0(operation.ID, operation.BackRelationKeyID, operation.AvID, operation.IsBiRelation, operation.KeyID)
+	}
+	return
+}
+
+func updateAttributeViewColRelation0(avID, relKeyID, destAvID string, isBiRel bool, backRelKeyID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == relKeyID {
+			keyValues.Key.RelationAvID = destAvID
+			keyValues.Key.IsBiRelation = isBiRel
+			keyValues.Key.BackRelationKeyID = backRelKeyID
+			err = av.SaveAttributeView(attrView)
+			return
+		}
+	}
+	return
+}
+
 func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	avID := operation.AvID
 	attrView, err := av.ParseAttributeView(avID)

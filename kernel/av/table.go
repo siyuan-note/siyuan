@@ -651,9 +651,11 @@ type TableColumn struct {
 
 	// 以下是某些列类型的特有属性
 
-	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
-	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
-	Template     string             `json:"template"`          // 模板内容
+	Options      []*KeySelectOption `json:"options,omitempty"`  // 选项列表
+	NumberFormat NumberFormat       `json:"numberFormat"`       // 列数字格式化
+	Template     string             `json:"template"`           // 模板内容
+	Relation     *Relation          `json:"relation,omitempty"` // 关联列
+	Rollup       *Rollup            `json:"rollup,omitempty"`   // 汇总列
 }
 
 type TableCell struct {

@@ -89,12 +89,10 @@ type Key struct {
 	Template string `json:"template"` // 模板内容
 
 	// 关联列
-	RelationAvID      string `json:"relationAvID"`      // 关联的属性视图 ID
-	IsBiRelation      bool   `json:"isBiRelation"`      // 是否双向关联
-	BackRelationKeyID string `json:"backRelationKeyID"` // 双向关联时回链关联列的 ID
+	Relation *Relation `json:"relation,omitempty"` // 关联信息
 
 	// 汇总列
-	RollupKeyID string `json:"rollupKeyID"` // 汇总列 ID
+	Rollup *Rollup `json:"rollup,omitempty"` // 汇总信息
 }
 
 func NewKey(id, name, icon string, keyType KeyType) *Key {
@@ -104,6 +102,16 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 		Type: keyType,
 		Icon: icon,
 	}
+}
+
+type Rollup struct {
+	KeyID string `json:"keyID"` // 汇总列 ID
+}
+
+type Relation struct {
+	AvID      string `json:"avID"`      // 关联的属性视图 ID
+	IsTwoWay  bool   `json:"isTwoWay"`  // 是否双向关联
+	BackKeyID string `json:"backKeyID"` // 双向关联时回链关联列的 ID
 }
 
 type KeySelectOption struct {

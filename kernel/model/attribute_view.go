@@ -553,6 +553,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
 			Template:     key.Template,
+			Relation:     key.Relation,
+			Rollup:       key.Rollup,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,
@@ -728,31 +730,65 @@ func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *T
 }
 
 func updateAttributeViewColRelation(operation *Operation) (err error) {
-	err = updateAttributeViewColRelation0(operation.AvID, operation.KeyID, operation.ID, operation.IsBiRelation, operation.BackRelationKeyID, operation.Name)
+	// operation.AvID 源 avID
+	// operation.ID 目标 avID
+	// operation.KeyID 源 av 关联列 ID
+	// operation.IsTwoWay 是否双向关联
+	// operation.BackRelationKeyID 双向关联的目标关联列 ID
+	// operation.Name 双向关联的目标关联列名称
+
+	srcAv, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
 	}
 
-	if operation.IsBiRelation {
-		err = updateAttributeViewColRelation0(operation.ID, operation.BackRelationKeyID, operation.AvID, operation.IsBiRelation, operation.KeyID, operation.Name)
-	}
-	return
-}
-
-func updateAttributeViewColRelation0(avID, relKeyID, destAvID string, isBiRel bool, backRelKeyID, backRelKeyName string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
+	destAv, err := av.ParseAttributeView(operation.ID)
 	if nil != err {
 		return
 	}
 
-	for _, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID == relKeyID {
-			keyValues.Key.RelationAvID = destAvID
-			keyValues.Key.IsBiRelation = isBiRel
-			keyValues.Key.BackRelationKeyID = backRelKeyID
-			err = av.SaveAttributeView(attrView)
-			return
+	isSameAv := srcAv.ID == destAv.ID
+
+	for _, keyValues := range srcAv.KeyValues {
+		if keyValues.Key.ID == operation.KeyID {
+			keyValues.Key.Relation = &av.Relation{
+				AvID:      operation.ID,
+				IsTwoWay:  operation.IsTwoWay,
+				BackKeyID: operation.BackRelationKeyID,
+			}
+			break
 		}
+	}
+
+	destAdded := false
+	for _, keyValues := range destAv.KeyValues {
+		if keyValues.Key.ID == operation.BackRelationKeyID {
+			keyValues.Key.Relation = &av.Relation{
+				AvID:      operation.AvID,
+				IsTwoWay:  operation.IsTwoWay,
+				BackKeyID: operation.KeyID,
+			}
+			destAdded = true
+			break
+		}
+	}
+	if !destAdded {
+		destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
+			Key: &av.Key{
+				ID:       operation.BackRelationKeyID,
+				Name:     operation.Name,
+				Type:     av.KeyTypeRelation,
+				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+			},
+		})
+	}
+
+	err = av.SaveAttributeView(srcAv)
+	if nil != err {
+		return
+	}
+	if !isSameAv {
+		err = av.SaveAttributeView(destAv)
 	}
 	return
 }

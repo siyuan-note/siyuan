@@ -474,7 +474,7 @@ func createDailyNote(c *gin.Context) {
 
 	if !existed {
 		// 只有创建的情况才推送，已经存在的情况不推送
-		// Creating a dailynote no longer expands the doc tree https://github.com/siyuan-note/siyuan/issues/9959
+		// Creating a dailynote existed no longer expands the doc tree https://github.com/siyuan-note/siyuan/issues/9959
 		appArg := arg["app"]
 		app := ""
 		if nil != appArg {

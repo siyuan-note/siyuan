@@ -1,4 +1,6 @@
 {
+  "relation": "关联",
+  "rollup": "查询引用",
   "replaceTypes": {
     "text": "普通文本",
     "imgText": "图片提示文本",

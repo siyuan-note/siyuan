@@ -1,4 +1,6 @@
 {
+  "relation": "Relación",
+  "rollup": "Acumular",
   "replaceTypes": {
     "text": "Texto normal",
     "imgText": "Texto alternativo de la imagen",

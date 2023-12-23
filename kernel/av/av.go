@@ -80,7 +80,7 @@ type Key struct {
 	// 以下是某些列类型的特有属性
 
 	// 单选/多选列
-	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
+	Options []*SelectOption `json:"options,omitempty"` // 选项列表
 
 	// 数字列
 	NumberFormat NumberFormat `json:"numberFormat"` // 列数字格式化
@@ -114,7 +114,7 @@ type Relation struct {
 	BackKeyID string `json:"backKeyID"` // 双向关联时回链关联列的 ID
 }
 
-type KeySelectOption struct {
+type SelectOption struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
 }

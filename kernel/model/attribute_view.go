@@ -751,6 +751,30 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 	for _, keyValues := range srcAv.KeyValues {
 		if keyValues.Key.ID == operation.KeyID {
+			// 已经设置过双向关联的话需要先断开双向关联
+			if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
+				oldDestAv, parseErr := av.ParseAttributeView(keyValues.Key.Relation.AvID)
+				if nil == parseErr {
+					isOldSameAv := oldDestAv.ID == destAv.ID
+					if isOldSameAv {
+						oldDestAv = destAv
+					}
+
+					oldDestKey, _ := oldDestAv.GetKey(keyValues.Key.Relation.BackKeyID)
+					if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
+						oldDestKey.Relation.IsTwoWay = false
+						oldDestKey.Relation.BackKeyID = ""
+					}
+
+					if !isOldSameAv {
+						err = av.SaveAttributeView(oldDestAv)
+						if nil != err {
+							return
+						}
+					}
+				}
+			}
+
 			keyValues.Key.Relation = &av.Relation{
 				AvID:      operation.ID,
 				IsTwoWay:  operation.IsTwoWay,
@@ -2086,7 +2110,7 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		return
 	}
 
-	options := []*av.KeySelectOption{}
+	options := []*av.SelectOption{}
 	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
 		return
 	}

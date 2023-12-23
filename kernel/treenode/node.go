@@ -708,7 +708,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
-	// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+	// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {

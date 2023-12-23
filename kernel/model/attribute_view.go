@@ -33,6 +33,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -52,9 +53,20 @@ type SearchAttributeViewResult struct {
 
 func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
 	waitForSyncingStorages()
-
 	ret = []*SearchAttributeViewResult{}
-	blocks, _, _, pageCount := FullTextSearchBlock(keyword, nil, nil, map[string]bool{"databaseBlock": true}, 0, 7, 0, page, pageSize)
+
+	var blocks []*Block
+	keyword = strings.TrimSpace(keyword)
+	if "" == keyword {
+		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'av' ORDER BY updated DESC LIMIT 10", page, pageSize)
+		blocks = fromSQLBlocks(&sqlBlocks, "", 36)
+		pageCount = 1
+	} else {
+		var matchedBlockCount int
+		blocks, matchedBlockCount, _ = fullTextSearchByKeyword(keyword, "", "", "('av')", "", 36, page, pageSize)
+		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	}
+
 	trees := map[string]*parse.Tree{}
 	for _, block := range blocks {
 		tree := trees[block.RootID]
@@ -154,7 +166,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+		// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
 		// 先处理创建时间和更新时间
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
@@ -647,7 +659,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
-	// 渲染自动生成的列值，比如模板列、创建时间列和更新时间列
+	// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
@@ -660,6 +672,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
+			case av.KeyTypeRelation: // 渲染关联列
+
+				//for _, blockID := range cell.Value.Relation.BlockIDs {
+				//
+				//}
 			case av.KeyTypeCreated: // 渲染创建时间
 				createdStr := row.ID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)

@@ -148,16 +148,17 @@ export const getEditHTML = (options: {
     <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     } else if (colData.type === "relation") {
-        html += `<button class="b3-menu__item" data-type="goSearchAV">
+        const isSelf = colData.relation.avID === options.data.id;
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-av-id="${colData.relation.avID}" data-old-col-id="${colData.relation.backKeyID}">
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
-    <span class="b3-menu__accelerator">TODO</span>
+    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : "TODO"}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item">
+<label class="b3-menu__item${isSelf ? " fn__none" : ""}">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
-    <input type="checkbox" class="b3-switch b3-switch--menu">
+    <input type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column" data-type="nobg">
     <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">

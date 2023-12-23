@@ -26,6 +26,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getAttributeView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	id := arg["id"].(string)
+	av := model.GetAttributeView(id)
+	ret.Data = map[string]interface{}{
+		"av": av,
+	}
+}
+
 func searchAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

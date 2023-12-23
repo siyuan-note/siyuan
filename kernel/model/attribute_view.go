@@ -37,6 +37,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeView(avID string) (ret *av.AttributeView) {
+	waitForSyncingStorages()
+
+	ret, _ = av.ParseAttributeView(avID)
+	return
+}
+
 type SearchAttributeViewResult struct {
 	AvID    string `json:"avID"`
 	AvName  string `json:"avName"`
@@ -721,18 +728,18 @@ func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *T
 }
 
 func updateAttributeViewColRelation(operation *Operation) (err error) {
-	err = updateAttributeViewColRelation0(operation.AvID, operation.KeyID, operation.ID, operation.IsBiRelation, operation.BackRelationKeyID)
+	err = updateAttributeViewColRelation0(operation.AvID, operation.KeyID, operation.ID, operation.IsBiRelation, operation.BackRelationKeyID, operation.Name)
 	if nil != err {
 		return
 	}
 
 	if operation.IsBiRelation {
-		err = updateAttributeViewColRelation0(operation.ID, operation.BackRelationKeyID, operation.AvID, operation.IsBiRelation, operation.KeyID)
+		err = updateAttributeViewColRelation0(operation.ID, operation.BackRelationKeyID, operation.AvID, operation.IsBiRelation, operation.KeyID, operation.Name)
 	}
 	return
 }
 
-func updateAttributeViewColRelation0(avID, relKeyID, destAvID string, isBiRel bool, backRelKeyID string) (err error) {
+func updateAttributeViewColRelation0(avID, relKeyID, destAvID string, isBiRel bool, backRelKeyID, backRelKeyName string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return

@@ -148,23 +148,21 @@ export const getEditHTML = (options: {
     <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     } else if (colData.type === "relation") {
-        const databaseName = "TODO"
         html += `<button class="b3-menu__item" data-type="goSearchAV">
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
-    <span class="fn__space"></span>
-    <svg class="b3-menu__icon"><use xlink:href="#iconDatabase"></use></svg>
-    <span class="b3-menu__accelerator" style="margin-left: 0">${databaseName}</span>
+    <span class="b3-menu__accelerator">TODO</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <label class="b3-menu__item">
-    <span class="fn__flex-center">${databaseName}</span>
-    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconHelp"></use></svg>
+    <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" class="b3-switch b3-switch--menu">
 </label>
-<label class="b3-menu__item" data-type="nobg">
-    <input class="b3-text-field fn__block" style="margin: 4px" placeholder="todo">
-</label>`;
+<div class="b3-menu__item fn__flex-column" data-type="nobg">
+    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+    <button style="margin: 8px 0" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+</div>`;
     }
     return `<div class="b3-menu__items">
     ${html}

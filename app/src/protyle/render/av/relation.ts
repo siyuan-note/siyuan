@@ -1,31 +1,52 @@
 import {Menu} from "../../../plugin/Menu";
-import {isMobile} from "../../../util/functions";
-import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {renderAssetsPreview} from "../../../asset/renderAssets";
+import {hasClosestByClassName} from "../../util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
-import {hintRenderAssets} from "../../hint/extend";
-import {focusByRange} from "../../util/selection";
 import {fetchPost} from "../../../util/fetch";
+import {escapeHtml} from "../../../util/escape";
+import {transaction} from "../../wysiwyg/transaction";
 
-const genSearchList = (element: HTMLElement, keyword: string) => {
+const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {keyword}, (response) => {
-        let html = ""
-        response.data.forEach((item) => {
-            html += `<div class="b3-list-item" data-value="${item.url}">`
+        let html = "";
+        response.data.results.forEach((item: {
+            avID: string
+            avName: string
+            blockID: string
+            hPath: string
+        }, index: number) => {
+            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
+    <div class="b3-list-item--two fn__flex-1">
+        <div class="b3-list-item__first">
+            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages.title)}</span>
+        </div>
+        <div class="b3-list-item__meta b3-list-item__showall">${escapeHtml(item.hPath)}</div>
+    </div>
+    <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
+</div>`
         });
-        element.lastElementChild.innerHTML = html;
+        element.innerHTML = html;
+        if (cb) {
+            cb()
+        }
     })
 }
 
-export const openSearchAV = () => {
+const setDatabase = (element: HTMLElement, item: HTMLElement) => {
+    element.dataset.avId = item.dataset.avId;
+    element.dataset.blockId = item.dataset.blockId;
+    element.querySelector(".b3-menu__accelerator").textContent = item.querySelector(".b3-list-item__hinticon").classList.contains("fn__none") ? item.querySelector(".b3-list-item__text").textContent : window.siyuan.languages.thisDatabase
+}
+
+export const openSearchAV = (avId: string, target: HTMLElement) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
         iconHTML: "",
-        type: "readonly",
+        type: "empty",
         label: `<div class="fn__flex-column" style = "min-width: 260px;max-width:420px;max-height: 50vh">
-    <input class="b3-text-field fn__flex-1"/>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">
+    <input class="b3-text-field fn__flex-shrink"/>
+    <div class="fn__hr"></div>
+    <div class="b3-list fn__flex-1 b3-list--background">
         <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
     </div>
 </div>`,
@@ -36,54 +57,56 @@ export const openSearchAV = () => {
                 if (event.isComposing) {
                     return;
                 }
-                const isEmpty = element.querySelector(".b3-list--empty");
-                if (!isEmpty) {
-                    const currentElement = upDownHint(listElement, event);
-                    if (currentElement) {
-                        event.stopPropagation();
-                    }
+                const currentElement = upDownHint(listElement, event);
+                if (currentElement) {
+                    event.stopPropagation();
                 }
-
                 if (event.key === "Enter") {
-                    if (!isEmpty) {
-                        const currentURL = element.querySelector(".b3-list-item--focus").getAttribute("data-value");
-
-                    } else {
-                        window.siyuan.menus.menu.remove();
-                        // focusByRange(protyle.toolbar.range);
-                    }
-                    // 空行处插入 mp3 会多一个空的 mp3 块
                     event.preventDefault();
                     event.stopPropagation();
+                    setDatabase(target, listElement.querySelector(".b3-list-item--focus"));
+                    window.siyuan.menus.menu.remove();
                 }
             });
             inputElement.addEventListener("input", (event) => {
                 event.stopPropagation();
-                genSearchList(element, inputElement.value);
+                genSearchList(listElement, inputElement.value, avId);
             });
             element.lastElementChild.addEventListener("click", (event) => {
-                const target = event.target as HTMLElement;
-                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
-                if (previousElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
-                    event.stopPropagation();
-                    return;
-                }
-                const nextElement = hasClosestByAttribute(target, "data-type", "next");
-                if (nextElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
-                    event.stopPropagation();
-                    return;
-                }
-                const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    const currentURL = listItemElement.getAttribute("data-value");
-                    //  hintRenderAssets(currentURL, protyle);
+                    setDatabase(target, listItemElement)
                     window.siyuan.menus.menu.remove();
                 }
             });
-            genSearchList(element, "");
+            genSearchList(listElement, "", avId, () => {
+                const rect = target.getBoundingClientRect();
+                menu.open({
+                    x: rect.left,
+                    y: rect.bottom,
+                    h: rect.height,
+                })
+                element.querySelector("input").focus();
+            });
         }
     });
+    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+}
+
+export const updateRelation = (options: {
+    protyle: IProtyle,
+    avID: string,
+    avElement: Element
+}) => {
+    transaction(options.protyle, [{
+        action: "updateAttrViewColRelation",
+        avID: options.avID,
+        id: options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]').getAttribute("data-av-id"),
+        keyID: options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),   // 源 av 关联列 ID
+        backRelationKeyID: Lute.NewNodeID(), // 双向关联的目标关联列 ID
+        isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
+        name: (options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement).value,
+    }], []);
+    options.avElement.remove();
 }

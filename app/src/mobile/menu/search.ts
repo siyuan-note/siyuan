@@ -190,7 +190,7 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta" style="margin-top: -4px">${escapeGreat(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
 </div>`;
         }
     });

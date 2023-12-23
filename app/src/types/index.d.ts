@@ -49,6 +49,7 @@ type TOperation =
     | "duplicateAttrViewView"
     | "sortAttrViewView"
     | "setAttrViewPageSize"
+    | "updateAttrViewColRelation"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -439,6 +440,8 @@ interface IScrollAttr {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
+    isTwoWay?: boolean, // 是否双向关联
+    backRelationKeyID?: string, // 双向关联的目标关联列 ID
     avID?: string,  // av
     format?: string // updateAttrViewColNumberFormat 专享
     keyID?: string // updateAttrViewCell 专享
@@ -981,7 +984,7 @@ interface IMenu {
     iconClass?: string,
     label?: string,
     click?: (element: HTMLElement, event: MouseEvent) => boolean | void | Promise<boolean | void>
-    type?: "separator" | "submenu" | "readonly",
+    type?: "separator" | "submenu" | "readonly" | "empty",
     accelerator?: string,
     action?: string,
     id?: string,

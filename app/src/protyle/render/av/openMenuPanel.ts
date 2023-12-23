@@ -26,7 +26,7 @@ import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
-import {openSearchAV} from "./relation";
+import {openSearchAV, updateRelation} from "./relation";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -740,8 +740,16 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchAV") {
-                    openSearchAV();
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    openSearchAV(avID, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "updateRelation") {
+                    updateRelation({
+                        protyle: options.protyle,
+                        avElement: avPanelElement,
+                        avID
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

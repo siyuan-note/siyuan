@@ -162,6 +162,15 @@ export class MenuItem {
     public element: HTMLElement;
 
     constructor(options: IMenu) {
+        if (options.type === "empty") {
+            this.element = document.createElement("div");
+            this.element.innerHTML = options.label;
+            if (options.bind) {
+                options.bind(this.element);
+            }
+            return;
+        }
+
         this.element = document.createElement("button");
         if (options.disabled) {
             this.element.setAttribute("disabled", "disabled");

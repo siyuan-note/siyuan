@@ -31,7 +31,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
     }
     let dockHtml = "";
     if (!isWindow()) {
-        dockHtml = "<ul class=\"b3-list b3-list--background\" style=\"overflow: auto;width: 200px;\">";
+        dockHtml = '<ul class="b3-list b3-list--background" style="overflow: auto;width: 200px;">';
         if (!key || window.siyuan.languages.riffCard.toLowerCase().includes(key.toLowerCase())) {
             dockHtml += `<li data-type="riffCard" data-index="0" class="b3-list-item${!switchPath ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
@@ -63,7 +63,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
     pathElement.innerHTML = switchPath;
     pathElement.previousElementSibling.innerHTML = `<div class="fn__flex fn__flex-1" style="overflow:auto;">
         ${dockHtml}
-        <ul${!isWindow() ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
+        <ul style="${isWindow() ? "border-left:0;" : ""}min-width:360px;" class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>`;
 };
 

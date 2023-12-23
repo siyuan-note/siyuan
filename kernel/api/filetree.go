@@ -472,29 +472,28 @@ func createDailyNote(c *gin.Context) {
 		return
 	}
 
-	appArg := arg["app"]
-	app := ""
-	if nil != appArg {
-		app = appArg.(string)
+	if !existed {
+		// 只有创建的情况才推送，已经存在的情况不推送
+		// Creating a dailynote existed no longer expands the doc tree https://github.com/siyuan-note/siyuan/issues/9959
+		appArg := arg["app"]
+		app := ""
+		if nil != appArg {
+			app = appArg.(string)
+		}
+		evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast)
+		evt.AppId = app
+		name := path.Base(p)
+		files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
+		evt.Data = map[string]interface{}{
+			"box":   box,
+			"path":  p,
+			"files": files,
+			"name":  name,
+			"id":    tree.Root.ID,
+		}
+		evt.Callback = arg["callback"]
+		util.PushEvent(evt)
 	}
-	pushMode := util.PushModeBroadcast
-	if existed && "" != app {
-		pushMode = util.PushModeBroadcastApp
-	}
-	evt := util.NewCmdResult("createdailynote", 0, pushMode)
-	evt.AppId = app
-
-	name := path.Base(p)
-	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
-	evt.Data = map[string]interface{}{
-		"box":   box,
-		"path":  p,
-		"files": files,
-		"name":  name,
-		"id":    tree.Root.ID,
-	}
-	evt.Callback = arg["callback"]
-	util.PushEvent(evt)
 
 	ret.Data = map[string]interface{}{
 		"id": tree.Root.ID,

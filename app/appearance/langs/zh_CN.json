@@ -1,4 +1,5 @@
 {
+  "relatedTo": "关联至",
   "relation": "关联",
   "rollup": "查询引用",
   "replaceTypes": {

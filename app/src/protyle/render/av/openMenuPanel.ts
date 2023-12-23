@@ -26,6 +26,7 @@ import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
+import {openSearchAV} from "./relation";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -734,6 +735,12 @@ export const openMenuPanel = (options: {
                         editMenuElement.firstElementChild.classList.add("fn__none");
                         editMenuElement.lastElementChild.classList.remove("fn__none");
                     }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchAV") {
+                    openSearchAV();
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

@@ -149,7 +149,7 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "relation") {
         const databaseName = "TODO"
-        html += `<button class="b3-menu__item" data-type="goUpdateColType">
+        html += `<button class="b3-menu__item" data-type="goSearchAV">
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#iconDatabase"></use></svg>

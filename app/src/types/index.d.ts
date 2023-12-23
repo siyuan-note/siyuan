@@ -1080,7 +1080,11 @@ interface IAVColumn {
     options?: {
         name: string,
         color: string,
-    }[]
+    }[],
+    relationAvID: string    // 关联的属性视图 ID
+    isBiRelation: string    // 是否双向关联
+    backRelationKeyID: string   // 双向关联时回链关联列的 ID
+    rollupKeyID: string // 汇总列 ID
 }
 
 interface IAVRow {

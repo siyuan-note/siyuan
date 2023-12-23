@@ -37,6 +37,70 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeView(avID string) (ret *av.AttributeView) {
+	waitForSyncingStorages()
+
+	ret, _ = av.ParseAttributeView(avID)
+	return
+}
+
+type SearchAttributeViewResult struct {
+	AvID    string `json:"avID"`
+	AvName  string `json:"avName"`
+	BlockID string `json:"blockID"`
+}
+
+func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
+	waitForSyncingStorages()
+
+	ret = []*SearchAttributeViewResult{}
+	blocks, _, _, pageCount := FullTextSearchBlock(keyword, nil, nil, map[string]bool{"databaseBlock": true}, 0, 7, 0, page, pageSize)
+	trees := map[string]*parse.Tree{}
+	for _, block := range blocks {
+		tree := trees[block.RootID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(block.ID)
+			if nil != tree {
+				trees[block.RootID] = tree
+			}
+		}
+		if nil == tree {
+			continue
+		}
+
+		node := treenode.GetNodeInTree(tree, block.ID)
+		if nil == node {
+			continue
+		}
+
+		if "" == node.AttributeViewID {
+			continue
+		}
+
+		avID := node.AttributeViewID
+		attrView, _ := av.ParseAttributeView(avID)
+		if nil == attrView {
+			continue
+		}
+
+		exist := false
+		for _, result := range ret {
+			if result.AvID == avID {
+				exist = true
+				break
+			}
+		}
+		if !exist {
+			ret = append(ret, &SearchAttributeViewResult{
+				AvID:    avID,
+				AvName:  attrView.Name,
+				BlockID: block.ID,
+			})
+		}
+	}
+	return
+}
+
 type BlockAttributeViewKeys struct {
 	AvID      string          `json:"avID"`
 	AvName    string          `json:"avName"`
@@ -489,6 +553,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
 			Template:     key.Template,
+			Relation:     key.Relation,
+			Rollup:       key.Rollup,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,
@@ -651,6 +717,102 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 			ret = kv.Values[0]
 			break
 		}
+	}
+	return
+}
+
+func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColRelation(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColRelation(operation *Operation) (err error) {
+	// operation.AvID 源 avID
+	// operation.ID 目标 avID
+	// operation.KeyID 源 av 关联列 ID
+	// operation.IsTwoWay 是否双向关联
+	// operation.BackRelationKeyID 双向关联的目标关联列 ID
+	// operation.Name 双向关联的目标关联列名称
+
+	srcAv, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	destAv, err := av.ParseAttributeView(operation.ID)
+	if nil != err {
+		return
+	}
+
+	isSameAv := srcAv.ID == destAv.ID
+
+	for _, keyValues := range srcAv.KeyValues {
+		if keyValues.Key.ID == operation.KeyID {
+			// 已经设置过双向关联的话需要先断开双向关联
+			if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
+				oldDestAv, parseErr := av.ParseAttributeView(keyValues.Key.Relation.AvID)
+				if nil == parseErr {
+					isOldSameAv := oldDestAv.ID == destAv.ID
+					if isOldSameAv {
+						oldDestAv = destAv
+					}
+
+					oldDestKey, _ := oldDestAv.GetKey(keyValues.Key.Relation.BackKeyID)
+					if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
+						oldDestKey.Relation.IsTwoWay = false
+						oldDestKey.Relation.BackKeyID = ""
+					}
+
+					if !isOldSameAv {
+						err = av.SaveAttributeView(oldDestAv)
+						if nil != err {
+							return
+						}
+					}
+				}
+			}
+
+			keyValues.Key.Relation = &av.Relation{
+				AvID:      operation.ID,
+				IsTwoWay:  operation.IsTwoWay,
+				BackKeyID: operation.BackRelationKeyID,
+			}
+			break
+		}
+	}
+
+	destAdded := false
+	for _, keyValues := range destAv.KeyValues {
+		if keyValues.Key.ID == operation.BackRelationKeyID {
+			keyValues.Key.Relation = &av.Relation{
+				AvID:      operation.AvID,
+				IsTwoWay:  operation.IsTwoWay,
+				BackKeyID: operation.KeyID,
+			}
+			destAdded = true
+			break
+		}
+	}
+	if !destAdded {
+		destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
+			Key: &av.Key{
+				ID:       operation.BackRelationKeyID,
+				Name:     operation.Name,
+				Type:     av.KeyTypeRelation,
+				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+			},
+		})
+	}
+
+	err = av.SaveAttributeView(srcAv)
+	if nil != err {
+		return
+	}
+	if !isSameAv {
+		err = av.SaveAttributeView(destAv)
 	}
 	return
 }
@@ -1948,7 +2110,7 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		return
 	}
 
-	options := []*av.KeySelectOption{}
+	options := []*av.SelectOption{}
 	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
 		return
 	}

@@ -37,6 +37,63 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type SearchAttributeViewResult struct {
+	AvID    string `json:"avID"`
+	AvName  string `json:"avName"`
+	BlockID string `json:"blockID"`
+}
+
+func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
+	waitForSyncingStorages()
+
+	ret = []*SearchAttributeViewResult{}
+	blocks, _, _, pageCount := FullTextSearchBlock(keyword, nil, nil, map[string]bool{"databaseBlock": true}, 0, 7, 0, page, pageSize)
+	trees := map[string]*parse.Tree{}
+	for _, block := range blocks {
+		tree := trees[block.RootID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(block.ID)
+			if nil != tree {
+				trees[block.RootID] = tree
+			}
+		}
+		if nil == tree {
+			continue
+		}
+
+		node := treenode.GetNodeInTree(tree, block.ID)
+		if nil == node {
+			continue
+		}
+
+		if "" == node.AttributeViewID {
+			continue
+		}
+
+		avID := node.AttributeViewID
+		attrView, _ := av.ParseAttributeView(avID)
+		if nil == attrView {
+			continue
+		}
+
+		exist := false
+		for _, result := range ret {
+			if result.AvID == avID {
+				exist = true
+				break
+			}
+		}
+		if !exist {
+			ret = append(ret, &SearchAttributeViewResult{
+				AvID:    avID,
+				AvName:  attrView.Name,
+				BlockID: block.ID,
+			})
+		}
+	}
+	return
+}
+
 type BlockAttributeViewKeys struct {
 	AvID      string          `json:"avID"`
 	AvName    string          `json:"avName"`

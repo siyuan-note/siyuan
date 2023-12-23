@@ -26,6 +26,35 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func searchAttributeView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	keyword := arg["keyword"].(string)
+	page := 1
+	pageArg := arg["page"]
+	if nil != pageArg {
+		page = int(pageArg.(float64))
+	}
+
+	pageSize := 10
+	pageSizeArg := arg["pageSize"]
+	if nil != pageSizeArg {
+		pageSize = int(pageSizeArg.(float64))
+	}
+
+	results, total := model.SearchAttributeView(keyword, page, pageSize)
+	ret.Data = map[string]interface{}{
+		"results": results,
+		"total":   total,
+	}
+}
+
 func renderSnapshotAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

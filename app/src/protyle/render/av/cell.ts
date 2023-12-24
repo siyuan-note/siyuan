@@ -9,6 +9,7 @@ import {focusBlock} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
+import {genAVValueHTML} from "./blockAttr";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
@@ -479,27 +480,33 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "") => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "", cElements?: HTMLElement[]) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
     let text = "";
-    const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
-    if (cellElements.length === 0) {
-        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
-            rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
-                cellElements.push(cellElement);
+    let cellElements: Element[];
+    if (cElements?.length > 0) {
+        cellElements = cElements;
+    } else {
+        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--select"));
+        if (cellElements.length === 0) {
+            nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
+                rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
+                    cellElements.push(cellElement);
+                });
             });
-        });
+        }
     }
+
     cellElements.forEach((item: HTMLElement) => {
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;
         }
-        const type = getTypeByCellElement(item);
+        const type = getTypeByCellElement(item) || item.dataset.type;
         if (["created", "updated", "template"].includes(type)) {
             return;
         }
@@ -527,6 +534,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         });
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);
+        } else {
+           item.innerHTML = genAVValueHTML(cellValue)
         }
     });
     if (doOperations.length > 0) {

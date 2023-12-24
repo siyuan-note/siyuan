@@ -255,7 +255,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     }
 }
 
-export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement) => {
+export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu__items");
     if (!menuElement) {
         return
@@ -302,6 +302,5 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             }
         }
     }
-
-    updateCellsValue(protyle, nodeElement, newValue);
+    updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

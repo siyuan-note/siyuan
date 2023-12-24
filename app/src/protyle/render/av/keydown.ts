@@ -35,7 +35,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "Backspace") {
-            updateCellsValue(protyle, nodeElement);
+            updateCellsValue(protyle, nodeElement, undefined, [selectCellElement]);
             event.preventDefault();
             return true;
         }

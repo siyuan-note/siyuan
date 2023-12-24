@@ -255,7 +255,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     }
 }
 
-export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLElement, target: HTMLElement) => {
+export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement) => {
     const menuElement = hasClosestByClassName(target, "b3-menu__items");
     if (!menuElement) {
         return
@@ -274,31 +274,34 @@ export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLE
             newValue.contents.push(item.textContent.trim());
         }
     })
-    const targetId = target.getAttribute("data-id")
-    const separatorElement = menuElement.querySelector(".b3-menu__separator");
-    if (target.getAttribute("draggable")) {
-        if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
-            separatorElement.nextElementSibling.remove();
-        }
-        const removeIndex = newValue.blockIDs.indexOf(targetId);
-        newValue.blockIDs.splice(removeIndex, 1);
-        newValue.contents.splice(removeIndex, 1);
-        separatorElement.after(target);
-        target.outerHTML = genSelectItemHTML("unselect", targetId, target.querySelector(".b3-menu__label").textContent);
-        if (!separatorElement.previousElementSibling) {
-            separatorElement.insertAdjacentHTML("beforebegin", genSelectItemHTML("empty"));
-        }
-    } else {
-        if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
-            separatorElement.previousElementSibling.remove();
-        }
-        newValue.blockIDs.push(targetId);
-        newValue.contents.push(target.textContent.trim());
-        separatorElement.before(target);
-        target.outerHTML = genSelectItemHTML("selected", targetId, target.querySelector(".b3-menu__label").textContent);
-        if (!separatorElement.nextElementSibling) {
-            separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
+    if (target.classList.contains("b3-menu__item")) {
+        const targetId = target.getAttribute("data-id")
+        const separatorElement = menuElement.querySelector(".b3-menu__separator");
+        if (target.getAttribute("draggable")) {
+            if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
+                separatorElement.nextElementSibling.remove();
+            }
+            const removeIndex = newValue.blockIDs.indexOf(targetId);
+            newValue.blockIDs.splice(removeIndex, 1);
+            newValue.contents.splice(removeIndex, 1);
+            separatorElement.after(target);
+            target.outerHTML = genSelectItemHTML("unselect", targetId, target.querySelector(".b3-menu__label").textContent);
+            if (!separatorElement.previousElementSibling) {
+                separatorElement.insertAdjacentHTML("beforebegin", genSelectItemHTML("empty"));
+            }
+        } else {
+            if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
+                separatorElement.previousElementSibling.remove();
+            }
+            newValue.blockIDs.push(targetId);
+            newValue.contents.push(target.textContent.trim());
+            separatorElement.before(target);
+            target.outerHTML = genSelectItemHTML("selected", targetId, target.querySelector(".b3-menu__label").textContent);
+            if (!separatorElement.nextElementSibling) {
+                separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
+            }
         }
     }
+
     updateCellsValue(protyle, nodeElement, newValue);
 };

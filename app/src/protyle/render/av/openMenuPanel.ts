@@ -307,7 +307,13 @@ export const openMenuPanel = (options: {
                 return;
             }
             if (targetElement.getAttribute("data-type") === "setRelationCell") {
-
+                if (isTop) {
+                    targetElement.before(sourceElement);
+                } else {
+                    targetElement.after(sourceElement);
+                }
+                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                setRelationCell(options.protyle, options.blockElement as HTMLElement, sourceElement.parentElement);
                 return;
             }
 
@@ -873,7 +879,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setRelationCell") {
-                    setRelationCell(options.protyle, data, options.blockElement as HTMLElement, target);
+                    setRelationCell(options.protyle, options.blockElement as HTMLElement, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

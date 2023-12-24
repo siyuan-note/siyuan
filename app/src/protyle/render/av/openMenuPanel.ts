@@ -26,14 +26,14 @@ import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
-import {openSearchAV, updateRelation} from "./relation";
+import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher",
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation",
     colId?: string, // for edit
-    cellElements?: HTMLElement[],   // for select & date
+    cellElements?: HTMLElement[],   // for select & date & relation & asset
     cb?: (avPanelElement: Element) => void
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
@@ -67,6 +67,17 @@ export const openMenuPanel = (options: {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {
             html = getDateHTML(data.view, options.cellElements);
+        } else if (options.type === "relation") {
+            html = getRelationHTML(data, options.cellElements);
+            if (!html) {
+                openMenuPanel({
+                    protyle: options.protyle,
+                    blockElement: options.blockElement,
+                    type: "edit",
+                    colId: options.cellElements[0].dataset.colId
+                });
+                return;
+            }
         }
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex}">
@@ -76,7 +87,7 @@ export const openMenuPanel = (options: {
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
-        if (["select", "date", "asset"].includes(options.type)) {
+        if (["select", "date", "asset", "relation"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
@@ -86,12 +97,16 @@ export const openMenuPanel = (options: {
                 bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
                 setTimeout(() => {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-                }, Constants.TIMEOUT_LOAD);  // 等待图片加载
+                }, Constants.TIMEOUT_LOAD);  // 等待加载
+            } else if (options.type === "relation") {
+                bindRelationEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
             }
-            if (["select", "date"].includes(options.type)) {
+            if (["select", "date", "relation"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
-                inputElement.select();
-                inputElement.focus();
+                if (inputElement) {
+                    inputElement.select();
+                    inputElement.focus();
+                }
                 setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             }
         } else {
@@ -858,6 +873,11 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "setColOption") {
                     setColOption(options.protyle, data, target, options.cellElements);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "setRelationCell") {
+                    setRelationCell(options.protyle, data, options.blockElement as HTMLElement, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

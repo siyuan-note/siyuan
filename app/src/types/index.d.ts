@@ -1084,11 +1084,7 @@ interface IAVColumn {
         name: string,
         color: string,
     }[],
-    relation?: {
-        avID: string
-        backKeyID: string
-        isTwoWay: boolean
-    }
+    relation?: IAVCellRelationValue
 }
 
 interface IAVRow {
@@ -1138,6 +1134,10 @@ interface IAVCellValue {
     checkbox?: {
         checked: boolean
     }
+    relation?: {
+        blockIDs: string[]
+        contents?: string[]
+    }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
@@ -1161,4 +1161,10 @@ interface IAVCellAssetValue {
     content: string,
     name: string,
     type: "file" | "image"
+}
+
+interface IAVCellRelationValue {
+    avID: string
+    backKeyID: string
+    isTwoWay: boolean
 }

@@ -4,6 +4,7 @@ import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
+import {updateCellsValue} from "./cell";
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {keyword}, (response) => {
@@ -135,7 +136,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
             inputItemElement.classList.add("fn__none");
         }
         const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
-        if ((searchElement.dataset.avId && oldValue.avID !== searchElement.dataset.avId)|| oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
+        if ((searchElement.dataset.avId && oldValue.avID !== searchElement.dataset.avId) || oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
             btnElement.classList.remove("fn__none");
         } else {
             btnElement.classList.add("fn__none");
@@ -150,3 +151,105 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
         btnElement.classList.remove("fn__none");
     }
 }
+
+export const bindRelationEvent = (options: {
+    protyle: IProtyle,
+    data: IAV,
+    menuElement: HTMLElement,
+    cellElements: HTMLElement[]
+}) => {
+    const hasIds = options.menuElement.textContent.split(",");
+    fetchPost("/api/av/renderAttributeView", {
+        id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+    }, response => {
+        const avData = response.data as IAV;
+        let cellIndex = 0
+        avData.view.columns.find((item, index) => {
+            if (item.type === "block") {
+                cellIndex = index
+                return;
+            }
+        })
+        let html = ""
+        let selectHTML = ""
+        avData.view.rows.forEach((item) => {
+            const text = item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id;
+            if (hasIds.includes(item.id)) {
+                selectHTML += `<button data-id="${item.id}" data-type="setRelationCell" data-type="setRelationCell" class="b3-menu__item" draggable="true">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <span class="b3-menu__label">${text}</span>
+</button>`
+            } else {
+                html += `<button data-id="${item.id}" class="b3-menu__item" data-type="setRelationCell">
+    <span class="b3-menu__label">${text}</span>
+</button>`
+            }
+        })
+        const empty = `<button class="b3-menu__item">
+    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
+</button>`
+        options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || empty}
+<button class="b3-menu__separator"></button>
+${html || empty}</div>`
+    })
+}
+
+export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
+    let colRelationData: IAVCellRelationValue
+    data.view.columns.find(item => {
+        if (item.id === cellElements[0].dataset.colId) {
+            colRelationData = item.relation
+            return true;
+        }
+    })
+    if (colRelationData && colRelationData.avID) {
+        let ids = ""
+        cellElements[0].querySelectorAll("span").forEach((item) => {
+            ids += `${item.getAttribute("data-id")},`;
+        });
+        return `<span data-av-id="${colRelationData.avID}">${ids}</span>`
+    } else {
+        return ""
+    }
+}
+
+export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLElement, target: HTMLElement) => {
+    const menuElement = hasClosestByClassName(target, "b3-menu__items");
+    if (!menuElement) {
+        return
+    }
+    const ids: string[] = [];
+    Array.from(menuElement.children).forEach((item) => {
+        const id = item.getAttribute("data-id")
+        if (item.getAttribute("draggable") && id) {
+            ids.push(id);
+        }
+    })
+    const empty = `<button class="b3-menu__item">
+    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
+</button>`
+    const targetId = target.getAttribute("data-id")
+    const separatorElement = menuElement.querySelector(".b3-menu__separator");
+    if (target.getAttribute("draggable")) {
+        if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
+            separatorElement.nextElementSibling.remove();
+        }
+        ids.splice(ids.indexOf(targetId), 1);
+        separatorElement.after(target);
+        // TODO
+        if (!separatorElement.previousElementSibling) {
+            separatorElement.insertAdjacentHTML("beforebegin", empty);
+        }
+    } else {
+        if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
+            separatorElement.previousElementSibling.remove();
+        }
+        ids.push(targetId);
+        separatorElement.before(target);
+        // TODO
+        if (!separatorElement.nextElementSibling) {
+            separatorElement.insertAdjacentHTML("afterend", empty);
+        }
+    }
+    updateCellsValue(protyle, nodeElement, ids);
+};

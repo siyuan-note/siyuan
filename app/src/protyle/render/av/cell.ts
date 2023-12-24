@@ -70,6 +70,13 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
             }
         };
+    }else if (colType === "relation") {
+        cellValue = {
+            type: colType,
+            relation: {
+                blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
+            }
+        };
     }
     if (colType === "block") {
         cellValue.isDetached = cellElement.dataset.detached === "true";
@@ -154,6 +161,13 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 checkbox: {
                     checked: value ? true : false
+                }
+            };
+        }else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {
+                   blockIDs: value as string[],
                 }
             };
         }
@@ -258,6 +272,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, cellElements);
+        } else if (type === "relation") {
+            openMenuPanel({protyle, blockElement, type: "relation", cellElements});
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -464,7 +480,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value = "") => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "") => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -583,6 +599,10 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         });
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else if (cellValue.type === "relation") {
+        cellValue?.relation?.contents?.forEach((item, index) => {
+            text += `<span data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
+        })
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {

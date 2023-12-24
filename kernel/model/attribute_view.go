@@ -774,6 +774,46 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColRollup(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColRollup(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColRollup(operation *Operation) (err error) {
+	// operation.AvID 汇总列所在 av
+	// operation.ID 汇总列 ID
+	// operation.ParentID 汇总列基于的关联列 ID
+	// operation.KeyID 目标列 ID
+	// operation.Data 计算方式
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	rollUpKey, _ := attrView.GetKey(operation.ID)
+	if nil == rollUpKey {
+		return
+	}
+
+	rollUpKey.Rollup = &av.Rollup{
+		RelationKeyID: operation.ParentID,
+		KeyID:         operation.KeyID,
+	}
+
+	if "" != operation.Data {
+		if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &rollUpKey.Rollup.Calc); nil != err {
+			return
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewColRelation(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColRelation(operation)
 	if nil != err {

@@ -274,6 +274,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewView(op)
 		case "updateAttrViewColRelation":
 			ret = tx.doUpdateAttrViewColRelation(op)
+		case "updateAttrViewColRollup":
+			ret = tx.doUpdateAttrViewColRollup(op)
 		}
 
 		if nil != ret {

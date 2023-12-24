@@ -105,8 +105,14 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 }
 
 type Rollup struct {
-	RelationKeyID string `json:"relationKeyID"` // 关联列 ID
-	KeyID         string `json:"keyID"`         // 目标列 ID
+	RelationKeyID string      `json:"relationKeyID"` // 关联列 ID
+	KeyID         string      `json:"keyID"`         // 目标列 ID
+	Calc          *RollupCalc `json:"calc"`          // 计算方式
+}
+
+type RollupCalc struct {
+	Operator CalcOperator `json:"operator"`
+	Result   *Value       `json:"result"`
 }
 
 type Relation struct {

@@ -818,6 +818,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
+	// processPDFWatermark(pdfCtx, "text", "Test", "")
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -825,6 +826,46 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 		return
 	}
 	return
+}
+
+func processPDFWatermark(pdfCtx *pdfcpu.Context, mode, watermark, desc string) {
+	// Support adding the watermark on export PDF https://github.com/siyuan-note/siyuan/issues/9961
+	// https://pdfcpu.io/core/watermark
+
+	if !IsPaidUser() {
+		return
+	}
+
+	if "" == watermark {
+		return
+	}
+
+	if "text" != mode && "image" != mode && "pdf" != mode {
+		logging.LogErrorf("invalid watermark type: %s", mode)
+		return
+	}
+
+	var wm *pdfcpu.Watermark
+	var err error
+	switch mode {
+	case "text":
+		wm, err = pdfcpu.ParseTextWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+	case "image":
+		wm, err = pdfcpu.ParseImageWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+	case "pdf":
+		wm, err = pdfcpu.ParsePDFWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+	}
+
+	if nil != err {
+		logging.LogErrorf("parse watermark failed: %s", err)
+		return
+	}
+
+	err = pdfCtx.AddWatermarks(nil, wm)
+	if nil != err {
+		logging.LogErrorf("add watermark failed: %s", err)
+		return
+	}
 }
 
 func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {

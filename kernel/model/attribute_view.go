@@ -180,22 +180,47 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
-		// 先处理创建时间和更新时间
+		// 先处理关联列、汇总列、创建时间列和更新时间列
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
-			case av.KeyTypeRelation:
-				relKey, _ := attrView.GetKey(kv.Values[0].KeyID)
-				if nil != relKey && nil != relKey.Relation {
-					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
-					if nil != destAv {
-						blocks := map[string]string{}
-						for _, blockValue := range destAv.GetBlockKeyValues().Values {
-							blocks[blockValue.BlockID] = blockValue.Block.Content
-						}
-						for _, blockID := range kv.Values[0].Relation.BlockIDs {
-							kv.Values[0].Relation.Contents = append(kv.Values[0].Relation.Contents, blocks[blockID])
-						}
+			case av.KeyTypeRollup:
+				if nil == kv.Key.Rollup {
+					break
+				}
+
+				relKey, _ := attrView.GetKey(kv.Key.Rollup.RelationKeyID)
+				if nil == relKey {
+					break
+				}
+
+				var blockIDs []string
+				relVal := attrView.GetValue(kv.Key.Rollup.RelationKeyID, kv.Values[0].BlockID)
+				if nil != relVal && nil != relVal.Relation {
+					blockIDs = relVal.Relation.BlockIDs
+				}
+
+				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+				if nil != destAv {
+					for _, bID := range blockIDs {
+						kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
 					}
+				}
+			case av.KeyTypeRelation:
+				if nil == kv.Key.Relation {
+					break
+				}
+
+				destAv, _ := av.ParseAttributeView(kv.Key.Relation.AvID)
+				if nil == destAv {
+					break
+				}
+
+				blocks := map[string]string{}
+				for _, blockValue := range destAv.GetBlockKeyValues().Values {
+					blocks[blockValue.BlockID] = blockValue.Block.Content
+				}
+				for _, bID := range kv.Values[0].Relation.BlockIDs {
+					kv.Values[0].Relation.Contents = append(kv.Values[0].Relation.Contents, blocks[bID])
 				}
 			case av.KeyTypeCreated:
 				createdStr := blockID[:len("20060102150405")]
@@ -699,6 +724,30 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
+			case av.KeyTypeRollup: // 渲染汇总列
+				rollupKey, _ := attrView.GetKey(cell.Value.KeyID)
+				if nil == rollupKey || nil == rollupKey.Rollup {
+					break
+				}
+
+				relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+				if nil == relKey || nil == relKey.Relation {
+					break
+				}
+
+				relVal := attrView.GetValue(relKey.ID, row.ID)
+				if nil == relVal || nil == relVal.Relation {
+					break
+				}
+
+				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+				if nil == destAv {
+					break
+				}
+
+				for _, blockID := range relVal.Relation.BlockIDs {
+					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destAv.GetValue(rollupKey.Rollup.KeyID, blockID).String())
+				}
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

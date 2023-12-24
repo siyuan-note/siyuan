@@ -2212,6 +2212,34 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 
+	key, _ := attrView.GetKey(val.KeyID)
+	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
+		// 更新双向关联的目标值
+		destAv, _ := av.ParseAttributeView(key.Relation.AvID)
+		if nil != destAv {
+			for _, blockID := range val.Relation.BlockIDs {
+				for _, keyValues := range destAv.KeyValues {
+					if keyValues.Key.ID != key.Relation.BackKeyID {
+						continue
+					}
+
+					destVal := keyValues.GetValue(blockID)
+					if nil == destVal {
+						destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+						keyValues.Values = append(keyValues.Values, destVal)
+					}
+
+					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
+					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+					break
+				}
+			}
+
+			av.SaveAttributeView(destAv)
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
+		}
+	}
+
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
 	}

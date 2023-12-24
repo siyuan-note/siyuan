@@ -263,6 +263,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 		}
 	}
+	if "" == av.Name {
+		av.Name = "Untitled"
+	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t") // TODO: single-line for production
 	if nil != err {

@@ -2171,9 +2171,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
 	oldBoundBlockID := val.BlockID
-	var oldRelation *av.ValueRelation
+	var oldRelationBlockIDs []string
 	if av.KeyTypeRelation == val.Type {
-		oldRelation = val.Relation
+		oldRelationBlockIDs = val.Relation.BlockIDs
 	}
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
@@ -2224,19 +2224,17 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		destAv, _ := av.ParseAttributeView(key.Relation.AvID)
 		if nil != destAv {
-			if nil != oldRelation {
-				// 清空旧的双向关联的目标值
-				for _, blockID := range oldRelation.BlockIDs {
-					for _, keyValues := range destAv.KeyValues {
-						if keyValues.Key.ID != key.Relation.BackKeyID {
-							continue
-						}
+			// 清空旧的双向关联的目标值
+			for _, blockID := range oldRelationBlockIDs {
+				for _, keyValues := range destAv.KeyValues {
+					if keyValues.Key.ID != key.Relation.BackKeyID {
+						continue
+					}
 
-						for _, value := range keyValues.Values {
-							if value.BlockID == blockID {
-								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
-								break
-							}
+					for _, value := range keyValues.Values {
+						if value.BlockID == blockID {
+							value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
+							break
 						}
 					}
 				}

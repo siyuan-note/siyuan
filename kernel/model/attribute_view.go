@@ -2173,7 +2173,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	oldBoundBlockID := val.BlockID
 	var oldRelationBlockIDs []string
 	if av.KeyTypeRelation == val.Type {
-		oldRelationBlockIDs = val.Relation.BlockIDs
+		for _, bID := range val.Relation.BlockIDs {
+			oldRelationBlockIDs = append(oldRelationBlockIDs, bID)
+		}
 	}
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {

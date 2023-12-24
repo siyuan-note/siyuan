@@ -801,6 +801,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	isSameAv := srcAv.ID == destAv.ID
+	if isSameAv {
+		destAv = srcAv
+	}
 
 	for _, keyValues := range srcAv.KeyValues {
 		if keyValues.Key.ID == operation.KeyID {
@@ -857,6 +860,13 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
 			},
 		})
+
+		for _, v := range destAv.Views {
+			switch v.LayoutType {
+			case av.LayoutTypeTable:
+				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.KeyID})
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(srcAv)

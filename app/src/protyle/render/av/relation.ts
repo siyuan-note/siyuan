@@ -123,7 +123,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     const btnElement = inputItemElement.nextElementSibling;
     const oldValue = JSON.parse(searchElement.dataset.oldValue);
     if (oldValue.avID) {
-        if (searchElement.dataset.avId !== avId) {
+        if (searchElement.dataset.avId !== avId || (searchElement.dataset.avId === avId && oldValue.avID !== avId)) {
             switchItemElement.classList.remove("fn__none");
             if (switchElement.checked) {
                 inputItemElement.classList.remove("fn__none");

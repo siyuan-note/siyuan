@@ -8,6 +8,7 @@ import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
+import {openSearchAV, toggleUpdateRelationBtn} from "./relation";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -148,22 +149,22 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
-        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-value="${JSON.stringify(colData.relation)}">
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item${(colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}">
+<label class="b3-menu__item${!colData.relation || (colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
-<div class="b3-menu__item fn__flex-column${(colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}" data-type="nobg">
-    <input data-type="colName" style="margin: 8px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+<div class="b3-menu__item fn__flex-column${!colData.relation || (colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}" data-type="nobg">
+    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
-    <button style="margin-bottom: 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+    <button style="margin: 8px 0;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     }
     return `<div class="b3-menu__items">
@@ -330,16 +331,17 @@ export const bindEditEvent = (options: {
     const backRelationElement = options.menuElement.querySelector('[data-type="backRelation"]') as HTMLInputElement;
     if (backRelationElement) {
         backRelationElement.addEventListener("change", () => {
-            backRelationElement.parentElement.nextElementSibling.classList.toggle("fn__none");
+            toggleUpdateRelationBtn(options.menuElement, avID);
         });
-        const oldValueStr = options.menuElement.querySelector('[data-type="goSearchAV" ]').getAttribute("data-old-value")
-        if (oldValueStr) {
-            const oldValue = JSON.parse(oldValueStr);
-            if (oldValue.isTwoWay) {
-                fetchPost("/api/av/getAttributeView", {id: ""}, (response) => {
-                    console.log(response);
-                });
-            }
+        const goSearchElement = options.menuElement.querySelector('[data-type="goSearchAV"]') as HTMLElement;
+        const oldValue = JSON.parse(goSearchElement.getAttribute("data-old-value"))
+        if (oldValue.avID) {
+            fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
+                console.log(response);
+                // TODO input old value
+            });
+        } else {
+            openSearchAV(avID, goSearchElement);
         }
     }
 };
@@ -443,7 +445,9 @@ export const addAttrViewColAnimation = (options: {
         previousElement.insertAdjacentHTML("afterend", html);
     });
     window.siyuan.menus.menu.remove();
-    showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
+    if (options.type !== "relation") {
+        showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
+    }
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {

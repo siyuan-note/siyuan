@@ -7,6 +7,7 @@ import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
+import {openMenuPanel} from "./openMenuPanel";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -292,14 +293,16 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                 item.removeAttribute("data-render");
                 const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
                 avRender(item, protyle, () => {
-                    // https://github.com/siyuan-note/siyuan/issues/9599
-                    if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
-                        popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
-                    }
                     if (operation.action === "insertAttrViewBlock") {
                         item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
                             cellElement.classList.remove("av__cell--select");
                         });
+                        // https://github.com/siyuan-note/siyuan/issues/9599
+                        if (!isUndo && operation.isDetached && isCurrent) {
+                            popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
+                        }
+                    } else if (operation.action === "addAttrViewCol") {
+                        openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
                     (operation.action === "removeAttrViewView" ? null : undefined));

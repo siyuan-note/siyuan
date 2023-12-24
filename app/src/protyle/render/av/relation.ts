@@ -31,10 +31,14 @@ const genSearchList = (element: Element, keyword: string, avId: string, cb?: () 
     })
 }
 
-const setDatabase = (element: HTMLElement, item: HTMLElement) => {
+const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     element.dataset.avId = item.dataset.avId;
     element.dataset.blockId = item.dataset.blockId;
     element.querySelector(".b3-menu__accelerator").textContent = item.querySelector(".b3-list-item__hinticon").classList.contains("fn__none") ? item.querySelector(".b3-list-item__text").textContent : window.siyuan.languages.thisDatabase
+    const menuElement = hasClosestByClassName(element, "b3-menu__items")
+    if (menuElement) {
+        toggleUpdateRelationBtn(menuElement, avId);
+    }
 }
 
 export const openSearchAV = (avId: string, target: HTMLElement) => {
@@ -64,7 +68,7 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
-                    setDatabase(target, listElement.querySelector(".b3-list-item--focus"));
+                    setDatabase(avId, target, listElement.querySelector(".b3-list-item--focus"));
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -76,7 +80,7 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    setDatabase(target, listItemElement)
+                    setDatabase(avId, target, listItemElement)
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -111,6 +115,37 @@ export const updateRelation = (options: {
     options.avElement.remove();
 }
 
-export const toggleUpdateRelationBtn = () => {
-
+export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string) => {
+    const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement
+    const switchItemElement = searchElement.nextElementSibling;
+    const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
+    const inputElement = switchItemElement.nextElementSibling as HTMLInputElement;
+    const btnElement = inputElement.nextElementSibling;
+    const oldValue = JSON.parse(searchElement.dataset.oldValue);
+    if (oldValue.avID) {
+        if (searchElement.dataset.avId !== avId) {
+            switchItemElement.classList.remove("fn__none");
+            if (switchElement.checked) {
+                inputElement.classList.remove("fn__none");
+            } else {
+                inputElement.classList.add("fn__none");
+            }
+        } else {
+            switchItemElement.classList.add("fn__none");
+            inputElement.classList.add("fn__none");
+        }
+        if (oldValue.avID !== searchElement.dataset.avId || oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
+            btnElement.classList.add("fn__none");
+        } else {
+            btnElement.classList.remove("fn__none");
+        }
+    } else if (searchElement.dataset.avId) {
+        switchItemElement.classList.remove("fn__none");
+        if (switchElement.checked) {
+            inputElement.classList.remove("fn__none");
+        } else {
+            inputElement.classList.add("fn__none");
+        }
+        btnElement.classList.remove("fn__none");
+    }
 }

@@ -206,7 +206,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         content: `<div class="emojis">
 <div class="fn__flex">
     <span class="fn__space"></span>
-    <label class="b3-form__icon fn__flex-1">
+    <label class="b3-form__icon fn__flex-1" style="overflow:initial;">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
     </label>

@@ -38,6 +38,14 @@
       &:hover {
         background-color: var(--b3-theme-surface-lighter);
       }
+
+      &:first-child {
+        border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
+      }
+
+      &:last-child {
+        border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
+      }
     }
 
     &__divider {

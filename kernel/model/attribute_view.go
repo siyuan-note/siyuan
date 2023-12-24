@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -790,6 +791,11 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	// operation.BackRelationKeyID 双向关联的目标关联列 ID
 	// operation.Name 双向关联的目标关联列名称
 
+	if "" == operation.AvID || "" == operation.ID || "" == operation.KeyID {
+		err = errors.New("invalid operation")
+		return
+	}
+
 	srcAv, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
@@ -862,10 +868,15 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 	if !destAdded {
 		if operation.IsTwoWay {
+			name := strings.TrimSpace(operation.Name)
+			if "" == name {
+				name = destAv.Name
+			}
+
 			destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
 				Key: &av.Key{
 					ID:       operation.BackRelationKeyID,
-					Name:     operation.Name,
+					Name:     name,
 					Type:     av.KeyTypeRelation,
 					Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
 				},

@@ -839,12 +839,12 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			AvID:     operation.ID,
 			IsTwoWay: operation.IsTwoWay,
 		}
-
 		if operation.IsTwoWay {
 			srcRel.BackKeyID = operation.BackRelationKeyID
 		} else {
 			srcRel.BackKeyID = ""
 		}
+		keyValues.Key.Relation = srcRel
 
 		break
 	}

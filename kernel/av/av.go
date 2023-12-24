@@ -186,6 +186,7 @@ func NewAttributeView(id string) (ret *AttributeView) {
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
+		Name:      "Untitled",
 		KeyValues: []*KeyValues{{Key: blockKey}},
 		ViewID:    view.ID,
 		Views:     []*View{view},

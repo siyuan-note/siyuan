@@ -865,7 +865,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			for _, v := range destAv.Views {
 				switch v.LayoutType {
 				case av.LayoutTypeTable:
-					v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.KeyID})
+					v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.BackRelationKeyID})
 				}
 			}
 		}

@@ -600,10 +600,9 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 组装列
 	for _, col := range view.Table.Columns {
-		key, getErr := attrView.GetKey(col.ID)
-		if nil != getErr {
-			err = getErr
-			return
+		key, _ := attrView.GetKey(col.ID)
+		if nil == key {
+			continue
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{

@@ -1917,7 +1917,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 				switch view.LayoutType {
 				case av.LayoutTypeTable:
 					for i, column := range view.Table.Columns {
-						if column.ID == removedKey.ID {
+						if column.ID == removedKey.Relation.BackKeyID {
 							view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
 							break
 						}
@@ -1925,6 +1925,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 				}
 			}
 
+			av.SaveAttributeView(destAv)
 			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 		}
 	}

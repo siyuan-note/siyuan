@@ -104,15 +104,28 @@ export const updateRelation = (options: {
     avID: string,
     avElement: Element
 }) => {
+    const inputElement = options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement;
+    const goSearchAVElement = options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
+    const oldValue = JSON.parse(goSearchAVElement.dataset.oldValue) as IAVCellRelationValue;
+    const newAVId = goSearchAVElement.getAttribute("data-av-id")
+    const colId = options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
     transaction(options.protyle, [{
         action: "updateAttrViewColRelation",
         avID: options.avID,
-        id: options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]').getAttribute("data-av-id"),
-        keyID: options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),   // 源 av 关联列 ID
-        backRelationKeyID: Lute.NewNodeID(), // 双向关联的目标关联列 ID
+        keyID: colId,
+        id: newAVId,
+        backRelationKeyID: oldValue.avID === newAVId ? oldValue.backKeyID : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
-        name: (options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement).value,
-    }], []);
+        name: inputElement.value,
+    }], [{
+        action: "updateAttrViewColRelation",
+        avID: options.avID,
+        keyID: colId,
+        id: oldValue.avID,
+        backRelationKeyID: oldValue.backKeyID,
+        isTwoWay: oldValue.isTwoWay,
+        name: inputElement.dataset.oldValue
+    }]);
     options.avElement.remove();
 }
 

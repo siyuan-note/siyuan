@@ -2171,12 +2171,20 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
 	oldBoundBlockID := val.BlockID
+	var oldRelation *av.ValueRelation
+	if av.KeyTypeRelation == val.Type {
+		oldRelation = val.Relation
+	}
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &val); nil != err {
 		return
+	}
+	if av.KeyTypeRelation == val.Type {
+		// 关联列得 content 是自动渲染的，所以不需要保存
+		val.Relation.Contents = nil
 	}
 
 	// val.IsDetached 只有更新主键的时候才会传入，所以下面需要结合 isUpdatingBlockKey 来判断
@@ -2209,6 +2217,52 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		blockVal.IsInitialized = true
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
+		}
+	}
+
+	key, _ := attrView.GetKey(val.KeyID)
+	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
+		destAv, _ := av.ParseAttributeView(key.Relation.AvID)
+		if nil != destAv {
+			if nil != oldRelation {
+				// 清空旧的双向关联的目标值
+				for _, blockID := range oldRelation.BlockIDs {
+					for _, keyValues := range destAv.KeyValues {
+						if keyValues.Key.ID != key.Relation.BackKeyID {
+							continue
+						}
+
+						for _, value := range keyValues.Values {
+							if value.BlockID == blockID {
+								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
+								break
+							}
+						}
+					}
+				}
+			}
+
+			// 更新新的双向关联的目标值
+			for _, blockID := range val.Relation.BlockIDs {
+				for _, keyValues := range destAv.KeyValues {
+					if keyValues.Key.ID != key.Relation.BackKeyID {
+						continue
+					}
+
+					destVal := keyValues.GetValue(blockID)
+					if nil == destVal {
+						destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+						keyValues.Values = append(keyValues.Values, destVal)
+					}
+
+					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
+					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+					break
+				}
+			}
+
+			av.SaveAttributeView(destAv)
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 		}
 	}
 

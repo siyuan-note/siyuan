@@ -186,7 +186,6 @@ func NewAttributeView(id string) (ret *AttributeView) {
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
-		Name:      "Untitled",
 		KeyValues: []*KeyValues{{Key: blockKey}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
@@ -263,9 +262,6 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				view.Table.PageSize = 50
 			}
 		}
-	}
-	if "" == av.Name {
-		av.Name = "Untitled"
 	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t") // TODO: single-line for production

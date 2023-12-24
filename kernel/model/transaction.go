@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -167,6 +168,19 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		ret = &TxErr{msg: err.Error()}
 		return
 	}
+
+	defer func() {
+		if e := recover(); nil != e {
+			stack := debug.Stack()
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
+			logging.LogErrorf(msg)
+
+			if 0 == tx.state.Load() {
+				tx.rollback()
+				return
+			}
+		}
+	}()
 
 	for _, op := range tx.DoOperations {
 		switch op.Action {

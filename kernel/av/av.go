@@ -105,7 +105,8 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 }
 
 type Rollup struct {
-	KeyID string `json:"keyID"` // 汇总列 ID
+	RelationKeyID string `json:"relationKeyID"` // 关联列 ID
+	KeyID         string `json:"keyID"`         // 目标列 ID
 }
 
 type Relation struct {

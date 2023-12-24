@@ -119,32 +119,33 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement
     const switchItemElement = searchElement.nextElementSibling;
     const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
-    const inputElement = switchItemElement.nextElementSibling as HTMLInputElement;
-    const btnElement = inputElement.nextElementSibling;
+    const inputItemElement = switchItemElement.nextElementSibling;
+    const btnElement = inputItemElement.nextElementSibling;
     const oldValue = JSON.parse(searchElement.dataset.oldValue);
     if (oldValue.avID) {
         if (searchElement.dataset.avId !== avId) {
             switchItemElement.classList.remove("fn__none");
             if (switchElement.checked) {
-                inputElement.classList.remove("fn__none");
+                inputItemElement.classList.remove("fn__none");
             } else {
-                inputElement.classList.add("fn__none");
+                inputItemElement.classList.add("fn__none");
             }
         } else {
             switchItemElement.classList.add("fn__none");
-            inputElement.classList.add("fn__none");
+            inputItemElement.classList.add("fn__none");
         }
-        if (oldValue.avID !== searchElement.dataset.avId || oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
-            btnElement.classList.add("fn__none");
-        } else {
+        const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
+        if ((searchElement.dataset.avId && oldValue.avID !== searchElement.dataset.avId)|| oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
             btnElement.classList.remove("fn__none");
+        } else {
+            btnElement.classList.add("fn__none");
         }
     } else if (searchElement.dataset.avId) {
         switchItemElement.classList.remove("fn__none");
         if (switchElement.checked) {
-            inputElement.classList.remove("fn__none");
+            inputItemElement.classList.remove("fn__none");
         } else {
-            inputElement.classList.add("fn__none");
+            inputItemElement.classList.add("fn__none");
         }
         btnElement.classList.remove("fn__none");
     }

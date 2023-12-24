@@ -161,10 +161,10 @@ export const getEditHTML = (options: {
     <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column${!colData.relation || (colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}" data-type="nobg">
-    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+    <input data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
-    <button style="margin: 8px 0;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+    <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     }
     return `<div class="b3-menu__items">
@@ -335,10 +335,20 @@ export const bindEditEvent = (options: {
         });
         const goSearchElement = options.menuElement.querySelector('[data-type="goSearchAV"]') as HTMLElement;
         const oldValue = JSON.parse(goSearchElement.getAttribute("data-old-value"))
+        const inputElement =  options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement
+        inputElement.addEventListener("input", () => {
+            toggleUpdateRelationBtn(options.menuElement, avID);
+        })
         if (oldValue.avID) {
             fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
-                console.log(response);
-                // TODO input old value
+                goSearchElement.querySelector(".b3-menu__accelerator").textContent = response.data.av.name || window.siyuan.languages.title;
+                response.data.av.keyValues.find((item: { key: { id: string, name: string } }) => {
+                    if (item.key.id === oldValue.backKeyID) {
+                        inputElement.setAttribute("data-old-value", item.key.name || window.siyuan.languages.title);
+                        inputElement.value = item.key.name || window.siyuan.languages.title;
+                        return true;
+                    }
+                })
             });
         } else {
             openSearchAV(avID, goSearchElement);

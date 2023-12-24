@@ -38,7 +38,7 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     element.querySelector(".b3-menu__accelerator").textContent = item.querySelector(".b3-list-item__hinticon").classList.contains("fn__none") ? item.querySelector(".b3-list-item__text").textContent : window.siyuan.languages.thisDatabase
     const menuElement = hasClosestByClassName(element, "b3-menu__items")
     if (menuElement) {
-        toggleUpdateRelationBtn(menuElement, avId);
+        toggleUpdateRelationBtn(menuElement, avId, true);
     }
 }
 
@@ -113,7 +113,7 @@ export const updateRelation = (options: {
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
-        id: newAVId,
+        id: newAVId || oldValue.avID,
         backRelationKeyID: oldValue.avID === newAVId ? oldValue.backKeyID : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
@@ -129,26 +129,35 @@ export const updateRelation = (options: {
     options.avElement.remove();
 }
 
-export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string) => {
+export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string, resetData = false) => {
     const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement
     const switchItemElement = searchElement.nextElementSibling;
     const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
     const inputItemElement = switchItemElement.nextElementSibling;
     const btnElement = inputItemElement.nextElementSibling;
-    const oldValue = JSON.parse(searchElement.dataset.oldValue);
+    const oldValue = JSON.parse(searchElement.dataset.oldValue) as IAVCellRelationValue;
     if (oldValue.avID) {
-        if (searchElement.dataset.avId !== avId || (searchElement.dataset.avId === avId && oldValue.avID !== avId)) {
+        const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
+        if (resetData) {
+            if (searchElement.dataset.avId !== oldValue.avID) {
+                inputElement.value = "";
+                switchElement.checked = false;
+            } else {
+                inputElement.value = inputElement.dataset.oldValue
+                switchElement.checked = oldValue.isTwoWay;
+            }
+        }
+        if (searchElement.dataset.avId === avId && oldValue.avID === avId && oldValue.isTwoWay) {
+            switchItemElement.classList.add("fn__none");
+            inputItemElement.classList.add("fn__none");
+        } else {
             switchItemElement.classList.remove("fn__none");
             if (switchElement.checked) {
                 inputItemElement.classList.remove("fn__none");
             } else {
                 inputItemElement.classList.add("fn__none");
             }
-        } else {
-            switchItemElement.classList.add("fn__none");
-            inputItemElement.classList.add("fn__none");
         }
-        const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
         if ((searchElement.dataset.avId && oldValue.avID !== searchElement.dataset.avId) || oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
             btnElement.classList.remove("fn__none");
         } else {

@@ -862,10 +862,15 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 	if !destAdded {
 		if operation.IsTwoWay {
+			name := strings.TrimSpace(operation.Name)
+			if "" == name {
+				name = srcAv.Name
+			}
+
 			destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
 				Key: &av.Key{
 					ID:       operation.BackRelationKeyID,
-					Name:     operation.Name,
+					Name:     name,
 					Type:     av.KeyTypeRelation,
 					Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
 				},
@@ -1893,10 +1898,40 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
+	var removedKey *av.Key
 	for i, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID {
 			attrView.KeyValues = append(attrView.KeyValues[:i], attrView.KeyValues[i+1:]...)
+			removedKey = keyValues.Key
 			break
+		}
+	}
+
+	// 删除双向关联的目标列
+	if nil != removedKey && nil != removedKey.Relation && removedKey.Relation.IsTwoWay {
+		destAv, _ := av.ParseAttributeView(removedKey.Relation.AvID)
+		if nil != destAv {
+			for i, keyValues := range destAv.KeyValues {
+				if keyValues.Key.ID == removedKey.Relation.BackKeyID {
+					destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
+					break
+				}
+			}
+
+			for _, view := range destAv.Views {
+				switch view.LayoutType {
+				case av.LayoutTypeTable:
+					for i, column := range view.Table.Columns {
+						if column.ID == removedKey.Relation.BackKeyID {
+							view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+							break
+						}
+					}
+				}
+			}
+
+			av.SaveAttributeView(destAv)
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 		}
 	}
 

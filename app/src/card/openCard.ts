@@ -197,7 +197,7 @@ export const bindCardEvent = (options: {
             notebook: filterElement.getAttribute("data-id"),
         }, (treeCards) => {
             index = 0;
-            options.cardsData.cards = treeCards.data.cards;
+            options.cardsData = treeCards.data;
             if (options.cardsData.unreviewedCount > 0) {
                 nextCard({
                     countElement,
@@ -411,7 +411,7 @@ export const bindCardEvent = (options: {
                         reviewedCards: options.cardsData.cards
                     }, (result) => {
                         index = 0;
-                        options.cardsData.cards = result.data.cards;
+                        options.cardsData = result.data;
                         if (options.cardsData.unreviewedCount === 0) {
                             if (result.data.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);

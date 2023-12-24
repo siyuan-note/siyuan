@@ -174,6 +174,27 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 }
 
+const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, text?: string) => {
+    if (type === "selected") {
+        return `<button data-id="${id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <span class="b3-menu__label">${text}</span>
+    <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>
+</button>`
+    }
+    if (type === "empty") {
+        return `<button class="b3-menu__item">
+    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
+</button>`
+    }
+    if (type == "unselect") {
+        return `<button data-id="${id}" class="b3-menu__item" data-type="setRelationCell">
+    <span class="b3-menu__label">${text}</span>
+    <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
+</button>`
+    }
+}
+
 export const bindRelationEvent = (options: {
     protyle: IProtyle,
     data: IAV,
@@ -189,30 +210,29 @@ export const bindRelationEvent = (options: {
         avData.view.columns.find((item, index) => {
             if (item.type === "block") {
                 cellIndex = index
-                return;
+                return true;
             }
         })
         let html = ""
         let selectHTML = ""
-        avData.view.rows.forEach((item) => {
-            const text = item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id;
-            if (hasIds.includes(item.id)) {
-                selectHTML += `<button data-id="${item.id}" data-type="setRelationCell" data-type="setRelationCell" class="b3-menu__item" draggable="true">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <span class="b3-menu__label">${text}</span>
-</button>`
-            } else {
-                html += `<button data-id="${item.id}" class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label">${text}</span>
-</button>`
+        hasIds.forEach(hasId => {
+            if (hasId) {
+                avData.view.rows.find((item) => {
+                    if (item.id === hasId) {
+                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id)
+                        return true
+                    }
+                })
             }
         })
-        const empty = `<button class="b3-menu__item">
-    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
-</button>`
-        options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || empty}
+        avData.view.rows.forEach((item) => {
+            if (!hasIds.includes(item.id)) {
+                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id)
+            }
+        })
+        options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
-${html || empty}</div>`
+${html || genSelectItemHTML("empty")}</div>`
     })
 }
 
@@ -258,9 +278,9 @@ export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLE
         }
         ids.splice(ids.indexOf(targetId), 1);
         separatorElement.after(target);
-        // TODO
+        target.outerHTML = genSelectItemHTML("unselect", targetId, target.querySelector(".b3-menu__label").textContent);
         if (!separatorElement.previousElementSibling) {
-            separatorElement.insertAdjacentHTML("beforebegin", empty);
+            separatorElement.insertAdjacentHTML("beforebegin", genSelectItemHTML("empty"));
         }
     } else {
         if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
@@ -268,9 +288,9 @@ export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLE
         }
         ids.push(targetId);
         separatorElement.before(target);
-        // TODO
+        target.outerHTML = genSelectItemHTML("selected", targetId, target.querySelector(".b3-menu__label").textContent);
         if (!separatorElement.nextElementSibling) {
-            separatorElement.insertAdjacentHTML("afterend", empty);
+            separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
         }
     }
     updateCellsValue(protyle, nodeElement, ids);

@@ -560,10 +560,10 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
 <span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>
 <span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
@@ -601,7 +601,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
-            text += `<span data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
+            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
         })
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&

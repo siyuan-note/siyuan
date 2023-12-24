@@ -49,6 +49,16 @@ type KeyValues struct {
 	Values []*Value `json:"values,omitempty"` // 属性视图属性列值
 }
 
+func (kValues *KeyValues) GetValue(blockID string) (ret *Value) {
+	for _, v := range kValues.Values {
+		if v.BlockID == blockID {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
 type KeyType string
 
 const (
@@ -105,7 +115,14 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 }
 
 type Rollup struct {
-	KeyID string `json:"keyID"` // 汇总列 ID
+	RelationKeyID string      `json:"relationKeyID"` // 关联列 ID
+	KeyID         string      `json:"keyID"`         // 目标列 ID
+	Calc          *RollupCalc `json:"calc"`          // 计算方式
+}
+
+type RollupCalc struct {
+	Operator CalcOperator `json:"operator"`
+	Result   *Value       `json:"result"`
 }
 
 type Relation struct {
@@ -296,6 +313,20 @@ func (av *AttributeView) GetCurrentView() (ret *View, err error) {
 		}
 	}
 	err = ErrViewNotFound
+	return
+}
+
+func (av *AttributeView) GetValue(keyID, blockID string) (ret *Value) {
+	for _, kv := range av.KeyValues {
+		if kv.Key.ID == keyID {
+			for _, v := range kv.Values {
+				if v.BlockID == blockID {
+					ret = v
+					return
+				}
+			}
+		}
+	}
 	return
 }
 

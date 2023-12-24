@@ -806,38 +806,47 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	for _, keyValues := range srcAv.KeyValues {
-		if keyValues.Key.ID == operation.KeyID {
-			// 已经设置过双向关联的话需要先断开双向关联
-			if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
-				oldDestAv, parseErr := av.ParseAttributeView(keyValues.Key.Relation.AvID)
-				if nil == parseErr {
-					isOldSameAv := oldDestAv.ID == destAv.ID
-					if isOldSameAv {
-						oldDestAv = destAv
-					}
+		if keyValues.Key.ID != operation.KeyID {
+			continue
+		}
 
-					oldDestKey, _ := oldDestAv.GetKey(keyValues.Key.Relation.BackKeyID)
-					if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
-						oldDestKey.Relation.IsTwoWay = false
-						oldDestKey.Relation.BackKeyID = ""
-					}
+		srcRel := keyValues.Key.Relation
+		// 已经设置过双向关联的话需要先断开双向关联
+		if nil != srcRel && srcRel.IsTwoWay {
+			oldDestAv, _ := av.ParseAttributeView(srcRel.AvID)
+			if nil != oldDestAv {
+				isOldSameAv := oldDestAv.ID == destAv.ID
+				if isOldSameAv {
+					oldDestAv = destAv
+				}
 
-					if !isOldSameAv {
-						err = av.SaveAttributeView(oldDestAv)
-						if nil != err {
-							return
-						}
+				oldDestKey, _ := oldDestAv.GetKey(srcRel.BackKeyID)
+				if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
+					oldDestKey.Relation.IsTwoWay = false
+					oldDestKey.Relation.BackKeyID = ""
+				}
+
+				if !isOldSameAv {
+					err = av.SaveAttributeView(oldDestAv)
+					if nil != err {
+						return
 					}
 				}
 			}
-
-			keyValues.Key.Relation = &av.Relation{
-				AvID:      operation.ID,
-				IsTwoWay:  operation.IsTwoWay,
-				BackKeyID: operation.BackRelationKeyID,
-			}
-			break
 		}
+
+		srcRel = &av.Relation{
+			AvID:     operation.ID,
+			IsTwoWay: operation.IsTwoWay,
+		}
+
+		if operation.IsTwoWay {
+			srcRel.BackKeyID = operation.BackRelationKeyID
+		} else {
+			srcRel.BackKeyID = ""
+		}
+
+		break
 	}
 
 	destAdded := false

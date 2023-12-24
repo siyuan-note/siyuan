@@ -110,3 +110,7 @@ export const updateRelation = (options: {
     }], []);
     options.avElement.remove();
 }
+
+export const toggleUpdateRelationBtn = () => {
+
+}

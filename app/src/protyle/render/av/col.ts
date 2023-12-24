@@ -134,8 +134,7 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         });
-    }
-    if (colData.type === "number") {
+    } else if (colData.type === "number") {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="numberFormat" data-format="${colData.numberFormat}">
     <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
@@ -149,20 +148,22 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
-        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-av-id="${colData.relation?.avID}" data-old-col-id="${colData.relation?.backKeyID}">
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-value="${JSON.stringify(colData.relation)}">
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
-    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : "TODO"}</span>
+    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item${isSelf ? " fn__none" : ""}">
+<label class="b3-menu__item${(colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
-    <input type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
-<div class="b3-menu__item fn__flex-column" data-type="nobg">
-    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
-    <button style="margin: 8px 0" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+<div class="b3-menu__item fn__flex-column${(colData.relation?.isTwoWay && isSelf) ? " fn__none" : ""}" data-type="nobg">
+    <input data-type="colName" style="margin: 8px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+</div>
+<div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
+    <button style="margin-bottom: 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     }
     return `<div class="b3-menu__items">
@@ -285,47 +286,62 @@ export const bindEditEvent = (options: {
     }
 
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
-    if (!addOptionElement) {
-        return;
-    }
-    addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (event.key === "Escape") {
-            options.menuElement.parentElement.remove();
-        }
-        if (event.key === "Enter") {
-            let hasSelected = false;
-            colData.options.find((item) => {
-                if (addOptionElement.value === item.name) {
-                    hasSelected = true;
-                    return true;
-                }
-            });
-            if (hasSelected || !addOptionElement.value) {
+    if (addOptionElement) {
+        addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
                 return;
             }
-            colData.options.push({
-                color: (colData.options.length + 1).toString(),
-                name: addOptionElement.value
-            });
-            transaction(options.protyle, [{
-                action: "updateAttrViewColOptions",
-                id: colId,
-                avID,
-                data: colData.options
-            }], [{
-                action: "removeAttrViewColOption",
-                id: colId,
-                avID,
-                data: addOptionElement.value
-            }]);
-            options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
-            bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
-            (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+            if (event.key === "Escape") {
+                options.menuElement.parentElement.remove();
+            }
+            if (event.key === "Enter") {
+                let hasSelected = false;
+                colData.options.find((item) => {
+                    if (addOptionElement.value === item.name) {
+                        hasSelected = true;
+                        return true;
+                    }
+                });
+                if (hasSelected || !addOptionElement.value) {
+                    return;
+                }
+                colData.options.push({
+                    color: (colData.options.length + 1).toString(),
+                    name: addOptionElement.value
+                });
+                transaction(options.protyle, [{
+                    action: "updateAttrViewColOptions",
+                    id: colId,
+                    avID,
+                    data: colData.options
+                }], [{
+                    action: "removeAttrViewColOption",
+                    id: colId,
+                    avID,
+                    data: addOptionElement.value
+                }]);
+                options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
+                bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
+                (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+            }
+        });
+    }
+
+    const backRelationElement = options.menuElement.querySelector('[data-type="backRelation"]') as HTMLInputElement;
+    if (backRelationElement) {
+        backRelationElement.addEventListener("change", () => {
+            backRelationElement.parentElement.nextElementSibling.classList.toggle("fn__none");
+        });
+        const oldValueStr = options.menuElement.querySelector('[data-type="goSearchAV" ]').getAttribute("data-old-value")
+        if (oldValueStr) {
+            const oldValue = JSON.parse(oldValueStr);
+            if (oldValue.isTwoWay) {
+                fetchPost("/api/av/getAttributeView", {id: ""}, (response) => {
+                    console.log(response);
+                });
+            }
         }
-    });
+    }
 };
 
 export const getColNameByType = (type: TAVCol) => {

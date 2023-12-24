@@ -705,6 +705,7 @@ export const openMenuPanel = (options: {
                         colId: target.parentElement.dataset.id
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement});
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

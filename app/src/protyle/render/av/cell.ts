@@ -70,11 +70,12 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
             }
         };
-    }else if (colType === "relation") {
+    } else if (colType === "relation") {
         cellValue = {
             type: colType,
             relation: {
                 blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
+                contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
             }
         };
     }
@@ -163,12 +164,10 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     checked: value ? true : false
                 }
             };
-        }else if (colType === "relation") {
+        } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {
-                   blockIDs: value as string[],
-                }
+                relation: value
             };
         }
     }

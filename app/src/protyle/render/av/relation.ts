@@ -260,23 +260,29 @@ export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLE
     if (!menuElement) {
         return
     }
-    const ids: string[] = [];
+    const newValue: {
+        blockIDs: string[]
+        contents?: string[]
+    } = {
+        blockIDs: [],
+        contents: []
+    }
     Array.from(menuElement.children).forEach((item) => {
         const id = item.getAttribute("data-id")
         if (item.getAttribute("draggable") && id) {
-            ids.push(id);
+            newValue.blockIDs.push(id);
+            newValue.contents.push(item.textContent.trim());
         }
     })
-    const empty = `<button class="b3-menu__item">
-    <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
-</button>`
     const targetId = target.getAttribute("data-id")
     const separatorElement = menuElement.querySelector(".b3-menu__separator");
     if (target.getAttribute("draggable")) {
         if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
             separatorElement.nextElementSibling.remove();
         }
-        ids.splice(ids.indexOf(targetId), 1);
+        const removeIndex = newValue.blockIDs.indexOf(targetId);
+        newValue.blockIDs.splice(removeIndex, 1);
+        newValue.contents.splice(removeIndex, 1);
         separatorElement.after(target);
         target.outerHTML = genSelectItemHTML("unselect", targetId, target.querySelector(".b3-menu__label").textContent);
         if (!separatorElement.previousElementSibling) {
@@ -286,12 +292,13 @@ export const setRelationCell = (protyle: IProtyle, data: IAV, nodeElement: HTMLE
         if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
             separatorElement.previousElementSibling.remove();
         }
-        ids.push(targetId);
+        newValue.blockIDs.push(targetId);
+        newValue.contents.push(target.textContent.trim());
         separatorElement.before(target);
         target.outerHTML = genSelectItemHTML("selected", targetId, target.querySelector(".b3-menu__label").textContent);
         if (!separatorElement.nextElementSibling) {
             separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
         }
     }
-    updateCellsValue(protyle, nodeElement, ids);
+    updateCellsValue(protyle, nodeElement, newValue);
 };

@@ -145,17 +145,123 @@ export const openMenuPanel = (options: {
             if (!targetElement) {
                 return;
             }
-            let type = "columns";
             const isTop = targetElement.classList.contains("dragover__top");
+            const sourceId = sourceElement.dataset.id;
+            const targetId = targetElement.dataset.id;
             if (targetElement.querySelector('[data-type="removeSort"]')) {
-                type = "sorts";
-            } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
-                type = "filters";
-            } else if (targetElement.querySelector('[data-type="av-view-edit"]')) {
-                type = "switcher";
-            } else if (targetElement.querySelector('[data-type="editAssetItem"]')) {
-                type = "assets";
-            } else if (targetElement.querySelector('[data-type="setColOption"]')) {
+                const changeData = data.view.sorts;
+                const oldData = Object.assign([], changeData);
+                let sortFilter: IAVSort;
+                changeData.find((sort, index: number) => {
+                    if (sort.column === sourceId) {
+                        sortFilter = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                });
+                changeData.find((sort, index: number) => {
+                    if (sort.column === targetId) {
+                        if (isTop) {
+                            changeData.splice(index, 0, sortFilter);
+                        } else {
+                            changeData.splice(index + 1, 0, sortFilter);
+                        }
+                        return true;
+                    }
+                });
+
+                transaction(options.protyle, [{
+                    action: "setAttrViewSorts",
+                    avID,
+                    data: changeData
+                }], [{
+                    action: "setAttrViewSorts",
+                    avID,
+                    data: oldData
+                }]);
+                menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
+                bindSortsEvent(options.protyle, menuElement, data);
+                return;
+            }
+            if (targetElement.querySelector('[data-type="removeFilter"]')) {
+                const changeData = data.view.filters;
+                const oldData = Object.assign([], changeData);
+                let targetFilter: IAVFilter;
+                changeData.find((filter, index: number) => {
+                    if (filter.column === sourceId) {
+                        targetFilter = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                });
+                changeData.find((filter, index: number) => {
+                    if (filter.column === targetId) {
+                        if (isTop) {
+                            changeData.splice(index, 0, targetFilter);
+                        } else {
+                            changeData.splice(index + 1, 0, targetFilter);
+                        }
+                        return true;
+                    }
+                });
+
+                transaction(options.protyle, [{
+                    action: "setAttrViewFilters",
+                    avID,
+                    data: changeData
+                }], [{
+                    action: "setAttrViewFilters",
+                    avID,
+                    data: oldData
+                }]);
+                menuElement.innerHTML = getFiltersHTML(data.view);
+                return;
+            }
+            if (targetElement.querySelector('[data-type="av-view-edit"]')) {
+                transaction(options.protyle, [{
+                    action: "sortAttrViewView",
+                    avID,
+                    id: sourceId,
+                    previousID: isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")
+                }], [{
+                    action: "sortAttrViewView",
+                    avID,
+                    id: sourceId,
+                    previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
+                }]);
+                if (isTop) {
+                    targetElement.before(sourceElement);
+                    targetElement.classList.remove("dragover__top");
+                } else {
+                    targetElement.after(sourceElement);
+                    targetElement.classList.remove("dragover__bottom");
+                }
+                return;
+            }
+            if (targetElement.querySelector('[data-type="editAssetItem"]')) {
+                if (isTop) {
+                    targetElement.before(sourceElement);
+                } else {
+                    targetElement.after(sourceElement);
+                }
+                const replaceValue: IAVCellAssetValue[] = [];
+                Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
+                    if (item.dataset.content) {
+                        replaceValue.push({
+                            content: item.dataset.content,
+                            name: item.dataset.name,
+                            type: item.dataset.type as "image" | "file",
+                        });
+                    }
+                });
+                updateAssetCell({
+                    protyle: options.protyle,
+                    data,
+                    cellElements: options.cellElements,
+                    type: "replace",
+                    replaceValue
+                });
+                return;
+            }
+            if (targetElement.querySelector('[data-type="setColOption"]')) {
                 const colId = options.cellElements ? options.cellElements[0].dataset.colId : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
                 const changeData = data.view.columns.find((column) => column.id === colId).options;
                 const oldData = Object.assign([], changeData);
@@ -200,121 +306,11 @@ export const openMenuPanel = (options: {
                 }
                 return;
             }
-            const sourceId = sourceElement.dataset.id;
-            const targetId = targetElement.dataset.id;
-            if (type === "sorts") {
-                const changeData = data.view.sorts;
-                const oldData = Object.assign([], changeData);
-                let sortFilter: IAVSort;
-                changeData.find((sort, index: number) => {
-                    if (sort.column === sourceId) {
-                        sortFilter = changeData.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                changeData.find((sort, index: number) => {
-                    if (sort.column === targetId) {
-                        if (isTop) {
-                            changeData.splice(index, 0, sortFilter);
-                        } else {
-                            changeData.splice(index + 1, 0, sortFilter);
-                        }
-                        return true;
-                    }
-                });
+            if (targetElement.getAttribute("data-type") === "setRelationCell") {
 
-                transaction(options.protyle, [{
-                    action: "setAttrViewSorts",
-                    avID,
-                    data: changeData
-                }], [{
-                    action: "setAttrViewSorts",
-                    avID,
-                    data: oldData
-                }]);
-                menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
-                bindSortsEvent(options.protyle, menuElement, data);
                 return;
             }
-            if (type === "switcher") {
-                transaction(options.protyle, [{
-                    action: "sortAttrViewView",
-                    avID,
-                    id: sourceId,
-                    previousID: isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")
-                }], [{
-                    action: "sortAttrViewView",
-                    avID,
-                    id: sourceId,
-                    previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
-                }]);
-                if (isTop) {
-                    targetElement.before(sourceElement);
-                    targetElement.classList.remove("dragover__top");
-                } else {
-                    targetElement.after(sourceElement);
-                    targetElement.classList.remove("dragover__bottom");
-                }
-                return;
-            }
-            if (type === "filters") {
-                const changeData = data.view.filters;
-                const oldData = Object.assign([], changeData);
-                let targetFilter: IAVFilter;
-                changeData.find((filter, index: number) => {
-                    if (filter.column === sourceId) {
-                        targetFilter = changeData.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                changeData.find((filter, index: number) => {
-                    if (filter.column === targetId) {
-                        if (isTop) {
-                            changeData.splice(index, 0, targetFilter);
-                        } else {
-                            changeData.splice(index + 1, 0, targetFilter);
-                        }
-                        return true;
-                    }
-                });
 
-                transaction(options.protyle, [{
-                    action: "setAttrViewFilters",
-                    avID,
-                    data: changeData
-                }], [{
-                    action: "setAttrViewFilters",
-                    avID,
-                    data: oldData
-                }]);
-                menuElement.innerHTML = getFiltersHTML(data.view);
-                return;
-            }
-            if (type === "assets") {
-                if (isTop) {
-                    targetElement.before(sourceElement);
-                } else {
-                    targetElement.after(sourceElement);
-                }
-                const replaceValue: IAVCellAssetValue[] = [];
-                Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
-                    if (item.dataset.content) {
-                        replaceValue.push({
-                            content: item.dataset.content,
-                            name: item.dataset.name,
-                            type: item.dataset.type as "image" | "file",
-                        });
-                    }
-                });
-                updateAssetCell({
-                    protyle: options.protyle,
-                    data,
-                    cellElements: options.cellElements,
-                    type: "replace",
-                    replaceValue
-                });
-                return;
-            }
             transaction(options.protyle, [{
                 action: "sortAttrViewCol",
                 avID,

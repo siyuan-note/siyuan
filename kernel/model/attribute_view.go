@@ -947,6 +947,13 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			BackKeyID: operation.KeyID,
 		}
 		destAdded = true
+		if operation.IsTwoWay {
+			name := strings.TrimSpace(operation.Name)
+			if "" == name {
+				name = srcAv.Name
+			}
+			backRelKey.Name = name
+		}
 	}
 
 	if !destAdded {

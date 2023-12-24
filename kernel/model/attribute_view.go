@@ -852,19 +852,21 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	if !destAdded {
-		destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
-			Key: &av.Key{
-				ID:       operation.BackRelationKeyID,
-				Name:     operation.Name,
-				Type:     av.KeyTypeRelation,
-				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
-			},
-		})
+		if operation.IsTwoWay {
+			destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
+				Key: &av.Key{
+					ID:       operation.BackRelationKeyID,
+					Name:     operation.Name,
+					Type:     av.KeyTypeRelation,
+					Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+				},
+			})
 
-		for _, v := range destAv.Views {
-			switch v.LayoutType {
-			case av.LayoutTypeTable:
-				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.KeyID})
+			for _, v := range destAv.Views {
+				switch v.LayoutType {
+				case av.LayoutTypeTable:
+					v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.KeyID})
+				}
 			}
 		}
 	}

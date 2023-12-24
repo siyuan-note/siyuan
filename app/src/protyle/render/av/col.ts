@@ -1050,6 +1050,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             });
         }
     });
+    /*
     menu.addItem({
         icon: "iconSearch",
         label: window.siyuan.languages.rollup,
@@ -1074,7 +1075,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 id
             });
         }
-    });
+    });*/
     menu.addItem({
         icon: "iconClock",
         label: window.siyuan.languages.createdTime,

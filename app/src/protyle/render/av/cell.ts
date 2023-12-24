@@ -141,6 +141,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     checked: value ? true : false
                 }
             };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {blockIDs: [], contents: []}
+            };
         }
     } else {
         if (colType === "mSelect" || colType === "select") {
@@ -506,7 +511,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (!rowElement) {
             return;
         }
-        const type = getTypeByCellElement(item) || item.dataset.type;
+        const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template"].includes(type)) {
             return;
         }
@@ -535,7 +540,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);
         } else {
-           item.innerHTML = genAVValueHTML(cellValue)
+            item.innerHTML = genAVValueHTML(cellValue)
         }
     });
     if (doOperations.length > 0) {

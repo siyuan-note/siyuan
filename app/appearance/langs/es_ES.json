@@ -1,6 +1,9 @@
 {
-  "relation": "Relación",
-  "rollup": "Acumular",
+  "backRelation": "Bidireccional",
+  "thisDatabase": "Esta base de datos",
+  "relacionadoTo": "Relación con",
+  "relación": "Relación",
+  "acumular": "Acumular",
   "replaceTypes": {
     "text": "Texto normal",
     "imgText": "Texto alternativo de la imagen",

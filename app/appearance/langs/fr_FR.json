@@ -1,4 +1,7 @@
 {
+  "backRelation": "Bidirectionnel",
+  "thisDatabase": "Cette base de données",
+  "relatedTo " : " Relation avec ",
   "relation": "Relation",
   "rollup": "Rollup",
   "replaceTypes": {

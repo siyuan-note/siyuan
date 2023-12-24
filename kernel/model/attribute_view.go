@@ -1923,9 +1923,9 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 						}
 					}
 				}
-
-				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 			}
+
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 		}
 	}
 

@@ -143,7 +143,7 @@ id="preview"></div>
             if (item.src.endsWith(".svg")) {
                 fetchGet(item.src, (response: string) => {
                     item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;
-                })
+                });
             }
         });
         btnsElement[0].removeAttribute("disabled");

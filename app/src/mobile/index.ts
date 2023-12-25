@@ -21,11 +21,10 @@ import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
-import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
+import {loadPlugins} from "../plugin/loader";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
-import {Menu} from "../plugin/Menu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];

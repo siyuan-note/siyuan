@@ -540,7 +540,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);
         } else {
-            item.innerHTML = genAVValueHTML(cellValue)
+            item.innerHTML = genAVValueHTML(cellValue);
         }
     });
     if (doOperations.length > 0) {
@@ -615,7 +615,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
             text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
-        })
+        });
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {

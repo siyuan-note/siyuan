@@ -8,7 +8,7 @@ import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {openSearchAV, toggleUpdateRelationBtn} from "./relation";
+import {toggleUpdateRelationBtn} from "./relation";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -334,21 +334,21 @@ export const bindEditEvent = (options: {
             toggleUpdateRelationBtn(options.menuElement, avID);
         });
         const goSearchElement = options.menuElement.querySelector('[data-type="goSearchAV"]') as HTMLElement;
-        const oldValue = JSON.parse(goSearchElement.getAttribute("data-old-value"))
-        const inputElement = options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement
+        const oldValue = JSON.parse(goSearchElement.getAttribute("data-old-value"));
+        const inputElement = options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement;
         inputElement.addEventListener("input", () => {
             toggleUpdateRelationBtn(options.menuElement, avID);
-        })
+        });
         if (oldValue.avID) {
             fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
-                goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages.title)
+                goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages.title);
                 response.data.av.keyValues.find((item: { key: { id: string, name: string } }) => {
                     if (item.key.id === oldValue.backKeyID) {
                         inputElement.setAttribute("data-old-value", item.key.name || window.siyuan.languages.title);
                         inputElement.value = item.key.name || window.siyuan.languages.title;
                         return true;
                     }
-                })
+                });
                 toggleUpdateRelationBtn(options.menuElement, avID);
             });
         } else {

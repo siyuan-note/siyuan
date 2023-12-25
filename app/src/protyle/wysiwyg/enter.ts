@@ -392,12 +392,12 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 action: "update",
                 data: blockElement.outerHTML,
                 id,
-            })
+            });
             undoOperation.push({
                 action: "update",
                 data: html,
                 id,
-            })
+            });
             mathRender(editableElement);
         } else {
             doOperation.push({
@@ -405,15 +405,15 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 data: item.outerHTML,
                 id: item.dataset.nodeId,
                 nextID: id,
-            })
+            });
             blockElement.insertAdjacentElement("beforebegin", item);
             undoOperation.push({
                 action: "delete",
                 id: item.dataset.nodeId,
-            })
+            });
             mathRender(item);
         }
-    })
+    });
 
     let previousElement = blockElement;
     Array.from(newElement.children).forEach((item: HTMLElement) => {

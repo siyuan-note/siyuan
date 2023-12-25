@@ -25,24 +25,24 @@ const genSearchList = (element: Element, keyword: string, avId: string, cb?: () 
         <div class="b3-list-item__meta b3-list-item__showall">${escapeHtml(item.hPath)}</div>
     </div>
     <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
-</div>`
+</div>`;
         });
         element.innerHTML = html;
         if (cb) {
-            cb()
+            cb();
         }
-    })
-}
+    });
+};
 
 const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     element.dataset.avId = item.dataset.avId;
     element.dataset.blockId = item.dataset.blockId;
-    element.querySelector(".b3-menu__accelerator").textContent = item.querySelector(".b3-list-item__hinticon").classList.contains("fn__none") ? item.querySelector(".b3-list-item__text").textContent : window.siyuan.languages.thisDatabase
-    const menuElement = hasClosestByClassName(element, "b3-menu__items")
+    element.querySelector(".b3-menu__accelerator").textContent = item.querySelector(".b3-list-item__hinticon").classList.contains("fn__none") ? item.querySelector(".b3-list-item__text").textContent : window.siyuan.languages.thisDatabase;
+    const menuElement = hasClosestByClassName(element, "b3-menu__items");
     if (menuElement) {
         toggleUpdateRelationBtn(menuElement, avId, true);
     }
-}
+};
 
 export const openSearchAV = (avId: string, target: HTMLElement) => {
     window.siyuan.menus.menu.remove();
@@ -83,7 +83,7 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    setDatabase(avId, target, listItemElement)
+                    setDatabase(avId, target, listItemElement);
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -93,13 +93,13 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
                     x: rect.left,
                     y: rect.bottom,
                     h: rect.height,
-                })
+                });
                 element.querySelector("input").focus();
             });
         }
     });
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-}
+};
 
 export const updateRelation = (options: {
     protyle: IProtyle,
@@ -110,18 +110,18 @@ export const updateRelation = (options: {
 }) => {
     const inputElement = options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement;
     const goSearchAVElement = options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
-    const newAVId = goSearchAVElement.getAttribute("data-av-id")
-    const colId = options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+    const newAVId = goSearchAVElement.getAttribute("data-av-id");
+    const colId = options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     let colData: IAVColumn;
     options.colsData.find(item => {
         if (item.id === colId) {
             if (!item.relation) {
-                item.relation = {}
+                item.relation = {};
             }
             colData = item;
             return true;
         }
-    })
+    });
     const colNewName = (options.avElement.querySelector('[data-type="name"]') as HTMLInputElement).value;
     transaction(options.protyle, [{
         action: "updateAttrViewColRelation",
@@ -145,10 +145,10 @@ export const updateRelation = (options: {
     options.avElement.remove();
     updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: colNewName});
     focusBlock(options.blockElement);
-}
+};
 
 export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string, resetData = false) => {
-    const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement
+    const searchElement = menuItemsElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
     const switchItemElement = searchElement.nextElementSibling;
     const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
     const inputItemElement = switchItemElement.nextElementSibling;
@@ -161,7 +161,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
                 inputElement.value = "";
                 switchElement.checked = false;
             } else {
-                inputElement.value = inputElement.dataset.oldValue
+                inputElement.value = inputElement.dataset.oldValue;
                 switchElement.checked = oldValue.isTwoWay;
             }
         }
@@ -190,7 +190,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
         }
         btnElement.classList.remove("fn__none");
     }
-}
+};
 
 const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, text?: string) => {
     if (type === "selected") {
@@ -198,20 +198,20 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <span class="b3-menu__label">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>
-</button>`
+</button>`;
     }
     if (type === "empty") {
         return `<button class="b3-menu__item">
     <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
-</button>`
+</button>`;
     }
     if (type == "unselect") {
         return `<button data-id="${id}" class="b3-menu__item" data-type="setRelationCell">
     <span class="b3-menu__label">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
-</button>`
+</button>`;
     }
-}
+};
 
 export const bindRelationEvent = (options: {
     protyle: IProtyle,
@@ -224,59 +224,59 @@ export const bindRelationEvent = (options: {
         id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
     }, response => {
         const avData = response.data as IAV;
-        let cellIndex = 0
+        let cellIndex = 0;
         avData.view.columns.find((item, index) => {
             if (item.type === "block") {
-                cellIndex = index
+                cellIndex = index;
                 return true;
             }
-        })
-        let html = ""
-        let selectHTML = ""
+        });
+        let html = "";
+        let selectHTML = "";
         hasIds.forEach(hasId => {
             if (hasId) {
                 avData.view.rows.find((item) => {
                     if (item.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id)
-                        return true
+                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id);
+                        return true;
                     }
-                })
+                });
             }
-        })
+        });
         avData.view.rows.forEach((item) => {
             if (!hasIds.includes(item.id)) {
-                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id)
+                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id);
             }
-        })
+        });
         options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
-${html || genSelectItemHTML("empty")}</div>`
-    })
-}
+${html || genSelectItemHTML("empty")}</div>`;
+    });
+};
 
 export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
-    let colRelationData: IAVCellRelationValue
+    let colRelationData: IAVCellRelationValue;
     data.view.columns.find(item => {
         if (item.id === cellElements[0].dataset.colId) {
-            colRelationData = item.relation
+            colRelationData = item.relation;
             return true;
         }
-    })
+    });
     if (colRelationData && colRelationData.avID) {
-        let ids = ""
+        let ids = "";
         cellElements[0].querySelectorAll("span").forEach((item) => {
             ids += `${item.getAttribute("data-id")},`;
         });
-        return `<span data-av-id="${colRelationData.avID}">${ids}</span>`
+        return `<span data-av-id="${colRelationData.avID}">${ids}</span>`;
     } else {
-        return ""
+        return "";
     }
-}
+};
 
 export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu__items");
     if (!menuElement) {
-        return
+        return;
     }
     const newValue: {
         blockIDs: string[]
@@ -284,16 +284,16 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     } = {
         blockIDs: [],
         contents: []
-    }
+    };
     Array.from(menuElement.children).forEach((item) => {
-        const id = item.getAttribute("data-id")
+        const id = item.getAttribute("data-id");
         if (item.getAttribute("draggable") && id) {
             newValue.blockIDs.push(id);
             newValue.contents.push(item.textContent.trim());
         }
-    })
+    });
     if (target.classList.contains("b3-menu__item")) {
-        const targetId = target.getAttribute("data-id")
+        const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
         if (target.getAttribute("draggable")) {
             if (!separatorElement.nextElementSibling.getAttribute("data-id")) {

@@ -24,7 +24,7 @@ const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: nu
 <span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${unreviewedNewCardCount}</span>
 <span class="fn__space"></span>+<span class="fn__space"></span>
 <span class="ariaLabel ft__success" aria-label="${window.siyuan.languages.flashcardReviewCard}">${unreviewedOldCardCount}</span>`;
-}
+};
 
 export const genCardHTML = (options: {
     id: string,

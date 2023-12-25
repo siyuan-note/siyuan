@@ -133,8 +133,8 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
-            hideAllElements(["gutter"])
-            const dialogElement = hasClosestByClassName(element, "b3-dialog--open")
+            hideAllElements(["gutter"]);
+            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
             if (dialogElement) {
                 const dialogId = dialogElement.dataset.key;
                 if (dialogId && element.offsetWidth) {
@@ -143,7 +143,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                         height: element.offsetHeight,
                         left: parseInt(element.style.left),
                         top: parseInt(element.style.top),
-                    }
+                    };
                     setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
                 }
             }

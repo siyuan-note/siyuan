@@ -33,8 +33,8 @@ export class Dialog {
         window.siyuan.dialogs.push(this);
         this.destroyCallback = options.destroyCallback;
         this.element = document.createElement("div") as HTMLElement;
-        let left
-        let top
+        let left;
+        let top;
         if (!isMobile() && options.positionId) {
             const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][options.positionId];
             if (dialogPosition) {

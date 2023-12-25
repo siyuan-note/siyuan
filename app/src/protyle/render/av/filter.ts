@@ -241,12 +241,12 @@ export const setFilter = (options: {
             });
         });
     } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(colData.type)) {
-        let value = ""
+        let value = "";
         if (options.filter.value) {
             if (colData.type === "relation") {
-                value = options.filter.value.relation.contents[0] || ""
+                value = options.filter.value.relation.contents[0] || "";
             } else {
-                value = options.filter.value[colData.type as "text"].content || ""
+                value = options.filter.value[colData.type as "text"].content || "";
             }
         }
         menu.addItem({

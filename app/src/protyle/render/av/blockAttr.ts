@@ -1,7 +1,6 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
-import {hasClosestByAttribute} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
 
@@ -129,27 +128,27 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                     popTextCell(protyle, [target], "date");
                     event.stopPropagation();
                     event.preventDefault();
-                    break
+                    break;
                 } else if (type === "select" || type === "mSelect") {
                     popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
                     event.stopPropagation();
                     event.preventDefault();
-                    break
+                    break;
                 } else if (type === "mAsset") {
                     popTextCell(protyle, [target], "mAsset");
                     event.stopPropagation();
                     event.preventDefault();
-                    break
+                    break;
                 } else if (type === "checkbox") {
                     popTextCell(protyle, [target], "checkbox");
                     event.stopPropagation();
                     event.preventDefault();
-                    break
+                    break;
                 } else if (type === "relation") {
                     popTextCell(protyle, [target], "relation");
                     event.stopPropagation();
                     event.preventDefault();
-                    break
+                    break;
                 }
                 target = target.parentElement;
             }

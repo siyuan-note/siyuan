@@ -1164,7 +1164,7 @@ interface IAVCellAssetValue {
 }
 
 interface IAVCellRelationValue {
-    avID: string
-    backKeyID: string
-    isTwoWay: boolean
+    avID?: string
+    backKeyID?: string
+    isTwoWay?: boolean
 }

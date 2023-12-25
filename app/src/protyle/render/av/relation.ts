@@ -115,7 +115,10 @@ export const updateRelation = (options: {
     let colData: IAVColumn;
     options.colsData.find(item => {
         if (item.id === colId) {
-            colData = item
+            if (!item.relation) {
+                item.relation = {}
+            }
+            colData = item;
             return true;
         }
     })

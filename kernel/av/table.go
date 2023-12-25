@@ -614,7 +614,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			contains := false
 			for _, c := range value.Relation.Contents {
 				for _, c1 := range other.Relation.Contents {
-					if c == c1 {
+					if strings.Contains(c, c1) {
 						contains = true
 						break
 					}
@@ -624,8 +624,8 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		case FilterOperatorDoesNotContain:
 			contains := false
 			for _, c := range value.Relation.Contents {
-				for _, c2 := range other.Relation.Contents {
-					if c == c2 {
+				for _, c1 := range other.Relation.Contents {
+					if strings.Contains(c, c1) {
 						contains = true
 						break
 					}

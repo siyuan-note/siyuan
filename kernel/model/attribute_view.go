@@ -878,6 +878,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	// operation.IsTwoWay 是否双向关联
 	// operation.BackRelationKeyID 双向关联的目标关联列 ID
 	// operation.Name 双向关联的目标关联列名称
+	// operation.Format 源 av 关联列名称
 
 	srcAv, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
@@ -934,6 +935,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			srcRel.BackKeyID = ""
 		}
 		keyValues.Key.Relation = srcRel
+		keyValues.Key.Name = operation.Format
 
 		break
 	}
@@ -950,9 +952,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		if operation.IsTwoWay {
 			name := strings.TrimSpace(operation.Name)
 			if "" == name {
-				name = srcAv.Name
+				name = srcAv.Name + " " + operation.Format
 			}
-			backRelKey.Name = name
+			backRelKey.Name = strings.TrimSpace(name)
 		}
 	}
 
@@ -960,7 +962,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		if operation.IsTwoWay {
 			name := strings.TrimSpace(operation.Name)
 			if "" == name {
-				name = srcAv.Name
+				name = srcAv.Name + " " + operation.Format
 			}
 
 			destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{

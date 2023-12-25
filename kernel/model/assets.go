@@ -326,7 +326,7 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 			request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
 			resp, reqErr := request.Get(u)
 			if strings.Contains(strings.ToLower(resp.GetContentType()), "text/html") {
-				// 忽略超链接网页
+				// 忽略超链接网页 `Convert network assets to local` no longer process webpage https://github.com/siyuan-note/siyuan/issues/9965
 				return ast.WalkContinue
 			}
 

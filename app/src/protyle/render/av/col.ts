@@ -219,9 +219,6 @@ export const bindEditEvent = (options: {
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
-        if (colData.type === "relation") {
-            return;
-        }
         const newValue = nameElement.value;
         if (newValue === colData.name) {
             return;
@@ -470,9 +467,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const menu = new Menu("av-header-cell", () => {
-        if (type === "relation") {
-            return;
-        }
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === oldValue) {
             return;

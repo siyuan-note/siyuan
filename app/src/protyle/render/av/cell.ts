@@ -144,7 +144,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {blockIDs: [], contents: []}
+                relation: {blockIDs: [], contents: value ? [value] : []}
             };
         }
     } else {

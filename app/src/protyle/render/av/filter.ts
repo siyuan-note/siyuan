@@ -240,10 +240,18 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "email", "phone", "template"].includes(colData.type)) {
+    } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(colData.type)) {
+        let value = ""
+        if (options.filter.value) {
+            if (colData.type === "relation") {
+                value = options.filter.value.relation.contents[0] || ""
+            } else {
+                value = options.filter.value[colData.type as "text"].content || ""
+            }
+        }
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value ? options.filter.value[colData.type as "text"].content : ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200">`
         });
     } else if (colData.type === "number") {
         menu.addItem({
@@ -422,9 +430,10 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
                 } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content ||
-                    filter.value?.phone?.content || filter.value?.email?.content) {
+                    filter.value?.phone?.content || filter.value?.email?.content || filter.value?.relation?.contents.length>0) {
                     const content = filter.value?.text?.content || filter.value?.block?.content ||
-                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content;
+                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content ||
+                        filter.value?.relation?.contents[0];
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {

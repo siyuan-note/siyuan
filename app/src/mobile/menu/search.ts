@@ -573,7 +573,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
                     if (id) {
-                        if (window.siyuan.mobile.editor.protyle) {
+                        if (window.siyuan.mobile.editor?.protyle) {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
                         checkFold(id, (zoomIn) => {

@@ -766,7 +766,9 @@ export const openMenuPanel = (options: {
                     updateRelation({
                         protyle: options.protyle,
                         avElement: avPanelElement,
-                        avID
+                        avID,
+                        colsData: data.view.columns,
+                        blockElement: options.blockElement,
                     });
                     event.preventDefault();
                     event.stopPropagation();

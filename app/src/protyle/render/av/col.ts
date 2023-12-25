@@ -149,7 +149,7 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
-        html += `<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -219,6 +219,9 @@ export const bindEditEvent = (options: {
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
+        if (colData.type === "relation") {
+            return;
+        }
         const newValue = nameElement.value;
         if (newValue === colData.name) {
             return;
@@ -352,7 +355,6 @@ export const bindEditEvent = (options: {
                 toggleUpdateRelationBtn(options.menuElement, avID);
             });
         } else {
-            openSearchAV(avID, goSearchElement);
             toggleUpdateRelationBtn(options.menuElement, avID);
         }
     }
@@ -468,6 +470,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const menu = new Menu("av-header-cell", () => {
+        if (type === "relation") {
+            return;
+        }
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === oldValue) {
             return;

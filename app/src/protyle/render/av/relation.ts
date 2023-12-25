@@ -5,6 +5,8 @@ import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {updateCellsValue} from "./cell";
+import {updateAttrViewCellAnimation} from "./action";
+import {focusBlock} from "../../util/selection";
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {keyword}, (response) => {
@@ -102,31 +104,44 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
 export const updateRelation = (options: {
     protyle: IProtyle,
     avID: string,
-    avElement: Element
+    avElement: Element,
+    colsData: IAVColumn[],
+    blockElement: Element,
 }) => {
     const inputElement = options.avElement.querySelector('input[data-type="colName"]') as HTMLInputElement;
     const goSearchAVElement = options.avElement.querySelector('.b3-menu__item[data-type="goSearchAV"]') as HTMLElement;
-    const oldValue = JSON.parse(goSearchAVElement.dataset.oldValue) as IAVCellRelationValue;
     const newAVId = goSearchAVElement.getAttribute("data-av-id")
     const colId = options.avElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+    let colData: IAVColumn;
+    options.colsData.find(item => {
+        if (item.id === colId) {
+            colData = item
+            return true;
+        }
+    })
+    const colNewName = (options.avElement.querySelector('[data-type="name"]') as HTMLInputElement).value;
     transaction(options.protyle, [{
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
-        id: newAVId || oldValue.avID,
-        backRelationKeyID: oldValue.avID === newAVId ? oldValue.backKeyID : Lute.NewNodeID(),
+        id: newAVId || colData.relation.avID,
+        backRelationKeyID: colData.relation.avID === newAVId ? colData.relation.backKeyID : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
+        format: colNewName
     }], [{
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
-        id: oldValue.avID,
-        backRelationKeyID: oldValue.backKeyID,
-        isTwoWay: oldValue.isTwoWay,
-        name: inputElement.dataset.oldValue
+        id: colData.relation.avID,
+        backRelationKeyID: colData.relation.backKeyID,
+        isTwoWay: colData.relation.isTwoWay,
+        name: inputElement.dataset.oldValue,
+        format: colData.name
     }]);
     options.avElement.remove();
+    updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: colNewName});
+    focusBlock(options.blockElement);
 }
 
 export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: string, resetData = false) => {

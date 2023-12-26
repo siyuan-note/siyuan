@@ -8,6 +8,7 @@ import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
+import {toggleUpdateRelationBtn} from "./relation";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -134,8 +135,7 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         });
-    }
-    if (colData.type === "number") {
+    } else if (colData.type === "number") {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="numberFormat" data-format="${colData.numberFormat}">
     <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
@@ -149,20 +149,22 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
-        html += `<button class="b3-menu__item" data-type="goSearchAV" data-old-av-id="${colData.relation?.avID}" data-old-col-id="${colData.relation?.backKeyID}">
+        html += `<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
-    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : "TODO"}</span>
+    <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item${isSelf ? " fn__none" : ""}">
+<label class="b3-menu__item fn__none">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
-    <input type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
-<div class="b3-menu__item fn__flex-column" data-type="nobg">
-    <input data-type="colName" style="margin-top: 8px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
-    <button style="margin: 8px 0" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
+<div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
+    <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+</div>
+<div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
+    <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     }
     return `<div class="b3-menu__items">
@@ -285,47 +287,74 @@ export const bindEditEvent = (options: {
     }
 
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
-    if (!addOptionElement) {
-        return;
-    }
-    addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (event.key === "Escape") {
-            options.menuElement.parentElement.remove();
-        }
-        if (event.key === "Enter") {
-            let hasSelected = false;
-            colData.options.find((item) => {
-                if (addOptionElement.value === item.name) {
-                    hasSelected = true;
-                    return true;
-                }
-            });
-            if (hasSelected || !addOptionElement.value) {
+    if (addOptionElement) {
+        addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
                 return;
             }
-            colData.options.push({
-                color: (colData.options.length + 1).toString(),
-                name: addOptionElement.value
+            if (event.key === "Escape") {
+                options.menuElement.parentElement.remove();
+            }
+            if (event.key === "Enter") {
+                let hasSelected = false;
+                colData.options.find((item) => {
+                    if (addOptionElement.value === item.name) {
+                        hasSelected = true;
+                        return true;
+                    }
+                });
+                if (hasSelected || !addOptionElement.value) {
+                    return;
+                }
+                colData.options.push({
+                    color: (colData.options.length + 1).toString(),
+                    name: addOptionElement.value
+                });
+                transaction(options.protyle, [{
+                    action: "updateAttrViewColOptions",
+                    id: colId,
+                    avID,
+                    data: colData.options
+                }], [{
+                    action: "removeAttrViewColOption",
+                    id: colId,
+                    avID,
+                    data: addOptionElement.value
+                }]);
+                options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
+                bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
+                (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+            }
+        });
+    }
+
+    const backRelationElement = options.menuElement.querySelector('[data-type="backRelation"]') as HTMLInputElement;
+    if (backRelationElement) {
+        backRelationElement.addEventListener("change", () => {
+            toggleUpdateRelationBtn(options.menuElement, avID);
+        });
+        const goSearchElement = options.menuElement.querySelector('[data-type="goSearchAV"]') as HTMLElement;
+        const oldValue = JSON.parse(goSearchElement.getAttribute("data-old-value"));
+        const inputElement = options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement;
+        inputElement.addEventListener("input", () => {
+            toggleUpdateRelationBtn(options.menuElement, avID);
+        });
+        if (oldValue.avID) {
+            fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
+                goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages.title);
+                response.data.av.keyValues.find((item: { key: { id: string, name: string } }) => {
+                    if (item.key.id === oldValue.backKeyID) {
+                        inputElement.setAttribute("data-old-value", item.key.name || window.siyuan.languages.title);
+                        inputElement.value = item.key.name || window.siyuan.languages.title;
+                        return true;
+                    }
+                });
+                toggleUpdateRelationBtn(options.menuElement, avID);
             });
-            transaction(options.protyle, [{
-                action: "updateAttrViewColOptions",
-                id: colId,
-                avID,
-                data: colData.options
-            }], [{
-                action: "removeAttrViewColOption",
-                id: colId,
-                avID,
-                data: addOptionElement.value
-            }]);
-            options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
-            bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
-            (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+        } else {
+            toggleUpdateRelationBtn(options.menuElement, avID);
         }
-    });
+    }
 };
 
 export const getColNameByType = (type: TAVCol) => {
@@ -427,7 +456,9 @@ export const addAttrViewColAnimation = (options: {
         previousElement.insertAdjacentHTML("afterend", html);
     });
     window.siyuan.menus.menu.remove();
-    showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
+    if (options.type !== "relation") {
+        showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
+    }
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
@@ -1018,6 +1049,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             });
         }
     });
+    /*
     menu.addItem({
         icon: "iconSearch",
         label: window.siyuan.languages.rollup,
@@ -1042,7 +1074,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 id
             });
         }
-    });
+    });*/
     menu.addItem({
         icon: "iconClock",
         label: window.siyuan.languages.createdTime,

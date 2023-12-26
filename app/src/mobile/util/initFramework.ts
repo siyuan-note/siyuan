@@ -46,14 +46,14 @@ const openDockMenu = (app: App) => {
                         custom = plugin.docks[dockId].mobileModel(document.querySelector('#sidebar [data-type="sidebar-plugin"]'));
                     }
                 }
-            })
+            });
         });
     });
     menu.fullscreen("bottom");
     if (menu.element.lastElementChild.innerHTML === "") {
         showMessage(window.siyuan.languages._kernel[122]);
     }
-}
+};
 
 export const initFramework = (app: App, isStart: boolean) => {
     setInlineStyle();

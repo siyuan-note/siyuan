@@ -21,11 +21,10 @@ import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
-import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
+import {loadPlugins} from "../plugin/loader";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
-import {Menu} from "../plugin/Menu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -85,7 +84,7 @@ class App {
             window.siyuan.config = confResponse.data.conf;
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
                     document.title = window.siyuan.languages.siyuanNote;

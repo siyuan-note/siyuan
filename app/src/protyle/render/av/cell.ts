@@ -9,6 +9,7 @@ import {focusBlock} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
+import {genAVValueHTML} from "./blockAttr";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
@@ -68,6 +69,14 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
             type: colType,
             checkbox: {
                 checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
+            }
+        };
+    } else if (colType === "relation") {
+        cellValue = {
+            type: colType,
+            relation: {
+                blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
+                contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
             }
         };
     }
@@ -132,6 +141,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     checked: value ? true : false
                 }
             };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {blockIDs: [], contents: value ? [value] : []}
+            };
         }
     } else {
         if (colType === "mSelect" || colType === "select") {
@@ -155,6 +169,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 checkbox: {
                     checked: value ? true : false
                 }
+            };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: value
             };
         }
     }
@@ -258,6 +277,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, cellElements);
+        } else if (type === "relation") {
+            openMenuPanel({protyle, blockElement, type: "relation", cellElements});
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -464,27 +485,33 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value = "") => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "", cElements?: HTMLElement[]) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
     let text = "";
-    const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
-    if (cellElements.length === 0) {
-        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
-            rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
-                cellElements.push(cellElement);
+    let cellElements: Element[];
+    if (cElements?.length > 0) {
+        cellElements = cElements;
+    } else {
+        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--select"));
+        if (cellElements.length === 0) {
+            nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
+                rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
+                    cellElements.push(cellElement);
+                });
             });
-        });
+        }
     }
+
     cellElements.forEach((item: HTMLElement) => {
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;
         }
-        const type = getTypeByCellElement(item);
+        const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template"].includes(type)) {
             return;
         }
@@ -512,6 +539,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         });
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);
+        } else {
+            item.innerHTML = genAVValueHTML(cellValue);
         }
     });
     if (doOperations.length > 0) {
@@ -544,10 +573,10 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
 <span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext${cellValue?.isDetached ? "" : " av__celltext--ref"}">${cellValue.block.content || ""}</span>
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>
 <span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
@@ -583,6 +612,10 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         });
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else if (cellValue.type === "relation") {
+        cellValue?.relation?.contents?.forEach((item, index) => {
+            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
+        });
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {

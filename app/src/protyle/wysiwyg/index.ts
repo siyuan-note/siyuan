@@ -1527,6 +1527,11 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            if (!hasClosestByAttribute(event.target, "contenteditable", "true")) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             const blockElement = hasClosestBlock(event.target);
             if (blockElement && !getContenteditableElement(blockElement)) {
                 event.stopPropagation();

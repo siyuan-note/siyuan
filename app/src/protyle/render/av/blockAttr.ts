@@ -1,7 +1,6 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
-import {hasClosestByAttribute} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
 
@@ -57,7 +56,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
         case "checkbox":
-            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked?"Check":"Uncheck"}"></use></svg>`;
+            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
             html = `<div class="fn__flex-1">${value.template.content}</div>`;
@@ -66,6 +65,11 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
 <span class="fn__space"></span>
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
+            break;
+        case "relation":
+            value.relation?.blockIDs.forEach((item, index) => {
+                html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
+            });
             break;
     }
     return html;
@@ -117,34 +121,36 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
         });
         element.innerHTML = html;
         element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-            const dateElement = hasClosestByAttribute(target, "data-type", "date");
-            if (dateElement) {
-                popTextCell(protyle, [dateElement], "date");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect");
-            if (mSelectElement) {
-                popTextCell(protyle, [mSelectElement], mSelectElement.getAttribute("data-type") as TAVCol);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const mAssetElement = hasClosestByAttribute(target, "data-type", "mAsset");
-            if (mAssetElement) {
-                popTextCell(protyle, [mAssetElement], "mAsset");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const checkboxElement = hasClosestByAttribute(target, "data-type", "checkbox");
-            if (checkboxElement) {
-                popTextCell(protyle, [checkboxElement], "checkbox");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+            let target = event.target as HTMLElement;
+            while (target && !element.isSameNode(target)) {
+                const type = target.getAttribute("data-type");
+                if (type === "date") {
+                    popTextCell(protyle, [target], "date");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "select" || type === "mSelect") {
+                    popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "mAsset") {
+                    popTextCell(protyle, [target], "mAsset");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "checkbox") {
+                    popTextCell(protyle, [target], "checkbox");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "relation") {
+                    popTextCell(protyle, [target], "relation");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
+                target = target.parentElement;
             }
         });
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {

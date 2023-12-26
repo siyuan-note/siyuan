@@ -93,10 +93,14 @@ export const fetchSyncPost = async (url: string, data?: any) => {
     return res2;
 };
 
-export const fetchGet = (url: string, cb: (response: IWebSocketData | IEmoji[]) => void) => {
+export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
     fetch(url).then((response) => {
-        return response.json();
-    }).then((response: IWebSocketData) => {
+        if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
+            return response.json();
+        } else {
+            return response.text();
+        }
+    }).then((response) => {
         cb(response);
     });
 };

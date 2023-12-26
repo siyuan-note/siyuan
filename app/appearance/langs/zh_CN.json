@@ -1,9 +1,9 @@
 {
   "backRelation": "双向关联",
-  "thisDatabase": "当前数据表格",
+  "thisDatabase": "当前数据库",
   "relatedTo": "关联至",
   "relation": "关联",
-  "rollup": "查询引用",
+  "rollup": "汇总",
   "replaceTypes": {
     "text": "普通文本",
     "imgText": "图片提示文本",

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -116,7 +117,8 @@ func flushTx(tx *Transaction) {
 		case TxErrCodeDataIsSyncing:
 			util.PushErrMsg(Conf.Language(81), 5000)
 		default:
-			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed: %s", txErr.msg)
+			txData, _ := gulu.JSON.MarshalJSON(tx)
+			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
 		}
 	}
 	elapsed := time.Now().Sub(start).Milliseconds()
@@ -167,6 +169,19 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		ret = &TxErr{msg: err.Error()}
 		return
 	}
+
+	defer func() {
+		if e := recover(); nil != e {
+			stack := debug.Stack()
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
+			logging.LogErrorf(msg)
+
+			if 0 == tx.state.Load() {
+				tx.rollback()
+				return
+			}
+		}
+	}()
 
 	for _, op := range tx.DoOperations {
 		switch op.Action {
@@ -260,6 +275,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewView(op)
 		case "updateAttrViewColRelation":
 			ret = tx.doUpdateAttrViewColRelation(op)
+		case "updateAttrViewColRollup":
+			ret = tx.doUpdateAttrViewColRollup(op)
 		}
 
 		if nil != ret {

@@ -203,9 +203,29 @@ func (value *Value) Compare(other *Value) int {
 			return 0
 		}
 	case KeyTypeRelation:
-		// TODO: relation compare
+		if nil != value.Relation && nil != other.Relation {
+			vContent := strings.TrimSpace(strings.Join(value.Relation.Contents, " "))
+			oContent := strings.TrimSpace(strings.Join(other.Relation.Contents, " "))
+			return strings.Compare(vContent, oContent)
+		}
 	case KeyTypeRollup:
-		// TODO: rollup compare
+		if nil != value.Rollup && nil != other.Rollup {
+			vContent := strings.TrimSpace(strings.Join(value.Relation.Contents, " "))
+			oContent := strings.TrimSpace(strings.Join(other.Relation.Contents, " "))
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
+				if v1 > v2 {
+					return 1
+				}
+
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
+			return strings.Compare(vContent, oContent)
+		}
 	}
 	return 0
 }
@@ -594,7 +614,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			contains := false
 			for _, c := range value.Relation.Contents {
 				for _, c1 := range other.Relation.Contents {
-					if c == c1 {
+					if strings.Contains(c, c1) {
 						contains = true
 						break
 					}
@@ -604,8 +624,8 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		case FilterOperatorDoesNotContain:
 			contains := false
 			for _, c := range value.Relation.Contents {
-				for _, c2 := range other.Relation.Contents {
-					if c == c2 {
+				for _, c1 := range other.Relation.Contents {
+					if strings.Contains(c, c1) {
 						contains = true
 						break
 					}

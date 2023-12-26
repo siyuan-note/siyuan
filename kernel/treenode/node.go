@@ -600,10 +600,9 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 组装列
 	for _, col := range view.Table.Columns {
-		key, getErr := attrView.GetKey(col.ID)
-		if nil != getErr {
-			err = getErr
-			return
+		key, _ := attrView.GetKey(col.ID)
+		if nil == key {
+			continue
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
@@ -724,6 +723,30 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
 				cell.Value.Template.Content = content
+			case av.KeyTypeRollup: // 渲染汇总列
+				rollupKey, _ := attrView.GetKey(cell.Value.KeyID)
+				if nil == rollupKey || nil == rollupKey.Rollup {
+					break
+				}
+
+				relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+				if nil == relKey || nil == relKey.Relation {
+					break
+				}
+
+				relVal := attrView.GetValue(relKey.ID, row.ID)
+				if nil == relVal || nil == relVal.Relation {
+					break
+				}
+
+				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+				if nil == destAv {
+					break
+				}
+
+				for _, blockID := range relVal.Relation.BlockIDs {
+					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destAv.GetValue(rollupKey.Rollup.KeyID, blockID).String())
+				}
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

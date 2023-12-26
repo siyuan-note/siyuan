@@ -3,7 +3,7 @@ import {escapeHtml} from "../../util/escape";
 import * as path from "path";
 /// #endif
 import {hideMessage, showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {fetchGet, fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
@@ -96,7 +96,7 @@ id="preview"></div>
             markItem.childNodes.forEach((item) => {
                 let spanHTML = "";
                 Array.from(item.textContent).forEach(str => {
-                    spanHTML += `<span style="${markItem.getAttribute("style")||""};border-radius: 0;padding-left: 0;padding-right: 0;box-shadow: none;border-left:0;border-right:0;border-top:0" data-type="${markItem.getAttribute("data-type")}">${str}</span>`;
+                    spanHTML += `<span style="${markItem.getAttribute("style") || ""};border-radius: 0;padding-left: 0;padding-right: 0;box-shadow: none;border-left:0;border-right:0;border-top:0" data-type="${markItem.getAttribute("data-type")}">${str}</span>`;
                 });
                 const templateElement = document.createElement("template");
                 templateElement.innerHTML = spanHTML;
@@ -138,6 +138,13 @@ id="preview"></div>
             }
             item.setAttribute("viewBox", viewBox);
             item.innerHTML = symbolElements[symbolElements.length - 1].innerHTML;
+        });
+        previewElement.querySelectorAll(".img img").forEach((item: HTMLImageElement) => {
+            if (item.src.endsWith(".svg")) {
+                fetchGet(item.src, (response: string) => {
+                    item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;
+                });
+            }
         });
         btnsElement[0].removeAttribute("disabled");
         btnsElement[1].removeAttribute("disabled");

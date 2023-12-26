@@ -285,6 +285,10 @@ func labelBlocksByKeyword(keyword string) (ret map[string]TagBlocks) {
 	sqlBlocks := sql.GetBlocks(blockIDs)
 	blockMap := map[string]*sql.Block{}
 	for _, block := range sqlBlocks {
+		if nil == block {
+			continue
+		}
+
 		blockMap[block.ID] = block
 	}
 

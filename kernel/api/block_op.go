@@ -29,6 +29,126 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func unfoldBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		ret.Code = -1
+		ret.Msg = "block tree not found [id=" + id + "]"
+		return
+	}
+
+	if bt.Type == "d" {
+		ret.Code = -1
+		ret.Msg = "document can not be unfolded"
+		return
+	}
+
+	var transactions []*model.Transaction
+	if "h" == bt.Type {
+		transactions = []*model.Transaction{
+			{
+				DoOperations: []*model.Operation{
+					{
+						Action: "unfoldHeading",
+						ID:     id,
+					},
+				},
+			},
+		}
+	} else {
+		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"unfold": "1"})
+		transactions = []*model.Transaction{
+			{
+				DoOperations: []*model.Operation{
+					{
+						Action: "setAttrs",
+						ID:     id,
+						Data:   string(data),
+					},
+				},
+			},
+		}
+	}
+
+	model.PerformTransactions(&transactions)
+	model.WaitForWritingFiles()
+
+	broadcastTransactions(transactions)
+}
+
+func foldBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		ret.Code = -1
+		ret.Msg = "block tree not found [id=" + id + "]"
+		return
+	}
+
+	if bt.Type == "d" {
+		ret.Code = -1
+		ret.Msg = "document can not be folded"
+		return
+	}
+
+	var transactions []*model.Transaction
+	if "h" == bt.Type {
+		transactions = []*model.Transaction{
+			{
+				DoOperations: []*model.Operation{
+					{
+						Action: "foldHeading",
+						ID:     id,
+					},
+				},
+			},
+		}
+	} else {
+		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"fold": "1"})
+		transactions = []*model.Transaction{
+			{
+				DoOperations: []*model.Operation{
+					{
+						Action: "setAttrs",
+						ID:     id,
+						Data:   string(data),
+					},
+				},
+			},
+		}
+	}
+
+	model.PerformTransactions(&transactions)
+	model.WaitForWritingFiles()
+
+	broadcastTransactions(transactions)
+}
+
 func moveBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

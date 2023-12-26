@@ -24,7 +24,7 @@ const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: nu
 <span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${unreviewedNewCardCount}</span>
 <span class="fn__space"></span>+<span class="fn__space"></span>
 <span class="ariaLabel ft__success" aria-label="${window.siyuan.languages.flashcardReviewCard}">${unreviewedOldCardCount}</span>`;
-}
+};
 
 export const genCardHTML = (options: {
     id: string,
@@ -197,7 +197,7 @@ export const bindCardEvent = (options: {
             notebook: filterElement.getAttribute("data-id"),
         }, (treeCards) => {
             index = 0;
-            options.cardsData.cards = treeCards.data.cards;
+            options.cardsData = treeCards.data;
             if (options.cardsData.unreviewedCount > 0) {
                 nextCard({
                     countElement,
@@ -411,7 +411,7 @@ export const bindCardEvent = (options: {
                         reviewedCards: options.cardsData.cards
                     }, (result) => {
                         index = 0;
-                        options.cardsData.cards = result.data.cards;
+                        options.cardsData = result.data;
                         if (options.cardsData.unreviewedCount === 0) {
                             if (result.data.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);
@@ -537,7 +537,7 @@ const nextCard = (options: {
 };
 
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
-    countElement.classList.add("fn__none");
+    countElement.parentElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
     emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`;

@@ -83,6 +83,16 @@ func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	stmt := "SELECT * FROM `blocks` WHERE `id` IN ('" + strings.Join(includeIDs, "','") + "')"
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 1024)
+
+	// 根据 includeIDs 的顺序排序 Improve `//!js` query embed block result sorting https://github.com/siyuan-note/siyuan/issues/9977
+	m := map[string]int{}
+	for i, id := range includeIDs {
+		m[id] = i
+	}
+	sort.Slice(sqlBlocks, func(i, j int) bool {
+		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
+	})
+
 	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, sqlBlocks)
 	return
 }

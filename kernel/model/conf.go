@@ -649,6 +649,15 @@ func (conf *AppConf) Box(boxID string) *Box {
 	return nil
 }
 
+func (conf *AppConf) GetBox(boxID string) *Box {
+	for _, box := range conf.GetBoxes() {
+		if box.ID == boxID {
+			return box
+		}
+	}
+	return nil
+}
+
 func (conf *AppConf) BoxNames(boxIDs []string) (ret map[string]string) {
 	ret = map[string]string{}
 

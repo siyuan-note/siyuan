@@ -65,7 +65,6 @@ export class Plugin {
     }) {
         this.app = options.app;
         this.i18n = options.i18n;
-        this.name = options.name;
         this.displayName = options.displayName;
         this.eventBus = new EventBus(options.name);
     }

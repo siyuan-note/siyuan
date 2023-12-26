@@ -6,6 +6,7 @@ import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
+import {escapeAttr} from "../../../util/escape";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -590,7 +591,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
 
     let selectedHTML = "";
     allUniqueOptions.forEach((unique) => {
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${unique.content}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(unique.content)}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items">

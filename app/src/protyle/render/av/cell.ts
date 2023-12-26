@@ -103,26 +103,19 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
 };
 
 export const genCellValue = (colType: TAVCol, value: string | any) => {
-    let cellValue: IAVCellValue;
-    if (typeof value === "string") {
+    let cellValue: IAVCellValue = {
+        type: colType,
+        [colType === "select" ? "mSelect" : colType]: value as IAVCellDateValue
+    };
+    if (typeof value === "string" && value && colType !== "mAsset") {
         if (colType === "number") {
-            if (value) {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        content: parseFloat(value),
-                        isNotEmpty: true
-                    }
-                };
-            } else {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        content: 0,
-                        isNotEmpty: false
-                    }
-                };
-            }
+            cellValue = {
+                type: colType,
+                number: {
+                    content: parseFloat(value) || 0,
+                    isNotEmpty: true
+                }
+            };
         } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
             cellValue = {
                 type: colType,
@@ -135,10 +128,44 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 mSelect: [{
                     content: value,
-                    color: value ? "1" : ""
+                    color: "1"
                 }]
             };
-        } else if (["date", "created", "updated"].includes(colType) && value === "") {
+        } else if (colType === "checkbox") {
+            cellValue = {
+                type: colType,
+                checkbox: {
+                    checked: true
+                }
+            };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {blockIDs: [], contents: [value]}
+            };
+        }
+    } else if (typeof value === "undefined" || !value) {
+        if (colType === "number") {
+            cellValue = {
+                type: colType,
+                number: {
+                    content: 0,
+                    isNotEmpty: true
+                }
+            };
+        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+            cellValue = {
+                type: colType,
+                [colType]: {
+                    content: ""
+                }
+            };
+        } else if (colType === "mSelect" || colType === "select" || colType === "mAsset") {
+            cellValue = {
+                type: colType,
+                [colType === "select" ? "mSelect" : colType]: []
+            };
+        } else if (["date", "created", "updated"].includes(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {
@@ -154,53 +181,15 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 checkbox: {
-                    checked: value ? true : false
+                    checked: false
                 }
             };
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {blockIDs: [], contents: value ? [value] : []}
-            };
-        } else if (colType === "mAsset") {
-            cellValue = {
-                type: colType,
-                mAsset: []
+                relation: {blockIDs: [], contents: []}
             };
         }
-    } else if (typeof value !== "undefined") {
-        if (colType === "mSelect" || colType === "select") {
-            cellValue = {
-                type: colType,
-                mSelect: value as IAVCellSelectValue[]
-            };
-        } else if (["date", "created", "updated"].includes(colType)) {
-            cellValue = {
-                type: colType,
-                [colType]: value as IAVCellDateValue
-            };
-        } else if (colType === "mAsset") {
-            cellValue = {
-                type: colType,
-                mAsset: value as IAVCellAssetValue[]
-            };
-        } else if (colType === "checkbox") {
-            cellValue = {
-                type: colType,
-                checkbox: {
-                    checked: value ? true : false
-                }
-            };
-        } else if (colType === "relation") {
-            cellValue = {
-                type: colType,
-                relation: value
-            };
-        }
-    } else {
-        cellValue = {
-            type: colType,
-        };
     }
     if (colType === "block") {
         cellValue.isDetached = true;

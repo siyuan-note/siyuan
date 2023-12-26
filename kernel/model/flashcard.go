@@ -390,7 +390,7 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 		delete(skipCardCache, cardID)
 	} else {
 		// 首次复习该卡片，将卡片缓存以便后续支持撤销后再次复习
-		reviewCardCache[cardID] = card
+		reviewCardCache[cardID] = card.Clone()
 	}
 
 	log := deck.Review(cardID, rating)
@@ -404,8 +404,8 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 		return
 	}
 
-	dueCards, _, _, _ := getDueFlashcards(deckID, reviewedCardIDs)
-	if 1 > len(dueCards) {
+	_, unreviewedCount, _, _ := getDueFlashcards(deckID, reviewedCardIDs)
+	if 1 > unreviewedCount {
 		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存和跳过缓存
 		reviewCardCache = map[string]riff.Card{}
 		skipCardCache = map[string]riff.Card{}
@@ -988,7 +988,7 @@ func getDeckIDs() (deckIDs []string) {
 	return
 }
 
-func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int) {
+func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCountInRound, unreviewedOldCardCountInRound int) {
 	ret = []riff.Card{}
 	dues := deck.Dues()
 
@@ -1006,7 +1006,8 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 	}
 	dues = tmp
 
-	if 1 > len(reviewedCardIDs) {
+	reviewedCardCount := len(reviewedCardIDs)
+	if 1 > reviewedCardCount {
 		// 未传入已复习的卡片 ID，说明是开始新的复习，需要清空缓存
 		reviewCardCache = map[string]riff.Card{}
 		skipCardCache = map[string]riff.Card{}
@@ -1014,9 +1015,43 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 
 	newCount := 0
 	reviewCount := 0
+	for _, reviewedCard := range reviewCardCache {
+		if riff.New == reviewedCard.GetState() {
+			newCount++
+		} else {
+			reviewCount++
+		}
+	}
+
 	for _, c := range dues {
 		if nil != skipCardCache[c.ID()] {
 			continue
+		}
+
+		if 0 < len(reviewedCardIDs) {
+			if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
+				unreviewedCount++
+				if riff.New == c.GetState() {
+					if newCount < newCardLimit {
+						unreviewedNewCardCountInRound++
+					}
+				} else {
+					if reviewCount < reviewCardLimit {
+						unreviewedOldCardCountInRound++
+					}
+				}
+			}
+		} else {
+			unreviewedCount++
+			if riff.New == c.GetState() {
+				if newCount < newCardLimit {
+					unreviewedNewCardCountInRound++
+				}
+			} else {
+				if reviewCount < reviewCardLimit {
+					unreviewedOldCardCountInRound++
+				}
+			}
 		}
 
 		if riff.New == c.GetState() {
@@ -1031,24 +1066,6 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			}
 
 			reviewCount++
-		}
-
-		if 0 < len(reviewedCardIDs) {
-			if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
-				unreviewedCount++
-				if riff.New == c.GetState() {
-					unreviewedNewCardCount++
-				} else {
-					unreviewedOldCardCount++
-				}
-			}
-		} else {
-			unreviewedCount++
-			if riff.New == c.GetState() {
-				unreviewedNewCardCount++
-			} else {
-				unreviewedOldCardCount++
-			}
 		}
 
 		ret = append(ret, c)

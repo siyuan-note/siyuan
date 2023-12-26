@@ -42,7 +42,7 @@ export const genCardHTML = (options: {
     iconsHTML = `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
-    <div data-type="count" class="${options.cardsData.unreviewedCount === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+    <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
@@ -54,7 +54,7 @@ export const genCardHTML = (options: {
         <span class="fn__space"></span>
         <span class="fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space fn__flex-1 resize__move" style="min-height: 100%"></span>
-        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.unreviewedCount === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
         <div class="fn__space"></div>
         <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -71,16 +71,16 @@ export const genCardHTML = (options: {
     /// #endif
     return `<div class="card__main">
     ${iconsHTML}
-    <div class="card__block fn__flex-1 ${options.cardsData.unreviewedCount === 0 ? "fn__none" : ""} 
+    <div class="card__block fn__flex-1 ${options.cardsData.cards.length === 0 ? "fn__none" : ""} 
 ${window.siyuan.config.flashcard.mark ? "card__block--hidemark" : ""} 
 ${window.siyuan.config.flashcard.superBlock ? "card__block--hidesb" : ""} 
 ${window.siyuan.config.flashcard.heading ? "card__block--hideh" : ""} 
 ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="render"></div>
-    <div class="card__empty card__empty--space${options.cardsData.unreviewedCount === 0 ? "" : " fn__none"}" data-type="empty">
+    <div class="card__empty card__empty--space${options.cardsData.cards.length === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
-    <div class="fn__flex card__action${options.cardsData.unreviewedCount === 0 ? " fn__none" : ""}">
+    <div class="fn__flex card__action${options.cardsData.cards.length === 0 ? " fn__none" : ""}">
         <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
             <svg><use xlink:href="#iconLeft"></use></svg>
             (p)
@@ -165,7 +165,7 @@ export const bindCardEvent = (options: {
     if (window.siyuan.mobile) {
         window.siyuan.mobile.popEditor = editor;
     }
-    if (options.cardsData.unreviewedCount > 0) {
+    if (options.cardsData.cards.length > 0) {
         fetchPost("/api/filetree/getDoc", {
             id: options.cardsData.cards[index].blockID,
             mode: 0,
@@ -198,7 +198,7 @@ export const bindCardEvent = (options: {
         }, (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
-            if (options.cardsData.unreviewedCount > 0) {
+            if (options.cardsData.cards.length > 0) {
                 nextCard({
                     countElement,
                     editor,
@@ -401,7 +401,7 @@ export const bindCardEvent = (options: {
                 }
                 /// #endif
                 index++;
-                if (index > options.cardsData.unreviewedCount - 1) {
+                if (index > options.cardsData.cards.length - 1) {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
                     fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
                         (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
@@ -412,8 +412,8 @@ export const bindCardEvent = (options: {
                     }, (result) => {
                         index = 0;
                         options.cardsData = result.data;
-                        if (options.cardsData.unreviewedCount === 0) {
-                            if (result.data.unreviewedCount > 0) {
+                        if (options.cardsData.cards.length === 0) {
+                            if (options.cardsData.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);
                             } else {
                                 allDone(countElement, editor, actionElements);

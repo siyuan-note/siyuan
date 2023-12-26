@@ -307,18 +307,16 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 });
             });
         }
-        if (type === "block" && blockElement) {
+        if (type === "block") {
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
                     return;
                 }
-                if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value)) {
+                if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
                     protyle.toolbar.range = document.createRange();
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
                     focusByRange(protyle.toolbar.range);
-                    hintRef("", protyle, "av");
-                    inputElement.value = "";
-                    updateCellValueByInput(protyle, type, cellElements);
+                    hintRef(inputElement.value.substring(2), protyle, "av");
                     avMaskElement?.remove();
                     event.preventDefault();
                     event.stopPropagation();

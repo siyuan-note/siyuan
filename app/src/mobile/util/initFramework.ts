@@ -41,7 +41,9 @@ const openDockMenu = (app: App) => {
                         return;
                     } else {
                         if (custom) {
-                            custom.destroy();
+                            if (custom.destroy) {
+                                custom.destroy();
+                            }
                         }
                         custom = plugin.docks[dockId].mobileModel(document.querySelector('#sidebar [data-type="sidebar-plugin"]'));
                     }

@@ -5,11 +5,13 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
-import {focusBlock} from "../../util/selection";
+import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {genAVValueHTML} from "./blockAttr";
+import {Constants} from "../../../constants";
+import {hintRef} from "../../hint/extend";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
@@ -304,6 +306,24 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     }
                 });
             });
+        }
+        if (type === "block" && blockElement) {
+            inputElement.addEventListener("input", (event: InputEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value)) {
+                    protyle.toolbar.range = document.createRange();
+                    protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
+                    focusByRange(protyle.toolbar.range);
+                    hintRef("", protyle, "av");
+                    inputElement.value = "";
+                    updateCellValueByInput(protyle, type, cellElements);
+                    avMaskElement?.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            })
         }
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {

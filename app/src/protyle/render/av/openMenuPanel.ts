@@ -23,7 +23,7 @@ import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
 import {addView, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
 import {removeBlock} from "../../wysiwyg/remove";
-import {getEditorRange} from "../../util/selection";
+import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
@@ -394,6 +394,7 @@ export const openMenuPanel = (options: {
                         window.siyuan.menus.menu.remove();
                     } else {
                         avPanelElement.remove();
+                        focusBlock(options.blockElement);
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();

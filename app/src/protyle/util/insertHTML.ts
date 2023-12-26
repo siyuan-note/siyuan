@@ -8,12 +8,16 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAVName} from "../render/av/action";
-import {readText} from "./compatibility";
 import {updateCellsValue} from "../render/av/cell";
 
-const processAV = (range: Range, text: string, protyle: IProtyle, blockElement: Element) => {
-    if (blockElement.querySelector(".av__cell--select, .av__row--select")) {
+const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: Element) => {
+    const text = protyle.lute.BlockDOM2StdMd(html);
+    const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));
+    const rowsElement = blockElement.querySelector(".av__row--select");
+    if (rowsElement) {
         updateCellsValue(protyle, blockElement as HTMLElement, text);
+    } else if (cellsElement.length > 0) {
+        updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement);
     } else {
         range.insertNode(document.createTextNode(text));
         range.collapse(false);
@@ -52,14 +56,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     if (blockElement.classList.contains("av")) {
         range.deleteContents();
-        const text = readText();
-        if (typeof text === "string") {
-            processAV(range, text, protyle, blockElement);
-        } else {
-            text.then((t) => {
-                processAV(range, t, protyle, blockElement);
-            });
-        }
+        processAV(range, html, protyle, blockElement);
         return;
     }
     let id = blockElement.getAttribute("data-node-id");

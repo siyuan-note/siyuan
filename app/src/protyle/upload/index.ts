@@ -8,6 +8,7 @@ import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {hasClosestBlock} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {updateCellsValue} from "../render/av/cell";
 
 export class Upload {
     public element: HTMLElement;
@@ -119,11 +120,18 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     }
     let succFileText = "";
     const keys = Object.keys(response.data.succMap);
+    const avAssets: IAVCellAssetValue[] = [];
     keys.forEach((key, index) => {
         const path = response.data.succMap[key];
         const type = pathPosix().extname(key).toLowerCase();
         const filename = protyle.options.upload.filename(key);
-        succFileText += genAssetHTML(type, path, filename.substring(0, filename.length - type.length), filename);
+        const name = filename.substring(0, filename.length - type.length)
+        avAssets.push({
+            type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
+            content: path,
+            name: name
+        })
+        succFileText += genAssetHTML(type, path, name, filename);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
@@ -135,8 +143,12 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
             }
         }
     });
-    // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
-    insertHTML(succFileText, protyle, insertBlock);
+    if (nodeElement && nodeElement.classList.contains("av")) {
+        updateCellsValue(protyle, nodeElement, avAssets);
+    } else {
+        // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
+        insertHTML(succFileText, protyle, insertBlock);
+    }
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {
@@ -159,15 +171,15 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             formData.append("file[]", files[i] as File);
         }
         const xhr = new XMLHttpRequest();
-        xhr.open("POST",  Constants.UPLOAD_ADDRESS);
+        xhr.open("POST", Constants.UPLOAD_ADDRESS);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                        successCB(xhr.responseText);
+                    successCB(xhr.responseText);
                 } else if (xhr.status === 0) {
                     showMessage(window.siyuan.languages.fileTypeError);
                 } else {
-                        showMessage(xhr.responseText);
+                    showMessage(xhr.responseText);
                 }
                 if (element) {
                     element.value = "";

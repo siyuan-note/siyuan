@@ -81,6 +81,20 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
             }
         };
+    } else if (colType === "mAsset") {
+        const mAsset: IAVCellAssetValue[] = []
+        Array.from(cellElement.children).forEach((item) => {
+            const isImg = item.classList.contains("av__cellassetimg")
+            mAsset.push({
+                type: isImg ? "image" : "file",
+                content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
+                name: isImg ? "" : item.textContent
+            })
+        })
+        cellValue = {
+            type: colType,
+            mAsset
+        };
     }
     if (colType === "block") {
         cellValue.isDetached = cellElement.dataset.detached === "true";
@@ -148,8 +162,13 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 relation: {blockIDs: [], contents: value ? [value] : []}
             };
+        } else if (colType === "mAsset") {
+            cellValue = {
+                type: colType,
+                mAsset: []
+            };
         }
-    } else {
+    } else if (typeof value !== "undefined") {
         if (colType === "mSelect" || colType === "select") {
             cellValue = {
                 type: colType,
@@ -178,6 +197,10 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 relation: value
             };
         }
+    } else {
+        cellValue = {
+            type: colType,
+        };
     }
     if (colType === "block") {
         cellValue.isDetached = true;
@@ -503,7 +526,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "", cElements?: HTMLElement[]) => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any, cElements?: HTMLElement[]) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -538,6 +561,24 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const colId = item.getAttribute("data-col-id");
 
         text += getCellText(item);
+        const oldValue = genCellValueByElement(type, item);
+        // relation 为全部更新，以下类型为添加
+        if (type === "mAsset") {
+            if (Array.isArray(value)) {
+                value = oldValue.mAsset.concat(value);
+            } else if (typeof value !== "undefined") {
+                // 不传入为删除，传入字符串不进行处理
+                return;
+            }
+        } else if (type === "mSelect") {
+            // 不传入为删除
+            if (typeof value === "string") {
+                value = oldValue.mSelect.concat({
+                    content: value,
+                    color: (oldValue.mSelect.length + 1).toString()
+                });
+            }
+        }
         const cellValue = genCellValue(type, value);
         doOperations.push({
             action: "updateAttrViewCell",
@@ -553,7 +594,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             avID,
             keyID: colId,
             rowID,
-            data: genCellValueByElement(type, item)
+            data: oldValue
         });
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);

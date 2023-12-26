@@ -152,7 +152,7 @@ func createNotebook(c *gin.Context) {
 
 	box := model.Conf.Box(id)
 	if nil == box {
-		ret.Code = -2
+		ret.Code = -1
 		ret.Msg = "opened notebook [" + id + "] not found"
 		return
 	}
@@ -203,7 +203,7 @@ func openNotebook(c *gin.Context) {
 
 	box := model.Conf.Box(notebook)
 	if nil == box {
-		ret.Code = -2
+		ret.Code = -1
 		ret.Msg = "opened notebook [" + notebook + "] not found"
 		return
 	}
@@ -249,7 +249,7 @@ func getNotebookConf(c *gin.Context) {
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
-		ret.Code = -2
+		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
 	}
@@ -277,7 +277,7 @@ func setNotebookConf(c *gin.Context) {
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
-		ret.Code = -2
+		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
 		return
 	}

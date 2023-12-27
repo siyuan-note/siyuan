@@ -211,6 +211,7 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
             keepFold: false,
+            watermark: false
         };
         defaultStorage[Constants.LOCAL_DOCINFO] = {
             id: "",

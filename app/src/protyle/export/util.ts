@@ -12,6 +12,7 @@ import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
+import {needSubscribe} from "../../util/needSubscribe";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -32,12 +33,18 @@ export const exportImage = (id: string) => {
     <div style="${isMobile() ? "padding: 16px;margin: 8px 0" : "padding: 48px;margin: 8px 0"};border: 1px solid var(--b3-border-color);border-radius: var(--b3-border-radius-b);" 
 class="export-img protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" 
 id="preview"></div>
+    <div class="export-img__watermark"></div>
 </div>
 <div class="b3-dialog__action">
     <label class="fn__flex">
         ${window.siyuan.languages.exportPDF5}
         <span class="fn__space"></span>
         <input id="keepFold" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold ? "checked" : ""}>
+    </label>
+    <label class="fn__flex">
+        ${window.siyuan.languages.exportPDF9}
+        <span class="fn__space"></span>
+        <input id="watermark" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark ? "checked" : ""}>
     </label>
     <span class="fn__flex-1"></span>
     <button disabled class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -87,6 +94,41 @@ id="preview"></div>
             refreshPreview(response);
         });
     });
+    const watermarkElement = (exportDialog.element.querySelector("#watermark") as HTMLInputElement);
+    watermarkElement.addEventListener("change", () => {
+        window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark = watermarkElement.checked;
+        if (watermarkElement.checked && needSubscribe("")) {
+            watermarkElement.checked = false;
+            showMessage(window.siyuan.languages._kernel[29]);
+        }
+        updateWatermark();
+    });
+    const updateWatermark = () => {
+        const watermarkPreviewElement = exportDialog.element.querySelector(".export-img__watermark") as HTMLElement;
+        if (watermarkElement.checked) {
+            window.siyuan.config.export.imageWatermarkDesc = "vvvvv";
+            if (window.siyuan.config.export.imageWatermarkDesc) {
+                watermarkPreviewElement.setAttribute("style", window.siyuan.config.export.imageWatermarkDesc)
+            } else if (window.siyuan.config.export.imageWatermarkStr) {
+                const fontSize = 120;
+                const fontWeight = "normal";
+                const canvas = document.createElement("canvas");
+                canvas.width = window.siyuan.config.export.imageWatermarkDesc.length * fontSize;
+                canvas.height = 140;
+                const context = canvas.getContext("2d");
+                context.fillStyle = 'transparent';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = "#66CCFF";
+                context.font = fontWeight + " " + fontSize + "px sans-serif";
+                context.textAlign = "left";
+                context.textBaseline = "top";
+                context.fillText(window.siyuan.config.export.imageWatermarkDesc, 0, 0);
+                watermarkPreviewElement.setAttribute("style", `background-image: url(${canvas.toDataURL("image/png")});background-repeat: repeat;`)
+            }
+        } else {
+            watermarkPreviewElement.removeAttribute("style");
+        }
+    }
     const refreshPreview = (response: IWebSocketData) => {
         previewElement.innerHTML = response.data.content;
         // https://github.com/siyuan-note/siyuan/issues/9685
@@ -144,6 +186,7 @@ id="preview"></div>
                 });
             }
         });
+        updateWatermark();
         btnsElement[0].removeAttribute("disabled");
         btnsElement[1].removeAttribute("disabled");
         exportDialog.element.querySelector(".fn__loading").remove();

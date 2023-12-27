@@ -184,7 +184,7 @@ export const getEditHTML = (options: {
     </button>
 </div>
 <div class="b3-menu__items fn__none">
-    <button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
+    <button class="b3-menu__item" data-type="nobg" data-col-id="${colData.id}">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goEditCol">
             <svg><use xlink:href="#iconLeft"></use></svg>
         </span>
@@ -422,7 +422,7 @@ export const getColIconByType = (type: TAVCol) => {
     }
 };
 
-export const addAttrViewColAnimation = (options: {
+const addAttrViewColAnimation = (options: {
     blockElement: Element,
     protyle: IProtyle,
     type: TAVCol,
@@ -456,9 +456,6 @@ export const addAttrViewColAnimation = (options: {
         previousElement.insertAdjacentHTML("afterend", html);
     });
     window.siyuan.menus.menu.remove();
-    if (options.type !== "relation") {
-        showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
-    }
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {

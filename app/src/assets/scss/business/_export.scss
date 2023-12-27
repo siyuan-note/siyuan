@@ -12,5 +12,10 @@
       border: 1px solid var(--b3-list-hover);
       box-sizing: border-box;
     }
+
+    .table th,
+    .table td {
+      background-color: transparent;
+    }
   }
 }

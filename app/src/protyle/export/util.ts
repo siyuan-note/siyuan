@@ -111,10 +111,11 @@ export const exportImage = (id: string) => {
             } else if (window.siyuan.config.export.imageWatermarkStr) {
                 addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
                     const width = Math.max(exportDialog.element.querySelector('.export-img').clientWidth / 3, 150);
-                    watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 12px;`)
+                    watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 14px;`)
                     watermarkPreviewElement.innerHTML = `<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`;
                     window.html2canvas(watermarkPreviewElement, {
-                        useCORS: true
+                        useCORS: true,
+                        scale: 1,
                     }).then((canvas) => {
                         watermarkPreviewElement.innerHTML = "";
                         watermarkPreviewElement.setAttribute("style", `background-image: url(${canvas.toDataURL("image/png")});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`)

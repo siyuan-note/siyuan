@@ -157,7 +157,8 @@ interface Window {
     siyuan: ISiyuan
     webkit: any
     html2canvas: (element: Element, opitons: {
-        useCORS: boolean
+        useCORS: boolean,
+        scale?: number
     }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void

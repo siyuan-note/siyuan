@@ -321,9 +321,6 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         if (type === "block") {
             inputElement.addEventListener("input", (event: InputEvent) => {
-                if (event.isComposing) {
-                    return;
-                }
                 if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
                     protyle.toolbar.range = document.createRange();
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);

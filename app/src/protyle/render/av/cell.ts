@@ -287,6 +287,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             openMenuPanel({protyle, blockElement, type: "select", cellElements});
         } else if (type === "mAsset") {
             openMenuPanel({protyle, blockElement, type: "asset", cellElements});
+            focusBlock(blockElement);
         } else if (type === "date") {
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {

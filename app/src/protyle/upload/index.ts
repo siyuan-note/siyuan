@@ -143,12 +143,19 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
             }
         }
     });
-    if (nodeElement && nodeElement.classList.contains("av")) {
+    if ((nodeElement && nodeElement.classList.contains("av"))) {
         updateCellsValue(protyle, nodeElement, avAssets);
-    } else {
-        // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
-        insertHTML(succFileText, protyle, insertBlock);
+        return
     }
+    if (document.querySelector(".av__panel")) {
+        const blockElement = hasClosestBlock(protyle.wysiwyg.element.querySelector(".av__cell--select"));
+        if (blockElement) {
+            updateCellsValue(protyle, blockElement, avAssets);
+            return;
+        }
+    }
+    // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
+    insertHTML(succFileText, protyle, insertBlock);
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {

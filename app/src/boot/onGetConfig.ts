@@ -341,6 +341,7 @@ export const initWindow = async (app: App) => {
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
             mergeSubdocs: ipcData.mergeSubdocs,
+            watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
             pageSize: ipcData.pdfOptions.pageSize,
@@ -380,6 +381,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     merge: ipcData.mergeSubdocs,
                     path: pdfFilePath,
                     removeAssets: ipcData.removeAssets,
+                    watermark: ipcData.watermark
                 }, () => {
                     afterExport(pdfFilePath, msgId);
                     if (ipcData.removeAssets) {

@@ -77,16 +77,15 @@ export const exportConfig = {
     </div>
     <input class="b3-text-field fn__flex-center fn__size200" id="pdfFooter">
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.export27}
-        <div class="b3-label__text">${window.siyuan.languages.export28}</div>
-    </div>
-    <input class="b3-text-field fn__flex-center fn__size200" id="pdfWatermarkStr">
-    <div class="fn__flex-1">
-        <div class="b3-label__text">${window.siyuan.languages.export29}</div>
-    </div>
-    <input class="b3-text-field fn__flex-center fn__size200" id="pdfWatermarkDesc">
+<div class="b3-label config__item">
+    ${window.siyuan.languages.export27}
+    <div class="b3-label__text">${window.siyuan.languages.export28}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="pdfWatermarkStr">
+    <div class="fn__hr"></div>
+    <div class="b3-label__text">${window.siyuan.languages.export29}</div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="pdfWatermarkDesc"></textarea>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">

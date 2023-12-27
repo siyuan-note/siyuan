@@ -250,7 +250,7 @@ export const bindEditEvent = (options: {
             options.menuElement.parentElement.remove();
         }
     });
-
+    nameElement.select();
     const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement;
     if (tplElement) {
         tplElement.addEventListener("blur", () => {

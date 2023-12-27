@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/88250/pdfcpu/pkg/font"
 	"net/http"
 	"net/url"
 	"os"
@@ -781,7 +782,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return
@@ -810,6 +811,12 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 		return ast.WalkContinue
 	})
 
+	pdfcpu.ConfigPath = "disable"
+	font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
+	if mkdirErr := os.MkdirAll(font.UserFontDir, 0755); nil != mkdirErr {
+		logging.LogErrorf("mkdir [%s] failed: %s", font.UserFontDir, mkdirErr)
+		return
+	}
 	pdfCtx, ctxErr := api.ReadContextFile(p)
 	if nil != ctxErr {
 		logging.LogErrorf("read pdf context failed: %s", ctxErr)
@@ -818,7 +825,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
-	processPDFWatermark(pdfCtx)
+	processPDFWatermark(pdfCtx, watermark)
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -828,9 +835,13 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 	return
 }
 
-func processPDFWatermark(pdfCtx *pdfcpu.Context) {
+func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 	// Support adding the watermark on export PDF https://github.com/siyuan-note/siyuan/issues/9961
 	// https://pdfcpu.io/core/watermark
+
+	if !watermark {
+		return
+	}
 
 	str := Conf.Export.PDFWatermarkStr
 	if "" == str {
@@ -842,9 +853,39 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context) {
 	}
 
 	desc := Conf.Export.PDFWatermarkDesc
-	f, e := pdfCtx.ExtractFont(1)
-	if nil == e {
-		desc = "fontname:" + f.Name
+	descParts := strings.Split(desc, ",")
+	m := map[string]string{}
+	for _, descPart := range descParts {
+		kv := strings.Split(descPart, ":")
+		if 2 != len(kv) {
+			continue
+		}
+		m[kv[0]] = kv[1]
+	}
+	if "" == m["fontname"] {
+		m["fontname"] = "LXGW WenKai Lite"
+	}
+	descBuilder := bytes.Buffer{}
+	for k, v := range m {
+		descBuilder.WriteString(k)
+		descBuilder.WriteString(":")
+		descBuilder.WriteString(v)
+		descBuilder.WriteString(",")
+	}
+	desc = descBuilder.String()
+	desc = desc[:len(desc)-1]
+	fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
+	err := api.InstallFonts([]string{fontPath})
+	if nil != err {
+		logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
+	}
+	fonts, err := api.ListFonts()
+	if nil != err {
+		logging.LogErrorf("list fonts failed: %s", err)
+	} else {
+		for _, f := range fonts {
+			logging.LogInfof("installed font: %s", f)
+		}
 	}
 
 	mode := "text"
@@ -859,7 +900,6 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context) {
 	logging.LogInfof("add PDF watermark [mode=%s, str=%s, desc=%s]", mode, str, desc)
 
 	var wm *pdfcpu.Watermark
-	var err error
 	switch mode {
 	case "text":
 		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, pdfcpu.POINTS)

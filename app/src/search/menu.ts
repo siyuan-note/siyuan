@@ -164,7 +164,7 @@ export const replaceFilterMenu = (config: ISearchOption) => {
 </label>`;
     });
     const filterDialog = new Dialog({
-        title: window.siyuan.languages.type,
+        title: window.siyuan.languages.replaceType,
         content: `<div class="b3-dialog__content">${html}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

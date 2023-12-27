@@ -83,7 +83,7 @@ export const exportConfig = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="pdfWatermarkStr">
     <div class="fn__hr"></div>
-    <div class="b3-label__text">${window.siyuan.languages.export29}</div>
+    <div class="b3-label__text"><a href="https://pdfcpu.io/core/watermark#description" target="_blank">${window.siyuan.languages.export29}</a></div>
     <div class="fn__hr"></div>
     <textarea class="b3-text-field fn__block" id="pdfWatermarkDesc"></textarea>
 </div>

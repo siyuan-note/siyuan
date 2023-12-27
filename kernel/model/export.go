@@ -863,7 +863,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 		m[kv[0]] = kv[1]
 	}
 	if "" == m["fontname"] {
-		m["fontname"] = "LXGW WenKai Lite"
+		m["fontname"] = "LXGWWenKaiLite-Regular"
 	}
 	descBuilder := bytes.Buffer{}
 	for k, v := range m {
@@ -874,18 +874,11 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 	}
 	desc = descBuilder.String()
 	desc = desc[:len(desc)-1]
+
 	fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
 	err := api.InstallFonts([]string{fontPath})
 	if nil != err {
 		logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
-	}
-	fonts, err := api.ListFonts()
-	if nil != err {
-		logging.LogErrorf("list fonts failed: %s", err)
-	} else {
-		for _, f := range fonts {
-			logging.LogInfof("installed font: %s", f)
-		}
 	}
 
 	mode := "text"

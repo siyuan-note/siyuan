@@ -596,6 +596,8 @@ interface IExport {
     pdfFooter: string;
     pdfWatermarkStr: string;
     pdfWatermarkDesc: string;
+    imageWatermarkStr: string;
+    imageWatermarkDesc: string;
     docxTemplate: string;
 }
 

@@ -534,7 +534,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
-					} else if n.IsTextMarkType("inlineMath") {
+					} else if n.IsTextMarkType("inline-math") {
 						if !replaceTypes["inlineMath"] {
 							return ast.WalkContinue
 						}
@@ -548,7 +548,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
 							}
 						}
-					} else if n.IsTextMarkType("inlineMemo") {
+					} else if n.IsTextMarkType("inline-memo") {
 						if !replaceTypes["inlineMemo"] {
 							return ast.WalkContinue
 						}

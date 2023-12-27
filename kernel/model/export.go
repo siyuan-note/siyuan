@@ -818,7 +818,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
-	// processPDFWatermark(pdfCtx, "text", "Test", "")
+	processPDFWatermark(pdfCtx)
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -828,32 +828,45 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 	return
 }
 
-func processPDFWatermark(pdfCtx *pdfcpu.Context, mode, watermark, desc string) {
+func processPDFWatermark(pdfCtx *pdfcpu.Context) {
 	// Support adding the watermark on export PDF https://github.com/siyuan-note/siyuan/issues/9961
 	// https://pdfcpu.io/core/watermark
+
+	str := Conf.Export.PDFWatermarkStr
+	if "" == str {
+		return
+	}
 
 	if !IsPaidUser() {
 		return
 	}
 
-	if "" == watermark {
-		return
+	desc := Conf.Export.PDFWatermarkDesc
+	f, e := pdfCtx.ExtractFont(1)
+	if nil == e {
+		desc = "fontname:" + f.Name
 	}
 
-	if "text" != mode && "image" != mode && "pdf" != mode {
-		logging.LogErrorf("invalid watermark type: %s", mode)
-		return
+	mode := "text"
+	if gulu.File.IsExist(str) {
+		if ".pdf" == strings.ToLower(filepath.Ext(str)) {
+			mode = "pdf"
+		} else {
+			mode = "image"
+		}
 	}
+
+	logging.LogInfof("add PDF watermark [mode=%s, str=%s, desc=%s]", mode, str, desc)
 
 	var wm *pdfcpu.Watermark
 	var err error
 	switch mode {
 	case "text":
-		wm, err = pdfcpu.ParseTextWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, pdfcpu.POINTS)
 	case "image":
-		wm, err = pdfcpu.ParseImageWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParseImageWatermarkDetails(str, desc, false, pdfcpu.POINTS)
 	case "pdf":
-		wm, err = pdfcpu.ParsePDFWatermarkDetails(watermark, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParsePDFWatermarkDetails(str, desc, false, pdfcpu.POINTS)
 	}
 
 	if nil != err {

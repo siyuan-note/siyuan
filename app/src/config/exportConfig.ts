@@ -79,6 +79,17 @@ export const exportConfig = {
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.export27}
+        <div class="b3-label__text">${window.siyuan.languages.export28}</div>
+    </div>
+    <input class="b3-text-field fn__flex-center fn__size200" id="pdfWatermarkStr">
+    <div class="fn__flex-1">
+        <div class="b3-label__text">${window.siyuan.languages.export29}</div>
+    </div>
+    <input class="b3-text-field fn__flex-center fn__size200" id="pdfWatermarkDesc">
+</div>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.export25}
         <div class="b3-label__text">${window.siyuan.languages.export26}</div>
     </div>
@@ -139,6 +150,8 @@ export const exportConfig = {
     bindEvent: () => {
         (exportConfig.element.querySelector("#docxTemplate") as HTMLInputElement).value = window.siyuan.config.export.docxTemplate;
         (exportConfig.element.querySelector("#pdfFooter") as HTMLInputElement).value = window.siyuan.config.export.pdfFooter;
+        (exportConfig.element.querySelector("#pdfWatermarkStr") as HTMLInputElement).value = window.siyuan.config.export.pdfWatermarkStr;
+        (exportConfig.element.querySelector("#pdfWatermarkDesc") as HTMLInputElement).value = window.siyuan.config.export.pdfWatermarkDesc;
         (exportConfig.element.querySelector("#blockRefTextLeft") as HTMLInputElement).value = window.siyuan.config.export.blockRefTextLeft;
         (exportConfig.element.querySelector("#blockRefTextRight") as HTMLInputElement).value = window.siyuan.config.export.blockRefTextRight;
         (exportConfig.element.querySelector("#tagOpenMarker") as HTMLInputElement).value = window.siyuan.config.export.tagOpenMarker;
@@ -153,6 +166,8 @@ export const exportConfig = {
                 blockEmbedMode: parseInt((exportConfig.element.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),
                 fileAnnotationRefMode: parseInt((exportConfig.element.querySelector("#fileAnnotationRefMode") as HTMLSelectElement).value, 10),
                 pdfFooter: (exportConfig.element.querySelector("#pdfFooter") as HTMLInputElement).value,
+                pdfWatermarkStr: (exportConfig.element.querySelector("#pdfWatermarkStr") as HTMLInputElement).value,
+                pdfWatermarkDesc: (exportConfig.element.querySelector("#pdfWatermarkDesc") as HTMLInputElement).value,
                 docxTemplate: (exportConfig.element.querySelector("#docxTemplate") as HTMLInputElement).value,
                 blockRefTextLeft: (exportConfig.element.querySelector("#blockRefTextLeft") as HTMLInputElement).value,
                 blockRefTextRight: (exportConfig.element.querySelector("#blockRefTextRight") as HTMLInputElement).value,

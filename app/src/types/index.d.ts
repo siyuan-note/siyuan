@@ -594,6 +594,8 @@ interface IExport {
     addTitle: boolean;
     markdownYFM: boolean;
     pdfFooter: string;
+    pdfWatermarkStr: string;
+    pdfWatermarkDesc: string;
     docxTemplate: string;
 }
 

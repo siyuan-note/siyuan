@@ -197,7 +197,7 @@ export const exportConfig = {
                 setexprt();
             });
         });
-        exportConfig.element.querySelectorAll("input").forEach((item) => {
+        exportConfig.element.querySelectorAll("input, textarea").forEach((item) => {
             if (item.id == "importData") {
                 item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                     const formData = new FormData();

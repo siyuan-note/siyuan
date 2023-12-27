@@ -13,6 +13,7 @@ import {Dialog} from "../../dialog";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
+import {needSubscribe} from "../../util/needSubscribe";
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
@@ -245,6 +246,7 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
+        <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[29]}</div>
     </label>
     <div class="fn__flex">
       <div class="fn__flex-1"></div>
@@ -448,7 +450,13 @@ id="preview">
         mergeSubdocsElement.addEventListener('change', () => {
             refreshPreview();
         });
-        
+        const  watermarkElement = actionElement.querySelector('#watermark');
+        watermarkElement.addEventListener('change', () => {
+            if (watermarkElement.checked && ${needSubscribe("")}) {
+                watermarkElement.nextElementSibling.style.display = "";
+                watermarkElement.checked = false;
+            }
+        });
         const refreshPreview = () => {
           previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
@@ -520,7 +528,7 @@ id="preview">
               },
               keepFold: keepFoldElement.checked,
               mergeSubdocs: mergeSubdocsElement.checked,
-              watermark: actionElement.querySelector('#watermark').checked,
+              watermark: watermarkElement.checked,
               removeAssets: actionElement.querySelector("#removeAssets").checked,
               rootId: "${id}",
               rootTitle: response.data.name,

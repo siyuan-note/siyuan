@@ -852,42 +852,6 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 		return
 	}
 
-	desc := Conf.Export.PDFWatermarkDesc
-	descParts := strings.Split(desc, ",")
-	m := map[string]string{}
-	for _, descPart := range descParts {
-		kv := strings.Split(descPart, ":")
-		if 2 != len(kv) {
-			continue
-		}
-		m[kv[0]] = kv[1]
-	}
-	if "" == m["fontname"] {
-		m["fontname"] = "LXGW WenKai Lite"
-	}
-	descBuilder := bytes.Buffer{}
-	for k, v := range m {
-		descBuilder.WriteString(k)
-		descBuilder.WriteString(":")
-		descBuilder.WriteString(v)
-		descBuilder.WriteString(",")
-	}
-	desc = descBuilder.String()
-	desc = desc[:len(desc)-1]
-	fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
-	err := api.InstallFonts([]string{fontPath})
-	if nil != err {
-		logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
-	}
-	fonts, err := api.ListFonts()
-	if nil != err {
-		logging.LogErrorf("list fonts failed: %s", err)
-	} else {
-		for _, f := range fonts {
-			logging.LogInfof("installed font: %s", f)
-		}
-	}
-
 	mode := "text"
 	if gulu.File.IsExist(str) {
 		if ".pdf" == strings.ToLower(filepath.Ext(str)) {
@@ -897,9 +861,40 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 		}
 	}
 
+	desc := Conf.Export.PDFWatermarkDesc
+	if "text" == mode && util.ContainsCJK(str) {
+		// 中日韩文本水印需要安装字体文件
+		descParts := strings.Split(desc, ",")
+		m := map[string]string{}
+		for _, descPart := range descParts {
+			kv := strings.Split(descPart, ":")
+			if 2 != len(kv) {
+				continue
+			}
+			m[kv[0]] = kv[1]
+		}
+		m["fontname"] = "LXGWWenKaiLite-Regular"
+		descBuilder := bytes.Buffer{}
+		for k, v := range m {
+			descBuilder.WriteString(k)
+			descBuilder.WriteString(":")
+			descBuilder.WriteString(v)
+			descBuilder.WriteString(",")
+		}
+		desc = descBuilder.String()
+		desc = desc[:len(desc)-1]
+
+		fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
+		err := api.InstallFonts([]string{fontPath})
+		if nil != err {
+			logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
+		}
+	}
+
 	logging.LogInfof("add PDF watermark [mode=%s, str=%s, desc=%s]", mode, str, desc)
 
 	var wm *pdfcpu.Watermark
+	var err error
 	switch mode {
 	case "text":
 		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, pdfcpu.POINTS)

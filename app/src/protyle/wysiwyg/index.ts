@@ -1852,7 +1852,7 @@ export class WYSIWYG {
             if (aElement && !event.altKey) {
                 event.stopPropagation();
                 event.preventDefault();
-                const linkAddress = Lute.UnEscapeHTMLStr(aLink);
+                let linkAddress = Lute.UnEscapeHTMLStr(aLink);
                 /// #if MOBILE
                 openByMobile(linkAddress);
                 /// #else
@@ -1882,6 +1882,10 @@ export class WYSIWYG {
                     }
                 } else if (linkAddress) {
                     /// #if !BROWSER
+                    if (0 > linkAddress.indexOf("://")) {
+                        // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
+                        linkAddress = `https://${linkAddress}`;
+                    }
                     shell.openExternal(linkAddress).catch((e) => {
                         showMessage(e);
                     });

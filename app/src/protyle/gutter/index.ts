@@ -2027,13 +2027,14 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             rect = nodeElement.getBoundingClientRect();
             space = 0;
-        } else if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
-            (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
-            marginHeight = (rect.height - this.element.clientHeight) / 2;
-        } else if (!element.classList.contains("av__row") &&
-            (nodeElement.getAttribute("data-type") === "NodeAttributeView" || element.getAttribute("data-type") === "NodeAttributeView") &&
-            contentTop < rect.top) {
-            marginHeight = 8;
+        } else if (!element.classList.contains("av__row")) {
+            if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
+                (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
+                marginHeight = (rect.height - this.element.clientHeight) / 2;
+            } else if ((nodeElement.getAttribute("data-type") === "NodeAttributeView" || element.getAttribute("data-type") === "NodeAttributeView") &&
+                contentTop < rect.top) {
+                marginHeight = 8;
+            }
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
         let left = rect.left - this.element.clientWidth - space;

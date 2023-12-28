@@ -1260,7 +1260,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-        lockScreen();
+        lockScreen(app);
         event.preventDefault();
         return;
     }

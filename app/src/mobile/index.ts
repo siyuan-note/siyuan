@@ -145,7 +145,7 @@ window.reconnectWebSocket = () => {
 };
 window.goBack = goBack;
 window.showKeyboardToolbar = (height) => {
-    document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.innerHeight / 2 - 42).toString());
+    document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.outerHeight / 2 - 42).toString());
     showKeyboardToolbar();
 };
 window.hideKeyboardToolbar = hideKeyboardToolbar;

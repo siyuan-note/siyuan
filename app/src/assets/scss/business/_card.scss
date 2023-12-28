@@ -70,8 +70,14 @@
     }
 
     &--hidemark span[data-type~=mark] {
-      transition: var(--b3-transition);
-      color: transparent !important;
+      font-size: 0;
+
+      &::before {
+        content: " [...] ";
+        color: var(--b3-theme-primary-light);
+        font-size: initial;
+        font-weight: bold;
+      }
     }
 
     &--hideli .li > .list {

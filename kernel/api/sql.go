@@ -26,6 +26,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func flushTransaction(c *gin.Context) {
+	// Add internal kernel API `/api/sqlite/flushTransaction` https://github.com/siyuan-note/siyuan/issues/10005
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	sql.FlushQueue()
+}
+
 func SQL(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

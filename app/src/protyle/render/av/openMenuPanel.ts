@@ -101,7 +101,13 @@ export const openMenuPanel = (options: {
                     blockElement: options.blockElement
                 });
             } else if (options.type === "asset") {
-                bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                bindAssetEvent({
+                    protyle: options.protyle,
+                    data,
+                    menuElement,
+                    cellElements: options.cellElements,
+                    blockElement: options.blockElement
+                });
                 setTimeout(() => {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
@@ -264,7 +270,8 @@ export const openMenuPanel = (options: {
                     data,
                     cellElements: options.cellElements,
                     type: "replace",
-                    replaceValue
+                    replaceValue,
+                    blockElement: options.blockElement
                 });
                 return;
             }
@@ -932,7 +939,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, data, options.cellElements, target);
+                    addAssetLink(options.protyle, data, options.cellElements, target, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -963,7 +970,8 @@ export const openMenuPanel = (options: {
                             data,
                             cellElements: options.cellElements,
                             type: "addUpdate",
-                            addUpdateValue: [value]
+                            addUpdateValue: [value],
+                            blockElement: options.blockElement
                         });
                         window.siyuan.menus.menu.remove();
                     });
@@ -996,7 +1004,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement);
+                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

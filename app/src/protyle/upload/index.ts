@@ -145,12 +145,14 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     });
     if ((nodeElement && nodeElement.classList.contains("av"))) {
         updateCellsValue(protyle, nodeElement, avAssets);
+        document.querySelector(".av__panel")?.remove();
         return
     }
     if (document.querySelector(".av__panel")) {
         const blockElement = hasClosestBlock(protyle.wysiwyg.element.querySelector(".av__cell--select"));
         if (blockElement) {
             updateCellsValue(protyle, blockElement, avAssets);
+            document.querySelector(".av__panel")?.remove();
             return;
         }
     }

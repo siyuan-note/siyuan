@@ -158,10 +158,12 @@ export const setDateValue = (options: {
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const oldValue = JSON.parse(JSON.stringify(cellValue))
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        cellValue.date = Object.assign(cellValue.date || {
-            isNotEmpty2: false,
-            isNotEmpty: false
-        }, options.value);
+        if (elementIndex === 0) {
+            cellValue.date = Object.assign(cellValue.date || {
+                isNotEmpty2: false,
+                isNotEmpty: false
+            }, options.value);
+        }
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,

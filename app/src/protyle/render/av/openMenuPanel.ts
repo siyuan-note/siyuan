@@ -859,7 +859,13 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCol") {
                     const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
+                    let previousID: string
+                    const colData = data.view.columns.find((item: IAVColumn, index) => {
+                        if (item.id === colId) {
+                            previousID = data.view.columns[index - 1]?.id;
+                            return true;
+                        }
+                    });
                     transaction(options.protyle, [{
                         action: "removeAttrViewCol",
                         id: colId,
@@ -869,7 +875,8 @@ export const openMenuPanel = (options: {
                         name: colData.name,
                         avID,
                         type: colData.type,
-                        id: colId
+                        id: colId,
+                        previousID
                     }]);
                     removeAttrViewColAnimation(options.blockElement, colId);
                     avPanelElement.remove();

@@ -516,7 +516,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
     }
 
-    cellElements.forEach((item: HTMLElement) => {
+    cellElements.forEach((item: HTMLElement, elementIndex) => {
+        if (!nodeElement.contains(item)) {
+            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+        }
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;

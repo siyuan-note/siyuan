@@ -1,9 +1,6 @@
-import {transaction} from "../../wysiwyg/transaction";
 import * as dayjs from "dayjs";
-import {updateAttrViewCellAnimation} from "./action";
-import {genAVValueHTML} from "./blockAttr";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {updateCellsValue} from "./cell";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
@@ -70,31 +67,25 @@ export const bindDateEvent = (options: {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     inputElements[0].addEventListener("change", () => {
         inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
-        setDateValue({
-            cellElements: options.cellElements,
-            data: options.data,
-            protyle: options.protyle,
-            blockElement: options.blockElement,
-            value: {
-                isNotEmpty: inputElements[0].value !== "",
-                content: new Date(inputElements[0].dataset.value).getTime(),
-                isNotTime: !inputElements[3].checked
-            }
-        });
+        updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+            content: new Date(inputElements[0].dataset.value).getTime(),
+            isNotEmpty: inputElements[0].value !== "",
+            content2: new Date(inputElements[1].dataset.value).getTime(),
+            isNotEmpty2: inputElements[1].value !== "",
+            hasEndDate: inputElements[2].checked,
+            isNotTime: !inputElements[3].checked,
+        }, options.cellElements);
     });
     inputElements[1].addEventListener("change", () => {
         inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
-        setDateValue({
-            cellElements: options.cellElements,
-            data: options.data,
-            protyle: options.protyle,
-            blockElement: options.blockElement,
-            value: {
-                isNotEmpty2: inputElements[1].value !== "",
-                content2: new Date(inputElements[1].dataset.value).getTime(),
-                isNotTime: !inputElements[3].checked
-            }
-        });
+        updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+            content: new Date(inputElements[0].dataset.value).getTime(),
+            isNotEmpty: inputElements[0].value !== "",
+            content2: new Date(inputElements[1].dataset.value).getTime(),
+            isNotEmpty2: inputElements[1].value !== "",
+            hasEndDate: inputElements[2].checked,
+            isNotTime: !inputElements[3].checked,
+        }, options.cellElements);
     });
     inputElements[2].addEventListener("change", () => {
         if (inputElements[2].checked) {
@@ -102,16 +93,14 @@ export const bindDateEvent = (options: {
         } else {
             inputElements[1].classList.add("fn__none");
         }
-        setDateValue({
-            cellElements: options.cellElements,
-            data: options.data,
-            blockElement: options.blockElement,
-            protyle: options.protyle,
-            value: {
-                hasEndDate: inputElements[2].checked,
-                isNotTime: !inputElements[3].checked
-            }
-        });
+        updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+            content: new Date(inputElements[0].dataset.value).getTime(),
+            isNotEmpty: inputElements[0].value !== "",
+            content2: new Date(inputElements[1].dataset.value).getTime(),
+            isNotEmpty2: inputElements[1].value !== "",
+            hasEndDate: inputElements[2].checked,
+            isNotTime: !inputElements[3].checked,
+        }, options.cellElements);
     });
     inputElements[3].addEventListener("change", () => {
         if (inputElements[3].checked) {
@@ -129,73 +118,13 @@ export const bindDateEvent = (options: {
             inputElements[0].value = inputElements[0].dataset.value.substring(0, 10);
             inputElements[1].value = inputElements[1].dataset.value.substring(0, 10);
         }
-        setDateValue({
-            cellElements: options.cellElements,
-            data: options.data,
-            blockElement: options.blockElement,
-            protyle: options.protyle,
-            value: {
-                isNotTime: !inputElements[3].checked
-            }
-        });
+        updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+            content: new Date(inputElements[0].dataset.value).getTime(),
+            isNotEmpty: inputElements[0].value !== "",
+            content2: new Date(inputElements[1].dataset.value).getTime(),
+            isNotEmpty2: inputElements[1].value !== "",
+            hasEndDate: inputElements[2].checked,
+            isNotTime: !inputElements[3].checked,
+        }, options.cellElements);
     });
-};
-
-export const setDateValue = (options: {
-    cellElements: HTMLElement[],
-    data: IAV
-    protyle: IProtyle,
-    value: IAVCellDateValue,
-    blockElement: Element
-}) => {
-    const colId = options.cellElements[0].dataset.colId;
-    const cellDoOperations: IOperation[] = [];
-    const cellUndoOperations: IOperation[] = [];
-    options.cellElements.forEach((item, elementIndex) => {
-        if (!options.blockElement.contains(item)) {
-            item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
-        }
-        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
-        const oldValue = JSON.parse(JSON.stringify(cellValue))
-        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        if (elementIndex === 0) {
-            cellValue.date = Object.assign(cellValue.date || {
-                isNotEmpty2: false,
-                isNotEmpty: false
-            }, options.value);
-        }
-        cellDoOperations.push({
-            action: "updateAttrViewCell",
-            id: cellValue.id,
-            keyID: colId,
-            rowID,
-            avID: options.data.id,
-            data: cellValue
-        });
-        cellUndoOperations.push({
-            action: "updateAttrViewCell",
-            id: cellValue.id,
-            keyID: colId,
-            rowID,
-            avID: options.data.id,
-            data: oldValue
-        });
-        options.data.view.rows.find(row => {
-            if (row.id === rowID) {
-                row.cells.find(cell => {
-                    if (cell.id === cellValue.id) {
-                        cell.value = cellValue;
-                        return true;
-                    }
-                });
-                return true;
-            }
-        });
-        if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellValue);
-        } else {
-            updateAttrViewCellAnimation(item, cellValue);
-        }
-    });
-    transaction(options.protyle, cellDoOperations, cellUndoOperations);
 };

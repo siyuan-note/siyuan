@@ -7,7 +7,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasCloses
 import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
-import {bindDateEvent, getDateHTML, setDateValue} from "./date";
+import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
@@ -28,6 +28,7 @@ import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {goSearchRollupCalc, goSearchRollupCol, goSearchRollupTarget} from "./rollup";
+import {updateCellsValue} from "./cell";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1009,20 +1010,14 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "clearDate") {
-                    setDateValue({
-                        cellElements: options.cellElements,
-                        data,
-                        protyle: options.protyle,
-                        blockElement: options.blockElement,
-                        value: {
-                            isNotEmpty2: false,
-                            isNotEmpty: false,
-                            content: null,
-                            content2: null,
-                            hasEndDate: false,
-                            isNotTime: true,
-                        }
-                    });
+                    updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+                        isNotEmpty2: false,
+                        isNotEmpty: false,
+                        content: null,
+                        content2: null,
+                        hasEndDate: false,
+                        isNotTime: true,
+                    }, options.cellElements);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

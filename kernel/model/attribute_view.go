@@ -38,6 +38,46 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
+	waitForSyncingStorages()
+
+	ret = []*av.Key{}
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeRelation != keyValues.Key.Type {
+			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
+				ret = append(ret, keyValues.Key)
+			}
+		}
+	}
+	return
+}
+
+func SearchAttributeViewRelationKey(avID, keyword string) (ret []*av.Key) {
+	waitForSyncingStorages()
+
+	ret = []*av.Key{}
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation {
+			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
+				ret = append(ret, keyValues.Key)
+			}
+		}
+	}
+	return
+}
+
 func GetAttributeView(avID string) (ret *av.AttributeView) {
 	waitForSyncingStorages()
 

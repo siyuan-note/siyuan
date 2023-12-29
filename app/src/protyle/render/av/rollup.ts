@@ -32,7 +32,7 @@ const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTM
 }
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeViewNonRelationKey", {
+    fetchPost("/api/av/searchAttributeViewRelationKey", {
         avID: avId,
         keyword
     }, (response) => {

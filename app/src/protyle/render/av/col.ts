@@ -767,7 +767,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     const menu = new Menu("av-header-add");
     const avID = blockElement.getAttribute("data-av-id");
     if (typeof previousID === "undefined") {
-        previousID = blockElement.querySelector(".av__row--header .av__cell:last-child").getAttribute("data-col-id");
+        previousID = Array.from(blockElement.querySelectorAll(".av__row--header .av__cell")).pop().getAttribute("data-col-id");
     }
     menu.addItem({
         icon: "iconAlignLeft",

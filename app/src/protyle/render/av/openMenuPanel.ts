@@ -91,7 +91,7 @@ export const openMenuPanel = (options: {
         if (["select", "date", "asset", "relation"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
-                bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+                bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
             } else if (options.type === "date") {
                 bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
             } else if (options.type === "asset") {
@@ -296,7 +296,7 @@ export const openMenuPanel = (options: {
                 }]);
                 if (options.cellElements) {
                     menuElement.innerHTML = getSelectHTML(data.view, options.cellElements);
-                    bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+                    bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
                 } else {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
@@ -905,7 +905,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setColOption") {
-                    setColOption(options.protyle, data, target, options.cellElements);
+                    setColOption(options.protyle, data, target, options.blockElement, options.cellElements);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -915,13 +915,13 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addColOptionOrCell") {
-                    addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement);
+                    addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCellOption") {
-                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement);
+                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

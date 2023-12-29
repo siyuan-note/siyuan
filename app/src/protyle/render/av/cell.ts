@@ -31,23 +31,20 @@ export const getCellText = (cellElement: HTMLElement | false) => {
     return cellText;
 };
 
-const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
-    let cellValue: IAVCellValue;
+export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
+    const cellValue: IAVCellValue = {
+        type: colType,
+        id: cellElement.dataset.id,
+    };
     if (colType === "number") {
         const value = cellElement.querySelector(".av__celltext").getAttribute("data-content");
-        cellValue = {
-            type: colType,
-            number: {
-                content: parseFloat(value) || 0,
-                isNotEmpty: !!value
-            }
+        cellValue.number = {
+            content: parseFloat(value) || 0,
+            isNotEmpty: !!value
         };
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
-        cellValue = {
-            type: colType,
-            [colType]: {
-                content: cellElement.querySelector(".av__celltext").textContent.trim()
-            }
+        cellValue[colType as "text"] = {
+            content: cellElement.querySelector(".av__celltext").textContent.trim()
         };
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
@@ -57,29 +54,17 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 color: item.style.color.replace("var(--b3-font-color", "").replace(")", "")
             });
         });
-        cellValue = {
-            type: colType,
-            mSelect
-        };
+        cellValue.mSelect = mSelect;
     } else if (["date", "created", "updated"].includes(colType)) {
-        cellValue = {
-            type: colType,
-            [colType]: JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
-        };
+        cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
     } else if (colType === "checkbox") {
-        cellValue = {
-            type: colType,
-            checkbox: {
-                checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
-            }
+        cellValue.checkbox = {
+            checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
         };
     } else if (colType === "relation") {
-        cellValue = {
-            type: colType,
-            relation: {
-                blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
-                contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
-            }
+        cellValue.relation = {
+            blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
+            contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
         };
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = []
@@ -91,10 +76,7 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 name: isImg ? "" : item.textContent
             })
         })
-        cellValue = {
-            type: colType,
-            mAsset
-        };
+        cellValue.mAsset = mAsset
     }
     if (colType === "block") {
         cellValue.isDetached = cellElement.dataset.detached === "true";

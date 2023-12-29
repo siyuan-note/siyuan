@@ -19,8 +19,8 @@ const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTM
         id: colId,
         avID: data.id,
         parentID: itemElement.dataset.colId,
-        // keyID: "",
-        // data: "",
+        keyID: "",
+        data: "",
     }], [{
         action: "updateAttrViewColRollup",
         // operation.AvID 汇总列所在 av

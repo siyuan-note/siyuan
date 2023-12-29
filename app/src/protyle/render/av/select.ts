@@ -500,7 +500,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                 });
                 return true;
             }
-        })
+        });
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellValue);
         } else {

@@ -56,7 +56,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         });
         cellValue.mSelect = mSelect;
     } else if (["date", "created", "updated"].includes(colType)) {
-        cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
+        cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"));
     } else if (colType === "checkbox") {
         cellValue.checkbox = {
             checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
@@ -67,16 +67,16 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
         };
     } else if (colType === "mAsset") {
-        const mAsset: IAVCellAssetValue[] = []
+        const mAsset: IAVCellAssetValue[] = [];
         Array.from(cellElement.children).forEach((item) => {
-            const isImg = item.classList.contains("av__cellassetimg")
+            const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
                 content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
                 name: isImg ? "" : item.textContent
-            })
-        })
-        cellValue.mAsset = mAsset
+            });
+        });
+        cellValue.mAsset = mAsset;
     }
     if (colType === "block") {
         cellValue.isDetached = cellElement.dataset.detached === "true";
@@ -313,7 +313,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     event.preventDefault();
                     event.stopPropagation();
                 }
-            })
+            });
         }
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {

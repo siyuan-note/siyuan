@@ -125,7 +125,7 @@ export const updateAssetCell = (options: {
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        const oldValue = JSON.parse(JSON.stringify(cellValue))
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
             if (options.type === "remove") {
                 cellValue.mAsset.find((oldItem, index) => {
@@ -317,7 +317,7 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
     });
 };
 
-export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string, blockElement: Element) => {
+export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string) => {
     const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,

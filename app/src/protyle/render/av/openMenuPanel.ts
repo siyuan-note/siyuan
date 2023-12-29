@@ -894,7 +894,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCol") {
                     const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                    let previousID: string
+                    let previousID: string;
                     const colData = data.view.columns.find((item: IAVColumn, index) => {
                         if (item.id === colId) {
                             previousID = data.view.columns[index - 1]?.id;

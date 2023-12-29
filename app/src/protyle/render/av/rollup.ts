@@ -13,7 +13,7 @@ const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTM
         if (item.id === colId) {
             return true;
         }
-    })
+    });
     transaction(protyle, [{
         action: "updateAttrViewColRollup",
         id: colId,
@@ -28,8 +28,8 @@ const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTM
         // operation.ParentID 汇总列基于的关联列 ID
         // operation.KeyID 目标列 ID
         // operation.Data 计算方式
-    }])
-}
+    }]);
+};
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeViewRelationKey", {
@@ -115,8 +115,8 @@ export const goSearchRollupCol = (options: {
 
 export const goSearchRollupTarget = (avId: string, target: HTMLElement) => {
 
-}
+};
 
 export const goSearchRollupCalc = (avId: string, target: HTMLElement) => {
 
-}
+};

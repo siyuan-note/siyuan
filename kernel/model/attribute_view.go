@@ -1880,10 +1880,25 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		key := av.NewKey(operation.ID, operation.Name, icon, keyType)
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
-		for _, v := range attrView.Views {
-			switch v.LayoutType {
+		for _, view := range attrView.Views {
+			switch view.LayoutType {
 			case av.LayoutTypeTable:
-				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+				if "" == operation.PreviousID {
+					view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
+					break
+				}
+
+				added := false
+				for i, column := range view.Table.Columns {
+					if column.ID == operation.PreviousID {
+						view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
+						added = true
+						break
+					}
+				}
+				if !added {
+					view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+				}
 			}
 		}
 	}

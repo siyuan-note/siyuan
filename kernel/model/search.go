@@ -562,6 +562,13 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
 							}
 						}
+					} else if n.IsTextMarkType("text") {
+						// Search and replace fails in some cases https://github.com/siyuan-note/siyuan/issues/10016
+						if !replaceTypes["text"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
 					}
 				}
 				return ast.WalkContinue

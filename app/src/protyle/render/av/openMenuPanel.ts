@@ -27,6 +27,7 @@ import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
+import {goSearchRollupCalc, goSearchRollupCol, goSearchRollupTarget} from "./rollup";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -760,6 +761,21 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchAV") {
                     openSearchAV(avID, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchRollupCol") {
+                    goSearchRollupCol(avID, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchRollupTarget") {
+                    goSearchRollupTarget(avID, target);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchRollupCalc") {
+                    goSearchRollupCalc(avID, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

@@ -158,6 +158,22 @@ export const getEditHTML = (options: {
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
+    } else if (colData.type === "rollup") {
+        html += `<button class="b3-menu__item" data-type="goSearchRollupCol" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+    <span class="b3-menu__label">${window.siyuan.languages.relation}</span>
+    <span class="b3-menu__accelerator">TODO</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item b3-menu__item--disabled" data-type="goSearchRollupTarget" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
+    <span class="b3-menu__accelerator">TODO</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item b3-menu__item--disabled" data-type="goSearchRollupCalc" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+    <span class="b3-menu__label">${window.siyuan.languages.calc}</span>
+    <span class="b3-menu__accelerator">TODO</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>`;
     }
     return `<div class="b3-menu__items">
     ${html}

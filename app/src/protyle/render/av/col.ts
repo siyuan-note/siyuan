@@ -637,7 +637,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         icon: "iconInsertRight",
         label: window.siyuan.languages.insertColumnRight,
         click() {
-            const addMenu = addCol(protyle, blockElement, cellElement.nextElementSibling?.getAttribute("data-col-id") || "");
+            const addMenu = addCol(protyle, blockElement, cellElement.getAttribute("data-col-id") || "");
             const addRect = cellElement.getBoundingClientRect();
             addMenu.open({
                 x: addRect.left,

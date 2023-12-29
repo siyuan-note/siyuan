@@ -786,7 +786,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 
 				for _, blockID := range relVal.Relation.BlockIDs {
-					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destAv.GetValue(rollupKey.Rollup.KeyID, blockID).String())
+					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
+					if nil == destVal {
+						continue
+					}
+					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)

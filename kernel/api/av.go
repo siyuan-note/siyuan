@@ -40,7 +40,7 @@ func searchAttributeViewNonRelationKey(c *gin.Context) {
 
 	nonRelationKeys := model.SearchAttributeViewNonRelationKey(avID, keyword)
 	ret.Data = map[string]interface{}{
-		"nonRelationKeys": nonRelationKeys,
+		"keys": nonRelationKeys,
 	}
 }
 
@@ -58,7 +58,7 @@ func searchAttributeViewRelationKey(c *gin.Context) {
 
 	relationKeys := model.SearchAttributeViewRelationKey(avID, keyword)
 	ret.Data = map[string]interface{}{
-		"relationKeys": relationKeys,
+		"keys": relationKeys,
 	}
 }
 

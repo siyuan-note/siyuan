@@ -627,6 +627,21 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         });
     }
     menu.addSeparator();
+
+    menu.addItem({
+        icon: "iconInsertLeft",
+        label: window.siyuan.languages.insertColumnLeft,
+        click() {
+
+        }
+    });
+    menu.addItem({
+        icon: "iconInsertRight",
+        label: window.siyuan.languages.insertColumnRight,
+        click() {
+
+        }
+    });
     if (type !== "block") {
         menu.addItem({
             icon: "iconEyeoff",
@@ -743,7 +758,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol, name: string) => {
 </button>`;
 };
 
-export const addCol = (protyle: IProtyle, blockElement: Element) => {
+export const addCol = (protyle: IProtyle, blockElement: Element, previousId: string) => {
     const menu = new Menu("av-header-add");
     const avID = blockElement.getAttribute("data-av-id");
     menu.addItem({
@@ -1046,7 +1061,6 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             });
         }
     });
-    /*
     menu.addItem({
         icon: "iconSearch",
         label: window.siyuan.languages.rollup,
@@ -1071,7 +1085,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 id
             });
         }
-    });*/
+    });
     menu.addItem({
         icon: "iconClock",
         label: window.siyuan.languages.createdTime,

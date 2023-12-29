@@ -1923,6 +1923,11 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		for _, view := range attrView.Views {
 			switch view.LayoutType {
 			case av.LayoutTypeTable:
+				if "" == operation.PreviousID {
+					view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
+					break
+				}
+
 				added := false
 				for i, column := range view.Table.Columns {
 					if column.ID == operation.PreviousID {

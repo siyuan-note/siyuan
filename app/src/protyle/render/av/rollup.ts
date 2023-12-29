@@ -37,7 +37,7 @@ const genSearchList = (element: Element, keyword: string, avId: string, cb?: () 
         keyword
     }, (response) => {
         let html = "";
-        response.data.nonRelationKeys.forEach((item: IAVColumn, index: number) => {
+        response.data.keys.forEach((item: IAVColumn, index: number) => {
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-col-id="${item.id}">
         ${item.icon ? unicode2Emoji(item.icon, "b3-list-item__graphic", true) : `<svg class="b3-list-item__graphic"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${genIconHTML()}

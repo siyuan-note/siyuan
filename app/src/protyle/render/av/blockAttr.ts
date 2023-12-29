@@ -32,12 +32,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            if (value[value.type].isNotEmpty) {
-                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}'>`;
+            if (value[value.type] && value[value.type].isNotEmpty) {
+                html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }
-            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
             }
+            html += "</span>";
             break;
         case "created":
         case "updated":

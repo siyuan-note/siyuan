@@ -3,6 +3,7 @@ import * as dayjs from "dayjs";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
@@ -63,6 +64,7 @@ export const bindDateEvent = (options: {
     protyle: IProtyle,
     data: IAV,
     menuElement: HTMLElement,
+    blockElement: Element,
     cellElements: HTMLElement[]
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
@@ -72,6 +74,7 @@ export const bindDateEvent = (options: {
             cellElements: options.cellElements,
             data: options.data,
             protyle: options.protyle,
+            blockElement: options.blockElement,
             value: {
                 isNotEmpty: inputElements[0].value !== "",
                 content: new Date(inputElements[0].dataset.value).getTime(),
@@ -85,6 +88,7 @@ export const bindDateEvent = (options: {
             cellElements: options.cellElements,
             data: options.data,
             protyle: options.protyle,
+            blockElement: options.blockElement,
             value: {
                 isNotEmpty2: inputElements[1].value !== "",
                 content2: new Date(inputElements[1].dataset.value).getTime(),
@@ -101,6 +105,7 @@ export const bindDateEvent = (options: {
         setDateValue({
             cellElements: options.cellElements,
             data: options.data,
+            blockElement: options.blockElement,
             protyle: options.protyle,
             value: {
                 hasEndDate: inputElements[2].checked,
@@ -127,6 +132,7 @@ export const bindDateEvent = (options: {
         setDateValue({
             cellElements: options.cellElements,
             data: options.data,
+            blockElement: options.blockElement,
             protyle: options.protyle,
             value: {
                 isNotTime: !inputElements[3].checked
@@ -139,73 +145,54 @@ export const setDateValue = (options: {
     cellElements: HTMLElement[],
     data: IAV
     protyle: IProtyle,
-    value: IAVCellDateValue
+    value: IAVCellDateValue,
+    blockElement: Element
 }) => {
-    let cellIndex: number;
-    Array.from((hasClosestByClassName(options.cellElements[0], "av__row") as HTMLElement).querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
-        if (item.dataset.id === options.cellElements[0].dataset.id) {
-            cellIndex = index;
-            return true;
-        }
-    });
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    options.cellElements.forEach(item => {
-        let cellData: IAVCell;
-        let oldValue;
+    options.cellElements.forEach((item, elementIndex) => {
+        if (!options.blockElement.contains(item)) {
+            item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+        }
+        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        const oldValue = JSON.parse(JSON.stringify(cellValue))
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        options.data.view.rows.find(row => {
-            if (row.id === rowID) {
-                if (typeof cellIndex === "number") {
-                    cellData = row.cells[cellIndex];
-                    // 为空时 cellId 每次请求都不一致
-                    cellData.id = item.dataset.id;
-                    if (!cellData.value) {
-                        cellData.value = {
-                            type: cellData.valueType
-                        };
-                    } else {
-                        cellData.value.id = item.dataset.id;
-                    }
-                } else {
-                    cellData = row.cells.find(cellItem => {
-                        if (item.dataset.id === cellItem.id) {
-                            return true;
-                        }
-                    });
-                }
-                oldValue = Object.assign({}, cellData.value.date);
-                cellData.value.date = Object.assign(cellData.value.date || {
-                    isNotEmpty2: false,
-                    isNotEmpty: false
-                }, options.value);
-                return true;
-            }
-        });
-
+        cellValue.date = Object.assign(cellValue.date || {
+            isNotEmpty2: false,
+            isNotEmpty: false
+        }, options.value);
         cellDoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: options.data.id,
-            data: cellData.value
+            data: cellValue
         });
         cellUndoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: options.data.id,
-            data: {
-                date: oldValue
+            data: oldValue
+        });
+        options.data.view.rows.find(row => {
+            if (row.id === rowID) {
+                row.cells.find(cell => {
+                    if (cell.id === cellValue.id) {
+                        cell.value = cellValue;
+                        return true;
+                    }
+                });
+                return true;
             }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellData.value);
+            item.innerHTML = genAVValueHTML(cellValue);
         } else {
-            updateAttrViewCellAnimation(item,  cellData.value);
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);

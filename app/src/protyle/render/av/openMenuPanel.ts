@@ -93,7 +93,13 @@ export const openMenuPanel = (options: {
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
             } else if (options.type === "date") {
-                bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                bindDateEvent({
+                    protyle: options.protyle,
+                    data,
+                    menuElement,
+                    cellElements: options.cellElements,
+                    blockElement: options.blockElement
+                });
             } else if (options.type === "asset") {
                 bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
                 setTimeout(() => {
@@ -999,6 +1005,7 @@ export const openMenuPanel = (options: {
                         cellElements: options.cellElements,
                         data,
                         protyle: options.protyle,
+                        blockElement: options.blockElement,
                         value: {
                             isNotEmpty2: false,
                             isNotEmpty: false,

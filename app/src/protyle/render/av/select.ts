@@ -60,7 +60,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
         }
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
-        const oldValue = Object.assign({}, cellValue.mSelect);
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
             cellValue.mSelect?.find((item: { content: string }, index: number) => {
                 if (item.content === target.dataset.content) {
@@ -450,7 +450,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             return;
         }
         const cellValue = genCellValueByElement(colData.type, item);
-        const oldValue = Object.assign({}, cellValue);
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (index === 0) {
             if (colData.type === "mSelect") {
                 let hasOption = false;

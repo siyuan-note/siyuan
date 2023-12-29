@@ -54,15 +54,6 @@
     }
   }
 
-  .custom-attr__avarrow {
-    height: 12px;
-    width: 12px;
-    color: var(--b3-theme-on-surface);
-    margin: 0 5px;
-    flex-shrink: 0;
-    align-self: center;
-  }
-
   .custom-attr__avvalue {
     cursor: pointer;
     transition: var(--b3-transition);

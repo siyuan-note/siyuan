@@ -4,27 +4,44 @@ import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {updateCellsValue} from "./cell";
-import {updateAttrViewCellAnimation} from "./action";
-import {focusBlock} from "../../util/selection";
+import {genIconHTML} from "../util";
+import {unicode2Emoji} from "../../../emoji";
+import {getColIconByType} from "./col";
+
+const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTMLElement) => {
+    const colData = data.view.columns.find((item) => {
+        if (item.id === colId) {
+            return true;
+        }
+    })
+    transaction(protyle, [{
+        action: "updateAttrViewColRollup",
+        id: colId,
+        avID: data.id,
+        parentID: itemElement.dataset.colId,
+        // keyID: "",
+        // data: "",
+    }], [{
+        action: "updateAttrViewColRollup",
+        // operation.AvID 汇总列所在 av
+        // operation.ID 汇总列 ID
+        // operation.ParentID 汇总列基于的关联列 ID
+        // operation.KeyID 目标列 ID
+        // operation.Data 计算方式
+    }])
+}
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeViewNonRelationKey", {keyword}, (response) => {
+    fetchPost("/api/av/searchAttributeViewNonRelationKey", {
+        avID: avId,
+        keyword
+    }, (response) => {
         let html = "";
-        response.data.results.forEach((item: {
-            avID: string
-            avName: string
-            blockID: string
-            hPath: string
-        }, index: number) => {
-            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
-    <div class="b3-list-item--two fn__flex-1">
-        <div class="b3-list-item__first">
-            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages.title)}</span>
-        </div>
-        <div class="b3-list-item__meta b3-list-item__showall">${escapeHtml(item.hPath)}</div>
-    </div>
-    <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
+        response.data.nonRelationKeys.forEach((item: IAVColumn, index: number) => {
+            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-col-id="${item.id}">
+        ${item.icon ? unicode2Emoji(item.icon, "b3-list-item__graphic", true) : `<svg class="b3-list-item__graphic"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
+        ${genIconHTML()}
+        <span class="b3-list-item__text">${escapeHtml(item.name || window.siyuan.languages.title)}</span>
 </div>`;
         });
         element.innerHTML = html;
@@ -34,7 +51,12 @@ const genSearchList = (element: Element, keyword: string, avId: string, cb?: () 
     });
 };
 
-export const goSearchRollupCol = (avId: string, target: HTMLElement) => {
+export const goSearchRollupCol = (options: {
+    target: HTMLElement,
+    data: IAV,
+    protyle: IProtyle,
+    colId: string
+}) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
@@ -61,24 +83,24 @@ export const goSearchRollupCol = (avId: string, target: HTMLElement) => {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
-                    // setDatabase(avId, target, listElement.querySelector(".b3-list-item--focus"));
+                    updateCol(options.protyle, options.data, options.colId, listElement.querySelector(".b3-list-item--focus"));
                     window.siyuan.menus.menu.remove();
                 }
             });
             inputElement.addEventListener("input", (event) => {
                 event.stopPropagation();
-                genSearchList(listElement, inputElement.value, avId);
+                genSearchList(listElement, inputElement.value, options.data.id);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    // setDatabase(avId, target, listItemElement);
+                    updateCol(options.protyle, options.data, options.colId, listItemElement);
                     window.siyuan.menus.menu.remove();
                 }
             });
-            genSearchList(listElement, "", avId, () => {
-                const rect = target.getBoundingClientRect();
+            genSearchList(listElement, "", options.data.id, () => {
+                const rect = options.target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
                     y: rect.bottom,

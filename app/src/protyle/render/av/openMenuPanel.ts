@@ -765,7 +765,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupCol") {
-                    goSearchRollupCol(avID, target);
+                    goSearchRollupCol({
+                        target,
+                        data,
+                        protyle: options.protyle,
+                        colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

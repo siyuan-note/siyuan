@@ -1063,7 +1063,8 @@ interface IAVTable extends IAVView {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
-    value: IAVCellValue
+    value: IAVCellValue,
+    type?: TAVCol   // 仅用于标识新增时的类型，用于区分 rollup
 }
 
 interface IAVSort {

@@ -517,7 +517,8 @@ export const openMenuPanel = (options: {
                         menuElement,
                         tabRect,
                         avId: avID,
-                        protyle: options.protyle
+                        protyle: options.protyle,
+                        blockElement: options.blockElement
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -552,7 +553,8 @@ export const openMenuPanel = (options: {
                                 filter: item,
                                 protyle: options.protyle,
                                 data,
-                                target
+                                target,
+                                blockElement: options.blockElement
                             });
                             return true;
                         }

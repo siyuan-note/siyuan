@@ -654,23 +654,16 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         filter = {
                             column: colId,
                             operator: getDefaultOperatorByType(type),
-                            value: genCellValue(type, "")
+                            value: genCellValue(type, ""),
+                            type,
                         };
                         avData.view.filters.push(filter);
-                        transaction(protyle, [{
-                            action: "setAttrViewFilters",
-                            avID,
-                            data: [filter]
-                        }], [{
-                            action: "setAttrViewFilters",
-                            avID,
-                            data: []
-                        }]);
                     }
                     setFilter({
                         filter,
                         protyle,
                         data: avData,
+                        blockElement: blockElement,
                         target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
                     });
                 });

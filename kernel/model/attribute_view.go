@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -855,6 +856,79 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 							}
 						}
 						cell.Value.Rollup.Contents = []string{strconv.Itoa(countNonEmpty*100/len(cell.Value.Rollup.Contents)) + "%"}
+					case av.CalcOperatorSum:
+						sum := 0.0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								sum += n
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(sum, 'f', -1, 64)}
+					case av.CalcOperatorAverage:
+						sum := 0.0
+						count := 0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								sum += n
+								count++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(sum/float64(count), 'f', -1, 64)}
+					case av.CalcOperatorMedian:
+						numbers := []float64{}
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								numbers = append(numbers, n)
+							}
+						}
+						sort.Float64s(numbers)
+						if 0 < len(numbers) {
+							if 0 == len(numbers)%2 {
+								cell.Value.Rollup.Contents = []string{strconv.FormatFloat((numbers[len(numbers)/2-1]+numbers[len(numbers)/2])/2, 'f', -1, 64)}
+							} else {
+								cell.Value.Rollup.Contents = []string{strconv.FormatFloat(numbers[len(numbers)/2], 'f', -1, 64)}
+							}
+						}
+					case av.CalcOperatorMin:
+						min := math.MaxFloat64
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								if n < min {
+									min = n
+								}
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64)}
+					case av.CalcOperatorMax:
+						max := -math.MaxFloat64
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								if n > max {
+									max = n
+								}
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(max, 'f', -1, 64)}
+					case av.CalcOperatorRange:
+						min := math.MaxFloat64
+						max := -math.MaxFloat64
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								n, _ := strconv.ParseFloat(v, 64)
+								if n < min {
+									min = n
+								}
+								if n > max {
+									max = n
+								}
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64) + "~" + strconv.FormatFloat(max, 'f', -1, 64)}
 					}
 				}
 			case av.KeyTypeRelation: // 渲染关联列

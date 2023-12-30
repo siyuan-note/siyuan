@@ -928,7 +928,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 								}
 							}
 						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64) + "~" + strconv.FormatFloat(max, 'f', -1, 64)}
+						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(max-min, 'f', -1, 64)}
 					}
 				}
 			case av.KeyTypeRelation: // 渲染关联列

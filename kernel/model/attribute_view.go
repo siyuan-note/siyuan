@@ -806,6 +806,57 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
+
+				if nil != rollupKey.Rollup.Calc {
+					switch rollupKey.Rollup.Calc.Operator {
+					case av.CalcOperatorCountAll:
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(len(cell.Value.Rollup.Contents))}
+					case av.CalcOperatorCountValues:
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(len(cell.Value.Rollup.Contents))}
+					case av.CalcOperatorCountUniqueValues:
+						countUniqueValues := 0
+						uniqueValues := map[string]bool{}
+						for _, v := range cell.Value.Rollup.Contents {
+							if !uniqueValues[v] {
+								uniqueValues[v] = true
+								countUniqueValues++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(countUniqueValues)}
+					case av.CalcOperatorCountEmpty:
+						countEmpty := 0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" == v {
+								countEmpty++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(countEmpty)}
+					case av.CalcOperatorCountNotEmpty:
+						countNonEmpty := 0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								countNonEmpty++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(countNonEmpty)}
+					case av.CalcOperatorPercentEmpty:
+						countEmpty := 0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" == v {
+								countEmpty++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(countEmpty*100/len(cell.Value.Rollup.Contents)) + "%"}
+					case av.CalcOperatorPercentNotEmpty:
+						countNonEmpty := 0
+						for _, v := range cell.Value.Rollup.Contents {
+							if "" != v {
+								countNonEmpty++
+							}
+						}
+						cell.Value.Rollup.Contents = []string{strconv.Itoa(countNonEmpty*100/len(cell.Value.Rollup.Contents)) + "%"}
+					}
+				}
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

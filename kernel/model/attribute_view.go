@@ -901,13 +901,19 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	data := operation.Data.(map[string]interface{})
-	calcData, err := gulu.JSON.MarshalJSON(data["calc"])
-	if nil != err {
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != err {
-		return
+	if nil != operation.Data {
+		data := operation.Data.(map[string]interface{})
+		if nil != data["calc"] {
+			calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])
+			if nil != jsonErr {
+				err = jsonErr
+				return
+			}
+			if jsonErr = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != jsonErr {
+				err = jsonErr
+				return
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

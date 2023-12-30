@@ -198,6 +198,11 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
+			if av.KeyTypeBlock == kv.Key.Type {
+				// The primary key are no longer shown in the attribute panel database https://github.com/siyuan-note/siyuan/issues/10027
+				continue
+			}
+
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
@@ -794,6 +799,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					if nil == destVal {
 						continue
 					}
+					if av.KeyTypeNumber == destVal.Type {
+						destVal.Number.Format = rollupKey.NumberFormat
+						destVal.Number.FormatNumber()
+					}
+
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
 			case av.KeyTypeRelation: // 渲染关联列
@@ -901,7 +911,7 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	if nil != operation.Data && "" != operation.Data.(string) {
+	if nil != operation.Data {
 		data := operation.Data.(map[string]interface{})
 		if nil != data["calc"] {
 			calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])

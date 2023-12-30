@@ -753,6 +753,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					if nil == destVal {
 						continue
 					}
+					if av.KeyTypeNumber == destVal.Type {
+						destVal.Number.Format = rollupKey.NumberFormat
+						destVal.Number.FormatNumber()
+					}
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
 			case av.KeyTypeRelation: // 渲染关联列

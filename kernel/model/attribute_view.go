@@ -547,7 +547,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		viewable, err = renderAttributeViewTable(attrView, view)
 	}
 
-	viewable.FilterRows()
+	viewable.FilterRows(attrView)
 	viewable.SortRows()
 	viewable.CalcCols()
 
@@ -1566,7 +1566,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	view, _ := attrView.GetCurrentView()
 	if nil != view && 0 < len(view.Table.Filters) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
-		viewable.FilterRows()
+		viewable.FilterRows(attrView)
 		viewable.SortRows()
 
 		addedVal := false

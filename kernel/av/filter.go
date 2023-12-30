@@ -22,7 +22,7 @@ import (
 )
 
 type Filterable interface {
-	FilterRows()
+	FilterRows(attrView *AttributeView)
 }
 
 type ViewFilter struct {

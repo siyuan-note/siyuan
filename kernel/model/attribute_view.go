@@ -211,6 +211,8 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 
 			switch kValues.Key.Type {
+			case av.KeyTypeRollup:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []string{}}})
 			case av.KeyTypeTemplate:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
 			case av.KeyTypeCreated:
@@ -238,16 +240,23 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					break
 				}
 
-				var blockIDs []string
 				relVal := attrView.GetValue(kv.Key.Rollup.RelationKeyID, kv.Values[0].BlockID)
 				if nil != relVal && nil != relVal.Relation {
-					blockIDs = relVal.Relation.BlockIDs
-				}
+					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						for _, bID := range relVal.Relation.BlockIDs {
+							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
+							if nil != destVal {
+								if av.KeyTypeNumber == destVal.Type {
+									destVal.Number.Format = kv.Key.NumberFormat
+									destVal.Number.FormatNumber()
+								}
 
-				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
-				if nil != destAv {
-					for _, bID := range blockIDs {
-						kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
+								kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
+							}
+
+							kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc)
+						}
 					}
 				}
 			case av.KeyTypeRelation:
@@ -547,7 +556,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		viewable, err = renderAttributeViewTable(attrView, view)
 	}
 
-	viewable.FilterRows()
+	viewable.FilterRows(attrView)
 	viewable.SortRows()
 	viewable.CalcCols()
 
@@ -806,6 +815,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
+
+				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {
@@ -1515,7 +1526,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	view, _ := attrView.GetCurrentView()
 	if nil != view && 0 < len(view.Table.Filters) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
-		viewable.FilterRows()
+		viewable.FilterRows(attrView)
 		viewable.SortRows()
 
 		addedVal := false

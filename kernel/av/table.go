@@ -230,7 +230,44 @@ func (value *Value) Compare(other *Value) int {
 	return 0
 }
 
-func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
+func (value *Value) CompareOperator(other *Value, operator FilterOperator, attrView *AttributeView, rowID string) bool {
+	if nil != value.Rollup && nil != other.Rollup {
+		rollupKey, _ := attrView.GetKey(value.KeyID)
+		if nil == rollupKey {
+			return false
+		}
+		relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+		if nil == relKey {
+			return false
+		}
+
+		relVal := attrView.GetValue(relKey.ID, rowID)
+		if nil == relVal || nil == relVal.Relation {
+			return false
+		}
+
+		destAv, _ := ParseAttributeView(relKey.Relation.AvID)
+		if nil == destAv {
+			return false
+		}
+
+		for _, blockID := range relVal.Relation.BlockIDs {
+			destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
+			if nil == destVal {
+				continue
+			}
+
+			if destVal.compareOperator(other, operator, attrView) {
+				return true
+			}
+		}
+		return false
+	}
+
+	return value.compareOperator(other, operator, attrView)
+}
+
+func (value *Value) compareOperator(other *Value, operator FilterOperator, attrView *AttributeView) bool {
 	if nil == other {
 		return true
 	}
@@ -639,9 +676,6 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		}
 	}
 
-	if nil != value.Rollup && nil != other.Rollup {
-		// TODO: rollup filter
-	}
 	return false
 }
 
@@ -745,7 +779,7 @@ func (table *Table) SortRows() {
 	})
 }
 
-func (table *Table) FilterRows() {
+func (table *Table) FilterRows(attrView *AttributeView) {
 	if 1 > len(table.Filters) {
 		return
 	}
@@ -780,7 +814,7 @@ func (table *Table) FilterRows() {
 				break
 			}
 
-			if !row.Cells[index].Value.CompareOperator(table.Filters[j].Value, operator) {
+			if !row.Cells[index].Value.CompareOperator(table.Filters[j].Value, operator, attrView, row.ID) {
 				pass = false
 				break
 			}

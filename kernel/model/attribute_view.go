@@ -1520,6 +1520,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 							newValue.IsDetached = operation.IsDetached
 							values, _ := attrView.GetKeyValues(filter.Column)
 							values.Values = append(values.Values, newValue)
+							break
 						}
 					}
 				}
@@ -1533,10 +1534,11 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 					if keyValues.Key.ID == filter.Column {
 						newValue := filter.GetAffectValue(keyValues.Key)
 						newValue.ID = ast.NewNodeID()
+						newValue.KeyID = keyValues.Key.ID
 						newValue.BlockID = blockID
 						newValue.IsDetached = operation.IsDetached
-						values, _ := attrView.GetKeyValues(filter.Column)
-						values.Values = append(values.Values, newValue)
+						keyValues.Values = append(keyValues.Values, newValue)
+						break
 					}
 				}
 			}

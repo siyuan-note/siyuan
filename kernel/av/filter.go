@@ -141,11 +141,11 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		switch filter.Operator {
 		case FilterOperatorIsEqual, FilterOperatorContains:
 			if 0 < len(filter.Value.MSelect) {
-				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content}}
+				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content, Color: filter.Value.MSelect[0].Color}}
 			}
 		case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
 			if 0 < len(filter.Value.MSelect) {
-				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content + " Untitled"}}
+				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content + " Untitled", Color: "1"}}
 			}
 		case FilterOperatorIsEmpty:
 			ret.MSelect = []*ValueSelect{}

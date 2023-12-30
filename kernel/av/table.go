@@ -762,12 +762,6 @@ func (table *Table) FilterRows() {
 
 	rows := []*TableRow{}
 	for _, row := range table.Rows {
-		block := row.GetBlockValue()
-		if nil != block && block.NotAffectFilter() {
-			rows = append(rows, row)
-			continue
-		}
-
 		pass := true
 		for j, index := range colIndexes {
 			operator := table.Filters[j].Operator

@@ -267,6 +267,12 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				}
 			}
 		}
+
+		for _, v := range kv.Values {
+			if "" == v.KeyID {
+				v.KeyID = kv.Key.ID
+			}
+		}
 	}
 
 	// 数据订正

@@ -742,6 +742,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeCreated}
 			case av.KeyTypeUpdated: // 填充更新时间列值，后面再渲染
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
+			case av.KeyTypeRelation: // 清空关联列值，后面再渲染 https://ld246.com/article/1703831044435
+				if nil != tableCell.Value && nil != tableCell.Value.Relation {
+					tableCell.Value.Relation.Contents = nil
+				}
 			}
 
 			treenode.FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)
@@ -897,9 +901,18 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	if "" != operation.Data {
-		if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &rollUpKey.Rollup.Calc); nil != err {
-			return
+	if nil != operation.Data && "" != operation.Data.(string) {
+		data := operation.Data.(map[string]interface{})
+		if nil != data["calc"] {
+			calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])
+			if nil != jsonErr {
+				err = jsonErr
+				return
+			}
+			if jsonErr = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != jsonErr {
+				err = jsonErr
+				return
+			}
 		}
 	}
 
@@ -1485,7 +1498,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		content = getNodeRefText(node)
 	}
 	now := time.Now().UnixMilli()
-	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
+	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
@@ -1495,6 +1508,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		viewable.FilterRows()
 		viewable.SortRows()
 
+		addedVal := false
 		if 0 < len(viewable.Rows) {
 			row := GetLastSortRow(viewable.Rows)
 			if nil != row {
@@ -1510,10 +1524,27 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 							newValue.ID = ast.NewNodeID()
 							newValue.BlockID = blockID
 							newValue.IsDetached = operation.IsDetached
-							newValue.IsInitialized = false
 							values, _ := attrView.GetKeyValues(filter.Column)
 							values.Values = append(values.Values, newValue)
+							break
 						}
+					}
+				}
+				addedVal = true
+			}
+		}
+
+		if !addedVal {
+			for _, filter := range view.Table.Filters {
+				for _, keyValues := range attrView.KeyValues {
+					if keyValues.Key.ID == filter.Column {
+						newValue := filter.GetAffectValue(keyValues.Key)
+						newValue.ID = ast.NewNodeID()
+						newValue.KeyID = keyValues.Key.ID
+						newValue.BlockID = blockID
+						newValue.IsDetached = operation.IsDetached
+						keyValues.Values = append(keyValues.Values, newValue)
+						break
 					}
 				}
 			}
@@ -1566,7 +1597,7 @@ func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
 		block := row.GetBlockValue()
-		if nil != block && !block.NotAffectFilter() {
+		if nil != block {
 			return row
 		}
 	}
@@ -2291,7 +2322,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	if nil != blockVal {
 		blockVal.Block.Updated = time.Now().UnixMilli()
-		blockVal.IsInitialized = true
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
 		}

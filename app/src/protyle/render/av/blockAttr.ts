@@ -73,6 +73,11 @@ export const genAVValueHTML = (value: IAVCellValue) => {
                 html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
             });
             break;
+        case "rollup":
+            value.rollup?.contents.forEach((item) => {
+                html += `<span class="av__celltext--url" style="margin-right: 8px">${item}</span>`;
+            });
+            break;
     }
     return html;
 };

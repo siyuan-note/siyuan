@@ -109,6 +109,7 @@ export const setFilter = async (options: {
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column) {
+                delete filter.type;
                 if (objEquals(filter, newFilter)) {
                     isSame = true;
                     return true;

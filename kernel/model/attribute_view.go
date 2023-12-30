@@ -901,10 +901,13 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	if "" != operation.Data {
-		if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &rollUpKey.Rollup.Calc); nil != err {
-			return
-		}
+	data := operation.Data.(map[string]interface{})
+	calcData, err := gulu.JSON.MarshalJSON(data["calc"])
+	if nil != err {
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != err {
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1489,7 +1492,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		content = getNodeRefText(node)
 	}
 	now := time.Now().UnixMilli()
-	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, IsInitialized: false, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
+	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
@@ -1499,6 +1502,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		viewable.FilterRows()
 		viewable.SortRows()
 
+		addedVal := false
 		if 0 < len(viewable.Rows) {
 			row := GetLastSortRow(viewable.Rows)
 			if nil != row {
@@ -1514,10 +1518,25 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 							newValue.ID = ast.NewNodeID()
 							newValue.BlockID = blockID
 							newValue.IsDetached = operation.IsDetached
-							newValue.IsInitialized = false
 							values, _ := attrView.GetKeyValues(filter.Column)
 							values.Values = append(values.Values, newValue)
 						}
+					}
+				}
+				addedVal = true
+			}
+		}
+
+		if !addedVal {
+			for _, filter := range view.Table.Filters {
+				for _, keyValues := range attrView.KeyValues {
+					if keyValues.Key.ID == filter.Column {
+						newValue := filter.GetAffectValue(keyValues.Key)
+						newValue.ID = ast.NewNodeID()
+						newValue.BlockID = blockID
+						newValue.IsDetached = operation.IsDetached
+						values, _ := attrView.GetKeyValues(filter.Column)
+						values.Values = append(values.Values, newValue)
 					}
 				}
 			}
@@ -1570,7 +1589,7 @@ func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
 		block := row.GetBlockValue()
-		if nil != block && !block.NotAffectFilter() {
+		if nil != block {
 			return row
 		}
 	}
@@ -2295,7 +2314,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	if nil != blockVal {
 		blockVal.Block.Updated = time.Now().UnixMilli()
-		blockVal.IsInitialized = true
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
 		}

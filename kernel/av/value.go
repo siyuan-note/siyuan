@@ -30,12 +30,11 @@ import (
 )
 
 type Value struct {
-	ID            string  `json:"id,omitempty"`
-	KeyID         string  `json:"keyID,omitempty"`
-	BlockID       string  `json:"blockID,omitempty"`
-	Type          KeyType `json:"type,omitempty"`
-	IsDetached    bool    `json:"isDetached,omitempty"`
-	IsInitialized bool    `json:"isInitialized,omitempty"`
+	ID         string  `json:"id,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`
+	BlockID    string  `json:"blockID,omitempty"`
+	Type       KeyType `json:"type,omitempty"`
+	IsDetached bool    `json:"isDetached,omitempty"`
 
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
@@ -52,10 +51,6 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
-}
-
-func (value *Value) NotAffectFilter() bool {
-	return !value.IsInitialized && nil != value.Block && "" == value.Block.Content && value.IsDetached
 }
 
 func (value *Value) String() string {

@@ -742,6 +742,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeCreated}
 			case av.KeyTypeUpdated: // 填充更新时间列值，后面再渲染
 				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
+			case av.KeyTypeRelation: // 清空关联列值，后面再渲染 https://ld246.com/article/1703831044435
+				if nil != tableCell.Value && nil != tableCell.Value.Relation {
+					tableCell.Value.Relation.Contents = nil
+				}
 			}
 
 			treenode.FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)

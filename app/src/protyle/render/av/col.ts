@@ -9,6 +9,7 @@ import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action"
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
+import {getNameByOperator} from "./calc";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -159,19 +160,19 @@ export const getEditHTML = (options: {
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     } else if (colData.type === "rollup") {
-        html += `<button class="b3-menu__item" data-type="goSearchRollupCol" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+        html += `<button class="b3-menu__item" data-type="goSearchRollupCol" data-old-value='${JSON.stringify(colData.rollup || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relation}</span>
-    <span class="b3-menu__accelerator">TODO</span>
+    <span class="b3-menu__accelerator"></span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item b3-menu__item--disabled" data-type="goSearchRollupTarget" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+<button class="b3-menu__item" data-type="goSearchRollupTarget">
     <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
-    <span class="b3-menu__accelerator">TODO</span>
+    <span class="b3-menu__accelerator"></span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item b3-menu__item--disabled" data-type="goSearchRollupCalc" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+<button class="b3-menu__item" data-type="goSearchRollupCalc">
     <span class="b3-menu__label">${window.siyuan.languages.calc}</span>
-    <span class="b3-menu__accelerator">TODO</span>
+    <span class="b3-menu__accelerator">${getNameByOperator(colData.rollup?.calc?.operator)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
     }
@@ -361,6 +362,36 @@ export const bindEditEvent = (options: {
             });
         } else {
             toggleUpdateRelationBtn(options.menuElement, avID);
+        }
+    }
+
+    const goSearchRollupColElement = options.menuElement.querySelector('[data-type="goSearchRollupCol"]') as HTMLElement;
+    if (goSearchRollupColElement) {
+        const oldValue = JSON.parse(goSearchRollupColElement.dataset.oldValue) as IAVCellRollupValue;
+        const goSearchRollupTargetElement = options.menuElement.querySelector('[data-type="goSearchRollupTarget"]') as HTMLElement;
+        let targetKeyAVId = ""
+        if (oldValue.relationKeyID) {
+            options.data.view.columns.find((item) => {
+                if (item.id === oldValue.relationKeyID) {
+                    goSearchRollupColElement.querySelector(".b3-menu__accelerator").textContent = item.name;
+                    targetKeyAVId = item.relation.avID;
+                    goSearchRollupTargetElement.dataset.avId = targetKeyAVId;
+                    return true;
+                }
+            })
+        }
+        if (oldValue.keyID && targetKeyAVId) {
+            fetchPost("/api/av/getAttributeView", {id: targetKeyAVId}, (response) => {
+                response.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
+                    if (item.key.id === oldValue.keyID) {
+                        goSearchRollupTargetElement.querySelector('.b3-menu__accelerator').textContent = item.key.name;
+                        const goSearchRollupCalcElement = options.menuElement.querySelector('[data-type="goSearchRollupCalc"]') as HTMLElement;
+                        goSearchRollupCalcElement.dataset.colType = item.key.type;
+                        goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
+                        return true;
+                    }
+                });
+            });
         }
     }
 };

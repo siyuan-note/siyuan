@@ -1082,16 +1082,14 @@ interface IAVColumn {
     type: TAVCol,
     numberFormat: string,
     template: string,
-    calc: {
-        operator: string,
-        result: IAVCellValue
-    },
+    calc: IAVCalc,
     // 选项列表
     options?: {
         name: string,
         color: string,
     }[],
-    relation?: IAVCellRelationValue
+    relation?: IAVCellRelationValue,
+    rollup?: IAVCellRollupValue
 }
 
 interface IAVRow {
@@ -1174,4 +1172,15 @@ interface IAVCellRelationValue {
     avID?: string
     backKeyID?: string
     isTwoWay?: boolean
+}
+
+interface IAVCellRollupValue {
+    relationKeyID?: string  // 关联列 ID
+    keyID?: string
+    calc?: IAVCalc
+}
+
+interface IAVCalc {
+    operator?: string,
+    result?: IAVCellValue
 }

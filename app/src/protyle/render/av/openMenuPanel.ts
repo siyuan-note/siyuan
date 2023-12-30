@@ -27,8 +27,9 @@ import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
-import {goSearchRollupCalc, goSearchRollupCol, goSearchRollupTarget} from "./rollup";
+import {goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
+import {openCalcMenu} from "./calc";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -782,6 +783,7 @@ export const openMenuPanel = (options: {
                     goSearchRollupCol({
                         target,
                         data,
+                        isRelation: true,
                         protyle: options.protyle,
                         colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
                     });
@@ -789,12 +791,18 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupTarget") {
-                    goSearchRollupTarget(avID, target);
+                    goSearchRollupCol({
+                        target,
+                        data,
+                        isRelation: false,
+                        protyle: options.protyle,
+                        colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupCalc") {
-                    goSearchRollupCalc(avID, target);
+                    openCalcMenu(options.protyle, target, data, options.colId);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

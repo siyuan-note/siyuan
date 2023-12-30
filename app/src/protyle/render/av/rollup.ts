@@ -8,40 +8,63 @@ import {genIconHTML} from "../util";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 
-const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTMLElement) => {
+const updateCol = (options: {
+    target: HTMLElement,
+    data: IAV,
+    protyle: IProtyle,
+    colId: string,
+    isRelation: boolean,
+}, itemElement: HTMLElement) => {
     if (itemElement.classList.contains("b3-list--empty")) {
         return
     }
-    const colData = data.view.columns.find((item) => {
-        if (item.id === colId) {
+    options.target.querySelector(".b3-menu__accelerator").textContent = itemElement.querySelector(".b3-list-item__text").textContent
+
+    const colData = options.data.view.columns.find((item) => {
+        if (item.id === options.colId) {
+            if (!item.rollup) {
+                item.rollup = {};
+            }
             return true;
         }
     });
-    transaction(protyle, [{
+    const oldColValue = Object.assign({}, colData.rollup);
+    if (options.isRelation) {
+        colData.rollup.relationKeyID = itemElement.dataset.colId;
+        options.target.nextElementSibling.setAttribute("data-av-id", itemElement.dataset.targetAvId);
+    } else {
+        colData.rollup.keyID = itemElement.dataset.colId;
+        options.target.nextElementSibling.setAttribute("data-col-type", itemElement.dataset.colType);
+    }
+    transaction(options.protyle, [{
         action: "updateAttrViewColRollup",
-        id: colId,
-        avID: data.id,
-        parentID: itemElement.dataset.colId,
-        keyID: "",
-        data: "",
+        id: options.colId,
+        avID: options.data.id,
+        parentID: colData.rollup.relationKeyID,
+        keyID: colData.rollup.keyID,
+        data: {
+            calc: colData.rollup.calc,
+        },
     }], [{
         action: "updateAttrViewColRollup",
-        // operation.AvID 汇总列所在 av
-        // operation.ID 汇总列 ID
-        // operation.ParentID 汇总列基于的关联列 ID
-        // operation.KeyID 目标列 ID
-        // operation.Data 计算方式
+        id: options.colId,
+        avID: options.data.id,
+        parentID: oldColValue.relationKeyID,
+        keyID: oldColValue.keyID,
+        data: {
+            calc: oldColValue.calc,
+        }
     }]);
 };
 
-const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeViewRelationKey", {
+const genSearchList = (element: Element, keyword: string, avId: string, isRelation: boolean, cb?: () => void) => {
+    fetchPost(isRelation ? "/api/av/searchAttributeViewRelationKey" : "/api/av/searchAttributeViewNonRelationKey", {
         avID: avId,
         keyword
     }, (response) => {
         let html = "";
         response.data.keys.forEach((item: IAVColumn, index: number) => {
-            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-col-id="${item.id}">
+            html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-col-id="${item.id}" ${isRelation ? `data-target-av-id="${item.relation.avID}"` : `data-col-type="${item.type}"`}>
         ${item.icon ? unicode2Emoji(item.icon, "b3-list-item__graphic", true) : `<svg class="b3-list-item__graphic"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${genIconHTML()}
         <span class="b3-list-item__text">${escapeHtml(item.name || window.siyuan.languages.title)}</span>
@@ -58,7 +81,8 @@ export const goSearchRollupCol = (options: {
     target: HTMLElement,
     data: IAV,
     protyle: IProtyle,
-    colId: string
+    colId: string,
+    isRelation: boolean,
 }) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
@@ -86,23 +110,23 @@ export const goSearchRollupCol = (options: {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
-                    updateCol(options.protyle, options.data, options.colId, listElement.querySelector(".b3-list-item--focus"));
+                    updateCol(options, listElement.querySelector(".b3-list-item--focus") as HTMLElement);
                     window.siyuan.menus.menu.remove();
                 }
             });
             inputElement.addEventListener("input", (event) => {
                 event.stopPropagation();
-                genSearchList(listElement, inputElement.value, options.data.id);
+                genSearchList(listElement, inputElement.value, options.isRelation ? options.data.id : options.target.dataset.avId, options.isRelation);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    updateCol(options.protyle, options.data, options.colId, listItemElement);
+                    updateCol(options, listItemElement);
                     window.siyuan.menus.menu.remove();
                 }
             });
-            genSearchList(listElement, "", options.data.id, () => {
+            genSearchList(listElement, "", options.isRelation ? options.data.id : options.target.dataset.avId, options.isRelation, () => {
                 const rect = options.target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
@@ -114,12 +138,4 @@ export const goSearchRollupCol = (options: {
         }
     });
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-};
-
-export const goSearchRollupTarget = (avId: string, target: HTMLElement) => {
-
-};
-
-export const goSearchRollupCalc = (avId: string, target: HTMLElement) => {
-
 };

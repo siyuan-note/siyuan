@@ -901,7 +901,7 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	if nil != operation.Data {
+	if nil != operation.Data && "" != operation.Data.(string) {
 		data := operation.Data.(map[string]interface{})
 		if nil != data["calc"] {
 			calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])

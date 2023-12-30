@@ -472,7 +472,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const menu = new Menu("av-header-cell", () => {
-        const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
+        const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === oldValue) {
             return;
         }
@@ -542,7 +542,19 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             icon: "iconEdit",
             label: window.siyuan.languages.edit,
             click() {
-                openMenuPanel({protyle, blockElement, type: "edit", colId});
+                const colName = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                openMenuPanel({
+                    protyle,
+                    blockElement,
+                    type: "edit",
+                    colId,
+                    cb(avElement) {
+                        // 修改名字后点击编辑，需要更新名字
+                        const editNameElement = avElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement
+                        editNameElement.value = colName;
+                        editNameElement.select();
+                    }
+                });
             }
         });
     }

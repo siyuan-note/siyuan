@@ -9,6 +9,9 @@ import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 
 const updateCol = (protyle: IProtyle, data: IAV, colId: string, itemElement: HTMLElement) => {
+    if (itemElement.classList.contains("b3-list--empty")) {
+        return
+    }
     const colData = data.view.columns.find((item) => {
         if (item.id === colId) {
             return true;
@@ -44,7 +47,7 @@ const genSearchList = (element: Element, keyword: string, avId: string, cb?: () 
         <span class="b3-list-item__text">${escapeHtml(item.name || window.siyuan.languages.title)}</span>
 </div>`;
         });
-        element.innerHTML = html;
+        element.innerHTML = html || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
         if (cb) {
             cb();
         }

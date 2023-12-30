@@ -53,6 +53,8 @@ const (
 )
 
 func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
+	// Improve adding rows of the filtered database table view https://github.com/siyuan-note/siyuan/issues/10025
+
 	ret = filter.Value.Clone()
 	switch filter.Value.Type {
 	case KeyTypeBlock:

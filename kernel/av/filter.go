@@ -64,7 +64,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorContains:
 			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
 		case FilterOperatorDoesNotContain:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: strings.TrimSpace(filter.Value.Block.Content + " Untitled")}
+			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: strings.ReplaceAll("Untitled", filter.Value.Block.Content, "")}
 		case FilterOperatorStartsWith:
 			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
 		case FilterOperatorEndsWith:
@@ -83,7 +83,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorContains:
 			ret.Text = &ValueText{Content: filter.Value.Text.Content}
 		case FilterOperatorDoesNotContain:
-			ret.Text = &ValueText{Content: strings.TrimSpace(filter.Value.Text.Content + " Untitled")}
+			ret.Text = &ValueText{Content: strings.ReplaceAll("Untitled", filter.Value.Text.Content, "")}
 		case FilterOperatorStartsWith:
 			ret.Text = &ValueText{Content: filter.Value.Text.Content}
 		case FilterOperatorEndsWith:
@@ -163,7 +163,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorContains:
 			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
 		case FilterOperatorDoesNotContain:
-			ret.URL = &ValueURL{Content: filter.Value.URL.Content + " Untitled"}
+			ret.URL = &ValueURL{Content: strings.ReplaceAll("Untitled", filter.Value.URL.Content, "")}
 		case FilterOperatorStartsWith:
 			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
 		case FilterOperatorEndsWith:
@@ -182,7 +182,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorContains:
 			ret.Email = &ValueEmail{Content: filter.Value.Email.Content}
 		case FilterOperatorDoesNotContain:
-			ret.Email = &ValueEmail{Content: filter.Value.Email.Content + " Untitled"}
+			ret.Email = &ValueEmail{Content: strings.ReplaceAll("Untitled", filter.Value.Email.Content, "")}
 		case FilterOperatorStartsWith:
 			ret.Email = &ValueEmail{Content: filter.Value.Email.Content}
 		case FilterOperatorEndsWith:
@@ -201,7 +201,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorContains:
 			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content}
 		case FilterOperatorDoesNotContain:
-			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content + " Untitled"}
+			ret.Phone = &ValuePhone{Content: strings.ReplaceAll("Untitled", filter.Value.Phone.Content, "")}
 		case FilterOperatorStartsWith:
 			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content}
 		case FilterOperatorEndsWith:

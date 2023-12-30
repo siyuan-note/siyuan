@@ -19,6 +19,7 @@ package av
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -468,4 +469,133 @@ type ValueRelation struct {
 
 type ValueRollup struct {
 	Contents []string `json:"contents"`
+}
+
+func (r *ValueRollup) RenderContents(calc *RollupCalc) {
+	if nil == calc {
+		return
+	}
+
+	switch calc.Operator {
+	case CalcOperatorNone:
+	case CalcOperatorCountAll:
+		r.Contents = []string{strconv.Itoa(len(r.Contents))}
+	case CalcOperatorCountValues:
+		r.Contents = []string{strconv.Itoa(len(r.Contents))}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, v := range r.Contents {
+			if !uniqueValues[v] {
+				uniqueValues[v] = true
+				countUniqueValues++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countUniqueValues)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v {
+				countEmpty++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countEmpty)}
+	case CalcOperatorCountNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countNonEmpty)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v {
+				countEmpty++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countEmpty*100/len(r.Contents)) + "%"}
+	case CalcOperatorPercentNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countNonEmpty*100/len(r.Contents)) + "%"}
+	case CalcOperatorSum:
+		sum := 0.0
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				sum += n
+			}
+		}
+		r.Contents = []string{strconv.FormatFloat(sum, 'f', -1, 64)}
+	case CalcOperatorAverage:
+		sum := 0.0
+		count := 0
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				sum += n
+				count++
+			}
+		}
+		r.Contents = []string{strconv.FormatFloat(sum/float64(count), 'f', -1, 64)}
+	case CalcOperatorMedian:
+		numbers := []float64{}
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				numbers = append(numbers, n)
+			}
+		}
+		sort.Float64s(numbers)
+		if 0 < len(numbers) {
+			if 0 == len(numbers)%2 {
+				r.Contents = []string{strconv.FormatFloat((numbers[len(numbers)/2-1]+numbers[len(numbers)/2])/2, 'f', -1, 64)}
+			} else {
+				r.Contents = []string{strconv.FormatFloat(numbers[len(numbers)/2], 'f', -1, 64)}
+			}
+		}
+	case CalcOperatorMin:
+		min := math.MaxFloat64
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				if n < min {
+					min = n
+				}
+			}
+		}
+		r.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64)}
+	case CalcOperatorMax:
+		max := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				if n > max {
+					max = n
+				}
+			}
+		}
+		r.Contents = []string{strconv.FormatFloat(max, 'f', -1, 64)}
+	case CalcOperatorRange:
+		min := math.MaxFloat64
+		max := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if "" != v {
+				n, _ := strconv.ParseFloat(v, 64)
+				if n < min {
+					min = n
+				}
+				if n > max {
+					max = n
+				}
+			}
+		}
+		r.Contents = []string{strconv.FormatFloat(max-min, 'f', -1, 64)}
+	}
 }

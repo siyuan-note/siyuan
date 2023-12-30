@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -212,6 +211,8 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 
 			switch kValues.Key.Type {
+			case av.KeyTypeRollup:
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []string{}}})
 			case av.KeyTypeTemplate:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
 			case av.KeyTypeCreated:
@@ -239,16 +240,23 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					break
 				}
 
-				var blockIDs []string
 				relVal := attrView.GetValue(kv.Key.Rollup.RelationKeyID, kv.Values[0].BlockID)
 				if nil != relVal && nil != relVal.Relation {
-					blockIDs = relVal.Relation.BlockIDs
-				}
+					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						for _, bID := range relVal.Relation.BlockIDs {
+							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
+							if nil != destVal {
+								if av.KeyTypeNumber == destVal.Type {
+									destVal.Number.Format = kv.Key.NumberFormat
+									destVal.Number.FormatNumber()
+								}
 
-				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
-				if nil != destAv {
-					for _, bID := range blockIDs {
-						kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
+								kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
+							}
+
+							kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc)
+						}
 					}
 				}
 			case av.KeyTypeRelation:
@@ -808,129 +816,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
 				}
 
-				if nil != rollupKey.Rollup.Calc {
-					switch rollupKey.Rollup.Calc.Operator {
-					case av.CalcOperatorCountAll:
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(len(cell.Value.Rollup.Contents))}
-					case av.CalcOperatorCountValues:
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(len(cell.Value.Rollup.Contents))}
-					case av.CalcOperatorCountUniqueValues:
-						countUniqueValues := 0
-						uniqueValues := map[string]bool{}
-						for _, v := range cell.Value.Rollup.Contents {
-							if !uniqueValues[v] {
-								uniqueValues[v] = true
-								countUniqueValues++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(countUniqueValues)}
-					case av.CalcOperatorCountEmpty:
-						countEmpty := 0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" == v {
-								countEmpty++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(countEmpty)}
-					case av.CalcOperatorCountNotEmpty:
-						countNonEmpty := 0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								countNonEmpty++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(countNonEmpty)}
-					case av.CalcOperatorPercentEmpty:
-						countEmpty := 0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" == v {
-								countEmpty++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(countEmpty*100/len(cell.Value.Rollup.Contents)) + "%"}
-					case av.CalcOperatorPercentNotEmpty:
-						countNonEmpty := 0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								countNonEmpty++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.Itoa(countNonEmpty*100/len(cell.Value.Rollup.Contents)) + "%"}
-					case av.CalcOperatorSum:
-						sum := 0.0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								sum += n
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(sum, 'f', -1, 64)}
-					case av.CalcOperatorAverage:
-						sum := 0.0
-						count := 0
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								sum += n
-								count++
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(sum/float64(count), 'f', -1, 64)}
-					case av.CalcOperatorMedian:
-						numbers := []float64{}
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								numbers = append(numbers, n)
-							}
-						}
-						sort.Float64s(numbers)
-						if 0 < len(numbers) {
-							if 0 == len(numbers)%2 {
-								cell.Value.Rollup.Contents = []string{strconv.FormatFloat((numbers[len(numbers)/2-1]+numbers[len(numbers)/2])/2, 'f', -1, 64)}
-							} else {
-								cell.Value.Rollup.Contents = []string{strconv.FormatFloat(numbers[len(numbers)/2], 'f', -1, 64)}
-							}
-						}
-					case av.CalcOperatorMin:
-						min := math.MaxFloat64
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								if n < min {
-									min = n
-								}
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64)}
-					case av.CalcOperatorMax:
-						max := -math.MaxFloat64
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								if n > max {
-									max = n
-								}
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(max, 'f', -1, 64)}
-					case av.CalcOperatorRange:
-						min := math.MaxFloat64
-						max := -math.MaxFloat64
-						for _, v := range cell.Value.Rollup.Contents {
-							if "" != v {
-								n, _ := strconv.ParseFloat(v, 64)
-								if n < min {
-									min = n
-								}
-								if n > max {
-									max = n
-								}
-							}
-						}
-						cell.Value.Rollup.Contents = []string{strconv.FormatFloat(max-min, 'f', -1, 64)}
-					}
-				}
+				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

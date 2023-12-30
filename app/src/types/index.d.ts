@@ -1143,6 +1143,9 @@ interface IAVCellValue {
         blockIDs: string[]
         contents?: string[]
     }
+    rollup?: {
+        contents?: string[]
+    }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue

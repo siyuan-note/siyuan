@@ -643,6 +643,10 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         });
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else if (cellValue.type === "rollup") {
+        cellValue?.rollup?.contents?.forEach((item) => {
+            text += `<span class="av__celltext--ref" style="margin-right: 8px">${item}</span>`;
+        });
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
             text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;

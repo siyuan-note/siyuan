@@ -96,7 +96,6 @@ export class Layout {
             });
         }
         addResize(child);
-        resizeTabs();
         // https://ld246.com/article/1669858316295
         if (this.direction === "tb") {
             child.element.style.minHeight = "64px";

@@ -39,7 +39,7 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
 };
 
 export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, behavior: ScrollBehavior = "auto") => {
-    if (!top && getSelection().rangeCount > 0 && hasClosestBlock(getSelection().getRangeAt(0).startContainer)) {
+    if (!protyle.disabled && !top && getSelection().rangeCount > 0 && hasClosestBlock(getSelection().getRangeAt(0).startContainer)) {
         const editorElement = protyle.contentElement;
         const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
         let top = 0;

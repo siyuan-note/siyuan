@@ -235,7 +235,6 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
-                saveScroll(tab.model.editor.protyle);
                 model = new Editor({
                     app,
                     tab: newTab,

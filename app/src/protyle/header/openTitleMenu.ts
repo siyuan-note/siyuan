@@ -206,7 +206,6 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             label: window.siyuan.languages.openByNewWindow,
             icon: "iconOpenWindow",
             click() {
-                saveScroll(protyle);
                 openNewWindowById(protyle.block.rootID);
             }
         }).element);

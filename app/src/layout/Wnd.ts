@@ -111,7 +111,11 @@ export class Wnd {
                     this.renderTabList(target);
                     break;
                 } else if (target.tagName === "LI" && target.getAttribute("data-id") && !pdfIsLoading(this.element)) {
-                    this.switchTab(target, true);
+                    if (target.classList.contains("item--focus")) {
+                        this.switchTab(target, true, true, false, false);
+                    } else {
+                        this.switchTab(target, true);
+                    }
                     break;
                 }
                 target = target.parentElement;
@@ -701,9 +705,6 @@ export class Wnd {
                         item.model.beforeDestroy();
                     }
                 }
-                if (item.model instanceof Editor) {
-                    saveScroll(item.model.editor.protyle);
-                }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
                     this.children = [];
@@ -754,7 +755,7 @@ export class Wnd {
                             }
                         });
                         if (latestHeadElement && !closeAll) {
-                            this.switchTab(latestHeadElement, true, true, false);
+                            this.switchTab(latestHeadElement, true, true, false, false);
                             this.showHeading();
                         }
                     }

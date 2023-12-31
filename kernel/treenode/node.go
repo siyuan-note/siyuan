@@ -544,11 +544,12 @@ func getAttributeViewName(avID string) (name string) {
 	}
 
 	buf := bytes.Buffer{}
+	buf.WriteString(attrView.Name)
+	buf.WriteByte(' ')
 	for _, v := range attrView.Views {
 		buf.WriteString(v.Name)
 		buf.WriteByte(' ')
 	}
-
 	name = strings.TrimSpace(buf.String())
 	return
 }

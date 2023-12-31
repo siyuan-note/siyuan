@@ -105,18 +105,16 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement, data?:
     if (menu.isOpen) {
         return;
     }
-    if (type !== "checkbox") {
-        calcItem({
-            menu,
-            protyle,
-            colId,
-            avId,
-            oldOperator,
-            operator: "",
-            data,
-            target: calcElement
-        });
-    }
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "",
+        data,
+        target: calcElement
+    });
     calcItem({
         menu,
         protyle,

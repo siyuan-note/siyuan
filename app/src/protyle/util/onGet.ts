@@ -425,7 +425,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         protyle.observer.observe(protyle.wysiwyg.element);
     }, 1000 * 3);
 
-    if (focusElement.isSameNode(protyle.wysiwyg.element.firstElementChild)) {
+    if (focusElement.isSameNode(protyle.wysiwyg.element.firstElementChild) && !hasScrollTop) {
         protyle.observerLoad.disconnect();
     }
 };

@@ -44,7 +44,6 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     }
     loadElement.classList.remove("fn__none");
     loadElement.nextElementSibling.classList.add("fn__none");
-    searchListElement.previousElementSibling.innerHTML = "";
     let ids: string[] = [];
     if (isAll) {
         searchListElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {

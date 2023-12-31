@@ -190,6 +190,9 @@
 #model {
   box-sizing: border-box;
 
+  .toolbar__text {
+    min-height: 48px;
+  }
   .config-about__logo {
     display: flex;
     align-items: center;

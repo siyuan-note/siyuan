@@ -700,10 +700,11 @@ export class Wnd {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
-                if (item.model instanceof Custom) {
-                    if (item.model.beforeDestroy) {
-                        item.model.beforeDestroy();
-                    }
+                if (item.model instanceof Custom && item.model.beforeDestroy) {
+                    item.model.beforeDestroy();
+                }
+                if (item.model instanceof Editor) {
+                    saveScroll(item.model.editor.protyle);
                 }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
@@ -771,7 +772,7 @@ export class Wnd {
                 item.panelElement.remove();
                 this.destroyModel(item.model);
                 this.children.splice(index, 1);
-                resizeTabs(item.headElement ? true : false);
+                resizeTabs(false);
                 return true;
             }
         });
@@ -791,6 +792,7 @@ export class Wnd {
                 setTitle(window.siyuan.languages.siyuanNote);
             }
         }
+        saveLayout();
         /// #if !BROWSER
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");

@@ -6,7 +6,7 @@ import {Constants} from "../../constants";
 import {setStorageVal} from "../util/compatibility";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
-    if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly || protyle.element.classList.contains("fn__none")) {
+    if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
         // 报错或者空白页面
         return undefined;
     }

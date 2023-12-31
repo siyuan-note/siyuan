@@ -205,7 +205,7 @@ export const saveLayout = () => {
         saveCount++;
         setTimeout(() => {
             saveLayout();
-        }, Constants.TIMEOUT_LOAD);
+        }, Constants.TIMEOUT_LOAD * saveCount);
     } else {
         saveCount = 0;
         if (isWindow()) {

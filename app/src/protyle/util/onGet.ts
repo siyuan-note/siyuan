@@ -398,8 +398,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         const contentRect = protyle.contentElement.getBoundingClientRect();
         const focusRect = focusElement.getBoundingClientRect();
-        if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
-            scrollCenter(protyle, focusElement, !hasScrollTop);
+        if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
+            scrollCenter(protyle, focusElement, true);
         }
     } else {
         protyle.observerLoad?.disconnect();
@@ -413,8 +413,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             const focusRect = focusElement.getBoundingClientRect();
-            if (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom) {
-                scrollCenter(protyle, focusElement, !hasScrollTop);
+            if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
+                scrollCenter(protyle, focusElement, true);
             }
         }
     });

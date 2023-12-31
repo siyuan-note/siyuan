@@ -16,7 +16,35 @@ var (
 	attributeViewRelationsLock = sync.Mutex{}
 )
 
-func RemoveAvRel(avID, destAvID string) {
+func GetSrcAvIDs(destAvID string) []string {
+	attributeViewRelationsLock.Lock()
+	defer attributeViewRelationsLock.Unlock()
+
+	relations := filepath.Join(util.DataDir, "storage", "av", "relations.msgpack")
+	if !filelock.IsExist(relations) {
+		return nil
+	}
+
+	data, err := filelock.ReadFile(relations)
+	if nil != err {
+		logging.LogErrorf("read attribute view relations failed: %s", err)
+		return nil
+	}
+
+	avRels := map[string][]string{}
+	if err = msgpack.Unmarshal(data, &avRels); nil != err {
+		logging.LogErrorf("unmarshal attribute view relations failed: %s", err)
+		return nil
+	}
+
+	srcAvIDs := avRels[destAvID]
+	if nil == srcAvIDs {
+		return nil
+	}
+	return srcAvIDs
+}
+
+func RemoveAvRel(srcAvID, destAvID string) {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
@@ -37,18 +65,18 @@ func RemoveAvRel(avID, destAvID string) {
 		return
 	}
 
-	destAvIDs := avRels[avID]
-	if nil == destAvIDs {
+	srcAvIDs := avRels[destAvID]
+	if nil == srcAvIDs {
 		return
 	}
 
 	var newAvIDs []string
-	for _, v := range destAvIDs {
-		if v != destAvID {
+	for _, v := range srcAvIDs {
+		if v != srcAvID {
 			newAvIDs = append(newAvIDs, v)
 		}
 	}
-	avRels[avID] = newAvIDs
+	avRels[destAvID] = newAvIDs
 
 	data, err = msgpack.Marshal(avRels)
 	if nil != err {
@@ -61,7 +89,7 @@ func RemoveAvRel(avID, destAvID string) {
 	}
 }
 
-func UpsertAvRel(avID, destAvID string) {
+func UpsertAvBackRel(srcAvID, destAvID string) {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
@@ -85,10 +113,10 @@ func UpsertAvRel(avID, destAvID string) {
 		}
 	}
 
-	destAvIDs := avRelations[avID]
-	destAvIDs = append(destAvIDs, destAvID)
-	destAvIDs = gulu.Str.RemoveDuplicatedElem(destAvIDs)
-	avRelations[avID] = destAvIDs
+	srcAvIDs := avRelations[destAvID]
+	srcAvIDs = append(srcAvIDs, srcAvID)
+	srcAvIDs = gulu.Str.RemoveDuplicatedElem(srcAvIDs)
+	avRelations[destAvID] = srcAvIDs
 
 	data, err := msgpack.Marshal(avRelations)
 	if nil != err {

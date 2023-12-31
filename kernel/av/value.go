@@ -597,5 +597,37 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 			}
 		}
 		r.Contents = []string{strconv.FormatFloat(max-min, 'f', -1, 64)}
+	case CalcOperatorChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if "√" == v {
+				countChecked++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countChecked)}
+	case CalcOperatorUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if "√" != v {
+				countUnchecked++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countUnchecked)}
+	case CalcOperatorPercentChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if "√" == v {
+				countChecked++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countChecked*100/len(r.Contents)) + "%"}
+	case CalcOperatorPercentUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if "√" != v {
+				countUnchecked++
+			}
+		}
+		r.Contents = []string{strconv.Itoa(countUnchecked*100/len(r.Contents)) + "%"}
 	}
 }

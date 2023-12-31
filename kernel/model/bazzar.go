@@ -350,6 +350,10 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 		return true
 	}
 
+	if nil == pkg || nil == pkg.DisplayName || nil == pkg.Description {
+		return false
+	}
+
 	for _, keyword := range keywords {
 		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
 			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||

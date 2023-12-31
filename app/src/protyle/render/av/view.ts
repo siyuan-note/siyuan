@@ -101,6 +101,7 @@ export const bindViewEvent = (options: {
             inputElement.dataset.value = inputElement.value;
         }
     });
+    inputElement.select();
 };
 
 export const getViewHTML = (data: IAVTable) => {

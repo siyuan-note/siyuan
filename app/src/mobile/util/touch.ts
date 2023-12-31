@@ -63,10 +63,12 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
         } else if (scrollElement.classList.contains("code-block")) {
             scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
         } else if (scrollElement.classList.contains("av")) {
-            scrollElement = scrollElement.querySelector(".av__scroll") as HTMLElement;
+            scrollElement = hasClosestByClassName(target, "layout-tab-bar") || hasClosestByClassName(target, "av__scroll");
         }
-        if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
-            (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
+        if (scrollElement && (
+            (xDiff <= 0 && scrollElement.scrollLeft > 0) ||
+            (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
+        )) {
             // 左滑拉出菜单后右滑至代码块右侧有空间时，需关闭菜单
             closePanel();
             return;
@@ -227,10 +229,12 @@ export const handleTouchMove = (event: TouchEvent) => {
             } else if (scrollElement.classList.contains("code-block")) {
                 scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
             } else if (scrollElement.classList.contains("av")) {
-                scrollElement = scrollElement.querySelector(".av__scroll") as HTMLElement;
+                scrollElement = hasClosestByClassName(target, "layout-tab-bar") || hasClosestByClassName(target, "av__scroll");
             }
-            if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
-                (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
+            if (scrollElement && (
+                (xDiff < 0 && scrollElement.scrollLeft > 0) ||
+                (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
+            )) {
                 return;
             }
         }

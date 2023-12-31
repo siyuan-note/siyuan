@@ -480,6 +480,10 @@ html[lang="zh_CN"] .protyle-wysiwyg [data-node-id]:last-child [spellcheck][conte
   content: "键入文字";
 }
 
+.av__views .block__icon {
+  opacity: 1;
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

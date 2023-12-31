@@ -1478,26 +1478,38 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			// 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 			for _, keyValues := range attrView.KeyValues {
-				if av.KeyTypeMAsset != keyValues.Key.Type {
-					continue
-				}
+				switch keyValues.Key.Type {
+				case av.KeyTypeMAsset:
+					for _, value := range keyValues.Values {
+						for _, asset := range value.MAsset {
+							if !isRelativePath([]byte(asset.Content)) {
+								continue
+							}
 
-				for _, value := range keyValues.Values {
-					for _, asset := range value.MAsset {
-						if !isRelativePath([]byte(asset.Content)) {
-							continue
-						}
+							destPath := filepath.Join(exportFolder, asset.Content)
+							srcPath, assetErr := GetAssetAbsPath(asset.Content)
+							if nil != assetErr {
+								logging.LogWarnf("get asset [%s] abs path failed: %s", asset.Content, assetErr)
+								continue
+							}
 
-						destPath := filepath.Join(exportFolder, asset.Content)
-						srcPath, assetErr := GetAssetAbsPath(asset.Content)
-						if nil != assetErr {
-							logging.LogWarnf("get asset [%s] abs path failed: %s", asset.Content, assetErr)
-							continue
+							if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
+								logging.LogErrorf("copy asset failed: %s", copyErr)
+							}
 						}
+					}
+				case av.KeyTypeRelation:
+					if nil == keyValues.Key.Relation {
+						break
+					}
 
-						if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
-							logging.LogErrorf("copy asset failed: %s", copyErr)
-						}
+					relAvJSONPath := av.GetAttributeViewDataPath(keyValues.Key.Relation.AvID)
+					if !filelock.IsExist(relAvJSONPath) {
+						break
+					}
+
+					if copyErr := filelock.Copy(relAvJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
+						logging.LogErrorf("copy av json failed: %s", copyErr)
 					}
 				}
 			}

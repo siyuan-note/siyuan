@@ -980,27 +980,31 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 		srcRel := keyValues.Key.Relation
 		// 已经设置过双向关联的话需要先断开双向关联
-		if nil != srcRel && srcRel.IsTwoWay {
-			oldDestAv, _ := av.ParseAttributeView(srcRel.AvID)
-			if nil != oldDestAv {
-				isOldSameAv := oldDestAv.ID == destAv.ID
-				if isOldSameAv {
-					oldDestAv = destAv
-				}
+		if nil != srcRel {
+			if srcRel.IsTwoWay {
+				oldDestAv, _ := av.ParseAttributeView(srcRel.AvID)
+				if nil != oldDestAv {
+					isOldSameAv := oldDestAv.ID == destAv.ID
+					if isOldSameAv {
+						oldDestAv = destAv
+					}
 
-				oldDestKey, _ := oldDestAv.GetKey(srcRel.BackKeyID)
-				if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
-					oldDestKey.Relation.IsTwoWay = false
-					oldDestKey.Relation.BackKeyID = ""
-				}
+					oldDestKey, _ := oldDestAv.GetKey(srcRel.BackKeyID)
+					if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == srcAv.ID && oldDestKey.Relation.IsTwoWay {
+						oldDestKey.Relation.IsTwoWay = false
+						oldDestKey.Relation.BackKeyID = ""
+					}
 
-				if !isOldSameAv {
-					err = av.SaveAttributeView(oldDestAv)
-					if nil != err {
-						return
+					if !isOldSameAv {
+						err = av.SaveAttributeView(oldDestAv)
+						if nil != err {
+							return
+						}
 					}
 				}
 			}
+
+			av.RemoveAvRel(srcAv.ID, srcRel.AvID)
 		}
 
 		srcRel = &av.Relation{
@@ -1069,6 +1073,8 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		err = av.SaveAttributeView(destAv)
 		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
 	}
+
+	av.UpsertAvRel(srcAv.ID, destAv.ID)
 	return
 }
 
@@ -2116,31 +2122,53 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 		}
 	}
 
-	// 删除双向关联的目标列
-	if nil != removedKey && nil != removedKey.Relation && removedKey.Relation.IsTwoWay {
-		destAv, _ := av.ParseAttributeView(removedKey.Relation.AvID)
-		if nil != destAv {
-			for i, keyValues := range destAv.KeyValues {
-				if keyValues.Key.ID == removedKey.Relation.BackKeyID {
-					destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
-					break
-				}
-			}
+	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation {
+		if removedKey.Relation.IsTwoWay {
+			// 删除双向关联的目标列
 
-			for _, view := range destAv.Views {
-				switch view.LayoutType {
-				case av.LayoutTypeTable:
-					for i, column := range view.Table.Columns {
-						if column.ID == removedKey.Relation.BackKeyID {
-							view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
-							break
+			destAv, _ := av.ParseAttributeView(removedKey.Relation.AvID)
+			if nil != destAv {
+				destAvRelSrcAv := false
+				for i, keyValues := range destAv.KeyValues {
+					if keyValues.Key.ID == removedKey.Relation.BackKeyID {
+						destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
+						continue
+					}
+
+					if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
+						destAvRelSrcAv = true
+					}
+				}
+
+				for _, view := range destAv.Views {
+					switch view.LayoutType {
+					case av.LayoutTypeTable:
+						for i, column := range view.Table.Columns {
+							if column.ID == removedKey.Relation.BackKeyID {
+								view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+								break
+							}
 						}
 					}
 				}
+
+				av.SaveAttributeView(destAv)
+				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
+
+				if !destAvRelSrcAv {
+					av.RemoveAvRel(destAv.ID, attrView.ID)
+				}
 			}
 
-			av.SaveAttributeView(destAv)
-			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
+			srcAvRelDestAv := false
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
+					srcAvRelDestAv = true
+				}
+			}
+			if !srcAvRelDestAv {
+				av.RemoveAvRel(attrView.ID, removedKey.Relation.AvID)
+			}
 		}
 	}
 

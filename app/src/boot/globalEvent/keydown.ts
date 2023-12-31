@@ -144,7 +144,7 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
                 openFileById({
                     app,
                     id: currentLiElement.getAttribute("data-node-id"),
-                    action: [Constants.CB_GET_SCROLL]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                 });
             }
             hideElements(["dialog"]);

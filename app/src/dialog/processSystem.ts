@@ -263,8 +263,6 @@ export const transactionError = () => {
         exitSiYuan();
         /// #else
         exportLayout({
-            reload: false,
-            onlyData: false,
             errorExit: true,
             cb: exitSiYuan
         });

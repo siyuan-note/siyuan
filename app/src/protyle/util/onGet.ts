@@ -395,7 +395,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }
-    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_SCROLL) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         const contentRect = protyle.contentElement.getBoundingClientRect();
         const focusRect = focusElement.getBoundingClientRect();
         if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {

@@ -306,8 +306,6 @@ export const about = {
         networkServeElement.addEventListener("change", () => {
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
                     cb: exitSiYuan
                 });
@@ -323,9 +321,10 @@ export const about = {
         googleAnalyticsElement.addEventListener("change", () => {
             fetchPost("/api/system/setGoogleAnalytics", {googleAnalytics: googleAnalyticsElement.checked}, () => {
                 exportLayout({
-                    reload: true,
-                    onlyData: false,
                     errorExit: false,
+                    cb() {
+                        window.location.reload();
+                    }
                 });
             });
         });
@@ -333,8 +332,6 @@ export const about = {
         uploadErrLogElement.addEventListener("change", () => {
             fetchPost("/api/system/setUploadErrLog", {uploadErrLog: uploadErrLogElement.checked}, () => {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
                     cb: exitSiYuan
                 });
@@ -369,9 +366,10 @@ export const about = {
                     proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`,
                 }).then(() => {
                     exportLayout({
-                        reload: true,
-                        onlyData: false,
                         errorExit: false,
+                        cb() {
+                            window.location.reload();
+                        },
                     });
                 });
                 /// #endif

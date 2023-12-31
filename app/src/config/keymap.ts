@@ -259,8 +259,9 @@ export const keymap = {
     bindEvent(app: App) {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
             exportLayout({
-                reload: true,
-                onlyData: false,
+                cb() {
+                    window.location.reload();
+                },
                 errorExit: false,
             });
         });

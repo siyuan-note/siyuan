@@ -24,7 +24,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic
                 element.firstElementChild.addEventListener("click", (event) => {
                     const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                     if (liElement) {
-                        openMobileFileById(app, liElement.dataset.nodeId, [Constants.CB_GET_SCROLL]);
+                        openMobileFileById(app, liElement.dataset.nodeId, [Constants.CB_GET_SCROLL, Constants.CB_GET_HL]);
                     }
                 });
             }

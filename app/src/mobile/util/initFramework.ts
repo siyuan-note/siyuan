@@ -180,7 +180,7 @@ export const initFramework = (app: App, isStart: boolean) => {
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
-                openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
+                openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL, Constants.CB_GET_HL]);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {

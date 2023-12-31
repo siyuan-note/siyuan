@@ -117,10 +117,8 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barExit") {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
-                    cb: exitSiYuan
+                    cb: exitSiYuan,
                 });
                 event.stopPropagation();
                 break;

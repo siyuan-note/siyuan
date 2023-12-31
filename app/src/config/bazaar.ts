@@ -626,8 +626,9 @@ export const bazaar = {
                         }, response => {
                             if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
                                 exportLayout({
-                                    reload: true,
-                                    onlyData: false,
+                                    cb() {
+                                        window.location.reload();
+                                    },
                                     errorExit: false,
                                 });
                                 return;
@@ -686,8 +687,9 @@ export const bazaar = {
                                 )) {
                                     if (window.siyuan.config.appearance.themeJS) {
                                         exportLayout({
-                                            reload: true,
-                                            onlyData: false,
+                                            cb() {
+                                                window.location.reload();
+                                            },
                                             errorExit: false,
                                         });
                                     } else {
@@ -763,8 +765,9 @@ export const bazaar = {
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&
                                 window.siyuan.config.appearance.themeJS) {
                                 exportLayout({
-                                    reload: true,
-                                    onlyData: false,
+                                    cb() {
+                                        window.location.reload();
+                                    },
                                     errorExit: false,
                                 });
                             } else {

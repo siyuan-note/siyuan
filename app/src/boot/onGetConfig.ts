@@ -176,7 +176,6 @@ export const initWindow = async (app: App) => {
     /// #if !BROWSER
     const winOnClose = (close = false) => {
         exportLayout({
-            reload: false,
             cb() {
                 if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
                     // 最小化
@@ -191,7 +190,6 @@ export const initWindow = async (app: App) => {
                     exitSiYuan();
                 }
             },
-            onlyData: false,
             errorExit: true
         });
     };

@@ -350,7 +350,7 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 		return true
 	}
 
-	if nil == pkg {
+	if nil == pkg || nil == pkg.DisplayName || nil == pkg.Description {
 		return false
 	}
 

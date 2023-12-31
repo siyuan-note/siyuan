@@ -252,7 +252,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 									destVal.Number.FormatNumber()
 								}
 
-								kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destAv.GetValue(kv.Key.Rollup.KeyID, bID).String())
+								kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destVal.String())
 							}
 
 							kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc)

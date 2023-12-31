@@ -195,7 +195,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     }
     hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
-    const oldHTML = nodeElement.outerHTML;
+    let oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.remove();
     let anchorElement: HTMLInputElement;
     window.siyuan.menus.menu.append(new MenuItem({
@@ -245,19 +245,26 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.remove,
-        click() {
-            refElement.outerHTML = refElement.textContent + "<wbr>";
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
         icon: "iconRefresh",
         click() {
-            const html = nodeElement.outerHTML;
-            removeInlineType(refElement, protyle.toolbar.range);
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            refElement.outerHTML = `${refElement.innerHTML}<wbr>`;
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
+            oldHTML = nodeElement.outerHTML;
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.remove,
+        click() {
+            refElement.insertAdjacentHTML("afterend", "<wbr>");
+            refElement.remove();
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
+            oldHTML = nodeElement.outerHTML;
         }
     }).element);
 
@@ -289,13 +296,9 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
 
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
         if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
-            if (refElement.parentElement) {
-                protyle.toolbar.range.selectNodeContents(refElement);
-                protyle.toolbar.range.collapse(false);
-                focusByRange(protyle.toolbar.range);
-            } else {
-                focusByWbr(nodeElement, protyle.toolbar.range);
-            }
+            protyle.toolbar.range.selectNodeContents(refElement);
+            protyle.toolbar.range.collapse(false);
+            focusByRange(protyle.toolbar.range);
         }
     };
 };
@@ -454,6 +457,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                         element.innerHTML = response.data;
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                        oldHTML = nodeElement.outerHTML;
                     });
                     focusByRange(protyle.toolbar.range);
                 }
@@ -466,6 +470,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                     focusByRange(protyle.toolbar.range);
+                    oldHTML = nodeElement.outerHTML;
                 }
             });
         }
@@ -476,6 +481,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
+                oldHTML = nodeElement.outerHTML;
             }
         }, {
             label: "*",
@@ -485,6 +491,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 focusByRange(protyle.toolbar.range);
+                oldHTML = nodeElement.outerHTML;
             }
         }, {
             label: window.siyuan.languages.text + " *",
@@ -495,6 +502,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 focusByRange(protyle.toolbar.range);
+                oldHTML = nodeElement.outerHTML;
             }
         }, {
             label: window.siyuan.languages.link,
@@ -504,6 +512,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
+                oldHTML = nodeElement.outerHTML;
             }
         }]);
         if (element.parentElement.textContent.trim() === element.textContent.trim() && element.parentElement.tagName === "DIV") {
@@ -515,6 +524,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     nodeElement.outerHTML = html;
                     updateTransaction(protyle, id, html, oldHTML);
                     blockRender(protyle, protyle.wysiwyg.element);
+                    oldHTML = nodeElement.outerHTML;
                 }
             });
         }
@@ -562,6 +572,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
+                oldHTML = nodeElement.outerHTML;
             }
         }).element);
     }
@@ -590,7 +601,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             if (nodeElement.outerHTML !== oldHTML) {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-                oldHTML = nodeElement.outerHTML;
             }
             const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
             if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
@@ -1175,26 +1185,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.remove,
-        click() {
-            const oldHTML = nodeElement.outerHTML;
-            linkElement.insertAdjacentHTML("afterend", "<wbr>");
-            linkElement.remove();
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            focusByWbr(nodeElement, protyle.toolbar.range);
+    if (linkAddress) {
+        openMenu(protyle.app, linkAddress, false, true);
+        /// #if !BROWSER
+        if (linkAddress?.startsWith("assets/")) {
+            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
         }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
-        icon: "iconRefresh",
-        click() {
-            removeInlineType(linkElement, protyle.toolbar.range);
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-        }
-    }).element);
+        /// #endif
+    }
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.rename,
@@ -1204,6 +1202,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
         }).element);
     }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
+        icon: "iconRefresh",
+        click() {
+            removeInlineType(linkElement, protyle.toolbar.range);
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+        }
+    }).element);
     if (linkAddress?.startsWith("siyuan://blocks/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
@@ -1225,14 +1231,18 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
         }).element);
     }
-    if (linkAddress) {
-        openMenu(protyle.app, linkAddress, false, true);
-        /// #if !BROWSER
-        if (linkAddress?.startsWith("assets/")) {
-            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.remove,
+        click() {
+            const oldHTML = nodeElement.outerHTML;
+            linkElement.insertAdjacentHTML("afterend", "<wbr>");
+            linkElement.remove();
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
         }
-        /// #endif
-    }
+    }).element);
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,

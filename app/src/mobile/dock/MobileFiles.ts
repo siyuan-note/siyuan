@@ -215,7 +215,7 @@ export class MobileFiles extends Model {
                 } else if (target.tagName === "LI") {
                     this.setCurrent(target);
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        openMobileFileById(app, target.getAttribute("data-node-id"));
+                        openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL, Constants.CB_GET_HL]);
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const ulElement = hasTopClosestByTag(target, "UL");
                         if (ulElement) {

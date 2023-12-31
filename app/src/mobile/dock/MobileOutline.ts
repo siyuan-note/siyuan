@@ -35,7 +35,7 @@ export class MobileOutline {
                     document.getElementById(id)?.scrollIntoView();
                 } else {
                     checkFold(id, (zoomIn) => {
-                        openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                        openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                     });
                 }
             }

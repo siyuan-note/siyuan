@@ -152,7 +152,7 @@ window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {
         openMobileFileById(siyuanApp, getIdFromSYProtocol(openURL),
-            getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+            getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
         return true;
     }
     return false;

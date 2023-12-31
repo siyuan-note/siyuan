@@ -232,6 +232,12 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
+	if "" == av.ID {
+		err = errors.New("av id is empty")
+		logging.LogErrorf("save attribute view failed: %s", err)
+		return
+	}
+
 	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {

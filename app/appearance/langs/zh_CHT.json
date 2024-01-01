@@ -1,4 +1,5 @@
 {
+  "original": "原值",
   "selectRelation": "請先選擇關聯列",
   "backRelation": "雙向關聯",
   "thisDatabase": "目前資料庫",

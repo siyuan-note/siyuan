@@ -8,13 +8,13 @@ const calcItem = (options: {
     operator: string,
     oldOperator: string,
     colId: string,
-    data?: IAV,
+    data?: IAV, // rollup
     target: HTMLElement,
     avId: string
 }) => {
     options.menu.addItem({
         iconHTML: "",
-        label: getNameByOperator(options.operator),
+        label: getNameByOperator(options.operator, !!options.data),
         click() {
             if (!options.data) {
                 transaction(options.protyle, [{
@@ -33,7 +33,7 @@ const calcItem = (options: {
                     }
                 }]);
             } else {
-                options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator)
+                options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator, true)
                 const colData = options.data.view.columns.find((item) => {
                     if (item.id === options.colId) {
                         if (!item.rollup) {
@@ -397,10 +397,10 @@ export const getCalcValue = (column: IAVColumn) => {
     return value;
 };
 
-export const getNameByOperator = (operator: string) => {
+export const getNameByOperator = (operator: string, isRollup: boolean) => {
     switch (operator) {
         case "":
-            return window.siyuan.languages.calcOperatorNone;
+            return isRollup ? window.siyuan.languages.original : window.siyuan.languages.calcOperatorNone;
         case "Count all":
             return window.siyuan.languages.calcOperatorCountAll;
         case "Count values":

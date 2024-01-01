@@ -170,7 +170,7 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
 </button>
 <button class="b3-menu__item" data-type="goSearchRollupCalc">
     <span class="b3-menu__label">${window.siyuan.languages.calc}</span>
-    <span class="b3-menu__accelerator">${getNameByOperator(colData.rollup?.calc?.operator)}</span>
+    <span class="b3-menu__accelerator">${getNameByOperator(colData.rollup?.calc?.operator, true)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`
 }

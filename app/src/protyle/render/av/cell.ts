@@ -668,7 +668,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 
 const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
     let text = ""
-    if (["text", "template"].includes(cellValue.type)) {
+    if (["text"].includes(cellValue.type)) {
         text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["url", "email", "phone"].includes(cellValue.type)) {
         const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
@@ -702,13 +702,6 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         if (text) {
             text = `<span class="av__celltext">${text}</span>`;
         }
-    } else if (["created", "updated"].includes(cellValue.type)) {
-        const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
-        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
-        if (dataValue && dataValue.isNotEmpty) {
-            text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
-        }
-        text += "</span>";
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {

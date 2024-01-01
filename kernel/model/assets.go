@@ -514,12 +514,17 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 		return
 	}
 
-	sqlAssets := sql.QueryRootBlockAssets(rootID)
-	err = uploadAssets2Cloud(sqlAssets, bizTypeUploadAssets)
+	tree, err := loadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
-	count = len(sqlAssets)
+
+	assets := assetsLinkDestsInTree(tree)
+	err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
+	if nil != err {
+		return
+	}
+	count = len(assets)
 	return
 }
 
@@ -529,17 +534,17 @@ const (
 )
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
-func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
+func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 	var uploadAbsAssets []string
-	for _, asset := range sqlAssets {
+	for _, assetPath := range assetPaths {
 		var absPath string
-		absPath, err = GetAssetAbsPath(asset.Path)
+		absPath, err = GetAssetAbsPath(assetPath)
 		if nil != err {
-			logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+			logging.LogWarnf("get asset [%s] abs path failed: %s", assetPath, err)
 			return
 		}
 		if "" == absPath {
-			logging.LogErrorf("not found asset [%s]", asset)
+			logging.LogErrorf("not found asset [%s]", assetPath)
 			continue
 		}
 

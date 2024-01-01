@@ -115,21 +115,6 @@ func QueryAssetByHash(hash string) (ret *Asset) {
 	return
 }
 
-func QueryRootBlockAssets(rootID string) (ret []*Asset) {
-	sqlStmt := "SELECT * FROM assets WHERE root_id = ?"
-	rows, err := query(sqlStmt, rootID)
-	if nil != err {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		asset := scanAssetRows(rows)
-		ret = append(ret, asset)
-	}
-	return
-}
-
 func scanAssetRows(rows *sql.Rows) (ret *Asset) {
 	var asset Asset
 	if err := rows.Scan(&asset.ID, &asset.BlockID, &asset.RootID, &asset.Box, &asset.DocPath, &asset.Path, &asset.Name, &asset.Title, &asset.Hash); nil != err {

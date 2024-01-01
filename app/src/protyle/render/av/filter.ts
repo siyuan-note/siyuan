@@ -9,9 +9,10 @@ import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {openMenuPanel} from "./openMenuPanel";
 import {fetchSyncPost} from "../../../util/fetch";
+import {showMessage} from "../../../dialog/message";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
-    if (["select", "number"].includes(type)) {
+    if (["select", "number", "date", "created", "updated"].includes(type)) {
         return "=";
     }
     if (["checkbox"].includes(type)) {
@@ -65,7 +66,11 @@ export const setFilter = async (options: {
     }
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
+        const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement
+        if (!selectElement) {
+            return;
+        }
+        const operator = selectElement.value as TAVFilterOperator;
         let hasMatch = false;
         let cellValue: IAVCellValue;
         if (textElements.length > 0) {
@@ -73,9 +78,10 @@ export const setFilter = async (options: {
                 cellValue = genCellValue(filterType, {
                     isNotEmpty2: textElements[1].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: new Date(textElements[0].value + " 00:00").getTime(),
-                    content2: new Date(textElements[1].value + " 00:00").getTime(),
-                    hasEndDate: operator === "Is between"
+                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
+                    content2: textElements[1].value ? new Date(textElements[1].value + " 00:00").getTime() : null,
+                    hasEndDate: operator === "Is between",
+                    isNotTime: true,
                 });
             } else {
                 cellValue = genCellValue(filterType, textElements[0].value);
@@ -94,9 +100,6 @@ export const setFilter = async (options: {
                     });
                 }
             });
-            if (mSelect.length === 0) {
-                mSelect.push({color: "", content: ""});
-            }
             cellValue = genCellValue(filterType, mSelect);
         } else {
             cellValue = genCellValue(filterType, undefined);
@@ -149,7 +152,8 @@ export const setFilter = async (options: {
     });
     let filterType = colData.type;
     if (filterType === "rollup") {
-        if (!colData.rollup.relationKeyID || !colData.rollup.keyID) {
+        if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
+            showMessage(window.siyuan.languages.plsChoose);
             openMenuPanel({
                 protyle: options.protyle,
                 blockElement: options.blockElement,

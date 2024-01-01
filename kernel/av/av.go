@@ -285,10 +285,13 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				}
 
 				for _, view := range av.Views {
-					for _, column := range view.Table.Columns {
-						if "" == column.ID {
-							column.ID = kv.Key.ID
-							break
+					switch view.LayoutType {
+					case LayoutTypeTable:
+						for _, column := range view.Table.Columns {
+							if "" == column.ID {
+								column.ID = kv.Key.ID
+								break
+							}
 						}
 					}
 				}

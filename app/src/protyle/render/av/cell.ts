@@ -645,7 +645,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item) => {
-            text += `<span class="av__celltext--ref" style="margin-right: 8px">${item}</span>`;
+            text += renderCell(item, wrap);
         });
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {

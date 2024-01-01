@@ -1145,7 +1145,7 @@ interface IAVCellValue {
         contents?: string[]
     }
     rollup?: {
-        contents?: string[]
+        contents?: IAVCellValue[]
     }
     date?: IAVCellDateValue
     created?: IAVCellDateValue

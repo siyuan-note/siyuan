@@ -1595,7 +1595,6 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 func exportRelationAvs(avID, exportStorageAvDir string) {
 	avIDs := hashset.New()
-	avIDs.Add(avID)
 	walkRelationAvs(avID, exportStorageAvDir, avIDs)
 
 	for _, v := range avIDs.Values() {

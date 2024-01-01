@@ -664,7 +664,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
     let text = ""
     if (["text", "template"].includes(cellValue.type)) {
-        text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
+        text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["url", "email", "phone"].includes(cellValue.type)) {
         const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
         // https://github.com/siyuan-note/siyuan/issues/9291
@@ -675,11 +675,9 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>
-<span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;

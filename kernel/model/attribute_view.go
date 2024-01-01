@@ -312,7 +312,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				if 0 < len(kv.Values) {
 					ial := map[string]string{}
 					block := getRowBlockValue(keyValues)
-					if !block.IsDetached {
+					if nil != block && !block.IsDetached {
 						ial = GetBlockAttrsWithoutWaitWriting(blockID)
 					}
 					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
@@ -592,7 +592,9 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
 	if "" == ial["id"] {
 		block := getRowBlockValue(rowValues)
-		ial["id"] = block.Block.ID
+		if nil != block && nil != block.Block {
+			ial["id"] = block.Block.ID
+		}
 	}
 	if "" == ial["updated"] {
 		block := getRowBlockValue(rowValues)

@@ -475,7 +475,7 @@ type ValueRollup struct {
 	Contents []*Value `json:"contents"`
 }
 
-func (r *ValueRollup) RenderContents(calc *RollupCalc) {
+func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	if nil == calc {
 		return
 	}
@@ -535,7 +535,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 				sum += v.Number.Content
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(sum)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum, destKey.NumberFormat)}}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0
@@ -546,7 +546,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 			}
 		}
 		if 0 < count {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(sum / float64(count))}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum/float64(count), destKey.NumberFormat)}}
 		}
 	case CalcOperatorMedian:
 		var numbers []float64
@@ -557,7 +557,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 		}
 		sort.Float64s(numbers)
 		if 0 < len(numbers) {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(numbers[len(numbers)/2])}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(numbers[len(numbers)/2], destKey.NumberFormat)}}
 		}
 	case CalcOperatorMin:
 		min := math.MaxFloat64
@@ -568,7 +568,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(min)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(min, destKey.NumberFormat)}}
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
 		for _, v := range r.Contents {
@@ -578,7 +578,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(max)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max, destKey.NumberFormat)}}
 	case CalcOperatorRange:
 		min := math.MaxFloat64
 		max := -math.MaxFloat64
@@ -592,7 +592,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(max - min)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max-min, destKey.NumberFormat)}}
 	case CalcOperatorChecked:
 		countChecked := 0
 		for _, v := range r.Contents {

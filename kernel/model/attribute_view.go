@@ -243,13 +243,9 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				relVal := attrView.GetValue(kv.Key.Rollup.RelationKeyID, kv.Values[0].BlockID)
 				if nil != relVal && nil != relVal.Relation {
 					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
-					if nil != destAv {
+					destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
+					if nil != destAv && nil != destKey {
 						for _, bID := range relVal.Relation.BlockIDs {
-							destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
-							if nil == destKey {
-								continue
-							}
-
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
 							if nil == destVal {
 								destVal = treenode.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.Rollup.KeyID, blockID, destKey.Type)
@@ -261,8 +257,8 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 							}
 
 							kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destVal.Clone())
-							kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc)
 						}
+						kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc, destKey)
 					}
 				}
 			case av.KeyTypeRelation:
@@ -817,12 +813,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					break
 				}
 
-				for _, blockID := range relVal.Relation.BlockIDs {
-					destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
-					if nil == destKey {
-						continue
-					}
+				destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+				if nil == destKey {
+					continue
+				}
 
+				for _, blockID := range relVal.Relation.BlockIDs {
 					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
 					if nil == destVal {
 						destVal = treenode.GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
@@ -835,7 +831,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.Clone())
 				}
 
-				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)
+				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

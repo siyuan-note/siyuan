@@ -1200,7 +1200,7 @@
     "38": "Trop de mots-clés mentionnés [%d], ajustez si nécessaire [Paramètres - Recherche - Mentions de backlink - Limite de mots-clés]",
     "39": "Suppression de l'index %s",
     "40": "Insertion de l'index %s",
-    "41": "Transfert complété",
+    "41": "Transfert complété [%d]",
     "42": "Le paramétrage est terminé, l'application se fermera automatiquement, merci de redémarrer plus tard...",
     "43": "La capacité de stockage maximale de l'espace cloud [%s] a été dépassée et le téléchargement des données ne peut pas continuer",
     "44": "L'analyse du template a échoué : %s",

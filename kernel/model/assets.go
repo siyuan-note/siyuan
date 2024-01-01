@@ -509,13 +509,17 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
-func UploadAssets2Cloud(rootID string) (err error) {
+func UploadAssets2Cloud(rootID string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
 	sqlAssets := sql.QueryRootBlockAssets(rootID)
 	err = uploadAssets2Cloud(sqlAssets, bizTypeUploadAssets)
+	if nil != err {
+		return
+	}
+	count = len(sqlAssets)
 	return
 }
 

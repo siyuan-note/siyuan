@@ -7,6 +7,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {genIconHTML} from "../util";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
+import {showMessage} from "../../../dialog/message";
 
 const updateCol = (options: {
     target: HTMLElement,
@@ -58,6 +59,10 @@ const updateCol = (options: {
 };
 
 const genSearchList = (element: Element, keyword: string, avId: string, isRelation: boolean, cb?: () => void) => {
+    if (!isRelation && !avId) {
+        showMessage(window.siyuan.languages.selectRelation);
+        return
+    }
     fetchPost(isRelation ? "/api/av/searchAttributeViewRelationKey" : "/api/av/searchAttributeViewNonRelationKey", {
         avID: avId,
         keyword

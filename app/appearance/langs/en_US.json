@@ -1,4 +1,5 @@
 {
+  "selectRelation": "Please select the related column first",
   "backRelation": "Bidirectional",
   "thisDatabase": "This database",
   "relatedTo": "Relation to",

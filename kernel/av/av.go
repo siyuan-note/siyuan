@@ -275,6 +275,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 
 		for _, v := range kv.Values {
+			if "" == kv.Key.ID {
+				kv.Key.ID = ast.NewNodeID()
+			}
 			if "" == v.KeyID {
 				v.KeyID = kv.Key.ID
 			}

@@ -12,7 +12,7 @@ import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
-import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
+import {isPaidUser} from "../../util/needSubscribe";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER

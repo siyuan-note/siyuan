@@ -13,7 +13,7 @@ import {Dialog} from "../../dialog";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
-import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
+import {isPaidUser} from "../../util/needSubscribe";
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER

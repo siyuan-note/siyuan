@@ -276,6 +276,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             updateCellValueByInput(protyle, type, cellElements);
         } else if (type === "relation") {
             openMenuPanel({protyle, blockElement, type: "relation", cellElements});
+        } else if (type === "rollup") {
+            openMenuPanel({protyle, blockElement, type: "rollup", cellElements, colId: cellElements[0].dataset.colId});
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -644,8 +646,8 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
-        cellValue?.rollup?.contents?.forEach((item) => {
-            text += renderCell(item, wrap);
+        cellValue?.rollup?.contents?.forEach((item, index) => {
+            text += renderRollup(item, wrap) + (index === cellValue.rollup.contents.length - 1 ? "" : " ,");
         });
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
@@ -658,6 +660,71 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     }
     return text;
 };
+
+const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
+    let text = ""
+    if (["text", "template"].includes(cellValue.type)) {
+        text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
+    } else if (["url", "email", "phone"].includes(cellValue.type)) {
+        const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
+        // https://github.com/siyuan-note/siyuan/issues/9291
+        let urlAttr = "";
+        if (cellValue.type === "url") {
+            urlAttr = ` data-href="${urlContent}"`;
+        }
+        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
+    } else if (cellValue.type === "block") {
+        if (cellValue?.isDetached) {
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
+<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+        } else {
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>
+<span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
+        }
+    } else if (cellValue.type === "number") {
+        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
+    } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
+        cellValue?.mSelect?.forEach((item) => {
+            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+        });
+    } else if (cellValue.type === "date") {
+        const dataValue = cellValue ? cellValue.date : null;
+        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
+        if (dataValue && dataValue.isNotEmpty) {
+            text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+        }
+        if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+        }
+        text += "</span>";
+    } else if (["created", "updated"].includes(cellValue.type)) {
+        const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
+        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
+        if (dataValue && dataValue.isNotEmpty) {
+            text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
+        }
+        text += "</span>";
+    } else if (cellValue.type === "mAsset") {
+        cellValue?.mAsset?.forEach((item) => {
+            if (item.type === "image") {
+                text += `<img class="av__cellassetimg" src="${item.content}">`;
+            } else {
+                text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
+            }
+        });
+    } else if (cellValue.type === "checkbox") {
+        text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else if (cellValue.type === "rollup") {
+        cellValue?.rollup?.contents?.forEach((item) => {
+            text += renderCell(item, wrap) + '<span class="fn__space"></span>';
+        });
+    } else if (cellValue.type === "relation") {
+        cellValue?.relation?.contents?.forEach((item, index) => {
+            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
+        });
+    }
+    return text;
+}
 
 export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     icon?: string,

@@ -27,15 +27,15 @@ import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
-import {goSearchRollupCol} from "./rollup";
+import {bindRollupEvent, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation",
-    colId?: string, // for edit
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation" | "rollup",
+    colId?: string, // for edit, rollup
     cellElements?: HTMLElement[],   // for select & date & relation & asset
     cb?: (avPanelElement: Element) => void
 }) => {
@@ -70,6 +70,8 @@ export const openMenuPanel = (options: {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {
             html = getDateHTML(data.view, options.cellElements);
+        } else if (options.type === "rollup") {
+            html = `<div class="b3-menu__items">${getRollupHTML({data, cellElements: options.cellElements})}</div>`;
         } else if (options.type === "relation") {
             html = getRelationHTML(data, options.cellElements);
             if (!html) {
@@ -90,7 +92,7 @@ export const openMenuPanel = (options: {
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
-        if (["select", "date", "asset", "relation"].includes(options.type)) {
+        if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
@@ -115,8 +117,10 @@ export const openMenuPanel = (options: {
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
             } else if (options.type === "relation") {
                 bindRelationEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+            } else if (options.type === "rollup") {
+                bindRollupEvent({protyle: options.protyle, data, menuElement});
             }
-            if (["select", "date", "relation"].includes(options.type)) {
+            if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
                 if (inputElement) {
                     inputElement.select();
@@ -787,7 +791,7 @@ export const openMenuPanel = (options: {
                         data,
                         isRelation: true,
                         protyle: options.protyle,
-                        colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                        colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -798,7 +802,7 @@ export const openMenuPanel = (options: {
                         data,
                         isRelation: false,
                         protyle: options.protyle,
-                        colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                        colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
                     });
                     event.preventDefault();
                     event.stopPropagation();

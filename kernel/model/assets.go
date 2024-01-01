@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/88250/lute/editor"
 	"io"
 	"io/fs"
 	"mime"
@@ -520,6 +521,9 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 	}
 
 	assets := assetsLinkDestsInTree(tree)
+	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
+	assets = append(assets, embedAssets...)
+	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if nil != err {
 		return
@@ -1053,9 +1057,43 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
+func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 	ret = []string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockQueryEmbedScript != n.Type {
+			return ast.WalkContinue
+		}
+
+		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
+		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		for _, sqlBlock := range sqlBlocks {
+			subtree, _ := loadTreeByBlockID(sqlBlock.ID)
+			if nil == subtree {
+				continue
+			}
+			embedNode := treenode.GetNodeInTree(subtree, sqlBlock.ID)
+			if nil == embedNode {
+				continue
+			}
+
+			ret = append(ret, assetsLinkDestsInNode(embedNode)...)
+		}
+		return ast.WalkContinue
+	})
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
+	ret = assetsLinkDestsInNode(tree.Root)
+	return
+}
+
+func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
+	ret = []string{}
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
@@ -1112,7 +1150,7 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 						dest := strings.TrimSpace(string(src))
 						ret = append(ret, dest)
 					} else {
-						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", tree.Box+tree.Path)
+						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", node.Box+node.Path)
 					}
 				}
 			}

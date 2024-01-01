@@ -277,12 +277,21 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		for _, v := range kv.Values {
 			if "" == kv.Key.ID {
 				kv.Key.ID = ast.NewNodeID()
-				for _, v := range kv.Values {
+				for _, val := range kv.Values {
+					val.KeyID = kv.Key.ID
+				}
+				if "" == v.KeyID {
 					v.KeyID = kv.Key.ID
 				}
-			}
-			if "" == v.KeyID {
-				v.KeyID = kv.Key.ID
+
+				for _, view := range av.Views {
+					for _, column := range view.Table.Columns {
+						if "" == column.ID {
+							column.ID = kv.Key.ID
+							break
+						}
+					}
+				}
 			}
 		}
 	}

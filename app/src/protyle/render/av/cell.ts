@@ -667,7 +667,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 };
 
 const renderRollup = (cellValue: IAVCellValue) => {
-    let text = ""
+    let text = "";
     if (["text"].includes(cellValue.type)) {
         text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["url", "email", "phone"].includes(cellValue.type)) {
@@ -700,7 +700,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     }
     return text;
-}
+};
 
 export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     icon?: string,

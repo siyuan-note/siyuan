@@ -18,9 +18,9 @@ const updateCol = (options: {
     isRelation: boolean,
 }, itemElement: HTMLElement) => {
     if (itemElement.classList.contains("b3-list--empty")) {
-        return
+        return;
     }
-    options.target.querySelector(".b3-menu__accelerator").textContent = itemElement.querySelector(".b3-list-item__text").textContent
+    options.target.querySelector(".b3-menu__accelerator").textContent = itemElement.querySelector(".b3-list-item__text").textContent;
 
     const colData = options.data.view.columns.find((item) => {
         if (item.id === options.colId) {
@@ -62,7 +62,7 @@ const updateCol = (options: {
 const genSearchList = (element: Element, keyword: string, avId: string, isRelation: boolean, cb?: () => void) => {
     if (!isRelation && !avId) {
         showMessage(window.siyuan.languages.selectRelation);
-        return
+        return;
     }
     fetchPost(isRelation ? "/api/av/searchAttributeViewRelationKey" : "/api/av/searchAttributeViewNonRelationKey", {
         avID: avId,
@@ -172,8 +172,8 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
     <span class="b3-menu__label">${window.siyuan.languages.calc}</span>
     <span class="b3-menu__accelerator">${getNameByOperator(colData.rollup?.calc?.operator, true)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
-</button>`
-}
+</button>`;
+};
 
 export const bindRollupEvent = (options: {
     protyle: IProtyle,
@@ -184,7 +184,7 @@ export const bindRollupEvent = (options: {
     if (goSearchRollupColElement) {
         const oldValue = JSON.parse(goSearchRollupColElement.dataset.oldValue) as IAVCellRollupValue;
         const goSearchRollupTargetElement = options.menuElement.querySelector('[data-type="goSearchRollupTarget"]') as HTMLElement;
-        let targetKeyAVId = ""
+        let targetKeyAVId = "";
         if (oldValue.relationKeyID) {
             options.data.view.columns.find((item) => {
                 if (item.id === oldValue.relationKeyID) {
@@ -193,13 +193,13 @@ export const bindRollupEvent = (options: {
                     goSearchRollupTargetElement.dataset.avId = targetKeyAVId;
                     return true;
                 }
-            })
+            });
         }
         if (oldValue.keyID && targetKeyAVId) {
             fetchPost("/api/av/getAttributeView", {id: targetKeyAVId}, (response) => {
                 response.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
                     if (item.key.id === oldValue.keyID) {
-                        goSearchRollupTargetElement.querySelector('.b3-menu__accelerator').textContent = item.key.name;
+                        goSearchRollupTargetElement.querySelector(".b3-menu__accelerator").textContent = item.key.name;
                         const goSearchRollupCalcElement = options.menuElement.querySelector('[data-type="goSearchRollupCalc"]') as HTMLElement;
                         goSearchRollupCalcElement.dataset.colType = item.key.type;
                         goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
@@ -209,4 +209,4 @@ export const bindRollupEvent = (options: {
             });
         }
     }
-}
+};

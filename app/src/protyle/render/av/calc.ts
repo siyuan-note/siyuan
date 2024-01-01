@@ -33,7 +33,7 @@ const calcItem = (options: {
                     }
                 }]);
             } else {
-                options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator, true)
+                options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator, true);
                 const colData = options.data.view.columns.find((item) => {
                     if (item.id === options.colId) {
                         if (!item.rollup) {
@@ -440,6 +440,6 @@ export const getNameByOperator = (operator: string, isRollup: boolean) => {
         case "Latest":
             return window.siyuan.languages.calcOperatorLatest;
         default:
-            return ""
+            return "";
     }
-}
+};

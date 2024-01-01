@@ -1100,7 +1100,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     const id = nodeElement.getAttribute("data-node-id");
     let html = nodeElement.outerHTML;
     const linkAddress = linkElement.getAttribute("data-href");
-    let inputElements: NodeListOf<HTMLTextAreaElement>
+    let inputElements: NodeListOf<HTMLTextAreaElement>;
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
         type: "readonly",

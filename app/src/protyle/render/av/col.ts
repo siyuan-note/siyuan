@@ -530,7 +530,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             icon: "iconEdit",
             label: window.siyuan.languages.edit,
             click() {
-                const colName = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                const colName = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
                 openMenuPanel({
                     protyle,
                     blockElement,
@@ -538,7 +538,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     colId,
                     cb(avElement) {
                         // 修改名字后点击编辑，需要更新名字
-                        const editNameElement = avElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement
+                        const editNameElement = avElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
                         editNameElement.value = colName;
                         editNameElement.select();
                     }

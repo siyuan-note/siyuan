@@ -391,7 +391,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         }
         /// #endif
     }
-    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number"
+    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }

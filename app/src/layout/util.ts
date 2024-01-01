@@ -229,8 +229,8 @@ export const exportLayout = (options: {
         };
         layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
         getAllModels().editor.forEach(item => {
-            saveScroll(item.editor.protyle)
-        })
+            saveScroll(item.editor.protyle);
+        });
         sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
         options.cb();
         return;
@@ -248,8 +248,8 @@ export const exportLayout = (options: {
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     getAllModels().editor.forEach(item => {
-        saveScroll(item.editor.protyle)
-    })
+        saveScroll(item.editor.protyle);
+    });
     fetchPost("/api/system/setUILayout", {
         layout: layoutJSON,
         errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
@@ -268,7 +268,7 @@ export const getAllLayout = () => {
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     return layoutJSON;
-}
+};
 
 const initInternalDock = (dockItem: IDockTab[]) => {
     dockItem.forEach((existSubItem) => {

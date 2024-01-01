@@ -61,7 +61,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
             preview: {
                 actions: ["mp-wechat", "zhihu"]
             }
-        }
+        };
         if (window.siyuan.mobile.editor) {
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);

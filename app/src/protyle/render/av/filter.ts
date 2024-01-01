@@ -66,7 +66,7 @@ export const setFilter = async (options: {
     }
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement
+        const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement;
         if (!selectElement) {
             return;
         }
@@ -162,10 +162,10 @@ export const setFilter = async (options: {
             });
             return;
         }
-        let targetAVId = ""
+        let targetAVId = "";
         options.data.view.columns.find((column) => {
             if (column.id === colData.rollup.relationKeyID) {
-                targetAVId = column.relation.avID
+                targetAVId = column.relation.avID;
                 return true;
             }
         });
@@ -180,10 +180,10 @@ export const setFilter = async (options: {
             if (item.column === colData.id && item.type) {
                 item.operator = getDefaultOperatorByType(filterType);
                 item.value = genCellValue(filterType, "");
-                delete item.type
+                delete item.type;
                 return true;
             }
-        })
+        });
     }
     switch (filterType) {
         case "checkbox":

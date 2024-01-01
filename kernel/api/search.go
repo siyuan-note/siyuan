@@ -54,6 +54,12 @@ func fullTextSearchAssetContent(c *gin.Context) {
 		return
 	}
 
+	if !model.IsPaidUser() {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(214)
+		return
+	}
+
 	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
 	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
 	ret.Data = map[string]interface{}{

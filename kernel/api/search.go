@@ -55,8 +55,7 @@ func fullTextSearchAssetContent(c *gin.Context) {
 	}
 
 	if !model.IsPaidUser() {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(214)
+		ret.Code = 1
 		return
 	}
 

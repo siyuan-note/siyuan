@@ -223,6 +223,10 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 			if 0 < len(kValues.Values) {
 				keyValues = append(keyValues, kValues)
+			} else {
+				// 如果没有值，那么就补一个默认值
+				kValues.Values = append(kValues.Values, treenode.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.ID, blockID, kv.Key.Type))
+				keyValues = append(keyValues, kValues)
 			}
 		}
 

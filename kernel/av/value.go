@@ -531,9 +531,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				sum += n
+			if nil != v.Number {
+				sum += v.Number.Content
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(sum)}}
@@ -541,9 +540,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 		sum := 0.0
 		count := 0
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				sum += n
+			if nil != v.Number {
+				sum += v.Number.Content
 				count++
 			}
 		}
@@ -553,9 +551,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	case CalcOperatorMedian:
 		var numbers []float64
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				numbers = append(numbers, n)
+			if nil != v.Number {
+				numbers = append(numbers, v.Number.Content)
 			}
 		}
 		sort.Float64s(numbers)
@@ -565,10 +562,9 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	case CalcOperatorMin:
 		min := math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				if n < min {
-					min = n
+			if nil != v.Number {
+				if v.Number.Content < min {
+					min = v.Number.Content
 				}
 			}
 		}
@@ -576,10 +572,9 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				if n > max {
-					max = n
+			if nil != v.Number {
+				if v.Number.Content > max {
+					max = v.Number.Content
 				}
 			}
 		}
@@ -588,13 +583,12 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 		min := math.MaxFloat64
 		max := -math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v.String() {
-				n, _ := strconv.ParseFloat(v.String(), 64)
-				if n < min {
-					min = n
+			if nil != v.Number {
+				if v.Number.Content < min {
+					min = v.Number.Content
 				}
-				if n > max {
-					max = n
+				if v.Number.Content > max {
+					max = v.Number.Content
 				}
 			}
 		}
@@ -602,32 +596,40 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	case CalcOperatorChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
-			if "√" == v.String() {
-				countChecked++
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked))}}
 	case CalcOperatorUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
-			if "√" != v.String() {
-				countUnchecked++
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked))}}
 	case CalcOperatorPercentChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
-			if "√" == v.String() {
-				countChecked++
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked * 100 / len(r.Contents)))}}
 	case CalcOperatorPercentUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
-			if "√" != v.String() {
-				countUnchecked++
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked * 100 / len(r.Contents)))}}

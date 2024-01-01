@@ -1479,10 +1479,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				return ast.WalkContinue
 			}
 
-			// 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 			for _, keyValues := range attrView.KeyValues {
 				switch keyValues.Key.Type {
-				case av.KeyTypeMAsset:
+				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 					for _, value := range keyValues.Values {
 						for _, asset := range value.MAsset {
 							if !isRelativePath([]byte(asset.Content)) {
@@ -1501,22 +1500,11 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 							}
 						}
 					}
-				case av.KeyTypeRelation:
-					if nil == keyValues.Key.Relation {
-						break
-					}
-
-					relAvJSONPath := av.GetAttributeViewDataPath(keyValues.Key.Relation.AvID)
-					if !filelock.IsExist(relAvJSONPath) {
-						break
-					}
-
-					if copyErr := filelock.Copy(relAvJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
-						logging.LogErrorf("copy av json failed: %s", copyErr)
-					}
 				}
 			}
 
+			// 级联导出关联列关联的数据库
+			exportRelationAvs(avID, exportStorageAvDir)
 			return ast.WalkContinue
 		})
 	}
@@ -1603,6 +1591,46 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	os.RemoveAll(exportFolder)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func exportRelationAvs(avID, exportStorageAvDir string) {
+	avIDs := hashset.New()
+	walkRelationAvs(avID, avIDs)
+
+	for _, v := range avIDs.Values() {
+		relAvID := v.(string)
+		relAvJSONPath := av.GetAttributeViewDataPath(relAvID)
+		if !filelock.IsExist(relAvJSONPath) {
+			continue
+		}
+
+		if copyErr := filelock.Copy(relAvJSONPath, filepath.Join(exportStorageAvDir, relAvID+".json")); nil != copyErr {
+			logging.LogErrorf("copy av json failed: %s", copyErr)
+		}
+	}
+}
+
+func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
+	if exportAvIDs.Contains(avID) {
+		return
+	}
+
+	attrView, _ := av.ParseAttributeView(avID)
+	if nil == attrView {
+		return
+	}
+
+	exportAvIDs.Add(avID)
+	for _, keyValues := range attrView.KeyValues {
+		switch keyValues.Key.Type {
+		case av.KeyTypeRelation: // 导出关联列
+			if nil == keyValues.Key.Relation {
+				break
+			}
+
+			walkRelationAvs(keyValues.Key.Relation.AvID, exportAvIDs)
+		}
+	}
 }
 
 func ExportMarkdownContent(id string) (hPath, exportedMd string) {

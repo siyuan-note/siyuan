@@ -17,7 +17,7 @@ import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
-import {needLogin, needSubscribe} from "../../util/needSubscribe";
+import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
@@ -74,7 +74,7 @@ const promiseTransaction = () => {
             promiseTransaction();
         }
         /// #if MOBILE
-        if (((0 !== window.siyuan.config.sync.provider && !needLogin("")) ||
+        if (((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
                 (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
             window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
             document.getElementById("toolbarSync").classList.remove("fn__none");

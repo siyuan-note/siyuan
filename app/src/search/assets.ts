@@ -190,6 +190,12 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
             orderBy: localSearch.sort
         }, (response) => {
             element.nextElementSibling.classList.add("fn__none");
+            if (response.code === 1) {
+                element.querySelector("#searchAssetList").innerHTML = `<div class="search__empty">
+    ${window.siyuan.languages["_kernel"][214]}
+</div>`;
+                return;
+            }
             const nextElement = element.querySelector('[data-type="assetNext"]');
             if (page < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");

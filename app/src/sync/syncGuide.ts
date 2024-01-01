@@ -1,4 +1,4 @@
-import {needLogin, needSubscribe} from "../util/needSubscribe";
+import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
@@ -147,7 +147,8 @@ export const syncGuide = (app?: App) => {
     }
     /// #if MOBILE
     if ((0 === window.siyuan.config.sync.provider && needSubscribe()) ||
-        (0 !== window.siyuan.config.sync.provider && needLogin())) {
+        (0 !== window.siyuan.config.sync.provider && !isPaidUser())) {
+        showMessage(window.siyuan.languages["_kernel"][214]);
         return;
     }
     /// #else
@@ -164,10 +165,8 @@ export const syncGuide = (app?: App) => {
         }
         return;
     }
-    if (0 !== window.siyuan.config.sync.provider && needLogin("") && app) {
-        const dialogSetting = openSetting(app);
-        dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
-        dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
+    if (0 !== window.siyuan.config.sync.provider && !isPaidUser() && app) {
+        showMessage(window.siyuan.languages["_kernel"][214]);
         return;
     }
     /// #endif

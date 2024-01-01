@@ -598,7 +598,9 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 	if "" == ial["updated"] {
 		block := getRowBlockValue(rowValues)
-		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
+		if nil != block && nil != block.Block {
+			ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
+		}
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")

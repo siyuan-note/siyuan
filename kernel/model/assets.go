@@ -1058,6 +1058,8 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 }
 
 func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
+	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
+
 	ret = []string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbedScript != n.Type {

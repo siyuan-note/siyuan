@@ -672,12 +672,13 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["url", "email", "phone"].includes(cellValue.type)) {
         const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
-        // https://github.com/siyuan-note/siyuan/issues/9291
-        let urlAttr = "";
-        if (cellValue.type === "url") {
-            urlAttr = ` data-href="${urlContent}"`;
+        if (urlContent) {
+            let urlAttr = "";
+            if (cellValue.type === "url") {
+                urlAttr = ` data-href="${urlContent}"`;
+            }
+            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
         }
-        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
             text = `<span class="av__celltext">${cellValue.block?.content || ""}</span>`;

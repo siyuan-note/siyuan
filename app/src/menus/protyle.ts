@@ -1278,15 +1278,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         } else {
             linkElement.removeAttribute("data-title");
         }
-        if (inputElements[0].value) {
+        if (linkElement.getAttribute("data-type").indexOf("a") > -1) {
             linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
-        } else if (linkElement.getAttribute("data-type").indexOf("a") === -1) {
+        } else {
             linkElement.removeAttribute("data-href");
         }
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
-        if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-            removeInlineType(linkElement, "a", (currentRange && !protyle.element.contains(currentRange.startContainer)) ? protyle.toolbar.range : undefined);
-        } else if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
+        if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
             protyle.toolbar.range.selectNodeContents(linkElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);

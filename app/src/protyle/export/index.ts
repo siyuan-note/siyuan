@@ -13,7 +13,7 @@ import {Dialog} from "../../dialog";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
-import {needSubscribe} from "../../util/needSubscribe";
+import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
@@ -246,7 +246,7 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
-        <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[29]}</div>
+        <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214]}</div>
     </label>
     <div class="fn__flex">
       <div class="fn__flex-1"></div>
@@ -452,7 +452,7 @@ id="preview">
         });
         const  watermarkElement = actionElement.querySelector('#watermark');
         watermarkElement.addEventListener('change', () => {
-            if (watermarkElement.checked && ${needSubscribe("")}) {
+            if (watermarkElement.checked && ${!isPaidUser()}) {
                 watermarkElement.nextElementSibling.style.display = "";
                 watermarkElement.checked = false;
             }

@@ -12,7 +12,7 @@ import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
-import {needSubscribe} from "../../util/needSubscribe";
+import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -97,13 +97,16 @@ export const exportImage = (id: string) => {
     const watermarkElement = (exportDialog.element.querySelector("#watermark") as HTMLInputElement);
     watermarkElement.addEventListener("change", () => {
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark = watermarkElement.checked;
-        if (watermarkElement.checked && needSubscribe("")) {
+        if (watermarkElement.checked && !isPaidUser()) {
             watermarkElement.checked = false;
-            showMessage(window.siyuan.languages._kernel[29]);
+            showMessage(window.siyuan.languages._kernel[214]);
         }
         updateWatermark();
     });
     const updateWatermark = () => {
+        if (!isPaidUser()) {
+            return;
+        }
         const watermarkPreviewElement = exportDialog.element.querySelector(".export-img__watermark") as HTMLElement;
         watermarkPreviewElement.innerHTML = "";
         if (watermarkElement.checked) {

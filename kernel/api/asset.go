@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -257,14 +258,15 @@ func uploadCloud(c *gin.Context) {
 	}
 
 	rootID := arg["id"].(string)
-	err := model.UploadAssets2Cloud(rootID)
+	count, err := model.UploadAssets2Cloud(rootID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 3000}
-	} else {
-		util.PushMsg(model.Conf.Language(41), 3000)
+		return
 	}
+
+	util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
 }
 
 func insertLocalAssets(c *gin.Context) {

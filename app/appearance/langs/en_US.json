@@ -1200,7 +1200,7 @@
     "38": "Too many keywords mentioned [%d], adjust if necessary [Settings - Search - Backlink Mentions - Keyword Limit]",
     "39": "Deleting index %s",
     "40": "Inserting index %s",
-    "41": "Upload completed",
+    "41": "Upload completed [%d]",
     "42": "The setting is complete, the application will be closed automatically, please restart later...",
     "43": "The maximum storage capacity of cloud space [%s] has been exceeded, and data upload cannot continue",
     "44": "Parse template failed: %s",

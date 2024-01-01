@@ -774,25 +774,25 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					break
 				}
 
+				destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+				if nil == destKey {
+					continue
+				}
+
 				for _, blockID := range relVal.Relation.BlockIDs {
 					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
 					if nil == destVal {
-						destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
-						if nil == destKey {
-							continue
-						}
-
 						destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
 					}
-					if av.KeyTypeNumber == destVal.Type {
-						destVal.Number.Format = rollupKey.NumberFormat
+					if av.KeyTypeNumber == destKey.Type {
+						destVal.Number.Format = destKey.NumberFormat
 						destVal.Number.FormatNumber()
 					}
 
 					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.Clone())
 				}
 
-				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)
+				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {

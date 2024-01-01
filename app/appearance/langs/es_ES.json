@@ -1200,7 +1200,7 @@
     "38": "Demasiadas palabras clave mencionadas [%d], ajústelas si es necesario [Configuración - Búsqueda - Menciones de backlinks - Límite de palabras clave]",
     "39": "Eliminando índice %s",
     "40": "Insertando índice %s",
-    "41": "Carga completada",
+    "41": "Carga completada [%d]",
     "42": "La configuración se ha completado, la aplicación se cerrará automáticamente, por favor reinicie más tarde...",
     "43": "Se ha superado la capacidad máxima de almacenamiento del espacio en la nube [%s] y la carga de datos no puede continuar",
     "44": "El proceso de análisis de la plantilla ha fallado: %s",

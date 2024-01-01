@@ -67,8 +67,11 @@ func Export2Liandi(id string) (err error) {
 		return errors.New(Conf.Language(204))
 	}
 
-	sqlAssets := sql.QueryRootBlockAssets(id)
-	err = uploadAssets2Cloud(sqlAssets, bizTypeExport2Liandi)
+	assets := assetsLinkDestsInTree(tree)
+	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
+	assets = append(assets, embedAssets...)
+	assets = gulu.Str.RemoveDuplicatedElem(assets)
+	err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
 	if nil != err {
 		return
 	}

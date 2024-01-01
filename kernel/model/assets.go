@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/88250/lute/editor"
 	"io"
 	"io/fs"
 	"mime"
@@ -509,13 +510,25 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
-func UploadAssets2Cloud(rootID string) (err error) {
+func UploadAssets2Cloud(rootID string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	sqlAssets := sql.QueryRootBlockAssets(rootID)
-	err = uploadAssets2Cloud(sqlAssets, bizTypeUploadAssets)
+	tree, err := loadTreeByBlockID(rootID)
+	if nil != err {
+		return
+	}
+
+	assets := assetsLinkDestsInTree(tree)
+	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
+	assets = append(assets, embedAssets...)
+	assets = gulu.Str.RemoveDuplicatedElem(assets)
+	err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
+	if nil != err {
+		return
+	}
+	count = len(assets)
 	return
 }
 
@@ -525,17 +538,17 @@ const (
 )
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
-func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
+func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 	var uploadAbsAssets []string
-	for _, asset := range sqlAssets {
+	for _, assetPath := range assetPaths {
 		var absPath string
-		absPath, err = GetAssetAbsPath(asset.Path)
+		absPath, err = GetAssetAbsPath(assetPath)
 		if nil != err {
-			logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+			logging.LogWarnf("get asset [%s] abs path failed: %s", assetPath, err)
 			return
 		}
 		if "" == absPath {
-			logging.LogErrorf("not found asset [%s]", asset)
+			logging.LogErrorf("not found asset [%s]", assetPath)
 			continue
 		}
 
@@ -1044,9 +1057,45 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
+func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
+	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
+
 	ret = []string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockQueryEmbedScript != n.Type {
+			return ast.WalkContinue
+		}
+
+		stmt := n.TokensStr()
+		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		for _, sqlBlock := range sqlBlocks {
+			subtree, _ := loadTreeByBlockID(sqlBlock.ID)
+			if nil == subtree {
+				continue
+			}
+			embedNode := treenode.GetNodeInTree(subtree, sqlBlock.ID)
+			if nil == embedNode {
+				continue
+			}
+
+			ret = append(ret, assetsLinkDestsInNode(embedNode)...)
+		}
+		return ast.WalkContinue
+	})
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
+	ret = assetsLinkDestsInNode(tree.Root)
+	return
+}
+
+func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
+	ret = []string{}
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
@@ -1103,7 +1152,7 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 						dest := strings.TrimSpace(string(src))
 						ret = append(ret, dest)
 					} else {
-						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", tree.Box+tree.Path)
+						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", node.Box+node.Path)
 					}
 				}
 			}

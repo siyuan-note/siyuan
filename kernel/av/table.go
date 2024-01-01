@@ -2105,8 +2105,8 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					if !uniqueValues[content] {
-						uniqueValues[content] = true
+					if !uniqueValues[content.String()] {
+						uniqueValues[content.String()] = true
 						countUniqueValues++
 					}
 				}

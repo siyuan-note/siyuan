@@ -789,7 +789,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 						destVal.Number.FormatNumber()
 					}
 
-					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
+					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.Clone())
 				}
 
 				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)

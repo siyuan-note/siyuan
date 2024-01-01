@@ -212,7 +212,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 			switch kValues.Key.Type {
 			case av.KeyTypeRollup:
-				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []string{}}})
+				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []*av.Value{}}})
 			case av.KeyTypeTemplate:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: ""}})
 			case av.KeyTypeCreated:
@@ -260,7 +260,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 								destVal.Number.FormatNumber()
 							}
 
-							kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destVal.String())
+							kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destVal.Clone())
 							kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc)
 						}
 					}
@@ -832,7 +832,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 						destVal.Number.FormatNumber()
 					}
 
-					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.String())
+					cell.Value.Rollup.Contents = append(cell.Value.Rollup.Contents, destVal.Clone())
 				}
 
 				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc)

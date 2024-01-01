@@ -147,10 +147,14 @@ func (value *Value) String() string {
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeRollup:
-		if nil == value.Rollup {
+		if nil == value.Rollup || nil == value.Rollup.Contents {
 			return ""
 		}
-		return strings.Join(value.Rollup.Contents, " ")
+		var ret []string
+		for _, v := range value.Rollup.Contents {
+			ret = append(ret, v.String())
+		}
+		return strings.Join(ret, " ")
 	default:
 		return ""
 	}
@@ -468,7 +472,7 @@ type ValueRelation struct {
 }
 
 type ValueRollup struct {
-	Contents []string `json:"contents"`
+	Contents []*Value `json:"contents"`
 }
 
 func (r *ValueRollup) RenderContents(calc *RollupCalc) {
@@ -479,115 +483,113 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 	switch calc.Operator {
 	case CalcOperatorNone:
 	case CalcOperatorCountAll:
-		r.Contents = []string{strconv.Itoa(len(r.Contents))}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
 	case CalcOperatorCountValues:
-		r.Contents = []string{strconv.Itoa(len(r.Contents))}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, v := range r.Contents {
-			if !uniqueValues[v] {
-				uniqueValues[v] = true
+			if _, ok := uniqueValues[v.String()]; !ok {
+				uniqueValues[v.String()] = true
 				countUniqueValues++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countUniqueValues)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUniqueValues))}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v {
+			if "" == v.String() {
 				countEmpty++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countEmpty)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty))}}
 	case CalcOperatorCountNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v {
+			if "" != v.String() {
 				countNonEmpty++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countNonEmpty)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty))}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v {
+			if "" == v.String() {
 				countEmpty++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countEmpty*100/len(r.Contents)) + "%"}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty * 100 / len(r.Contents)))}}
 	case CalcOperatorPercentNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v {
+			if "" != v.String() {
 				countNonEmpty++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countNonEmpty*100/len(r.Contents)) + "%"}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty * 100 / len(r.Contents)))}}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				sum += n
 			}
 		}
-		r.Contents = []string{strconv.FormatFloat(sum, 'f', -1, 64)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(sum)}}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				sum += n
 				count++
 			}
 		}
-		r.Contents = []string{strconv.FormatFloat(sum/float64(count), 'f', -1, 64)}
+		if 0 < count {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(sum / float64(count))}}
+		}
 	case CalcOperatorMedian:
-		numbers := []float64{}
+		var numbers []float64
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				numbers = append(numbers, n)
 			}
 		}
 		sort.Float64s(numbers)
 		if 0 < len(numbers) {
-			if 0 == len(numbers)%2 {
-				r.Contents = []string{strconv.FormatFloat((numbers[len(numbers)/2-1]+numbers[len(numbers)/2])/2, 'f', -1, 64)}
-			} else {
-				r.Contents = []string{strconv.FormatFloat(numbers[len(numbers)/2], 'f', -1, 64)}
-			}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(numbers[len(numbers)/2])}}
 		}
 	case CalcOperatorMin:
 		min := math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				if n < min {
 					min = n
 				}
 			}
 		}
-		r.Contents = []string{strconv.FormatFloat(min, 'f', -1, 64)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(min)}}
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				if n > max {
 					max = n
 				}
 			}
 		}
-		r.Contents = []string{strconv.FormatFloat(max, 'f', -1, 64)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(max)}}
 	case CalcOperatorRange:
 		min := math.MaxFloat64
 		max := -math.MaxFloat64
 		for _, v := range r.Contents {
-			if "" != v {
-				n, _ := strconv.ParseFloat(v, 64)
+			if "" != v.String() {
+				n, _ := strconv.ParseFloat(v.String(), 64)
 				if n < min {
 					min = n
 				}
@@ -596,38 +598,38 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc) {
 				}
 			}
 		}
-		r.Contents = []string{strconv.FormatFloat(max-min, 'f', -1, 64)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(max - min)}}
 	case CalcOperatorChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
-			if "√" == v {
+			if "√" == v.String() {
 				countChecked++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countChecked)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked))}}
 	case CalcOperatorUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
-			if "√" != v {
+			if "√" != v.String() {
 				countUnchecked++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countUnchecked)}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked))}}
 	case CalcOperatorPercentChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
-			if "√" == v {
+			if "√" == v.String() {
 				countChecked++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countChecked*100/len(r.Contents)) + "%"}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked * 100 / len(r.Contents)))}}
 	case CalcOperatorPercentUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
-			if "√" != v {
+			if "√" != v.String() {
 				countUnchecked++
 			}
 		}
-		r.Contents = []string{strconv.Itoa(countUnchecked*100/len(r.Contents)) + "%"}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked * 100 / len(r.Contents)))}}
 	}
 }

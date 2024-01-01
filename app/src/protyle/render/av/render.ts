@@ -301,7 +301,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                         if (!isUndo && operation.isDetached && isCurrent) {
                             popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
                         }
-                    } else if (operation.action === "addAttrViewCol") {
+                    } else if (operation.action === "addAttrViewCol" && isCurrent) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

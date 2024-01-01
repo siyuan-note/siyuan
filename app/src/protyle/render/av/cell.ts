@@ -647,7 +647,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item, index) => {
-            const rollupText = renderRollup(item, wrap);
+            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
             if (!rollupText && text) {
                 text = text.substring(0, text.length - 2);
             } else {
@@ -666,7 +666,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     return text;
 };
 
-const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
+const renderRollup = (cellValue: IAVCellValue) => {
     let text = ""
     if (["text"].includes(cellValue.type)) {
         text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
@@ -687,10 +687,6 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         }
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
-    } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
-        cellValue?.mSelect?.forEach((item) => {
-            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
-        });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;
         if (dataValue && dataValue.isNotEmpty) {
@@ -702,24 +698,6 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         if (text) {
             text = `<span class="av__celltext">${text}</span>`;
         }
-    } else if (cellValue.type === "mAsset") {
-        cellValue?.mAsset?.forEach((item) => {
-            if (item.type === "image") {
-                text += `<img class="av__cellassetimg" src="${item.content}">`;
-            } else {
-                text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
-            }
-        });
-    } else if (cellValue.type === "checkbox") {
-        text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
-    } else if (cellValue.type === "rollup") {
-        cellValue?.rollup?.contents?.forEach((item) => {
-            text += renderCell(item, wrap) + '<span class="fn__space"></span>';
-        });
-    } else if (cellValue.type === "relation") {
-        cellValue?.relation?.contents?.forEach((item, index) => {
-            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
-        });
     }
     return text;
 }

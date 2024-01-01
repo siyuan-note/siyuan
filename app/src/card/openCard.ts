@@ -490,6 +490,7 @@ export const openCardByData = (app: App, cardsData: {
         dialog
     });
     dialog.editor = editor;
+    (dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement).focus();
 };
 
 const nextCard = (options: {

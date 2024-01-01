@@ -275,8 +275,26 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 
 		for _, v := range kv.Values {
-			if "" == v.KeyID {
-				v.KeyID = kv.Key.ID
+			if "" == kv.Key.ID {
+				kv.Key.ID = ast.NewNodeID()
+				for _, val := range kv.Values {
+					val.KeyID = kv.Key.ID
+				}
+				if "" == v.KeyID {
+					v.KeyID = kv.Key.ID
+				}
+
+				for _, view := range av.Views {
+					switch view.LayoutType {
+					case LayoutTypeTable:
+						for _, column := range view.Table.Columns {
+							if "" == column.ID {
+								column.ID = kv.Key.ID
+								break
+							}
+						}
+					}
+				}
 			}
 		}
 	}

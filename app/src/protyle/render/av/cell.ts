@@ -647,7 +647,12 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item, index) => {
-            text += renderRollup(item, wrap) + (index === cellValue.rollup.contents.length - 1 ? "" : " ,");
+            const rollupText = renderRollup(item, wrap);
+            if (!rollupText && text) {
+                text = text.substring(0, text.length - 2);
+            } else {
+                text += rollupText + ((index === cellValue.rollup.contents.length - 1 || !rollupText) ? "" : ", ");
+            }
         });
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
@@ -675,26 +680,27 @@ const renderRollup = (cellValue: IAVCellValue, wrap: boolean) => {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>`;
+            text = `<span class="av__celltext">${cellValue.block?.content || ""}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || ""}</span>`;
+            text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || ""}</span>`;
         }
     } else if (cellValue.type === "number") {
-        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
+        text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
         cellValue?.mSelect?.forEach((item) => {
             text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;
-        text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
         if (dataValue && dataValue.isNotEmpty) {
             text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
         }
         if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
             text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
         }
-        text += "</span>";
+        if (text) {
+            text = `<span class="av__celltext">${text}</span>`;
+        }
     } else if (["created", "updated"].includes(cellValue.type)) {
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;

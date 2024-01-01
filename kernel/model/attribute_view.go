@@ -1995,6 +1995,10 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 			icon = operation.Data.(string)
 		}
 		key := av.NewKey(operation.ID, operation.Name, icon, keyType)
+		if av.KeyTypeRollup == keyType {
+			key.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
+		}
+
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
 		for _, view := range attrView.Views {

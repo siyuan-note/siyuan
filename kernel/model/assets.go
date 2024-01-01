@@ -1064,7 +1064,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 			return ast.WalkContinue
 		}
 
-		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
+		stmt := n.TokensStr()
 		stmt = html.UnescapeString(stmt)
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)

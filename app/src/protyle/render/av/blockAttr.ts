@@ -105,7 +105,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
-            value.relation?.blockIDs.forEach((item, index) => {
+            value.relation?.blockIDs?.forEach((item, index) => {
                 html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
             });
             break;

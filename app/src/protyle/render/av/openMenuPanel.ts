@@ -65,7 +65,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "select") {
             html = getSelectHTML(data.view, options.cellElements);
         } else if (options.type === "asset") {
-            html = getAssetHTML(data.view, options.cellElements);
+            html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {

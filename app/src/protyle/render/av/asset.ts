@@ -51,43 +51,27 @@ export const bindAssetEvent = (options: {
     });
 };
 
-export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
-    const cellId = cellElements[0].dataset.id;
-    const rowId = (hasClosestByClassName(cellElements[0], "av__row") as HTMLElement).dataset.id;
-    let cellData: IAVCell;
-    data.rows.find(row => {
-        if (row.id === rowId) {
-            row.cells.find(cell => {
-                if (cell.id === cellId) {
-                    cellData = cell;
-                    return true;
-                }
-            });
-            return true;
-        }
-    });
+export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
-    if (cellData?.value?.mAsset) {
-        cellData.value.mAsset.forEach(item => {
-            if (!item.content) {
-                return;
-            }
-            let contentHTML;
-            if (item.type === "image") {
-                contentHTML = `<span data-type="openAssetItem" class="fn__flex-1">
+    genCellValueByElement(getTypeByCellElement(cellElements[0]), cellElements[0]).mAsset.forEach(item => {
+        if (!item.content) {
+            return;
+        }
+        let contentHTML;
+        if (item.type === "image") {
+            contentHTML = `<span data-type="openAssetItem" class="fn__flex-1">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
-            } else {
-                contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
-            }
+        } else {
+            contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
+        }
 
-            html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
+        html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
 <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
-        });
-    }
+    });
     return `<div class="b3-menu__items">
     ${html}
     <button data-type="addAssetExist" class="b3-menu__item">
@@ -121,7 +105,18 @@ export const updateAssetCell = (options: {
     const cellUndoOperations: IOperation[] = [];
     options.cellElements.forEach((item, elementIndex) => {
         if (!options.blockElement.contains(item)) {
-            item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+            const rowElement = hasClosestByClassName(item, "av__row");
+            if (rowElement) {
+                let cellIndex: number;
+                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, ghostIndex) => {
+                    if (cellElement.dataset.id === item.dataset.id) {
+                        cellIndex = ghostIndex
+                    }
+                });
+                if (typeof cellIndex === "number") {
+                    item = options.cellElements[elementIndex] = options.blockElement.querySelectorAll(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell`)[cellIndex] as HTMLElement;
+                }
+            }
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
@@ -193,7 +188,7 @@ export const updateAssetCell = (options: {
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;
     if (menuElement) {
-        menuElement.innerHTML = getAssetHTML(options.data.view, options.cellElements);
+        menuElement.innerHTML = getAssetHTML(options.cellElements);
         bindAssetEvent({
             protyle: options.protyle,
             data: options.data,

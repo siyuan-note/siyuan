@@ -7,7 +7,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasCloses
 import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
-import {bindDateEvent, getDateHTML, setDateValue} from "./date";
+import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
@@ -23,16 +23,19 @@ import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
 import {addView, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
 import {removeBlock} from "../../wysiwyg/remove";
-import {getEditorRange} from "../../util/selection";
+import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
+import {bindRollupEvent, getRollupHTML, goSearchRollupCol} from "./rollup";
+import {updateCellsValue} from "./cell";
+import {openCalcMenu} from "./calc";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation",
-    colId?: string, // for edit
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation" | "rollup",
+    colId?: string, // for edit, rollup
     cellElements?: HTMLElement[],   // for select & date & relation & asset
     cb?: (avPanelElement: Element) => void
 }) => {
@@ -67,6 +70,8 @@ export const openMenuPanel = (options: {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {
             html = getDateHTML(data.view, options.cellElements);
+        } else if (options.type === "rollup") {
+            html = `<div class="b3-menu__items">${getRollupHTML({data, cellElements: options.cellElements})}</div>`;
         } else if (options.type === "relation") {
             html = getRelationHTML(data, options.cellElements);
             if (!html) {
@@ -87,21 +92,35 @@ export const openMenuPanel = (options: {
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
-        if (["select", "date", "asset", "relation"].includes(options.type)) {
+        if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
-                bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+                bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
             } else if (options.type === "date") {
-                bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                bindDateEvent({
+                    protyle: options.protyle,
+                    data,
+                    menuElement,
+                    cellElements: options.cellElements,
+                    blockElement: options.blockElement
+                });
             } else if (options.type === "asset") {
-                bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                bindAssetEvent({
+                    protyle: options.protyle,
+                    data,
+                    menuElement,
+                    cellElements: options.cellElements,
+                    blockElement: options.blockElement
+                });
                 setTimeout(() => {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
             } else if (options.type === "relation") {
                 bindRelationEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+            } else if (options.type === "rollup") {
+                bindRollupEvent({protyle: options.protyle, data, menuElement});
             }
-            if (["select", "date", "relation"].includes(options.type)) {
+            if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
                 if (inputElement) {
                     inputElement.select();
@@ -257,7 +276,8 @@ export const openMenuPanel = (options: {
                     data,
                     cellElements: options.cellElements,
                     type: "replace",
-                    replaceValue
+                    replaceValue,
+                    blockElement: options.blockElement
                 });
                 return;
             }
@@ -295,7 +315,7 @@ export const openMenuPanel = (options: {
                 }]);
                 if (options.cellElements) {
                     menuElement.innerHTML = getSelectHTML(data.view, options.cellElements);
-                    bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+                    bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
                 } else {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
@@ -394,6 +414,7 @@ export const openMenuPanel = (options: {
                         window.siyuan.menus.menu.remove();
                     } else {
                         avPanelElement.remove();
+                        focusBlock(options.blockElement);
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -500,7 +521,8 @@ export const openMenuPanel = (options: {
                         menuElement,
                         tabRect,
                         avId: avID,
-                        protyle: options.protyle
+                        protyle: options.protyle,
+                        blockElement: options.blockElement
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -535,7 +557,8 @@ export const openMenuPanel = (options: {
                                 filter: item,
                                 protyle: options.protyle,
                                 data,
-                                target
+                                target,
+                                blockElement: options.blockElement
                             });
                             return true;
                         }
@@ -762,6 +785,33 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "goSearchRollupCol") {
+                    goSearchRollupCol({
+                        target,
+                        data,
+                        isRelation: true,
+                        protyle: options.protyle,
+                        colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchRollupTarget") {
+                    goSearchRollupCol({
+                        target,
+                        data,
+                        isRelation: false,
+                        protyle: options.protyle,
+                        colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id")
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSearchRollupCalc") {
+                    openCalcMenu(options.protyle, target, data, options.colId);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "updateRelation") {
                     updateRelation({
                         protyle: options.protyle,
@@ -858,7 +908,13 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCol") {
                     const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
+                    let previousID: string;
+                    const colData = data.view.columns.find((item: IAVColumn, index) => {
+                        if (item.id === colId) {
+                            previousID = data.view.columns[index - 1]?.id;
+                            return true;
+                        }
+                    });
                     transaction(options.protyle, [{
                         action: "removeAttrViewCol",
                         id: colId,
@@ -868,7 +924,8 @@ export const openMenuPanel = (options: {
                         name: colData.name,
                         avID,
                         type: colData.type,
-                        id: colId
+                        id: colId,
+                        previousID
                     }]);
                     removeAttrViewColAnimation(options.blockElement, colId);
                     avPanelElement.remove();
@@ -876,7 +933,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setColOption") {
-                    setColOption(options.protyle, data, target, options.cellElements);
+                    setColOption(options.protyle, data, target, options.blockElement, options.cellElements);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -886,18 +943,18 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addColOptionOrCell") {
-                    addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement);
+                    addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCellOption") {
-                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement);
+                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, data, options.cellElements, target);
+                    addAssetLink(options.protyle, data, options.cellElements, target, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -928,7 +985,8 @@ export const openMenuPanel = (options: {
                             data,
                             cellElements: options.cellElements,
                             type: "addUpdate",
-                            addUpdateValue: [value]
+                            addUpdateValue: [value],
+                            blockElement: options.blockElement
                         });
                         window.siyuan.menus.menu.remove();
                     });
@@ -961,24 +1019,19 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement);
+                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "clearDate") {
-                    setDateValue({
-                        cellElements: options.cellElements,
-                        data,
-                        protyle: options.protyle,
-                        value: {
-                            isNotEmpty2: false,
-                            isNotEmpty: false,
-                            content: null,
-                            content2: null,
-                            hasEndDate: false,
-                            isNotTime: true,
-                        }
-                    });
+                    updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+                        isNotEmpty2: false,
+                        isNotEmpty: false,
+                        content: null,
+                        content2: null,
+                        hasEndDate: false,
+                        isNotTime: true,
+                    }, options.cellElements);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

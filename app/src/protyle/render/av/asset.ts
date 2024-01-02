@@ -14,12 +14,14 @@ import {genAVValueHTML} from "./blockAttr";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
     data: IAV,
     menuElement: HTMLElement,
-    cellElements: HTMLElement[]
+    cellElements: HTMLElement[],
+    blockElement: Element
 }) => {
     options.menuElement.querySelector("input").addEventListener("change", (event: InputEvent & {
         target: HTMLInputElement
@@ -42,7 +44,8 @@ export const bindAssetEvent = (options: {
                 data: options.data,
                 cellElements: options.cellElements,
                 type: "addUpdate",
-                addUpdateValue: value
+                addUpdateValue: value,
+                blockElement: options.blockElement
             });
         });
     });
@@ -110,61 +113,33 @@ export const updateAssetCell = (options: {
     type: "replace" | "addUpdate" | "remove",
     replaceValue?: IAVCellAssetValue[],
     addUpdateValue?: IAVCellAssetValue[],
-    removeContent?: string
+    removeContent?: string,
+    blockElement: Element
 }) => {
-    let cellIndex: number;
-    Array.from((hasClosestByClassName(options.cellElements[0], "av__row") as HTMLElement).querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
-        if (item.dataset.id === options.cellElements[0].dataset.id) {
-            cellIndex = index;
-            return true;
-        }
-    });
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    let newValue: IAVCellAssetValue[] = [];
     options.cellElements.forEach((item, elementIndex) => {
-        let cellData: IAVCell;
+        if (!options.blockElement.contains(item)) {
+            item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+        }
+        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        options.data.view.rows.find(row => {
-            if (row.id === rowID) {
-                if (typeof cellIndex === "number") {
-                    cellData = row.cells[cellIndex];
-                    // 为空时 cellId 每次请求都不一致
-                    cellData.id = item.dataset.id;
-                    if (!cellData.value || !cellData.value.mAsset) {
-                        cellData.value = {type: "mAsset", mAsset: []} as IAVCellValue;
-                    }
-                } else {
-                    cellData = row.cells.find(cellItem => {
-                        if (cellItem.id === item.dataset.id) {
-                            return true;
-                        }
-                    });
-                }
-                return true;
-            }
-        });
-        const oldValue = Object.assign([], cellData.value.mAsset);
-        if (options.type === "remove") {
-            if (elementIndex === 0) {
-                cellData.value.mAsset.find((oldItem, index) => {
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
+        if (elementIndex === 0) {
+            if (options.type === "remove") {
+                cellValue.mAsset.find((oldItem, index) => {
                     if (oldItem.content === options.removeContent) {
-                        cellData.value.mAsset.splice(index, 1);
+                        cellValue.mAsset.splice(index, 1);
                         return true;
                     }
                 });
-                newValue = cellData.value.mAsset;
-            } else {
-                cellData.value.mAsset = newValue;
-            }
-        } else if (options.type === "addUpdate") {
-            if (elementIndex === 0) {
+            } else if (options.type === "addUpdate") {
                 options.addUpdateValue.forEach(newitem => {
                     if (!newitem.content) {
                         return;
                     }
-                    const hasMatch = cellData.value.mAsset.find(oldItem => {
+                    const hasMatch = cellValue.mAsset.find(oldItem => {
                         if (oldItem.content === newitem.content) {
                             oldItem.name = newitem.name;
                             oldItem.type = newitem.type;
@@ -175,45 +150,57 @@ export const updateAssetCell = (options: {
                         if (newitem.type === "file" && !newitem.name) {
                             newitem.name = newitem.content;
                         }
-                        cellData.value.mAsset.push(newitem);
+                        cellValue.mAsset.push(newitem);
                     }
                 });
-                newValue = cellData.value.mAsset;
             } else {
-                cellData.value.mAsset = newValue;
+                cellValue.mAsset = options.replaceValue;
             }
-        } else {
-            cellData.value.mAsset = options.replaceValue;
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: options.data.id,
-            data: cellData.value
+            data: cellValue
         });
         cellUndoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: options.data.id,
-            data: {
-                mAsset: oldValue
+            data: oldValue
+        });
+        options.data.view.rows.find(row => {
+            if (row.id === rowID) {
+                row.cells.find(cell => {
+                    if (cell.id === cellValue.id) {
+                        cell.value = cellValue;
+                        return true;
+                    }
+                });
+                return true;
             }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellData.value);
+            item.innerHTML = genAVValueHTML(cellValue);
         } else {
-            updateAttrViewCellAnimation(item, cellData.value);
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;
     if (menuElement) {
         menuElement.innerHTML = getAssetHTML(options.data.view, options.cellElements);
-        bindAssetEvent({protyle: options.protyle, data: options.data, menuElement, cellElements: options.cellElements});
+        bindAssetEvent({
+            protyle: options.protyle,
+            data: options.data,
+            menuElement,
+            cellElements: options.cellElements,
+            blockElement: options.blockElement
+        });
         const cellRect = (options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] : options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`)).getBoundingClientRect();
         setTimeout(() => {
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
@@ -221,7 +208,7 @@ export const updateAssetCell = (options: {
     }
 };
 
-export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
+export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const linkAddress = target.dataset.content;
     const type = target.dataset.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
@@ -233,6 +220,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
             data,
             cellElements,
             type: "addUpdate",
+            blockElement,
             addUpdateValue: [{
                 content: linkAddress,
                 name: textElement.value,
@@ -265,6 +253,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
                 protyle,
                 data,
                 cellElements,
+                blockElement,
                 type: "remove",
                 removeContent: linkAddress
             });
@@ -289,7 +278,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
     });
 };
 
-export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
+export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const menu = new Menu("av-asset-link", () => {
         const textElements = menu.element.querySelectorAll("textarea");
         if (!textElements[0].value) {
@@ -299,6 +288,7 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
             protyle,
             data,
             cellElements,
+            blockElement,
             type: "addUpdate",
             addUpdateValue: [{
                 type: "file",
@@ -361,6 +351,7 @@ export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTML
             }, (response) => {
                 updateAssetCell({
                     protyle,
+                    blockElement,
                     data: response.data as IAV,
                     cellElements: [cellElement],
                     type: "addUpdate",

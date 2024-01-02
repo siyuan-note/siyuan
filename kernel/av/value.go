@@ -19,6 +19,7 @@ package av
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -30,12 +31,11 @@ import (
 )
 
 type Value struct {
-	ID            string  `json:"id,omitempty"`
-	KeyID         string  `json:"keyID,omitempty"`
-	BlockID       string  `json:"blockID,omitempty"`
-	Type          KeyType `json:"type,omitempty"`
-	IsDetached    bool    `json:"isDetached,omitempty"`
-	IsInitialized bool    `json:"isInitialized,omitempty"`
+	ID         string  `json:"id,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`
+	BlockID    string  `json:"blockID,omitempty"`
+	Type       KeyType `json:"type,omitempty"`
+	IsDetached bool    `json:"isDetached,omitempty"`
 
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
@@ -52,10 +52,6 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
-}
-
-func (value *Value) NotAffectFilter() bool {
-	return !value.IsInitialized && nil != value.Block && "" == value.Block.Content && value.IsDetached
 }
 
 func (value *Value) String() string {
@@ -151,10 +147,14 @@ func (value *Value) String() string {
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeRollup:
-		if nil == value.Rollup {
+		if nil == value.Rollup || nil == value.Rollup.Contents {
 			return ""
 		}
-		return strings.Join(value.Rollup.Contents, " ")
+		var ret []string
+		for _, v := range value.Rollup.Contents {
+			ret = append(ret, v.String())
+		}
+		return strings.Join(ret, " ")
 	default:
 		return ""
 	}
@@ -472,5 +472,166 @@ type ValueRelation struct {
 }
 
 type ValueRollup struct {
-	Contents []string `json:"contents"`
+	Contents []*Value `json:"contents"`
+}
+
+func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
+	if nil == calc {
+		return
+	}
+
+	switch calc.Operator {
+	case CalcOperatorNone:
+	case CalcOperatorCountAll:
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
+	case CalcOperatorCountValues:
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, v := range r.Contents {
+			if _, ok := uniqueValues[v.String()]; !ok {
+				uniqueValues[v.String()] = true
+				countUniqueValues++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUniqueValues))}}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v.String() {
+				countEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty))}}
+	case CalcOperatorCountNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v.String() {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty))}}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v.String() {
+				countEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty * 100 / len(r.Contents)))}}
+	case CalcOperatorPercentNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v.String() {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty * 100 / len(r.Contents)))}}
+	case CalcOperatorSum:
+		sum := 0.0
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				sum += v.Number.Content
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum, destKey.NumberFormat)}}
+	case CalcOperatorAverage:
+		sum := 0.0
+		count := 0
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				sum += v.Number.Content
+				count++
+			}
+		}
+		if 0 < count {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum/float64(count), destKey.NumberFormat)}}
+		}
+	case CalcOperatorMedian:
+		var numbers []float64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				numbers = append(numbers, v.Number.Content)
+			}
+		}
+		sort.Float64s(numbers)
+		if 0 < len(numbers) {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(numbers[len(numbers)/2], destKey.NumberFormat)}}
+		}
+	case CalcOperatorMin:
+		min := math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content < min {
+					min = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(min, destKey.NumberFormat)}}
+	case CalcOperatorMax:
+		max := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content > max {
+					max = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max, destKey.NumberFormat)}}
+	case CalcOperatorRange:
+		min := math.MaxFloat64
+		max := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content < min {
+					min = v.Number.Content
+				}
+				if v.Number.Content > max {
+					max = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max-min, destKey.NumberFormat)}}
+	case CalcOperatorChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked))}}
+	case CalcOperatorUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked))}}
+	case CalcOperatorPercentChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked * 100 / len(r.Contents)))}}
+	case CalcOperatorPercentUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked * 100 / len(r.Contents)))}}
+	}
 }

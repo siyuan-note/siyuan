@@ -64,6 +64,11 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
         name: item.name,
         i18n: item.i18n
     });
+    // https://github.com/siyuan-note/siyuan/issues/9943
+    Object.defineProperty(plugin, "name", {
+        value: item.name,
+        writable: false,
+    });
     app.plugins.push(plugin);
     try {
         await plugin.onload();

@@ -4,6 +4,42 @@ import {escapeAttr} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
 
+const genAVRollupHTML = (value: IAVCellValue) => {
+    let html = "";
+    switch (value.type) {
+        case "block":
+            html = value.block.content;
+            break;
+        case "text":
+            html = value.text.content;
+            break;
+        case "number":
+            html = value.number.formattedContent || value.number.content.toString();
+            break;
+        case "date":
+            if (value[value.type] && value[value.type].isNotEmpty) {
+                html = dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+            }
+            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+            }
+            if (html) {
+                html = `<span class="av__celltext">${html}</span>`;
+            }
+            break;
+        case "url":
+            html = value.url.content ? `<a class="fn__a" href="${value.url.content}" target="_blank">${value.url.content}</a>` : "";
+            break;
+        case "phone":
+            html = value.phone.content ? `<a class="fn__a" href="tel:${value.phone.content}" target="_blank">${value.phone.content}</a>` : "";
+            break;
+        case "email":
+            html = value.email.content ? `<a class="fn__a" href="mailto:${value.email.content}" target="_blank">${value.email.content}</a>` : "";
+            break;
+    }
+    return html;
+};
+
 export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
@@ -32,12 +68,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            if (value[value.type].isNotEmpty) {
-                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}'>`;
+            if (value[value.type] && value[value.type].isNotEmpty) {
+                html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }
-            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
             }
+            html += "</span>";
             break;
         case "created":
         case "updated":
@@ -69,6 +107,16 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "relation":
             value.relation?.blockIDs.forEach((item, index) => {
                 html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
+            });
+            break;
+        case "rollup":
+            value?.rollup?.contents?.forEach((item, index) => {
+                const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
+                if (!rollupText && html) {
+                    html = html.substring(0, html.length - 2);
+                } else {
+                    html += rollupText + ((index === value.rollup.contents.length - 1 || !rollupText) ? "" : ",&nbsp;");
+                }
             });
             break;
     }

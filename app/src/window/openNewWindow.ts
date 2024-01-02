@@ -50,29 +50,17 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
                 rootId: response.data.rootID,
                 mode: "wysiwyg",
                 instance: "Editor",
+                action: response.data.rootID === id ? Constants.CB_GET_SCROLL : Constants.CB_GET_ALL
             }
         };
-        if (response.data.rootID === id) {
-            json.children.action = Constants.CB_GET_SCROLL;
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
-                position: options.position,
-                width: options.width,
-                height: options.height,
-                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
-            });
-            /// #endif
-        } else {
-            json.children.action = Constants.CB_GET_ALL;
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
-                position: options.position,
-                width: options.width,
-                height: options.height,
-                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
-            });
-            /// #endif
-        }
+        /// #if !BROWSER
+        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+            position: options.position,
+            width: options.width,
+            height: options.height,
+            url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+        });
+        /// #endif
     });
 
 };

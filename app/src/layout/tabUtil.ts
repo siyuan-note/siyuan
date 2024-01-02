@@ -6,7 +6,6 @@ import {pdfResize} from "../asset/renderAssets";
 import {App} from "../index";
 import {Model} from "./Model";
 import {Editor} from "../editor";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Asset} from "../asset";
 import {Graph} from "./dock/Graph";
 import {Files} from "./dock/Files";
@@ -235,7 +234,6 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
-                saveScroll(tab.model.editor.protyle);
                 model = new Editor({
                     app,
                     tab: newTab,

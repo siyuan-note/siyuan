@@ -144,7 +144,7 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
                 openFileById({
                     app,
                     id: currentLiElement.getAttribute("data-node-id"),
-                    action: [Constants.CB_GET_SCROLL]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                 });
             }
             hideElements(["dialog"]);
@@ -1260,7 +1260,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-        lockScreen();
+        lockScreen(app);
         event.preventDefault();
         return;
     }

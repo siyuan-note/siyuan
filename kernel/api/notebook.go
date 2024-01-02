@@ -150,13 +150,20 @@ func createNotebook(c *gin.Context) {
 		return
 	}
 
+	box := model.Conf.Box(id)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "opened notebook [" + id + "] not found"
+		return
+	}
+
 	ret.Data = map[string]interface{}{
-		"notebook": model.Conf.Box(id),
+		"notebook": box,
 	}
 
 	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
-		"box":     model.Conf.Box(id),
+		"box":     box,
 		"existed": existed,
 	}
 	util.PushEvent(evt)
@@ -194,9 +201,16 @@ func openNotebook(c *gin.Context) {
 		return
 	}
 
+	box := model.Conf.Box(notebook)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "opened notebook [" + notebook + "] not found"
+		return
+	}
+
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
-		"box":     model.Conf.Box(notebook),
+		"box":     box,
 		"existed": existed,
 	}
 	evt.Callback = arg["callback"]
@@ -233,7 +247,13 @@ func getNotebookConf(c *gin.Context) {
 		return
 	}
 
-	box := model.Conf.Box(notebook)
+	box := model.Conf.GetBox(notebook)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "notebook [" + notebook + "] not found"
+		return
+	}
+
 	ret.Data = map[string]interface{}{
 		"box":  box.ID,
 		"name": box.Name,
@@ -255,7 +275,12 @@ func setNotebookConf(c *gin.Context) {
 		return
 	}
 
-	box := model.Conf.Box(notebook)
+	box := model.Conf.GetBox(notebook)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "notebook [" + notebook + "] not found"
+		return
+	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["conf"])
 	if nil != err {

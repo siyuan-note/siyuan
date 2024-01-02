@@ -11,7 +11,7 @@ import {isInAndroid, isInIOS, isIPad, setStorageVal, writeText} from "../protyle
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
-import {exportLayout} from "../layout/util";
+import {exportLayout, getAllLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
@@ -252,11 +252,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         if (item.name === value) {
                             saveDialog.destroy();
                             confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
-                                item.layout = exportLayout({
-                                    reload: false,
-                                    onlyData: true,
-                                    errorExit: false,
-                                });
+                                item.layout = getAllLayout();
                                 setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                             });
                             return true;
@@ -267,11 +263,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     }
                     window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
                         name: value,
-                        layout: exportLayout({
-                            reload: false,
-                            onlyData: true,
-                            errorExit: false,
-                        })
+                        layout: getAllLayout()
                     });
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                     saveDialog.destroy();
@@ -380,7 +372,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 icon: "iconLock",
                 accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
                 click: () => {
-                    lockScreen();
+                    lockScreen(app);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -427,10 +419,8 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 icon: "iconQuit",
                 click: () => {
                     exportLayout({
-                        reload: false,
-                        onlyData: false,
                         errorExit: true,
-                        cb: exitSiYuan
+                        cb: exitSiYuan,
                     });
                 }
             }).element);

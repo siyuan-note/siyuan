@@ -169,9 +169,10 @@ export const appearance = {
                     window.siyuan.config.appearance.themeDark !== response.data.themeDark
                 )) {
                     exportLayout({
-                        reload: true,
-                        onlyData: false,
                         errorExit: false,
+                        cb() {
+                            window.location.reload();
+                        },
                     });
                     return;
                 }
@@ -180,8 +181,9 @@ export const appearance = {
                     (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
                 )) {
                     exportLayout({
-                        reload: true,
-                        onlyData: false,
+                        cb() {
+                            window.location.reload();
+                        },
                         errorExit: false,
                     });
                     return;
@@ -215,8 +217,9 @@ export const appearance = {
         });
         appearance.element.querySelector("#appearanceRefresh").addEventListener("click", () => {
             exportLayout({
-                reload: true,
-                onlyData: false,
+                cb() {
+                    window.location.reload();
+                },
                 errorExit: false,
             });
         });
@@ -235,8 +238,9 @@ export const appearance = {
     onSetappearance(data: IAppearance) {
         if (data.lang !== window.siyuan.config.appearance.lang) {
             exportLayout({
-                reload: true,
-                onlyData: false,
+                cb() {
+                    window.location.reload();
+                },
                 errorExit: false,
             });
             return;

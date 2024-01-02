@@ -30,6 +30,10 @@ type Export struct {
 	MarkdownYFM             bool   `json:"markdownYFM"`             // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
 	PDFFooter               string `json:"pdfFooter"`               // PDF 导出时页脚内容
 	DocxTemplate            string `json:"docxTemplate"`            // Docx 导出时模板文件路径
+	PDFWatermarkStr         string `json:"pdfWatermarkStr"`         // PDF 导出时水印文本或水印文件路径
+	PDFWatermarkDesc        string `json:"pdfWatermarkDesc"`        // PDF 导出时水印位置、大小和样式等
+	ImageWatermarkStr       string `json:"imageWatermarkStr"`       // 图片导出时水印文本或水印文件路径
+	ImageWatermarkDesc      string `json:"imageWatermarkDesc"`      // 图片导出时水印位置、大小和样式等
 }
 
 func NewExport() *Export {

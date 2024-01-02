@@ -130,10 +130,13 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     /// #endif
 };
 
-export const lockScreen = () => {
+export const lockScreen = (app: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
+    app.plugins.forEach(item => {
+        item.eventBus.emit("lock-screen");
+    });
     /// #if BROWSER
     fetchPost("/api/system/logoutAuth", {}, () => {
         redirectToCheckAuth();
@@ -260,8 +263,6 @@ export const transactionError = () => {
         exitSiYuan();
         /// #else
         exportLayout({
-            reload: false,
-            onlyData: false,
             errorExit: true,
             cb: exitSiYuan
         });

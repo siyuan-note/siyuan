@@ -5,11 +5,13 @@ import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
 import {objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
-import {focusBlock} from "../../util/selection";
+import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {genAVValueHTML} from "./blockAttr";
+import {Constants} from "../../../constants";
+import {hintRef} from "../../hint/extend";
 
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
@@ -29,23 +31,20 @@ export const getCellText = (cellElement: HTMLElement | false) => {
     return cellText;
 };
 
-const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
-    let cellValue: IAVCellValue;
+export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
+    const cellValue: IAVCellValue = {
+        type: colType,
+        id: cellElement.dataset.id,
+    };
     if (colType === "number") {
         const value = cellElement.querySelector(".av__celltext").getAttribute("data-content");
-        cellValue = {
-            type: colType,
-            number: {
-                content: parseFloat(value) || 0,
-                isNotEmpty: !!value
-            }
+        cellValue.number = {
+            content: parseFloat(value) || 0,
+            isNotEmpty: !!value
         };
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
-        cellValue = {
-            type: colType,
-            [colType]: {
-                content: cellElement.querySelector(".av__celltext").textContent.trim()
-            }
+        cellValue[colType as "text"] = {
+            content: cellElement.querySelector(".av__celltext").textContent.trim()
         };
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
@@ -55,30 +54,29 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
                 color: item.style.color.replace("var(--b3-font-color", "").replace(")", "")
             });
         });
-        cellValue = {
-            type: colType,
-            mSelect
-        };
+        cellValue.mSelect = mSelect;
     } else if (["date", "created", "updated"].includes(colType)) {
-        cellValue = {
-            type: colType,
-            [colType]: JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"))
-        };
+        cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"));
     } else if (colType === "checkbox") {
-        cellValue = {
-            type: colType,
-            checkbox: {
-                checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
-            }
+        cellValue.checkbox = {
+            checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
         };
     } else if (colType === "relation") {
-        cellValue = {
-            type: colType,
-            relation: {
-                blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
-                contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
-            }
+        cellValue.relation = {
+            blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
+            contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
         };
+    } else if (colType === "mAsset") {
+        const mAsset: IAVCellAssetValue[] = [];
+        Array.from(cellElement.children).forEach((item) => {
+            const isImg = item.classList.contains("av__cellassetimg");
+            mAsset.push({
+                type: isImg ? "image" : "file",
+                content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
+                name: isImg ? "" : item.textContent
+            });
+        });
+        cellValue.mAsset = mAsset;
     }
     if (colType === "block") {
         cellValue.isDetached = cellElement.dataset.detached === "true";
@@ -87,26 +85,19 @@ const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement) => {
 };
 
 export const genCellValue = (colType: TAVCol, value: string | any) => {
-    let cellValue: IAVCellValue;
-    if (typeof value === "string") {
+    let cellValue: IAVCellValue = {
+        type: colType,
+        [colType === "select" ? "mSelect" : colType]: value as IAVCellDateValue
+    };
+    if (typeof value === "string" && value && colType !== "mAsset") {
         if (colType === "number") {
-            if (value) {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        content: parseFloat(value),
-                        isNotEmpty: true
-                    }
-                };
-            } else {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        content: 0,
-                        isNotEmpty: false
-                    }
-                };
-            }
+            cellValue = {
+                type: colType,
+                number: {
+                    content: parseFloat(value) || 0,
+                    isNotEmpty: true
+                }
+            };
         } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
             cellValue = {
                 type: colType,
@@ -119,10 +110,44 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 mSelect: [{
                     content: value,
-                    color: value ? "1" : ""
+                    color: "1"
                 }]
             };
-        } else if (["date", "created", "updated"].includes(colType) && value === "") {
+        } else if (colType === "checkbox") {
+            cellValue = {
+                type: colType,
+                checkbox: {
+                    checked: true
+                }
+            };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {blockIDs: [], contents: [value]}
+            };
+        }
+    } else if (typeof value === "undefined" || !value) {
+        if (colType === "number") {
+            cellValue = {
+                type: colType,
+                number: {
+                    content: 0,
+                    isNotEmpty: true
+                }
+            };
+        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+            cellValue = {
+                type: colType,
+                [colType]: {
+                    content: ""
+                }
+            };
+        } else if (colType === "mSelect" || colType === "select" || colType === "mAsset") {
+            cellValue = {
+                type: colType,
+                [colType === "select" ? "mSelect" : colType]: []
+            };
+        } else if (["date", "created", "updated"].includes(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {
@@ -138,42 +163,13 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 checkbox: {
-                    checked: value ? true : false
+                    checked: false
                 }
             };
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {blockIDs: [], contents: value ? [value] : []}
-            };
-        }
-    } else {
-        if (colType === "mSelect" || colType === "select") {
-            cellValue = {
-                type: colType,
-                mSelect: value as IAVCellSelectValue[]
-            };
-        } else if (["date", "created", "updated"].includes(colType)) {
-            cellValue = {
-                type: colType,
-                [colType]: value as IAVCellDateValue
-            };
-        } else if (colType === "mAsset") {
-            cellValue = {
-                type: colType,
-                mAsset: value as IAVCellAssetValue[]
-            };
-        } else if (colType === "checkbox") {
-            cellValue = {
-                type: colType,
-                checkbox: {
-                    checked: value ? true : false
-                }
-            };
-        } else if (colType === "relation") {
-            cellValue = {
-                type: colType,
-                relation: value
+                relation: {blockIDs: [], contents: []}
             };
         }
     }
@@ -273,12 +269,15 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             openMenuPanel({protyle, blockElement, type: "select", cellElements});
         } else if (type === "mAsset") {
             openMenuPanel({protyle, blockElement, type: "asset", cellElements});
+            focusBlock(blockElement);
         } else if (type === "date") {
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, cellElements);
         } else if (type === "relation") {
             openMenuPanel({protyle, blockElement, type: "relation", cellElements});
+        } else if (type === "rollup") {
+            openMenuPanel({protyle, blockElement, type: "rollup", cellElements, colId: cellElements[0].dataset.colId});
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -303,6 +302,19 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                         return true;
                     }
                 });
+            });
+        }
+        if (type === "block") {
+            inputElement.addEventListener("input", (event: InputEvent) => {
+                if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
+                    protyle.toolbar.range = document.createRange();
+                    protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
+                    focusByRange(protyle.toolbar.range);
+                    hintRef(inputElement.value.substring(2), protyle, "av");
+                    avMaskElement?.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
             });
         }
         inputElement.addEventListener("keydown", (event) => {
@@ -485,7 +497,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value: string | any = "", cElements?: HTMLElement[]) => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any, cElements?: HTMLElement[]) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -506,7 +518,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
     }
 
-    cellElements.forEach((item: HTMLElement) => {
+    cellElements.forEach((item: HTMLElement, elementIndex) => {
+        if (!nodeElement.contains(item)) {
+            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+        }
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;
@@ -520,6 +535,24 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const colId = item.getAttribute("data-col-id");
 
         text += getCellText(item);
+        const oldValue = genCellValueByElement(type, item);
+        // relation 为全部更新，以下类型为添加
+        if (type === "mAsset") {
+            if (Array.isArray(value)) {
+                value = oldValue.mAsset.concat(value);
+            } else if (typeof value !== "undefined") {
+                // 不传入为删除，传入字符串不进行处理
+                return;
+            }
+        } else if (type === "mSelect") {
+            // 不传入为删除
+            if (typeof value === "string") {
+                value = oldValue.mSelect.concat({
+                    content: value,
+                    color: (oldValue.mSelect.length + 1).toString()
+                });
+            }
+        }
         const cellValue = genCellValue(type, value);
         doOperations.push({
             action: "updateAttrViewCell",
@@ -535,7 +568,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             avID,
             keyID: colId,
             rowID,
-            data: genCellValueByElement(type, item)
+            data: oldValue
         });
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             updateAttrViewCellAnimation(item, cellValue);
@@ -612,6 +645,15 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         });
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else if (cellValue.type === "rollup") {
+        cellValue?.rollup?.contents?.forEach((item, index) => {
+            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
+            if (!rollupText && text) {
+                text = text.substring(0, text.length - 2);
+            } else {
+                text += rollupText + ((index === cellValue.rollup.contents.length - 1 || !rollupText) ? "" : ", ");
+            }
+        });
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
             text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
@@ -620,6 +662,42 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+    }
+    return text;
+};
+
+const renderRollup = (cellValue: IAVCellValue) => {
+    let text = "";
+    if (["text"].includes(cellValue.type)) {
+        text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
+    } else if (["url", "email", "phone"].includes(cellValue.type)) {
+        const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
+        if (urlContent) {
+            let urlAttr = "";
+            if (cellValue.type === "url") {
+                urlAttr = ` data-href="${urlContent}"`;
+            }
+            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
+        }
+    } else if (cellValue.type === "block") {
+        if (cellValue?.isDetached) {
+            text = `<span class="av__celltext">${cellValue.block?.content || ""}</span>`;
+        } else {
+            text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || ""}</span>`;
+        }
+    } else if (cellValue.type === "number") {
+        text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
+    } else if (cellValue.type === "date") {
+        const dataValue = cellValue ? cellValue.date : null;
+        if (dataValue && dataValue.isNotEmpty) {
+            text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+        }
+        if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+        }
+        if (text) {
+            text = `<span class="av__celltext">${text}</span>`;
+        }
     }
     return text;
 };

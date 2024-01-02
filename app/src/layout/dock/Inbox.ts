@@ -15,6 +15,7 @@ import {App} from "../../index";
 import {getCloudURL} from "../../config/util/about";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
+import {emitOpenMenu} from "../../plugin/EventBus";
 
 export class Inbox extends Model {
     private element: Element;
@@ -293,6 +294,17 @@ ${data.shorthandContent}
                     });
                 }
             }).element);
+        }
+        if (this.app.plugins) {
+            emitOpenMenu({
+                plugins: this.app.plugins,
+                type: "open-menu-inbox",
+                detail: {
+                    ids,
+                    element: itemElement || detailsElement,
+                },
+                separatorPosition: "top",
+            });
         }
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
     }

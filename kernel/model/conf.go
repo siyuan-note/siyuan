@@ -649,6 +649,15 @@ func (conf *AppConf) Box(boxID string) *Box {
 	return nil
 }
 
+func (conf *AppConf) GetBox(boxID string) *Box {
+	for _, box := range conf.GetBoxes() {
+		if box.ID == boxID {
+			return box
+		}
+	}
+	return nil
+}
+
 func (conf *AppConf) BoxNames(boxIDs []string) (ret map[string]string) {
 	ret = map[string]string{}
 
@@ -771,12 +780,17 @@ func IsSubscriber() bool {
 }
 
 func IsPaidUser() bool {
+	// S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
+
 	if IsSubscriber() {
 		return true
 	}
-	return nil != Conf.GetUser() // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
-	// TODO S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
-	// return nil != Conf.User && 1 == Conf.User.UserSiYuanOneTimePayStatus
+
+	u := Conf.GetUser()
+	if nil == u {
+		return false
+	}
+	return 1 == u.UserSiYuanOneTimePayStatus
 }
 
 const (

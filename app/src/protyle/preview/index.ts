@@ -34,7 +34,9 @@ export class Preview {
         if (protyle.options.classes.preview) {
             previewElement.classList.add(protyle.options.classes.preview);
         }
-        previewElement.style.padding = protyle.wysiwyg.element.style.padding;
+        if (protyle.wysiwyg.element.style.padding) {
+            previewElement.style.padding = protyle.wysiwyg.element.style.padding;
+        }
 
         const actions = protyle.options.preview.actions;
         const actionElement = document.createElement("div");
@@ -48,7 +50,7 @@ export class Preview {
             }
             switch (action) {
                 case "desktop":
-                    actionHtml.push('<button type="button" class="protyle-preview__action--current" data-type="desktop">Desktop</button>');
+                    actionHtml.push(`<button type="button"${protyle.wysiwyg.element.style.padding ? ' class="protyle-preview__action--current"' : ""} data-type="desktop">Desktop</button>`);
                     break;
                 case "tablet":
                     actionHtml.push('<button type="button" data-type="tablet">Tablet</button>');
@@ -138,11 +140,12 @@ export class Preview {
                         previewElement.style.width = "360px";
                         previewElement.style.padding = "8px";
                     }
-                    this.render(protyle);
-                    actionElement.querySelectorAll("button").forEach((item) => {
-                        item.classList.remove("protyle-preview__action--current");
-                    });
-                    target.classList.add("protyle-preview__action--current");
+                    if (type !== "mp-wechat" && type !== "zhihu" && type !== "yuque") {
+                        actionElement.querySelectorAll("button").forEach((item) => {
+                            item.classList.remove("protyle-preview__action--current");
+                        });
+                        target.classList.add("protyle-preview__action--current");
+                    }
                 }
                 target = target.parentElement;
             }
@@ -224,7 +227,8 @@ export class Preview {
         } else if (type === "zhihu") {
             this.link2online(copyElement);
             copyElement.querySelectorAll('[data-subtype="math"]').forEach((item: HTMLElement) => {
-                item.outerHTML = `<img class="Formula-image" data-eeimg="true" src="//www.zhihu.com/equation?tex=" alt="${item.getAttribute("data-content")}\\" style="display: block; margin: 0 auto; max-width: 100%;">`;
+                // https://github.com/siyuan-note/siyuan/issues/10015
+                item.outerHTML = `<img class="Formula-image" data-eeimg="true" src="//www.zhihu.com/equation?tex=" alt="${item.getAttribute("data-content")}" style="${item.tagName === "DIV" ? "display: block; max-width: 100%;" : ""}margin: 0 auto;">`;
             });
             copyElement.querySelectorAll("blockquote").forEach((item) => {
                 const elements: HTMLElement[] = [];
@@ -251,7 +255,10 @@ export class Preview {
             item.style.backgroundImage = "none";
         });
         this.element.append(copyElement);
-        const cloneRange = getSelection().getRangeAt(0).cloneRange();
+        let cloneRange;
+        if (getSelection().rangeCount > 0) {
+            cloneRange = getSelection().getRangeAt(0).cloneRange();
+        }
         const range = copyElement.ownerDocument.createRange();
         range.selectNodeContents(copyElement);
         focusByRange(range);

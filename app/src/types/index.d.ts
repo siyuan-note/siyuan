@@ -50,19 +50,21 @@ type TOperation =
     | "sortAttrViewView"
     | "setAttrViewPageSize"
     | "updateAttrViewColRelation"
+    | "updateAttrViewColRollup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
-    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
+    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
+    "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =
     "text"
@@ -157,7 +159,8 @@ interface Window {
     siyuan: ISiyuan
     webkit: any
     html2canvas: (element: Element, opitons: {
-        useCORS: boolean
+        useCORS: boolean,
+        scale?: number
     }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
@@ -594,6 +597,10 @@ interface IExport {
     addTitle: boolean;
     markdownYFM: boolean;
     pdfFooter: string;
+    pdfWatermarkStr: string;
+    pdfWatermarkDesc: string;
+    imageWatermarkStr: string;
+    imageWatermarkDesc: string;
     docxTemplate: string;
 }
 
@@ -1056,7 +1063,8 @@ interface IAVTable extends IAVView {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
-    value: IAVCellValue
+    value: IAVCellValue,
+    type?: TAVCol   // 仅用于标识新增时的类型，用于区分 rollup
 }
 
 interface IAVSort {
@@ -1075,16 +1083,14 @@ interface IAVColumn {
     type: TAVCol,
     numberFormat: string,
     template: string,
-    calc: {
-        operator: string,
-        result: IAVCellValue
-    },
+    calc: IAVCalc,
     // 选项列表
     options?: {
         name: string,
         color: string,
     }[],
-    relation?: IAVCellRelationValue
+    relation?: IAVCellRelationValue,
+    rollup?: IAVCellRollupValue
 }
 
 interface IAVRow {
@@ -1138,6 +1144,9 @@ interface IAVCellValue {
         blockIDs: string[]
         contents?: string[]
     }
+    rollup?: {
+        contents?: IAVCellValue[]
+    }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
@@ -1167,4 +1176,15 @@ interface IAVCellRelationValue {
     avID?: string
     backKeyID?: string
     isTwoWay?: boolean
+}
+
+interface IAVCellRollupValue {
+    relationKeyID?: string  // 关联列 ID
+    keyID?: string
+    calc?: IAVCalc
+}
+
+interface IAVCalc {
+    operator?: string,
+    result?: IAVCellValue
 }

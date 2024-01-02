@@ -9,7 +9,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c
-	github.com/88250/lute v1.7.6-0.20231220014330-9cf092e41060
+	github.com/88250/lute v1.7.6-0.20231229035326-cc7390fe9048
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
@@ -56,7 +56,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20231211015131-3b3dfabdce9c
 	github.com/siyuan-note/httpclient v0.0.0-20231219001541-d75e4dce39fa
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
-	github.com/siyuan-note/riff v0.0.0-20231222032533-1f1b309dbc08
+	github.com/siyuan-note/riff v0.0.0-20231226152006-8833f8b9a6c1
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0

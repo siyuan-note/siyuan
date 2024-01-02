@@ -66,6 +66,8 @@ export class Tab {
                         }
                         this.headElement.setAttribute("aria-label", escapeGreat(response.data));
                     });
+                } else {
+                    this.headElement.setAttribute("aria-label", escapeGreat(options.title));
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {

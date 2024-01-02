@@ -232,6 +232,12 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
+	if "" == av.ID {
+		err = errors.New("av id is empty")
+		logging.LogErrorf("save attribute view failed: %s", err)
+		return
+	}
+
 	// 做一些数据兼容和订正处理
 	now := util.CurrentTimeMillis()
 	for _, kv := range av.KeyValues {
@@ -267,6 +273,30 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				}
 			}
 		}
+
+		for _, v := range kv.Values {
+			if "" == kv.Key.ID {
+				kv.Key.ID = ast.NewNodeID()
+				for _, val := range kv.Values {
+					val.KeyID = kv.Key.ID
+				}
+				if "" == v.KeyID {
+					v.KeyID = kv.Key.ID
+				}
+
+				for _, view := range av.Views {
+					switch view.LayoutType {
+					case LayoutTypeTable:
+						for _, column := range view.Table.Columns {
+							if "" == column.ID {
+								column.ID = kv.Key.ID
+								break
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// 数据订正
@@ -281,7 +311,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t") // TODO: single-line for production
+	data, err := gulu.JSON.MarshalJSON(av)
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return

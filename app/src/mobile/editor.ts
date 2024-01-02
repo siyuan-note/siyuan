@@ -13,6 +13,7 @@ import {pushBack} from "./util/MobileBackFoward";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
+import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -22,6 +23,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     if (window.siyuan.mobile.editor) {
+        saveScroll(window.siyuan.mobile.editor.protyle);
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobile.editor.protyle);
         if (window.siyuan.mobile.editor.protyle.contentElement.classList.contains("fn__none")) {
             setEditMode(window.siyuan.mobile.editor.protyle, "wysiwyg");
@@ -46,32 +48,41 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
             showMessage(data.msg);
             return;
         }
+        const protyleOptions: IOptions = {
+            blockId: id,
+            rootId: data.data.rootID,
+            action,
+            render: {
+                scroll: true,
+                background: true,
+                gutter: true,
+            },
+            typewriterMode: true,
+            preview: {
+                actions: ["mp-wechat", "zhihu"]
+            }
+        };
         if (window.siyuan.mobile.editor) {
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);
-            fetchPost("/api/filetree/getDoc", {
-                id,
-                size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-                mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
-            }, getResponse => {
-                onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action});
-            });
+            if (action.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
+                getDocByScroll({
+                    protyle: window.siyuan.mobile.editor.protyle,
+                    scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
+                    mergedOptions: protyleOptions
+                });
+            } else {
+                fetchPost("/api/filetree/getDoc", {
+                    id,
+                    size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+                    mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
+                }, getResponse => {
+                    onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action});
+                });
+            }
             window.siyuan.mobile.editor.protyle.undo.clear();
         } else {
-            window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), {
-                blockId: id,
-                rootId: data.data.rootID,
-                action,
-                render: {
-                    scroll: true,
-                    background: true,
-                    gutter: true,
-                },
-                typewriterMode: true,
-                preview: {
-                    actions: ["mp-wechat", "zhihu"]
-                }
-            });
+            window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
         }
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === "Untitled" ? "" : data.data.rootTitle;
         setEditor();

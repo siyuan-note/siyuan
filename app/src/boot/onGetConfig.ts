@@ -176,7 +176,6 @@ export const initWindow = async (app: App) => {
     /// #if !BROWSER
     const winOnClose = (close = false) => {
         exportLayout({
-            reload: false,
             cb() {
                 if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
                     // 最小化
@@ -191,7 +190,6 @@ export const initWindow = async (app: App) => {
                     exitSiYuan();
                 }
             },
-            onlyData: false,
             errorExit: true
         });
     };
@@ -341,6 +339,7 @@ export const initWindow = async (app: App) => {
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
             mergeSubdocs: ipcData.mergeSubdocs,
+            watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
             pageSize: ipcData.pdfOptions.pageSize,
@@ -380,6 +379,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     merge: ipcData.mergeSubdocs,
                     path: pdfFilePath,
                     removeAssets: ipcData.removeAssets,
+                    watermark: ipcData.watermark
                 }, () => {
                     afterExport(pdfFilePath, msgId);
                     if (ipcData.removeAssets) {

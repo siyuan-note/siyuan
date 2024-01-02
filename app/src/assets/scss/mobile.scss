@@ -190,6 +190,9 @@
 #model {
   box-sizing: border-box;
 
+  .toolbar__text {
+    min-height: 48px;
+  }
   .config-about__logo {
     display: flex;
     align-items: center;
@@ -478,6 +481,10 @@ html .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="tr
 
 html[lang="zh_CN"] .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="true"]:empty:before {
   content: "键入文字";
+}
+
+.av__views .block__icon {
+  opacity: 1;
 }
 
 @media (max-width: 620px) {

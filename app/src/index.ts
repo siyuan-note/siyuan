@@ -149,21 +149,6 @@ export class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
-            // 历史数据兼容，202306后可删除
-            if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {
-                window.siyuan.config.uiLayout.left = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.left
-                };
-                window.siyuan.config.uiLayout.right = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.right
-                };
-                window.siyuan.config.uiLayout.bottom = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.bottom
-                };
-            }
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages:IObject) => {

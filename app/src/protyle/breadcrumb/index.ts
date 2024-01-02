@@ -15,7 +15,7 @@ import {zoomOut} from "../../menus/protyle";
 import {getEditorRange} from "../util/selection";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {setPanelFocus} from "../../layout/util";
+import {saveLayout, setPanelFocus} from "../../layout/util";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -416,36 +416,36 @@ export class Breadcrumb {
                 }
             }).element);
             /// #endif
-            const editSubmenu: IMenu[] = [{
-                current: !protyle.contentElement.classList.contains("fn__none"),
-                label: window.siyuan.languages.wysiwyg,
-                accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
-                click: () => {
-                    setEditMode(protyle, "wysiwyg");
-                    protyle.scroll.lastScrollTop = 0;
-                    fetchPost("/api/filetree/getDoc", {
-                        id: protyle.block.parentID,
-                        size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
-                        onGet({data: getResponse, protyle});
-                    });
-                }
-            }];
-            editSubmenu.push({
-                current: !protyle.preview.element.classList.contains("fn__none"),
-                icon: "iconPreview",
-                label: window.siyuan.languages.preview,
-                accelerator: window.siyuan.config.keymap.editor.general.preview.custom,
-                click: () => {
-                    setEditMode(protyle, "preview");
-                    window.siyuan.menus.menu.remove();
-                }
-            });
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconEdit",
                 label: window.siyuan.languages["edit-mode"],
                 type: "submenu",
-                submenu: editSubmenu
+                submenu: [{
+                    current: !protyle.contentElement.classList.contains("fn__none"),
+                    label: window.siyuan.languages.wysiwyg,
+                    accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
+                    click: () => {
+                        setEditMode(protyle, "wysiwyg");
+                        protyle.scroll.lastScrollTop = 0;
+                        fetchPost("/api/filetree/getDoc", {
+                            id: protyle.block.parentID,
+                            size: window.siyuan.config.editor.dynamicLoadBlocks,
+                        }, getResponse => {
+                            onGet({data: getResponse, protyle});
+                        });
+                        saveLayout();
+                    }
+                }, {
+                    current: !protyle.preview.element.classList.contains("fn__none"),
+                    icon: "iconPreview",
+                    label: window.siyuan.languages.preview,
+                    accelerator: window.siyuan.config.keymap.editor.general.preview.custom,
+                    click: () => {
+                        setEditMode(protyle, "preview");
+                        window.siyuan.menus.menu.remove();
+                        saveLayout();
+                    }
+                }]
             }).element);
             if (!window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
                 const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);

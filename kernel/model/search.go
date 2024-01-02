@@ -83,6 +83,16 @@ func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	stmt := "SELECT * FROM `blocks` WHERE `id` IN ('" + strings.Join(includeIDs, "','") + "')"
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 1024)
+
+	// 根据 includeIDs 的顺序排序 Improve `//!js` query embed block result sorting https://github.com/siyuan-note/siyuan/issues/9977
+	m := map[string]int{}
+	for i, id := range includeIDs {
+		m[id] = i
+	}
+	sort.Slice(sqlBlocks, func(i, j int) bool {
+		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
+	})
+
 	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, sqlBlocks)
 	return
 }
@@ -524,7 +534,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
-					} else if n.IsTextMarkType("inlineMath") {
+					} else if n.IsTextMarkType("inline-math") {
 						if !replaceTypes["inlineMath"] {
 							return ast.WalkContinue
 						}
@@ -538,7 +548,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
 							}
 						}
-					} else if n.IsTextMarkType("inlineMemo") {
+					} else if n.IsTextMarkType("inline-memo") {
 						if !replaceTypes["inlineMemo"] {
 							return ast.WalkContinue
 						}
@@ -552,6 +562,13 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
 							}
 						}
+					} else if n.IsTextMarkType("text") {
+						// Search and replace fails in some cases https://github.com/siyuan-note/siyuan/issues/10016
+						if !replaceTypes["text"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
 					}
 				}
 				return ast.WalkContinue

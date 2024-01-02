@@ -273,7 +273,7 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 
     const toolbarElement = document.getElementById("keyboardToolbar");
     let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight");
-    keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.innerHeight / 2) + "px";
+    keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.outerHeight / 2) + "px";
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;
@@ -415,12 +415,13 @@ export const showKeyboardToolbar = () => {
     setTimeout(() => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
-            const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
-            if (cursorTop < window.innerHeight - 118.5) {   // 118: contentElement.getBoundingClientRect().top + toolbarElement.clientHeight
+            const contentTop = contentElement.getBoundingClientRect().top;
+            const cursorTop = getSelectionPosition(contentElement).top;
+            if (cursorTop < window.innerHeight - 42 && cursorTop > contentTop) {
                 return;
             }
             contentElement.scroll({
-                top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 118.5) / 2 - 26),
+                top: contentElement.scrollTop + cursorTop - window.innerHeight + 42 + 26,
                 left: contentElement.scrollLeft,
                 behavior: "smooth"
             });

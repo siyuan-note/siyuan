@@ -64,25 +64,32 @@ export const removeSearchMark = (element: HTMLElement) => {
     }
 };
 
-export const removeInlineType = (linkElement: HTMLElement, range?: Range) => {
-    const types = linkElement.getAttribute("data-type").split(" ");
+export const removeInlineType = (inlineElement: HTMLElement, type: string, range?: Range) => {
+    const types = inlineElement.getAttribute("data-type").split(" ");
     if (types.length === 1) {
-        const linkParentElement = linkElement.parentElement;
-        linkElement.outerHTML = linkElement.innerHTML.replace(Constants.ZWSP, "") + "<wbr>";
+        const linkParentElement = inlineElement.parentElement;
+        inlineElement.outerHTML = inlineElement.innerHTML.replace(Constants.ZWSP, "") + "<wbr>";
         if (range) {
             focusByWbr(linkParentElement, range);
         }
     } else {
         types.find((itemType, index) => {
-            if ("a" === itemType) {
+            if (type === itemType) {
                 types.splice(index, 1);
                 return true;
             }
         });
-        linkElement.setAttribute("data-type", types.join(" "));
-        linkElement.removeAttribute("data-href");
+        inlineElement.setAttribute("data-type", types.join(" "));
+        if (type === "a") {
+            inlineElement.removeAttribute("data-href");
+        } else if (type === "file-annotation-ref") {
+            inlineElement.removeAttribute("data-id");
+        } else if (type === "block-ref") {
+            inlineElement.removeAttribute("data-id");
+            inlineElement.removeAttribute("data-subtype");
+        }
         if (range) {
-            range.selectNodeContents(linkElement);
+            range.selectNodeContents(inlineElement);
             range.collapse(false);
             focusByRange(range);
         }

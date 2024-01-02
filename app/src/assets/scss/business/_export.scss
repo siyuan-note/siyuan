@@ -1,5 +1,21 @@
-.export-img.protyle-wysiwyg [data-node-id].li[fold="1"] > .protyle-action:after {
-  background-color: transparent;
-  border: 1px solid var(--b3-list-hover);
-  box-sizing: border-box;
+.export-img {
+  position: relative;
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius-b);
+
+  .protyle-wysiwyg {
+    position: relative;
+    z-index: 1;
+
+    [data-node-id].li[fold="1"] > .protyle-action:after {
+      background-color: transparent;
+      border: 1px solid var(--b3-list-hover);
+      box-sizing: border-box;
+    }
+
+    .table th,
+    .table td {
+      background-color: transparent;
+    }
+  }
 }

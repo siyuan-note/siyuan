@@ -2,7 +2,7 @@ productName: "SiYuan"
 appId: "org.b3log.siyuan"
 asar: false
 compression: "normal"
-copyright: "© 2023 Yunnan Liandi Technology Co., Ltd."
+copyright: "© 2024 Yunnan Liandi Technology Co., Ltd."
 artifactName: "siyuan-${version}-${os}.${ext}"
 extraMetadata:
   main: "electron/main.js"
@@ -55,5 +55,8 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
+  - from: "appearance/fonts"
+    to: "appearance/fonts"
+    filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-darwin-amd64.zip"
     to: "pandoc.zip"

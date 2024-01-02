@@ -51,7 +51,7 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 				return ast.WalkContinue
 			}
 
-			content := treenode.NodeStaticContent(n, nil, false, false)
+			content := treenode.NodeStaticContent(n, nil, false, false, false)
 			buf.WriteString(content)
 			return ast.WalkContinue
 		})

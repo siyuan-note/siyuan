@@ -1,4 +1,4 @@
-import {needLogin, needSubscribe} from "../util/needSubscribe";
+import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
@@ -38,8 +38,8 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.syncOfficialProviderIntro}
 </div>`;
     }
-    if (needLogin("")) {
-        return `<div class="b3-label b3-label--inner">${window.siyuan.languages.needLogin}</div>`;
+    if (!isPaidUser()) {
+        return `<div class="b3-label b3-label--inner">${window.siyuan.languages["_kernel"][214]}</div>`;
     }
     if (provider === 2) {
         return `<div class="b3-label b3-label--inner">
@@ -235,7 +235,7 @@ const bindProviderEvent = () => {
     loadingElement.classList.add("fn__none");
     let nextElement = reposDataElement.nextElementSibling;
     while (nextElement) {
-        if (!needLogin("")) {
+        if (isPaidUser()) {
             nextElement.classList.remove("fn__none");
         } else {
             nextElement.classList.add("fn__none");

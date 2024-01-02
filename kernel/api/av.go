@@ -26,6 +26,42 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func searchAttributeViewNonRelationKey(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyword := arg["keyword"].(string)
+
+	nonRelationKeys := model.SearchAttributeViewNonRelationKey(avID, keyword)
+	ret.Data = map[string]interface{}{
+		"keys": nonRelationKeys,
+	}
+}
+
+func searchAttributeViewRelationKey(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyword := arg["keyword"].(string)
+
+	relationKeys := model.SearchAttributeViewRelationKey(avID, keyword)
+	ret.Data = map[string]interface{}{
+		"keys": relationKeys,
+	}
+}
+
 func getAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

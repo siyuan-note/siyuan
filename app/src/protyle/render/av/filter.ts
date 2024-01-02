@@ -67,10 +67,10 @@ export const setFilter = async (options: {
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement;
-        if (!selectElement) {
+        const operator = selectElement.value as TAVFilterOperator;
+        if (!selectElement || !operator) {
             return;
         }
-        const operator = selectElement.value as TAVFilterOperator;
         let hasMatch = false;
         let cellValue: IAVCellValue;
         if (textElements.length > 0) {
@@ -101,6 +101,10 @@ export const setFilter = async (options: {
                 }
             });
             cellValue = genCellValue(filterType, mSelect);
+        } else if (filterType === "checkbox") {
+            cellValue = genCellValue(filterType, {
+                checked: operator === "Is true"
+            });
         } else {
             cellValue = genCellValue(filterType, undefined);
         }
@@ -112,6 +116,12 @@ export const setFilter = async (options: {
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column) {
+                if (filter.type && filter.type === "checkbox") {
+                    hasMatch = true;
+                    delete filter.type;
+                    options.data.view.filters[index] = newFilter;
+                    return true;
+                }
                 delete filter.type;
                 if (objEquals(filter, newFilter)) {
                     isSame = true;
@@ -187,8 +197,12 @@ export const setFilter = async (options: {
     }
     switch (filterType) {
         case "checkbox":
-            selectHTML = `<option ${"Is true" === options.filter.operator ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
-<option ${"Is false" === options.filter.operator ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            selectHTML = `<option ${("Is true" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
+<option ${("Is false" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            if (options.filter.type) {
+                // 初始化时有 type 字段
+                selectHTML = `<option selected></option>${selectHTML}`;
+            }
             break;
         case "block":
         case "text":

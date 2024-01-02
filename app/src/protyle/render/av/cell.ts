@@ -131,8 +131,8 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 number: {
-                    content: 0,
-                    isNotEmpty: true
+                    content: null,
+                    isNotEmpty: false
                 }
             };
         } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {

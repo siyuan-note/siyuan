@@ -65,7 +65,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         if (window.siyuan.mobile.editor) {
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);
-            if (action.includes(Constants.CB_GET_SCROLL)) {
+            if (action.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],

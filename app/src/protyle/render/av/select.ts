@@ -54,6 +54,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
     const colId = cellElements[0].dataset.colId;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, elementIndex) => {
         if (!blockElement.contains(item)) {
             item = cellElements[elementIndex] = blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
@@ -62,14 +63,16 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
-            cellValue.mSelect?.find((item: { content: string }, index: number) => {
+            cellValue.mSelect?.find((item, index) => {
                 if (item.content === target.dataset.content) {
                     cellValue.mSelect.splice(index, 1);
                     return true;
                 }
             });
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
         }
-
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -455,6 +458,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, index) => {
         const itemRowElement = hasClosestByClassName(item, "av__row");
         if (!itemRowElement) {
@@ -483,6 +487,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                     content: currentElement.dataset.name
                 }];
             }
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
         }
         const rowID = itemRowElement.dataset.id;
         cellDoOperations.push({

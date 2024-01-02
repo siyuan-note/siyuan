@@ -103,6 +103,7 @@ export const updateAssetCell = (options: {
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
+    let mAssetValue: IAVCellAssetValue[]
     options.cellElements.forEach((item, elementIndex) => {
         if (!options.blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");
@@ -151,6 +152,9 @@ export const updateAssetCell = (options: {
             } else {
                 cellValue.mAsset = options.replaceValue;
             }
+            mAssetValue = cellValue.mAsset
+        } else {
+            cellValue.mAsset = mAssetValue
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",

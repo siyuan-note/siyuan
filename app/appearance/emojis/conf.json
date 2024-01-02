@@ -7679,7 +7679,7 @@
         "keywords": "heart,break,broken,心,破碎,破碎"
       },
       {
-        "unicode": "2763",
+        "unicode": "2763-fe0f",
         "description": "Heart exclamation",
         "description_zh_cn": "心感叹",
         "keywords": "heart,exclamation,mark,punctuation,心,感叹号,标记,标点符号"
@@ -7745,37 +7745,37 @@
         "keywords": "heart,心"
       },
       {
-        "unicode": "262e",
+        "unicode": "262e-fe0f",
         "description": "Peace symbol",
         "description_zh_cn": "和平象征",
         "keywords": "peace,和平"
       },
       {
-        "unicode": "271d",
+        "unicode": "271d-fe0f",
         "description": "Latin cross",
         "description_zh_cn": "拉丁十字",
         "keywords": "christian,cross,religion,基督教,十字架,宗教"
       },
       {
-        "unicode": "262a",
+        "unicode": "262a-fe0f",
         "description": "Star and crescent",
         "description_zh_cn": "星星和新月",
         "keywords": "islam,muslim,religion,伊斯兰教,穆斯林,宗教"
       },
       {
-        "unicode": "1f549",
+        "unicode": "1f549-fe0f",
         "description": "Om symbol",
         "description_zh_cn": "嗡符号",
         "keywords": "hindu,om,religion,印度教,OM,宗教"
       },
       {
-        "unicode": "2638",
+        "unicode": "2638-fe0f",
         "description": "Wheel of dharma",
         "description_zh_cn": "法轮",
         "keywords": "buddhist,dharma,religion,wheel,佛教,佛法,宗教,轮子"
       },
       {
-        "unicode": "2721",
+        "unicode": "2721-fe0f",
         "description": "Star of david",
         "description_zh_cn": "大卫之星",
         "keywords": "david,jew,jewish,religion,star,大卫,犹太人,犹太人,宗教,明星"
@@ -7793,13 +7793,13 @@
         "keywords": "candelabrum,candlestick,menorah,religion,烛台,烛台,烛台,宗教"
       },
       {
-        "unicode": "262f",
+        "unicode": "262f-fe0f",
         "description": "Yin yang",
         "description_zh_cn": "阴阳",
         "keywords": "religion,tao,taoist,yang,yin,宗教,道,道,阳,阴"
       },
       {
-        "unicode": "2626",
+        "unicode": "2626-fe0f",
         "description": "Orthodox cross",
         "description_zh_cn": "东正教十字架",
         "keywords": "christian,cross,religion,基督教,十字架,宗教"
@@ -7895,25 +7895,25 @@
         "keywords": "id,identity,身份证,身份"
       },
       {
-        "unicode": "269b",
+        "unicode": "269b-fe0f",
         "description": "Atom symbol",
         "description_zh_cn": "原子符号",
         "keywords": "atheist,atom,无神论者,原子"
       },
       {
-        "unicode": "2695",
+        "unicode": "2695-fe0f",
         "description": "Staff of aesculapius",
         "description_zh_cn": "埃斯库拉皮乌斯的工作人员",
         "keywords": "health,care,doctor,medicine,rod,snake,健康,护理,医生,医药,棒,蛇"
       },
       {
-        "unicode": "2622",
+        "unicode": "2622-fe0f",
         "description": "Radioactive sign",
         "description_zh_cn": "放射性标志",
         "keywords": "radioactive,放射性"
       },
       {
-        "unicode": "2623",
+        "unicode": "2623-fe0f",
         "description": "Biohazard sign",
         "description_zh_cn": "生物危害标志",
         "keywords": "biohazard,生物危害"
@@ -7955,13 +7955,13 @@
         "keywords": "squared operating ideograph,chinese,平方操作表意文字,中文"
       },
       {
-        "unicode": "1f237",
+        "unicode": "1f237-fe0f",
         "description": "Squared cjk unified ideograph-6708",
         "description_zh_cn": "平方 cjk 统一表意文字-6708",
         "keywords": "squared moon ideograph,japanese,方月象形文字,日语"
       },
       {
-        "unicode": "2734",
+        "unicode": "2734-fe0f",
         "description": "Eight pointed star",
         "description_zh_cn": "八尖星",
         "keywords": "star,星星"
@@ -7991,13 +7991,13 @@
         "keywords": "circled advantage ideograph,japanese,带圆圈的优势表意文字,日语"
       },
       {
-        "unicode": "3299",
+        "unicode": "3299-fe0f",
         "description": "Circled ideograph secret",
         "description_zh_cn": "带圆圈的表意文字秘密",
         "keywords": "circled secret ideograph,chinese,ideograph,secret,带圆圈的秘密表意文字,中文,表意文字,秘密"
       },
       {
-        "unicode": "3297",
+        "unicode": "3297-fe0f",
         "description": "Circled ideograph congratulation",
         "description_zh_cn": "带圆圈的表意文字祝贺",
         "keywords": "circled congratulate ideograph,chinese,圆圈祝贺表意文字,中文"
@@ -8099,7 +8099,7 @@
         "keywords": "angry,comic,mad,愤怒,喜剧,疯狂"
       },
       {
-        "unicode": "2668",
+        "unicode": "2668-fe0f",
         "description": "Hot springs",
         "description_zh_cn": "温泉",
         "keywords": "hot,hotsprings,springs,steaming,热,温泉,温泉,蒸"
@@ -8171,13 +8171,13 @@
         "keywords": "mark,outlined,punctuation,question,标记,概述,标点符号,问题"
       },
       {
-        "unicode": "203c",
+        "unicode": "203c-fe0f",
         "description": "Double exclamation mark",
         "description_zh_cn": "双感叹号",
         "keywords": "bangbang,exclamation,mark,punctuation,bangbang,感叹号,标记,标点符号"
       },
       {
-        "unicode": "2049",
+        "unicode": "2049-fe0f",
         "description": "Exclamation question mark",
         "description_zh_cn": "感叹号",
         "keywords": "exclamation,interrobang,mark,punctuation,question,感叹号,interrobang,标记,标点符号,问题"
@@ -8207,13 +8207,13 @@
         "keywords": "anchor,emblem,ship,tool,trident,锚,会徽,船舶,工具,三叉戟"
       },
       {
-        "unicode": "269c",
+        "unicode": "269c-fe0f",
         "description": "Fleur-de-lis",
         "description_zh_cn": "百合花",
         "keywords": "fleur-de-lis,百合"
       },
       {
-        "unicode": "303d",
+        "unicode": "303d-fe0f",
         "description": "Part alternation mark",
         "description_zh_cn": "零件交替标记",
         "keywords": "mark,part,标记,部分"
@@ -8237,7 +8237,7 @@
         "keywords": "beginner,chevron,green,japanese,leaf,tool,yellow,初学者,雪佛龙,绿色,日语,叶,工具,黄色"
       },
       {
-        "unicode": "267b",
+        "unicode": "267b-fe0f",
         "description": "Universal recycling symbol",
         "description_zh_cn": "通用回收符号",
         "keywords": "recycle,回收"
@@ -8255,13 +8255,13 @@
         "keywords": "chart increasing with yen,bank,chart,currency,graph,growth,market,money,rise,trend,upward,yen,图表随着日元,银行,图表,货币,图形,增长,市场,资金,上升,趋势,向上,日元而增加"
       },
       {
-        "unicode": "2747",
+        "unicode": "2747-fe0f",
         "description": "Sparkle",
         "description_zh_cn": "火花",
         "keywords": "sparkle,火花"
       },
       {
-        "unicode": "2733",
+        "unicode": "2733-fe0f",
         "description": "Eight spoked asterisk",
         "description_zh_cn": "八辐星号",
         "keywords": "asterisk,星号"
@@ -8309,7 +8309,7 @@
         "keywords": "forever,unbounded,universal,永远,无限,普遍"
       },
       {
-        "unicode": "24c2",
+        "unicode": "24c2-fe0f",
         "description": "Circled latin capital letter m",
         "description_zh_cn": "带圆圈的拉丁大写字母 m",
         "keywords": "circle,m,圆,米"
@@ -8345,7 +8345,7 @@
         "keywords": "squared empty ideograph,chinese,平方空表意文字,中文"
       },
       {
-        "unicode": "1f202",
+        "unicode": "1f202-fe0f",
         "description": "Squared katakana sa",
         "description_zh_cn": "平方片假名",
         "keywords": "japanese,日本人"
@@ -8393,7 +8393,7 @@
         "keywords": "men’s room,lavatory,man,restroom,wc,men,male,男厕所,厕所,男人,洗手间,厕所,男人,男"
       },
       {
-        "unicode": "2642",
+        "unicode": "2642-fe0f",
         "description": "Male sign",
         "description_zh_cn": "男性标志",
         "keywords": "male,man,men,男,男,男"
@@ -8405,13 +8405,13 @@
         "keywords": "women’s room,lavatory,restroom,wc,woman,women,female,女厕所,洗手间,洗手间,厕所,女人,女人,女性"
       },
       {
-        "unicode": "2640",
+        "unicode": "2640-fe0f",
         "description": "Female sign",
         "description_zh_cn": "女性标志",
         "keywords": "female,woman,women,女性,女人,妇女"
       },
       {
-        "unicode": "26a7",
+        "unicode": "26a7-fe0f",
         "description": "Transgender sign",
         "description_zh_cn": "变性标志",
         "keywords": "transgender,pride,lgbt,变性人,骄傲,lgbt"
@@ -8489,61 +8489,61 @@
         "keywords": "free,自由"
       },
       {
-        "unicode": "30-20e3",
+        "unicode": "30-fe0f-20e3",
         "description": "Keycap digit zero",
         "description_zh_cn": "键帽数字零",
         "keywords": "0,keycap,zero,0,键帽,零"
       },
       {
-        "unicode": "31-20e3",
+        "unicode": "31-fe0f-20e3",
         "description": "Keycap digit one",
         "description_zh_cn": "键帽数字一",
         "keywords": "1,keycap,one,1,键帽,一个"
       },
       {
-        "unicode": "32-20e3",
+        "unicode": "32-fe0f-20e3",
         "description": "Keycap digit two",
         "description_zh_cn": "键帽数字二",
         "keywords": "2,keycap,two,2,键帽,两个"
       },
       {
-        "unicode": "33-20e3",
+        "unicode": "33-fe0f-20e3",
         "description": "Keycap digit three",
         "description_zh_cn": "键帽数字三",
         "keywords": "3,keycap,three,3,键帽,三个"
       },
       {
-        "unicode": "34-20e3",
+        "unicode": "34-fe0f-20e3",
         "description": "Keycap digit four",
         "description_zh_cn": "键帽数字四",
         "keywords": "4,four,keycap,4,四,键帽"
       },
       {
-        "unicode": "35-20e3",
+        "unicode": "35-fe0f-20e3",
         "description": "Keycap digit five",
         "description_zh_cn": "键帽数字五",
         "keywords": "5,five,keycap,5,五,键帽"
       },
       {
-        "unicode": "36-20e3",
+        "unicode": "36-fe0f-20e3",
         "description": "Keycap digit six",
         "description_zh_cn": "键帽数字六",
         "keywords": "6,keycap,six,6,键帽,六个"
       },
       {
-        "unicode": "37-20e3",
+        "unicode": "37-fe0f-20e3",
         "description": "Keycap digit seven",
         "description_zh_cn": "键帽数字七",
         "keywords": "7,keycap,seven,7,键帽,七"
       },
       {
-        "unicode": "38-20e3",
+        "unicode": "38-fe0f-20e3",
         "description": "Keycap digit eight",
         "description_zh_cn": "键帽数字八",
         "keywords": "8,eight,keycap,8,八,键帽"
       },
       {
-        "unicode": "39-20e3",
+        "unicode": "39-fe0f-20e3",
         "description": "Keycap digit nine",
         "description_zh_cn": "键帽数字九",
         "keywords": "9,keycap,nine,9,键帽,九"
@@ -8561,7 +8561,7 @@
         "keywords": "1234,input,numbers,1234,输入,数字"
       },
       {
-        "unicode": "25b6",
+        "unicode": "25b6-fe0f",
         "description": "Right-pointing triangle",
         "description_zh_cn": "右指三角形",
         "keywords": "play button,arrow,play,right,triangle,播放按钮,箭头,播放,右,三角形"
@@ -8591,7 +8591,7 @@
         "keywords": "record button,circle,record,记录按钮,圆圈,记录"
       },
       {
-        "unicode": "23cf",
+        "unicode": "23cf-fe0f",
         "description": "Eject symbol",
         "description_zh_cn": "弹出符号",
         "keywords": "eject button,弹出按钮"
@@ -8639,7 +8639,7 @@
         "keywords": "repeat button,arrow,clockwise,once,重复按钮,箭头,顺时针,一次"
       },
       {
-        "unicode": "25c0",
+        "unicode": "25c0-fe0f",
         "description": "Left-pointing triangle",
         "description_zh_cn": "左指三角形",
         "keywords": "reverse button,arrow,left,reverse,triangle,反向按钮,箭头,左,反向,三角形"
@@ -8669,61 +8669,61 @@
         "keywords": "fast down button,arrow,double,down,快速向下按钮,箭头,双,向下"
       },
       {
-        "unicode": "27a1",
+        "unicode": "27a1-fe0f",
         "description": "Rightwards arrow",
         "description_zh_cn": "向右箭头",
         "keywords": "right arrow,arrow,cardinal,direction,east,向右箭头,箭头,基数,方向,东"
       },
       {
-        "unicode": "2b05",
+        "unicode": "2b05-fe0f",
         "description": "Leftwards arrow",
         "description_zh_cn": "向左箭头",
         "keywords": "left arrow,arrow,cardinal,direction,west,左箭头,箭头,基数,方向,西"
       },
       {
-        "unicode": "2b06",
+        "unicode": "2b06-fe0f",
         "description": "Upwards arrow",
         "description_zh_cn": "向上箭头",
         "keywords": "up arrow,arrow,cardinal,direction,north,向上箭头,箭头,基数,方向,北"
       },
       {
-        "unicode": "2b07",
+        "unicode": "2b07-fe0f",
         "description": "Downwards arrow",
         "description_zh_cn": "向下箭头",
         "keywords": "down arrow,arrow,cardinal,direction,down,south,向下箭头,箭头,基数,方向,向下,南"
       },
       {
-        "unicode": "2197",
+        "unicode": "2197-fe0f",
         "description": "North east arrow",
         "description_zh_cn": "东北箭头",
         "keywords": "up-right arrow,arrow,direction,intercardinal,northeast,向上箭头,箭头,方向,intercardinal,东北"
       },
       {
-        "unicode": "2198",
+        "unicode": "2198-fe0f",
         "description": "South east arrow",
         "description_zh_cn": "东南箭头",
         "keywords": "down-right arrow,arrow,direction,intercardinal,southeast,右下箭头,箭头,方向,intercardinal,东南"
       },
       {
-        "unicode": "2199",
+        "unicode": "2199-fe0f",
         "description": "South west arrow",
         "description_zh_cn": "西南箭头",
         "keywords": "down-left arrow,arrow,direction,intercardinal,southwest,左下箭头,箭头,方向,intercardinal,西南"
       },
       {
-        "unicode": "2196",
+        "unicode": "2196-fe0f",
         "description": "North west arrow",
         "description_zh_cn": "西北箭头",
         "keywords": "up-left arrow,arrow,direction,intercardinal,northwest,左上箭头,箭头,方向,intercardinal,西北"
       },
       {
-        "unicode": "2195",
+        "unicode": "2195-fe0f",
         "description": "Up down arrow",
         "description_zh_cn": "向上向下箭头",
         "keywords": "up-down arrow,arrow,direction,intercardinal,northwest,上下箭头,箭头,方向,intercardinal,西北"
       },
       {
-        "unicode": "2194",
+        "unicode": "2194-fe0f",
         "description": "Left right arrow",
         "description_zh_cn": "左右箭头",
         "keywords": "left-right arrow,arrow,左右箭头,箭头"
@@ -8735,13 +8735,13 @@
         "keywords": "anticlockwise,arrow,counterclockwise,withershins,逆时针,箭头,逆时针,凋零"
       },
       {
-        "unicode": "21aa",
+        "unicode": "21aa-fe0f",
         "description": "Rightwards arrow with hook",
         "description_zh_cn": "带钩的向右箭头",
         "keywords": "arrow curving right,arrow,箭头向右弯曲箭头"
       },
       {
-        "unicode": "21a9",
+        "unicode": "21a9-fe0f",
         "description": "Leftwards arrow with hook",
         "description_zh_cn": "带钩的向左箭头",
         "keywords": "arrow curving left,arrow,箭头向左弯曲箭头"
@@ -8753,31 +8753,31 @@
         "keywords": "clockwise vertical arrows,arrow,clockwise,reload,顺时针垂直箭头,箭头,顺时针,重新加载"
       },
       {
-        "unicode": "2934",
+        "unicode": "2934-fe0f",
         "description": "Arrow pointing rightwards then curving upwards",
         "description_zh_cn": "箭头向右然后向上弯曲",
         "keywords": "right arrow curving up,arrow,向右箭头向上弯曲箭头"
       },
       {
-        "unicode": "2935",
+        "unicode": "2935-fe0f",
         "description": "Arrow pointing rightwards then curving downwards",
         "description_zh_cn": "箭头向右然后向下弯曲",
         "keywords": "right arrow curving down,arrow,down,向右箭头向下弯曲,箭头,向下"
       },
       {
-        "unicode": "23-20e3",
+        "unicode": "23-fe0f-20e3",
         "description": "Keycap number sign",
         "description_zh_cn": "键帽数字符号",
         "keywords": "hash,keycap,pound,哈希,键帽,磅"
       },
       {
-        "unicode": "2a-20e3",
+        "unicode": "2a-fe0f-20e3",
         "description": "Keycap asterisk",
         "description_zh_cn": "键帽星号",
         "keywords": "asterisk,keycap,star,星号,键帽,星星"
       },
       {
-        "unicode": "2139",
+        "unicode": "2139-fe0f",
         "description": "Information source",
         "description_zh_cn": "信息来源",
         "keywords": "i,information,一,信息"
@@ -8819,7 +8819,7 @@
         "keywords": "activity,entertainment,music,note,notes,活动,娱乐,音乐,笔记,笔记"
       },
       {
-        "unicode": "3030",
+        "unicode": "3030-fe0f",
         "description": "Wavy dash",
         "description_zh_cn": "波浪线",
         "keywords": "dash,punctuation,wavy,破折号,标点符号,波浪线"
@@ -8831,7 +8831,7 @@
         "keywords": "curl,loop,卷曲,循环"
       },
       {
-        "unicode": "2714",
+        "unicode": "2714-fe0f",
         "description": "Heavy check mark",
         "description_zh_cn": "重复选标记",
         "keywords": "check,mark,复选标记"
@@ -8855,7 +8855,7 @@
         "keywords": "division,math,除法,数学"
       },
       {
-        "unicode": "2716",
+        "unicode": "2716-fe0f",
         "description": "Heavy multiplication x",
         "description_zh_cn": "重乘 x",
         "keywords": "cancel,multiplication,multiply,x,取消,乘法,乘法,x"
@@ -8873,19 +8873,19 @@
         "keywords": "bank,currency,exchange,money,银行,货币,交易所,钱"
       },
       {
-        "unicode": "a9",
+        "unicode": "a9-fe0f",
         "description": "Copyright sign",
         "description_zh_cn": "版权标志",
         "keywords": "copyright,版权"
       },
       {
-        "unicode": "ae",
+        "unicode": "ae-fe0f",
         "description": "Registered sign",
         "description_zh_cn": "注册标志",
         "keywords": "registered,挂号的"
       },
       {
-        "unicode": "2122",
+        "unicode": "2122-fe0f",
         "description": "Trade mark sign",
         "description_zh_cn": "商标标志",
         "keywords": "mark,tm,trademark,商标,tm,商标"
@@ -8921,7 +8921,7 @@
         "keywords": "arrow,soon,箭头,很快"
       },
       {
-        "unicode": "2611",
+        "unicode": "2611-fe0f",
         "description": "Ballot box with check",
         "description_zh_cn": "带支票的投票箱",
         "keywords": "ballot,box,check,选票,框,检查"
@@ -9181,31 +9181,31 @@
       {
         "unicode": "1f004",
         "description": "Mahjong tile red dragon",
-        "description_zh_cn": "麻将牌红龙",
+        "description_zh_cn": "麻将牌红中",
         "keywords": "game,mahjong,red,游戏,麻将,红色"
       },
       {
-        "unicode": "2660",
+        "unicode": "2660-fe0f",
         "description": "Spade suit",
-        "description_zh_cn": "铲套装",
+        "description_zh_cn": "黑桃",
         "keywords": "card,game,spade,suit,卡,游戏,黑桃,西装"
       },
       {
-        "unicode": "2663",
+        "unicode": "2663-fe0f",
         "description": "Club suit",
-        "description_zh_cn": "俱乐部套装",
+        "description_zh_cn": "梅花",
         "keywords": "card,club,clubs,game,suit,卡,俱乐部,俱乐部,游戏,西装"
       },
       {
-        "unicode": "2665",
+        "unicode": "2665-fe0f",
         "description": "Heart suit",
-        "description_zh_cn": "心套装",
+        "description_zh_cn": "红心",
         "keywords": "card,game,heart,hearts,suit,卡,游戏,心,心,西装"
       },
       {
-        "unicode": "2666",
+        "unicode": "2666-fe0f",
         "description": "Diamond suit",
-        "description_zh_cn": "钻石套装",
+        "description_zh_cn": "方块",
         "keywords": "card,diamond,diamonds,game,suit,卡,钻石,钻石,游戏,西装"
       },
       {
@@ -9221,7 +9221,7 @@
         "keywords": "bubble,eye,speech,witness,泡沫,眼睛,演讲,证人"
       },
       {
-        "unicode": "1f5e8",
+        "unicode": "1f5e8-fe0f",
         "description": "Left speech bubble",
         "description_zh_cn": "左气泡",
         "keywords": "dialog,speech,对话,演讲"
@@ -9233,7 +9233,7 @@
         "keywords": "balloon,bubble,comic,thought,气球,泡泡,漫画,思想"
       },
       {
-        "unicode": "1f5ef",
+        "unicode": "1f5ef-fe0f",
         "description": "Right anger bubble",
         "description_zh_cn": "正确的愤怒泡沫",
         "keywords": "angry,balloon,bubble,mad,生气,气球,泡泡,疯狂"

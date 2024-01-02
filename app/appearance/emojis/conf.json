@@ -83,7 +83,7 @@
         "keywords": "face,upside-down,脸,倒立"
       },
       {
-        "unicode": "263a",
+        "unicode": "263a-fe0f",
         "description": "Smiling face",
         "description_zh_cn": "微笑的面孔",
         "keywords": "face,outlined,relaxed,smile,脸,概述,放松,微笑,)"
@@ -341,7 +341,7 @@
         "keywords": "face,frown,sad,unhappy,脸,皱眉,悲伤,不开心"
       },
       {
-        "unicode": "2639",
+        "unicode": "2639-fe0f",
         "description": "Frowning face",
         "description_zh_cn": "皱眉的脸",
         "keywords": "face,frown,sad,unhappy,脸,皱眉,悲伤,不开心"
@@ -629,7 +629,7 @@
         "keywords": "body,death,face,fairy tale,monster,skull,halloween,身体,死亡,脸,童话故事,怪物,头骨,万圣节"
       },
       {
-        "unicode": "2620",
+        "unicode": "2620-fe0f",
         "description": "Skull and crossbones",
         "description_zh_cn": "骷髅和交叉骨",
         "keywords": "body,crossbones,death,face,monster,skull,halloween,身体,交叉骨,死亡,脸,怪物,头骨,万圣节"
@@ -977,7 +977,7 @@
         "keywords": "body,nose,身体,鼻子"
       },
       {
-        "unicode": "1f441",
+        "unicode": "1f441-fe0f",
         "description": "Eye",
         "description_zh_cn": "眼睛",
         "keywords": "body,eye,身体,眼睛"
@@ -1025,7 +1025,7 @@
         "keywords": "bust,silhouette,胸围,剪影"
       },
       {
-        "unicode": "1f5e3",
+        "unicode": "1f5e3-fe0f",
         "description": "Speaking head in silhouette",
         "description_zh_cn": "在剪影中说话的头",
         "keywords": "face,head,silhouette,speak,speaking,脸,头,剪影,说话,说话"
@@ -2729,7 +2729,7 @@
         "keywords": "clothing,eye,eyeglasses,eyewear,glasses,服装,眼睛,眼镜,眼镜,眼镜"
       },
       {
-        "unicode": "1f576",
+        "unicode": "1f576-fe0f",
         "description": "Dark sunglasses",
         "description_zh_cn": "深色太阳镜",
         "keywords": "dark,eye,eyewear,glasses,sunglasses,黑暗,眼睛,眼镜,眼镜,太阳镜"
@@ -2765,39 +2765,39 @@
         "keywords": "clothing,rain,umbrella,weather,衣服,雨,伞,天气"
       },
       {
-        "unicode": "2602",
+        "unicode": "2602-fe0f",
         "description": "Umbrella",
         "description_zh_cn": "雨伞",
         "keywords": "clothing,rain,umbrella,weather,衣服,雨,伞,天气"
       },
       {
         "unicode": "1f3fb",
-        "description": "(light skin tone",
-        "description_zh_cn": ",浅肤色",
+        "description": "Light skin tone",
+        "description_zh_cn": "浅肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fc",
-        "description": "(medium light skin tone",
-        "description_zh_cn": ",中浅肤色",
+        "description": "Medium light skin tone",
+        "description_zh_cn": "中浅肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fd",
-        "description": "(medium skin tone",
-        "description_zh_cn": ",中等肤色",
+        "description": "Medium skin tone",
+        "description_zh_cn": "中等肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fe",
-        "description": "(medium dark skin tone",
-        "description_zh_cn": ",中深肤色",
+        "description": "Medium dark skin tone",
+        "description_zh_cn": "中深肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3ff",
-        "description": "(dark skin tone",
-        "description_zh_cn": ",深色肤色",
+        "description": "Dark skin tone",
+        "description_zh_cn": "深色肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
@@ -3144,13 +3144,13 @@
         "keywords": "cockroach,insect,pest,roach,蟑螂,昆虫,害虫,蟑螂"
       },
       {
-        "unicode": "1f577",
+        "unicode": "1f577-fe0f",
         "description": "Spider",
         "description_zh_cn": "蜘蛛",
         "keywords": "insect,spider,昆虫,蜘蛛"
       },
       {
-        "unicode": "1f578",
+        "unicode": "1f578-fe0f",
         "description": "Spider web",
         "description_zh_cn": "蜘蛛网",
         "keywords": "spider,web,蜘蛛网"
@@ -3534,7 +3534,7 @@
         "keywords": "mouse,鼠"
       },
       {
-        "unicode": "1f43f",
+        "unicode": "1f43f-fe0f",
         "description": "Chipmunk",
         "description_zh_cn": "花栗鼠",
         "keywords": "chipmunk,花栗鼠"
@@ -3636,7 +3636,7 @@
         "keywords": "herb,leaf,plant,草本,叶,植物"
       },
       {
-        "unicode": "2618",
+        "unicode": "2618-fe0f",
         "description": "Shamrock",
         "description_zh_cn": "三叶草",
         "keywords": "plant,shamrock,植物,三叶草"
@@ -3888,13 +3888,13 @@
         "keywords": "bright,face,space,sun,weather,明亮,脸,空间,太阳,天气"
       },
       {
-        "unicode": "2600",
+        "unicode": "2600-fe0f",
         "description": "Sun with rays",
         "description_zh_cn": "有光芒的太阳",
         "keywords": "bright,rays,space,sun,sunny,weather,明亮,光线,空间,太阳,晴朗,天气"
       },
       {
-        "unicode": "1f324",
+        "unicode": "1f324-fe0f",
         "description": "Sun with small cloud",
         "description_zh_cn": "太阳与小云",
         "keywords": "cloud,sun,weather,云,太阳,天气"
@@ -3906,37 +3906,37 @@
         "keywords": "cloud,sun,weather,云,太阳,天气"
       },
       {
-        "unicode": "1f325",
+        "unicode": "1f325-fe0f",
         "description": "Sun behind large cloud",
         "description_zh_cn": "大云后面的太阳",
         "keywords": "cloud,sun,weather,云,太阳,天气"
       },
       {
-        "unicode": "1f326",
+        "unicode": "1f326-fe0f",
         "description": "Sun behind cloud with rain",
         "description_zh_cn": "雨云背后的太阳",
         "keywords": "cloud,rain,sun,weather,云,雨,太阳,天气"
       },
       {
-        "unicode": "2601",
+        "unicode": "2601-fe0f",
         "description": "Cloud",
         "description_zh_cn": "云",
         "keywords": "cloud,weather,云,天气"
       },
       {
-        "unicode": "1f327",
+        "unicode": "1f327-fe0f",
         "description": "Cloud with rain",
         "description_zh_cn": "有雨的云",
         "keywords": "cloud,rain,weather,云,雨,天气"
       },
       {
-        "unicode": "26c8",
+        "unicode": "26c8-fe0f",
         "description": "Thunder cloud and rain",
         "description_zh_cn": "雷云和雨",
         "keywords": "cloud,rain,thunder,weather,云,雨,雷,天气"
       },
       {
-        "unicode": "1f329",
+        "unicode": "1f329-fe0f",
         "description": "Cloud with lightning",
         "description_zh_cn": "有闪电的云",
         "keywords": "cloud,lightning,weather,云,闪电,天气"
@@ -3960,19 +3960,19 @@
         "keywords": "boom,collision,comic,繁荣,碰撞,漫画"
       },
       {
-        "unicode": "2744",
+        "unicode": "2744-fe0f",
         "description": "Snowflake",
         "description_zh_cn": "雪花",
         "keywords": "cold,snow,snowflake,weather,寒冷,雪,雪花,天气"
       },
       {
-        "unicode": "1f328",
+        "unicode": "1f328-fe0f",
         "description": "Cloud with snow",
         "description_zh_cn": "有雪的云",
         "keywords": "cloud,cold,snow,weather,云,冷,雪,天气"
       },
       {
-        "unicode": "2603",
+        "unicode": "2603-fe0f",
         "description": "Snowman",
         "description_zh_cn": "雪人",
         "keywords": "cold,snow,snowman,weather,寒冷,雪,雪人,天气"
@@ -3984,7 +3984,7 @@
         "keywords": "cold,snow,snowman,weather,寒冷,雪,雪人,天气"
       },
       {
-        "unicode": "1f32c",
+        "unicode": "1f32c-fe0f",
         "description": "Wind blowing face",
         "description_zh_cn": "风吹脸",
         "keywords": "blow,cloud,face,weather,wind,吹,云,脸,天气,风"
@@ -3996,13 +3996,13 @@
         "keywords": "comic,dash,running,漫画,破折号,跑步"
       },
       {
-        "unicode": "1f32a",
+        "unicode": "1f32a-fe0f",
         "description": "Cloud with tornado",
         "description_zh_cn": "有龙卷风的云",
         "keywords": "cloud,tornado,weather,whirlwind,云,龙卷风,天气,旋风"
       },
       {
-        "unicode": "1f32b",
+        "unicode": "1f32b-fe0f",
         "description": "Fog",
         "description_zh_cn": "多雾路段",
         "keywords": "cloud,fog,weather,云,雾,天气"
@@ -4171,7 +4171,7 @@
         "keywords": "aubergine,eggplant,plant,vegetable,茄子,茄子,植物,蔬菜"
       },
       {
-        "unicode": "1f336",
+        "unicode": "1f336-fe0f",
         "description": "Hot pepper",
         "description_zh_cn": "辣椒",
         "keywords": "hot,pepper,plant,热,胡椒,植物"
@@ -4747,7 +4747,7 @@
         "keywords": "cooking,fork,knife,tableware,烹饪,叉,刀,餐具"
       },
       {
-        "unicode": "1f37d",
+        "unicode": "1f37d-fe0f",
         "description": "Fork and knife with plate",
         "description_zh_cn": "带盘子的刀叉",
         "keywords": "cooking,fork,knife,plate,tableware,烹饪,叉,刀,盘,餐具"
@@ -4922,7 +4922,7 @@
         "keywords": "judo,karate,martial arts,taekwondo,uniform,柔道,空手道,武术,跆拳道,制服"
       },
       {
-        "unicode": "26f8",
+        "unicode": "26f8-fe0f",
         "description": "Ice skate",
         "description_zh_cn": "滑冰",
         "keywords": "ice,skate,滑冰"
@@ -4940,7 +4940,7 @@
         "keywords": "sledge,sleigh,luge,toboggan,雪橇,雪橇,雪橇,雪橇"
       },
       {
-        "unicode": "26f7",
+        "unicode": "26f7-fe0f",
         "description": "Skier",
         "description_zh_cn": "滑雪者",
         "keywords": "ski,snow,滑雪,雪"
@@ -5240,7 +5240,7 @@
         "keywords": "running,sash,shirt,跑步,腰带,衬衫"
       },
       {
-        "unicode": "1f396",
+        "unicode": "1f396-fe0f",
         "description": "Military medal",
         "description_zh_cn": "军事勋章",
         "keywords": "celebration,medal,military,庆典,奖牌,军事"
@@ -5276,13 +5276,13 @@
         "keywords": "prize,trophy,奖品,奖杯"
       },
       {
-        "unicode": "1f3f5",
+        "unicode": "1f3f5-fe0f",
         "description": "Rosette",
         "description_zh_cn": "玫瑰花",
         "keywords": "plant,rosette,植物,玫瑰花"
       },
       {
-        "unicode": "1f397",
+        "unicode": "1f397-fe0f",
         "description": "Reminder ribbon",
         "description_zh_cn": "提醒功能区",
         "keywords": "celebration,reminder,ribbon,庆祝活动,提醒,丝带"
@@ -5294,7 +5294,7 @@
         "keywords": "activity,admission,entertainment,ticket,活动,入场,娱乐,门票"
       },
       {
-        "unicode": "1f39f",
+        "unicode": "1f39f-fe0f",
         "description": "Admission tickets",
         "description_zh_cn": "门票",
         "keywords": "admission,entertainment,ticket,入场,娱乐,门票"
@@ -5426,7 +5426,7 @@
         "keywords": "clue,interlocking,piece,puzzle,jigsaw,线索,联锁,件,拼图,拼图"
       },
       {
-        "unicode": "265f",
+        "unicode": "265f-fe0f",
         "description": "Chess pawn",
         "description_zh_cn": "棋子",
         "keywords": "chess,piece,game,expendable,国际象棋,棋子,游戏,消耗品"
@@ -5985,7 +5985,7 @@
         "keywords": "national park,park,国家公园,公园"
       },
       {
-        "unicode": "1f6e3",
+        "unicode": "1f6e3-fe0f",
         "description": "Motorway",
         "description_zh_cn": "高速公路",
         "keywords": "highway,motorway,road,高速公路,高速公路,道路"
@@ -6021,7 +6021,7 @@
         "keywords": "beach,umbrella,沙滩伞"
       },
       {
-        "unicode": "1f3dd",
+        "unicode": "1f3dd-fe0f",
         "description": "Desert island",
         "description_zh_cn": "沙漠荒岛",
         "keywords": "desert,island,沙漠荒岛"
@@ -6087,7 +6087,7 @@
         "keywords": "house,hut,roundhouse,yurt,房子,小屋,圆屋,蒙古包"
       },
       {
-        "unicode": "1f3d8",
+        "unicode": "1f3d8-fe0f",
         "description": "House buildings",
         "description_zh_cn": "房屋建筑",
         "keywords": "building,house,建筑,房子"
@@ -7378,7 +7378,7 @@
         "keywords": "file,folder,open,文件,文件夹,打开"
       },
       {
-        "unicode": "1f5c2",
+        "unicode": "1f5c2-fe0f",
         "description": "Card index dividers",
         "description_zh_cn": "卡片索引分隔符",
         "keywords": "card,dividers,index,卡,分频器,索引"
@@ -7619,7 +7619,7 @@
     "title_zh_cn": "符号",
     "items": [
       {
-        "unicode": "2764",
+        "unicode": "2764-fe0f",
         "description": "Red heart",
         "description_zh_cn": "红心",
         "keywords": "heart,心"
@@ -8219,7 +8219,7 @@
         "keywords": "mark,part,标记,部分"
       },
       {
-        "unicode": "26a0",
+        "unicode": "26a0-fe0f",
         "description": "Warning sign",
         "description_zh_cn": "警告牌",
         "keywords": "warning,警告"
@@ -8303,7 +8303,7 @@
         "keywords": "earth,globe,meridians,world,地球,全球,经络,世界"
       },
       {
-        "unicode": "267e",
+        "unicode": "267e-fe0f",
         "description": "Infinity",
         "description_zh_cn": "无穷",
         "keywords": "forever,unbounded,universal,永远,无限,普遍"

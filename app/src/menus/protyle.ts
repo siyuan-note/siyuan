@@ -87,8 +87,10 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
 };
 
 export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts?: string[]) => {
-    window.siyuan.menus.menu.remove();
-    const menu = new Menu();
+    const menu = new Menu("background-asset");
+    if (menu.isOpen) {
+        return;
+    }
     menu.addItem({
         iconHTML: "",
         type: "readonly",

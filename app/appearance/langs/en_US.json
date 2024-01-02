@@ -6,6 +6,10 @@
   "relatedTo": "Relation to",
   "relation": "Relation",
   "rollup": "Rollup",
+  "rollupProperty": "Property",
+  "rollupCalc": "Calculate",
+  "searchRelation": "Search for a relation property",
+  "searchRollupProperty": "Search for a property",
   "replaceTypes": {
     "text": "Normal text",
     "imgText": "Image alt text",

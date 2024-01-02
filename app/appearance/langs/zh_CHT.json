@@ -6,6 +6,10 @@
   "relatedTo": "關聯至",
   "relation": "關聯",
   "rollup": "匯總",
+  "rollupProperty": "總計欄位",
+  "rollupCalc": "彙總方式",
+  "searchRelation": "搜尋關聯列",
+  "searchRollupProperty": "搜尋總計欄位",
   "replaceTypes": {
     "text": "普通文字",
     "imgText": "圖片提示文字",

@@ -6,6 +6,10 @@
   "relatedTo": "关联至",
   "relation": "关联",
   "rollup": "汇总",
+  "rollupProperty": "汇总字段",
+  "rollupCalc": "汇总方式",
+  "searchRelation": "搜索关联列",
+  "searchRollupProperty": "搜索汇总字段",
   "replaceTypes": {
     "text": "普通文本",
     "imgText": "图片提示文本",

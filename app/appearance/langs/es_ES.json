@@ -6,6 +6,10 @@
   "relatedTo": "Relación con",
   "relation": "Relación",
   "rollup": "Acumular",
+  "rollupProperty": "Propiedad",
+  "rollupCalc": "Calcular",
+  "searchRelation": "Buscar una propiedad de relación",
+  "searchRollupProperty": "Buscar una propiedad",
   "replaceTypes": {
     "text": "Texto normal",
     "imgText": "Texto alternativo de la imagen",

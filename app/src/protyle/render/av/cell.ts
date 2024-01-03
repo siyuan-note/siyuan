@@ -648,12 +648,13 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item, index) => {
             const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
-            if (!rollupText && text && text.endsWith(", ")) {
-                text = text.substring(0, text.length - 2);
-            } else if (rollupText) {
-                text += rollupText + ((index === cellValue.rollup.contents.length - 1 || !rollupText) ? "" : ", ");
+            if (rollupText) {
+                text += rollupText + ", ";
             }
         });
+        if (text && text.endsWith(", ")) {
+            text = text.substring(0, text.length - 2);
+        }
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
             text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;

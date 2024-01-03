@@ -648,9 +648,9 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item, index) => {
             const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
-            if (!rollupText && text) {
+            if (!rollupText && text && text.endsWith(", ")) {
                 text = text.substring(0, text.length - 2);
-            } else {
+            } else if (rollupText) {
                 text += rollupText + ((index === cellValue.rollup.contents.length - 1 || !rollupText) ? "" : ", ");
             }
         });

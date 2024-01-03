@@ -1048,6 +1048,15 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		treenode.MoveFoldHeading(updatedNode, oldNode)
 	}
 
+	if ast.NodeHeading == oldNode.Type && ast.NodeHeading != updatedNode.Type {
+		// 将标题块更新为非标题块时需要更新下方块的 parent id
+		children := treenode.HeadingChildren(oldNode)
+		updated := time.Now().Format("20060102150405")
+		for _, child := range children {
+			child.SetIALAttr("updated", updated)
+		}
+	}
+
 	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
 
 	// 替换为新节点
@@ -1055,6 +1064,16 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.Unlink()
 
 	createdUpdated(updatedNode)
+	if ast.NodeHeading != oldNode.Type && ast.NodeHeading == updatedNode.Type {
+		// 将非标题块更新为标题块时需要更新下方块的 parent id
+		// The parent block field of the blocks under the heading block is calculated incorrectly https://github.com/siyuan-note/siyuan/issues/9869
+		children := treenode.HeadingChildren(updatedNode)
+		updated := updatedNode.IALAttr("updated")
+		for _, child := range children {
+			child.SetIALAttr("updated", updated)
+		}
+	}
+
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}

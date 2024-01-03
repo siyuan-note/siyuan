@@ -216,15 +216,6 @@ const (
 	NumberFormatFranc          NumberFormat = "franc"
 )
 
-func NewValueNumber(content float64) *ValueNumber {
-	return &ValueNumber{
-		Content:          content,
-		IsNotEmpty:       true,
-		Format:           NumberFormatNone,
-		FormattedContent: fmt.Sprintf("%f", content),
-	}
-}
-
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
 	ret = &ValueNumber{
 		Content:          content,
@@ -483,9 +474,9 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	switch calc.Operator {
 	case CalcOperatorNone:
 	case CalcOperatorCountAll:
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountValues:
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -495,7 +486,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countUniqueValues++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUniqueValues))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
@@ -503,7 +494,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
@@ -511,7 +502,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countNonEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
@@ -519,7 +510,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countEmpty * 100 / len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countEmpty*100/len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorPercentNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
@@ -527,7 +518,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countNonEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countNonEmpty * 100 / len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty*100/len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, v := range r.Contents {
@@ -560,39 +551,39 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(numbers[len(numbers)/2], destKey.NumberFormat)}}
 		}
 	case CalcOperatorMin:
-		min := math.MaxFloat64
+		minVal := math.MaxFloat64
 		for _, v := range r.Contents {
 			if nil != v.Number {
-				if v.Number.Content < min {
-					min = v.Number.Content
+				if v.Number.Content < minVal {
+					minVal = v.Number.Content
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(min, destKey.NumberFormat)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(minVal, destKey.NumberFormat)}}
 	case CalcOperatorMax:
-		max := -math.MaxFloat64
+		maxVal := -math.MaxFloat64
 		for _, v := range r.Contents {
 			if nil != v.Number {
-				if v.Number.Content > max {
-					max = v.Number.Content
+				if v.Number.Content > maxVal {
+					maxVal = v.Number.Content
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max, destKey.NumberFormat)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal, destKey.NumberFormat)}}
 	case CalcOperatorRange:
-		min := math.MaxFloat64
-		max := -math.MaxFloat64
+		minVal := math.MaxFloat64
+		maxVal := -math.MaxFloat64
 		for _, v := range r.Contents {
 			if nil != v.Number {
-				if v.Number.Content < min {
-					min = v.Number.Content
+				if v.Number.Content < minVal {
+					minVal = v.Number.Content
 				}
-				if v.Number.Content > max {
-					max = v.Number.Content
+				if v.Number.Content > maxVal {
+					maxVal = v.Number.Content
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(max-min, destKey.NumberFormat)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
 	case CalcOperatorChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
@@ -602,7 +593,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked), NumberFormatNone)}}
 	case CalcOperatorUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
@@ -612,7 +603,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked), NumberFormatNone)}}
 	case CalcOperatorPercentChecked:
 		countChecked := 0
 		for _, v := range r.Contents {
@@ -622,7 +613,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countChecked * 100 / len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked*100/len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorPercentUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
@@ -632,6 +623,6 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewValueNumber(float64(countUnchecked * 100 / len(r.Contents)))}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
 	}
 }

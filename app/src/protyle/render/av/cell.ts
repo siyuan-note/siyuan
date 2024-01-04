@@ -246,17 +246,18 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         return;
     }
     const blockElement = hasClosestBlock(cellElements[0]);
-    let cellRect = cellElements[0].getBoundingClientRect();
-    if (blockElement) {
-        /// #if MOBILE
-        const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-        if (contentElement) {
-            contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
-        }
-        /// #else
-        cellScrollIntoView(blockElement, cellElements[0], false);
-        /// #endif
+    if (!blockElement) {
+        return;
     }
+    let cellRect = cellElements[0].getBoundingClientRect();
+    /// #if MOBILE
+    const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+    if (contentElement) {
+        contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
+    }
+    /// #else
+    cellScrollIntoView(blockElement, cellElements[0], false);
+    /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${cellRect.height}px"`;
@@ -264,7 +265,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
-    } else if (blockElement) {
+    } else {
         if (["select", "mSelect"].includes(type)) {
             openMenuPanel({protyle, blockElement, type: "select", cellElements});
         } else if (type === "mAsset") {
@@ -273,7 +274,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         } else if (type === "date") {
             openMenuPanel({protyle, blockElement, type: "date", cellElements});
         } else if (type === "checkbox") {
-            updateCellValueByInput(protyle, type, cellElements);
+            updateCellValueByInput(protyle, type, blockElement, cellElements);
         } else if (type === "relation") {
             openMenuPanel({protyle, blockElement, type: "relation", cellElements});
         } else if (type === "rollup") {
@@ -293,7 +294,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (inputElement) {
         inputElement.select();
         inputElement.focus();
-        if (blockElement && type === "template") {
+        if (type === "template") {
             fetchPost("/api/av/renderAttributeView", {id: blockElement.dataset.avId}, (response) => {
                 response.data.view.columns.find((item: IAVColumn) => {
                     if (item.id === cellElements[0].dataset.colId) {
@@ -323,7 +324,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                updateCellValueByInput(protyle, type, cellElements);
+                updateCellValueByInput(protyle, type, blockElement, cellElements);
                 if (event.key === "Tab") {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
@@ -341,49 +342,22 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     avMaskElement.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")) {
-            updateCellValueByInput(protyle, type, cellElements);
+            updateCellValueByInput(protyle, type, blockElement, cellElements);
             avMaskElement?.remove();
         }
     });
 };
 
-const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
+const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[]) => {
     const rowElement = hasClosestByClassName(cellElements[0], "av__row");
     if (!rowElement) {
         return;
     }
-    if (!document.contains(cellElements[0]) && cellElements.length === 1) {
-        // 原始 cell 已被更新
-        const avid = rowElement.dataset.avid;
-        if (avid) {
-            // 新增行后弹出的输入框
-            const previousId = rowElement.dataset.previousId;
-            cellElements[0] = protyle.wysiwyg.element.querySelector(previousId ? `[data-av-id="${avid}"] .av__row[data-id="${previousId}"]` : `[data-av-id="${avid}"] .av__row--header`).nextElementSibling.querySelector('[data-detached="true"]');
-        } else {
-            // 修改单元格后立即修改其他单元格
-            let tempElement = protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${cellElements[0].dataset.id}"]`) as HTMLElement;
-            if (!tempElement) {
-                // 修改单元格后修改其他没有内容的单元格（id 会随机）
-                tempElement = protyle.wysiwyg.element.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
-            }
-            if (!tempElement) {
-                return;
-            }
-            cellElements[0] = tempElement;
-        }
-    }
     if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !rowElement.dataset.id) {
         return;
     }
-    const blockElement = hasClosestBlock(cellElements[0]);
-    if (!blockElement) {
-        return;
-    }
     const avMaskElement = document.querySelector(".av__mask");
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
     const avID = blockElement.getAttribute("data-av-id");
-    const id = blockElement.getAttribute("data-node-id");
     if (type === "template") {
         const colId = cellElements[0].getAttribute("data-col-id");
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
@@ -403,93 +377,15 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, cellElements: H
             }]);
         }
     } else {
-        cellElements.forEach((item) => {
-            const rowElement = hasClosestByClassName(item, "av__row");
-            if (!rowElement) {
-                return;
-            }
-            const rowID = rowElement.getAttribute("data-id");
-            const cellId = item.getAttribute("data-id");
-            const colId = item.getAttribute("data-col-id");
-            const inputValue: {
-                content?: string | number,
-                isNotEmpty?: boolean,
-                checked?: boolean,
-            } = {};
-            const oldValue: {
-                content?: string | number,
-                isNotEmpty?: boolean,
-                checked?: boolean,
-            } = {};
-            if (type === "number") {
-                oldValue.content = parseFloat(item.textContent.trim());
-                oldValue.isNotEmpty = typeof oldValue.content === "number" && !isNaN(oldValue.content);
-                inputValue.content = parseFloat((avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value);
-                inputValue.isNotEmpty = typeof inputValue.content === "number" && !isNaN(inputValue.content);
-                if (!inputValue.isNotEmpty) {
-                    // 后端仅支持传入数字，因此在为空的时候需要设置为 0
-                    inputValue.content = 0;
-                }
-            } else if (type === "checkbox") {
-                const useElement = item.querySelector("use");
-                inputValue.checked = useElement.getAttribute("xlink:href") === "#iconUncheck";
-                oldValue.checked = !inputValue.checked;
-                useElement.setAttribute("xlink:href", inputValue.checked ? "#iconCheck" : "#iconUncheck");
-            } else {
-                inputValue.content = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value;
-                oldValue.content = type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim();
-            }
-            if (objEquals(inputValue, oldValue)) {
-                return;
-            }
-            doOperations.push({
-                action: "updateAttrViewCell",
-                id: cellId,
-                avID,
-                keyID: colId,
-                rowID,
-                data: {
-                    [type]: inputValue,
-                    isDetached: true,
-                }
-            }, {
-                action: "doUpdateUpdated",
-                id,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            });
-            undoOperations.push({
-                action: "updateAttrViewCell",
-                id: cellId,
-                avID,
-                keyID: colId,
-                rowID,
-                data: {
-                    [type]: oldValue,
-                    isDetached: true,
-                }
-            }, {
-                action: "doUpdateUpdated",
-                id,
-                data: blockElement.getAttribute("updated"),
-            });
-            if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
-                updateAttrViewCellAnimation(item, {
-                    [type]: inputValue,
-                    isDetached: true,
-                    type
-                });
-            }
-        });
-    }
-    if (doOperations.length > 0) {
-        transaction(protyle, doOperations, undoOperations);
+        updateCellsValue(protyle, blockElement, type === "checkbox" ? {
+            checked: cellElements[0].querySelector("use").getAttribute("xlink:href") === "#iconUncheck"
+        } : (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value, cellElements);
     }
     if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
     }
-    if (blockElement &&
-        // 单元格编辑中 ctrl+p 光标定位
-        !document.querySelector(".b3-dialog")) {
+    //  单元格编辑中 ctrl+p 光标定位
+    if (!document.querySelector(".b3-dialog")) {
         focusBlock(blockElement);
     }
     document.querySelectorAll(".av__mask").forEach((item) => {
@@ -519,17 +415,18 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     }
 
     cellElements.forEach((item: HTMLElement, elementIndex) => {
-        if (!nodeElement.contains(item)) {
-            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
-        }
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;
+        }
+        if (!nodeElement.contains(item)) {
+            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
         }
         const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template"].includes(type)) {
             return;
         }
+
         const rowID = rowElement.getAttribute("data-id");
         const cellId = item.getAttribute("data-id");
         const colId = item.getAttribute("data-col-id");
@@ -554,6 +451,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             }
         }
         const cellValue = genCellValue(type, value);
+        cellValue.id = cellId;
+        if (objEquals(cellValue, oldValue)) {
+            return;
+        }
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellId,

@@ -237,7 +237,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
                     }
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
-                        (avMaskElement.querySelector(" textarea") as HTMLTextAreaElement).focus();
+                        (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
                     } else if (!document.querySelector(".av__panel")) {
                         focusBlock(e);
                     }

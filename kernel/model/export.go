@@ -56,8 +56,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ExportAv2CSV(avID string) (csvPath string, err error) {
-	// TODO: Database table view supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
+func ExportAv2CSV(avID string) (zipPath string, err error) {
+	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
@@ -69,25 +69,26 @@ func ExportAv2CSV(avID string) (csvPath string, err error) {
 		return
 	}
 
+	name := util.FilterFileName(attrView.Name)
+
 	table, err := renderAttributeViewTable(attrView, view)
 	if nil != err {
 		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
 		return
 	}
 
-	tmpExport := filepath.Join(util.TempDir, "export", "csv")
-	if err = os.MkdirAll(tmpExport, 0755); nil != err {
-		logging.LogErrorf("mkdir [%s] failed: %s", tmpExport, err)
+	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
+	if err = os.MkdirAll(exportFolder, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: %s", exportFolder, err)
 		return
 	}
-	csvPath = filepath.Join(tmpExport, avID+".csv")
+	csvPath := filepath.Join(exportFolder, name+".csv")
 
 	f, err := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if nil != err {
 		logging.LogErrorf("open [%s] failed: %s", csvPath, err)
 		return
 	}
-	defer f.Close()
 
 	writer := csv.NewWriter(f)
 
@@ -97,6 +98,7 @@ func ExportAv2CSV(avID string) (csvPath string, err error) {
 	}
 	if err = writer.Write(header); nil != err {
 		logging.LogErrorf("write csv header [%s] failed: %s", header, err)
+		f.Close()
 		return
 	}
 
@@ -136,10 +138,38 @@ func ExportAv2CSV(avID string) (csvPath string, err error) {
 		}
 		if err = writer.Write(rowVal); nil != err {
 			logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
+			f.Close()
 			return
 		}
 	}
 	writer.Flush()
+
+	zipPath = exportFolder + ".db.zip"
+	zip, err := gulu.Zip.Create(zipPath)
+	if nil != err {
+		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
+		f.Close()
+		return
+	}
+
+	if err = zip.AddDirectory("", exportFolder); nil != err {
+		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
+		f.Close()
+		return
+	}
+
+	if err = zip.Close(); nil != err {
+		logging.LogErrorf("close export .db.zip failed: %s", err)
+		f.Close()
+		return
+	}
+
+	f.Close()
+	removeErr := os.RemoveAll(exportFolder)
+	if nil != removeErr {
+		logging.LogErrorf("remove export folder [%s] failed: %s", exportFolder, removeErr)
+	}
+	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
 }
 

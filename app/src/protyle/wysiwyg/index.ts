@@ -1882,7 +1882,8 @@ export class WYSIWYG {
                     }
                 } else if (linkAddress) {
                     /// #if !BROWSER
-                    if (0 > linkAddress.indexOf("://")) {
+                    if (0 > linkAddress.indexOf(":")) {
+                        // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
                         // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
                         linkAddress = `https://${linkAddress}`;
                     }

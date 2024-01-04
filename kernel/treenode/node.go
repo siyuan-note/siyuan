@@ -962,8 +962,8 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 		ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
 	}
 
-	funcMap := util.BuiltInTemplateFuncs()
 	goTpl := template.New("").Delims(".action{", "}")
+	funcMap := util.BuiltInTemplateFuncs()
 	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)

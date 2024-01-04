@@ -18,9 +18,14 @@ package util
 
 import (
 	"math"
+	"strings"
 	"text/template"
+	"time"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/spf13/cast"
 )
 
@@ -34,6 +39,30 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["powf"] = powf
 	ret["log"] = log
 	ret["logf"] = logf
+
+	ret["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*sql.Block) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retBlocks = sql.SelectBlocksRawStmt(stmt, 1, 512)
+		return
+	}
+	ret["querySpans"] = func(stmt string, args ...string) (retSpans []*sql.Span) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retSpans = sql.SelectSpansRawStmt(stmt, 512)
+		return
+	}
+	ret["parseTime"] = func(dateStr string) time.Time {
+		now := time.Now()
+		retTime, err := dateparse.ParseIn(dateStr, now.Location())
+		if nil != err {
+			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
+			return now
+		}
+		return retTime
+	}
 	return
 }
 

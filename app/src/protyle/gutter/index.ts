@@ -2038,8 +2038,9 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
         let left = rect.left - this.element.clientWidth - space;
-        if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
-            // 嵌入块为列表时
+        if ((nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) ||    // 嵌入块为列表时
+            // 为数据库行
+            element.classList.contains("av__row")) {
             left = nodeElement.getBoundingClientRect().left - this.element.clientWidth - space;
         }
         this.element.style.left = `${left}px`;

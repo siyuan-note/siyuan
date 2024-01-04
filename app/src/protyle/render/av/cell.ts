@@ -44,7 +44,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         };
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
         cellValue[colType as "text"] = {
-            content: cellElement.querySelector(".av__celltext").textContent.trim()
+            content: cellElement.querySelector(".av__celltext").textContent
         };
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
@@ -119,11 +119,6 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 checkbox: {
                     checked: true
                 }
-            };
-        } else if (colType === "relation") {
-            cellValue = {
-                type: colType,
-                relation: {blockIDs: [], contents: [value]}
             };
         }
     } else if (typeof value === "undefined" || !value) {
@@ -434,7 +429,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
         }
         const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
-        if (["created", "updated", "template"].includes(type)) {
+        if (["created", "updated", "template", "rollup"].includes(type)) {
             return;
         }
 
@@ -463,6 +458,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
         const cellValue = genCellValue(type, value);
         cellValue.id = cellId;
+        if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
+            (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
+            return;
+        }
         if (objEquals(cellValue, oldValue)) {
             return;
         }

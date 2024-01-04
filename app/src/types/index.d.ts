@@ -1158,6 +1158,7 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+    formattedContent?: string,
     isNotTime?: boolean // 默认 true
 }
 

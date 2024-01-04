@@ -33,6 +33,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func exportAttributeView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["id"].(string)
+	zipPath, err := model.ExportAv2CSV(avID)
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
 func exportEPUB(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

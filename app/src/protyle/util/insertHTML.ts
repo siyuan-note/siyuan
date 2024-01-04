@@ -11,7 +11,7 @@ import {updateAVName} from "../render/av/action";
 import {updateCellsValue} from "../render/av/cell";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: Element) => {
-    const text = protyle.lute.BlockDOM2StdMd(html);
+    const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);
     const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));
     const rowsElement = blockElement.querySelector(".av__row--select");
     if (rowsElement) {

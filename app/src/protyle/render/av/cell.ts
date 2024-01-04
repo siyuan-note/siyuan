@@ -568,7 +568,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         }
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
-            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item}</span>`;
+            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item || "Untitled"}</span>`;
         });
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&

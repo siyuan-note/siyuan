@@ -237,7 +237,7 @@ export const bindRelationEvent = (options: {
             if (hasId) {
                 avData.view.rows.find((item) => {
                     if (item.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id);
+                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || "Untitled");
                         return true;
                     }
                 });
@@ -245,7 +245,7 @@ export const bindRelationEvent = (options: {
         });
         avData.view.rows.forEach((item) => {
             if (!hasIds.includes(item.id)) {
-                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || item.cells[cellIndex].value.block.id);
+                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || "Untitled");
             }
         });
         options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}

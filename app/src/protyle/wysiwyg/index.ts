@@ -1390,7 +1390,7 @@ export class WYSIWYG {
             }
             const avCellHeaderElement = hasClosestByClassName(target, "av__cellheader");
             if (avCellHeaderElement) {
-                showColMenu(protyle, nodeElement, target.parentElement);
+                showColMenu(protyle, nodeElement, avCellHeaderElement.parentElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

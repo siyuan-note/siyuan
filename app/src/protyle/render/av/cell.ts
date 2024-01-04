@@ -214,11 +214,22 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             contentElement.scrollTop = contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
         }
     } else {
-        const avFooterRect = blockElement.querySelector(".av__row--footer").getBoundingClientRect();
-        if (avFooterRect.top < cellRect.bottom) {
+        const footerElement = blockElement.querySelector(".av__row--footer")
+        if (footerElement.querySelector(".av__calc--ashow")) {
+            const avFooterRect = footerElement.getBoundingClientRect();
+            if (avFooterRect.top < cellRect.bottom) {
+                const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+                if (contentElement) {
+                    contentElement.scrollTop = contentElement.scrollTop + cellRect.bottom - avFooterRect.top;
+                }
+            }
+        } else {
             const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
             if (contentElement) {
-                contentElement.scrollTop = contentElement.scrollTop + cellRect.bottom - avFooterRect.top;
+                const contentBottom = contentElement.getBoundingClientRect().bottom;
+                if (cellRect.bottom > contentBottom) {
+                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - contentBottom);
+                }
             }
         }
     }

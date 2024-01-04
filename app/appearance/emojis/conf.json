@@ -8027,13 +8027,13 @@
         "keywords": "squared prohibit ideograph,japanese,平方禁止表意文字,日语"
       },
       {
-        "unicode": "1f170",
+        "unicode": "1f170-fe0f",
         "description": "Negative squared latin capital letter a",
         "description_zh_cn": "负平方拉丁大写字母 a",
         "keywords": "a,blood,一,血液"
       },
       {
-        "unicode": "1f171",
+        "unicode": "1f171-fe0f",
         "description": "Negative squared latin capital letter b",
         "description_zh_cn": "负平方拉丁大写字母 b",
         "keywords": "b,blood,b,血液"
@@ -8051,7 +8051,7 @@
         "keywords": "cl,CL"
       },
       {
-        "unicode": "1f17e",
+        "unicode": "1f17e-fe0f",
         "description": "Negative squared latin capital letter o",
         "description_zh_cn": "负平方拉丁大写字母 o",
         "keywords": "blood,o,血,o"
@@ -8333,7 +8333,7 @@
         "keywords": "access,wheelchair,访问,轮椅"
       },
       {
-        "unicode": "1f17f",
+        "unicode": "1f17f-fe0f",
         "description": "Negative squared latin capital letter p",
         "description_zh_cn": "负平方拉丁文大写字母 p",
         "keywords": "parking,停车处"

@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"github.com/88250/pdfcpu/pkg/font"
@@ -54,6 +55,93 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func ExportAv2CSV(avID string) (csvPath string, err error) {
+	// TODO: Database table view supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	view, err := attrView.GetCurrentView()
+	if nil != err {
+		return
+	}
+
+	table, err := renderAttributeViewTable(attrView, view)
+	if nil != err {
+		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
+		return
+	}
+
+	tmpExport := filepath.Join(util.TempDir, "export", "csv")
+	if err = os.MkdirAll(tmpExport, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: %s", tmpExport, err)
+		return
+	}
+	csvPath = filepath.Join(tmpExport, avID+".csv")
+
+	f, err := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: %s", csvPath, err)
+		return
+	}
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+
+	var header []string
+	for _, col := range table.Columns {
+		header = append(header, col.Name)
+	}
+	if err = writer.Write(header); nil != err {
+		logging.LogErrorf("write csv header [%s] failed: %s", header, err)
+		return
+	}
+
+	for _, row := range table.Rows {
+		var rowVal []string
+		for _, cell := range row.Cells {
+			var val string
+			if nil != cell.Value {
+				if av.KeyTypeDate == cell.Value.Type {
+					if nil != cell.Value.Date {
+						cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime)
+					}
+				} else if av.KeyTypeCreated == cell.Value.Type {
+					if nil != cell.Value.Created {
+						cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone)
+					}
+				} else if av.KeyTypeUpdated == cell.Value.Type {
+					if nil != cell.Value.Updated {
+						cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
+					}
+				} else if av.KeyTypeMAsset == cell.Value.Type {
+					if nil != cell.Value.MAsset {
+						buf := &bytes.Buffer{}
+						for _, a := range cell.Value.MAsset {
+							buf.WriteString("![](")
+							buf.WriteString(a.Content)
+							buf.WriteString(") ")
+						}
+						val = strings.TrimSpace(buf.String())
+					}
+				}
+
+				val = cell.Value.String()
+			}
+
+			rowVal = append(rowVal, val)
+		}
+		if err = writer.Write(rowVal); nil != err {
+			logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
+			return
+		}
+	}
+	writer.Flush()
+	return
+}
 
 func Export2Liandi(id string) (err error) {
 	tree, err := loadTreeByBlockID(id)

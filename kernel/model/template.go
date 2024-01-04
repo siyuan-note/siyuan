@@ -20,12 +20,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/araddon/dateparse"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -42,7 +44,9 @@ import (
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
-	tmpl = tmpl.Funcs(util.BuiltInTemplateFuncs())
+	tplFuncMap := util.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
@@ -216,8 +220,10 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	funcMap := util.BuiltInTemplateFuncs()
-	tpl, err := goTpl.Funcs(funcMap).Parse(gulu.Str.FromBytes(md))
+	tplFuncMap := util.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
+	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if nil != err {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 	}
@@ -386,5 +392,31 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 	})
 	for _, block := range blocks {
 		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
+	}
+}
+
+func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
+	(*templateFuncMap)["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*sql.Block) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retBlocks = sql.SelectBlocksRawStmt(stmt, 1, 512)
+		return
+	}
+	(*templateFuncMap)["querySpans"] = func(stmt string, args ...string) (retSpans []*sql.Span) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retSpans = sql.SelectSpansRawStmt(stmt, 512)
+		return
+	}
+	(*templateFuncMap)["parseTime"] = func(dateStr string) time.Time {
+		now := time.Now()
+		retTime, err := dateparse.ParseIn(dateStr, now.Location())
+		if nil != err {
+			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
+			return now
+		}
+		return retTime
 	}
 }

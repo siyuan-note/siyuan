@@ -963,8 +963,10 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	funcMap := util.BuiltInTemplateFuncs()
-	tpl, tplErr := goTpl.Funcs(funcMap).Parse(tplContent)
+	tplFuncMap := util.BuiltInTemplateFuncs()
+	// 这里存在依赖问题所以不支持 SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
+	tpl, tplErr := goTpl.Funcs(tplFuncMap).Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
 		return ""

@@ -432,15 +432,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         cellElements.forEach((item, index) => {
             const rowElement = hasClosestByClassName(item, "av__row");
             if (rowElement) {
-                let cellIndex: number;
-                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, ghostIndex) => {
-                    if (cellElement.dataset.id === item.dataset.id) {
-                        cellIndex = ghostIndex
-                    }
-                });
-                if (typeof cellIndex === "number") {
-                    cellElements[index] = blockElement.querySelectorAll(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell`)[cellIndex] as HTMLElement;
-                }
+                cellElements[index] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
             }
         });
     }

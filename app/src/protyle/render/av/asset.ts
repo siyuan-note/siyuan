@@ -108,15 +108,7 @@ export const updateAssetCell = (options: {
         if (!options.blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");
             if (rowElement) {
-                let cellIndex: number;
-                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, ghostIndex) => {
-                    if (cellElement.dataset.id === item.dataset.id) {
-                        cellIndex = ghostIndex
-                    }
-                });
-                if (typeof cellIndex === "number") {
-                    item = options.cellElements[elementIndex] = options.blockElement.querySelectorAll(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell`)[cellIndex] as HTMLElement;
-                }
+                item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement
             }
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);

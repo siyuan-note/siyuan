@@ -48,7 +48,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20240102050638-e741e9f54197
-	github.com/sashabaranov/go-openai v1.17.9
+	github.com/sashabaranov/go-openai v1.17.10
 	github.com/shirou/gopsutil/v3 v3.23.12
 	github.com/siyuan-note/dejavu v0.0.0-20240105084039-9867350d60a1
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
@@ -63,7 +63,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e
 	github.com/xuri/excelize/v2 v2.8.0
-	golang.org/x/image v0.14.0
+	golang.org/x/image v0.15.0
 	golang.org/x/mobile v0.0.0-20230901161150-52620a4a7557
 	golang.org/x/mod v0.14.0
 	golang.org/x/text v0.14.0
@@ -155,7 +155,7 @@ require (
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.uber.org/mock v0.4.0 // indirect
-	golang.org/x/arch v0.6.0 // indirect
+	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
 	golang.org/x/net v0.19.0 // indirect

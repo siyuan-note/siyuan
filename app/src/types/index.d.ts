@@ -64,6 +64,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
+    "update-cards"|
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =

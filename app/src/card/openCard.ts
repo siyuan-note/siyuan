@@ -143,6 +143,9 @@ export const bindCardEvent = (options: {
     dialog?: Dialog,
     index?: number
 }) => {
+    options.app.plugins.forEach(item => {
+        item.eventBus.emit("update-cards", options);
+    });
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
             options.element.querySelector('[data-type="fullscreen"]'));

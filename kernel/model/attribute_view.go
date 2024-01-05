@@ -604,7 +604,9 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	goTpl = goTpl.Funcs(util.BuiltInTemplateFuncs())
+	tplFuncMap := util.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, tplErr := goTpl.Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)

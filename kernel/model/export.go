@@ -169,7 +169,7 @@ func ExportAv2CSV(avID string) (zipPath string, err error) {
 	if nil != removeErr {
 		logging.LogErrorf("remove export folder [%s] failed: %s", exportFolder, removeErr)
 	}
-	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
 	return
 }
 

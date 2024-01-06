@@ -229,6 +229,9 @@ export class Toolbar {
             case "a":
                 menuItemObj = new Link(protyle, menuItem);
                 break;
+            default:
+                menuItemObj = new ToolbarItem(protyle, menuItem);
+                break;
         }
         if (!menuItemObj) {
             return;

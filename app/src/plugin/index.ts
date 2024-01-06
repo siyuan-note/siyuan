@@ -56,6 +56,7 @@ export class Plugin {
             /// #endif
         }
     } = {};
+    private protyleOptionsValue: IOptions;
 
     constructor(options: {
         app: App,
@@ -307,4 +308,12 @@ export class Plugin {
             defIds: options.defIds,
         }));
     };
+
+    set protyleOptions(options: IOptions) {
+        this.protyleOptionsValue = options;
+    }
+
+    get protyleOptions() {
+        return this.protyleOptionsValue;
+    }
 }

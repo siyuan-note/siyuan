@@ -577,7 +577,7 @@ func formatRepoErrorMsg(err error) string {
 	return msg
 }
 
-func getIgnoreLines() (ret []string) {
+func getSyncIgnoreLines() (ret []string) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err := os.MkdirAll(filepath.Dir(ignore), 0755)
 	if nil != err {

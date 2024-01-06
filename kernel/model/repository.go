@@ -1560,7 +1560,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		return
 	}
 
-	ignoreLines := getIgnoreLines()
+	ignoreLines := getSyncIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
 	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.System.ID, Conf.System.Name, Conf.System.OS, Conf.Repo.Key, ignoreLines, cloudRepo)
 	if nil != err {

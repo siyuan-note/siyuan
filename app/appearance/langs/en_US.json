@@ -482,6 +482,7 @@
   "useDefaultWidth": "Use Default Column Width",
   "type": "Type",
   "replaceType": "Replace type",
+  "searchType": "Search type",
   "searchBlockType": "Block types (searches in the enabled types below, the filter option in the global search overrides this setting)",
   "searchBlockAttr": "Block attributes (search not only in the content, but also in the following enabled attributes)",
   "searchIndex": "Index",

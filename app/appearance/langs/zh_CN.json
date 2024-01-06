@@ -482,6 +482,7 @@
   "useDefaultWidth": "使用默认列宽",
   "type": "类型",
   "replaceType": "替换类型",
+  "searchType": "搜索类型",
   "searchBlockType": "块级类型（在以下启用的类型中进行搜索，全局搜索中的过滤选项会覆盖该设置）",
   "searchBlockAttr": "块级属性（不仅在内容中进行搜索，同时也会在以下启用的属性中搜索）",
   "searchIndex": "索引",

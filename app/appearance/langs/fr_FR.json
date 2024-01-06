@@ -482,6 +482,7 @@
   "useDefaultWidth": "Utiliser la largeur de colonne par défaut",
   "type": "Type",
   "replaceType": "Remplacer le type",
+  "searchType": "Type de recherche",
   "searchBlockType": "Types de bloc (recherche dans les types activés ci-dessous, l'option de filtre dans la recherche globale remplace ce paramètre)",
   "searchBlockAttr": "Attributs de bloc (recherche non seulement dans le contenu, mais aussi dans les attributs activés suivants)",
   "searchIndex": "Index",

@@ -11,7 +11,7 @@ import {updateSearchResult} from "../mobile/menu/search";
 
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
-        title: window.siyuan.languages.type,
+        title: window.siyuan.languages.replaceType,
         content: `<div class="b3-dialog__content">
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconMath"></use></svg>
@@ -370,7 +370,7 @@ export const moreMenu = async (config: ISearchOption,
     /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
-        label: window.siyuan.languages.type,
+        label: window.siyuan.languages.searchType,
         click() {
             filterMenu(config, () => {
                 updateSearchResult(config, element, true);

@@ -482,6 +482,7 @@
   "useDefaultWidth": "Usar el ancho de columna por defecto",
   "type": "Tipo",
   "replaceType": "Reemplazar tipo",
+  "searchType": "Tipo de búsqueda",
   "searchBlockType": "Tipos de bloque (busque en los tipos habilitados a continuación, la opción de filtro en la búsqueda global anula esta configuración)",
   "searchBlockAttr": "Atributos de bloque (busca no sólo en el contenido, sino también en los siguientes atributos habilitados)",
   "searchIndex": "Índice",

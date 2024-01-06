@@ -295,7 +295,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         </div>
         <div class="block__icons">
-            <span id="searchFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel" data-position="9bottom">
+            <span id="searchFilter" aria-label="${window.siyuan.languages.replaceType}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span> 
             <span class="fn__space"></span>

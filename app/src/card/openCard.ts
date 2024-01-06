@@ -202,6 +202,9 @@ export const bindCardEvent = (options: {
         }, (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
+            options.app.plugins.forEach(item => {
+                item.eventBus.emit("update-cards", options);
+            });
             if (options.cardsData.cards.length > 0) {
                 nextCard({
                     countElement,
@@ -416,6 +419,9 @@ export const bindCardEvent = (options: {
                     }, (result) => {
                         index = 0;
                         options.cardsData = result.data;
+                        options.app.plugins.forEach(item => {
+                            item.eventBus.emit("update-cards", options);
+                        });
                         if (options.cardsData.cards.length === 0) {
                             if (options.cardsData.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);

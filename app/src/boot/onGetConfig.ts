@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
+import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
@@ -126,6 +126,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(app, isStart);
+            adjustLayout();
             /// #if !BROWSER
             sendGlobalShortcut(app);
             /// #endif
@@ -145,6 +146,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
+            adjustLayout();
             resizeTabs();
             resizeTopBar();
         }, 200);

@@ -82,11 +82,14 @@ func performTransactions(c *gin.Context) {
 func pushTransactions(app, session string, transactions []*model.Transaction) {
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		model.WaitForWritingFiles()
-		if action := transactions[0].DoOperations[0].Action; strings.Contains(strings.ToLower(action), "attrview") {
-			if "setAttrViewName" != action {
-				pushMode = util.PushModeBroadcast
-			}
+		action := transactions[0].DoOperations[0].Action
+		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")
+		if "insertAttrViewBlock" != action {
+			// 插入行时不等待 Reduce the delay in adding rows in database table view https://github.com/siyuan-note/siyuan/issues/10082
+			model.WaitForWritingFiles()
+		}
+		if isAttrViewTx && "setAttrViewName" != action {
+			pushMode = util.PushModeBroadcast
 		}
 	}
 

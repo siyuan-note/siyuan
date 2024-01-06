@@ -17,6 +17,7 @@ import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {focusByRange} from "../protyle/util/selection";
 
 const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: number,) => {
     return `<span class="ft__error">1</span>
@@ -493,7 +494,11 @@ export const openCardByData = (app: App, cardsData: {
         dialog
     });
     dialog.editor = editor;
-    (dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement).focus();
+    const focusElement = dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement
+    focusElement.focus();
+    const range = document.createRange()
+    range.selectNodeContents(focusElement)
+    focusByRange(range);
 };
 
 const nextCard = (options: {

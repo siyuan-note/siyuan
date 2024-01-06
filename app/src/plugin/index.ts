@@ -74,7 +74,11 @@ export class Plugin {
     }
 
     public onunload() {
-        // 禁用/卸载
+        // 禁用/关闭
+    }
+
+    public uninstall() {
+        // 卸载
     }
 
     public onLayoutReady() {

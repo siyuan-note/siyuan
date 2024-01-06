@@ -730,7 +730,7 @@ export const bazaar = {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                                 if (bazaarType === "plugins") {
-                                    uninstall(app, packageName);
+                                    uninstall(app, packageName, true);
                                 }
                             });
                         });

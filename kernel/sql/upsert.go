@@ -21,12 +21,20 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/eventbus"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -400,11 +408,6 @@ func indexTree(tx *sql.Tx, box, p string, context map[string]interface{}) (err e
 		return
 	}
 
-	err = insertTree(tx, tree, context)
-	return
-}
-
-func insertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	refs, fileAnnotationRefs := refsFromTree(tree)
 	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
@@ -470,6 +473,14 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
 	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
 	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
+	if ignoreLines := getIndexIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore index https://github.com/siyuan-note/siyuan/issues/9198
+		matcher := ignore.CompileIgnoreLines(ignoreLines...)
+		if matcher.MatchesPath("/" + path.Join(tree.Box, tree.Path)) {
+			return
+		}
+	}
+
 	if err = insertBlocks(tx, blocks, context); nil != err {
 		return
 	}
@@ -495,6 +506,54 @@ func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
 	}
 	if err = insertAttributes(tx, attributes); nil != err {
 		return
+	}
+	return
+}
+
+var (
+	indexIgnoreLastModified int64
+	indexIgnore             []string
+	indexIgnoreLock         = sync.Mutex{}
+)
+
+func getIndexIgnoreLines() (ret []string) {
+	now := time.Now().UnixMilli()
+	if now-indexIgnoreLastModified < 30*1000 {
+		return indexIgnore
+	}
+
+	indexIgnoreLock.Lock()
+	defer indexIgnoreLock.Unlock()
+
+	indexIgnoreLastModified = now
+
+	indexIgnorePath := filepath.Join(util.DataDir, ".siyuan", "indexignore")
+	err := os.MkdirAll(filepath.Dir(indexIgnorePath), 0755)
+	if nil != err {
+		return
+	}
+	if !gulu.File.IsExist(indexIgnorePath) {
+		if err = gulu.File.WriteFileSafer(indexIgnorePath, nil, 0644); nil != err {
+			logging.LogErrorf("create indexignore [%s] failed: %s", indexIgnorePath, err)
+			return
+		}
+	}
+	data, err := os.ReadFile(indexIgnorePath)
+	if nil != err {
+		logging.LogErrorf("read indexignore [%s] failed: %s", indexIgnorePath, err)
+		return
+	}
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	ret = strings.Split(dataStr, "\n")
+
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	if 0 < len(ret) && "" == ret[0] {
+		ret = ret[1:]
+	}
+	indexIgnore = nil
+	for _, line := range ret {
+		indexIgnore = append(indexIgnore, line)
 	}
 	return
 }

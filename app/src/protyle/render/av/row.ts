@@ -2,6 +2,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {popTextCell} from "./cell";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -69,15 +70,15 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-export const insertAttrViewBlockAnimation = (blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
+export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
-    let colHTML = '<div style="width: 24px"></div>';
+    let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {
-        colHTML = '<div class="av__colsticky"><div style="width: 24px"></div>';
+        colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
+        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
         if (pinIndex === index) {
             colHTML += "</div>";
         }
@@ -90,6 +91,9 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, srcIDs: stri
 </div>`;
     });
     previousElement.insertAdjacentHTML("afterend", html);
+    if (avId) {
+        popTextCell(protyle, [previousElement.nextElementSibling.querySelector('.av__cell[data-detached="true"]')], "block");
+    }
     const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {
         const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
@@ -230,7 +234,7 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
-    const blockIds:string[] = [];
+    const blockIds: string[] = [];
     rowElements.forEach(item => {
         blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));
     });

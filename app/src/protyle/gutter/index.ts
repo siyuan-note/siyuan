@@ -231,7 +231,7 @@ export class Gutter {
                         srcIDs,
                         avID,
                     }]);
-                    insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
+                    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,

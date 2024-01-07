@@ -85,7 +85,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 srcIDs,
                 avID,
             }]);
-            insertAttrViewBlockAnimation(blockElement, srcIDs, undefined, avID);
+            insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, undefined, avID);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -155,7 +155,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 srcIDs,
                 avID,
             }]);
-            insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
+            insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
             event.preventDefault();
             event.stopPropagation();
             return true;

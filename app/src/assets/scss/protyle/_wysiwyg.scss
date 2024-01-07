@@ -621,4 +621,9 @@
   .protyle-icons--show {
     opacity: .86;
   }
+
+  .render-node .img:hover .protyle-icons,
+  .render-node .render-node:hover > .protyle-icons {
+    opacity: 0;
+  }
 }

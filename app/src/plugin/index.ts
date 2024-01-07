@@ -68,6 +68,12 @@ export class Plugin {
         this.i18n = options.i18n;
         this.displayName = options.displayName;
         this.eventBus = new EventBus(options.name);
+
+        // https://github.com/siyuan-note/siyuan/issues/9943
+        Object.defineProperty(this, "name", {
+            value: options.name,
+            writable: false,
+        });
     }
 
     public onload() {

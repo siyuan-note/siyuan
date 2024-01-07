@@ -26,6 +26,24 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getAttributeViewFilterSort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["id"].(string)
+
+	filters, sorts := model.GetAttributeViewFilterSort(avID)
+	ret.Data = map[string]interface{}{
+		"filters": filters,
+		"sorts":   sorts,
+	}
+}
+
 func searchAttributeViewNonRelationKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -72,9 +90,8 @@ func getAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	av := model.GetAttributeView(id)
 	ret.Data = map[string]interface{}{
-		"av": av,
+		"av": model.GetAttributeView(id),
 	}
 }
 

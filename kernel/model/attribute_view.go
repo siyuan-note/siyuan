@@ -38,6 +38,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeViewFilterSort(id string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(id)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", id, err)
+		return
+	}
+
+	filters = []*av.ViewFilter{}
+	sorts = []*av.ViewSort{}
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			filters = view.Table.Filters
+			sorts = view.Table.Sorts
+		}
+	}
+	return
+}
+
 func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
 	waitForSyncingStorages()
 

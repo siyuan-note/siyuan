@@ -36,7 +36,7 @@ export const exportConfig = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="markdownYFM" type="checkbox"${window.siyuan.config.export.markdownYFM ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label config__item">
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.ref}
         <div class="b3-label__text">${window.siyuan.languages.export11}</div>
@@ -47,8 +47,8 @@ export const exportConfig = {
         <option value="3" ${window.siyuan.config.export.blockRefMode === 3 ? "selected" : ""}>${window.siyuan.languages.export3}</option>
         <option value="4" ${window.siyuan.config.export.blockRefMode === 4 ? "selected" : ""}>${window.siyuan.languages.export4}</option>
     </select>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.blockEmbed}
         <div class="b3-label__text">${window.siyuan.languages.export12}</div>
@@ -58,8 +58,8 @@ export const exportConfig = {
         <option value="0" ${window.siyuan.config.export.blockEmbedMode === 0 ? "selected" : ""}>${window.siyuan.languages.export0}</option>
         <option value="1" ${window.siyuan.config.export.blockEmbedMode === 1 ? "selected" : ""}>${window.siyuan.languages.export1}</option>
     </select>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export5}
         <div class="b3-label__text">${window.siyuan.languages.export6}</div>
@@ -69,22 +69,42 @@ export const exportConfig = {
         <option value="0" ${window.siyuan.config.export.fileAnnotationRefMode === 0 ? "selected" : ""}>${window.siyuan.languages.export7}</option>
         <option value="1" ${window.siyuan.config.export.fileAnnotationRefMode === 1 ? "selected" : ""}>${window.siyuan.languages.export8}</option>
     </select>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export21}
         <div class="b3-label__text">${window.siyuan.languages.export22}</div>
     </div>
     <input class="b3-text-field fn__flex-center fn__size200" id="pdfFooter">
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="b3-label config__item">
+    ${window.siyuan.languages.export27}
+    <div class="b3-label__text">${window.siyuan.languages.export28}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="pdfWatermarkStr">
+    <div class="fn__hr"></div>
+    <div class="b3-label__text"><a href="https://pdfcpu.io/core/watermark#description" target="_blank">${window.siyuan.languages.export29}</a></div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="pdfWatermarkDesc"></textarea>
+</div>
+<div class="b3-label config__item">
+    ${window.siyuan.languages.export9}
+    <div class="b3-label__text">${window.siyuan.languages.export28}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="imageWatermarkStr">
+    <div class="fn__hr"></div>
+    <div class="b3-label__text">${window.siyuan.languages.export29}</div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="imageWatermarkDesc"></textarea>
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export25}
         <div class="b3-label__text">${window.siyuan.languages.export26}</div>
     </div>
     <input class="b3-text-field fn__flex-center fn__size200" id="docxTemplate" placeholder="F:\\template.docx">
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export13}
         <div class="b3-label__text">${window.siyuan.languages.export14}</div>
@@ -93,8 +113,8 @@ export const exportConfig = {
     <input class="b3-text-field fn__flex-center fn__size96" id="blockRefTextLeft">
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size96" id="blockRefTextRight">
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export15}
         <div class="b3-label__text">${window.siyuan.languages.export16}</div>
@@ -103,8 +123,8 @@ export const exportConfig = {
     <input class="b3-text-field fn__flex-center fn__size96" id="tagOpenMarker">
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size96" id="tagCloseMarker">
-</label>
-<label class="fn__flex b3-label config__item${isBrowser() ? " fn__none" : ""}">
+</div>
+<div class="fn__flex b3-label config__item${isBrowser() ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.export19}
         <span class="fn__space"></span>
@@ -113,8 +133,8 @@ export const exportConfig = {
     </div>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="pandocBin"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}</button>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.export} Data
         <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
@@ -123,8 +143,8 @@ export const exportConfig = {
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportData">
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.import} Data
         <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
@@ -134,11 +154,15 @@ export const exportConfig = {
         <input id="importData" class="b3-form__upload" type="file">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
     </button>
-</label>`;
+</div>`;
     },
     bindEvent: () => {
         (exportConfig.element.querySelector("#docxTemplate") as HTMLInputElement).value = window.siyuan.config.export.docxTemplate;
         (exportConfig.element.querySelector("#pdfFooter") as HTMLInputElement).value = window.siyuan.config.export.pdfFooter;
+        (exportConfig.element.querySelector("#pdfWatermarkStr") as HTMLInputElement).value = window.siyuan.config.export.pdfWatermarkStr;
+        (exportConfig.element.querySelector("#pdfWatermarkDesc") as HTMLInputElement).value = window.siyuan.config.export.pdfWatermarkDesc;
+        (exportConfig.element.querySelector("#imageWatermarkStr") as HTMLInputElement).value = window.siyuan.config.export.imageWatermarkStr;
+        (exportConfig.element.querySelector("#imageWatermarkDesc") as HTMLInputElement).value = window.siyuan.config.export.imageWatermarkDesc;
         (exportConfig.element.querySelector("#blockRefTextLeft") as HTMLInputElement).value = window.siyuan.config.export.blockRefTextLeft;
         (exportConfig.element.querySelector("#blockRefTextRight") as HTMLInputElement).value = window.siyuan.config.export.blockRefTextRight;
         (exportConfig.element.querySelector("#tagOpenMarker") as HTMLInputElement).value = window.siyuan.config.export.tagOpenMarker;
@@ -153,6 +177,10 @@ export const exportConfig = {
                 blockEmbedMode: parseInt((exportConfig.element.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),
                 fileAnnotationRefMode: parseInt((exportConfig.element.querySelector("#fileAnnotationRefMode") as HTMLSelectElement).value, 10),
                 pdfFooter: (exportConfig.element.querySelector("#pdfFooter") as HTMLInputElement).value,
+                pdfWatermarkStr: (exportConfig.element.querySelector("#pdfWatermarkStr") as HTMLInputElement).value,
+                pdfWatermarkDesc: (exportConfig.element.querySelector("#pdfWatermarkDesc") as HTMLInputElement).value,
+                imageWatermarkStr: (exportConfig.element.querySelector("#imageWatermarkStr") as HTMLInputElement).value,
+                imageWatermarkDesc: (exportConfig.element.querySelector("#imageWatermarkDesc") as HTMLInputElement).value,
                 docxTemplate: (exportConfig.element.querySelector("#docxTemplate") as HTMLInputElement).value,
                 blockRefTextLeft: (exportConfig.element.querySelector("#blockRefTextLeft") as HTMLInputElement).value,
                 blockRefTextRight: (exportConfig.element.querySelector("#blockRefTextRight") as HTMLInputElement).value,
@@ -169,7 +197,7 @@ export const exportConfig = {
                 setexprt();
             });
         });
-        exportConfig.element.querySelectorAll("input").forEach((item) => {
+        exportConfig.element.querySelectorAll("input, textarea").forEach((item) => {
             if (item.id == "importData") {
                 item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                     const formData = new FormData();

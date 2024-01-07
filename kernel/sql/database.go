@@ -683,7 +683,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeDocument:
-		if asset := docTitleImgAsset(n); nil != asset {
+		if asset := docTitleImgAsset(n, boxLocalPath, docDirLocalPath); nil != asset {
 			assets = append(assets, asset)
 		}
 		if tags := docTagSpans(n); 0 < len(tags) {
@@ -798,35 +798,30 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-
 		if !treenode.IsNodeOCRed(n) {
-			util.PushNodeOCRQueue(n.ID)
+			util.PushNodeOCRQueue(n)
 		}
-		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
-		fc := treenode.FirstLeafBlock(n)
+		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath, true)
 
+		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
-			util.PushNodeOCRQueue(fc.ID)
+			util.PushNodeOCRQueue(fc)
 		}
-		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
+		fcontent = treenode.NodeStaticContent(fc, nil, true, false, true)
 
 		parentID = n.Parent.ID
-		// 将标题块作为父节点
-		if h := heading(n); nil != h {
+		if h := heading(n); nil != h { // 如果在标题块下方，则将标题块作为父节点
 			parentID = h.ID
 		}
 		length = utf8.RuneCountInString(fcontent)
 	} else {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-
 		if !treenode.IsNodeOCRed(n) {
-			util.PushNodeOCRQueue(n.ID)
+			util.PushNodeOCRQueue(n)
 		}
-
-		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
+		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath, true)
 
 		parentID = n.Parent.ID
-		// 将标题块作为父节点
 		if h := heading(n); nil != h {
 			parentID = h.ID
 		}
@@ -912,6 +907,10 @@ func tagFromNode(node *ast.Node) (ret string) {
 }
 
 func heading(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+
 	currentLevel := 16
 	if ast.NodeHeading == node.Type {
 		currentLevel = node.HeadingLevel

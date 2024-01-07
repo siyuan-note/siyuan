@@ -68,22 +68,6 @@
     font-size: 87.5%;
   }
 
-  &__gutters {
-    @extend .protyle-gutters;
-    top: 0;
-    left: -44px;
-    opacity: 0;
-    display: flex;
-
-    &--min .av__gutter {
-      padding: 4px 0;
-    }
-
-    svg {
-      height: 25px;
-    }
-  }
-
   &__mask {
     position: fixed;
     top: 0;
@@ -114,18 +98,12 @@
       box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
     }
 
-    &:hover {
-      [data-type="block-ref"],
-      [data-type="block-more"] {
-        display: block;
-      }
-
-      .av__gutters {
-        opacity: 1;
-      }
+    &:hover [data-type="block-more"] {
+      display: block;
     }
 
-    &--select {
+    &--select,
+    &--hl {
       &:not(.av__row--header) .av__cell,
       &:not(.av__row--header) .av__firstcol {
         background-color: var(--b3-av-background-hl);
@@ -250,13 +228,16 @@
     cursor: pointer;
     //  display: flex; 不需要使用，否则 av__celltext 会占满单元格，导致链接列点击空白无法进行编辑
 
-    [data-type="block-ref"],
     [data-type="block-more"] {
       display: none;
       position: absolute;
       right: 5px;
       font-size: 85%;
       top: 5.5px;
+    }
+
+    .popover__block {
+      color: var(--b3-protyle-inline-blockref-color);
     }
 
     &[data-wrap="true"] {
@@ -331,7 +312,7 @@
     color: var(--b3-theme-on-surface);
     height: 14px;
     width: 14px;
-    float: left;
+    vertical-align: bottom;
     padding: 4.5px 0;
 
     &:hover {
@@ -344,6 +325,7 @@
       @extend .av__checkbox;
       opacity: 0;
       padding: 9.5px 5px;
+      cursor: pointer;
     }
 
     &:hover svg {

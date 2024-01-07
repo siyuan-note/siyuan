@@ -303,15 +303,18 @@ interface IUpload {
 interface IMenuItem {
     /** 唯一标示 */
     name: string;
+    /** 提示 */
+    tip?: string;
+    /** 语言 key */
     lang?: string;
     /** svg 图标 */
     icon?: string;
-    /** 提示 */
-    tip?: string;
     /** 快捷键 */
     hotkey?: string;
-    /** 插入编辑器中的后缀 */
+    /** 提示的位置 */
     tipPosition?: string;
+
+    click?(protyle: import("../protyle").Protyle): void;
 }
 
 /** @link https://ld246.com/article/1549638745630#options-preview-markdown */

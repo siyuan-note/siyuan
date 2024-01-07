@@ -10,6 +10,8 @@ import {Dialog} from "../dialog";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {addClearButton} from "../util/addClearButton";
+import {isPaidUser} from "../util/needSubscribe";
+import {showMessage} from "../dialog/message";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -169,6 +171,15 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 
 let inputTimeout: number;
 export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOption, page = 1) => {
+    if (!isPaidUser()) {
+        element.nextElementSibling.classList.add("fn__none");
+        element.querySelector(".search__drag")?.classList.add("fn__none");
+        element.querySelector("#searchAssetPreview").classList.add("fn__none");
+        element.querySelector("#searchAssetList").innerHTML = `<div class="search__empty">
+    ${window.siyuan.languages["_kernel"][214]}
+</div>`;
+        return;
+    }
     element.nextElementSibling.classList.remove("fn__none");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
@@ -512,6 +523,10 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
         iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.rebuildIndex,
         click() {
+            if (!isPaidUser()) {
+                showMessage(window.siyuan.languages["_kernel"][214]);
+                return;
+            }
             element.nextElementSibling.classList.remove("fn__none");
             fetchPost("/api/asset/fullReindexAssetContent", {}, () => {
                 assetInputEvent(element, localData);

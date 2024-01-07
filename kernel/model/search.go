@@ -83,6 +83,16 @@ func GetEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	stmt := "SELECT * FROM `blocks` WHERE `id` IN ('" + strings.Join(includeIDs, "','") + "')"
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 1024)
+
+	// 根据 includeIDs 的顺序排序 Improve `//!js` query embed block result sorting https://github.com/siyuan-note/siyuan/issues/9977
+	m := map[string]int{}
+	for i, id := range includeIDs {
+		m[id] = i
+	}
+	sort.Slice(sqlBlocks, func(i, j int) bool {
+		return m[sqlBlocks[i].ID] < m[sqlBlocks[j].ID]
+	})
+
 	ret = buildEmbedBlock(embedBlockID, []string{}, headingMode, breadcrumb, sqlBlocks)
 	return
 }
@@ -265,7 +275,7 @@ func prependNotebookNameInHPath(blocks []*Block) {
 	}
 }
 
-func FindReplace(keyword, replacement string, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
+func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 1 == method || 2 == method {
 		err = errors.New(Conf.Language(132))
@@ -353,6 +363,10 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 		}
 
 		if ast.NodeDocument == node.Type {
+			if !replaceTypes["docTitle"] {
+				continue
+			}
+
 			title := node.IALAttr("title")
 			if 0 == method {
 				if strings.Contains(title, keyword) {
@@ -372,18 +386,54 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 				}
 
 				switch n.Type {
-				case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
-					if 0 == method {
-						if bytes.Contains(n.Tokens, []byte(keyword)) {
-							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
-						}
-					} else if 3 == method {
-						if nil != r && r.MatchString(string(n.Tokens)) {
-							n.Tokens = []byte(r.ReplaceAllString(string(n.Tokens), replacement))
-						}
+				case ast.NodeText:
+					if !replaceTypes["text"] {
+						return ast.WalkContinue
 					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeLinkDest:
+					if !replaceTypes["imgSrc"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeLinkText:
+					if !replaceTypes["imgText"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeLinkTitle:
+					if !replaceTypes["imgTitle"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeCodeBlockCode:
+					if !replaceTypes["codeBlock"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeMathBlockContent:
+					if !replaceTypes["mathBlock"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
+				case ast.NodeHTMLBlock:
+					if !replaceTypes["htmlBlock"] {
+						return ast.WalkContinue
+					}
+
+					replaceNodeTokens(n, method, keyword, replacement, r)
 				case ast.NodeTextMark:
 					if n.IsTextMarkType("code") {
+						if !replaceTypes["code"] {
+							return ast.WalkContinue
+						}
+
 						if 0 == method {
 							if strings.Contains(n.TextMarkTextContent, escapedKey) {
 								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
@@ -393,52 +443,132 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, replacement)
 							}
 						}
-					} else {
+					} else if n.IsTextMarkType("a") {
+						if replaceTypes["aText"] {
+							if 0 == method {
+								if bytes.Contains(n.Tokens, []byte(keyword)) {
+									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+								}
+							} else if 3 == method {
+								if nil != r && r.MatchString(n.TextMarkTextContent) {
+									n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+								}
+							}
+						}
+
+						if replaceTypes["aTitle"] {
+							if 0 == method {
+								if strings.Contains(n.TextMarkATitle, keyword) {
+									n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
+								}
+							} else if 3 == method {
+								if nil != r && r.MatchString(n.TextMarkATitle) {
+									n.TextMarkATitle = r.ReplaceAllString(n.TextMarkATitle, replacement)
+								}
+							}
+						}
+
+						if replaceTypes["aHref"] {
+							if 0 == method {
+								if strings.Contains(n.TextMarkAHref, keyword) {
+									n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+								}
+							} else if 3 == method {
+								if nil != r && r.MatchString(n.TextMarkAHref) {
+									n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, replacement)
+								}
+							}
+						}
+
+					} else if n.IsTextMarkType("em") {
+						if !replaceTypes["em"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("strong") {
+						if !replaceTypes["strong"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("kbd") {
+						if !replaceTypes["kbd"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("mark") {
+						if !replaceTypes["mark"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("s") {
+						if !replaceTypes["s"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("sub") {
+						if !replaceTypes["sub"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("sup") {
+						if !replaceTypes["sup"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("tag") {
+						if !replaceTypes["tag"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("u") {
+						if !replaceTypes["u"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+					} else if n.IsTextMarkType("inline-math") {
+						if !replaceTypes["inlineMath"] {
+							return ast.WalkContinue
+						}
+
 						if 0 == method {
-							if bytes.Contains(n.Tokens, []byte(keyword)) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+							if strings.Contains(n.TextMarkInlineMathContent, keyword) {
+								n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
 							}
 						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-							}
-						}
-					}
-
-					if 0 == method {
-						if strings.Contains(n.TextMarkTextContent, keyword) {
-							n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
-						}
-						if strings.Contains(n.TextMarkInlineMathContent, keyword) {
-							n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
-						}
-						if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
-							n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
-						}
-						if strings.Contains(n.TextMarkATitle, keyword) {
-							n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
-						}
-						if strings.Contains(n.TextMarkAHref, keyword) {
-							n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
-						}
-					} else if 3 == method {
-						if nil != r {
-							if r.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
-							}
-							if r.MatchString(n.TextMarkInlineMathContent) {
+							if nil != r && r.MatchString(n.TextMarkInlineMathContent) {
 								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
 							}
-							if r.MatchString(n.TextMarkInlineMemoContent) {
+						}
+					} else if n.IsTextMarkType("inline-memo") {
+						if !replaceTypes["inlineMemo"] {
+							return ast.WalkContinue
+						}
+
+						if 0 == method {
+							if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
+								n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
+							}
+						} else if 3 == method {
+							if nil != r && r.MatchString(n.TextMarkInlineMemoContent) {
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
 							}
-							if r.MatchString(n.TextMarkATitle) {
-								n.TextMarkATitle = r.ReplaceAllString(n.TextMarkATitle, replacement)
-							}
-							if r.MatchString(n.TextMarkAHref) {
-								n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, replacement)
-							}
 						}
+					} else if n.IsTextMarkType("text") {
+						// Search and replace fails in some cases https://github.com/siyuan-note/siyuan/issues/10016
+						if !replaceTypes["text"] {
+							return ast.WalkContinue
+						}
+
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
 					}
 				}
 				return ast.WalkContinue
@@ -467,6 +597,30 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 		}()
 	}
 	return
+}
+
+func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp) {
+	if 0 == method {
+		if strings.Contains(n.TextMarkTextContent, keyword) {
+			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+		}
+	} else if 3 == method {
+		if nil != r && r.MatchString(n.TextMarkTextContent) {
+			n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+		}
+	}
+}
+
+func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp) {
+	if 0 == method {
+		if bytes.Contains(n.Tokens, []byte(keyword)) {
+			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
+		}
+	} else if 3 == method {
+		if nil != r && r.MatchString(string(n.Tokens)) {
+			n.Tokens = []byte(r.ReplaceAllString(string(n.Tokens), replacement))
+		}
+	}
 }
 
 // FullTextSearchBlock 搜索内容块。

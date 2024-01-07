@@ -13,7 +13,12 @@ export const newCardModel = (options: {
         cardType: TCardType,
         id: string,
         title?: string
-        blocks?: ICard[],
+        cardsData?: {
+            cards: ICard[],
+            unreviewedCount: number
+            unreviewedNewCardCount: number
+            unreviewedOldCardCount: number
+        },
         index?: number,
     }
 }) => {
@@ -24,11 +29,11 @@ export const newCardModel = (options: {
         tab: options.tab,
         data: options.data,
         init() {
-            if (options.data.blocks) {
+            if (options.data.cardsData) {
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
                     cardType: this.data.cardType,
-                    blocks: options.data.blocks,
+                    cardsData: options.data.cardsData,
                     isTab: true,
                 });
 
@@ -38,12 +43,12 @@ export const newCardModel = (options: {
                     id: this.data.id,
                     title: this.data.title,
                     cardType: this.data.cardType,
-                    blocks: options.data.blocks,
+                    cardsData: options.data.cardsData,
                     index: options.data.index,
                 });
                 this.data.editor = editor;
                 // https://github.com/siyuan-note/siyuan/issues/9561#issuecomment-1794473512
-                delete options.data.blocks;
+                delete options.data.cardsData;
                 delete options.data.index;
             } else {
                 fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
@@ -55,7 +60,7 @@ export const newCardModel = (options: {
                     this.element.innerHTML = genCardHTML({
                         id: this.data.id,
                         cardType: this.data.cardType,
-                        blocks: response.data.cards,
+                        cardsData: response.data,
                         isTab: true,
                     });
 
@@ -65,7 +70,7 @@ export const newCardModel = (options: {
                         id: this.data.id,
                         title: this.data.title,
                         cardType: this.data.cardType,
-                        blocks: response.data.cards,
+                        cardsData: response.data,
                     });
                     customObj.data.editor = editor;
                 });
@@ -91,7 +96,7 @@ export const newCardModel = (options: {
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
                     cardType: this.data.cardType,
-                    blocks: response.data.cards,
+                    cardsData: response.data,
                     isTab: true,
                 });
             });

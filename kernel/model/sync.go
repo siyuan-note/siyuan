@@ -277,13 +277,14 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 	removeRootIDs = []string{}
 
 	util.IncBootProgress(3, "Sync reindexing...")
-	msg := fmt.Sprintf(Conf.Language(35))
-	util.PushStatusBar(msg)
+	removeRootIDs = removeIndexes(removes) // 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
+	upsertRootIDs = upsertIndexes(upserts)
+	return
+}
 
-	luteEngine := util.NewLute()
-	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
-	bootProgressPart := int32(10 / float64(len(removes)))
-	for _, removeFile := range removes {
+func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
+	bootProgressPart := int32(10 / float64(len(removeFilePaths)))
+	for _, removeFile := range removeFilePaths {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
 		}
@@ -292,7 +293,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 		removeRootIDs = append(removeRootIDs, id)
 		block := treenode.GetBlockTree(id)
 		if nil != block {
-			msg = fmt.Sprintf(Conf.Language(39), block.RootID)
+			msg := fmt.Sprintf(Conf.Language(39), block.RootID)
 			util.IncBootProgress(bootProgressPart, msg)
 			util.PushStatusBar(msg)
 
@@ -300,12 +301,13 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 			sql.RemoveTreeQueue(block.BoxID, block.RootID)
 		}
 	}
+	return
+}
 
-	msg = fmt.Sprintf(Conf.Language(35))
-	util.PushStatusBar(msg)
-
-	bootProgressPart = int32(10 / float64(len(upserts)))
-	for _, upsertFile := range upserts {
+func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
+	luteEngine := util.NewLute()
+	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
+	for _, upsertFile := range upsertFilePaths {
 		if !strings.HasSuffix(upsertFile, ".sy") {
 			continue
 		}
@@ -322,7 +324,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 
 		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
-		msg = fmt.Sprintf(Conf.Language(40), strings.TrimSuffix(path.Base(p), ".sy"))
+		msg := fmt.Sprintf(Conf.Language(40), strings.TrimSuffix(path.Base(p), ".sy"))
 		util.IncBootProgress(bootProgressPart, msg)
 		util.PushStatusBar(msg)
 
@@ -545,7 +547,7 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.Language(188)
 	} else if errors.Is(err, dejavu.ErrCloudLocked) {
 		msg = Conf.Language(189)
-	} else if errors.Is(err, dejavu.ErrRepoFatalErr) {
+	} else if errors.Is(err, dejavu.ErrRepoFatal) {
 		msg = Conf.Language(23)
 	} else if errors.Is(err, cloud.ErrSystemTimeIncorrect) {
 		msg = Conf.Language(195)
@@ -575,7 +577,7 @@ func formatRepoErrorMsg(err error) string {
 	return msg
 }
 
-func getIgnoreLines() (ret []string) {
+func getSyncIgnoreLines() (ret []string) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err := os.MkdirAll(filepath.Dir(ignore), 0755)
 	if nil != err {

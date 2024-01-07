@@ -137,15 +137,15 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="virtualBlockRef" type="checkbox"${window.siyuan.config.editor.virtualBlockRef ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label config__item">
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md9}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefInclude" value="${window.siyuan.config.editor.virtualBlockRefInclude}" />
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md35}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
@@ -153,56 +153,56 @@ export const editor = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md39}
         <div class="b3-label__text">${window.siyuan.languages.md40}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.dynamicLoadBlocks}
         <div class="b3-label__text">${window.siyuan.languages.dynamicLoadBlocksTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="dynamicLoadBlocks" type="number" min="48" max="1024" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md37}
         <div class="b3-label__text">${window.siyuan.languages.md38}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="blockRefDynamicAnchorTextMaxLen" type="number" min="1" max="5120" value="${window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.backlinkExpand}
         <div class="b3-label__text">${window.siyuan.languages.backlinkExpandTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="backlinkExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backlinkExpandCount}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.backmentionExpand}
         <div class="b3-label__text">${window.siyuan.languages.backmentionExpandTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="backmentionExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.generateHistory}
         <div class="b3-label__text">${window.siyuan.languages.generateHistoryInterval}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="generateHistoryInterval" type="number" min="0" max="120" value="${window.siyuan.config.editor.generateHistoryInterval}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.historyRetentionDays} 
         <a href="javascript:void(0)" id="clearHistory">${window.siyuan.languages.clearHistory}</a>
@@ -210,15 +210,15 @@ export const editor = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="historyRetentionDays" type="number" min="0" value="${window.siyuan.config.editor.historyRetentionDays}"/>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.font}
         <div class="b3-label__text">${window.siyuan.languages.font1}</div>
     </div>
     <span class="fn__space"></span>
     ${fontFamilyHTML}
-</label>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fontSizeScrollZoom}
@@ -227,7 +227,7 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="fontSizeScrollZoom" type="checkbox"${window.siyuan.config.editor.fontSizeScrollZoom ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label config__item">
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fontSize}
         <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
@@ -236,8 +236,8 @@ export const editor = {
     <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.fontSize}">   
         <input class="b3-slider fn__size200" id="fontSize" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
     </div>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md29}
         <div class="b3-label__text">${window.siyuan.languages.md30}</div>
@@ -246,15 +246,15 @@ export const editor = {
     <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.codeTabSpaces}">   
         <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
     </div>
-</label>
-<label class="b3-label fn__flex">
-    <div class="fn__flex-1">
+</div>
+<div class="b3-label">
+    <div class="fn__block">
         ${window.siyuan.languages.katexMacros}
         <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
         <div class="fn__hr"></div>
         <textarea class="b3-text-field fn__block" id="katexMacros" spellcheck="false">${window.siyuan.config.editor.katexMacros}</textarea>
     </div>
-</label>`;
+</div>`;
     },
     bindEvent: () => {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;

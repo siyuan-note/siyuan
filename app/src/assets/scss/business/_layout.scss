@@ -11,10 +11,15 @@
     }
   }
 
+  &__center {
+    min-width: 148px;
+  }
+
   &__dockl,
   &__dockr,
   &__dockb {
     transition: var(--b3-width-transition);
+    flex-shrink: 0;
   }
 
   & > .layout__dockresize {
@@ -145,6 +150,7 @@
     width: 100%;
     background-color: var(--b3-theme-background);
     align-items: center;
+    min-width: 204px;
 
     .b3-list-item {
       width: 204px;

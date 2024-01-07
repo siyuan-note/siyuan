@@ -49,19 +49,23 @@ type TOperation =
     | "duplicateAttrViewView"
     | "sortAttrViewView"
     | "setAttrViewPageSize"
+    | "updateAttrViewColRelation"
+    | "updateAttrViewColRollup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
-    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" |
+    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
+    "update-cards"|
+    "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =
     "text"
@@ -156,7 +160,8 @@ interface Window {
     siyuan: ISiyuan
     webkit: any
     html2canvas: (element: Element, opitons: {
-        useCORS: boolean
+        useCORS: boolean,
+        scale?: number
     }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
@@ -264,7 +269,10 @@ interface ISearchOption {
         htmlBlock: boolean
         embedBlock: boolean
         databaseBlock: boolean
-    }
+    },
+    replaceTypes: {
+        [key: string]: boolean;
+    },
 }
 
 interface ITextOption {
@@ -436,6 +444,8 @@ interface IScrollAttr {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
+    isTwoWay?: boolean, // 是否双向关联
+    backRelationKeyID?: string, // 双向关联的目标关联列 ID
     avID?: string,  // av
     format?: string // updateAttrViewColNumberFormat 专享
     keyID?: string // updateAttrViewCell 专享
@@ -588,6 +598,10 @@ interface IExport {
     addTitle: boolean;
     markdownYFM: boolean;
     pdfFooter: string;
+    pdfWatermarkStr: string;
+    pdfWatermarkDesc: string;
+    imageWatermarkStr: string;
+    imageWatermarkDesc: string;
     docxTemplate: string;
 }
 
@@ -673,6 +687,10 @@ interface IAccount {
 }
 
 interface IConfig {
+    snippet: {
+        enabledCSS: boolean
+        enabledJS: boolean
+    }
     cloudRegion: number
     bazaar: {
         trust: boolean
@@ -974,7 +992,7 @@ interface IMenu {
     iconClass?: string,
     label?: string,
     click?: (element: HTMLElement, event: MouseEvent) => boolean | void | Promise<boolean | void>
-    type?: "separator" | "submenu" | "readonly",
+    type?: "separator" | "submenu" | "readonly" | "empty",
     accelerator?: string,
     action?: string,
     id?: string,
@@ -1046,7 +1064,8 @@ interface IAVTable extends IAVView {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
-    value: IAVCellValue
+    value: IAVCellValue,
+    type?: TAVCol   // 仅用于标识新增时的类型，用于区分 rollup
 }
 
 interface IAVSort {
@@ -1065,15 +1084,14 @@ interface IAVColumn {
     type: TAVCol,
     numberFormat: string,
     template: string,
-    calc: {
-        operator: string,
-        result: IAVCellValue
-    },
+    calc: IAVCalc,
     // 选项列表
     options?: {
         name: string,
         color: string,
-    }[]
+    }[],
+    relation?: IAVCellRelationValue,
+    rollup?: IAVCellRollupValue
 }
 
 interface IAVRow {
@@ -1091,7 +1109,7 @@ interface IAVCell {
 
 interface IAVCellValue {
     id?: string,
-    type?: TAVCol,
+    type: TAVCol,
     isDetached?: boolean,
     text?: {
         content: string
@@ -1123,6 +1141,13 @@ interface IAVCellValue {
     checkbox?: {
         checked: boolean
     }
+    relation?: {
+        blockIDs: string[]
+        contents?: string[]
+    }
+    rollup?: {
+        contents?: IAVCellValue[]
+    }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
@@ -1134,6 +1159,7 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+    formattedContent?: string,
     isNotTime?: boolean // 默认 true
 }
 
@@ -1146,4 +1172,21 @@ interface IAVCellAssetValue {
     content: string,
     name: string,
     type: "file" | "image"
+}
+
+interface IAVCellRelationValue {
+    avID?: string
+    backKeyID?: string
+    isTwoWay?: boolean
+}
+
+interface IAVCellRollupValue {
+    relationKeyID?: string  // 关联列 ID
+    keyID?: string
+    calc?: IAVCalc
+}
+
+interface IAVCalc {
+    operator?: string,
+    result?: IAVCellValue
 }

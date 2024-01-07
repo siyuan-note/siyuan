@@ -1,12 +1,11 @@
 import {Tab} from "./Tab";
-import {getInstanceById, newModelByInitData} from "./util";
+import {getInstanceById, newModelByInitData, saveLayout} from "./util";
 import {getAllModels, getAllTabs} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";
 import {App} from "../index";
 import {Model} from "./Model";
 import {Editor} from "../editor";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Asset} from "../asset";
 import {Graph} from "./dock/Graph";
 import {Files} from "./dock/Files";
@@ -23,6 +22,7 @@ import {openRecentDocs} from "../business/openRecentDocs";
 import {openHistory} from "../history/history";
 import {newFile} from "../util/newFile";
 import {mountHelp, newNotebook} from "../util/mount";
+import {Constants} from "../constants";
 
 export const getActiveTab = (wndActive = true) => {
     const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
@@ -84,7 +84,7 @@ export const switchTabByIndex = (index: number) => {
 };
 
 let resizeTimeout: number;
-export const resizeTabs = () => {
+export const resizeTabs = (isSaveLayout = true) => {
     clearTimeout(resizeTimeout);
     //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
     // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
@@ -117,6 +117,9 @@ export const resizeTabs = () => {
         });
         pdfResize();
         hideAllElements(["gutter"]);
+        if (isSaveLayout) {
+            saveLayout();
+        }
     }, 200);
 };
 
@@ -182,7 +185,7 @@ export const newCenterEmptyTab = (app: App) => {
                     if (target.id === "editorEmptySearch") {
                         openSearch({
                             app,
-                            hotkey: window.siyuan.config.keymap.general.globalSearch.custom,
+                            hotkey: Constants.DIALOG_GLOBALSEARCH,
                         });
                         event.stopPropagation();
                         event.preventDefault();
@@ -231,7 +234,6 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
-                saveScroll(tab.model.editor.protyle);
                 model = new Editor({
                     app,
                     tab: newTab,

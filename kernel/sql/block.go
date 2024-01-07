@@ -109,7 +109,7 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		return
 	}
 
-	content := treenode.NodeStaticContent(node, nil, true, indexAssetPath)
+	content := treenode.NodeStaticContent(node, nil, true, indexAssetPath, true)
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, content, id); nil != err {
 		tx.Rollback()

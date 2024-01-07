@@ -16,8 +16,19 @@
     height: 100%;
 
     .b3-label:not(.b3-label--inner) {
-      padding: 16px 0;
-      margin: 0 24px;
+      padding: 0;
+      margin: 16px 24px 32px;
+      box-shadow: 0 15px 0 0 var(--b3-theme-background), 0 16px 0 0 var(--b3-border-color);
+      border-bottom: 0;
+
+      &:last-child {
+        margin-bottom: 16px;
+        box-shadow: none;
+      }
+    }
+
+    label.b3-label:not(.b3-label--inner) {
+      cursor: pointer;
     }
 
     &--full {
@@ -72,7 +83,8 @@
     display: flex;
     flex-wrap: wrap;
 
-    label {
+    label,
+    .label {
       width: 16%;
       margin: 8px 17% 0 0;
       color: var(--b3-theme-on-surface);

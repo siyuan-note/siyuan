@@ -57,7 +57,7 @@ export const about = {
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
 <div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad())) ? " fn__none" : ""}">
-    <label class="fn__flex">
+    <div class="fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about5}
             <div class="b3-label__text">${window.siyuan.languages.about6}</div>
@@ -66,7 +66,7 @@ export const about = {
         <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode">
             <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
         </button>
-    </label>
+    </div>
     <label class="b3-label fn__flex${!window.siyuan.config.accessAuthCode || isBrowser() ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about7}
@@ -76,7 +76,7 @@ export const about = {
         <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
-<label class="b3-label config__item${(isBrowser() && !isInAndroid()) ? " fn__none" : " fn__flex"}">
+<div class="b3-label config__item${(isBrowser() && !isInAndroid()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
@@ -88,7 +88,7 @@ export const about = {
     <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
-</label>
+</div>
 <div class="b3-label fn__flex config__item">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.dataRepoKey}
@@ -119,7 +119,7 @@ export const about = {
         </button>
     </div>
 </div>
-<label class="fn__flex b3-label config__item">
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.dataRepoPurge}
         <div class="b3-label__text">${window.siyuan.languages.dataRepoPurgeTip}</div>
@@ -128,8 +128,8 @@ export const about = {
     <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
         <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
@@ -138,8 +138,8 @@ export const about = {
     <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
-</label>
-<label class="fn__flex b3-label config__item">
+</div>
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
         <span id="isInsider"></span>
@@ -151,15 +151,15 @@ export const about = {
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
         </button>
     </div>
-</label>
-<label class="fn__flex config__item  b3-label">
+</div>
+<div class="fn__flex config__item  b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}
          <div class="b3-label__text">${window.siyuan.languages.about14}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="token" value="${window.siyuan.config.api.token}">
-</label>
+</div>
 <div class="b3-label${(window.siyuan.config.system.container === "std" || window.siyuan.config.system.container === "docker") ? "" : " fn__none"}">
     ${window.siyuan.languages.networkProxy}
     <div class="b3-label__text">
@@ -306,8 +306,6 @@ export const about = {
         networkServeElement.addEventListener("change", () => {
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
                     cb: exitSiYuan
                 });
@@ -323,9 +321,10 @@ export const about = {
         googleAnalyticsElement.addEventListener("change", () => {
             fetchPost("/api/system/setGoogleAnalytics", {googleAnalytics: googleAnalyticsElement.checked}, () => {
                 exportLayout({
-                    reload: true,
-                    onlyData: false,
                     errorExit: false,
+                    cb() {
+                        window.location.reload();
+                    }
                 });
             });
         });
@@ -333,8 +332,6 @@ export const about = {
         uploadErrLogElement.addEventListener("change", () => {
             fetchPost("/api/system/setUploadErrLog", {uploadErrLog: uploadErrLogElement.checked}, () => {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
                     cb: exitSiYuan
                 });
@@ -369,9 +366,10 @@ export const about = {
                     proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`,
                 }).then(() => {
                     exportLayout({
-                        reload: true,
-                        onlyData: false,
                         errorExit: false,
+                        cb() {
+                            window.location.reload();
+                        },
                     });
                 });
                 /// #endif

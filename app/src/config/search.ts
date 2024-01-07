@@ -45,9 +45,9 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         getLang(["assets", "unreferencedAssets", "missingAssets"]),
 
         // 导出
-        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11",
+        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export9", "export11",
             "export13", "export14", "export15", "export19", "export20", "ref", "blockEmbed", "export17", "export18",
-            "export23", "export24"]),
+            "export23", "export24", "export25", "export26", "export27", "export28", "export29"]),
 
         // 外观
         getLang(["language", "language1", "appearance", "appearance1", "appearance2", "appearance3", "appearance4",

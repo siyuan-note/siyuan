@@ -101,6 +101,19 @@ export abstract class Constants {
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
     public static readonly LOCAL_FLASHCARD = "local-flashcard";
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";
+    public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
+    public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
+
+    // dialog
+    public static readonly DIALOG_OPENCARD = "dialog-opencard";
+    public static readonly DIALOG_MAKECARD = "dialog-makecard";
+    public static readonly DIALOG_VIEWCARDS = "dialog-viewcards";
+    public static readonly DIALOG_DIALYNOTE = "dialog-dialynote";
+    public static readonly DIALOG_RECENTDOCS = "dialog-recentdocs";
+    public static readonly DIALOG_SWITCHTAB = "dialog-switchtab";
+    public static readonly DIALOG_SEARCH = "dialog-search";
+    public static readonly DIALOG_REPLACE = "dialog-replace";
+    public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;
@@ -514,6 +527,34 @@ export abstract class Constants {
                 }]
             ]
         }
+    };
+
+    public static readonly SIYUAN_DEFAULT_REPLACETYPES: {
+        [key: string]: boolean;
+    } = {
+        "text": true,
+        "imgText": true,
+        "imgTitle": true,
+        "imgSrc": false,
+        "aText": true,
+        "aTitle": true,
+        "aHref": false,
+        "code": false,
+        "em": true,
+        "strong": true,
+        "inlineMath": false,
+        "inlineMemo": true,
+        "kbd": true,
+        "mark": true,
+        "s": true,
+        "sub": true,
+        "sup": true,
+        "tag": true,
+        "u": true,
+        "docTitle": true,
+        "codeBlock": false,
+        "mathBlock": false,
+        "htmlBlock": false
     };
 
     // image

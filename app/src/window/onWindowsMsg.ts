@@ -16,8 +16,6 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             break;
         case "lockscreen":
             exportLayout({
-                reload: false,
-                onlyData: false,
                 errorExit: false,
                 cb() {
                     fetchPost("/api/system/logoutAuth", {}, () => {
@@ -29,8 +27,6 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
         case "lockscreenByMode":
             if (window.siyuan.config.system.lockScreenMode === 1) {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: false,
                     cb() {
                         fetchPost("/api/system/logoutAuth", {}, () => {

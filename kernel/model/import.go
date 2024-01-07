@@ -147,7 +147,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return ast.WalkContinue
 			}
 
-			newNodeID := ast.NewNodeID()
+			// 新 ID 保留时间部分，仅修改随机值，避免时间变化导致更新时间早于创建时间
+			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
+			newNodeID := util.TimeFromID(n.ID) + "-" + gulu.Rand.String(7)
 			blockIDs[n.ID] = newNodeID
 			oldNodeID := n.ID
 			n.ID = newNodeID
@@ -215,30 +217,32 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			newPath := filepath.Join(filepath.Dir(path), newAvID+".json")
 			renameAvPaths[path] = newPath
 			avIDs[oldAvID] = newAvID
-
-			// 将数据库文件中的块 ID 替换为新的块 ID
-			data, readErr := os.ReadFile(path)
-			if nil != readErr {
-				logging.LogErrorf("read av file [%s] failed: %s", path, readErr)
-				return nil
-			}
-			var newData []byte
-			newData = data
-			for oldID, newID := range avBlockIDs {
-				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
-			}
-			newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
-			if !bytes.Equal(data, newData) {
-				if writeErr := os.WriteFile(path, newData, 0644); nil != writeErr {
-					logging.LogErrorf("write av file [%s] failed: %s", path, writeErr)
-					return nil
-				}
-			}
 			return nil
 		})
 
 		// 重命名数据库文件
 		for oldPath, newPath := range renameAvPaths {
+			data, readErr := os.ReadFile(oldPath)
+			if nil != readErr {
+				logging.LogErrorf("read av file [%s] failed: %s", oldPath, readErr)
+				return nil
+			}
+
+			// 将数据库文件中的块 ID 替换为新的块 ID
+			newData := data
+			for oldAvID, newAvID := range avIDs {
+				for oldID, newID := range avBlockIDs {
+					newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
+				}
+				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+			}
+			if !bytes.Equal(data, newData) {
+				if writeErr := os.WriteFile(oldPath, newData, 0644); nil != writeErr {
+					logging.LogErrorf("write av file [%s] failed: %s", oldPath, writeErr)
+					return nil
+				}
+			}
+
 			if err = os.Rename(oldPath, newPath); nil != err {
 				logging.LogErrorf("rename av file from [%s] to [%s] failed: %s", oldPath, newPath, err)
 				return

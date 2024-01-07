@@ -870,7 +870,7 @@ app.whenReady().then(() => {
             modal: true,
             show: true,
             width: 1032,
-            height: 650,
+            height: 725,
             resizable: false,
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),

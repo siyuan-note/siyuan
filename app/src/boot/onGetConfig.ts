@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
+import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
@@ -126,6 +126,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(app, isStart);
+            adjustLayout();
             /// #if !BROWSER
             sendGlobalShortcut(app);
             /// #endif
@@ -145,6 +146,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
+            adjustLayout();
             resizeTabs();
             resizeTopBar();
         }, 200);
@@ -172,24 +174,10 @@ const winOnMaxRestore = async () => {
     /// #endif
 };
 
-const saveUI = () => {
-    exportLayout({
-        reload: false,
-        onlyData: false,
-        errorExit: false
-    });
-};
-
-export const unbindSaveUI = () => {
-    window.removeEventListener("beforeunload", saveUI);
-    window.removeEventListener("pagehide", saveUI);
-};
-
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
     const winOnClose = (close = false) => {
         exportLayout({
-            reload: false,
             cb() {
                 if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
                     // 最小化
@@ -204,7 +192,6 @@ export const initWindow = async (app: App) => {
                     exitSiYuan();
                 }
             },
-            onlyData: false,
             errorExit: true
         });
     };
@@ -215,11 +202,6 @@ export const initWindow = async (app: App) => {
             if (getSelection().rangeCount > 0) {
                 focusByRange(getSelection().getRangeAt(0));
             }
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
             window.siyuan.altIsPressed = false;
             window.siyuan.ctrlIsPressed = false;
             window.siyuan.shiftIsPressed = false;
@@ -359,6 +341,7 @@ export const initWindow = async (app: App) => {
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
             mergeSubdocs: ipcData.mergeSubdocs,
+            watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
             pageSize: ipcData.pdfOptions.pageSize,
@@ -398,6 +381,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     merge: ipcData.mergeSubdocs,
                     path: pdfFilePath,
                     removeAssets: ipcData.removeAssets,
+                    watermark: ipcData.watermark
                 }, () => {
                     afterExport(pdfFilePath, msgId);
                     if (ipcData.removeAssets) {
@@ -519,7 +503,5 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
     }
-    window.addEventListener("beforeunload", saveUI, false);
-    window.addEventListener("pagehide", saveUI, false);
     /// #endif
 };

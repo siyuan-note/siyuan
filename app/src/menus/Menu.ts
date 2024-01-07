@@ -84,7 +84,7 @@ export class Menu {
     }
 
     public addSeparator(index?: number) {
-       return this.addItem({type: "separator", index});
+        return this.addItem({type: "separator", index});
     }
 
     public addItem(option: IMenu) {
@@ -105,10 +105,12 @@ export class Menu {
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
         this.element.lastElementChild.innerHTML = "";
+        this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
+        window.siyuan.menus.menu.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
     }
 
     public append(element?: HTMLElement, index?: number) {
@@ -136,6 +138,9 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
+        if (this.element.lastElementChild.innerHTML === "") {
+            return;
+        }
         this.element.classList.add("b3-menu--fullscreen");
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
@@ -158,6 +163,15 @@ export class MenuItem {
     public element: HTMLElement;
 
     constructor(options: IMenu) {
+        if (options.type === "empty") {
+            this.element = document.createElement("div");
+            this.element.innerHTML = options.label;
+            if (options.bind) {
+                options.bind(this.element);
+            }
+            return;
+        }
+
         this.element = document.createElement("button");
         if (options.disabled) {
             this.element.setAttribute("disabled", "disabled");
@@ -226,7 +240,7 @@ export class MenuItem {
             options.submenu.forEach((item) => {
                 submenuElement.firstElementChild.append(new MenuItem(item).element);
             });
-            this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>');
+            this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);
         }
     }

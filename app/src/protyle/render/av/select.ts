@@ -1,11 +1,13 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
+import {escapeAttr} from "../../../util/escape";
+import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -45,71 +47,70 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     return html;
 };
 
-export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
+export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     if (!target) {
         return;
     }
     const colId = cellElements[0].dataset.colId;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    let newData: IAVCellSelectValue[];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, elementIndex) => {
+        if (!blockElement.contains(item)) {
+            item = cellElements[elementIndex] = blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+        }
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        const cellId = item.dataset.id;
-        let cellData: IAVCell;
+        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
+        if (elementIndex === 0) {
+            cellValue.mSelect?.find((item, index) => {
+                if (item.content === target.dataset.content) {
+                    cellValue.mSelect.splice(index, 1);
+                    return true;
+                }
+            });
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
+        }
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: cellValue.id,
+            keyID: colId,
+            rowID,
+            avID: data.id,
+            data: cellValue
+        });
+        undoOperations.push({
+            action: "updateAttrViewCell",
+            id: cellValue.id,
+            keyID: colId,
+            rowID,
+            avID: data.id,
+            data: oldValue
+        });
         data.view.rows.find(row => {
             if (row.id === rowID) {
                 row.cells.find(cell => {
-                    if (cell.id === cellId) {
-                        cellData = cell;
+                    if (cell.id === cellValue.id) {
+                        cell.value = cellValue;
                         return true;
                     }
                 });
                 return true;
             }
         });
-        const oldValue = Object.assign([], cellData.value.mSelect);
-        if (elementIndex === 0) {
-            cellData.value.mSelect?.find((item: { content: string }, index: number) => {
-                if (item.content === target.dataset.content) {
-                    cellData.value.mSelect.splice(index, 1);
-                    return true;
-                }
-            });
-            newData = cellData.value.mSelect;
-        } else {
-            cellData.value.mSelect = newData;
-        }
-
-        doOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
-            keyID: colId,
-            rowID,
-            avID: data.id,
-            data: cellData.value
-        });
-        undoOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
-            keyID: colId,
-            rowID,
-            avID: data.id,
-            data: {
-                mSelect: oldValue
-            }
-        });
         if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellData.value);
+            item.innerHTML = genAVValueHTML(cellValue);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     transaction(protyle, doOperations, undoOperations);
     target.remove();
 };
 
-export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, cellElements?: HTMLElement[]) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, cellElements?: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
         return;
@@ -184,7 +185,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (cellElement.classList.contains("custom-attr__avvalue")) {
                                     cellElement.innerHTML = genAVValueHTML(cell.value);
                                 } else {
-                                    updateAttrViewCellAnimation(cellElement);
+                                    updateAttrViewCellAnimation(cellElement, cell.value);
                                 }
                                 return true;
                             }
@@ -194,7 +195,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
             });
             menuElement.innerHTML = getSelectHTML(data.view, cellElements);
-            bindSelectEvent(protyle, data, menuElement, cellElements);
+            bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         }
     });
     if (menu.isOpen) {
@@ -262,7 +263,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                         if (cellElement.classList.contains("custom-attr__avvalue")) {
                                             cellElement.innerHTML = genAVValueHTML(cell.value);
                                         } else {
-                                            updateAttrViewCellAnimation(cellElement);
+                                            updateAttrViewCellAnimation(cellElement, cell.value);
                                         }
                                         return true;
                                     }
@@ -272,7 +273,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         });
                     });
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
-                    bindSelectEvent(protyle, data, menuElement, cellElements);
+                    bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
                 }
             });
         }
@@ -342,7 +343,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                         if (cellElement.classList.contains("custom-attr__avvalue")) {
                                             cellElement.innerHTML = genAVValueHTML(cell.value);
                                         } else {
-                                            updateAttrViewCellAnimation(cellElement);
+                                            updateAttrViewCellAnimation(cellElement, cell.value);
                                         }
                                         return true;
                                     }
@@ -352,7 +353,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         });
                     });
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
-                    bindSelectEvent(protyle, data, menuElement, cellElements);
+                    bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
                 }
                 name = inputElement.value;
                 color = (index + 1).toString();
@@ -371,7 +372,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     inputElement.select();
 };
 
-export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[]) => {
+export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {
     const inputElement = menuElement.querySelector("input");
     const colId = cellElements[0].dataset.colId;
     let colData: IAVColumn;
@@ -406,14 +407,14 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
-            addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement);
+            addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement, blockElement);
         } else if (event.key === "Backspace" && inputElement.value === "") {
-            removeCellOption(protyle, data, cellElements, inputElement.previousElementSibling as HTMLElement);
+            removeCellOption(protyle, data, cellElements, inputElement.previousElementSibling as HTMLElement, blockElement);
         }
     });
 };
 
-export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement) => {
+export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
     let hasSelected = false;
     Array.from(menuElement.querySelectorAll(".b3-chips .b3-chip")).find((item: HTMLElement) => {
         if (item.dataset.content === currentElement.dataset.name) {
@@ -426,17 +427,15 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         return;
     }
 
-    const rowElement = hasClosestByClassName(cellElements[0], "av__row");
-    if (!rowElement) {
-        return;
+    const nodeElement = hasClosestBlock(cellElements[0]);
+    if (!nodeElement) {
+        cellElements.forEach((item, index) => {
+            const rowElement = hasClosestByClassName(item, "av__row");
+            if (rowElement) {
+                cellElements[index] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            }
+        });
     }
-    let cellIndex: number;
-    Array.from(rowElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
-        if (item.dataset.id === cellElements[0].dataset.id) {
-            cellIndex = index;
-            return true;
-        }
-    });
     const colId = cellElements[0].dataset.colId;
     let colData: IAVColumn;
     data.view.columns.find((item: IAVColumn) => {
@@ -451,87 +450,71 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    let newValue: IAVCellSelectValue[];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, index) => {
         const itemRowElement = hasClosestByClassName(item, "av__row");
         if (!itemRowElement) {
             return;
         }
-        let cellData: IAVCell;
-        const rowID = itemRowElement.dataset.id;
-        data.view.rows.find(row => {
-            if (row.id === rowID) {
-                if (typeof cellIndex === "number") {
-                    cellData = row.cells[cellIndex];
-                    // 为空时 cellId 每次请求都不一致
-                    cellData.id = item.dataset.id;
-                    if (!cellData.value || !cellData.value.mSelect) {
-                        cellData.value = {mSelect: []} as IAVCellValue;
-                    }
-                } else {
-                    cellData = row.cells.find(cellItem => {
-                        if (cellItem.id === item.dataset.id) {
-                            return true;
-                        }
-                    });
-                }
-                return true;
-            }
-        });
-
-        const oldValue = Object.assign([], cellData.value.mSelect);
-        if (colData.type === "mSelect") {
-            if (index === 0) {
+        const cellValue = genCellValueByElement(colData.type, item);
+        const oldValue = JSON.parse(JSON.stringify(cellValue));
+        if (index === 0) {
+            if (colData.type === "mSelect") {
                 let hasOption = false;
-                cellData.value.mSelect.find((item) => {
+                cellValue.mSelect.find((item) => {
                     if (item.content === currentElement.dataset.name) {
                         hasOption = true;
                         return true;
                     }
                 });
                 if (!hasOption) {
-                    cellData.value.mSelect.push({
+                    cellValue.mSelect.push({
                         color: currentElement.dataset.color,
                         content: currentElement.dataset.name
                     });
                 }
-                newValue = cellData.value.mSelect;
             } else {
-                cellData.value.mSelect = newValue;
-            }
-        } else {
-            if (index === 0) {
-                cellData.value.mSelect = [{
+                cellValue.mSelect = [{
                     color: currentElement.dataset.color,
                     content: currentElement.dataset.name
                 }];
-                newValue = cellData.value.mSelect;
-            } else {
-                cellData.value.mSelect = newValue;
             }
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
         }
+        const rowID = itemRowElement.dataset.id;
         cellDoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: data.id,
-            data: cellData.value
+            data: cellValue
         });
         cellUndoOperations.push({
             action: "updateAttrViewCell",
-            id: cellData.id,
+            id: cellValue.id,
             keyID: colId,
             rowID,
             avID: data.id,
-            data: {
-                [colData.type]: oldValue
+            data: oldValue
+        });
+        data.view.rows.find(row => {
+            if (row.id === rowID) {
+                row.cells.find(cell => {
+                    if (cell.id === cellValue.id) {
+                        cell.value = cellValue;
+                        return true;
+                    }
+                });
+                return true;
             }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellData.value);
+            item.innerHTML = genAVValueHTML(cellValue);
         } else {
-            updateAttrViewCellAnimation(item);
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
 
@@ -559,7 +542,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         menuElement.parentElement.remove();
     } else {
         menuElement.innerHTML = getSelectHTML(data.view, cellElements);
-        bindSelectEvent(protyle, data, menuElement, cellElements);
+        bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         menuElement.querySelector("input").focus();
     }
 };
@@ -572,25 +555,9 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
         }
     });
 
-    let allUniqueOptions: IAVCellSelectValue[] = [];
-    data.rows.find(row => {
-        const rowElement = hasClosestByClassName(cellElements[0], "av__row");
-        if (rowElement && rowElement.dataset.id === row.id) {
-            row.cells.find(cell => {
-                if (cell.id === cellElements[0].dataset.id) {
-                    if (cell.value && cell.value.mSelect) {
-                        allUniqueOptions = cell.value.mSelect;
-                    }
-                    return true;
-                }
-            });
-            return true;
-        }
-    });
-
     let selectedHTML = "";
-    allUniqueOptions.forEach((unique) => {
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${unique.content}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+    genCellValueByElement(colData.type, cellElements[0]).mSelect?.forEach((item) => {
+        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items">

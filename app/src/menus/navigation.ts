@@ -232,12 +232,13 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 k: localData.k,
                 r: localData.r,
                 page: 1,
-                types: Object.assign({}, localData.types)
+                types: Object.assign({}, localData.types),
+                replaceTypes: Object.assign({}, localData.replaceTypes)
             });
             /// #else
             openSearch({
                 app,
-                hotkey: window.siyuan.config.keymap.general.search.custom,
+                hotkey: Constants.DIALOG_SEARCH,
                 notebookId,
             });
             /// #endif
@@ -262,12 +263,13 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({
                     app,
-                    hotkey: window.siyuan.config.keymap.general.replace.custom,
+                    hotkey: Constants.DIALOG_REPLACE,
                     notebookId,
                 });
                 /// #endif
@@ -556,12 +558,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({
                     app,
-                    hotkey: window.siyuan.config.keymap.general.search.custom,
+                    hotkey: Constants.DIALOG_SEARCH,
                     notebookId,
                     searchPath
                 });
@@ -591,12 +594,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     k: localData.k,
                     r: localData.r,
                     page: 1,
-                    types: Object.assign({}, localData.types)
+                    types: Object.assign({}, localData.types),
+                    replaceTypes: Object.assign({}, localData.replaceTypes)
                 });
                 /// #else
                 openSearch({
                     app,
-                    hotkey: window.siyuan.config.keymap.general.replace.custom,
+                    hotkey: Constants.DIALOG_REPLACE,
                     notebookId,
                     searchPath
                 });

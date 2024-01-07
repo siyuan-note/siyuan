@@ -11,6 +11,7 @@
     --b3-theme-surface-light: rgba(243, 243, 243, .86);
     --b3-theme-surface-lighter: #e0e0e0;
     --b3-theme-error: #d23f31;
+    --b3-theme-success: #65b84d;
 
     /* 文字颜色 */
     --b3-theme-on-primary: #fff;

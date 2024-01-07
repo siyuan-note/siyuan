@@ -62,7 +62,7 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 	return
 }
 
-func docTitleImgAsset(root *ast.Node) *Asset {
+func docTitleImgAsset(root *ast.Node, boxLocalPath, docDirLocalPath string) *Asset {
 	if p := treenode.GetDocTitleImgPath(root); "" != p {
 		if !util.IsAssetLinkDest([]byte(p)) {
 			return nil
@@ -70,18 +70,21 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 
 		var hash string
 		var err error
-		absPath := filepath.Join(util.DataDir, p)
-		if hash, err = util.GetEtag(absPath); nil != err {
-			logging.LogErrorf("read asset [%s] data failed: %s", absPath, err)
-			return nil
+		if lp := assetLocalPath(p, boxLocalPath, docDirLocalPath); "" != lp {
+			hash, err = util.GetEtag(lp)
+			if nil != err {
+				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, err)
+				return nil
+			}
 		}
+
 		name, _ := util.LastID(p)
 		asset := &Asset{
 			ID:      ast.NewNodeID(),
 			BlockID: root.ID,
 			RootID:  root.ID,
 			Box:     root.Box,
-			DocPath: p,
+			DocPath: root.Path,
 			Path:    p,
 			Name:    name,
 			Title:   "title-img",
@@ -109,21 +112,6 @@ func QueryAssetByHash(hash string) (ret *Asset) {
 		return
 	}
 	ret = &asset
-	return
-}
-
-func QueryRootBlockAssets(rootID string) (ret []*Asset) {
-	sqlStmt := "SELECT * FROM assets WHERE root_id = ?"
-	rows, err := query(sqlStmt, rootID)
-	if nil != err {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		asset := scanAssetRows(rows)
-		ret = append(ret, asset)
-	}
 	return
 }
 

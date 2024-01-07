@@ -1,14 +1,13 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {popTextCell} from "./cell";
-import * as dayjs from "dayjs";
+import {popTextCell, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {isMac} from "../../util/compatibility";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
+import {openMenuPanel} from "./openMenuPanel";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -121,11 +120,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
 </div>`;
                 // body
                 data.rows.forEach((row: IAVRow) => {
-                    tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters">
-    <button class="av__gutter ariaLabel" data-action="add" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>
-    <button class="av__gutter ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg></button>
-</div>`;
+                    tableHTML += `<div class="av__row" data-id="${row.id}">`;
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
@@ -136,68 +131,12 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         if (data.columns[index].hidden) {
                             return;
                         }
-                        let text = "";
-                        if (["text", "template"].includes(cell.valueType)) {
-                            text = `<span class="av__celltext">${cell.value ? (cell.value[cell.valueType as "text"].content || "") : ""}</span>`;
-                        } else if (["url", "email", "phone"].includes(cell.valueType)) {
-                            const urlContent = cell.value ? cell.value[cell.valueType as "url"].content : "";
-                            // https://github.com/siyuan-note/siyuan/issues/9291
-                            let urlAttr = "";
-                            if (cell.valueType === "url") {
-                                urlAttr = ` data-href="${urlContent}"`;
-                            }
-                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}"${urlAttr}>${urlContent}</span>`;
-                        } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext${cell.value?.isDetached ? "" : " av__celltext--ref"}">${cell.value.block.content || ""}</span>`;
-                            if (cell.value?.isDetached) {
-                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more" >${window.siyuan.languages.more}</span>`;
-                            } else {
-                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
-                            }
-                        } else if (cell.valueType === "number") {
-                            text = `<span style="float: right;${data.columns[index].wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cell.value?.number.isNotEmpty ? cell.value?.number.content : ""}">${cell.value?.number.formattedContent || ""}</span>`;
-                        } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
-                            cell.value?.mSelect?.forEach((item) => {
-                                text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
-                            });
-                        } else if (cell.valueType === "date") {
-                            const dataValue = cell.value ? cell.value.date : null;
-                            text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
-                            if (dataValue && dataValue.isNotEmpty) {
-                                text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-                            }
-                            if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-                                text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
-                            }
-                            text += "</span>";
-                        } else if (["created", "updated"].includes(cell.valueType)) {
-                            const dataValue = cell.value ? cell.value[cell.valueType as "date"] : null;
-                            text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
-                            if (dataValue && dataValue.isNotEmpty) {
-                                text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
-                            }
-                            text += "</span>";
-                        } else if (cell.valueType === "mAsset") {
-                            cell.value?.mAsset?.forEach((item) => {
-                                if (item.type === "image") {
-                                    text += `<img class="av__cellassetimg" src="${item.content}">`;
-                                } else {
-                                    text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
-                                }
-                            });
-                        } else if (cell.valueType === "checkbox") {
-                            text += `<svg class="av__checkbox"><use xlink:href="#icon${cell.value?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
-                        }
-                        if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cell.valueType) &&
-                            cell.value && cell.value[cell.valueType as "url"].content) {
-                            text += `<span ${cell.valueType !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
-                        }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-wrap="${data.columns[index].wrap}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.columns[index].wrap)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";
@@ -298,7 +237,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     }
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
-                        (avMaskElement.querySelector(" textarea") as HTMLTextAreaElement).focus();
+                        (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
                     } else if (!document.querySelector(".av__panel")) {
                         focusBlock(e);
                     }
@@ -354,13 +293,20 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
                 item.removeAttribute("data-render");
                 const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
                 avRender(item, protyle, () => {
-                    // https://github.com/siyuan-note/siyuan/issues/9599
-                    if (!isUndo && operation.action === "insertAttrViewBlock" && operation.isDetached && isCurrent) {
-                        popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
+                    if (operation.action === "insertAttrViewBlock") {
+                        item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
+                            cellElement.classList.remove("av__cell--select");
+                        });
+                        // https://github.com/siyuan-note/siyuan/issues/9599
+                        if (!isUndo && operation.isDetached && isCurrent) {
+                            popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
+                        }
+                    } else if (operation.action === "addAttrViewCol" && isCurrent) {
+                        openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
                     (operation.action === "removeAttrViewView" ? null : undefined));
             });
         }
-    }, 100);
+    }, ["insertAttrViewBlock", "addAttrViewCol"].includes(operation.action) ? 2 : 100);
 };

@@ -1,5 +1,7 @@
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
+import {hideAllElements} from "../protyle/ui/hideElements";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
@@ -131,6 +133,20 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
+            hideAllElements(["gutter"]);
+            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
+            if (dialogElement) {
+                const dialogId = dialogElement.dataset.key;
+                if (dialogId && element.offsetWidth) {
+                    window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][dialogId] = {
+                        width: element.offsetWidth,
+                        height: element.offsetHeight,
+                        left: parseInt(element.style.left),
+                        top: parseInt(element.style.top),
+                    };
+                    setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
+                }
+            }
             if (hasMove && afterCB) {
                 afterCB(type);
             }

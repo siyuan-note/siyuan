@@ -75,46 +75,46 @@ export const flashcard = {
     <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamWeightsTip}</div>
 </div>`;
         /// #else
-        responsiveHTML = `${responsiveHTML}<label class="fn__flex b3-label">
+        responsiveHTML = `${responsiveHTML}<div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.flashcardNewCardLimit}
         <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.newCardLimit}"/>
-</label>
-<label class="fn__flex b3-label">
+</div>
+<div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.flashcardReviewCardLimit}
         <div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="reviewCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
-</label>
-<label class="fn__flex b3-label">
+</div>
+<div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.flashcardFSRSParamRequestRetention}
         <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamRequestRetentionTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="requestRetention" step="0.01" min="0" max="1" type="number" value="${window.siyuan.config.flashcard.requestRetention}"/>
-</label>
-<label class="fn__flex b3-label">
+</div>
+<div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.flashcardFSRSParamMaximumInterval}
         <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamMaximumIntervalTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="maximumInterval" step="1" min="365" max="36500" type="number" value="${window.siyuan.config.flashcard.maximumInterval}"/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__block">
         ${window.siyuan.languages.flashcardFSRSParamWeights}
         <div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamWeightsTip}</div>
         <span class="fn__hr"></span>
         <input class="b3-text-field fn__block" id="weights" value="${window.siyuan.config.flashcard.weights}"/>
     </div>
-</label>`;
+</div>`;
         /// #endif
         return responsiveHTML;
     },

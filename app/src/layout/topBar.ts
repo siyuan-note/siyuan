@@ -117,10 +117,8 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barExit") {
                 exportLayout({
-                    reload: false,
-                    onlyData: false,
                     errorExit: true,
-                    cb: exitSiYuan
+                    cb: exitSiYuan,
                 });
                 event.stopPropagation();
                 break;
@@ -173,7 +171,7 @@ export const initBar = (app: App) => {
             } else if (targetId === "barSearch") {
                 openSearch({
                     app,
-                    hotkey: window.siyuan.config.keymap.general.globalSearch.custom
+                    hotkey: Constants.DIALOG_GLOBALSEARCH
                 });
                 event.stopPropagation();
                 break;

@@ -139,8 +139,9 @@ export const initAssets = () => {
             if (window.siyuan.config.appearance.themeJS) {
                 /// #if !MOBILE
                 exportLayout({
-                    reload: true,
-                    onlyData: false,
+                    cb() {
+                        window.location.reload();
+                    },
                     errorExit: false,
                 });
                 /// #else
@@ -271,8 +272,9 @@ export const setMode = (modeElementValue: number) => {
                 window.siyuan.config.appearance.themeDark !== response.data.themeDark
             )) {
                 exportLayout({
-                    reload: true,
-                    onlyData: false,
+                    cb() {
+                        window.location.reload();
+                    },
                     errorExit: false,
                 });
                 return;
@@ -282,8 +284,9 @@ export const setMode = (modeElementValue: number) => {
                 (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
             )) {
                 exportLayout({
-                    reload: true,
-                    onlyData: false,
+                    cb() {
+                        window.location.reload();
+                    },
                     errorExit: false,
                 });
                 return;

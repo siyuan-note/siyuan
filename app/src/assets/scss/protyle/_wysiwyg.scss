@@ -17,7 +17,7 @@
     position: relative;
 
     &[custom-riff-decks] {
-      box-shadow: -3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+      box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
     }
 
     [spellcheck] {
@@ -229,7 +229,7 @@
       background-color: var(--b3-theme-secondary);
     }
 
-    span[data-type~="block-ref"],
+    span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
       color: var(--b3-protyle-inline-blockref-color);
       opacity: .86;

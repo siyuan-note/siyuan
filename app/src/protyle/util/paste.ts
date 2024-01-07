@@ -15,6 +15,7 @@ import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
+import {cellScrollIntoView} from "../render/av/cell";
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
@@ -366,5 +367,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
     }
-    scrollCenter(protyle, undefined, false, "smooth");
+    const selectCellElement = nodeElement.querySelector(".av__cell--select");
+    if (nodeElement.classList.contains("av") && selectCellElement) {
+        cellScrollIntoView(nodeElement, selectCellElement);
+    } else {
+        scrollCenter(protyle, undefined, false, "smooth");
+    }
 };

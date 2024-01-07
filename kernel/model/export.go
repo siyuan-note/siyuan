@@ -18,8 +18,10 @@ package model
 
 import (
 	"bytes"
+	"encoding/csv"
 	"errors"
 	"fmt"
+	"github.com/88250/pdfcpu/pkg/font"
 	"net/http"
 	"net/url"
 	"os"
@@ -54,6 +56,123 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ExportAv2CSV(avID string) (zipPath string, err error) {
+	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	view, err := attrView.GetCurrentView()
+	if nil != err {
+		return
+	}
+
+	name := util.FilterFileName(attrView.Name)
+
+	table, err := renderAttributeViewTable(attrView, view)
+	if nil != err {
+		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
+		return
+	}
+
+	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
+	if err = os.MkdirAll(exportFolder, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: %s", exportFolder, err)
+		return
+	}
+	csvPath := filepath.Join(exportFolder, name+".csv")
+
+	f, err := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: %s", csvPath, err)
+		return
+	}
+
+	writer := csv.NewWriter(f)
+
+	var header []string
+	for _, col := range table.Columns {
+		header = append(header, col.Name)
+	}
+	if err = writer.Write(header); nil != err {
+		logging.LogErrorf("write csv header [%s] failed: %s", header, err)
+		f.Close()
+		return
+	}
+
+	for _, row := range table.Rows {
+		var rowVal []string
+		for _, cell := range row.Cells {
+			var val string
+			if nil != cell.Value {
+				if av.KeyTypeDate == cell.Value.Type {
+					if nil != cell.Value.Date {
+						cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime)
+					}
+				} else if av.KeyTypeCreated == cell.Value.Type {
+					if nil != cell.Value.Created {
+						cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone)
+					}
+				} else if av.KeyTypeUpdated == cell.Value.Type {
+					if nil != cell.Value.Updated {
+						cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
+					}
+				} else if av.KeyTypeMAsset == cell.Value.Type {
+					if nil != cell.Value.MAsset {
+						buf := &bytes.Buffer{}
+						for _, a := range cell.Value.MAsset {
+							buf.WriteString("![](")
+							buf.WriteString(a.Content)
+							buf.WriteString(") ")
+						}
+						val = strings.TrimSpace(buf.String())
+					}
+				}
+
+				val = cell.Value.String()
+			}
+
+			rowVal = append(rowVal, val)
+		}
+		if err = writer.Write(rowVal); nil != err {
+			logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
+			f.Close()
+			return
+		}
+	}
+	writer.Flush()
+
+	zipPath = exportFolder + ".db.zip"
+	zip, err := gulu.Zip.Create(zipPath)
+	if nil != err {
+		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
+		f.Close()
+		return
+	}
+
+	if err = zip.AddDirectory("", exportFolder); nil != err {
+		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
+		f.Close()
+		return
+	}
+
+	if err = zip.Close(); nil != err {
+		logging.LogErrorf("close export .db.zip failed: %s", err)
+		f.Close()
+		return
+	}
+
+	f.Close()
+	removeErr := os.RemoveAll(exportFolder)
+	if nil != removeErr {
+		logging.LogErrorf("remove export folder [%s] failed: %s", exportFolder, removeErr)
+	}
+	zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
+	return
+}
+
 func Export2Liandi(id string) (err error) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
@@ -66,8 +185,11 @@ func Export2Liandi(id string) (err error) {
 		return errors.New(Conf.Language(204))
 	}
 
-	sqlAssets := sql.QueryRootBlockAssets(id)
-	err = uploadAssets2Cloud(sqlAssets, bizTypeExport2Liandi)
+	assets := assetsLinkDestsInTree(tree)
+	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
+	assets = append(assets, embedAssets...)
+	assets = gulu.Str.RemoveDuplicatedElem(assets)
+	err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
 	if nil != err {
 		return
 	}
@@ -781,7 +903,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return
@@ -810,6 +932,12 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 		return ast.WalkContinue
 	})
 
+	pdfcpu.ConfigPath = "disable"
+	font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
+	if mkdirErr := os.MkdirAll(font.UserFontDir, 0755); nil != mkdirErr {
+		logging.LogErrorf("mkdir [%s] failed: %s", font.UserFontDir, mkdirErr)
+		return
+	}
 	pdfCtx, ctxErr := api.ReadContextFile(p)
 	if nil != ctxErr {
 		logging.LogErrorf("read pdf context failed: %s", ctxErr)
@@ -818,6 +946,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
+	processPDFWatermark(pdfCtx, watermark)
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -825,6 +954,87 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 		return
 	}
 	return
+}
+
+func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
+	// Support adding the watermark on export PDF https://github.com/siyuan-note/siyuan/issues/9961
+	// https://pdfcpu.io/core/watermark
+
+	if !watermark {
+		return
+	}
+
+	str := Conf.Export.PDFWatermarkStr
+	if "" == str {
+		return
+	}
+
+	if !IsPaidUser() {
+		return
+	}
+
+	mode := "text"
+	if gulu.File.IsExist(str) {
+		if ".pdf" == strings.ToLower(filepath.Ext(str)) {
+			mode = "pdf"
+		} else {
+			mode = "image"
+		}
+	}
+
+	desc := Conf.Export.PDFWatermarkDesc
+	if "text" == mode && util.ContainsCJK(str) {
+		// 中日韩文本水印需要安装字体文件
+		descParts := strings.Split(desc, ",")
+		m := map[string]string{}
+		for _, descPart := range descParts {
+			kv := strings.Split(descPart, ":")
+			if 2 != len(kv) {
+				continue
+			}
+			m[kv[0]] = kv[1]
+		}
+		m["fontname"] = "LXGWWenKaiLite-Regular"
+		descBuilder := bytes.Buffer{}
+		for k, v := range m {
+			descBuilder.WriteString(k)
+			descBuilder.WriteString(":")
+			descBuilder.WriteString(v)
+			descBuilder.WriteString(",")
+		}
+		desc = descBuilder.String()
+		desc = desc[:len(desc)-1]
+
+		fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
+		err := api.InstallFonts([]string{fontPath})
+		if nil != err {
+			logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
+		}
+	}
+
+	logging.LogInfof("add PDF watermark [mode=%s, str=%s, desc=%s]", mode, str, desc)
+
+	var wm *pdfcpu.Watermark
+	var err error
+	switch mode {
+	case "text":
+		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+	case "image":
+		wm, err = pdfcpu.ParseImageWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+	case "pdf":
+		wm, err = pdfcpu.ParsePDFWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+	}
+
+	if nil != err {
+		logging.LogErrorf("parse watermark failed: %s", err)
+		return
+	}
+
+	err = pdfCtx.AddWatermarks(nil, wm)
+	if nil != err {
+		logging.LogErrorf("add watermark failed: %s", err)
+		return
+	}
 }
 
 func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
@@ -1380,6 +1590,39 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
 				logging.LogErrorf("copy av json failed: %s", copyErr)
 			}
+
+			attrView, err := av.ParseAttributeView(avID)
+			if nil != err {
+				logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+				return ast.WalkContinue
+			}
+
+			for _, keyValues := range attrView.KeyValues {
+				switch keyValues.Key.Type {
+				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
+					for _, value := range keyValues.Values {
+						for _, asset := range value.MAsset {
+							if !isRelativePath([]byte(asset.Content)) {
+								continue
+							}
+
+							destPath := filepath.Join(exportFolder, asset.Content)
+							srcPath, assetErr := GetAssetAbsPath(asset.Content)
+							if nil != assetErr {
+								logging.LogWarnf("get asset [%s] abs path failed: %s", asset.Content, assetErr)
+								continue
+							}
+
+							if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
+								logging.LogErrorf("copy asset failed: %s", copyErr)
+							}
+						}
+					}
+				}
+			}
+
+			// 级联导出关联列关联的数据库
+			exportRelationAvs(avID, exportStorageAvDir)
 			return ast.WalkContinue
 		})
 	}
@@ -1466,6 +1709,46 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	os.RemoveAll(exportFolder)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func exportRelationAvs(avID, exportStorageAvDir string) {
+	avIDs := hashset.New()
+	walkRelationAvs(avID, avIDs)
+
+	for _, v := range avIDs.Values() {
+		relAvID := v.(string)
+		relAvJSONPath := av.GetAttributeViewDataPath(relAvID)
+		if !filelock.IsExist(relAvJSONPath) {
+			continue
+		}
+
+		if copyErr := filelock.Copy(relAvJSONPath, filepath.Join(exportStorageAvDir, relAvID+".json")); nil != copyErr {
+			logging.LogErrorf("copy av json failed: %s", copyErr)
+		}
+	}
+}
+
+func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
+	if exportAvIDs.Contains(avID) {
+		return
+	}
+
+	attrView, _ := av.ParseAttributeView(avID)
+	if nil == attrView {
+		return
+	}
+
+	exportAvIDs.Add(avID)
+	for _, keyValues := range attrView.KeyValues {
+		switch keyValues.Key.Type {
+		case av.KeyTypeRelation: // 导出关联列
+			if nil == keyValues.Key.Relation {
+				break
+			}
+
+			walkRelationAvs(keyValues.Key.Relation.AvID, exportAvIDs)
+		}
+	}
 }
 
 func ExportMarkdownContent(id string) (hPath, exportedMd string) {
@@ -1916,7 +2199,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		table, err := renderAttributeViewTable(attrView, view, 1, -1)
+		table, err := renderAttributeViewTable(attrView, view)
 		if nil != err {
 			logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
 			return ast.WalkContinue

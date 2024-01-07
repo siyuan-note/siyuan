@@ -33,6 +33,7 @@ import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -169,30 +170,69 @@ const dockToJSON = (dock: Dock) => {
 
 export const resetLayout = () => {
     fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+        window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+        setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
+        window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
+        setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
         window.location.reload();
     });
 };
 
+let saveCount = 0;
+export const saveLayout = () => {
+    const breakObj = {};
+    let layoutJSON: any = {};
+    if (isWindow()) {
+        layoutJSON = {
+            layout: {},
+        };
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
+    } else {
+        const useElement = document.querySelector("#barDock use");
+        if (useElement) {
+            layoutJSON = {
+                hideDock: useElement.getAttribute("xlink:href") === "#iconDock",
+                layout: {},
+                bottom: dockToJSON(window.siyuan.layout.bottomDock),
+                left: dockToJSON(window.siyuan.layout.leftDock),
+                right: dockToJSON(window.siyuan.layout.rightDock),
+            };
+            layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
+        }
+    }
+
+    if (Object.keys(breakObj).length > 0 && saveCount < 10) {
+        saveCount++;
+        setTimeout(() => {
+            saveLayout();
+        }, Constants.TIMEOUT_LOAD * saveCount);
+    } else {
+        saveCount = 0;
+        if (isWindow()) {
+            sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
+        } else {
+            fetchPost("/api/system/setUILayout", {
+                layout: layoutJSON,
+                errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
+            });
+        }
+    }
+};
+
 export const exportLayout = (options: {
-    reload: boolean,
-    cb?: () => void,
-    onlyData: boolean,
-    errorExit: boolean,
+    cb: () => void,
+    errorExit: boolean
 }) => {
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},
         };
         layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-        if (options.onlyData) {
-            return layoutJSON;
-        }
+        getAllModels().editor.forEach(item => {
+            saveScroll(item.editor.protyle);
+        });
         sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
-        if (options.reload) {
-            window.location.reload();
-        } else if (options.cb) {
-            options.cb();
-        }
+        options.cb();
         return;
     }
     const useElement = document.querySelector("#barDock use");
@@ -207,19 +247,27 @@ export const exportLayout = (options: {
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-    if (options.onlyData) {
-        return layoutJSON;
-    }
+    getAllModels().editor.forEach(item => {
+        saveScroll(item.editor.protyle);
+    });
     fetchPost("/api/system/setUILayout", {
         layout: layoutJSON,
         errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
     }, () => {
-        if (options.reload) {
-            window.location.reload();
-        } else if (options.cb) {
-            options.cb();
-        }
+        options.cb();
     });
+};
+
+export const getAllLayout = () => {
+    const layoutJSON: any = {
+        hideDock: document.querySelector("#barDock use").getAttribute("xlink:href") === "#iconDock",
+        layout: {},
+        bottom: dockToJSON(window.siyuan.layout.bottomDock),
+        left: dockToJSON(window.siyuan.layout.leftDock),
+        right: dockToJSON(window.siyuan.layout.rightDock),
+    };
+    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
+    return layoutJSON;
 };
 
 const initInternalDock = (dockItem: IDockTab[]) => {
@@ -298,10 +346,10 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
                 child.headElement.querySelector(".item__text").classList.add("fn__none");
             }
         }
-        if (json.active) {
+        if (json.active && child.headElement) {
             child.headElement.setAttribute("data-init-active", "true");
         }
-        (layout as Wnd).addTab(child);
+        (layout as Wnd).addTab(child, false, false);
         (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -375,12 +423,25 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined);
     JSONToDock(window.siyuan.config.uiLayout, app);
     // 启动时不打开页签，需要移除没有钉住的页签
-    if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
-        getAllTabs().forEach(item => {
-            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id, false, false);
-            }
-        });
+    if (window.siyuan.config.fileTree.closeTabsOnStart) {
+        /// #if BROWSER
+        if (!sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD)) {
+            getAllTabs().forEach(item => {
+                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                    item.parent.removeTab(item.id, false, false);
+                }
+            });
+            sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
+        }
+        /// #else
+        if (isStart) {
+            getAllTabs().forEach(item => {
+                if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                    item.parent.removeTab(item.id, false, false);
+                }
+            });
+        }
+        /// #endif
     }
     app.plugins.forEach(item => {
         afterLoadPlugin(item);
@@ -420,13 +481,13 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
             item.removeAttribute("data-init-active");
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
-            tab.parent.switchTab(item, false, false);
+            tab.parent.switchTab(item, false, false, true, false);
         });
     }
     resizeTopBar();
 };
 
-export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
+export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {
     if (layout instanceof Layout) {
         json.direction = layout.direction;
         if (layout.parent) {
@@ -469,13 +530,15 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         }
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
+        if (!layout.editor.protyle.notebookId && breakObj) {
+            breakObj.editor = "true";
+        }
         json.notebookId = layout.editor.protyle.notebookId;
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.instance = "Editor";
-        saveScroll(layout.editor.protyle);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         if (layout.pdfObject) {
@@ -542,13 +605,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 const itemJSON = {};
                 json.children.push(itemJSON);
-                layoutToJSON(item, itemJSON);
+                layoutToJSON(item, itemJSON, breakObj);
             });
         }
     } else if (layout instanceof Tab) {
         if (layout.model) {
             json.children = {};
-            layoutToJSON(layout.model, json.children);
+            layoutToJSON(layout.model, json.children, breakObj);
         } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
             json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");
@@ -778,6 +841,7 @@ export const addResize = (obj: Layout | Wnd) => {
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
+                adjustLayout(isWindow() ? window.siyuan.layout.centerLayout : undefined);
                 resizeTabs();
                 if (!isWindow()) {
                     window.siyuan.layout.leftDock.setSize();
@@ -800,4 +864,35 @@ export const addResize = (obj: Layout | Wnd) => {
     resizeElement.classList.add("layout__resize");
     obj.element.insertAdjacentElement("beforebegin", resizeElement);
     resizeWnd(resizeElement, obj.resize);
+};
+
+export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
+    layout.children.forEach((item: Layout | Wnd) => {
+        item.element.style.maxWidth = "";
+        if (!item.element.style.width && !item.element.classList.contains("layout__center")) {
+            item.element.style.minWidth = "8px";
+        } else {
+            item.element.style.minWidth = "";
+        }
+    });
+    let lastItem: HTMLElement
+    while (layout.element.scrollWidth > layout.element.clientWidth) {
+        layout.children.find((item: Layout | Wnd) => {
+            if (item.element.style.width && item.element.style.width !== "0px") {
+                item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
+                lastItem = item.element;
+            }
+            if (layout.element.scrollWidth <= layout.element.clientWidth) {
+                return true;
+            }
+        });
+    }
+    if (lastItem) {
+        lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";
+    }
+    layout.children.forEach((item: Layout | Wnd) => {
+        if (item instanceof Layout && item.size !== "0px") {
+            adjustLayout(item);
+        }
+    });
 };

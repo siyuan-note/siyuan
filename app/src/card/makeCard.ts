@@ -37,7 +37,7 @@ export const genCardItem = (item: ICardPackage) => {
 
 export const makeCard = (app: App, ids: string[]) => {
     window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === "makeCard") {
+        if (item.element.getAttribute("data-key") === Constants.DIALOG_MAKECARD) {
             hideElements(["dialog"]);
             return true;
         }
@@ -48,6 +48,7 @@ export const makeCard = (app: App, ids: string[]) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_MAKECARD,
             width: isMobile() ? "92vw" : "50vw",
             height: "70vh",
             title: window.siyuan.languages.riffCard,
@@ -67,7 +68,7 @@ export const makeCard = (app: App, ids: string[]) => {
     <ul class="b3-list b3-list--background fn__flex-1">${html}</ul>
 </div>`,
         });
-        dialog.element.setAttribute("data-key", "makeCard");
+        dialog.element.setAttribute("data-key", Constants.DIALOG_MAKECARD);
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {

@@ -78,7 +78,7 @@ export class Options {
         lang: window.siyuan.config.appearance.lang,
         preview: {
             actions: ["desktop", "tablet", "mobile", "mp-wechat", "zhihu", "yuque"],
-            delay: 1000,
+            delay: 0,
             markdown: {
                 paragraphBeginningSpace: window.siyuan.config.export.paragraphBeginningSpace,
                 listStyle: false,

@@ -20,6 +20,7 @@ import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
 import {loadPlugins} from "../plugin/loader";
+import {hideAllElements} from "../protyle/ui/hideElements";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -52,6 +53,13 @@ class App {
                         switch (data.cmd) {
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
+                                break;
+                            case "readonly":
+                                window.siyuan.config.editor.readOnly = data.data;
+                                hideAllElements(["util"]);
+                                break;
+                            case "setConf":
+                                window.siyuan.config = data.data;
                                 break;
                             case "progress":
                                 progressLoading(data);
@@ -129,7 +137,7 @@ class App {
             window.siyuan.config = response.data.conf;
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {

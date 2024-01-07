@@ -90,9 +90,9 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, srcIDs: stri
 </div>`;
     });
     previousElement.insertAdjacentHTML("afterend", html);
-    const pageSize = parseInt(blockElement.getAttribute("data-page-size"))
+    const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {
-        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length
+        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
         if (pageSize < currentCount) {
             blockElement.setAttribute("data-page-size", currentCount.toString());
         }
@@ -253,4 +253,4 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     });
     stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
     updateHeader(blockElement.querySelector(".av__row"));
-}
+};

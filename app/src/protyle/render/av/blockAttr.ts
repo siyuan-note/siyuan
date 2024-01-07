@@ -1,9 +1,44 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
-import {hasClosestByAttribute} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
+
+const genAVRollupHTML = (value: IAVCellValue) => {
+    let html = "";
+    switch (value.type) {
+        case "block":
+            html = value.block.content;
+            break;
+        case "text":
+            html = value.text.content;
+            break;
+        case "number":
+            html = value.number.formattedContent || value.number.content.toString();
+            break;
+        case "date":
+            if (value[value.type] && value[value.type].isNotEmpty) {
+                html = dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+            }
+            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+            }
+            if (html) {
+                html = `<span class="av__celltext">${html}</span>`;
+            }
+            break;
+        case "url":
+            html = value.url.content ? `<a class="fn__a" href="${value.url.content}" target="_blank">${value.url.content}</a>` : "";
+            break;
+        case "phone":
+            html = value.phone.content ? `<a class="fn__a" href="tel:${value.phone.content}" target="_blank">${value.phone.content}</a>` : "";
+            break;
+        case "email":
+            html = value.email.content ? `<a class="fn__a" href="mailto:${value.email.content}" target="_blank">${value.email.content}</a>` : "";
+            break;
+    }
+    return html;
+};
 
 export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
@@ -33,12 +68,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            if (value[value.type].isNotEmpty) {
-                html = `<span data-content="${value[value.type].content}">${dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}'>`;
+            if (value[value.type] && value[value.type].isNotEmpty) {
+                html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }
-            if (value[value.type].hasEndDate && value[value.type].isNotEmpty2 && value[value.type].isNotEmpty) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${value[value.type].content2}">${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}</span>`;
+            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
+                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
             }
+            html += "</span>";
             break;
         case "created":
         case "updated":
@@ -57,7 +94,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
         case "checkbox":
-            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked?"Check":"Uncheck"}"></use></svg>`;
+            html = `<svg class="av__checkbox" style="height: 17px;"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
             html = `<div class="fn__flex-1">${value.template.content}</div>`;
@@ -66,6 +103,21 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
 <span class="fn__space"></span>
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
+            break;
+        case "relation":
+            value.relation?.blockIDs?.forEach((item, index) => {
+                html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
+            });
+            break;
+        case "rollup":
+            value?.rollup?.contents?.forEach((item, index) => {
+                const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
+                if (!rollupText && html) {
+                    html = html.substring(0, html.length - 2);
+                } else {
+                    html += rollupText + ((index === value.rollup.contents.length - 1 || !rollupText) ? "" : ",&nbsp;");
+                }
+            });
             break;
     }
     return html;
@@ -88,7 +140,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IP
                     keyID: string,
                     id: string,
                     blockID: string,
-                    type?: TAVCol & IAVCellValue
+                    type: TAVCol & IAVCellValue
                 }  []
             }[],
             blockIDs: string[],
@@ -117,34 +169,36 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
         });
         element.innerHTML = html;
         element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-            const dateElement = hasClosestByAttribute(target, "data-type", "date");
-            if (dateElement) {
-                popTextCell(protyle, [dateElement], "date");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect");
-            if (mSelectElement) {
-                popTextCell(protyle, [mSelectElement], mSelectElement.getAttribute("data-type") as TAVCol);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const mAssetElement = hasClosestByAttribute(target, "data-type", "mAsset");
-            if (mAssetElement) {
-                popTextCell(protyle, [mAssetElement], "mAsset");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-            const checkboxElement = hasClosestByAttribute(target, "data-type", "checkbox");
-            if (checkboxElement) {
-                popTextCell(protyle, [checkboxElement], "checkbox");
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+            let target = event.target as HTMLElement;
+            while (target && !element.isSameNode(target)) {
+                const type = target.getAttribute("data-type");
+                if (type === "date") {
+                    popTextCell(protyle, [target], "date");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "select" || type === "mSelect") {
+                    popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "mAsset") {
+                    popTextCell(protyle, [target], "mAsset");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "checkbox") {
+                    popTextCell(protyle, [target], "checkbox");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "relation") {
+                    popTextCell(protyle, [target], "relation");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
+                target = target.parentElement;
             }
         });
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {

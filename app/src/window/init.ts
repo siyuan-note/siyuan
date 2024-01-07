@@ -1,7 +1,7 @@
 import {Constants} from "../constants";
 import {webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
-import {getInstanceById, JSONToCenter} from "../layout/util";
+import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearance} from "../config/appearance";
@@ -41,6 +41,7 @@ export const init = (app: App) => {
             }]
         });
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+        adjustLayout(window.siyuan.layout.centerLayout);
         afterLayout(app);
     });
     initStatus(true);
@@ -53,6 +54,7 @@ export const init = (app: App) => {
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
+            adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
         }, 200);
     });

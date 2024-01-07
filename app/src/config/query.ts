@@ -195,13 +195,13 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch" id="backlinkMentionDoc" type="checkbox"${window.siyuan.config.search.backlinkMentionDoc ? " checked" : ""}/>
         </label>
-        <label class="fn__flex" style="flex: 2">
-            <div class=>
+        <div class="fn__flex label" style="flex: 2">
+            <div>
                 ${window.siyuan.languages.keywordsLimit}
             </div>
             <span class="fn__space"></span>
             <input class="b3-text-field" id="backlinkMentionKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.backlinkMentionKeywordsLimit}">
-        </label>
+        </div>
     </div>
 </div>
 <div class="b3-label">
@@ -249,7 +249,7 @@ export const query = {
         </label>
     </div>
 </div>
-<label class="fn__flex b3-label config__item">
+<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.searchLimit}
          <div class="b3-label__text">${window.siyuan.languages.searchLimit1}</div>
@@ -257,7 +257,7 @@ export const query = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="limit" type="number" min="32" max="10240" value="${window.siyuan.config.search.limit}">
-</label>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.searchCaseSensitive}

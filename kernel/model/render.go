@@ -93,7 +93,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 }
 
 func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
-	ret = treenode.NodeStaticContent(node, excludeTypes, false, false)
+	ret = treenode.NodeStaticContent(node, excludeTypes, false, false, false)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")
 	ret = util.EscapeHTML(ret)
@@ -156,7 +156,7 @@ func renderBlockContentByNodes(nodes []*ast.Node) string {
 
 	buf := bytes.Buffer{}
 	for _, n := range subNodes {
-		buf.WriteString(treenode.NodeStaticContent(n, nil, false, false))
+		buf.WriteString(treenode.NodeStaticContent(n, nil, false, false, false))
 	}
 	return buf.String()
 }

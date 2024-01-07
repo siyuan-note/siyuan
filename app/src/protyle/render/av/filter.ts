@@ -7,12 +7,18 @@ import {objEquals} from "../../../util/functions";
 import {genCellValue} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
+import {openMenuPanel} from "./openMenuPanel";
+import {fetchSyncPost} from "../../../util/fetch";
+import {showMessage} from "../../../dialog/message";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
-    if (["select", "number"].includes(type)) {
+    if (["select", "number", "date", "created", "updated"].includes(type)) {
         return "=";
     }
-    if (["text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
+    if (["checkbox"].includes(type)) {
+        return "Is false";
+    }
+    if (["rollup", "relation", "rollup", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
         return "Contains";
     }
 };
@@ -47,11 +53,12 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
     }
 };
 
-export const setFilter = (options: {
+export const setFilter = async (options: {
     filter: IAVFilter,
     protyle: IProtyle,
     data: IAV,
     target: HTMLElement,
+    blockElement: Element
 }) => {
     let rectTarget = options.target.getBoundingClientRect();
     if (rectTarget.height === 0) {
@@ -59,22 +66,27 @@ export const setFilter = (options: {
     }
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
+        const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement;
+        const operator = selectElement.value as TAVFilterOperator;
+        if (!selectElement || !operator) {
+            return;
+        }
         let hasMatch = false;
         let cellValue: IAVCellValue;
         if (textElements.length > 0) {
-            if (["date", "updated", "created"].includes(colData.type)) {
-                cellValue = genCellValue(colData.type, {
+            if (["date", "updated", "created"].includes(filterType)) {
+                cellValue = genCellValue(filterType, {
                     isNotEmpty2: textElements[1].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: new Date(textElements[0].value + " 00:00").getTime(),
-                    content2: new Date(textElements[1].value + " 00:00").getTime(),
-                    hasEndDate: operator === "Is between"
+                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
+                    content2: textElements[1].value ? new Date(textElements[1].value + " 00:00").getTime() : null,
+                    hasEndDate: operator === "Is between",
+                    isNotTime: true,
                 });
             } else {
-                cellValue = genCellValue(colData.type, textElements[0].value);
+                cellValue = genCellValue(filterType, textElements[0].value);
             }
-        } else {
+        } else if (filterType === "select" || filterType === "mSelect") {
             const mSelect: {
                 color: string,
                 content: string
@@ -88,20 +100,29 @@ export const setFilter = (options: {
                     });
                 }
             });
-            if (mSelect.length === 0) {
-                mSelect.push({color: "", content: ""});
-            }
-            cellValue = genCellValue(colData.type, mSelect);
+            cellValue = genCellValue(filterType, mSelect);
+        } else if (filterType === "checkbox") {
+            cellValue = genCellValue(filterType, {
+                checked: operator === "Is true"
+            });
+        } else {
+            cellValue = genCellValue(filterType, undefined);
         }
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
             operator
         };
-
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column) {
+                if (filter.type && filter.type === "checkbox") {
+                    hasMatch = true;
+                    delete filter.type;
+                    options.data.view.filters[index] = newFilter;
+                    return true;
+                }
+                delete filter.type;
                 if (objEquals(filter, newFilter)) {
                     isSame = true;
                     return true;
@@ -139,10 +160,49 @@ export const setFilter = (options: {
             return true;
         }
     });
-    switch (colData.type) {
+    let filterType = colData.type;
+    if (filterType === "rollup") {
+        if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
+            showMessage(window.siyuan.languages.plsChoose);
+            openMenuPanel({
+                protyle: options.protyle,
+                blockElement: options.blockElement,
+                type: "edit",
+                colId: colData.id
+            });
+            return;
+        }
+        let targetAVId = "";
+        options.data.view.columns.find((column) => {
+            if (column.id === colData.rollup.relationKeyID) {
+                targetAVId = column.relation.avID;
+                return true;
+            }
+        });
+        const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
+        response.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
+            if (item.key.id === colData.rollup.keyID) {
+                filterType = item.key.type;
+                return true;
+            }
+        });
+        options.data.view.filters.find(item => {
+            if (item.column === colData.id && item.type) {
+                item.operator = getDefaultOperatorByType(filterType);
+                item.value = genCellValue(filterType, "");
+                delete item.type;
+                return true;
+            }
+        });
+    }
+    switch (filterType) {
         case "checkbox":
-            selectHTML = `<option ${"Is true" === options.filter.operator ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
-<option ${"Is false" === options.filter.operator ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            selectHTML = `<option ${("Is true" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
+<option ${("Is false" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            if (options.filter.type) {
+                // 初始化时有 type 字段
+                selectHTML = `<option selected></option>${selectHTML}`;
+            }
             break;
         case "block":
         case "text":
@@ -195,25 +255,24 @@ export const setFilter = (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
         case "mSelect":
-        case "select":
-            if (colData.type === "select") {
-                selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
-<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
-<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
-            } else {
-                selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+        case "relation":
+            selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
 <option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
-            }
+            break;
+        case "select":
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
     }
     menu.addItem({
         iconHTML: "",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (colData.type === "select" || colData.type === "mSelect") {
+    if (filterType === "select" || filterType === "mSelect") {
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
             options.filter.value?.mSelect.find((optionItem) => {
@@ -238,21 +297,29 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "email", "phone", "template"].includes(colData.type)) {
+    } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(filterType)) {
+        let value = "";
+        if (options.filter.value) {
+            if (filterType === "relation") {
+                value = options.filter.value.relation.contents[0] || "";
+            } else {
+                value = options.filter.value[filterType as "text"].content || "";
+            }
+        }
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value ? options.filter.value[colData.type as "text"].content : ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200">`
         });
-    } else if (colData.type === "number") {
+    } else if (filterType === "number") {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value?.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
         });
-    } else if (["date", "updated", "created"].includes(colData.type)) {
-        const dateValue = options.filter.value ? options.filter.value[colData.type as "date"] : null;
+    } else if (["date", "updated", "created"].includes(filterType)) {
+        const dateValue = options.filter.value ? options.filter.value[filterType as "date"] : null;
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || colData.type !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || filterType !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
@@ -287,7 +354,7 @@ export const setFilter = (options: {
     });
     const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value, colData.type);
+        toggleEmpty(selectElement, selectElement.value, filterType);
     });
     const textElements: NodeListOf<HTMLInputElement> = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field");
     textElements.forEach(item => {
@@ -302,7 +369,7 @@ export const setFilter = (options: {
             }
         });
     });
-    toggleEmpty(selectElement, selectElement.value, colData.type);
+    toggleEmpty(selectElement, selectElement.value, filterType);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {
         textElements[0].select();
@@ -316,6 +383,7 @@ export const addFilter = (options: {
     tabRect: DOMRect,
     avId: string,
     protyle: IProtyle
+    blockElement: Element
 }) => {
     const menu = new Menu("av-add-filter");
     options.data.view.columns.forEach((column) => {
@@ -331,22 +399,13 @@ export const addFilter = (options: {
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
-                    const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = genCellValue(column.type, "");
                     options.data.view.filters.push({
                         column: column.id,
                         operator: getDefaultOperatorByType(column.type),
                         value: cellValue,
+                        type: column.type
                     });
-                    transaction(options.protyle, [{
-                        action: "setAttrViewFilters",
-                        avID: options.data.id,
-                        data: options.data.view.filters
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID: options.data.id,
-                        data: oldFilters
-                    }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data.view);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
@@ -358,7 +417,8 @@ export const addFilter = (options: {
                         },
                         protyle: options.protyle,
                         data: options.data,
-                        target: filterElement
+                        target: filterElement,
+                        blockElement: options.blockElement
                     });
                 }
             });
@@ -420,9 +480,10 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
                 } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content ||
-                    filter.value?.phone?.content || filter.value?.email?.content) {
+                    filter.value?.phone?.content || filter.value?.email?.content || filter.value?.relation?.contents.length > 0) {
                     const content = filter.value?.text?.content || filter.value?.block?.content ||
-                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content;
+                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content ||
+                        filter.value?.relation?.contents[0];
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {

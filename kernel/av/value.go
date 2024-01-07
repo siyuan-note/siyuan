@@ -19,6 +19,7 @@ package av
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -30,12 +31,11 @@ import (
 )
 
 type Value struct {
-	ID            string  `json:"id,omitempty"`
-	KeyID         string  `json:"keyID,omitempty"`
-	BlockID       string  `json:"blockID,omitempty"`
-	Type          KeyType `json:"type,omitempty"`
-	IsDetached    bool    `json:"isDetached,omitempty"`
-	IsInitialized bool    `json:"isInitialized,omitempty"`
+	ID         string  `json:"id,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`
+	BlockID    string  `json:"blockID,omitempty"`
+	Type       KeyType `json:"type,omitempty"`
+	IsDetached bool    `json:"isDetached,omitempty"`
 
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
@@ -65,7 +65,7 @@ func (value *Value) String() string {
 		if nil == value.Text {
 			return ""
 		}
-		return value.Text.Content
+		return strings.TrimSpace(value.Text.Content)
 	case KeyTypeNumber:
 		if nil == value.Number {
 			return ""
@@ -118,7 +118,7 @@ func (value *Value) String() string {
 		if nil == value.Template {
 			return ""
 		}
-		return value.Template.Content
+		return strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
 		if nil == value.Created {
 			return ""
@@ -138,15 +138,23 @@ func (value *Value) String() string {
 		}
 		return ""
 	case KeyTypeRelation:
-		if nil == value.Relation {
+		if 1 > len(value.Relation.Contents) {
 			return ""
 		}
-		return value.Relation.Content
+		var ret []string
+		for _, v := range value.Relation.Contents {
+			ret = append(ret, v)
+		}
+		return strings.Join(ret, " ")
 	case KeyTypeRollup:
-		if nil == value.Rollup {
+		if nil == value.Rollup || nil == value.Rollup.Contents {
 			return ""
 		}
-		return strings.Join(value.Rollup.Contents, " ")
+		var ret []string
+		for _, v := range value.Rollup.Contents {
+			ret = append(ret, v.String())
+		}
+		return strings.Join(ret, " ")
 	default:
 		return ""
 	}
@@ -158,6 +166,18 @@ func (value *Value) ToJSONString() string {
 		return ""
 	}
 	return string(data)
+}
+
+func (value *Value) Clone() (ret *Value) {
+	data, err := gulu.JSON.MarshalJSON(value)
+	if nil != err {
+		return
+	}
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	if nil != err {
+		return
+	}
+	return
 }
 
 type ValueBlock struct {
@@ -195,15 +215,6 @@ const (
 	NumberFormatCanadianDollar NumberFormat = "canadianDollar"
 	NumberFormatFranc          NumberFormat = "franc"
 )
-
-func NewValueNumber(content float64) *ValueNumber {
-	return &ValueNumber{
-		Content:          content,
-		IsNotEmpty:       true,
-		Format:           NumberFormatNone,
-		FormattedContent: fmt.Sprintf("%f", content),
-	}
-}
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
 	ret = &ValueNumber{
@@ -292,19 +303,35 @@ const (
 
 func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime bool) (ret *ValueDate) {
 	var formatted string
-	if isNotTime {
-		formatted = time.UnixMilli(content).Format("2006-01-02")
-	} else {
-		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	contentTime := time.UnixMilli(content)
+	if 0 == content || contentTime.IsZero() {
+		ret = &ValueDate{
+			Content:          content,
+			Content2:         content2,
+			HasEndDate:       false,
+			IsNotTime:        true,
+			FormattedContent: formatted,
+		}
+		return
 	}
+
+	if isNotTime {
+		formatted = contentTime.Format("2006-01-02")
+	} else {
+		formatted = contentTime.Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		var formattedContent2 string
+		content2Time := time.UnixMilli(content2)
 		if isNotTime {
-			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02")
+			formattedContent2 = content2Time.Format("2006-01-02")
 		} else {
-			formattedContent2 = time.UnixMilli(content2).Format("2006-01-02 15:04")
+			formattedContent2 = content2Time.Format("2006-01-02 15:04")
 		}
-		formatted += " → " + formattedContent2
+		if !content2Time.IsZero() {
+			formatted += " → " + formattedContent2
+		}
 	}
 	switch format {
 	case DateFormatNone:
@@ -447,10 +474,171 @@ type ValueCheckbox struct {
 }
 
 type ValueRelation struct {
-	Content  string   `json:"content"`
+	Contents []string `json:"contents"`
 	BlockIDs []string `json:"blockIDs"`
 }
 
 type ValueRollup struct {
-	Contents []string `json:"contents"`
+	Contents []*Value `json:"contents"`
+}
+
+func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
+	if nil == calc {
+		return
+	}
+
+	switch calc.Operator {
+	case CalcOperatorNone:
+	case CalcOperatorCountAll:
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorCountValues:
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, v := range r.Contents {
+			if _, ok := uniqueValues[v.String()]; !ok {
+				uniqueValues[v.String()] = true
+				countUniqueValues++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v.String() {
+				countEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorCountNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v.String() {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, v := range r.Contents {
+			if "" == v.String() {
+				countEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countEmpty*100/len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorPercentNotEmpty:
+		countNonEmpty := 0
+		for _, v := range r.Contents {
+			if "" != v.String() {
+				countNonEmpty++
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty*100/len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorSum:
+		sum := 0.0
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				sum += v.Number.Content
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum, destKey.NumberFormat)}}
+	case CalcOperatorAverage:
+		sum := 0.0
+		count := 0
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				sum += v.Number.Content
+				count++
+			}
+		}
+		if 0 < count {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum/float64(count), destKey.NumberFormat)}}
+		}
+	case CalcOperatorMedian:
+		var numbers []float64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				numbers = append(numbers, v.Number.Content)
+			}
+		}
+		sort.Float64s(numbers)
+		if 0 < len(numbers) {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(numbers[len(numbers)/2], destKey.NumberFormat)}}
+		}
+	case CalcOperatorMin:
+		minVal := math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content < minVal {
+					minVal = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(minVal, destKey.NumberFormat)}}
+	case CalcOperatorMax:
+		maxVal := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content > maxVal {
+					maxVal = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal, destKey.NumberFormat)}}
+	case CalcOperatorRange:
+		minVal := math.MaxFloat64
+		maxVal := -math.MaxFloat64
+		for _, v := range r.Contents {
+			if nil != v.Number {
+				if v.Number.Content < minVal {
+					minVal = v.Number.Content
+				}
+				if v.Number.Content > maxVal {
+					maxVal = v.Number.Content
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
+	case CalcOperatorChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked), NumberFormatNone)}}
+	case CalcOperatorUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked), NumberFormatNone)}}
+	case CalcOperatorPercentChecked:
+		countChecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if v.Checkbox.Checked {
+					countChecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked*100/len(r.Contents)), NumberFormatNone)}}
+	case CalcOperatorPercentUnchecked:
+		countUnchecked := 0
+		for _, v := range r.Contents {
+			if nil != v.Checkbox {
+				if !v.Checkbox.Checked {
+					countUnchecked++
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
+	}
 }

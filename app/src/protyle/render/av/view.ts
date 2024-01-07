@@ -101,6 +101,7 @@ export const bindViewEvent = (options: {
             inputElement.dataset.value = inputElement.value;
         }
     });
+    inputElement.select();
 };
 
 export const getViewHTML = (data: IAVTable) => {
@@ -118,25 +119,25 @@ export const getViewHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
     <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
     <span class="b3-menu__accelerator">${data.filters.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goSorts">
     <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
     <span class="b3-menu__accelerator">${data.sorts.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="set-page-size" data-size="${data.pageSize}">
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
     <span class="b3-menu__accelerator">${data.pageSize}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="duplicate-view">

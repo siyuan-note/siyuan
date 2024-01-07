@@ -44,7 +44,6 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     }
     loadElement.classList.remove("fn__none");
     loadElement.nextElementSibling.classList.add("fn__none");
-    searchListElement.previousElementSibling.innerHTML = "";
     let ids: string[] = [];
     if (isAll) {
         searchListElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
@@ -59,6 +58,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
         ids,
         types: config.types,
         method: config.method,
+        replaceTypes: config.replaceTypes
     }, (response) => {
         loadElement.classList.add("fn__none");
         loadElement.nextElementSibling.classList.remove("fn__none");
@@ -189,7 +189,7 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta" style="margin-top: -4px">${escapeGreat(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
 </div>`;
         }
     });
@@ -497,7 +497,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
                             databaseBlock: window.siyuan.config.search.databaseBlock,
-                        }
+                        },
+                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                 });
                 window.siyuan.menus.menu.fullscreen();
@@ -571,7 +572,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
                     if (id) {
-                        if (window.siyuan.mobile.editor.protyle) {
+                        if (window.siyuan.mobile.editor?.protyle) {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
                         checkFold(id, (zoomIn) => {

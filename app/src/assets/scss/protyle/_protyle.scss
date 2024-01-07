@@ -192,9 +192,9 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 4px;
-    line-height: 16px;
-    height: 16px;
+    padding: 0 4px;
+    line-height: 24px;
+    height: 24px;
     border-radius: var(--b3-border-radius);
     margin: 3px 0;
     color: var(--b3-theme-on-surface);
@@ -340,7 +340,7 @@
   }
 
   &[custom-riff-decks] {
-    box-shadow: -3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
   }
 
   &__icon {

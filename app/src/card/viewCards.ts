@@ -21,6 +21,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         const dialog = new Dialog({
+            positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
     <div class="block__icons">
         <span class="fn__flex-1 fn__flex-center resize__move">${escapeHtml(title)}</span>
@@ -78,7 +79,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
-        dialog.element.setAttribute("data-key", "viewCards");
+        dialog.element.setAttribute("data-key", Constants.DIALOG_VIEWCARDS);
         dialog.element.addEventListener("click", (event) => {
             if (typeof event.detail === "string") {
                 let currentElement = listElement.querySelector(".b3-list-item--focus");

@@ -1294,8 +1294,7 @@ export class Toolbar {
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
         const previewElement = this.subElement.firstElementChild.lastElementChild;
-        let previewPath = listElement.firstElementChild.getAttribute("data-value");
-        previewTemplate(previewPath, previewElement, protyle.block.parentID);
+        let previewPath: string
         listElement.addEventListener("mouseover", (event) => {
             const target = event.target as HTMLElement;
             const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
@@ -1437,10 +1436,7 @@ export class Toolbar {
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span></div>`;
             });
-            if (html === "") {
-                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-            }
-            this.subElement.querySelector(".b3-list--background").innerHTML = html;
+            this.subElement.querySelector(".b3-list--background").innerHTML = html ||`<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             /// #if !MOBILE
             const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
@@ -1448,6 +1444,8 @@ export class Toolbar {
             /// #else
             setPosition(this.subElement, 0, 0);
             /// #endif
+            previewPath = listElement.firstElementChild.getAttribute("data-value");
+            previewTemplate(previewPath, previewElement, protyle.block.parentID);
         });
     }
 

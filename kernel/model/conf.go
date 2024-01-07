@@ -208,10 +208,6 @@ func InitConf() {
 	if "../" == Conf.FileTree.DocCreateSavePath {
 		Conf.FileTree.DocCreateSavePath = "../Untitled"
 	}
-	for strings.HasSuffix(Conf.FileTree.DocCreateSavePath, "/") {
-		Conf.FileTree.DocCreateSavePath = strings.TrimSuffix(Conf.FileTree.DocCreateSavePath, "/")
-		Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
-	}
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion

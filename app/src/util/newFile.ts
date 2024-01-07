@@ -94,7 +94,7 @@ export const newFile = (optios: {
             if (data.data.path.startsWith("/") || optios.currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: optios.notebookId,
-                    path: pathPosix().join(data.data.path, optios.name || ""),
+                    path: pathPosix().join(data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
                     // 根目录时无法确定 parentID
                     markdown: ""
                 }, response => {
@@ -115,7 +115,7 @@ export const newFile = (optios: {
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: optios.notebookId,
-                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || ""),
+                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
                         parentID: getDisplayName(optios.currentPath, true, true),
                         markdown: ""
                     }, response => {
@@ -132,8 +132,7 @@ export const newFile = (optios: {
                 });
             }
         } else {
-            let title = data.data.path || "Untitled";
-            title = title.substring(title.lastIndexOf("/") + 1);
+            const title = pathPosix().basename(data.data.path || "Untitled");
             if (!validateName(title)) {
                 return;
             }

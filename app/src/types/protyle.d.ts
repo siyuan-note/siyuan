@@ -168,6 +168,8 @@ declare class Lute {
 
     public BlockDOM2EscapeMarkerContent(text: string): string;
 
+    public SetSpin(enable: boolean): void;
+
     public SetTextMark(enable: boolean): void;
 
     public SetHeadingID(enable: boolean): void;
@@ -193,8 +195,6 @@ declare class Lute {
     public BlockDOM2Md(html: string): string;
 
     public BlockDOM2StdMd(html: string): string;
-
-    public SetGitConflict(enable: boolean): void;
 
     public SetSuperBlock(enable: boolean): void;
 

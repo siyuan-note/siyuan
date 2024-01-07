@@ -2,7 +2,8 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {popTextCell} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell} from "./cell";
+import {fetchPost} from "../../../util/fetch";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -70,6 +71,14 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
+/**
+ * 前端插入一假行
+ * @param protyle
+ * @param blockElement
+ * @param srcIDs
+ * @param previousId
+ * @param avId 还用于判断是否是插入的 block
+ */
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -83,7 +92,6 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
             colHTML += "</div>";
         }
     });
-
     let html = "";
     srcIDs.forEach((id) => {
         html += `<div class="av__row" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
@@ -92,7 +100,23 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
     });
     previousElement.insertAdjacentHTML("afterend", html);
     if (avId) {
-        popTextCell(protyle, [previousElement.nextElementSibling.querySelector('.av__cell[data-detached="true"]')], "block");
+        const currentRow = previousElement.nextElementSibling;
+        const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
+        if (sideRow.classList.contains("av__row")) {
+            fetchPost("/api/av/getAttributeViewFilterSort", {id: avId}, (response) => {
+                response.data.filters.forEach((item: IAVFilter) => {
+                    const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
+                    currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
+                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
+                })
+                response.data.sorts.forEach((item: IAVSort) => {
+                    const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
+                    currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
+                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
+                })
+            })
+        }
+        popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
     }
     const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {

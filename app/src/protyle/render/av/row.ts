@@ -114,9 +114,11 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
                     currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
                         renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
                 })
+                popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             })
+        } else {
+            popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
         }
-        popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
     }
     const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {

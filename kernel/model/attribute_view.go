@@ -1691,8 +1691,12 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
-		block := row.GetBlockValue()
-		if nil != block {
+		blockVal := row.GetBlockValue()
+		if nil != blockVal {
+			if nil != blockVal.Block && blockVal.Block.Created == blockVal.Block.Updated {
+				// 说明是刚刚创建的块，跳过
+				continue
+			}
 			return row
 		}
 	}

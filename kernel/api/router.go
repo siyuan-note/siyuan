@@ -363,6 +363,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/downloadCloudSnapshot", model.CheckAuth, model.CheckReadonly, downloadCloudSnapshot)
 	ginServer.Handle("POST", "/api/repo/diffRepoSnapshots", model.CheckAuth, diffRepoSnapshots)
 	ginServer.Handle("POST", "/api/repo/openRepoSnapshotDoc", model.CheckAuth, openRepoSnapshotDoc)
+	ginServer.Handle("POST", "/api/repo/getRepoFile", model.CheckAuth, getRepoFile)
 
 	ginServer.Handle("POST", "/api/riff/createRiffDeck", model.CheckAuth, model.CheckReadonly, createRiffDeck)
 	ginServer.Handle("POST", "/api/riff/renameRiffDeck", model.CheckAuth, model.CheckReadonly, renameRiffDeck)

@@ -51,7 +51,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.17.10
 	github.com/shirou/gopsutil/v3 v3.23.12
-	github.com/siyuan-note/dejavu v0.0.0-20240106123310-d41af94d3e67
+	github.com/siyuan-note/dejavu v0.0.0-20240108131531-9a38601f4e0b
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20231210025112-82fdedd8e374
 	github.com/siyuan-note/filelock v0.0.0-20231211015131-3b3dfabdce9c

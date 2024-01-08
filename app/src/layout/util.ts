@@ -875,7 +875,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "";
         }
     });
-    let lastItem: HTMLElement
+    let lastItem: HTMLElement;
     while (layout.element.scrollWidth > layout.element.clientWidth) {
         layout.children.find((item: Layout | Wnd) => {
             if (item.element.style.width && item.element.style.width !== "0px") {

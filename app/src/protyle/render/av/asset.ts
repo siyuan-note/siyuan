@@ -103,12 +103,12 @@ export const updateAssetCell = (options: {
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    let mAssetValue: IAVCellAssetValue[]
+    let mAssetValue: IAVCellAssetValue[];
     options.cellElements.forEach((item, elementIndex) => {
         if (!options.blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");
             if (rowElement) {
-                item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement
+                item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
             }
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
@@ -144,9 +144,9 @@ export const updateAssetCell = (options: {
             } else {
                 cellValue.mAsset = options.replaceValue;
             }
-            mAssetValue = cellValue.mAsset
+            mAssetValue = cellValue.mAsset;
         } else {
-            cellValue.mAsset = mAssetValue
+            cellValue.mAsset = mAssetValue;
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",

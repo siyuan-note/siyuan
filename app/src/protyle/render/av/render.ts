@@ -1,7 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {popTextCell, renderCell} from "./cell";
+import {renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -264,7 +264,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
 const refreshTimeouts: {
     [key: string]: number;
 } = {};
-export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
+export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;

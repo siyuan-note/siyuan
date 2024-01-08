@@ -485,10 +485,10 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         dialog
     });
     dialog.editor = editor;
-    const focusElement = dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement
+    const focusElement = dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement;
     focusElement.focus();
-    const range = document.createRange()
-    range.selectNodeContents(focusElement)
+    const range = document.createRange();
+    range.selectNodeContents(focusElement);
     focusByRange(range);
 };
 

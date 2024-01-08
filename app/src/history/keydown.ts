@@ -1,8 +1,8 @@
 import {Dialog} from "../dialog";
 
 export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
-    let currentItem = dialog.element.querySelector(".history__diff .b3-list-item--focus")
-    const items = Array.from(dialog.element.querySelectorAll(".history__diff .b3-list-item[data-id]"))
+    let currentItem = dialog.element.querySelector(".history__diff .b3-list-item--focus");
+    const items = Array.from(dialog.element.querySelectorAll(".history__diff .b3-list-item[data-id]"));
     if (items.length < 2) {
         return;
     }
@@ -11,9 +11,9 @@ export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
     } else {
         currentItem.classList.remove("b3-list-item--focus");
         if (event.key === "Home") {
-            currentItem = items[0]
+            currentItem = items[0];
         } else if (event.key === "End") {
-            currentItem = items[items.length - 1]
+            currentItem = items[items.length - 1];
         } else {
             items.find((item, index) => {
                 if (item.isSameNode(currentItem)) {
@@ -32,7 +32,7 @@ export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
                     }
                     return true;
                 }
-            })
+            });
         }
     }
     currentItem.classList.add("b3-list-item--focus");
@@ -44,9 +44,9 @@ export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
     const historyDiffElement = dialog.element.querySelector(".history__diff");
     const historyDiffRect = historyDiffElement.getBoundingClientRect();
     if (currentItemRect.bottom > historyDiffRect.bottom) {
-        currentItem.scrollIntoView(false)
+        currentItem.scrollIntoView(false);
     } else if (currentItemRect.top < historyDiffRect.top) {
-        currentItem.scrollIntoView()
+        currentItem.scrollIntoView();
     }
     dialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
-}
+};

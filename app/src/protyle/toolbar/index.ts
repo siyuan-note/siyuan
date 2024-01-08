@@ -1294,7 +1294,7 @@ export class Toolbar {
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
         const previewElement = this.subElement.firstElementChild.lastElementChild;
-        let previewPath: string
+        let previewPath: string;
         listElement.addEventListener("mouseover", (event) => {
             const target = event.target as HTMLElement;
             const hoverItemElement = hasClosestByClassName(target, "b3-list-item");

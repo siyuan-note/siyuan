@@ -161,7 +161,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
             rightEditor = undefined;
         }
     });
-    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE)
+    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE);
     dialog.element.addEventListener("click", (event) => {
         if (typeof event.detail === "string") {
             renderCompare(app, dialog.element.querySelector(".history__diff .b3-list-item--focus"));

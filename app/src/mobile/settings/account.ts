@@ -20,7 +20,7 @@ export const showAccountInfo = () => {
         });
         userTitlesHTML += "</div>";
     }
-    let subscriptionHTML = ""
+    let subscriptionHTML = "";
     if (window.siyuan.user.userSiYuanProExpireTime === -1) {
         // 终身会员
         subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;

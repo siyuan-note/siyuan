@@ -108,14 +108,14 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
                         renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
-                })
+                });
                 response.data.sorts.forEach((item: IAVSort) => {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
                         renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
-                })
+                });
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
-            })
+            });
         } else {
             popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
         }

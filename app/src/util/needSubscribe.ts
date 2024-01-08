@@ -33,5 +33,6 @@ export const needSubscribe = (tip = window.siyuan.languages._kernel[29]) => {
 };
 
 export const isPaidUser = () => {
-    return window.siyuan.user && (0 === window.siyuan.user.userSiYuanSubscriptionStatus || 1 === window.siyuan.user.userSiYuanOneTimePayStatus);
+    // return window.siyuan.user && (0 === window.siyuan.user.userSiYuanSubscriptionStatus || 1 === window.siyuan.user.userSiYuanOneTimePayStatus);
+    return true;
 };

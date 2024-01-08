@@ -1,5 +1,6 @@
 import {getEventName} from "../util/compatibility";
 import {updateHotkeyTip} from "../util/compatibility";
+import {Constants} from "../../constants";
 
 export class ToolbarItem {
     public element: HTMLElement;
@@ -17,7 +18,11 @@ export class ToolbarItem {
         }
         this.element.addEventListener(getEventName(), (event) => {
             event.preventDefault();
-            protyle.toolbar.setInlineMark(protyle, menuItem.name, "toolbar");
+            if (Constants.INLINE_TYPE.includes(menuItem.name)) {
+                protyle.toolbar.setInlineMark(protyle, menuItem.name, "toolbar");
+            } else if (menuItem.click) {
+                menuItem.click(protyle.getInstance());
+            }
         });
     }
 }

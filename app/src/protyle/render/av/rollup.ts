@@ -96,7 +96,7 @@ export const goSearchRollupCol = (options: {
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column" style = "min-width: 260px;max-width:420px;max-height: 50vh">
-    <input class="b3-text-field fn__flex-shrink"/>
+    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
@@ -164,12 +164,12 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goSearchRollupTarget">
-    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.rollupProperty}</span>
     <span class="b3-menu__accelerator"></span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goSearchRollupCalc">
-    <span class="b3-menu__label">${window.siyuan.languages.calc}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.rollupCalc}</span>
     <span class="b3-menu__accelerator">${getNameByOperator(colData.rollup?.calc?.operator, true)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;

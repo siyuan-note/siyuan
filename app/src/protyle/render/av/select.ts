@@ -54,6 +54,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
     const colId = cellElements[0].dataset.colId;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, elementIndex) => {
         if (!blockElement.contains(item)) {
             item = cellElements[elementIndex] = blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
@@ -62,14 +63,16 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
-            cellValue.mSelect?.find((item: { content: string }, index: number) => {
+            cellValue.mSelect?.find((item, index) => {
                 if (item.content === target.dataset.content) {
                     cellValue.mSelect.splice(index, 1);
                     return true;
                 }
             });
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
         }
-
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -427,7 +430,10 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     const nodeElement = hasClosestBlock(cellElements[0]);
     if (!nodeElement) {
         cellElements.forEach((item, index) => {
-            cellElements[index] = blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
+            const rowElement = hasClosestByClassName(item, "av__row");
+            if (rowElement) {
+                cellElements[index] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            }
         });
     }
     const colId = cellElements[0].dataset.colId;
@@ -444,6 +450,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
+    let mSelectValue: IAVCellSelectValue[];
     cellElements.forEach((item, index) => {
         const itemRowElement = hasClosestByClassName(item, "av__row");
         if (!itemRowElement) {
@@ -472,6 +479,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                     content: currentElement.dataset.name
                 }];
             }
+            mSelectValue = cellValue.mSelect;
+        } else {
+            cellValue.mSelect = mSelectValue;
         }
         const rowID = itemRowElement.dataset.id;
         cellDoOperations.push({
@@ -545,25 +555,9 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
         }
     });
 
-    let allUniqueOptions: IAVCellSelectValue[] = [];
-    data.rows.find(row => {
-        const rowElement = hasClosestByClassName(cellElements[0], "av__row");
-        if (rowElement && rowElement.dataset.id === row.id) {
-            row.cells.find(cell => {
-                if (cell.id === cellElements[0].dataset.id) {
-                    if (cell.value && cell.value.mSelect) {
-                        allUniqueOptions = cell.value.mSelect;
-                    }
-                    return true;
-                }
-            });
-            return true;
-        }
-    });
-
     let selectedHTML = "";
-    allUniqueOptions.forEach((unique) => {
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(unique.content)}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+    genCellValueByElement(colData.type, cellElements[0]).mSelect?.forEach((item) => {
+        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items">

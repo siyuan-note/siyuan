@@ -841,6 +841,7 @@ export const addResize = (obj: Layout | Wnd) => {
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
+                adjustLayout(isWindow() ? window.siyuan.layout.centerLayout : undefined);
                 resizeTabs();
                 if (!isWindow()) {
                     window.siyuan.layout.leftDock.setSize();
@@ -863,4 +864,35 @@ export const addResize = (obj: Layout | Wnd) => {
     resizeElement.classList.add("layout__resize");
     obj.element.insertAdjacentElement("beforebegin", resizeElement);
     resizeWnd(resizeElement, obj.resize);
+};
+
+export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
+    layout.children.forEach((item: Layout | Wnd) => {
+        item.element.style.maxWidth = "";
+        if (!item.element.style.width && !item.element.classList.contains("layout__center")) {
+            item.element.style.minWidth = "8px";
+        } else {
+            item.element.style.minWidth = "";
+        }
+    });
+    let lastItem: HTMLElement
+    while (layout.element.scrollWidth > layout.element.clientWidth) {
+        layout.children.find((item: Layout | Wnd) => {
+            if (item.element.style.width && item.element.style.width !== "0px") {
+                item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
+                lastItem = item.element;
+            }
+            if (layout.element.scrollWidth <= layout.element.clientWidth) {
+                return true;
+            }
+        });
+    }
+    if (lastItem) {
+        lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";
+    }
+    layout.children.forEach((item: Layout | Wnd) => {
+        if (item instanceof Layout && item.size !== "0px") {
+            adjustLayout(item);
+        }
+    });
 };

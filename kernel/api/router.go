@@ -113,6 +113,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/heading2Doc", model.CheckAuth, model.CheckReadonly, heading2Doc)
 	ginServer.Handle("POST", "/api/filetree/li2Doc", model.CheckAuth, model.CheckReadonly, li2Doc)
 	ginServer.Handle("POST", "/api/filetree/refreshFiletree", model.CheckAuth, model.CheckReadonly, refreshFiletree)
+	ginServer.Handle("POST", "/api/filetree/upsertIndexes", model.CheckAuth, model.CheckReadonly, upsertIndexes)
+	ginServer.Handle("POST", "/api/filetree/removeIndexes", model.CheckAuth, model.CheckReadonly, removeIndexes)
 
 	ginServer.Handle("POST", "/api/format/autoSpace", model.CheckAuth, model.CheckReadonly, autoSpace)
 	ginServer.Handle("POST", "/api/format/netImg2LocalAssets", model.CheckAuth, model.CheckReadonly, netImg2LocalAssets)
@@ -283,6 +285,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/exportODT", model.CheckAuth, exportODT)
 	ginServer.Handle("POST", "/api/export/exportRTF", model.CheckAuth, exportRTF)
 	ginServer.Handle("POST", "/api/export/exportEPUB", model.CheckAuth, exportEPUB)
+	ginServer.Handle("POST", "/api/export/exportAttributeView", model.CheckAuth, exportAttributeView)
 
 	ginServer.Handle("POST", "/api/import/importStdMd", model.CheckAuth, model.CheckReadonly, importStdMd)
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckReadonly, importData)
@@ -393,6 +396,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeView", model.CheckAuth, model.CheckReadonly, getAttributeView)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRelationKey", model.CheckAuth, model.CheckReadonly, searchAttributeViewRelationKey)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", model.CheckAuth, model.CheckReadonly, searchAttributeViewNonRelationKey)
+	ginServer.Handle("POST", "/api/av/getAttributeViewFilterSort", model.CheckAuth, model.CheckReadonly, getAttributeViewFilterSort)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, chatGPTWithAction)

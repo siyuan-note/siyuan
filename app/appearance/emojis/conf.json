@@ -83,7 +83,7 @@
         "keywords": "face,upside-down,脸,倒立"
       },
       {
-        "unicode": "263a",
+        "unicode": "263a-fe0f",
         "description": "Smiling face",
         "description_zh_cn": "微笑的面孔",
         "keywords": "face,outlined,relaxed,smile,脸,概述,放松,微笑,)"
@@ -341,7 +341,7 @@
         "keywords": "face,frown,sad,unhappy,脸,皱眉,悲伤,不开心"
       },
       {
-        "unicode": "2639",
+        "unicode": "2639-fe0f",
         "description": "Frowning face",
         "description_zh_cn": "皱眉的脸",
         "keywords": "face,frown,sad,unhappy,脸,皱眉,悲伤,不开心"
@@ -629,7 +629,7 @@
         "keywords": "body,death,face,fairy tale,monster,skull,halloween,身体,死亡,脸,童话故事,怪物,头骨,万圣节"
       },
       {
-        "unicode": "2620",
+        "unicode": "2620-fe0f",
         "description": "Skull and crossbones",
         "description_zh_cn": "骷髅和交叉骨",
         "keywords": "body,crossbones,death,face,monster,skull,halloween,身体,交叉骨,死亡,脸,怪物,头骨,万圣节"
@@ -977,7 +977,7 @@
         "keywords": "body,nose,身体,鼻子"
       },
       {
-        "unicode": "1f441",
+        "unicode": "1f441-fe0f",
         "description": "Eye",
         "description_zh_cn": "眼睛",
         "keywords": "body,eye,身体,眼睛"
@@ -1025,7 +1025,7 @@
         "keywords": "bust,silhouette,胸围,剪影"
       },
       {
-        "unicode": "1f5e3",
+        "unicode": "1f5e3-fe0f",
         "description": "Speaking head in silhouette",
         "description_zh_cn": "在剪影中说话的头",
         "keywords": "face,head,silhouette,speak,speaking,脸,头,剪影,说话,说话"
@@ -2681,7 +2681,7 @@
         "keywords": "clothing,crown,king,queen,服装,皇冠,国王,王后"
       },
       {
-        "unicode": "26d1",
+        "unicode": "26d1-fe0f",
         "description": "Helmet with white cross",
         "description_zh_cn": "带白色十字架的头盔",
         "keywords": "aid,cross,face,hat,helmet,援助,交叉,脸,帽子,头盔"
@@ -2729,7 +2729,7 @@
         "keywords": "clothing,eye,eyeglasses,eyewear,glasses,服装,眼睛,眼镜,眼镜,眼镜"
       },
       {
-        "unicode": "1f576",
+        "unicode": "1f576-fe0f",
         "description": "Dark sunglasses",
         "description_zh_cn": "深色太阳镜",
         "keywords": "dark,eye,eyewear,glasses,sunglasses,黑暗,眼睛,眼镜,眼镜,太阳镜"
@@ -2765,39 +2765,39 @@
         "keywords": "clothing,rain,umbrella,weather,衣服,雨,伞,天气"
       },
       {
-        "unicode": "2602",
+        "unicode": "2602-fe0f",
         "description": "Umbrella",
         "description_zh_cn": "雨伞",
         "keywords": "clothing,rain,umbrella,weather,衣服,雨,伞,天气"
       },
       {
         "unicode": "1f3fb",
-        "description": "(light skin tone",
-        "description_zh_cn": ",浅肤色",
+        "description": "Light skin tone",
+        "description_zh_cn": "浅肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fc",
-        "description": "(medium light skin tone",
-        "description_zh_cn": ",中浅肤色",
+        "description": "Medium light skin tone",
+        "description_zh_cn": "中浅肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fd",
-        "description": "(medium skin tone",
-        "description_zh_cn": ",中等肤色",
+        "description": "Medium skin tone",
+        "description_zh_cn": "中等肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3fe",
-        "description": "(medium dark skin tone",
-        "description_zh_cn": ",中深肤色",
+        "description": "Medium dark skin tone",
+        "description_zh_cn": "中深肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
         "unicode": "1f3ff",
-        "description": "(dark skin tone",
-        "description_zh_cn": ",深色肤色",
+        "description": "Dark skin tone",
+        "description_zh_cn": "深色肤色",
         "keywords": "emoji modifier,fitzpatrick,skin,tone,表情符号修饰符,菲茨帕特里克,皮肤,色调"
       },
       {
@@ -3144,13 +3144,13 @@
         "keywords": "cockroach,insect,pest,roach,蟑螂,昆虫,害虫,蟑螂"
       },
       {
-        "unicode": "1f577",
+        "unicode": "1f577-fe0f",
         "description": "Spider",
         "description_zh_cn": "蜘蛛",
         "keywords": "insect,spider,昆虫,蜘蛛"
       },
       {
-        "unicode": "1f578",
+        "unicode": "1f578-fe0f",
         "description": "Spider web",
         "description_zh_cn": "蜘蛛网",
         "keywords": "spider,web,蜘蛛网"
@@ -3420,7 +3420,7 @@
         "keywords": "turkey,bird,火鸡,鸟"
       },
       {
-        "unicode": "1f54a",
+        "unicode": "1f54a-fe0f",
         "description": "Dove of peace",
         "description_zh_cn": "和平鸽",
         "keywords": "bird,dove,fly,peace,鸟,鸽子,飞,和平"
@@ -3534,7 +3534,7 @@
         "keywords": "mouse,鼠"
       },
       {
-        "unicode": "1f43f",
+        "unicode": "1f43f-fe0f",
         "description": "Chipmunk",
         "description_zh_cn": "花栗鼠",
         "keywords": "chipmunk,花栗鼠"
@@ -3636,7 +3636,7 @@
         "keywords": "herb,leaf,plant,草本,叶,植物"
       },
       {
-        "unicode": "2618",
+        "unicode": "2618-fe0f",
         "description": "Shamrock",
         "description_zh_cn": "三叶草",
         "keywords": "plant,shamrock,植物,三叶草"
@@ -3870,7 +3870,7 @@
         "keywords": "entertainment,sparkle,star,娱乐,闪耀,明星"
       },
       {
-        "unicode": "2604",
+        "unicode": "2604-fe0f",
         "description": "Comet",
         "description_zh_cn": "彗星",
         "keywords": "comet,space,彗星,空间"
@@ -3888,13 +3888,13 @@
         "keywords": "bright,face,space,sun,weather,明亮,脸,空间,太阳,天气"
       },
       {
-        "unicode": "2600",
+        "unicode": "2600-fe0f",
         "description": "Sun with rays",
         "description_zh_cn": "有光芒的太阳",
         "keywords": "bright,rays,space,sun,sunny,weather,明亮,光线,空间,太阳,晴朗,天气"
       },
       {
-        "unicode": "1f324",
+        "unicode": "1f324-fe0f",
         "description": "Sun with small cloud",
         "description_zh_cn": "太阳与小云",
         "keywords": "cloud,sun,weather,云,太阳,天气"
@@ -3906,37 +3906,37 @@
         "keywords": "cloud,sun,weather,云,太阳,天气"
       },
       {
-        "unicode": "1f325",
+        "unicode": "1f325-fe0f",
         "description": "Sun behind large cloud",
         "description_zh_cn": "大云后面的太阳",
         "keywords": "cloud,sun,weather,云,太阳,天气"
       },
       {
-        "unicode": "1f326",
+        "unicode": "1f326-fe0f",
         "description": "Sun behind cloud with rain",
         "description_zh_cn": "雨云背后的太阳",
         "keywords": "cloud,rain,sun,weather,云,雨,太阳,天气"
       },
       {
-        "unicode": "2601",
+        "unicode": "2601-fe0f",
         "description": "Cloud",
         "description_zh_cn": "云",
         "keywords": "cloud,weather,云,天气"
       },
       {
-        "unicode": "1f327",
+        "unicode": "1f327-fe0f",
         "description": "Cloud with rain",
         "description_zh_cn": "有雨的云",
         "keywords": "cloud,rain,weather,云,雨,天气"
       },
       {
-        "unicode": "26c8",
+        "unicode": "26c8-fe0f",
         "description": "Thunder cloud and rain",
         "description_zh_cn": "雷云和雨",
         "keywords": "cloud,rain,thunder,weather,云,雨,雷,天气"
       },
       {
-        "unicode": "1f329",
+        "unicode": "1f329-fe0f",
         "description": "Cloud with lightning",
         "description_zh_cn": "有闪电的云",
         "keywords": "cloud,lightning,weather,云,闪电,天气"
@@ -3960,19 +3960,19 @@
         "keywords": "boom,collision,comic,繁荣,碰撞,漫画"
       },
       {
-        "unicode": "2744",
+        "unicode": "2744-fe0f",
         "description": "Snowflake",
         "description_zh_cn": "雪花",
         "keywords": "cold,snow,snowflake,weather,寒冷,雪,雪花,天气"
       },
       {
-        "unicode": "1f328",
+        "unicode": "1f328-fe0f",
         "description": "Cloud with snow",
         "description_zh_cn": "有雪的云",
         "keywords": "cloud,cold,snow,weather,云,冷,雪,天气"
       },
       {
-        "unicode": "2603",
+        "unicode": "2603-fe0f",
         "description": "Snowman",
         "description_zh_cn": "雪人",
         "keywords": "cold,snow,snowman,weather,寒冷,雪,雪人,天气"
@@ -3984,7 +3984,7 @@
         "keywords": "cold,snow,snowman,weather,寒冷,雪,雪人,天气"
       },
       {
-        "unicode": "1f32c",
+        "unicode": "1f32c-fe0f",
         "description": "Wind blowing face",
         "description_zh_cn": "风吹脸",
         "keywords": "blow,cloud,face,weather,wind,吹,云,脸,天气,风"
@@ -3996,13 +3996,13 @@
         "keywords": "comic,dash,running,漫画,破折号,跑步"
       },
       {
-        "unicode": "1f32a",
+        "unicode": "1f32a-fe0f",
         "description": "Cloud with tornado",
         "description_zh_cn": "有龙卷风的云",
         "keywords": "cloud,tornado,weather,whirlwind,云,龙卷风,天气,旋风"
       },
       {
-        "unicode": "1f32b",
+        "unicode": "1f32b-fe0f",
         "description": "Fog",
         "description_zh_cn": "多雾路段",
         "keywords": "cloud,fog,weather,云,雾,天气"
@@ -4171,7 +4171,7 @@
         "keywords": "aubergine,eggplant,plant,vegetable,茄子,茄子,植物,蔬菜"
       },
       {
-        "unicode": "1f336",
+        "unicode": "1f336-fe0f",
         "description": "Hot pepper",
         "description_zh_cn": "辣椒",
         "keywords": "hot,pepper,plant,热,胡椒,植物"
@@ -4747,7 +4747,7 @@
         "keywords": "cooking,fork,knife,tableware,烹饪,叉,刀,餐具"
       },
       {
-        "unicode": "1f37d",
+        "unicode": "1f37d-fe0f",
         "description": "Fork and knife with plate",
         "description_zh_cn": "带盘子的刀叉",
         "keywords": "cooking,fork,knife,plate,tableware,烹饪,叉,刀,盘,餐具"
@@ -4922,7 +4922,7 @@
         "keywords": "judo,karate,martial arts,taekwondo,uniform,柔道,空手道,武术,跆拳道,制服"
       },
       {
-        "unicode": "26f8",
+        "unicode": "26f8-fe0f",
         "description": "Ice skate",
         "description_zh_cn": "滑冰",
         "keywords": "ice,skate,滑冰"
@@ -4940,7 +4940,7 @@
         "keywords": "sledge,sleigh,luge,toboggan,雪橇,雪橇,雪橇,雪橇"
       },
       {
-        "unicode": "26f7",
+        "unicode": "26f7-fe0f",
         "description": "Skier",
         "description_zh_cn": "滑雪者",
         "keywords": "ski,snow,滑雪,雪"
@@ -5240,7 +5240,7 @@
         "keywords": "running,sash,shirt,跑步,腰带,衬衫"
       },
       {
-        "unicode": "1f396",
+        "unicode": "1f396-fe0f",
         "description": "Military medal",
         "description_zh_cn": "军事勋章",
         "keywords": "celebration,medal,military,庆典,奖牌,军事"
@@ -5276,13 +5276,13 @@
         "keywords": "prize,trophy,奖品,奖杯"
       },
       {
-        "unicode": "1f3f5",
+        "unicode": "1f3f5-fe0f",
         "description": "Rosette",
         "description_zh_cn": "玫瑰花",
         "keywords": "plant,rosette,植物,玫瑰花"
       },
       {
-        "unicode": "1f397",
+        "unicode": "1f397-fe0f",
         "description": "Reminder ribbon",
         "description_zh_cn": "提醒功能区",
         "keywords": "celebration,reminder,ribbon,庆祝活动,提醒,丝带"
@@ -5294,7 +5294,7 @@
         "keywords": "activity,admission,entertainment,ticket,活动,入场,娱乐,门票"
       },
       {
-        "unicode": "1f39f",
+        "unicode": "1f39f-fe0f",
         "description": "Admission tickets",
         "description_zh_cn": "门票",
         "keywords": "admission,entertainment,ticket,入场,娱乐,门票"
@@ -5426,7 +5426,7 @@
         "keywords": "clue,interlocking,piece,puzzle,jigsaw,线索,联锁,件,拼图,拼图"
       },
       {
-        "unicode": "265f",
+        "unicode": "265f-fe0f",
         "description": "Chess pawn",
         "description_zh_cn": "棋子",
         "keywords": "chess,piece,game,expendable,国际象棋,棋子,游戏,消耗品"
@@ -5517,7 +5517,7 @@
         "keywords": "bus,tram,trolley,trolleybus,vehicle,公共汽车,电车,手推车,无轨电车,车辆"
       },
       {
-        "unicode": "1f3ce",
+        "unicode": "1f3ce-fe0f",
         "description": "Racing car",
         "description_zh_cn": "赛车",
         "keywords": "car,racing,赛车"
@@ -5571,7 +5571,7 @@
         "keywords": "tractor,vehicle,拖拉机,汽车"
       },
       {
-        "unicode": "1f3cd",
+        "unicode": "1f3cd-fe0f",
         "description": "Racing motorcycle",
         "description_zh_cn": "赛车摩托车",
         "keywords": "motorcycle,racing,摩托车,赛车"
@@ -5745,13 +5745,13 @@
         "keywords": "helicopter,vehicle,直升机,车辆"
       },
       {
-        "unicode": "1f6e9",
+        "unicode": "1f6e9-fe0f",
         "description": "Small airplane",
         "description_zh_cn": "小飞机",
         "keywords": "airplane,vehicle,飞机,汽车"
       },
       {
-        "unicode": "2708",
+        "unicode": "2708-fe0f",
         "description": "Airplane",
         "description_zh_cn": "飞机",
         "keywords": "airplane,vehicle,飞机,汽车"
@@ -5781,7 +5781,7 @@
         "keywords": "chair,seat,椅子,座位"
       },
       {
-        "unicode": "1f6f0",
+        "unicode": "1f6f0-fe0f",
         "description": "Satellite",
         "description_zh_cn": "卫星",
         "keywords": "satellite,space,vehicle,卫星,空间,车辆"
@@ -5811,7 +5811,7 @@
         "keywords": "boat,resort,sailboat,sea,vehicle,yacht,船,度假村,帆船,海,车辆,游艇"
       },
       {
-        "unicode": "1f6e5",
+        "unicode": "1f6e5-fe0f",
         "description": "Motor boat",
         "description_zh_cn": "摩托艇",
         "keywords": "boat,motorboat,vehicle,船,摩托艇,车辆"
@@ -5823,13 +5823,13 @@
         "keywords": "boat,speedboat,vehicle,船,快艇,车辆"
       },
       {
-        "unicode": "26f4",
+        "unicode": "26f4-fe0f",
         "description": "Ferry",
         "description_zh_cn": "渡船",
         "keywords": "boat,ferry,船,渡轮"
       },
       {
-        "unicode": "1f6f3",
+        "unicode": "1f6f3-fe0f",
         "description": "Passenger ship",
         "description_zh_cn": "客船",
         "keywords": "passenger,ship,vehicle,乘客,船舶,车辆"
@@ -5901,7 +5901,7 @@
         "keywords": "activity,carousel,entertainment,horse,活动,旋转木马,娱乐,马"
       },
       {
-        "unicode": "1f3d7",
+        "unicode": "1f3d7-fe0f",
         "description": "Building construction",
         "description_zh_cn": "建筑施工",
         "keywords": "building,construction,建筑,施工"
@@ -5937,13 +5937,13 @@
         "keywords": "activity,celebration,ceremony,entertainment,moon,活动,庆典,仪式,娱乐,月亮"
       },
       {
-        "unicode": "26f0",
+        "unicode": "26f0-fe0f",
         "description": "Mountain",
         "description_zh_cn": "山",
         "keywords": "mountain,山"
       },
       {
-        "unicode": "1f3d4",
+        "unicode": "1f3d4-fe0f",
         "description": "Snow capped mountain",
         "description_zh_cn": "雪山",
         "keywords": "cold,mountain,snow,寒冷,山,雪"
@@ -5967,7 +5967,7 @@
         "keywords": "japan,map,日本,地图"
       },
       {
-        "unicode": "1f3d5",
+        "unicode": "1f3d5-fe0f",
         "description": "Camping",
         "description_zh_cn": "野营",
         "keywords": "camping,野营"
@@ -5979,19 +5979,19 @@
         "keywords": "camping,tent,野营帐篷"
       },
       {
-        "unicode": "1f3de",
+        "unicode": "1f3de-fe0f",
         "description": "National park",
         "description_zh_cn": "国家公园",
         "keywords": "national park,park,国家公园,公园"
       },
       {
-        "unicode": "1f6e3",
+        "unicode": "1f6e3-fe0f",
         "description": "Motorway",
         "description_zh_cn": "高速公路",
         "keywords": "highway,motorway,road,高速公路,高速公路,道路"
       },
       {
-        "unicode": "1f6e4",
+        "unicode": "1f6e4-fe0f",
         "description": "Railway track",
         "description_zh_cn": "铁路轨道",
         "keywords": "railway,train,铁路,火车"
@@ -6009,19 +6009,19 @@
         "keywords": "morning,mountain,sun,sunrise,weather,早上,山,太阳,日出,天气"
       },
       {
-        "unicode": "1f3dc",
+        "unicode": "1f3dc-fe0f",
         "description": "Desert",
         "description_zh_cn": "沙漠",
         "keywords": "desert,沙漠"
       },
       {
-        "unicode": "1f3d6",
+        "unicode": "1f3d6-fe0f",
         "description": "Beach with umbrella",
         "description_zh_cn": "带伞的海滩",
         "keywords": "beach,umbrella,沙滩伞"
       },
       {
-        "unicode": "1f3dd",
+        "unicode": "1f3dd-fe0f",
         "description": "Desert island",
         "description_zh_cn": "沙漠荒岛",
         "keywords": "desert,island,沙漠荒岛"
@@ -6039,7 +6039,7 @@
         "keywords": "building,city,dusk,evening,landscape,sun,sunset,weather,建筑,城市,黄昏,晚上,景观,太阳,日落,天气"
       },
       {
-        "unicode": "1f3d9",
+        "unicode": "1f3d9-fe0f",
         "description": "Cityscape",
         "description_zh_cn": "城市景观",
         "keywords": "building,city,建筑,城市"
@@ -6087,7 +6087,7 @@
         "keywords": "house,hut,roundhouse,yurt,房子,小屋,圆屋,蒙古包"
       },
       {
-        "unicode": "1f3d8",
+        "unicode": "1f3d8-fe0f",
         "description": "House buildings",
         "description_zh_cn": "房屋建筑",
         "keywords": "building,house,建筑,房子"
@@ -6105,7 +6105,7 @@
         "keywords": "building,castle,japanese,建设,城堡,日语"
       },
       {
-        "unicode": "1f3df",
+        "unicode": "1f3df-fe0f",
         "description": "Stadium",
         "description_zh_cn": "体育场",
         "keywords": "stadium,体育场"
@@ -6129,7 +6129,7 @@
         "keywords": "building,garden,home,house,建筑,花园,家,房子"
       },
       {
-        "unicode": "1f3da",
+        "unicode": "1f3da-fe0f",
         "description": "Derelict house building",
         "description_zh_cn": "废弃的房屋建筑",
         "keywords": "building,derelict,house,建筑,废弃,房子"
@@ -6201,7 +6201,7 @@
         "keywords": "activity,chapel,romance,wedding,活动,教堂,浪漫,婚礼"
       },
       {
-        "unicode": "1f3db",
+        "unicode": "1f3db-fe0f",
         "description": "Classical building",
         "description_zh_cn": "古典建筑",
         "keywords": "building,classical,建筑,古典"
@@ -6237,7 +6237,7 @@
         "keywords": "islam,kaaba,muslim,religion,伊斯兰教,天房,穆斯林,宗教"
       },
       {
-        "unicode": "26e9",
+        "unicode": "26e9-fe0f",
         "description": "Shinto shrine",
         "description_zh_cn": "神社",
         "keywords": "religion,shinto,shrine,宗教,神道,神社"
@@ -6280,43 +6280,43 @@
         "keywords": "laptop computer,computer,pc,personal,笔记本电脑,计算机,个人电脑,个人"
       },
       {
-        "unicode": "2328",
+        "unicode": "2328-fe0f",
         "description": "Keyboard",
         "description_zh_cn": "键盘",
         "keywords": "computer,keyboard,计算机键盘"
       },
       {
-        "unicode": "1f5a5",
+        "unicode": "1f5a5-fe0f",
         "description": "Desktop computer",
         "description_zh_cn": "台式电脑",
         "keywords": "computer,desktop,电脑,台式机"
       },
       {
-        "unicode": "1f5a8",
+        "unicode": "1f5a8-fe0f",
         "description": "Printer",
         "description_zh_cn": "打印机",
         "keywords": "computer,printer,电脑打印机"
       },
       {
-        "unicode": "1f5b1",
+        "unicode": "1f5b1-fe0f",
         "description": "Three button mouse",
         "description_zh_cn": "三键鼠标",
         "keywords": "3,button,computer,mouse,three,3,按键,电脑,鼠标,三"
       },
       {
-        "unicode": "1f5b2",
+        "unicode": "1f5b2-fe0f",
         "description": "Trackball",
         "description_zh_cn": "轨迹球",
         "keywords": "computer,trackball,电脑,轨迹球"
       },
       {
-        "unicode": "1f579",
+        "unicode": "1f579-fe0f",
         "description": "Joystick",
         "description_zh_cn": "操纵杆",
         "keywords": "entertainment,game,joystick,video game,娱乐,游戏,操纵杆,视频游戏"
       },
       {
-        "unicode": "1f5dc",
+        "unicode": "1f5dc-fe0f",
         "description": "Compression",
         "description_zh_cn": "压缩",
         "keywords": "compression,tool,vice,压缩,工具,副"
@@ -6376,13 +6376,13 @@
         "keywords": "activity,camera,cinema,entertainment,movie,活动,相机,电影院,娱乐,电影"
       },
       {
-        "unicode": "1f4fd",
+        "unicode": "1f4fd-fe0f",
         "description": "Film projector",
         "description_zh_cn": "电影放映机",
         "keywords": "cinema,entertainment,film,movie,projector,video,电影院,娱乐,电影,电影,投影仪,视频"
       },
       {
-        "unicode": "1f39e",
+        "unicode": "1f39e-fe0f",
         "description": "Film frames",
         "description_zh_cn": "胶卷架",
         "keywords": "cinema,entertainment,film,frames,movie,电影院,娱乐,电影,帧,电影"
@@ -6394,7 +6394,7 @@
         "keywords": "communication,phone,receiver,telephone,通讯,电话,接收器,电话"
       },
       {
-        "unicode": "260e",
+        "unicode": "260e-fe0f",
         "description": "Telephone",
         "description_zh_cn": "电话",
         "keywords": "phone,telephone,电话,电话"
@@ -6424,19 +6424,19 @@
         "keywords": "entertainment,radio,video,娱乐,广播,视频"
       },
       {
-        "unicode": "1f399",
+        "unicode": "1f399-fe0f",
         "description": "Studio microphone",
         "description_zh_cn": "录音室麦克风",
         "keywords": "mic,microphone,music,studio,麦克风,麦克风,音乐,工作室"
       },
       {
-        "unicode": "1f39a",
+        "unicode": "1f39a-fe0f",
         "description": "Level slider",
         "description_zh_cn": "水平滑块",
         "keywords": "level,music,slider,水平,音乐,滑块"
       },
       {
-        "unicode": "1f39b",
+        "unicode": "1f39b-fe0f",
         "description": "Control knobs",
         "description_zh_cn": "控制旋钮",
         "keywords": "control,knobs,music,控制,旋钮,音乐"
@@ -6460,7 +6460,7 @@
         "keywords": "alarm,clock,闹钟,时钟"
       },
       {
-        "unicode": "1f570",
+        "unicode": "1f570-fe0f",
         "description": "Mantelpiece clock",
         "description_zh_cn": "壁炉钟",
         "keywords": "clock,钟"
@@ -6514,7 +6514,7 @@
         "keywords": "electric,flashlight,light,tool,torch,电动,手电筒,光,工具,手电筒"
       },
       {
-        "unicode": "1f56f",
+        "unicode": "1f56f-fe0f",
         "description": "Candle",
         "description_zh_cn": "蜡烛",
         "keywords": "candle,light,蜡烛,光"
@@ -6526,13 +6526,13 @@
         "keywords": "extinguish,fire,quench,灭火,灭火,灭火"
       },
       {
-        "unicode": "1f5d1",
+        "unicode": "1f5d1-fe0f",
         "description": "Wastebasket",
         "description_zh_cn": "废纸篓",
         "keywords": "wastebasket,trash,can,litter,bin,废纸篓,垃圾桶,罐头,垃圾,垃圾桶"
       },
       {
-        "unicode": "1f6e2",
+        "unicode": "1f6e2-fe0f",
         "description": "Oil drum",
         "description_zh_cn": "油桶",
         "keywords": "drum,oil,鼓,油"
@@ -6604,7 +6604,7 @@
         "keywords": "diamond,gem,jewel,romance,钻石,宝石,珠宝,浪漫"
       },
       {
-        "unicode": "2696",
+        "unicode": "2696-fe0f",
         "description": "Scales",
         "description_zh_cn": "秤",
         "keywords": "balance,justice,libra,scales,tool,weight,zodiac,平衡,正义,天秤座,秤,工具,重量,生肖"
@@ -6640,19 +6640,19 @@
         "keywords": "hammer,tool,锤子,工具"
       },
       {
-        "unicode": "2692",
+        "unicode": "2692-fe0f",
         "description": "Hammer and pick",
         "description_zh_cn": "锤子和挑选",
         "keywords": "hammer,pick,tool,锤子,镐,工具"
       },
       {
-        "unicode": "1f6e0",
+        "unicode": "1f6e0-fe0f",
         "description": "Hammer and wrench",
         "description_zh_cn": "锤子和扳手",
         "keywords": "hammer,tool,wrench,锤子,工具,扳手"
       },
       {
-        "unicode": "26cf",
+        "unicode": "26cf-fe0f",
         "description": "Pick",
         "description_zh_cn": "挑选",
         "keywords": "mining,pick,tool,采矿,挑选,工具"
@@ -6676,13 +6676,13 @@
         "keywords": "bolt,nut,tool,螺栓,螺母,工具"
       },
       {
-        "unicode": "2699",
+        "unicode": "2699-fe0f",
         "description": "Gear",
         "description_zh_cn": "齿轮",
         "keywords": "gear,tool,齿轮,工具"
       },
       {
-        "unicode": "26d3",
+        "unicode": "26d3-fe0f",
         "description": "Chains",
         "description_zh_cn": "链条",
         "keywords": "chain,链"
@@ -6742,19 +6742,19 @@
         "keywords": "kitchen knife,cooking,hocho,knife,菜刀,烹饪,hocho,刀"
       },
       {
-        "unicode": "1f5e1",
+        "unicode": "1f5e1-fe0f",
         "description": "Dagger knife",
         "description_zh_cn": "匕首刀",
         "keywords": "dagger,knife,匕首,刀"
       },
       {
-        "unicode": "2694",
+        "unicode": "2694-fe0f",
         "description": "Crossed swords",
         "description_zh_cn": "交叉的剑",
         "keywords": "crossed,swords,交叉,剑"
       },
       {
-        "unicode": "1f6e1",
+        "unicode": "1f6e1-fe0f",
         "description": "Shield",
         "description_zh_cn": "盾",
         "keywords": "shield,盾"
@@ -6766,7 +6766,7 @@
         "keywords": "activity,smoking,活动,吸烟"
       },
       {
-        "unicode": "26b0",
+        "unicode": "26b0-fe0f",
         "description": "Coffin",
         "description_zh_cn": "棺材",
         "keywords": "coffin,death,棺材,死亡"
@@ -6778,7 +6778,7 @@
         "keywords": "cemetery,death,grave,graveyard,tombstone,halloween,公墓,死亡,坟墓,墓地,墓碑,万圣节"
       },
       {
-        "unicode": "26b1",
+        "unicode": "26b1-fe0f",
         "description": "Funeral urn",
         "description_zh_cn": "骨灰盒",
         "keywords": "death,funeral,urn,死亡,葬礼,骨灰盒"
@@ -6826,7 +6826,7 @@
         "keywords": "attraction,horseshoe,magnetic,吸引力,马蹄铁,磁性"
       },
       {
-        "unicode": "2697",
+        "unicode": "2697-fe0f",
         "description": "Alembic",
         "description_zh_cn": "阿朗比克",
         "keywords": "alembic,chemistry,tool,蒸馏器,化学,工具"
@@ -6862,7 +6862,7 @@
         "keywords": "microscope,tool,显微镜,工具"
       },
       {
-        "unicode": "1f573",
+        "unicode": "1f573-fe0f",
         "description": "Hole",
         "description_zh_cn": "洞",
         "keywords": "hole,洞"
@@ -6898,13 +6898,13 @@
         "keywords": "doctor,medicine,heart,医生,医学,心脏"
       },
       {
-        "unicode": "1f321",
+        "unicode": "1f321-fe0f",
         "description": "Thermometer",
         "description_zh_cn": "温度计",
         "keywords": "thermometer,weather,temperature,温度计,天气,温度"
       },
       {
-        "unicode": "1f3f7",
+        "unicode": "1f3f7-fe0f",
         "description": "Label",
         "description_zh_cn": "标签",
         "keywords": "label,标签"
@@ -7006,7 +7006,7 @@
         "keywords": "key,lock,password,钥匙,锁,密码"
       },
       {
-        "unicode": "1f5dd",
+        "unicode": "1f5dd-fe0f",
         "description": "Old key",
         "description_zh_cn": "旧钥匙",
         "keywords": "clue,key,lock,old,线索,钥匙,锁,旧"
@@ -7018,7 +7018,7 @@
         "keywords": "bait,mouse,mousetrap,rodent,snare,trap,诱饵,鼠标,捕鼠器,啮齿动物,圈套,陷阱"
       },
       {
-        "unicode": "1f6cb",
+        "unicode": "1f6cb-fe0f",
         "description": "Couch and lamp",
         "description_zh_cn": "沙发和灯",
         "keywords": "couch,hotel,lamp,沙发,酒店,灯"
@@ -7036,7 +7036,7 @@
         "keywords": "person in bed,hotel,sleep,bed,人在床上,酒店,睡眠,床上"
       },
       {
-        "unicode": "1f6cf",
+        "unicode": "1f6cf-fe0f",
         "description": "Bed",
         "description_zh_cn": "床",
         "keywords": "bed,hotel,sleep,床,酒店,睡觉"
@@ -7066,13 +7066,13 @@
         "keywords": "packing,travel,suitcase,包装,旅行,手提箱"
       },
       {
-        "unicode": "1f6ce",
+        "unicode": "1f6ce-fe0f",
         "description": "Bellhop bell",
         "description_zh_cn": "门铃",
         "keywords": "bell,bellhop,hotel,钟,bellhop,酒店"
       },
       {
-        "unicode": "1f5bc",
+        "unicode": "1f5bc-fe0f",
         "description": "Frame with picture",
         "description_zh_cn": "带图片的框架",
         "keywords": "art,frame,museum,painting,picture,艺术,帧,博物馆,绘画,图片"
@@ -7084,13 +7084,13 @@
         "keywords": "magnetic,navigation,orienteering,磁力,导航,定向"
       },
       {
-        "unicode": "1f5fa",
+        "unicode": "1f5fa-fe0f",
         "description": "World map",
         "description_zh_cn": "世界地图",
         "keywords": "map,world,地图,世界"
       },
       {
-        "unicode": "26f1",
+        "unicode": "26f1-fe0f",
         "description": "Umbrella on ground",
         "description_zh_cn": "地上的雨伞",
         "keywords": "rain,sun,umbrella,weather,雨,太阳,伞,天气"
@@ -7102,7 +7102,7 @@
         "keywords": "moai,face,moyai,statue,摩艾,脸,摩艾,雕像"
       },
       {
-        "unicode": "1f6cd",
+        "unicode": "1f6cd-fe0f",
         "description": "Shopping bags",
         "description_zh_cn": "购物袋",
         "keywords": "bag,hotel,shopping,包,酒店,购物"
@@ -7186,7 +7186,7 @@
         "keywords": "diya,lamp,oil,diya,灯,油"
       },
       {
-        "unicode": "2709",
+        "unicode": "2709-fe0f",
         "description": "Envelope",
         "description_zh_cn": "信封",
         "keywords": "e-mail,email,envelope,电子邮件,电子邮件,信封"
@@ -7324,7 +7324,7 @@
         "keywords": "calendar,日历"
       },
       {
-        "unicode": "1f5d3",
+        "unicode": "1f5d3-fe0f",
         "description": "Spiral calendar pad",
         "description_zh_cn": "螺旋日历垫",
         "keywords": "spiral calendar,calendar,pad,spiral,螺旋日历,日历,垫,螺旋"
@@ -7336,19 +7336,19 @@
         "keywords": "card,index,rolodex,卡片,索引,rolodex"
       },
       {
-        "unicode": "1f5c3",
+        "unicode": "1f5c3-fe0f",
         "description": "Card file box",
         "description_zh_cn": "卡片档案盒",
         "keywords": "box,card,file,盒子,卡片,文件"
       },
       {
-        "unicode": "1f5f3",
+        "unicode": "1f5f3-fe0f",
         "description": "Ballot box with ballot",
         "description_zh_cn": "带选票的投票箱",
         "keywords": "ballot,box,vote,voting,选票,框,投票,投票"
       },
       {
-        "unicode": "1f5c4",
+        "unicode": "1f5c4-fe0f",
         "description": "File cabinet",
         "description_zh_cn": "文件柜",
         "keywords": "cabinet,file,柜子,文件"
@@ -7360,7 +7360,7 @@
         "keywords": "clipboard,剪贴板"
       },
       {
-        "unicode": "1f5d2",
+        "unicode": "1f5d2-fe0f",
         "description": "Spiral note pad",
         "description_zh_cn": "螺旋记事本",
         "keywords": "spiral notepad,note,pad,spiral,螺旋记事本,注意,垫,螺旋"
@@ -7378,13 +7378,13 @@
         "keywords": "file,folder,open,文件,文件夹,打开"
       },
       {
-        "unicode": "1f5c2",
+        "unicode": "1f5c2-fe0f",
         "description": "Card index dividers",
         "description_zh_cn": "卡片索引分隔符",
         "keywords": "card,dividers,index,卡,分频器,索引"
       },
       {
-        "unicode": "1f5de",
+        "unicode": "1f5de-fe0f",
         "description": "Rolled-up newspaper",
         "description_zh_cn": "卷起来的报纸",
         "keywords": "news,newspaper,paper,rolled,新闻,报纸,纸,卷"
@@ -7468,13 +7468,13 @@
         "keywords": "paperclip,回形针"
       },
       {
-        "unicode": "1f587",
+        "unicode": "1f587-fe0f",
         "description": "Linked paperclips",
         "description_zh_cn": "链接回形针",
         "keywords": "communication,link,paperclip,通信,链接,回形针"
       },
       {
-        "unicode": "2702",
+        "unicode": "2702-fe0f",
         "description": "Scissors",
         "description_zh_cn": "剪刀",
         "keywords": "scissors,tool,剪刀,工具"
@@ -7558,19 +7558,19 @@
         "keywords": "ink,lock,nib,pen,privacy,墨水,锁,笔尖,钢笔,隐私"
       },
       {
-        "unicode": "1f58a",
+        "unicode": "1f58a-fe0f",
         "description": "Lower left ballpoint pen",
         "description_zh_cn": "左下角圆珠笔",
         "keywords": "ballpoint,communication,pen,圆珠笔,通讯,笔"
       },
       {
-        "unicode": "1f58b",
+        "unicode": "1f58b-fe0f",
         "description": "Lower left fountain pen",
         "description_zh_cn": "左下角钢笔",
         "keywords": "communication,fountain,pen,通讯,喷泉,笔"
       },
       {
-        "unicode": "2712",
+        "unicode": "2712-fe0f",
         "description": "Nib",
         "description_zh_cn": "笔尖",
         "keywords": "nib,pen,笔尖,笔"
@@ -7582,19 +7582,19 @@
         "keywords": "communication,memo,pencil,通讯,备忘录,铅笔"
       },
       {
-        "unicode": "270f",
+        "unicode": "270f-fe0f",
         "description": "Pencil",
         "description_zh_cn": "铅笔",
         "keywords": "pencil,铅笔"
       },
       {
-        "unicode": "1f58d",
+        "unicode": "1f58d-fe0f",
         "description": "Lower left crayon",
         "description_zh_cn": "左下角蜡笔",
         "keywords": "communication,crayon,交流,蜡笔"
       },
       {
-        "unicode": "1f58c",
+        "unicode": "1f58c-fe0f",
         "description": "Lower left paintbrush",
         "description_zh_cn": "左下画笔",
         "keywords": "communication,paintbrush,painting,通信,画笔,绘画"
@@ -7619,7 +7619,7 @@
     "title_zh_cn": "符号",
     "items": [
       {
-        "unicode": "2764",
+        "unicode": "2764-fe0f",
         "description": "Red heart",
         "description_zh_cn": "红心",
         "keywords": "heart,心"
@@ -7679,7 +7679,7 @@
         "keywords": "heart,break,broken,心,破碎,破碎"
       },
       {
-        "unicode": "2763",
+        "unicode": "2763-fe0f",
         "description": "Heart exclamation",
         "description_zh_cn": "心感叹",
         "keywords": "heart,exclamation,mark,punctuation,心,感叹号,标记,标点符号"
@@ -7745,37 +7745,37 @@
         "keywords": "heart,心"
       },
       {
-        "unicode": "262e",
+        "unicode": "262e-fe0f",
         "description": "Peace symbol",
         "description_zh_cn": "和平象征",
         "keywords": "peace,和平"
       },
       {
-        "unicode": "271d",
+        "unicode": "271d-fe0f",
         "description": "Latin cross",
         "description_zh_cn": "拉丁十字",
         "keywords": "christian,cross,religion,基督教,十字架,宗教"
       },
       {
-        "unicode": "262a",
+        "unicode": "262a-fe0f",
         "description": "Star and crescent",
         "description_zh_cn": "星星和新月",
         "keywords": "islam,muslim,religion,伊斯兰教,穆斯林,宗教"
       },
       {
-        "unicode": "1f549",
+        "unicode": "1f549-fe0f",
         "description": "Om symbol",
         "description_zh_cn": "嗡符号",
         "keywords": "hindu,om,religion,印度教,OM,宗教"
       },
       {
-        "unicode": "2638",
+        "unicode": "2638-fe0f",
         "description": "Wheel of dharma",
         "description_zh_cn": "法轮",
         "keywords": "buddhist,dharma,religion,wheel,佛教,佛法,宗教,轮子"
       },
       {
-        "unicode": "2721",
+        "unicode": "2721-fe0f",
         "description": "Star of david",
         "description_zh_cn": "大卫之星",
         "keywords": "david,jew,jewish,religion,star,大卫,犹太人,犹太人,宗教,明星"
@@ -7793,13 +7793,13 @@
         "keywords": "candelabrum,candlestick,menorah,religion,烛台,烛台,烛台,宗教"
       },
       {
-        "unicode": "262f",
+        "unicode": "262f-fe0f",
         "description": "Yin yang",
         "description_zh_cn": "阴阳",
         "keywords": "religion,tao,taoist,yang,yin,宗教,道,道,阳,阴"
       },
       {
-        "unicode": "2626",
+        "unicode": "2626-fe0f",
         "description": "Orthodox cross",
         "description_zh_cn": "东正教十字架",
         "keywords": "christian,cross,religion,基督教,十字架,宗教"
@@ -7895,25 +7895,25 @@
         "keywords": "id,identity,身份证,身份"
       },
       {
-        "unicode": "269b",
+        "unicode": "269b-fe0f",
         "description": "Atom symbol",
         "description_zh_cn": "原子符号",
         "keywords": "atheist,atom,无神论者,原子"
       },
       {
-        "unicode": "2695",
+        "unicode": "2695-fe0f",
         "description": "Staff of aesculapius",
         "description_zh_cn": "埃斯库拉皮乌斯的工作人员",
         "keywords": "health,care,doctor,medicine,rod,snake,健康,护理,医生,医药,棒,蛇"
       },
       {
-        "unicode": "2622",
+        "unicode": "2622-fe0f",
         "description": "Radioactive sign",
         "description_zh_cn": "放射性标志",
         "keywords": "radioactive,放射性"
       },
       {
-        "unicode": "2623",
+        "unicode": "2623-fe0f",
         "description": "Biohazard sign",
         "description_zh_cn": "生物危害标志",
         "keywords": "biohazard,生物危害"
@@ -7955,13 +7955,13 @@
         "keywords": "squared operating ideograph,chinese,平方操作表意文字,中文"
       },
       {
-        "unicode": "1f237",
+        "unicode": "1f237-fe0f",
         "description": "Squared cjk unified ideograph-6708",
         "description_zh_cn": "平方 cjk 统一表意文字-6708",
         "keywords": "squared moon ideograph,japanese,方月象形文字,日语"
       },
       {
-        "unicode": "2734",
+        "unicode": "2734-fe0f",
         "description": "Eight pointed star",
         "description_zh_cn": "八尖星",
         "keywords": "star,星星"
@@ -7991,13 +7991,13 @@
         "keywords": "circled advantage ideograph,japanese,带圆圈的优势表意文字,日语"
       },
       {
-        "unicode": "3299",
+        "unicode": "3299-fe0f",
         "description": "Circled ideograph secret",
         "description_zh_cn": "带圆圈的表意文字秘密",
         "keywords": "circled secret ideograph,chinese,ideograph,secret,带圆圈的秘密表意文字,中文,表意文字,秘密"
       },
       {
-        "unicode": "3297",
+        "unicode": "3297-fe0f",
         "description": "Circled ideograph congratulation",
         "description_zh_cn": "带圆圈的表意文字祝贺",
         "keywords": "circled congratulate ideograph,chinese,圆圈祝贺表意文字,中文"
@@ -8027,13 +8027,13 @@
         "keywords": "squared prohibit ideograph,japanese,平方禁止表意文字,日语"
       },
       {
-        "unicode": "1f170",
+        "unicode": "1f170-fe0f",
         "description": "Negative squared latin capital letter a",
         "description_zh_cn": "负平方拉丁大写字母 a",
         "keywords": "a,blood,一,血液"
       },
       {
-        "unicode": "1f171",
+        "unicode": "1f171-fe0f",
         "description": "Negative squared latin capital letter b",
         "description_zh_cn": "负平方拉丁大写字母 b",
         "keywords": "b,blood,b,血液"
@@ -8051,7 +8051,7 @@
         "keywords": "cl,CL"
       },
       {
-        "unicode": "1f17e",
+        "unicode": "1f17e-fe0f",
         "description": "Negative squared latin capital letter o",
         "description_zh_cn": "负平方拉丁大写字母 o",
         "keywords": "blood,o,血,o"
@@ -8099,7 +8099,7 @@
         "keywords": "angry,comic,mad,愤怒,喜剧,疯狂"
       },
       {
-        "unicode": "2668",
+        "unicode": "2668-fe0f",
         "description": "Hot springs",
         "description_zh_cn": "温泉",
         "keywords": "hot,hotsprings,springs,steaming,热,温泉,温泉,蒸"
@@ -8171,13 +8171,13 @@
         "keywords": "mark,outlined,punctuation,question,标记,概述,标点符号,问题"
       },
       {
-        "unicode": "203c",
+        "unicode": "203c-fe0f",
         "description": "Double exclamation mark",
         "description_zh_cn": "双感叹号",
         "keywords": "bangbang,exclamation,mark,punctuation,bangbang,感叹号,标记,标点符号"
       },
       {
-        "unicode": "2049",
+        "unicode": "2049-fe0f",
         "description": "Exclamation question mark",
         "description_zh_cn": "感叹号",
         "keywords": "exclamation,interrobang,mark,punctuation,question,感叹号,interrobang,标记,标点符号,问题"
@@ -8207,19 +8207,19 @@
         "keywords": "anchor,emblem,ship,tool,trident,锚,会徽,船舶,工具,三叉戟"
       },
       {
-        "unicode": "269c",
+        "unicode": "269c-fe0f",
         "description": "Fleur-de-lis",
         "description_zh_cn": "百合花",
         "keywords": "fleur-de-lis,百合"
       },
       {
-        "unicode": "303d",
+        "unicode": "303d-fe0f",
         "description": "Part alternation mark",
         "description_zh_cn": "零件交替标记",
         "keywords": "mark,part,标记,部分"
       },
       {
-        "unicode": "26a0",
+        "unicode": "26a0-fe0f",
         "description": "Warning sign",
         "description_zh_cn": "警告牌",
         "keywords": "warning,警告"
@@ -8237,7 +8237,7 @@
         "keywords": "beginner,chevron,green,japanese,leaf,tool,yellow,初学者,雪佛龙,绿色,日语,叶,工具,黄色"
       },
       {
-        "unicode": "267b",
+        "unicode": "267b-fe0f",
         "description": "Universal recycling symbol",
         "description_zh_cn": "通用回收符号",
         "keywords": "recycle,回收"
@@ -8255,13 +8255,13 @@
         "keywords": "chart increasing with yen,bank,chart,currency,graph,growth,market,money,rise,trend,upward,yen,图表随着日元,银行,图表,货币,图形,增长,市场,资金,上升,趋势,向上,日元而增加"
       },
       {
-        "unicode": "2747",
+        "unicode": "2747-fe0f",
         "description": "Sparkle",
         "description_zh_cn": "火花",
         "keywords": "sparkle,火花"
       },
       {
-        "unicode": "2733",
+        "unicode": "2733-fe0f",
         "description": "Eight spoked asterisk",
         "description_zh_cn": "八辐星号",
         "keywords": "asterisk,星号"
@@ -8303,13 +8303,13 @@
         "keywords": "earth,globe,meridians,world,地球,全球,经络,世界"
       },
       {
-        "unicode": "267e",
+        "unicode": "267e-fe0f",
         "description": "Infinity",
         "description_zh_cn": "无穷",
         "keywords": "forever,unbounded,universal,永远,无限,普遍"
       },
       {
-        "unicode": "24c2",
+        "unicode": "24c2-fe0f",
         "description": "Circled latin capital letter m",
         "description_zh_cn": "带圆圈的拉丁大写字母 m",
         "keywords": "circle,m,圆,米"
@@ -8333,7 +8333,7 @@
         "keywords": "access,wheelchair,访问,轮椅"
       },
       {
-        "unicode": "1f17f",
+        "unicode": "1f17f-fe0f",
         "description": "Negative squared latin capital letter p",
         "description_zh_cn": "负平方拉丁文大写字母 p",
         "keywords": "parking,停车处"
@@ -8345,7 +8345,7 @@
         "keywords": "squared empty ideograph,chinese,平方空表意文字,中文"
       },
       {
-        "unicode": "1f202",
+        "unicode": "1f202-fe0f",
         "description": "Squared katakana sa",
         "description_zh_cn": "平方片假名",
         "keywords": "japanese,日本人"
@@ -8393,7 +8393,7 @@
         "keywords": "men’s room,lavatory,man,restroom,wc,men,male,男厕所,厕所,男人,洗手间,厕所,男人,男"
       },
       {
-        "unicode": "2642",
+        "unicode": "2642-fe0f",
         "description": "Male sign",
         "description_zh_cn": "男性标志",
         "keywords": "male,man,men,男,男,男"
@@ -8405,13 +8405,13 @@
         "keywords": "women’s room,lavatory,restroom,wc,woman,women,female,女厕所,洗手间,洗手间,厕所,女人,女人,女性"
       },
       {
-        "unicode": "2640",
+        "unicode": "2640-fe0f",
         "description": "Female sign",
         "description_zh_cn": "女性标志",
         "keywords": "female,woman,women,女性,女人,妇女"
       },
       {
-        "unicode": "26a7",
+        "unicode": "26a7-fe0f",
         "description": "Transgender sign",
         "description_zh_cn": "变性标志",
         "keywords": "transgender,pride,lgbt,变性人,骄傲,lgbt"
@@ -8489,61 +8489,61 @@
         "keywords": "free,自由"
       },
       {
-        "unicode": "30-20e3",
+        "unicode": "30-fe0f-20e3",
         "description": "Keycap digit zero",
         "description_zh_cn": "键帽数字零",
         "keywords": "0,keycap,zero,0,键帽,零"
       },
       {
-        "unicode": "31-20e3",
+        "unicode": "31-fe0f-20e3",
         "description": "Keycap digit one",
         "description_zh_cn": "键帽数字一",
         "keywords": "1,keycap,one,1,键帽,一个"
       },
       {
-        "unicode": "32-20e3",
+        "unicode": "32-fe0f-20e3",
         "description": "Keycap digit two",
         "description_zh_cn": "键帽数字二",
         "keywords": "2,keycap,two,2,键帽,两个"
       },
       {
-        "unicode": "33-20e3",
+        "unicode": "33-fe0f-20e3",
         "description": "Keycap digit three",
         "description_zh_cn": "键帽数字三",
         "keywords": "3,keycap,three,3,键帽,三个"
       },
       {
-        "unicode": "34-20e3",
+        "unicode": "34-fe0f-20e3",
         "description": "Keycap digit four",
         "description_zh_cn": "键帽数字四",
         "keywords": "4,four,keycap,4,四,键帽"
       },
       {
-        "unicode": "35-20e3",
+        "unicode": "35-fe0f-20e3",
         "description": "Keycap digit five",
         "description_zh_cn": "键帽数字五",
         "keywords": "5,five,keycap,5,五,键帽"
       },
       {
-        "unicode": "36-20e3",
+        "unicode": "36-fe0f-20e3",
         "description": "Keycap digit six",
         "description_zh_cn": "键帽数字六",
         "keywords": "6,keycap,six,6,键帽,六个"
       },
       {
-        "unicode": "37-20e3",
+        "unicode": "37-fe0f-20e3",
         "description": "Keycap digit seven",
         "description_zh_cn": "键帽数字七",
         "keywords": "7,keycap,seven,7,键帽,七"
       },
       {
-        "unicode": "38-20e3",
+        "unicode": "38-fe0f-20e3",
         "description": "Keycap digit eight",
         "description_zh_cn": "键帽数字八",
         "keywords": "8,eight,keycap,8,八,键帽"
       },
       {
-        "unicode": "39-20e3",
+        "unicode": "39-fe0f-20e3",
         "description": "Keycap digit nine",
         "description_zh_cn": "键帽数字九",
         "keywords": "9,keycap,nine,9,键帽,九"
@@ -8561,7 +8561,7 @@
         "keywords": "1234,input,numbers,1234,输入,数字"
       },
       {
-        "unicode": "25b6",
+        "unicode": "25b6-fe0f",
         "description": "Right-pointing triangle",
         "description_zh_cn": "右指三角形",
         "keywords": "play button,arrow,play,right,triangle,播放按钮,箭头,播放,右,三角形"
@@ -8591,7 +8591,7 @@
         "keywords": "record button,circle,record,记录按钮,圆圈,记录"
       },
       {
-        "unicode": "23cf",
+        "unicode": "23cf-fe0f",
         "description": "Eject symbol",
         "description_zh_cn": "弹出符号",
         "keywords": "eject button,弹出按钮"
@@ -8639,7 +8639,7 @@
         "keywords": "repeat button,arrow,clockwise,once,重复按钮,箭头,顺时针,一次"
       },
       {
-        "unicode": "25c0",
+        "unicode": "25c0-fe0f",
         "description": "Left-pointing triangle",
         "description_zh_cn": "左指三角形",
         "keywords": "reverse button,arrow,left,reverse,triangle,反向按钮,箭头,左,反向,三角形"
@@ -8669,61 +8669,61 @@
         "keywords": "fast down button,arrow,double,down,快速向下按钮,箭头,双,向下"
       },
       {
-        "unicode": "27a1",
+        "unicode": "27a1-fe0f",
         "description": "Rightwards arrow",
         "description_zh_cn": "向右箭头",
         "keywords": "right arrow,arrow,cardinal,direction,east,向右箭头,箭头,基数,方向,东"
       },
       {
-        "unicode": "2b05",
+        "unicode": "2b05-fe0f",
         "description": "Leftwards arrow",
         "description_zh_cn": "向左箭头",
         "keywords": "left arrow,arrow,cardinal,direction,west,左箭头,箭头,基数,方向,西"
       },
       {
-        "unicode": "2b06",
+        "unicode": "2b06-fe0f",
         "description": "Upwards arrow",
         "description_zh_cn": "向上箭头",
         "keywords": "up arrow,arrow,cardinal,direction,north,向上箭头,箭头,基数,方向,北"
       },
       {
-        "unicode": "2b07",
+        "unicode": "2b07-fe0f",
         "description": "Downwards arrow",
         "description_zh_cn": "向下箭头",
         "keywords": "down arrow,arrow,cardinal,direction,down,south,向下箭头,箭头,基数,方向,向下,南"
       },
       {
-        "unicode": "2197",
+        "unicode": "2197-fe0f",
         "description": "North east arrow",
         "description_zh_cn": "东北箭头",
         "keywords": "up-right arrow,arrow,direction,intercardinal,northeast,向上箭头,箭头,方向,intercardinal,东北"
       },
       {
-        "unicode": "2198",
+        "unicode": "2198-fe0f",
         "description": "South east arrow",
         "description_zh_cn": "东南箭头",
         "keywords": "down-right arrow,arrow,direction,intercardinal,southeast,右下箭头,箭头,方向,intercardinal,东南"
       },
       {
-        "unicode": "2199",
+        "unicode": "2199-fe0f",
         "description": "South west arrow",
         "description_zh_cn": "西南箭头",
         "keywords": "down-left arrow,arrow,direction,intercardinal,southwest,左下箭头,箭头,方向,intercardinal,西南"
       },
       {
-        "unicode": "2196",
+        "unicode": "2196-fe0f",
         "description": "North west arrow",
         "description_zh_cn": "西北箭头",
         "keywords": "up-left arrow,arrow,direction,intercardinal,northwest,左上箭头,箭头,方向,intercardinal,西北"
       },
       {
-        "unicode": "2195",
+        "unicode": "2195-fe0f",
         "description": "Up down arrow",
         "description_zh_cn": "向上向下箭头",
         "keywords": "up-down arrow,arrow,direction,intercardinal,northwest,上下箭头,箭头,方向,intercardinal,西北"
       },
       {
-        "unicode": "2194",
+        "unicode": "2194-fe0f",
         "description": "Left right arrow",
         "description_zh_cn": "左右箭头",
         "keywords": "left-right arrow,arrow,左右箭头,箭头"
@@ -8735,13 +8735,13 @@
         "keywords": "anticlockwise,arrow,counterclockwise,withershins,逆时针,箭头,逆时针,凋零"
       },
       {
-        "unicode": "21aa",
+        "unicode": "21aa-fe0f",
         "description": "Rightwards arrow with hook",
         "description_zh_cn": "带钩的向右箭头",
         "keywords": "arrow curving right,arrow,箭头向右弯曲箭头"
       },
       {
-        "unicode": "21a9",
+        "unicode": "21a9-fe0f",
         "description": "Leftwards arrow with hook",
         "description_zh_cn": "带钩的向左箭头",
         "keywords": "arrow curving left,arrow,箭头向左弯曲箭头"
@@ -8753,31 +8753,31 @@
         "keywords": "clockwise vertical arrows,arrow,clockwise,reload,顺时针垂直箭头,箭头,顺时针,重新加载"
       },
       {
-        "unicode": "2934",
+        "unicode": "2934-fe0f",
         "description": "Arrow pointing rightwards then curving upwards",
         "description_zh_cn": "箭头向右然后向上弯曲",
         "keywords": "right arrow curving up,arrow,向右箭头向上弯曲箭头"
       },
       {
-        "unicode": "2935",
+        "unicode": "2935-fe0f",
         "description": "Arrow pointing rightwards then curving downwards",
         "description_zh_cn": "箭头向右然后向下弯曲",
         "keywords": "right arrow curving down,arrow,down,向右箭头向下弯曲,箭头,向下"
       },
       {
-        "unicode": "23-20e3",
+        "unicode": "23-fe0f-20e3",
         "description": "Keycap number sign",
         "description_zh_cn": "键帽数字符号",
         "keywords": "hash,keycap,pound,哈希,键帽,磅"
       },
       {
-        "unicode": "2a-20e3",
+        "unicode": "2a-fe0f-20e3",
         "description": "Keycap asterisk",
         "description_zh_cn": "键帽星号",
         "keywords": "asterisk,keycap,star,星号,键帽,星星"
       },
       {
-        "unicode": "2139",
+        "unicode": "2139-fe0f",
         "description": "Information source",
         "description_zh_cn": "信息来源",
         "keywords": "i,information,一,信息"
@@ -8819,7 +8819,7 @@
         "keywords": "activity,entertainment,music,note,notes,活动,娱乐,音乐,笔记,笔记"
       },
       {
-        "unicode": "3030",
+        "unicode": "3030-fe0f",
         "description": "Wavy dash",
         "description_zh_cn": "波浪线",
         "keywords": "dash,punctuation,wavy,破折号,标点符号,波浪线"
@@ -8831,7 +8831,7 @@
         "keywords": "curl,loop,卷曲,循环"
       },
       {
-        "unicode": "2714",
+        "unicode": "2714-fe0f",
         "description": "Heavy check mark",
         "description_zh_cn": "重复选标记",
         "keywords": "check,mark,复选标记"
@@ -8855,7 +8855,7 @@
         "keywords": "division,math,除法,数学"
       },
       {
-        "unicode": "2716",
+        "unicode": "2716-fe0f",
         "description": "Heavy multiplication x",
         "description_zh_cn": "重乘 x",
         "keywords": "cancel,multiplication,multiply,x,取消,乘法,乘法,x"
@@ -8873,19 +8873,19 @@
         "keywords": "bank,currency,exchange,money,银行,货币,交易所,钱"
       },
       {
-        "unicode": "a9",
+        "unicode": "a9-fe0f",
         "description": "Copyright sign",
         "description_zh_cn": "版权标志",
         "keywords": "copyright,版权"
       },
       {
-        "unicode": "ae",
+        "unicode": "ae-fe0f",
         "description": "Registered sign",
         "description_zh_cn": "注册标志",
         "keywords": "registered,挂号的"
       },
       {
-        "unicode": "2122",
+        "unicode": "2122-fe0f",
         "description": "Trade mark sign",
         "description_zh_cn": "商标标志",
         "keywords": "mark,tm,trademark,商标,tm,商标"
@@ -8921,7 +8921,7 @@
         "keywords": "arrow,soon,箭头,很快"
       },
       {
-        "unicode": "2611",
+        "unicode": "2611-fe0f",
         "description": "Ballot box with check",
         "description_zh_cn": "带支票的投票箱",
         "keywords": "ballot,box,check,选票,框,检查"
@@ -9181,31 +9181,31 @@
       {
         "unicode": "1f004",
         "description": "Mahjong tile red dragon",
-        "description_zh_cn": "麻将牌红龙",
+        "description_zh_cn": "麻将牌红中",
         "keywords": "game,mahjong,red,游戏,麻将,红色"
       },
       {
-        "unicode": "2660",
+        "unicode": "2660-fe0f",
         "description": "Spade suit",
-        "description_zh_cn": "铲套装",
+        "description_zh_cn": "黑桃",
         "keywords": "card,game,spade,suit,卡,游戏,黑桃,西装"
       },
       {
-        "unicode": "2663",
+        "unicode": "2663-fe0f",
         "description": "Club suit",
-        "description_zh_cn": "俱乐部套装",
+        "description_zh_cn": "梅花",
         "keywords": "card,club,clubs,game,suit,卡,俱乐部,俱乐部,游戏,西装"
       },
       {
-        "unicode": "2665",
+        "unicode": "2665-fe0f",
         "description": "Heart suit",
-        "description_zh_cn": "心套装",
+        "description_zh_cn": "红心",
         "keywords": "card,game,heart,hearts,suit,卡,游戏,心,心,西装"
       },
       {
-        "unicode": "2666",
+        "unicode": "2666-fe0f",
         "description": "Diamond suit",
-        "description_zh_cn": "钻石套装",
+        "description_zh_cn": "方块",
         "keywords": "card,diamond,diamonds,game,suit,卡,钻石,钻石,游戏,西装"
       },
       {
@@ -9221,7 +9221,7 @@
         "keywords": "bubble,eye,speech,witness,泡沫,眼睛,演讲,证人"
       },
       {
-        "unicode": "1f5e8",
+        "unicode": "1f5e8-fe0f",
         "description": "Left speech bubble",
         "description_zh_cn": "左气泡",
         "keywords": "dialog,speech,对话,演讲"
@@ -9233,7 +9233,7 @@
         "keywords": "balloon,bubble,comic,thought,气球,泡泡,漫画,思想"
       },
       {
-        "unicode": "1f5ef",
+        "unicode": "1f5ef-fe0f",
         "description": "Right anger bubble",
         "description_zh_cn": "正确的愤怒泡沫",
         "keywords": "angry,balloon,bubble,mad,生气,气球,泡泡,疯狂"

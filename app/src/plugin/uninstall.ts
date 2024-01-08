@@ -3,12 +3,15 @@ import {Plugin} from "../plugin";
 import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
 
-export const uninstall = (app: App, name: string) => {
+export const uninstall = (app: App, name: string, isUninstall = false) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
             // rm command
             try {
                 plugin.onunload();
+                if (isUninstall) {
+                    plugin.uninstall();
+                }
             } catch (e) {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
             }

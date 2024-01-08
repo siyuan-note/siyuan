@@ -6,6 +6,10 @@
   "relatedTo": "關聯至",
   "relation": "關聯",
   "rollup": "匯總",
+  "rollupProperty": "總計欄位",
+  "rollupCalc": "彙總方式",
+  "searchRelation": "搜尋關聯列",
+  "searchRollupProperty": "搜尋總計欄位",
   "replaceTypes": {
     "text": "普通文字",
     "imgText": "圖片提示文字",
@@ -478,6 +482,7 @@
   "useDefaultWidth": "使用預設列寬",
   "type": "類型",
   "replaceType": "替換類型",
+  "searchType": "搜尋類型",
   "searchBlockType": "塊級類型（在以下啟用的類型中進行搜索，全域搜索中的過濾選項會覆蓋該設置）",
   "searchBlockAttr": "塊級屬性（不僅在內容中進行搜索，同時也會在以下啟用的屬性中搜索）",
   "searchIndex": "索引",

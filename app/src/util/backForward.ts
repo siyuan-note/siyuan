@@ -135,7 +135,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
         }
         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-        scrollCenter(stack.protyle, blockElement, true);
+        scrollCenter(stack.protyle, blockElement);
         getAllModels().outline.forEach(item => {
             if (item.blockId === stack.protyle.block.rootID) {
                 item.setCurrent(blockElement);

@@ -33,6 +33,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func upsertIndexes(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, p := range pathsArg {
+		paths = append(paths, p.(string))
+	}
+	model.UpsertIndexes(paths)
+}
+
+func removeIndexes(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, p := range pathsArg {
+		paths = append(paths, p.(string))
+	}
+	model.RemoveIndexes(paths)
+}
+
 func refreshFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -577,10 +611,6 @@ func getDocCreateSavePath(c *gin.Context) {
 	docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
 	if "../" == docCreateSavePathTpl {
 		docCreateSavePathTpl = "../Untitled"
-	}
-	for strings.HasSuffix(docCreateSavePathTpl, "/") {
-		docCreateSavePathTpl = strings.TrimSuffix(docCreateSavePathTpl, "/")
-		docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
 	}
 
 	p, err := model.RenderGoTemplate(docCreateSavePathTpl)

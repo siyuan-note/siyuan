@@ -38,10 +38,13 @@ export class Dialog {
         if (!isMobile() && options.positionId) {
             const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][options.positionId];
             if (dialogPosition) {
-                left = dialogPosition.left + "px";
-                top = dialogPosition.top + "px";
-                options.width = dialogPosition.width + "px";
-                options.height = dialogPosition.height + "px";
+                if (dialogPosition.left + dialogPosition.width <= window.innerWidth &&
+                    dialogPosition.top + dialogPosition.height <= window.innerHeight) {
+                    left = dialogPosition.left + "px";
+                    top = dialogPosition.top + "px";
+                    options.width = dialogPosition.width + "px";
+                    options.height = dialogPosition.height + "px";
+                }
             }
         }
         this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">

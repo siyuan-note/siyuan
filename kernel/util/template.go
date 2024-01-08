@@ -17,11 +17,10 @@
 package util
 
 import (
-	"math"
-	"text/template"
-
 	"github.com/Masterminds/sprig/v3"
 	"github.com/spf13/cast"
+	"math"
+	"text/template"
 )
 
 func BuiltInTemplateFuncs() (ret template.FuncMap) {

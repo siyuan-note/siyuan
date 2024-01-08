@@ -9,7 +9,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {copyPlainText, isMac, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
+import {copyPlainText, isMac, isOnlyMeta, openByMobile, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction,
@@ -231,7 +231,7 @@ export class Gutter {
                         srcIDs,
                         avID,
                     }]);
-                    insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
+                    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
@@ -1355,6 +1355,19 @@ export class Gutter {
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range) as IMenu[]
                 }).element);
             }
+        } else if (type === "NodeAttributeView" && !protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconDatabase",
+                label: window.siyuan.languages.export + " CSV",
+                click() {
+                    fetchPost("/api/export/exportAttributeView", {
+                        id: nodeElement.getAttribute("data-av-id")
+                    }, response => {
+                        openByMobile(response.data.zip);
+                    });
+                }
+            }).element);
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2038,8 +2051,9 @@ data-type="fold"><svg style="width:10px${fold && fold === "1" ? "" : ";transform
         }
         this.element.style.top = `${Math.max(rect.top, contentTop) + marginHeight}px`;
         let left = rect.left - this.element.clientWidth - space;
-        if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
-            // 嵌入块为列表时
+        if ((nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) ||    // 嵌入块为列表时
+            // 为数据库行
+            element.classList.contains("av__row")) {
             left = nodeElement.getBoundingClientRect().left - this.element.clientWidth - space;
         }
         this.element.style.left = `${left}px`;

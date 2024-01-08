@@ -203,8 +203,8 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
             color = "var(--b3-card-error-color)" + Constants.ZWSP + "var(--b3-card-error-background)";
         } else {
             const fontStyles = localFontStyles[0].split(Constants.ZWSP);
-            type = fontStyles[0];
-            color = fontStyles[1];
+            type = fontStyles.splice(0, 1)[0];
+            color = fontStyles.join(Constants.ZWSP);
         }
     }
     if (nodeElements && nodeElements.length > 0) {

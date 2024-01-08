@@ -38,6 +38,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeViewFilterSort(id string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(id)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", id, err)
+		return
+	}
+
+	filters = []*av.ViewFilter{}
+	sorts = []*av.ViewSort{}
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			filters = view.Table.Filters
+			sorts = view.Table.Sorts
+		}
+	}
+	return
+}
+
 func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
 	waitForSyncingStorages()
 
@@ -604,7 +625,9 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	goTpl = goTpl.Funcs(util.BuiltInTemplateFuncs())
+	tplFuncMap := util.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, tplErr := goTpl.Parse(tplContent)
 	if nil != tplErr {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
@@ -1551,20 +1574,28 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
-	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
+	// 如果存在排序和过滤条件，则将排序和过滤条件应用到新添加的块上
 	view, _ := attrView.GetCurrentView()
-	if nil != view && 0 < len(view.Table.Filters) {
+	if nil != view && (0 < len(view.Table.Filters) || 0 < len(view.Table.Sorts)) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
 		viewable.SortRows()
 
-		addedVal := false
+		affectKeyIDs := map[string]bool{}
+		for _, f := range view.Table.Filters {
+			affectKeyIDs[f.Column] = true
+		}
+		for _, s := range view.Table.Sorts {
+			affectKeyIDs[s.Column] = true
+		}
+
+		addedValues := map[string]bool{}
 		if 0 < len(viewable.Rows) {
 			row := GetLastSortRow(viewable.Rows)
 			if nil != row {
-				for _, filter := range view.Table.Filters {
+				for affectKeyID, _ := range affectKeyIDs {
 					for _, cell := range row.Cells {
-						if nil != cell.Value && cell.Value.KeyID == filter.Column {
+						if nil != cell.Value && cell.Value.KeyID == affectKeyID {
 							if av.KeyTypeBlock == cell.ValueType {
 								blockValue.Block.Content = cell.Value.Block.Content
 								continue
@@ -1574,18 +1605,30 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 							newValue.ID = ast.NewNodeID()
 							newValue.BlockID = blockID
 							newValue.IsDetached = operation.IsDetached
-							values, _ := attrView.GetKeyValues(filter.Column)
+							values, _ := attrView.GetKeyValues(affectKeyID)
 							values.Values = append(values.Values, newValue)
+							addedValues[affectKeyID] = true
 							break
 						}
 					}
 				}
-				addedVal = true
 			}
 		}
 
-		if !addedVal {
+		notAddedValues := map[string]bool{}
+		for affectKeyID, _ := range affectKeyIDs {
+			if !addedValues[affectKeyID] {
+				notAddedValues[affectKeyID] = true
+				break
+			}
+		}
+
+		if 0 < len(notAddedValues) {
 			for _, filter := range view.Table.Filters {
+				if !notAddedValues[filter.Column] {
+					continue
+				}
+
 				for _, keyValues := range attrView.KeyValues {
 					if keyValues.Key.ID == filter.Column {
 						newValue := filter.GetAffectValue(keyValues.Key)
@@ -1598,6 +1641,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 					}
 				}
 			}
+
+			// 仅使用上面的过滤条件计算受影响的值并插入兜底，受影响的排序条件不进行计算值插入
 		}
 	}
 

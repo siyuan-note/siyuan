@@ -377,9 +377,9 @@ ${genHintItemHTML(item)}
     <button data-type="3" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[2][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f433")}</button>
     <button data-type="4" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[3][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f96a")}</button>
     <button data-type="5" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[4][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3a8")}</button>
-    <button data-type="6" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd")}</button>
+    <button data-type="6" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd-fe0f")}</button>
     <button data-type="7" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[6][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f52e")}</button>
-    <button data-type="8" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e")}</button>
+    <button data-type="8" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e-fe0f")}</button>
     <button data-type="9" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</button>
 </div>
 </div>`;

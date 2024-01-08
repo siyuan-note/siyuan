@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -42,6 +43,64 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func UpsertIndexes(paths []string) {
+	var syFiles []string
+	for _, p := range paths {
+		if strings.HasSuffix(p, "/") {
+			syFiles = append(syFiles, listSyFiles(p)...)
+			continue
+		}
+
+		if strings.HasSuffix(p, ".sy") {
+			syFiles = append(syFiles, p)
+		}
+	}
+
+	syFiles = gulu.Str.RemoveDuplicatedElem(syFiles)
+	upsertIndexes(syFiles)
+}
+
+func RemoveIndexes(paths []string) {
+	var syFiles []string
+	for _, p := range paths {
+		if strings.HasSuffix(p, "/") {
+			syFiles = append(syFiles, listSyFiles(p)...)
+			continue
+		}
+
+		if strings.HasSuffix(p, ".sy") {
+			syFiles = append(syFiles, p)
+		}
+	}
+
+	syFiles = gulu.Str.RemoveDuplicatedElem(syFiles)
+	removeIndexes(syFiles)
+}
+
+func listSyFiles(dir string) (ret []string) {
+	dirPath := filepath.Join(util.DataDir, dir)
+	err := filepath.WalkDir(dirPath, func(path string, d os.DirEntry, err error) error {
+		if nil != err {
+			logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if strings.HasSuffix(path, ".sy") {
+			p := filepath.ToSlash(strings.TrimPrefix(path, util.DataDir))
+			ret = append(ret, p)
+		}
+		return nil
+	})
+	if nil != err {
+		logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
+	}
+	return
+}
 
 func (box *Box) Unindex() {
 	task.AppendTask(task.DatabaseIndex, unindex, box.ID)
@@ -267,6 +326,7 @@ func init() {
 }
 
 func subscribeSQLEvents() {
+	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
 	//	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 	//		// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392

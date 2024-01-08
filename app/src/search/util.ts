@@ -295,21 +295,21 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         </div>
         <div class="block__icons">
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
-                <svg><use xlink:href="#iconRefresh"></use></svg>
+            <span id="searchFilter" aria-label="${window.siyuan.languages.replaceType}" class="block__icon ariaLabel" data-position="9bottom">
+                <svg><use xlink:href="#iconFilter"></use></svg>
+            </span> 
+            <span class="fn__space"></span>
+            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon ariaLabel" data-position="9bottom">
+                <svg><use xlink:href="#iconRegex"></use></svg>
             </span>
             <span class="fn__space"></span>
             <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon ariaLabel" data-position="9bottom">
-                <svg><use xlink:href="#iconRegex"></use></svg>
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon ariaLabel" data-position="9bottom">
+                <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
-            <span class="fn__space"></span>
-            <span id="searchFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel" data-position="9bottom">
-                <svg><use xlink:href="#iconFilter"></use></svg>
-            </span> 
             <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
                 <span class="fn__space"></span>
                 <span id="searchExpand" class="block__icon block__icon--show ariaLabel" data-position="9bottom" aria-label="${window.siyuan.languages.expand}">

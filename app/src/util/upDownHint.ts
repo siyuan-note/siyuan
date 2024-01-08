@@ -59,5 +59,35 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
             currentHintElement.scrollIntoView(overTop);
         }
         return currentHintElement;
+    } else if (event.key === "Home") {
+        event.preventDefault();
+        event.stopPropagation();
+        currentHintElement.classList.remove(classActiveName);
+        currentHintElement = listElement.children[0] as HTMLElement;
+        while (currentHintElement &&
+        (currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className))) {
+            currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
+        }
+        if (!currentHintElement) {
+            return;
+        }
+        currentHintElement.classList.add(classActiveName);
+        currentHintElement.scrollIntoView();
+        return currentHintElement;
+    } else if (event.key === "End") {
+        event.preventDefault();
+        event.stopPropagation();
+        currentHintElement.classList.remove(classActiveName);
+        currentHintElement = listElement.children[listElement.children.length - 1] as HTMLElement;
+        while (currentHintElement &&
+        (currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className))) {
+            currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
+        }
+        if (!currentHintElement) {
+            return;
+        }
+        currentHintElement.classList.add(classActiveName);
+        currentHintElement.scrollIntoView(false);
+        return currentHintElement;
     }
 };

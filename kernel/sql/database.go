@@ -810,8 +810,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		fcontent = treenode.NodeStaticContent(fc, nil, true, false, true)
 
 		parentID = n.Parent.ID
-		// 将标题块作为父节点
-		if h := heading(n); nil != h {
+		if h := heading(n); nil != h { // 如果在标题块下方，则将标题块作为父节点
 			parentID = h.ID
 		}
 		length = utf8.RuneCountInString(fcontent)
@@ -823,7 +822,6 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath, true)
 
 		parentID = n.Parent.ID
-		// 将标题块作为父节点
 		if h := heading(n); nil != h {
 			parentID = h.ID
 		}
@@ -909,6 +907,10 @@ func tagFromNode(node *ast.Node) (ret string) {
 }
 
 func heading(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+
 	currentLevel := 16
 	if ast.NodeHeading == node.Type {
 		currentLevel = node.HeadingLevel

@@ -244,7 +244,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
                     }
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
-                        (avMaskElement.querySelector(" textarea") as HTMLTextAreaElement).focus();
+                        (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
                     } else if (!document.querySelector(".av__panel")) {
                         focusBlock(e);
                     }
@@ -298,17 +298,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
         } else {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
-                const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
                 avRender(item, protyle, () => {
                     if (operation.action === "insertAttrViewBlock") {
                         item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
                             cellElement.classList.remove("av__cell--select");
                         });
-                        // https://github.com/siyuan-note/siyuan/issues/9599
-                        if (!isUndo && operation.isDetached && isCurrent) {
-                            popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
-                        }
-                    } else if (operation.action === "addAttrViewCol" && isCurrent) {
+                    } else if (operation.action === "addAttrViewCol" && item.querySelector(".av__pulse")) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

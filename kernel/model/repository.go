@@ -57,18 +57,25 @@ import (
 	"github.com/studio-b12/gowebdav"
 )
 
-func init() {
-	subscribeRepoEvents()
-}
+func GetRepoFile(fileID string) (ret []byte, p string, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
 
-type Snapshot struct {
-	*dejavu.Log
-	TypesCount []*TypeCount `json:"typesCount"`
-}
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
 
-type TypeCount struct {
-	Type  string `json:"type"`
-	Count int    `json:"count"`
+	file, err := repo.GetFile(fileID)
+	if nil != err {
+		return
+	}
+
+	ret, err = repo.OpenFile(file)
+	p = file.Path
+	return
 }
 
 func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, updated int64, err error) {
@@ -325,6 +332,16 @@ func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isProtyleDoc bool,
 		return
 	}
 	return
+}
+
+type Snapshot struct {
+	*dejavu.Log
+	TypesCount []*TypeCount `json:"typesCount"`
+}
+
+type TypeCount struct {
+	Type  string `json:"type"`
+	Count int    `json:"count"`
 }
 
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
@@ -1568,6 +1585,10 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		return
 	}
 	return
+}
+
+func init() {
+	subscribeRepoEvents()
 }
 
 func subscribeRepoEvents() {

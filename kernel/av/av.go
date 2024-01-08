@@ -429,14 +429,9 @@ func (av *AttributeView) ShallowClone() (ret *AttributeView) {
 	}
 
 	ret.ID = ast.NewNodeID()
-	view, err := ret.GetCurrentView()
-	if nil == err {
-		view.ID = ast.NewNodeID()
-		ret.ViewID = view.ID
-	} else {
-		view, _ = NewTableViewWithBlockKey(ast.NewNodeID())
-		ret.ViewID = view.ID
-		ret.Views = append(ret.Views, view)
+	if 1 > len(ret.Views) {
+		logging.LogErrorf("attribute view [%s] has no views", av.ID)
+		return nil
 	}
 
 	keyIDMap := map[string]string{}
@@ -447,11 +442,22 @@ func (av *AttributeView) ShallowClone() (ret *AttributeView) {
 		kv.Values = []*Value{}
 	}
 
-	view.Table.ID = ast.NewNodeID()
-	for _, column := range view.Table.Columns {
-		column.ID = keyIDMap[column.ID]
+	for _, view := range ret.Views {
+		view.ID = ast.NewNodeID()
+		view.Table.ID = ast.NewNodeID()
+		for _, column := range view.Table.Columns {
+			column.ID = keyIDMap[column.ID]
+		}
+		view.Table.RowIDs = []string{}
+
+		for _, f := range view.Table.Filters {
+			f.Column = keyIDMap[f.Column]
+		}
+		for _, s := range view.Table.Sorts {
+			s.Column = keyIDMap[s.Column]
+		}
 	}
-	view.Table.RowIDs = []string{}
+	ret.ViewID = ret.Views[0].ID
 	return
 }
 

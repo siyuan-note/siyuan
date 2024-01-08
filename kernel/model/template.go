@@ -287,45 +287,48 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
 			} else {
 				cloned := attrView.ShallowClone()
-				if nil != cloned {
-					n.AttributeViewID = cloned.ID
-					if !preview {
-						// 非预览时持久化数据库
-						if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
-							logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
-						}
-					} else {
-						// 预览时使用简单表格渲染
-						view, getErr := attrView.GetCurrentView()
-						if nil != getErr {
-							logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
-							return ast.WalkContinue
-						}
+				if nil == cloned {
+					logging.LogErrorf("clone attribute view [%s] failed", n.AttributeViewID)
+					return ast.WalkContinue
+				}
 
-						table, renderErr := renderAttributeViewTable(attrView, view)
-						if nil != renderErr {
-							logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
-							return ast.WalkContinue
-						}
-
-						var aligns []int
-						for range table.Columns {
-							aligns = append(aligns, 0)
-						}
-						mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
-						mdTableHead := &ast.Node{Type: ast.NodeTableHead}
-						mdTable.AppendChild(mdTableHead)
-						mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
-						mdTableHead.AppendChild(mdTableHeadRow)
-						for _, col := range table.Columns {
-							cell := &ast.Node{Type: ast.NodeTableCell}
-							cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
-							mdTableHeadRow.AppendChild(cell)
-						}
-
-						n.InsertBefore(mdTable)
-						unlinks = append(unlinks, n)
+				n.AttributeViewID = cloned.ID
+				if !preview {
+					// 非预览时持久化数据库
+					if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
+						logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
 					}
+				} else {
+					// 预览时使用简单表格渲染
+					view, getErr := attrView.GetCurrentView()
+					if nil != getErr {
+						logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
+						return ast.WalkContinue
+					}
+
+					table, renderErr := renderAttributeViewTable(attrView, view)
+					if nil != renderErr {
+						logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
+						return ast.WalkContinue
+					}
+
+					var aligns []int
+					for range table.Columns {
+						aligns = append(aligns, 0)
+					}
+					mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
+					mdTableHead := &ast.Node{Type: ast.NodeTableHead}
+					mdTable.AppendChild(mdTableHead)
+					mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
+					mdTableHead.AppendChild(mdTableHeadRow)
+					for _, col := range table.Columns {
+						cell := &ast.Node{Type: ast.NodeTableCell}
+						cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
+						mdTableHeadRow.AppendChild(cell)
+					}
+
+					n.InsertBefore(mdTable)
+					unlinks = append(unlinks, n)
 				}
 			}
 		}

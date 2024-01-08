@@ -114,6 +114,7 @@ export abstract class Constants {
     public static readonly DIALOG_SEARCH = "dialog-search";
     public static readonly DIALOG_REPLACE = "dialog-replace";
     public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
+    public static readonly DIALOG_HISTORYCOMPARE = "dialog-historycompare";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;

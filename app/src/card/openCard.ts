@@ -30,12 +30,7 @@ const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: nu
 export const genCardHTML = (options: {
     id: string,
     cardType: TCardType,
-    cardsData: {
-        cards: ICard[],
-        unreviewedCount: number
-        unreviewedNewCardCount: number
-        unreviewedOldCardCount: number
-    },
+    cardsData: ICardData,
     isTab: boolean
 }) => {
     let iconsHTML: string;
@@ -129,24 +124,19 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
 </div>`;
 };
 
-export const bindCardEvent = (options: {
+export const bindCardEvent = async (options: {
     app: App,
     element: Element,
     title?: string,
-    cardsData: {
-        cards: ICard[],
-        unreviewedCount: number
-        unreviewedNewCardCount: number
-        unreviewedOldCardCount: number
-    }
+    cardsData: ICardData
     cardType: TCardType,
     id?: string,
     dialog?: Dialog,
     index?: number
 }) => {
-    options.app.plugins.forEach(item => {
-        item.eventBus.emit("update-cards", options);
-    });
+    for (let i = 0; i < options.app.plugins.length; i++) {
+        options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
+    }
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
             options.element.querySelector('[data-type="fullscreen"]'));
@@ -199,12 +189,12 @@ export const bindCardEvent = (options: {
             rootID: filterElement.getAttribute("data-id"),
             deckID: filterElement.getAttribute("data-id"),
             notebook: filterElement.getAttribute("data-id"),
-        }, (treeCards) => {
+        }, async (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
-            options.app.plugins.forEach(item => {
-                item.eventBus.emit("update-cards", options);
-            });
+            for (let i = 0; i < options.app.plugins.length; i++) {
+                options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
+            }
             if (options.cardsData.cards.length > 0) {
                 nextCard({
                     countElement,
@@ -416,12 +406,12 @@ export const bindCardEvent = (options: {
                         deckID: filterElement.getAttribute("data-id"),
                         notebook: filterElement.getAttribute("data-id"),
                         reviewedCards: options.cardsData.cards
-                    }, (result) => {
+                    }, async (result) => {
                         index = 0;
                         options.cardsData = result.data;
-                        options.app.plugins.forEach(item => {
-                            item.eventBus.emit("update-cards", options);
-                        });
+                        for (let i = 0; i < options.app.plugins.length; i++) {
+                            options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
+                        }
                         if (options.cardsData.cards.length === 0) {
                             if (options.cardsData.unreviewedCount > 0) {
                                 newRound(countElement, editor, actionElements, result.data.unreviewedCount);
@@ -459,12 +449,7 @@ export const openCard = (app: App) => {
     });
 };
 
-export const openCardByData = (app: App, cardsData: {
-    cards: ICard[],
-    unreviewedCount: number
-    unreviewedNewCardCount: number
-    unreviewedOldCardCount: number
-}, cardType: TCardType, id?: string, title?: string) => {
+export const openCardByData = async (app: App, cardsData: ICardData, cardType: TCardType, id?: string, title?: string) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {
             item.destroy();
@@ -490,7 +475,7 @@ export const openCardByData = (app: App, cardsData: {
     });
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
-    const editor = bindCardEvent({
+    const editor = await bindCardEvent({
         app,
         element: dialog.element,
         cardsData,

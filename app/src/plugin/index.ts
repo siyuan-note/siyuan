@@ -88,6 +88,10 @@ export class Plugin {
         // 卸载
     }
 
+    public async updateCards(options: ICardData) {
+        return options;
+    }
+
     public onLayoutReady() {
         // 布局加载完成
     }

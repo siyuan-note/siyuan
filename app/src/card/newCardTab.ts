@@ -13,12 +13,7 @@ export const newCardModel = (options: {
         cardType: TCardType,
         id: string,
         title?: string
-        cardsData?: {
-            cards: ICard[],
-            unreviewedCount: number
-            unreviewedNewCardCount: number
-            unreviewedOldCardCount: number
-        },
+        cardsData?: ICardData,
         index?: number,
     }
 }) => {
@@ -28,7 +23,7 @@ export const newCardModel = (options: {
         type: "siyuan-card",
         tab: options.tab,
         data: options.data,
-        init() {
+        async init() {
             if (options.data.cardsData) {
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
@@ -37,7 +32,7 @@ export const newCardModel = (options: {
                     isTab: true,
                 });
 
-                editor = bindCardEvent({
+                editor = await bindCardEvent({
                     app: options.app,
                     element: this.element,
                     id: this.data.id,
@@ -56,7 +51,7 @@ export const newCardModel = (options: {
                     rootID: this.data.id,
                     deckID: this.data.id,
                     notebook: this.data.id,
-                }, (response) => {
+                }, async (response) => {
                     this.element.innerHTML = genCardHTML({
                         id: this.data.id,
                         cardType: this.data.cardType,
@@ -64,7 +59,7 @@ export const newCardModel = (options: {
                         isTab: true,
                     });
 
-                    editor = bindCardEvent({
+                    editor = await bindCardEvent({
                         app: options.app,
                         element: this.element,
                         id: this.data.id,

@@ -877,13 +877,14 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
     });
     let lastItem: HTMLElement;
     let index = Math.floor(window.innerWidth / 24);
-    while (layout.element.scrollWidth > layout.element.clientWidth && index > 0) {
+    // +2 由于某些分辨率下 scrollWidth 会大于 clientWidth
+    while (layout.element.scrollWidth > layout.element.clientWidth + 2 && index > 0) {
         layout.children.find((item: Layout | Wnd) => {
             if (item.element.style.width && item.element.style.width !== "0px") {
                 item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
                 lastItem = item.element;
             }
-            if (layout.element.scrollWidth <= layout.element.clientWidth) {
+            if (layout.element.scrollWidth <= layout.element.clientWidth + 2) {
                 return true;
             }
         });

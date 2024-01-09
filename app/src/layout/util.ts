@@ -876,7 +876,8 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
         }
     });
     let lastItem: HTMLElement;
-    while (layout.element.scrollWidth > layout.element.clientWidth) {
+    let index = Math.floor(window.innerWidth / 24);
+    while (layout.element.scrollWidth > layout.element.clientWidth && index > 0) {
         layout.children.find((item: Layout | Wnd) => {
             if (item.element.style.width && item.element.style.width !== "0px") {
                 item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
@@ -886,6 +887,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
                 return true;
             }
         });
+        index--;
     }
     if (lastItem) {
         lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";

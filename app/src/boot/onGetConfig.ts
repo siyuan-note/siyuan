@@ -126,7 +126,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(app, isStart);
-            adjustLayout();
+            setTimeout(() => {
+                adjustLayout();
+            }); // 等待 dock 中 !this.pin 的 setTimeout
             /// #if !BROWSER
             sendGlobalShortcut(app);
             /// #endif

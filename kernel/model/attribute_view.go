@@ -2238,7 +2238,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 
 			srcAvRelDestAv := false
 			for _, keyValues := range attrView.KeyValues {
-				if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
+				if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
 					srcAvRelDestAv = true
 				}
 			}

@@ -65,14 +65,28 @@ export const getDocByScroll = (options: {
             id: options.scrollAttr.zoomInId,
             size: Constants.SIZE_GET_MAX,
         }, response => {
-            actions.push(Constants.CB_GET_ALL);
-            onGet({
-                data: response,
-                protyle: options.protyle,
-                action: actions,
-                scrollAttr: options.scrollAttr,
-                afterCB: options.cb
-            });
+            if (response.code === 1) {
+                fetchPost("/api/filetree/getDoc", {
+                    id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
+                }, response => {
+                    onGet({
+                        data: response,
+                        protyle: options.protyle,
+                        action: actions,
+                        scrollAttr: options.scrollAttr,
+                        afterCB: options.cb
+                    });
+                });
+            } else {
+                actions.push(Constants.CB_GET_ALL);
+                onGet({
+                    data: response,
+                    protyle: options.protyle,
+                    action: actions,
+                    scrollAttr: options.scrollAttr,
+                    afterCB: options.cb
+                });
+            }
         });
         return;
     }

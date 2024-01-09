@@ -514,7 +514,6 @@ ${genHintItemHTML(item)}
         }
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
-            focusByRange(range);
             const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
             getSavePath(protyle.path, protyle.notebookId, (pathString) => {
@@ -524,6 +523,8 @@ ${genHintItemHTML(item)}
                     parentID: protyle.block.rootID,
                     markdown: ""
                 }, response => {
+                    // https://github.com/siyuan-note/siyuan/issues/10133
+                    protyle.toolbar.range = range;
                     protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
@@ -557,6 +558,7 @@ ${genHintItemHTML(item)}
                     tempElement.innerText = dynamicTexts[1];
                 }
             }
+            protyle.toolbar.range = range;
             protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`

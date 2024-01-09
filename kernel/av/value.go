@@ -633,7 +633,9 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked*100/len(r.Contents)), NumberFormatNone)}}
+		if 0 < len(r.Contents) {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked*100/len(r.Contents)), NumberFormatNone)}}
+		}
 	case CalcOperatorPercentUnchecked:
 		countUnchecked := 0
 		for _, v := range r.Contents {
@@ -643,6 +645,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				}
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
+		if 0 < len(r.Contents) {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
+		}
 	}
 }

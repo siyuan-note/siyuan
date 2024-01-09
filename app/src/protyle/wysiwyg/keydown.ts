@@ -1041,7 +1041,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         parentID: protyle.block.rootID,
                         markdown: ""
                     }, response => {
-                        insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
+                        insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`,
+                            protyle, false, true);
                         hideElements(["toolbar"], protyle);
                     });
                 });

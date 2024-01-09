@@ -1337,7 +1337,7 @@
     "169": "Téléchargement du fichier de référentiel de données %v/%v",
     "170": "Téléchargement du bloc de dépôt de données %v/%v",
     "171": "Téléchargement de la référence de référentiel de données %s",
-    "172": "Si vous oubliez le code d'autorisation, vous pouvez rechercher <code class=\"b3-code\">accessAuthCode</code> dans le fichier <br>conf/conf.json de l'espace de travail",
+    "172": "Si vous oubliez le code d'autorisation, veuillez trouver de l'aide <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">ici</a>",
     "173": "Veuillez entrer le code d'autorisation d'accès",
     "174": "Déverrouiller l'accès",
     "175": "Veuillez entrer le code de vérification",

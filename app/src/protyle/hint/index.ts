@@ -58,8 +58,7 @@ export class Hint {
             }
             const btnElement = hasClosestByMatchTag(eventTarget, "BUTTON");
             if (btnElement && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
-                focusByRange(protyle.toolbar.range);
-                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event));
+                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, false, this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event));
                 event.preventDefault();
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710
                 return;
@@ -294,10 +293,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
                 upDownHint(this.element.lastElementChild, event);
                 if (event.key === "Enter") {
-                    setTimeout(() => {
-                        this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, true, isNotCtrl(event));
-                    }, 148);    // 划选引用点击，需先重置 range
-                    focusByRange(protyle.toolbar.range);
+                    this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, false, isNotCtrl(event));
                     event.preventDefault();
                 } else if (event.key === "Escape") {
                     this.element.classList.add("fn__none");

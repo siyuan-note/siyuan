@@ -517,6 +517,8 @@ var (
 )
 
 func getIndexIgnoreLines() (ret []string) {
+	// Support ignore index https://github.com/siyuan-note/siyuan/issues/9198
+
 	now := time.Now().UnixMilli()
 	if now-indexIgnoreLastModified < 30*1000 {
 		return indexIgnore

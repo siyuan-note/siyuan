@@ -48,7 +48,6 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteTemplatePath" value="${data.conf.dailyNoteTemplatePath}">
 </div></div>`;
-    let contentElement;
     if (isMobile()) {
         openModel({
             title: titleHTML,
@@ -64,9 +63,8 @@ export const onGetnotebookconf = (data: INotebookConf) => {
             title: titleHTML,
             content: contentHTML
         });
-        contentElement = dialog.element;
-        contentElement.setAttribute("data-key", Constants.DIALOG_NOTEBOOKCONF);
-        bindSettingEvent(contentElement, data);
+        dialog.element.setAttribute("data-key", Constants.DIALOG_NOTEBOOKCONF);
+        bindSettingEvent(dialog.element, data);
     }
 };
 

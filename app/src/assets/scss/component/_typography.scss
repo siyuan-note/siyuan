@@ -218,6 +218,8 @@
       padding: 4px 8px;
       border: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
+      max-width: 620px;
+      word-wrap: break-word;
 
       &:empty::after {
         content: "";

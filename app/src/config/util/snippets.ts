@@ -2,6 +2,7 @@ import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {Constants} from "../../constants";
 
 export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
@@ -100,6 +101,7 @@ export const openSnippets = () => {
             contentElement.textContent = item.content;
         });
         const removeIds: string[] = [];
+        dialog.element.setAttribute("data-key", Constants.DIALOG_SNIPPETS);
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {

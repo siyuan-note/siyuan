@@ -98,6 +98,7 @@ export const openDocHistory = (options: {
             historyEditor = undefined;
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYDOC);
 
     const opElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
     opElement.addEventListener("change", () => {

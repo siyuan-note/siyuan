@@ -116,6 +116,52 @@ export abstract class Constants {
     public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
     public static readonly DIALOG_HISTORYCOMPARE = "dialog-historycompare";
 
+    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 访问鉴权码
+    public static readonly DIALOG_AICUSTOMACTION = "dialog-aicustomaction"; // AI 自定义操作
+    public static readonly DIALOG_AIUPDATECUSTOMACTION = "dialog-aiupdatecustomaction"; // 更新 AI 自定义操作
+    public static readonly DIALOG_BACKGROUNDLINK = "dialog-backgroundlink"; // 题头图-随机
+    public static readonly DIALOG_BACKGROUNDRANDOM = "dialog-backgroundrandom"; // 题头图-链接
+    public static readonly DIALOG_CHANGELOG = "dialog-changelog"; // 更新日志
+    public static readonly DIALOG_COMMANDPANEL = "dialog-commandpanel"; // 插件命令面板
+    public static readonly DIALOG_DEACTIVATEUSER = "dialog-deactivateuser"; // 注销账户
+    public static readonly DIALOG_EMOJIS = "dialog-emojis"; // 文档、笔记本图表
+    public static readonly DIALOG_EXPORTIMAGE = "dialog-exportimage"; // 导出为图片
+    public static readonly DIALOG_EXPORTTEMPLATE = "dialog-exporttemplate"; // 导出为模板
+    public static readonly DIALOG_EXPORTWORD = "dialog-exportword"; // 导出为 word
+    public static readonly DIALOG_HISTORY = "dialog-history"; // 数据历史(Alt + H)
+    public static readonly DIALOG_HISTORYDOC = "dialog-historydoc"; // 文档历史
+    public static readonly DIALOG_MOVEPATHTO = "dialog-movepathto"; // 移动文档
+    public static readonly DIALOG_RENAME = "dialog-rename"; // 重命名
+    public static readonly DIALOG_RENAMEASSETS = "dialog-renameassets"; // 重命名资源文件
+    public static readonly DIALOG_RENAMEBOOKMARK = "dialog-renamebookmark"; // 重命名书签
+    public static readonly DIALOG_RENAMETAG = "dialog-renametag"; // 重命名标签
+    public static readonly DIALOG_REPLACETYPE = "dialog-replacetype"; // 替换 - 替换类型
+    public static readonly DIALOG_SAVECRITERION = "dialog-savecriterion"; // 保存查询条件
+    public static readonly DIALOG_SEARCHTYPE = "dialog-searchtype"; // 搜索 - 类型
+    public static readonly DIALOG_SEARCHASSETSTYPE = "dialog-searchassetstype"; // 搜索资源文件 - 类型
+    public static readonly DIALOG_SETTING = "dialog-setting"; // 设置面板
+    public static readonly DIALOG_SNAPSHOTTAG = "dialog-snapshottag"; // 标记快照
+    public static readonly DIALOG_SNAPSHOTMEMO = "dialog-snapshotmemo"; // 快照备注
+    public static readonly DIALOG_SNIPPETS = "dialog-snippets"; // 代码片段
+    public static readonly DIALOG_SYNCADDCLOUDDIR = "dialog-syncaddclouddir"; // 新建云端同步目录
+    public static readonly DIALOG_SYNCCHOOSEDIR = "dialog-syncchoosedir"; // 选择云端同步目录
+    public static readonly DIALOG_SYNCCHOOSEDIRECTION = "dialog-syncchoosedirection"; // 选择云端同步方向
+    public static readonly DIALOG_TRANSFERBLOCKREF = "dialog-transferblockref"; // 转移引用
+    public static readonly DIALOG_WECHATREMINDER = "dialog-wechatreminder"; // 微信提醒
+    
+    public static readonly DIALOG_PASSWORD = "dialog-password"; // 导入同步密钥
+    public static readonly DIALOG_SETPASSWORD = "dialog-setpassword"; // 设置同步密钥
+    public static readonly DIALOG_BOOTSYNCFAILED = "dialog-bootsyncfailed"; // 启动时同步数据失败
+    public static readonly DIALOG_KERNELFAULT = "dialog-kernelfault"; // 内核退出
+    public static readonly DIALOG_STATEEXCEPTED = "dialog-stateexcepted"; // 状态异常
+    public static readonly DIALOG_ATTR = "dialog-attr"; // 设置块属性
+    public static readonly DIALOG_SETCUSTOMATTR = "dialog-setcustomattr"; // 设置自定义属性
+    public static readonly DIALOG_CREATENOTEBOOK = "dialog-createnotebook"; // 创建笔记本
+    public static readonly DIALOG_NOTEBOOKCONF = "dialog-notebookconf"; // 笔记本设置
+    public static readonly DIALOG_CREATEWORKSPACE = "dialog-createworkspace"; // 创建工作空间
+    public static readonly DIALOG_OPENWORKSPACE = "dialog-openworkspace"; // 打开工作空间
+    public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
+
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;
     public static readonly TIMEOUT_INPUT = 256;

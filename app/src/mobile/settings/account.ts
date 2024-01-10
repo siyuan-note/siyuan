@@ -98,6 +98,7 @@ ${renewHTML}`;
                     content: getLoginHTML(true),
                 });
                 bindLoginEvent(dialog.element.querySelector(".b3-dialog__body"), true);
+                dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
             });
             const refreshElement = modelMainElement.querySelector("#refresh");
             refreshElement.addEventListener("click", () => {

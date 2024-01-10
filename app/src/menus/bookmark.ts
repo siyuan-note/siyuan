@@ -7,6 +7,7 @@ import {copySubMenu} from "./commonMenuItem";
 import {Bookmark} from "../layout/dock/Bookmark";
 import {isMobile} from "../util/functions";
 import {MobileBookmarks} from "../mobile/dock/MobileBookmarks";
+import {Constants} from "../constants";
 
 export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookmarkObj: Bookmark | MobileBookmarks) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -31,6 +32,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
 </div>`,
                     width: isMobile() ? "92vw" : "520px",
                 });
+                dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEBOOKMARK);
                 const btnsElement = dialog.element.querySelectorAll(".b3-button");
                 btnsElement[0].addEventListener("click", () => {
                     dialog.destroy();

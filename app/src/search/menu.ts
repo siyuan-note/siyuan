@@ -138,6 +138,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
         width: isMobile() ? "92vw" : "520px",
         height: "70vh",
     });
+    filterDialog.element.setAttribute("data-key", Constants.DIALOG_SEARCHTYPE);
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();
@@ -173,6 +174,7 @@ export const replaceFilterMenu = (config: ISearchOption) => {
         width: isMobile() ? "92vw" : "520px",
         height: "70vh",
     });
+    filterDialog.element.setAttribute("data-key", Constants.DIALOG_REPLACETYPE);
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();
@@ -265,6 +267,7 @@ export const saveCriterion = (config: ISearchOption,
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    saveDialog.element.setAttribute("data-key", Constants.DIALOG_SAVECRITERION);
     const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
     saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
         btnsElement[1].dispatchEvent(new CustomEvent("click"));

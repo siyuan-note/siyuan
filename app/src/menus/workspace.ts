@@ -125,6 +125,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
 </div>`,
                         width: "520px",
                     });
+                    createWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_CREATEWORKSPACE);
                     const inputElement = createWorkspaceDialog.element.querySelector("input");
                     inputElement.focus();
                     const btnsElement = createWorkspaceDialog.element.querySelectorAll(".b3-button");
@@ -159,6 +160,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
 </div>`,
                             width: "520px",
                         });
+                        openWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_OPENWORKSPACE);
                         const btnsElement = openWorkspaceDialog.element.querySelectorAll(".b3-button");
                         btnsElement[0].addEventListener("click", () => {
                             openWorkspaceDialog.destroy();
@@ -235,6 +237,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
 </div>`,
                     width: "520px",
                 });
+                saveDialog.element.setAttribute("data-key", Constants.DIALOG_SAVEWORKSPACE);
                 const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
                 saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
                     btnsElement[1].dispatchEvent(new CustomEvent("click"));

@@ -9,6 +9,7 @@ import {processSync} from "../dialog/processSystem";
 import {openSetting} from "../config";
 /// #endif
 import {App} from "../index";
+import {Constants} from "../constants";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -23,6 +24,7 @@ export const addCloudName = (cloudPanelElement: Element) => {
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCADDCLOUDDIR);
     const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(inputElement, () => {
@@ -212,6 +214,7 @@ const syncNow = () => {
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    manualDialog.element.setAttribute("data-key", Constants.DIALOG_SYNCCHOOSEDIRECTION);
     const btnsElement = manualDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         manualDialog.destroy();
@@ -252,6 +255,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
                 width: isMobile() ? "92vw" : "520px",
             });
         }
+        dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCCHOOSEDIR);
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
         const btnElement = dialog.element.querySelector(".b3-button");
         bindSyncCloudListEvent(contentElement, () => {
@@ -315,6 +319,7 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SETPASSWORD);
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });

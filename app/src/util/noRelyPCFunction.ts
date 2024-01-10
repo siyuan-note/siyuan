@@ -14,6 +14,7 @@ export const renameTag = (labelName: string) => {
 </div>`,
         width: isMobile() ? "92vw": "520px",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMETAG);
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();

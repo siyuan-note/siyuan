@@ -58,15 +58,8 @@ export class Hint {
             }
             const btnElement = hasClosestByMatchTag(eventTarget, "BUTTON");
             if (btnElement && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
-                if (this.source !== "search") {
-                    this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, isOnlyMeta(event));
-                } else {
-                    setTimeout(() => {
-                        this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, isNotCtrl(event));
-                    }, 148);    // 划选引用点击，需先重置 range
-                }
                 focusByRange(protyle.toolbar.range);
-
+                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event));
                 event.preventDefault();
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710
                 return;
@@ -558,7 +551,6 @@ ${genHintItemHTML(item)}
                     tempElement.innerText = dynamicTexts[1];
                 }
             }
-            protyle.toolbar.range = range;
             protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`

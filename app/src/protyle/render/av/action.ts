@@ -35,7 +35,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (event.shiftKey) {
         const rowElement = hasClosestByClassName(event.target, "av__row");
         if (rowElement && !rowElement.classList.contains("av__row--header")) {
-            selectRow(rowElement.querySelector(".av__check"), "toggle");
+            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
             return true;
         }
     }
@@ -159,7 +159,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__check")) {
+        } else if (target.classList.contains("av__firstcol")) {
             window.siyuan.menus.menu.remove();
             selectRow(target, "toggle");
             event.preventDefault();
@@ -214,10 +214,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }
                 const type = getTypeByCellElement(target);
                 if (type === "updated" || type === "created" || (type === "block" && !target.getAttribute("data-detached"))) {
-                    selectRow(rowElement.querySelector(".av__check"), "toggle");
+                    selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                 } else {
                     scrollElement.querySelectorAll(".av__row--select").forEach(item => {
-                        item.querySelector(".av__check use").setAttribute("xlink:href", "#iconUncheck");
+                        item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
                         item.classList.remove("av__row--select");
                     });
                     updateHeader(rowElement);
@@ -263,7 +263,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
             item.classList.remove("av__row--select");
         });
-        blockElement.querySelectorAll(".av__check use").forEach(item => {
+        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
             item.setAttribute("xlink:href", "#iconUncheck");
         });
     }
@@ -273,7 +273,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         return true;
     }
     rowElement.classList.add("av__row--select");
-    rowElement.querySelector(".av__check use").setAttribute("xlink:href", "#iconCheck");
+    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     updateHeader(rowElement);
     if (!protyle.disabled) {

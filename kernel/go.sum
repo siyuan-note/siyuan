@@ -339,8 +339,8 @@ github.com/rqlite/sql v0.0.0-20240102050638-e741e9f54197 h1:xgTklYfia0mN9rbcL0gh
 github.com/rqlite/sql v0.0.0-20240102050638-e741e9f54197/go.mod h1:ib9zVtNgRKiGuoMyUqqL5aNpk+r+++YlyiVIkclVqPg=
 github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 h1:OkMGxebDjyw0ULyrTYWeN0UNCCkmCWfjPnIA2W6oviI=
 github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06/go.mod h1:+ePHsJ1keEjQtpvf9HHw0f4ZeJ0TLRsxhunSI2hYJSs=
-github.com/sashabaranov/go-openai v1.17.10 h1:ybvWN+d/rgEK/64U6dsjnOQ9AUya2wBoJKj3Wuaonqo=
-github.com/sashabaranov/go-openai v1.17.10/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
+github.com/sashabaranov/go-openai v1.17.11 h1:XVr00J8JymJVx8Hjbh/5mG0V4PQHRarBU3v7k2x6MR0=
+github.com/sashabaranov/go-openai v1.17.11/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
 github.com/scylladb/termtables v0.0.0-20191203121021-c4c0b6d42ff4/go.mod h1:C1a7PQSMz9NShzorzCiG2fk9+xuCgLkPeCvMHYR2OWg=
 github.com/shirou/gopsutil/v3 v3.23.12 h1:z90NtUkp3bMtmICZKpC4+WaknU1eXtp5vtbQ11DgpE4=
 github.com/shirou/gopsutil/v3 v3.23.12/go.mod h1:1FrWgea594Jp7qmjHUUPlJDTPgcsb9mGnXDxavtikzM=

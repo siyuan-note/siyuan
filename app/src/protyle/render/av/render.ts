@@ -67,8 +67,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     e.dataset.pageSize = data.pageSize.toString();
                 }
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg class="av__check"><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconMath"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                let calcHTML = '<div style="width: 24px"></div>';
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
@@ -85,9 +85,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     }
                 });
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
-                if (pinIndex < 0) {
-                    tableHTML += '</div>';
-                    calcHTML += '</div>';
+                if (pinIndex > -1) {
+                    tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                    calcHTML = '<div class="av__colsticky"><div style="width: 24px"></div>';
                 }
                 data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
@@ -120,15 +120,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
 </div>`;
                 // body
                 data.rows.forEach((row: IAVRow) => {
-                    tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__colsticky">
-    <div class="av__firstcol">
-        <svg class="av__check"><use xlink:href="#iconUncheck"></use></svg>
-    </div>
-`;
-
-                    if (pinIndex < 0) {
-                        tableHTML += '</div>';
+                    tableHTML += `<div class="av__row" data-id="${row.id}">`;
+                    if (pinIndex > -1) {
+                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                    } else {
+                        tableHTML += '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     }
 
                     row.cells.forEach((cell, index) => {
@@ -198,9 +194,6 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
             ${tableHTML}
             <div class="av__row--util">
                 <div class="av__colsticky">
-                    <div class="av__firstcol">
-                        <svg><use xlink:href="#iconAdd"></use></svg>
-                    </div>
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
                         ${window.siyuan.languages.addAttr}

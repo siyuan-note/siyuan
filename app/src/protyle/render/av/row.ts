@@ -13,7 +13,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
@@ -21,7 +21,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
                 }
             });
         } else {
-            rowElement.parentElement.querySelectorAll(".av__check").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {

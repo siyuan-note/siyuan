@@ -189,13 +189,10 @@
       display: flex;
 
       .b3-button {
+        margin: 3px 0 3px 24px;
         color: var(--b3-theme-on-surface);
         background-color: transparent;
         font-size: 75%;
-
-        > div {
-          background-color: transparent;
-        }
 
         &:hover,
         &:focus {
@@ -216,16 +213,6 @@
           &:hover {
             background-color: var(--b3-theme-background);
           }
-        }
-      }
-    }
-
-    &,
-    &--util,
-    &--footer {
-      &:hover {
-        .av__firstcol svg {
-          opacity: 1;
         }
       }
     }
@@ -263,10 +250,6 @@
 
     &.dragover__right {
       border-right-color: var(--b3-theme-primary-lighter);
-    }
-
-    &--add {
-      padding-left: 0.5em;
     }
 
     &--select {
@@ -338,13 +321,15 @@
   }
 
   &__firstcol {
-    border-right: 1px solid var(--b3-theme-surface-lighter);
-
     svg {
       @extend .av__checkbox;
-      padding: 9.5px 5px;
       opacity: 0;
+      padding: 9.5px 5px;
       cursor: pointer;
+    }
+
+    &:hover svg {
+      opacity: 1;
     }
   }
 

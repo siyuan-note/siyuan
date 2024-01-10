@@ -172,6 +172,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_MOVEPATHTO);
     if (paths && paths.length > 0) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
             dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));

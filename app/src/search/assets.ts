@@ -415,6 +415,7 @@ export const assetFilterMenu = (assetsElement: Element) => {
         width: "520px",
         height: "70vh",
     });
+    filterDialog.element.setAttribute("data-key", Constants.DIALOG_SEARCHASSETSTYPE);
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();

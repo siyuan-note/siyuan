@@ -231,6 +231,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
 </div>
 </div>`
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_EMOJIS);
     dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
     const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement;
     dialogElement.style.justifyContent = "inherit";

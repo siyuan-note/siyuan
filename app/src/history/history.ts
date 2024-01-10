@@ -416,6 +416,7 @@ export const openHistory = (app: App) => {
                 historyEditor = undefined;
             }
         });
+        dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
         bindEvent(app, dialog.element, dialog);
     }
 };
@@ -647,6 +648,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
 </div>`,
                     width: isMobile() ? "92vw" : "520px",
                 });
+                genRepoDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
                 const textareaElement = genRepoDialog.element.querySelector("textarea");
                 textareaElement.focus();
                 const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
@@ -704,6 +706,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
 </div>`,
                     width: isMobile() ? "92vw" : "520px",
                 });
+                genTagDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTTAG);
                 const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
                 inputElement.select();
                 const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");

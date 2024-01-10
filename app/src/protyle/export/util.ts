@@ -54,6 +54,7 @@ export const exportImage = (id: string) => {
         width: isMobile() ? "92vw" : "990px",
         height: "70vh"
     });
+    exportDialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTIMAGE);
     const btnsElement = exportDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         exportDialog.destroy();

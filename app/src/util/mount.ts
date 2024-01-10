@@ -113,6 +113,7 @@ export const newNotebook = () => {
 </div>`,
         width: isMobile() ? "92vw" : "520px"
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_CREATENOTEBOOK);
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(dialog.element.querySelector("input"), () => {
         btnsElement[1].dispatchEvent(new CustomEvent("click"));

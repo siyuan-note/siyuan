@@ -5,6 +5,7 @@ import {escapeHtml} from "../util/escape";
 import {writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {openModel} from "../mobile/menu/model";
+import {Constants} from "../constants";
 
 declare interface INotebookConf {
     name: string,
@@ -64,6 +65,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
             content: contentHTML
         });
         contentElement = dialog.element;
+        contentElement.setAttribute("data-key", Constants.DIALOG_NOTEBOOKCONF);
         bindSettingEvent(contentElement, data);
     }
 };

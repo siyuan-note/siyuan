@@ -150,6 +150,9 @@ export abstract class Constants {
     public static readonly DIALOG_WECHATREMINDER = "dialog-wechatreminder"; // 微信提醒
     public static readonly DIALOG_PASSWORD = "dialog-password"; // 导入同步密钥
     public static readonly DIALOG_SETPASSWORD = "dialog-setpassword"; // 设置同步密钥
+    public static readonly DIALOG_BOOTSYNCFAILED = "dialog-bootsyncfailed"; // 启动时同步数据失败
+    public static readonly DIALOG_KERNELFAULT = "dialog-kernelfault"; // 内核退出
+    public static readonly DIALOG_STATEEXCEPTED = "dialog-stateexcepted"; // 状态异常
     public static readonly DIALOG_ATTR = "dialog-attr"; // 设置块属性
     public static readonly DIALOG_SETCUSTOMATTR = "dialog-setcustomattr"; // 设置自定义属性
     public static readonly DIALOG_CREATENOTEBOOK = "dialog-createnotebook"; // 创建笔记本

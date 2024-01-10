@@ -18,13 +18,47 @@ package api
 
 import (
 	"fmt"
+	"mime"
 	"net/http"
+	"path/filepath"
 
 	"github.com/88250/gulu"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func getRepoFile(c *gin.Context) {
+	// Add internal kernel API `/api/repo/getRepoFile` https://github.com/siyuan-note/siyuan/issues/10101
+
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	data, p, err := model.GetRepoFile(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	contentType := mime.TypeByExtension(filepath.Ext(p))
+	if "" == contentType {
+		if m := mimetype.Detect(data); nil != m {
+			contentType = m.String()
+		}
+	}
+	if "" == contentType {
+		contentType = "application/octet-stream"
+	}
+	c.Data(http.StatusOK, contentType, data)
+}
 
 func openRepoSnapshotDoc(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

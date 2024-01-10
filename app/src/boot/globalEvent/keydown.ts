@@ -73,6 +73,7 @@ import {copyPNG} from "../../menus/util";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
 import {openNewWindow} from "../../window/openNewWindow";
+import {historyKeydown} from "../../history/keydown";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1064,6 +1065,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (isNotCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey &&
         Constants.KEYCODELIST[event.keyCode] !== "PageUp" &&
         Constants.KEYCODELIST[event.keyCode] !== "PageDown" &&
+        event.key !== "Home" && event.key !== "End" &&
         !/^F\d{1,2}$/.test(event.key) && event.key.indexOf("Arrow") === -1 && event.key !== "Enter" && event.key !== "Backspace" && event.key !== "Delete") {
         return;
     }
@@ -1213,14 +1215,20 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        const viewCardsDialog = window.siyuan.dialogs.find(item => {
-            if (item.element.getAttribute("data-key") === Constants.DIALOG_VIEWCARDS) {
-                return true;
+    if (["Home", "End", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        let matchDialog: Dialog;
+        // 需找到最顶层的，因此不能用 find
+        window.siyuan.dialogs.forEach(item => {
+            if ([Constants.DIALOG_VIEWCARDS, Constants.DIALOG_HISTORYCOMPARE].includes(item.element.getAttribute("data-key"))) {
+                matchDialog = item;
             }
         });
-        if (viewCardsDialog) {
-            viewCardsDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+        if (matchDialog) {
+            if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_VIEWCARDS) {
+                matchDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+            } else if (matchDialog.element.getAttribute("data-key") === Constants.DIALOG_HISTORYCOMPARE) {
+                historyKeydown(event, matchDialog);
+            }
             event.preventDefault();
             return;
         }

@@ -64,7 +64,6 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
-    "update-cards"|
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
 type TAVCol =
@@ -216,6 +215,13 @@ interface ICard {
     cardID: string
     blockID: string
     nextDues: IObject
+}
+
+interface ICardData  {
+    cards: ICard[],
+    unreviewedCount: number
+    unreviewedNewCardCount: number
+    unreviewedOldCardCount: number
 }
 
 interface IPluginSettingOption {

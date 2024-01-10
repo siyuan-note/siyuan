@@ -161,7 +161,14 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
             rightEditor = undefined;
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE);
     dialog.element.addEventListener("click", (event) => {
+        if (typeof event.detail === "string") {
+            renderCompare(app, dialog.element.querySelector(".history__diff .b3-list-item--focus"));
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         let target = event.target as HTMLElement;
         while (target && target !== dialog.element) {
             if (target.classList.contains("b3-list-item") && !target.dataset.id) {

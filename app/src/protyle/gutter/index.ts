@@ -217,6 +217,9 @@ export class Gutter {
                     return;
                 }
                 if (buttonElement.dataset.type === "NodeAttributeViewRow") {
+                    blockElement.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
+                        cellElement.classList.remove("av__cell--select");
+                    });
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;

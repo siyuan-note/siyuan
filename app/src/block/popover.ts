@@ -23,7 +23,7 @@ export const initBlockPopover = (app: App) => {
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
             if (aElement.classList.contains("av__celltext")) {
-                if (aElement.offsetWidth > aElement.parentElement.clientWidth - 5) {    // 只能减左边 padding，换行时字体会穿透到右侧 padding
+                if (aElement.offsetWidth > aElement.parentElement.clientWidth - (aElement.classList.contains("fn__flex-shrink") ? 19 : 5)) {    // 只能减左边 padding，换行时字体会穿透到右侧 padding
                     if (aElement.querySelector(".av__cellicon")) {
                         tip = `${aElement.firstChild.textContent} → ${aElement.lastChild.textContent}`;
                     } else {

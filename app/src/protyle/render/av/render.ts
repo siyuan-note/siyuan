@@ -98,7 +98,7 @@ data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}
 style="width: ${column.width || "200px"};">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
-        <span class="av__celltext">${column.name}</span>
+        <span class="av__celltext fn__flex-shrink">${column.name}</span>
         ${column.pin ? '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>' : ""}
     </div>
     <div class="av__widthdrag"></div>
@@ -292,11 +292,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
                 avRender(item, protyle, () => {
-                    if (operation.action === "insertAttrViewBlock") {
-                        item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
-                            cellElement.classList.remove("av__cell--select");
-                        });
-                    } else if (operation.action === "addAttrViewCol" && item.querySelector(".av__pulse")) {
+                    if (operation.action === "addAttrViewCol" && item.querySelector(".av__pulse")) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

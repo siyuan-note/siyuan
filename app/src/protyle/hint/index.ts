@@ -399,7 +399,10 @@ ${genHintItemHTML(item)}
             return;
         }
         if (this.source === "av") {
-            const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            let cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+            if (!cellElement) {
+                cellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
+            }
             if (!cellElement) {
                 return;
             }

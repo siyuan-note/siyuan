@@ -198,7 +198,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle);
+        setReadonlyByConfig(protyle, options.action);
     }
 
     focusElementById(protyle, options.action, options.scrollAttr);
@@ -431,9 +431,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
 };
 
-export const setReadonlyByConfig = (protyle: IProtyle) => {
+export const setReadonlyByConfig = (protyle: IProtyle, action: string[]) => {
     let readOnly = window.siyuan.config.readonly ? "true" : "false";
-    if (readOnly === "false") {
+    if (action?.includes(Constants.CB_GET_UNCHANGEID)) {
+        readOnly = protyle.disabled ? "true" : "false";
+    } else if (readOnly === "false") {
         readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
         if (readOnly === "false") {
             readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);

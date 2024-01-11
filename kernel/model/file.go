@@ -1452,12 +1452,17 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 
 	if existChildren {
 		if err = box.Remove(childrenDir); nil != err {
+			logging.LogErrorf("remove children dir [%s%s] failed: %s", box.ID, childrenDir, err)
 			return
 		}
+		logging.LogInfof("removed children dir [%s%s]", box.ID, childrenDir)
 	}
 	if err = box.Remove(p); nil != err {
+		logging.LogErrorf("remove [%s%s] failed: %s", box.ID, p, err)
 		return
 	}
+	logging.LogInfof("removed doc [%s%s]", box.ID, p)
+
 	box.removeSort(removeIDs)
 	RemoveRecentDoc(removeIDs)
 	if "/" != dir {

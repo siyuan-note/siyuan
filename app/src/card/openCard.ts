@@ -484,10 +484,11 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     });
     dialog.editor = editor;
     /// #if !MOBILE
-    const focusElement = dialog.element.querySelector("svg");
+    const focusElement = dialog.element.querySelector(".block__icons") as HTMLElement;
     focusElement.focus();
     const range = document.createRange();
     range.selectNodeContents(focusElement);
+    range.collapse();
     focusByRange(range);
     /// #endif
 };

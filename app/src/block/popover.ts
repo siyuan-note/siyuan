@@ -102,14 +102,38 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     if (!target) {
         return false;
     }
-    if (hasClosestByClassName(target, "b3-menu") ||
-        (target.id && target.tagName !== "svg" && (target.id.startsWith("minder_node") || target.id.startsWith("kity_") || target.id.startsWith("node_")))
+    if ((target.id && target.tagName !== "svg" && (target.id.startsWith("minder_node") || target.id.startsWith("kity_") || target.id.startsWith("node_")))
         || target.classList.contains("counter")
         || target.tagName === "circle"
     ) {
-        // b3-menu 需要处理，(( 后的 hint 上的图表移上去需显示预览
         // gutter & mindmap & 文件树上的数字 & 关系图节点不处理
         return false;
+    }
+
+    const avPanelElement = hasClosestByClassName(target, "av__panel")
+    if (avPanelElement) {
+        // 浮窗上点击 av 操作，浮窗不能消失
+        const blockPanel = window.siyuan.blockPanels.find((item) => {
+            if (item.element.style.zIndex < avPanelElement.style.zIndex) {
+                return true;
+            }
+        });
+        if (blockPanel) {
+            return false;
+        }
+    } else {
+        // 浮窗上点击菜单，浮窗不能消失 https://ld246.com/article/1632668091023
+        const menuElement = hasClosestByClassName(target, "b3-menu")
+        if (menuElement) {
+            const blockPanel = window.siyuan.blockPanels.find((item) => {
+                if (item.element.style.zIndex < menuElement.style.zIndex) {
+                    return true;
+                }
+            });
+            if (blockPanel) {
+                return false;
+            }
+        }
     }
     popoverTargetElement = hasClosestByAttribute(target, "data-type", "block-ref") as HTMLElement ||
         hasClosestByAttribute(target, "data-type", "virtual-block-ref") as HTMLElement;

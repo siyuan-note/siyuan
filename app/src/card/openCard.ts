@@ -44,12 +44,10 @@ export const genCardHTML = (options: {
 </div>`;
     /// #else
     iconsHTML = `<div class="block__icons">
-        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__icon block__icon--show">
-            <svg><use xlink:href="#iconRiffCard"></use></svg>
-        </div>
-        <span class="fn__space"></span>
-        <span class="fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
-        <span class="fn__space fn__flex-1 resize__move" style="min-height: 100%"></span>
+        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__logo">
+            <svg><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
+        </div>`}
+        <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
         <div class="fn__space"></div>
         <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
@@ -485,11 +483,13 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         dialog
     });
     dialog.editor = editor;
-    const focusElement = dialog.element.querySelector('.b3-button[data-type="-1"]') as HTMLButtonElement;
+    /// #if !MOBILE
+    const focusElement = dialog.element.querySelector("svg");
     focusElement.focus();
     const range = document.createRange();
     range.selectNodeContents(focusElement);
     focusByRange(range);
+    /// #endif
 };
 
 const nextCard = (options: {

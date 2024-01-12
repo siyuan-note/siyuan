@@ -93,8 +93,13 @@ func ExportAv2CSV(avID string) (zipPath string, err error) {
 		return
 	}
 
-	writer := csv.NewWriter(f)
+	if _, err = f.WriteString("\xEF\xBB\xBF"); nil != err { // 写入 UTF-8 BOM，避免使用 Microsoft Excel 打开乱码
+		logging.LogErrorf("write UTF-8 BOM to [%s] failed: %s", csvPath, err)
+		f.Close()
+		return
+	}
 
+	writer := csv.NewWriter(f)
 	var header []string
 	for _, col := range table.Columns {
 		header = append(header, col.Name)

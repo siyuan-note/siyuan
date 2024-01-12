@@ -50,9 +50,9 @@ export const genCardHTML = (options: {
         <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
         <div class="fn__space"></div>
-        <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
+        <button data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
-        </div>
+        </button>
         <div class="fn__space"></div>
         <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
             <svg><use xlink:href="#iconFullscreen"></use></svg>
@@ -484,7 +484,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     });
     dialog.editor = editor;
     /// #if !MOBILE
-    const focusElement = dialog.element.querySelector(".block__icons") as HTMLElement;
+    const focusElement = dialog.element.querySelector(".block__icons button.block__icon") as HTMLElement;
     focusElement.focus();
     const range = document.createRange();
     range.selectNodeContents(focusElement);

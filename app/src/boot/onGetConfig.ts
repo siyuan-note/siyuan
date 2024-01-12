@@ -201,9 +201,7 @@ export const initWindow = async (app: App) => {
     ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent");
     ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
         if (cmd === "focus") {
-            if (getSelection().rangeCount > 0) {
-                focusByRange(getSelection().getRangeAt(0));
-            }
+            // 由于 https://github.com/siyuan-note/siyuan/issues/10060 和新版 electron 应用切出再切进会保持光标，故移除 focus
             window.siyuan.altIsPressed = false;
             window.siyuan.ctrlIsPressed = false;
             window.siyuan.shiftIsPressed = false;

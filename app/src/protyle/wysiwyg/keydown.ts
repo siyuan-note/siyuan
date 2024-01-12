@@ -63,9 +63,7 @@ import {countBlockWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
-import {getSavePath} from "../../util/newFile";
-import {escapeHtml} from "../../util/escape";
-import {insertHTML} from "../util/insertHTML";
+import {getSavePath, newFileBySelect} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -1021,7 +1019,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event)) {
+        const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event);
+        if (isNewNameFile || matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event)) {
             if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
                 // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
             } else {
@@ -1030,47 +1029,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ) {
                     selectAll(protyle, nodeElement, range);
                 }
-                const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
-                fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: protyle.notebookId,
-                    path: protyle.path,
-                }, (response) => {
-                    fetchPost("/api/filetree/createDocWithMd", {
+                if (isNewNameFile) {
+                    fetchPost("/api/filetree/getHPathByPath", {
                         notebook: protyle.notebookId,
-                        path: pathPosix().join(response.data, newFileName),
-                        parentID: protyle.block.rootID,
-                        markdown: ""
-                    }, response => {
-                        insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`,
-                            protyle, false, true);
-                        hideElements(["toolbar"], protyle);
+                        path: protyle.path,
+                    }, (response) => {
+                        newFileBySelect(protyle, selectText, nodeElement, response.data);
                     });
-                });
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event)) {
-            if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
-                // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
-            } else {
-                if (!selectText.trim() && getContenteditableElement(nodeElement).textContent) {
-                    selectAll(protyle, nodeElement, range);
+                } else {
+                    getSavePath(protyle.path, protyle.notebookId, (pathString) => {
+                        newFileBySelect(protyle, selectText, nodeElement, pathString);
+                    });
                 }
-                getSavePath(protyle.path, protyle.notebookId, (pathString) => {
-                    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
-                    fetchPost("/api/filetree/createDocWithMd", {
-                        notebook: protyle.notebookId,
-                        path: pathPosix().join(pathString, newFileName),
-                        parentID: protyle.block.rootID,
-                        markdown: ""
-                    }, response => {
-                        insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
-                        hideElements(["toolbar"], protyle);
-                    });
-                });
             }
             event.preventDefault();
             event.stopPropagation();

@@ -7,9 +7,24 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240112145126"
+		"updated": "20240112150737"
 	},
 	"Children": [
+		{
+			"ID": "20240112150737-e41yt1y",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240112150737-e41yt1y",
+				"updated": "20240112150737"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通用"
+				}
+			]
+		},
 		{
 			"ID": "20201227133317-ovwnk1y",
 			"Type": "NodeTable",
@@ -21,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20231116104116"
+				"updated": "20240112150738"
 			},
 			"Children": [
 				{
@@ -2239,25 +2254,6 @@
 			]
 		},
 		{
-			"ID": "20201227133317-cjsfv26",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20201227133317-cjsfv26",
-				"updated": "20231030110249"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "通用"
-				}
-			]
-		},
-		{
 			"ID": "20210826183308-g4ck02v",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -2283,7 +2279,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183308-gok25ug",
-				"updated": "20230719121948"
+				"updated": "20210826181714"
 			},
 			"Children": [
 				{

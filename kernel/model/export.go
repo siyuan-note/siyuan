@@ -70,6 +70,9 @@ func ExportAv2CSV(avID string) (zipPath string, err error) {
 	}
 
 	name := util.FilterFileName(attrView.Name)
+	if "" == name {
+		name = "Untitled"
+	}
 
 	table, err := renderAttributeViewTable(attrView, view)
 	if nil != err {

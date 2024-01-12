@@ -331,11 +331,31 @@ func ControlConcurrency(c *gin.Context) {
 		return
 	}
 
+	reqPath := c.Request.URL.Path
+
+	// Improve the concurrency of the kernel data reading interfaces https://github.com/siyuan-note/siyuan/issues/10149
+	if strings.HasPrefix(reqPath, "/stage/") || strings.HasPrefix(reqPath, "/assets/") || strings.HasPrefix(reqPath, "/appearance/") {
+		c.Next()
+		return
+	}
+
+	parts := strings.Split(reqPath, "/")
+	function := parts[len(parts)-1]
+	if strings.HasPrefix(function, "get") || strings.HasPrefix(function, "list") ||
+		strings.HasPrefix(function, "search") || strings.HasPrefix(function, "render") || strings.HasPrefix(function, "ls") {
+		c.Next()
+		return
+	}
+	if strings.HasPrefix(function, "/api/query/") || strings.HasPrefix(function, "/api/search/") {
+		c.Next()
+		return
+	}
+
 	requestingLock.Lock()
-	mutex := requesting[c.Request.URL.Path]
+	mutex := requesting[reqPath]
 	if nil == mutex {
 		mutex = &sync.Mutex{}
-		requesting[c.Request.URL.Path] = mutex
+		requesting[reqPath] = mutex
 	}
 	requestingLock.Unlock()
 

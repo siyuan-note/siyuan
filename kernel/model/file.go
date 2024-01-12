@@ -1199,6 +1199,7 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 }
 
 func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
+	ret = []string{}
 	roots := treenode.GetBlockTreeRootsByHPath(boxID, hpath)
 	if 1 > len(roots) {
 		return
@@ -1208,6 +1209,9 @@ func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 		ret = append(ret, root.ID)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	return
 }
 

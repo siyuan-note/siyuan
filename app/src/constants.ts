@@ -358,6 +358,7 @@ export abstract class Constants {
                 vLayout: {default: "", custom: ""},
                 refPopover: {default: "", custom: ""},
                 copyText: {default: "", custom: ""},
+                exitFocus: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},

@@ -74,6 +74,7 @@ import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
 import {openNewWindow} from "../../window/openNewWindow";
 import {historyKeydown} from "../../history/keydown";
+import {zoomOut} from "../../menus/protyle";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -326,6 +327,11 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     if (target.tagName !== "TABLE" && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.exitFocus.custom, event)) {
+        event.preventDefault();
+        zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
+        return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
         event.preventDefault();

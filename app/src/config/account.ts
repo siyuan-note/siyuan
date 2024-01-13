@@ -10,7 +10,7 @@ import {processSync} from "../dialog/processSystem";
 import {needSubscribe} from "../util/needSubscribe";
 import {syncGuide} from "../sync/syncGuide";
 import {hideElements} from "../protyle/ui/hideElements";
-import {getCloudURL} from "./util/about";
+import {getCloudURL, getIndexURL} from "./util/about";
 
 const genSVGBG = () => {
     let html = "";
@@ -30,7 +30,7 @@ export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
         const payHTML = `
-<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
+<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
 <div class="fn__hr--b"></div>

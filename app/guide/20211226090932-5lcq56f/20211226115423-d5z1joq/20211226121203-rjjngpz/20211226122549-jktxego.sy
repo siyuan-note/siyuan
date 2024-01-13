@@ -6,7 +6,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20240112151316"
+		"updated": "20240113110727"
 	},
 	"Children": [
 		{
@@ -3048,7 +3048,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20240112151316"
+				"updated": "20240113110727"
 			},
 			"Children": [
 				{
@@ -6983,6 +6983,51 @@
 								{
 									"Type": "NodeText",
 									"Data": "退出聚焦"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換唯讀模式"
 								}
 							]
 						},

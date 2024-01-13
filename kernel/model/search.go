@@ -283,6 +283,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		return
 	}
 
+	if 0 != groupBy {
+		// 按文档分组后不支持替换 Need to be reminded that replacement operations are not supported after grouping by doc https://github.com/siyuan-note/siyuan/issues/10161
+		err = errors.New(Conf.Language(221))
+		return
+	}
+
 	// No longer trim spaces for the keyword and replacement https://github.com/siyuan-note/siyuan/issues/9229
 	if keyword == replacement {
 		return

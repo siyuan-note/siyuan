@@ -99,7 +99,7 @@ func findReplace(c *gin.Context) {
 
 	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, method, orderBy, groupBy)
 	if nil != err {
-		ret.Code = -1
+		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return

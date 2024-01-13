@@ -1385,6 +1385,7 @@
     "217": "[%d/%d] Índice de datos de contenido de activos creado",
     "218": "Se han detectado demasiadas instantáneas del repositorio de datos, lo que ralentiza el inicio del programa y la sincronización de datos. Considere ejecutar [Configuración - Acerca de - Purga del repositorio de datos]",
     "219": "El servicio de almacenamiento en la nube no está disponible, inténtalo de nuevo más tarde",
-    "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube"
+    "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube",
+    "221": "La operación de reemplazo no es compatible después de agrupar por documento. Utilice desagrupar y luego reemplazar"
   }
 }

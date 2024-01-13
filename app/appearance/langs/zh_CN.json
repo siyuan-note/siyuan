@@ -1,4 +1,5 @@
 {
+  "dragFill": "下拉填充数据",
   "switchReadonly": "只读模式切换",
   "original": "原值",
   "selectRelation": "请先选择关联列",

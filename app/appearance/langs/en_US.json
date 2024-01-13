@@ -1,4 +1,5 @@
 {
+  "dragFill": "Drag vertically to fill value",
   "switchReadonly": "Switch read-only mode",
   "original": "Original",
   "selectRelation": "Please select the related column first",

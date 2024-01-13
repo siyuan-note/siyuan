@@ -258,6 +258,10 @@
       border-radius: var(--b3-border-radius);
     }
 
+    &--active {
+      background-color: var(--b3-menu-background);
+    }
+
     .block__icon {
       position: absolute;
       right: 5px;
@@ -273,6 +277,18 @@
       margin: 1px 2px;
       padding: 2px 6px;
     }
+  }
+
+  &__drag-fill {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--b3-theme-primary-lighter);
+    border-radius: 50%;
+    box-sizing: border-box;
+    cursor: ns-resize;
   }
 
   &__cellheader {

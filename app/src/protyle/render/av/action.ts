@@ -256,8 +256,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (!blockElement) {
         return false;
     }
-    blockElement.querySelectorAll(".av__cell--select").forEach(item => {
-        item.classList.remove("av__cell--select");
+    blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+        item.classList.remove("av__cell--select", "av__cell--active");
+        item.querySelector(".av__drag-fill")?.remove();
     });
     if (!rowElement.classList.contains("av__row--select")) {
         blockElement.querySelectorAll(".av__row--select").forEach(item => {

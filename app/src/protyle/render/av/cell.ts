@@ -647,3 +647,21 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
         }
     }
 };
+
+export const getPositionByCellElement = (cellElement: HTMLElement) => {
+    let rowElement = hasClosestByClassName(cellElement, "av__row");
+    if (!rowElement) {
+        return;
+    }
+    let rowIndex = -1;
+    while (rowElement) {
+        rowElement = rowElement.previousElementSibling as HTMLElement;
+        rowIndex++;
+    }
+    let celIndex = -2;
+    while (cellElement) {
+        cellElement = cellElement.previousElementSibling as HTMLElement;
+        celIndex++;
+    }
+    return {rowIndex, celIndex};
+}

@@ -2,7 +2,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
-import {fullscreen, net2LocalAssets} from "./action";
+import {fullscreen, net2LocalAssets, updateReadonly} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
@@ -107,23 +107,7 @@ export class Breadcrumb {
                     event.preventDefault();
                     break;
                 } else if (type === "readonly") {
-                    if (!window.siyuan.config.readonly) {
-                        const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock";
-                        if (window.siyuan.config.editor.readOnly) {
-                            if (isReadonly) {
-                                enableProtyle(protyle);
-                            } else {
-                                disabledProtyle(protyle);
-                            }
-                        } else {
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id: protyle.block.rootID,
-                                attrs: {
-                                    [Constants.CUSTOM_SY_READONLY]: isReadonly ? "false" : "true"
-                                }
-                            });
-                        }
-                    }
+                    updateReadonly(target, protyle);
                     event.stopPropagation();
                     event.preventDefault();
                     break;

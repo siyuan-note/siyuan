@@ -359,6 +359,7 @@ export abstract class Constants {
                 refPopover: {default: "", custom: ""},
                 copyText: {default: "", custom: ""},
                 exitFocus: {default: "", custom: ""},
+                switchReadonly: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},

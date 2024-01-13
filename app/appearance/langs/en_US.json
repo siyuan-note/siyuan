@@ -1,4 +1,5 @@
 {
+  "switchReadonly": "Switch read-only mode",
   "original": "Original",
   "selectRelation": "Please select the related column first",
   "backRelation": "Bidirectional",

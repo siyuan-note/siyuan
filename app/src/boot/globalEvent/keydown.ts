@@ -57,7 +57,7 @@ import {openCard, openCardByData} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
-import {fullscreen} from "../../protyle/breadcrumb/action";
+import {fullscreen, updateReadonly} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";
@@ -331,6 +331,11 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.exitFocus.custom, event)) {
         event.preventDefault();
         zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.switchReadonly.custom, event)) {
+        event.preventDefault();
+        updateReadonly(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {

@@ -1,4 +1,5 @@
 {
+  "switchReadonly": "Changer de mode lecture seule",
   "original": "Originale",
   "selectRelation": "Veuillez d'abord sélectionner la colonne associée",
   "backRelation": "Bidirectionnel",

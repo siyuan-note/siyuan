@@ -1,4 +1,5 @@
 {
+  "switchReadonly": "只读模式切换",
   "original": "原值",
   "selectRelation": "请先选择关联列",
   "backRelation": "双向关联",

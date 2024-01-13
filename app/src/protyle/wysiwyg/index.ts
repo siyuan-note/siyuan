@@ -486,11 +486,13 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    focusBlock(nodeElement);
-                    lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`)
+                    if (lastCellElement) {
+                        focusBlock(nodeElement);
+                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`)
+                        this.preventClick = true;
+                    }
                     return false;
                 };
-                this.preventClick = true;
                 event.stopPropagation();
                 event.preventDefault();
                 return false;

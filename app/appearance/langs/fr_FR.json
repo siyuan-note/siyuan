@@ -1387,6 +1387,7 @@
     "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",
     "219": "Le service de stockage cloud n'est pas disponible, veuillez réessayer plus tard",
     "220": "En raison d'un défaut dans la version précédente, les données cloud sont corrompues. Veuillez vous référer aux étapes User Guide-FAQ-Lost Key pour réinitialiser le référentiel de données local et le répertoire cloud",
-    "221": "L'opération de remplacement n'est pas prise en charge après le regroupement par document. Veuillez utiliser le dissociation puis remplacer"
+    "221": "L'opération de remplacement n'est pas prise en charge après le regroupement par document. Veuillez utiliser le dissociation puis remplacer",
+    "222": "La synchronisation des données est en cours, veuillez attendre que la synchronisation des données soit terminée et réessayer"
   }
 }

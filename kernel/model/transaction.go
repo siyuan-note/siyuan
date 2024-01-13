@@ -115,7 +115,7 @@ func flushTx(tx *Transaction) {
 			util.PushTxErr("Transaction failed", txErr.code, nil)
 			return
 		case TxErrCodeDataIsSyncing:
-			util.PushErrMsg(Conf.Language(81), 5000)
+			util.PushMsg(Conf.Language(222), 5000)
 		default:
 			txData, _ := gulu.JSON.MarshalJSON(tx)
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)

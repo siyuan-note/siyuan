@@ -101,4 +101,4 @@ export const updateReadonly = (target: Element, protyle: IProtyle) => {
             });
         }
     }
-}
+};

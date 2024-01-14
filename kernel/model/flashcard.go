@@ -641,7 +641,7 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages.Load() {
+	if isSyncingStorages() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}
@@ -753,7 +753,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages.Load() {
+	if isSyncingStorages() {
 		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}

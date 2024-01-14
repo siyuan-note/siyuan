@@ -12,7 +12,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     }
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
-        if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
+        if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol--checkbox").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
@@ -87,7 +87,9 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
         colHTML += "</div>";
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
-        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
+        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 
+style="width: ${item.style.width};text-align: ${item.style.textAlign}" 
+${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
         if (pinIndex === index) {
             colHTML += "</div>";
         }

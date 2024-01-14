@@ -163,7 +163,7 @@ const renderPDF = (id: string) => {
         ${getSnippetCSS()}
     </style>
 </head>
-<body>
+<body style="-webkit-print-color-adjust: exact;">
 <div id="action">
     <div class="b3-label">
         <div>

@@ -439,11 +439,9 @@ const addAttrViewColAnimation = (options: {
         }
         let html = "";
         if (index === 0) {
-            html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
-    <div draggable="true" class="av__cellheader">
-        ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
-        <span class="av__celltext">${options.name}</span>
-    </div>
+            html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
+    ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
+    <span class="av__celltext fn__flex-1">${options.name}</span>
     <div class="av__widthdrag"></div>
 </div>`;
         } else {

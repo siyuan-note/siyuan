@@ -20,7 +20,7 @@ import {saveLayout, setPanelFocus} from "../../layout/util";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
+import {onGet} from "../util/onGet";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";

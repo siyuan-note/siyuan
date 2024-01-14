@@ -135,7 +135,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.columns[index].wrap)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";

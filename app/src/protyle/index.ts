@@ -139,7 +139,7 @@ export class Protyle {
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;
-                            setReadonlyByConfig(this.protyle);
+                            setReadonlyByConfig(this.protyle, true);
                             break;
                         case "heading2doc":
                         case "li2doc":

@@ -46,9 +46,13 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             isNotEmpty: !!value
         };
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+        const textElement = cellElement.querySelector(".av__celltext") as HTMLElement;
         cellValue[colType as "text"] = {
-            content: cellElement.querySelector(".av__celltext").textContent
+            content: textElement.textContent
         };
+        if (colType === "block" && textElement.dataset.id) {
+            cellValue.block.id = textElement.dataset.id;
+        }
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
         cellElement.querySelectorAll(".b3-chip").forEach((item: HTMLElement) => {
@@ -513,7 +517,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     return text;
 };
 
-export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
+export const renderCell = (cellValue: IAVCellValue) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
         text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
@@ -568,7 +572,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
+            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item) : renderRollup(item);
             if (rollupText) {
                 text += rollupText + ", ";
             }
@@ -668,3 +672,60 @@ export const getPositionByCellElement = (cellElement: HTMLElement) => {
     }
     return {rowIndex, celIndex};
 };
+
+export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, originData: {
+    [key: string]: IAVCellValue[]
+}, originCellIds: string[]) => {
+    nodeElement.querySelector(".av__drag-fill")?.remove();
+    const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
+    nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+        if (originCellIds.includes(item.dataset.id)) {
+            return;
+        }
+        const rowElement = hasClosestByClassName(item, "av__row");
+        if (!rowElement) {
+            return;
+        }
+        if (!newData[rowElement.dataset.id]) {
+            newData[rowElement.dataset.id] = [];
+        }
+        const value: IAVCellValue & {
+            colId?: string,
+            element?: HTMLElement
+        } = genCellValueByElement(getTypeByCellElement(item), item)
+        value.colId = item.dataset.colId;
+        value.element = item;
+        newData[rowElement.dataset.id].push(value);
+    })
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const avID = nodeElement.dataset.avId
+    const originKeys = Object.keys(originData);
+    Object.keys(newData).forEach((rowID, index) => {
+        newData[rowID].forEach((item, cellIndex) => {
+            if (["rollup", "template", "created", "updated"].includes(item.type)) {
+                return;
+            }
+            const data = originData[originKeys[index % originKeys.length]][cellIndex]
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: item.id,
+                avID,
+                keyID: item.colId,
+                rowID,
+                data
+            });
+            undoOperations.push({
+                action: "updateAttrViewCell",
+                id: item.id,
+                avID,
+                keyID: item.colId,
+                rowID,
+                data: item
+            });
+            item.element.innerHTML = renderCell(data);
+        })
+    });
+    focusBlock(nodeElement);
+    transaction(protyle, doOperations, undoOperations);
+}

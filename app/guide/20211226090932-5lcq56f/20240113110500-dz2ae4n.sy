@@ -1,0 +1,520 @@
+{
+	"ID": "20240113110500-dz2ae4n",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4f1",
+		"id": "20240113110500-dz2ae4n",
+		"title": "行動端 App",
+		"updated": "20240113111013"
+	},
+	"Children": [
+		{
+			"ID": "20240113110513-8s7tp6d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110513-8s7tp6d",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-7dv2nyk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110513-7dv2nyk",
+				"updated": "20240113110531"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源筆記提供了 Android 端和 iOS 端 App，已經上架部分手機應用程式商店，請在應用程式商店中搜尋 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-zvmefnd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110513-zvmefnd",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安裝和更新"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-f0yckci",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110513-f0yckci",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前已經上架應用程式商店："
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-s2ty09e",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240113110513-s2ty09e",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"ID": "20240113110513-zkcjaqy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-zkcjaqy",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-orc8lc9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-orc8lc9",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "小米"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-iztzopq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-iztzopq",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-wugi1za",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-wugi1za",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "華為"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-cn7qzup",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-cn7qzup",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-g7vsmnv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-g7vsmnv",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OPPO"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-qxnwszv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-qxnwszv",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-hkyqb3y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-hkyqb3y",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "vivo"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-f3vaz7w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-f3vaz7w",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-dc4b1v0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-dc4b1v0",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "蘋果"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-pa32ob5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-pa32ob5",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-s2nbnca",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-s2nbnca",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "酷安"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-ymrho6a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-ymrho6a",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-izjg5e1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-izjg5e1",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google Play"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-8lwzed3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110513-8lwzed3",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "apk 下載： "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/download.html",
+					"TextMarkTextContent": "https://b3log.org/siyuan/download.html"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-f0ouee1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110513-f0ouee1",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用集市"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-1zlx78j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110513-1zlx78j",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "因為應用程式商店審核原因，目前無法直接在 App 上提供市集。"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-bta55b6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110513-bta55b6",
+				"updated": "20240113110550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需使用集市，請啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "網路伺服"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，然後在桌面端瀏覽器上存取配置。"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-pxc89dc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110513-pxc89dc",
+				"updated": "20240113110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240113110513-hrvrjsj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240113110513-hrvrjsj",
+				"updated": "20240113110557"
+			},
+			"Children": [
+				{
+					"ID": "20240113110513-cvue0bs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-cvue0bs",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-cfsoofb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-cfsoofb",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "卸載 App 會導致本機資料完全刪除且無法復原"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-2q984od",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-2q984od",
+						"updated": "20240113110557"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-4xcnhoh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-4xcnhoh",
+								"updated": "20240113110557"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "退出應用程式請使用右側面板中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "退出應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 進行正常退出，直接劃走會強制結束應用，導致資料同步未執行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-jqntg24",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-jqntg24",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-gw393oi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-gw393oi",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "iOS 端切換應用程式後會導致連線中斷，請點選提示框中的按鈕手動重連"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110513-99in2ac",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110513-99in2ac",
+						"updated": "20240113110513"
+					},
+					"Children": [
+						{
+							"ID": "20240113110513-213ok2i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110513-213ok2i",
+								"updated": "20240113110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料同步過程中請勿切換應用程式並保持亮屏，否則會導致資料同步失敗"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

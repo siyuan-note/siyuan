@@ -61,6 +61,7 @@ export const rename = (options: {
             }
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_RENAME);
     const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(inputElement, () => {
@@ -113,6 +114,7 @@ export const renameAsset = (assetPath: string) => {
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEASSETS);
     const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(inputElement, () => {

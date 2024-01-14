@@ -124,6 +124,7 @@ const setHTML = (options: {
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
+    const isUpdate = protyle.wysiwyg.element.innerHTML !== ""
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
@@ -198,7 +199,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle);
+        setReadonlyByConfig(protyle, isUpdate);
     }
 
     focusElementById(protyle, options.action, options.scrollAttr);
@@ -431,9 +432,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
 };
 
-export const setReadonlyByConfig = (protyle: IProtyle) => {
+export const setReadonlyByConfig = (protyle: IProtyle, isUpdate: boolean) => {
     let readOnly = window.siyuan.config.readonly ? "true" : "false";
-    if (readOnly === "false") {
+    if (isUpdate) {
+        readOnly = protyle.disabled ? "true" : "false";
+    } else if (readOnly === "false") {
         readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
         if (readOnly === "false") {
             readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);

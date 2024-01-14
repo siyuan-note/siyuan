@@ -192,11 +192,11 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
-const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, text?: string) => {
+const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string) => {
     if (type === "selected") {
         return `<button data-id="${id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <span class="b3-menu__label">${text}</span>
+    <span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>
 </button>`;
     }
@@ -207,7 +207,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     }
     if (type == "unselect") {
         return `<button data-id="${id}" class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label">${text}</span>
+    <span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
     }
@@ -237,7 +237,7 @@ export const bindRelationEvent = (options: {
             if (hasId) {
                 avData.view.rows.find((item) => {
                     if (item.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.block.content || "Untitled");
+                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.isDetached, item.cells[cellIndex].value.block.content || "Untitled");
                         return true;
                     }
                 });
@@ -245,7 +245,7 @@ export const bindRelationEvent = (options: {
         });
         avData.view.rows.forEach((item) => {
             if (!hasIds.includes(item.id)) {
-                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.block.content || "Untitled");
+                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.isDetached, item.cells[cellIndex].value.block.content || "Untitled");
             }
         });
         options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}
@@ -303,7 +303,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             newValue.blockIDs.splice(removeIndex, 1);
             newValue.contents.splice(removeIndex, 1);
             separatorElement.after(target);
-            target.outerHTML = genSelectItemHTML("unselect", targetId, target.querySelector(".b3-menu__label").textContent);
+            target.outerHTML = genSelectItemHTML("unselect", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent);
             if (!separatorElement.previousElementSibling) {
                 separatorElement.insertAdjacentHTML("beforebegin", genSelectItemHTML("empty"));
             }
@@ -314,7 +314,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             newValue.blockIDs.push(targetId);
             newValue.contents.push(target.textContent.trim());
             separatorElement.before(target);
-            target.outerHTML = genSelectItemHTML("selected", targetId, target.querySelector(".b3-menu__label").textContent);
+            target.outerHTML = genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent);
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }

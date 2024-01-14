@@ -6,6 +6,7 @@ import {openSetting} from "../config";
 /// #endif
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {isMobile} from "../util/functions";
+import {Constants} from "../constants";
 
 export const commandPanel = (app: App) => {
     const dialog = new Dialog({
@@ -22,6 +23,7 @@ export const commandPanel = (app: App) => {
     <div class="fn__hr"></div>
 </div>`
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {

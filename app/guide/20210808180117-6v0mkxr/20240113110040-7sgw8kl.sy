@@ -1,0 +1,520 @@
+{
+	"ID": "20240113110040-7sgw8kl",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4f1",
+		"id": "20240113110040-7sgw8kl",
+		"title": "Mobile App",
+		"updated": "20240113110431"
+	},
+	"Children": [
+		{
+			"ID": "20240113110114-xav9o1n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110114-xav9o1n",
+				"updated": "20240113110114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-j6okyut",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110114-j6okyut",
+				"updated": "20240113110129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan provides Android and iOS apps, which are already available in some mobile app stores. Please search for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in the app store."
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-rugjxcf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110114-rugjxcf",
+				"updated": "20240113110114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Installation and updates"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-aqce9bb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110114-aqce9bb",
+				"updated": "20240113110114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Currently available on the app store:"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-2r0390j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240113110114-2r0390j",
+				"updated": "20240113110151"
+			},
+			"Children": [
+				{
+					"ID": "20240113110114-vpn2w0q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-vpn2w0q",
+						"updated": "20240113110114"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-xwxkfdw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-xwxkfdw",
+								"updated": "20240113110136"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mi"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-o3ddwpp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-o3ddwpp",
+						"updated": "20240113110114"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-aw8tod9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-aw8tod9",
+								"updated": "20240113110114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Huawei"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-gpwaczm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-gpwaczm",
+						"updated": "20240113110114"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-pnj3nky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-pnj3nky",
+								"updated": "20240113110141"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OPPO"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110141-gyywbkd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110141-gyywbkd",
+						"updated": "20240113110141"
+					},
+					"Children": [
+						{
+							"ID": "20240113110141-zlrxqnn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110141-zlrxqnn",
+								"updated": "20240113110141"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "vivo"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-s58cwy2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-s58cwy2",
+						"updated": "20240113110144"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-cdqjctx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-cdqjctx",
+								"updated": "20240113110144"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Apple"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-v5x1rvc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-v5x1rvc",
+						"updated": "20240113110151"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-in0jqwy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-in0jqwy",
+								"updated": "20240113110151"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Kuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-mhekema",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-mhekema",
+						"updated": "20240113110114"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-0ul416g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-0ul416g",
+								"updated": "20240113110114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google Play"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-dixpfgf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110114-dixpfgf",
+				"updated": "20240113110203"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "apk download: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/download.html",
+					"TextMarkTextContent": "https://b3log.org/siyuan/en/download.html"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-ekanw3f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110114-ekanw3f",
+				"updated": "20240113110213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-54bc1f8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110114-54bc1f8",
+				"updated": "20240113110224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Due to App Store review reasons, the marketplace cannot be provided directly on the App at present."
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-5cymxj6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240113110114-5cymxj6",
+				"updated": "20240113110322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To use the marketplace, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Network serving"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and access the configuration on your desktop browser."
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-3h7r74i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240113110114-3h7r74i",
+				"updated": "20240113110333"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240113110114-7cvpqyg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240113110114-7cvpqyg",
+				"updated": "20240113110431"
+			},
+			"Children": [
+				{
+					"ID": "20240113110114-erqy4o6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-erqy4o6",
+						"updated": "20240113110114"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-eheouiq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-eheouiq",
+								"updated": "20240113110114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Uninstalling the App will cause local data to be completely deleted and cannot be recovered"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-fn3cur4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-fn3cur4",
+						"updated": "20240113110423"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-z7ij7u2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-z7ij7u2",
+								"updated": "20240113110423"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "To exit the application, please use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Exit the application"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the right panel to exit normally. Swiping away directly will force the application to end, resulting in data synchronization not being executed"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-7yqcofv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-7yqcofv",
+						"updated": "20240113110425"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-mnulyqm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-mnulyqm",
+								"updated": "20240113110425"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switching apps on iOS will cause the connection to be interrupted. Please click the button in the prompt box to manually reconnect"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240113110114-oz77ny6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240113110114-oz77ny6",
+						"updated": "20240113110431"
+					},
+					"Children": [
+						{
+							"ID": "20240113110114-rqu8ptk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240113110114-rqu8ptk",
+								"updated": "20240113110431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Please do not switch applications and keep the screen on during data synchronization, otherwise data synchronization will fail"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

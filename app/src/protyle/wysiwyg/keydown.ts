@@ -37,7 +37,7 @@ import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {isLocalPath, pathPosix} from "../../util/pathName";
+import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif

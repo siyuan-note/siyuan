@@ -14,7 +14,6 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFile, openFileById} from "../editor/util";
-import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";

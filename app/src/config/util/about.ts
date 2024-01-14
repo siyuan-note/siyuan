@@ -37,6 +37,6 @@ export const getCloudURL = (key: string) => {
 };
 
 export const getIndexURL = (key: string) => {
-    const lang = 'zh_CN' === window.siyuan.config.lang ? "" : "/en";
-    return 'https://b3log.org/siyuan' + `${lang}/${key}`;
-}
+    const lang = "zh_CN" === window.siyuan.config.lang ? "" : "/en";
+    return "https://b3log.org/siyuan" + `${lang}/${key}`;
+};

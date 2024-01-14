@@ -447,10 +447,10 @@ export class WYSIWYG {
                 }
                 nodeElement.querySelectorAll(".av__cell--select").forEach(item => {
                     item.classList.remove("av__cell--select");
-                })
+                });
                 nodeElement.querySelectorAll(".av__drag-fill").forEach(item => {
                     item.remove();
-                })
+                });
                 avCellElement.classList.add("av__cell--select");
                 const originIndex = getPositionByCellElement(avCellElement);
                 let moveCellElement: HTMLElement;
@@ -465,7 +465,7 @@ export class WYSIWYG {
                         const newIndex = getPositionByCellElement(moveCellElement);
                         nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             item.classList.remove("av__cell--active");
-                        })
+                        });
                         nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
                             if (index >= Math.min(originIndex.rowIndex, newIndex.rowIndex) && index <= Math.max(originIndex.rowIndex, newIndex.rowIndex)) {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
@@ -475,7 +475,7 @@ export class WYSIWYG {
                                     }
                                 });
                             }
-                        })
+                        });
                     }
                 };
 
@@ -487,7 +487,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         focusBlock(nodeElement);
-                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`)
+                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
                         this.preventClick = true;
                     }
                     return false;

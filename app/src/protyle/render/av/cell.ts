@@ -26,7 +26,7 @@ export const getCellText = (cellElement: HTMLElement | false) => {
             } else if (item.getAttribute("data-type") !== "block-more") {
                 cellText += item.textContent + ", ";
             }
-        })
+        });
         cellText = cellText.substring(0, cellText.length - 2);
     } else {
         cellText = cellElement.textContent;
@@ -643,7 +643,7 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
                 textElement.insertAdjacentHTML("afterend", '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>');
             }
         } else {
-            cellElement.querySelector(".av__cellheadericon--pin")?.remove()
+            cellElement.querySelector(".av__cellheadericon--pin")?.remove();
         }
     }
 };
@@ -664,4 +664,4 @@ export const getPositionByCellElement = (cellElement: HTMLElement) => {
         celIndex++;
     }
     return {rowIndex, celIndex};
-}
+};

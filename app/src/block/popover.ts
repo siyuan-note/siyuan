@@ -27,12 +27,12 @@ export const initBlockPopover = (app: App) => {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
                     if (textElement.scrollWidth > textElement.clientWidth + 2) {
-                        tip = getCellText(aElement)
+                        tip = getCellText(aElement);
                     }
                 } else if (aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                     aElement.style.overflow = "auto";
                     if (aElement.scrollWidth > aElement.clientWidth + 2) {
-                        tip = getCellText(aElement)
+                        tip = getCellText(aElement);
                     }
                     aElement.style.overflow = "";
                 }
@@ -115,7 +115,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
         return false;
     }
 
-    const avPanelElement = hasClosestByClassName(target, "av__panel")
+    const avPanelElement = hasClosestByClassName(target, "av__panel");
     if (avPanelElement) {
         // 浮窗上点击 av 操作，浮窗不能消失
         const blockPanel = window.siyuan.blockPanels.find((item) => {
@@ -128,7 +128,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
         }
     } else {
         // 浮窗上点击菜单，浮窗不能消失 https://ld246.com/article/1632668091023
-        const menuElement = hasClosestByClassName(target, "b3-menu")
+        const menuElement = hasClosestByClassName(target, "b3-menu");
         if (menuElement) {
             const blockPanel = window.siyuan.blockPanels.find((item) => {
                 if (item.element.style.zIndex < menuElement.style.zIndex) {
@@ -213,7 +213,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
         if (aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") {
             popoverTargetElement = aElement;
         } else if (aElement.classList.contains("av__cell")) {
-            const textElement = aElement.querySelector(".av__celltext--url") as HTMLElement
+            const textElement = aElement.querySelector(".av__celltext--url") as HTMLElement;
             if (textElement && textElement.dataset.type === "url" && textElement.dataset.href?.startsWith("siyuan://blocks")) {
                 popoverTargetElement = textElement;
             }

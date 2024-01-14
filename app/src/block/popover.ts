@@ -17,10 +17,10 @@ export const initBlockPopover = (app: App) => {
             return;
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
-            hasClosestByAttribute(event.target, "data-type", "tab-header") ||
-            hasClosestByClassName(event.target, "av__cell") ||
             hasClosestByClassName(event.target, "ariaLabel") ||
-            hasClosestByAttribute(event.target, "data-type", "inline-memo");
+            hasClosestByAttribute(event.target, "data-type", "tab-header") ||
+            hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
+            hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
             if (aElement.classList.contains("av__cell")) {
@@ -29,16 +29,12 @@ export const initBlockPopover = (app: App) => {
                     if (textElement.scrollWidth > textElement.clientWidth + 2) {
                         tip = getCellText(aElement)
                     }
-                } else if (aElement.dataset.wrap !== "true") {
+                } else if (aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                     aElement.style.overflow = "auto";
                     if (aElement.scrollWidth > aElement.clientWidth + 2) {
                         tip = getCellText(aElement)
                     }
                     aElement.style.overflow = "";
-                }
-                if (!tip) {
-                    hideTooltip();
-                    return;
                 }
             }
             if (!tip) {
@@ -48,10 +44,11 @@ export const initBlockPopover = (app: App) => {
                     tip += "<br>" + title;
                 }
             }
-            if (tip && !tip.startsWith("siyuan://blocks") && !aElement.classList.contains("b3-tooltips")) {
+            if (tip && !aElement.classList.contains("b3-tooltips")) {
                 showTooltip(tip, aElement);
                 event.stopPropagation();
-                return;
+            } else {
+                hideTooltip();
             }
         } else if (!aElement) {
             const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
@@ -212,10 +209,15 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     if (!popoverTargetElement) {
         popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
     }
-    if (!popoverTargetElement && aElement && (
-        (aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") ||
-        (aElement.classList.contains("av__cell") && aElement.firstElementChild?.getAttribute("data-type") === "url"))) {
-        popoverTargetElement = aElement;
+    if (!popoverTargetElement && aElement) {
+        if (aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") {
+            popoverTargetElement = aElement;
+        } else if (aElement.classList.contains("av__cell")) {
+            const textElement = aElement.querySelector(".av__celltext--url") as HTMLElement
+            if (textElement && textElement.dataset.type === "url" && textElement.dataset.href?.startsWith("siyuan://blocks")) {
+                popoverTargetElement = textElement;
+            }
+        }
     }
     if (!popoverTargetElement || window.siyuan.altIsPressed ||
         (window.siyuan.config.editor.floatWindowMode === 0 && window.siyuan.ctrlIsPressed) ||

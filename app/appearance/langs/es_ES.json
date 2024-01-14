@@ -1389,6 +1389,7 @@
     "219": "El servicio de almacenamiento en la nube no está disponible, inténtalo de nuevo más tarde",
     "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube",
     "221": "La operación de reemplazo no es compatible después de agrupar por documento. Utilice desagrupar y luego reemplazar",
-    "222": "La sincronización de datos está en curso. Espere hasta que se complete la sincronización de datos e inténtelo de nuevo"
+    "222": "La sincronización de datos está en curso. Espere hasta que se complete la sincronización de datos e inténtelo de nuevo",
+    "223": "Limpiando el almacenamiento en la nube..."
   }
 }

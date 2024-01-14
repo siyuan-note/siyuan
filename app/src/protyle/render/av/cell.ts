@@ -18,13 +18,16 @@ export const getCellText = (cellElement: HTMLElement | false) => {
         return "";
     }
     let cellText = "";
-    const textElement = cellElement.querySelector(".av__celltext");
-    if (textElement) {
-        if (textElement.querySelector(".av__cellicon")) {
-            cellText = `${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`;
-        } else {
-            cellText = textElement.textContent;
-        }
+    const textElements = cellElement.querySelectorAll(".b3-chip, .av__celltext--ref, .av__celltext");
+    if (textElements.length > 0) {
+        textElements.forEach(item => {
+            if (item.querySelector(".av__cellicon")) {
+                cellText += `${item.firstChild.textContent} → ${item.lastChild.textContent}, `;
+            } else if (item.getAttribute("data-type") !== "block-more") {
+                cellText += item.textContent + ", ";
+            }
+        })
+        cellText = cellText.substring(0, cellText.length - 2);
     } else {
         cellText = cellElement.textContent;
     }
@@ -531,7 +534,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 <span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
-        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
+        text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
         cellValue?.mSelect?.forEach((item) => {
             text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
@@ -636,14 +639,11 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     if (typeof headerValue.pin !== "undefined") {
         const textElement = cellElement.querySelector(".av__celltext");
         if (headerValue.pin) {
-            if (!textElement.nextElementSibling) {
-                textElement.insertAdjacentHTML("afterend", '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>');
+            if (!cellElement.querySelector(".av__cellheadericon--pin")) {
+                textElement.insertAdjacentHTML("afterend", '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>');
             }
         } else {
-            if (textElement.nextElementSibling) {
-                textElement.nextElementSibling.nextElementSibling.remove();
-                textElement.nextElementSibling.remove();
-            }
+            cellElement.querySelector(".av__cellheadericon--pin")?.remove()
         }
     }
 };

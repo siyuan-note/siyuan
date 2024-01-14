@@ -5,6 +5,7 @@ import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {getIdFromSYProtocol} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
+import {getCellText} from "../protyle/render/av/cell";
 
 let popoverTargetElement: HTMLElement;
 export const initBlockPopover = (app: App) => {
@@ -17,19 +18,26 @@ export const initBlockPopover = (app: App) => {
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
-            hasClosestByClassName(event.target, "av__celltext") ||
+            hasClosestByClassName(event.target, "av__cell") ||
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
-            if (aElement.classList.contains("av__celltext")) {
-                if (aElement.offsetWidth > aElement.parentElement.clientWidth - (aElement.classList.contains("fn__flex-shrink") ? 24 : 5)) {    // 只能减左边 padding，换行时字体会穿透到右侧 padding
-                    if (aElement.querySelector(".av__cellicon")) {
-                        tip = `${aElement.firstChild.textContent} → ${aElement.lastChild.textContent}`;
-                    } else {
-                        tip = aElement.textContent;
+            if (aElement.classList.contains("av__cell")) {
+                if (aElement.classList.contains("av__cell--header")) {
+                    const textElement = aElement.querySelector(".av__celltext");
+                    if (textElement.scrollWidth > textElement.clientWidth + 2) {
+                        tip = getCellText(aElement)
                     }
-                } else {
+                } else if (aElement.dataset.wrap !== "true") {
+                    aElement.style.overflow = "auto";
+                    if (aElement.scrollWidth > aElement.clientWidth + 2) {
+                        tip = getCellText(aElement)
+                    }
+                    aElement.style.overflow = "";
+                }
+                if (!tip) {
+                    hideTooltip();
                     return;
                 }
             }
@@ -206,7 +214,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     }
     if (!popoverTargetElement && aElement && (
         (aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") ||
-        (aElement.classList.contains("av__celltext") && aElement.dataset.type === "url"))) {
+        (aElement.classList.contains("av__cell") && aElement.firstElementChild?.getAttribute("data-type") === "url"))) {
         popoverTargetElement = aElement;
     }
     if (!popoverTargetElement || window.siyuan.altIsPressed ||

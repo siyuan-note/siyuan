@@ -197,8 +197,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__cellheader")) {
-            showColMenu(protyle, blockElement, target.parentElement);
+        } else if (target.classList.contains("av__cell--header")) {
+            showColMenu(protyle, blockElement, target);
             event.preventDefault();
             event.stopPropagation();
             return true;

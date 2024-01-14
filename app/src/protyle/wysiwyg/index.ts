@@ -381,7 +381,7 @@ export class WYSIWYG {
             }
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-action") ||
-                hasClosestByClassName(target, "av__cellheader")) {
+                (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }
             const documentSelf = document;
@@ -435,7 +435,6 @@ export class WYSIWYG {
                     }]);
                 };
                 this.preventClick = true;
-                event.stopPropagation();
                 event.preventDefault();
                 return;
             }
@@ -493,8 +492,6 @@ export class WYSIWYG {
                     }
                     return false;
                 };
-                event.stopPropagation();
-                event.preventDefault();
                 return false;
             }
             // 图片、iframe、video 缩放
@@ -1449,9 +1446,9 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return false;
             }
-            const avCellHeaderElement = hasClosestByClassName(target, "av__cellheader");
+            const avCellHeaderElement = hasClosestByClassName(target, "av__cell--header");
             if (avCellHeaderElement) {
-                showColMenu(protyle, nodeElement, avCellHeaderElement.parentElement);
+                showColMenu(protyle, nodeElement, avCellHeaderElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

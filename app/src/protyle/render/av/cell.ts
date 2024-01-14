@@ -661,6 +661,9 @@ export const getPositionByCellElement = (cellElement: HTMLElement) => {
     let celIndex = -2;
     while (cellElement) {
         cellElement = cellElement.previousElementSibling as HTMLElement;
+        if (cellElement && cellElement.classList.contains("av__colsticky")) {
+            cellElement = cellElement.lastElementChild as HTMLElement;
+        }
         celIndex++;
     }
     return {rowIndex, celIndex};

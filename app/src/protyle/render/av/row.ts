@@ -12,7 +12,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     }
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
-        if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
+        if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");

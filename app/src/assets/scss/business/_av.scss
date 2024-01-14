@@ -106,7 +106,7 @@
     &--hl {
       &:not(.av__row--header) .av__cell,
       &:not(.av__row--header) .av__firstcol {
-        background-color: var(--b3-av-background-hl);
+        background-color: var(--b3-av-background-hl) !important;
       }
 
       .av__firstcol svg {
@@ -242,7 +242,7 @@
     }
 
     &--select {
-      background-color: var(--b3-theme-primary-lightest);
+      background-color: var(--b3-menu-background);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;
       border-radius: var(--b3-border-radius);
     }
@@ -358,7 +358,7 @@
     display: flex;
 
     &.av__firstcol,
-    & > div {
+    & > div:not(.av__cell--select):not(.av__cell--active) {
       background-color: var(--av-background);
     }
   }
@@ -450,8 +450,10 @@
   .av__row--select .av__cell,
   .av__colsticky.av__firstcol,
   .av__colsticky > div,
+  .av__cell--select,
+  .av__cell--active,
   .av__counter {
-    background-color: var(--b3-av-background-hl);
+    background-color: var(--b3-av-background-hl) !important;
   }
 }
 

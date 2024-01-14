@@ -76,12 +76,18 @@ import {removeSearchMark} from "../toolbar/util";
 import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
-import {stickyRow, updateHeader} from "../render/av/row";
+import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {avRender} from "../render/av/render";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {getCellText, getPositionByCellElement, updateCellsValue} from "../render/av/cell";
+import {
+    genCellValueByElement,
+    getCellText,
+    getPositionByCellElement,
+    getTypeByCellElement,
+    updateCellsValue
+} from "../render/av/cell";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -438,6 +444,78 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
+            // av drag fill
+            const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
+            if (!protyle.disabled && avDragFillElement) {
+                const nodeElement = hasClosestBlock(avDragFillElement);
+                if (!nodeElement) {
+                    return;
+                }
+                const originData: { [key: string]: IAVCellValue[] } = {}
+                let lastOriginCellElement
+                const lastOriginCellId: string[] = []
+                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement, index: number) => {
+                    const rowElement = hasClosestByClassName(item, "av__row");
+                    if (rowElement) {
+                        if (!originData[rowElement.dataset.id]) {
+                            originData[rowElement.dataset.id] = [];
+                        }
+                        originData[rowElement.dataset.id].push(genCellValueByElement(getTypeByCellElement(item), item));
+                        lastOriginCellElement = item
+                        lastOriginCellId.push(item.dataset.id)
+                    }
+                });
+                const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
+                const firstCellIndex = getPositionByCellElement(nodeElement.querySelector(".av__cell--active"));
+                let moveCellElement: HTMLElement;
+                let lastCellElement: HTMLElement;
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
+                    if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
+                        return;
+                    }
+                    moveCellElement = tempCellElement;
+                    if (moveCellElement && moveCellElement.dataset.id) {
+                        const newIndex = getPositionByCellElement(moveCellElement);
+                        nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                            if (!lastOriginCellId.includes(item.dataset.id)) {
+                                item.classList.remove("av__cell--active");
+                            }
+                        });
+                        if (newIndex.celIndex !== dragFillCellIndex.celIndex || dragFillCellIndex.rowIndex >= newIndex.rowIndex) {
+                            lastCellElement = undefined
+                            return;
+                        }
+                        nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
+                            if (index >= dragFillCellIndex.rowIndex && index <= newIndex.rowIndex) {
+                                rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
+                                    if (cellIndex >= firstCellIndex.celIndex && cellIndex <= newIndex.celIndex) {
+                                        cellElement.classList.add("av__cell--active");
+                                        lastCellElement = cellElement;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                };
+
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    if (lastCellElement) {
+                        nodeElement.querySelector(".av__drag-fill")?.remove();
+                        selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
+                        focusBlock(nodeElement);
+                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+                        this.preventClick = true;
+                    }
+                    return false;
+                };
+                return false;
+            }
             // av cell select
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id) {
@@ -461,7 +539,7 @@ export class WYSIWYG {
                         return;
                     }
                     moveCellElement = tempCellElement;
-                    if (moveCellElement && moveCellElement.dataset.id && !avCellElement.isSameNode(moveCellElement)) {
+                    if (moveCellElement && moveCellElement.dataset.id) {
                         const newIndex = getPositionByCellElement(moveCellElement);
                         nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             item.classList.remove("av__cell--active");
@@ -486,6 +564,7 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     if (lastCellElement) {
+                        selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
                         lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
                         this.preventClick = true;

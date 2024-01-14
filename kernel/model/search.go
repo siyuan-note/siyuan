@@ -636,7 +636,16 @@ func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement stri
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
 func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
-	query = strings.TrimSpace(query)
+	ret = []*Block{}
+	if "" == query {
+		return
+	}
+
+	trimQuery := strings.TrimSpace(query)
+	if "" != trimQuery {
+		query = trimQuery
+	}
+
 	beforeLen := 36
 	var blocks []*Block
 	orderByClause := buildOrderBy(method, orderBy)
@@ -842,7 +851,7 @@ func buildTypeFilter(types map[string]bool) string {
 }
 
 func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	stmt = gulu.Str.RemoveInvisible(stmt)
+	stmt = filterQueryInvisibleChars(stmt)
 	stmt = strings.TrimSpace(stmt)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
@@ -886,7 +895,7 @@ func removeLimitClause(stmt string) string {
 }
 
 func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
-	keyword = gulu.Str.RemoveInvisible(keyword)
+	keyword = filterQueryInvisibleChars(keyword)
 
 	if ast.IsNodeIDPattern(keyword) {
 		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36, 1, 32)
@@ -950,7 +959,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 }
 
 func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
@@ -959,7 +968,7 @@ func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, order
 }
 
 func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
@@ -969,7 +978,7 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, or
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	exp = gulu.Str.RemoveInvisible(exp)
+	exp = filterQueryInvisibleChars(exp)
 
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
@@ -1069,7 +1078,7 @@ func highlightByQuery(query, typeFilter, id string) (ret []string) {
 }
 
 func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (matchedBlockCount, matchedRootCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
 		if 1 > len(ret) {
@@ -1267,6 +1276,10 @@ func columnFilter() string {
 }
 
 func stringQuery(query string) string {
+	if "" == strings.TrimSpace(query) {
+		return "\"" + query + "\""
+	}
+
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	query = strings.ReplaceAll(query, "'", "''")
 
@@ -1486,4 +1499,11 @@ func getRefSearchIgnoreLines() (ret []string) {
 		refSearchIgnore = append(refSearchIgnore, line)
 	}
 	return
+}
+
+func filterQueryInvisibleChars(query string) string {
+	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
+	query = gulu.Str.RemoveInvisible(query)
+	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
+	return query
 }

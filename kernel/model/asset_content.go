@@ -113,18 +113,18 @@ func FullTextSearchAssetContent(query string, types map[string]bool, method, ord
 }
 
 func fullTextSearchAssetContentByQuerySyntax(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
 func fullTextSearchAssetContentByKeyword(query, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 	query = stringQuery(query)
 	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
 func fullTextSearchAssetContentByRegexp(exp, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
-	exp = gulu.Str.RemoveInvisible(exp)
+	exp = filterQueryInvisibleChars(exp)
 	fieldFilter := assetContentFieldRegexp(exp)
 	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + " AND ext IN " + typeFilter
 	stmt += " " + orderBy
@@ -180,7 +180,7 @@ func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLe
 }
 
 func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
-	stmt = gulu.Str.RemoveInvisible(stmt)
+	stmt = filterQueryInvisibleChars(stmt)
 	stmt = strings.TrimSpace(stmt)
 	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
 	ret = fromSQLAssetContents(&assetContents, beforeLen)
@@ -202,7 +202,7 @@ func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []
 }
 
 func fullTextSearchAssetContentCount(query, typeFilter string) (matchedAssetCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = filterQueryInvisibleChars(query)
 
 	table := "asset_contents_fts_case_insensitive"
 	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"

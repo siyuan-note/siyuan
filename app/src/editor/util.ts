@@ -82,6 +82,10 @@ export const openFile = async (options: IOpenFileOptions) => {
     if (typeof options.removeCurrentTab === "undefined") {
         options.removeCurrentTab = true;
     }
+    // https://github.com/siyuan-note/siyuan/issues/10168
+    document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
+        item.remove();
+    });
     const allModels = getAllModels();
     // 文档已打开
     if (options.assetPath) {

@@ -124,7 +124,7 @@ const setHTML = (options: {
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
-    const isUpdate = protyle.wysiwyg.element.innerHTML !== ""
+    const isUpdate = protyle.wysiwyg.element.innerHTML !== "";
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {

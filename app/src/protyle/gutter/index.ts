@@ -217,8 +217,9 @@ export class Gutter {
                     return;
                 }
                 if (buttonElement.dataset.type === "NodeAttributeViewRow") {
-                    blockElement.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
-                        cellElement.classList.remove("av__cell--select");
+                    blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach((cellElement: HTMLElement) => {
+                        cellElement.classList.remove("av__cell--select", "av__cell--active");
+                        cellElement.querySelector(".av__drag-fill")?.remove();
                     });
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];

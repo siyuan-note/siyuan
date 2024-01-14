@@ -67,8 +67,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     e.dataset.pageSize = data.pageSize.toString();
                 }
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg class="av__check"><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconMath"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg class="av__firstcol--icon av__firstcol--checkbox"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let calcHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg class="av__firstcol--icon"><use xlink:href="#iconMath"></use></svg></div>';
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
@@ -123,7 +123,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                     tableHTML += `<div class="av__row" data-id="${row.id}">
 <div class="av__colsticky">
     <div class="av__firstcol">
-        <svg class="av__check"><use xlink:href="#iconUncheck"></use></svg>
+        <svg class="av__firstcol--icon av__firstcol--checkbox"><use xlink:href="#iconUncheck"></use></svg>
     </div>
 `;
 
@@ -198,14 +198,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
             ${tableHTML}
             <div class="av__row--util">
                 <div class="av__colsticky">
-                    <div class="av__firstcol">
-                        <svg><use xlink:href="#iconAdd"></use></svg>
-                    </div>
+                    <span class="fn__space"></span>
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
                         ${window.siyuan.languages.addAttr}
                     </button>
-                    <span class="fn__space"></span>
                     <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
                         <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
                         <span data-type="av-load-more">

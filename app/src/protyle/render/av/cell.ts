@@ -707,23 +707,31 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 return;
             }
             const data = originData[originKeys[index % originKeys.length]][cellIndex]
+            data.id = item.id;
+            const keyID = item.colId
+            if (data.type === "block") {
+                data.isDetached = true;
+                delete data.block.id;
+            }
             doOperations.push({
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
-                keyID: item.colId,
+                keyID,
                 rowID,
                 data
             });
+            item.element.innerHTML = renderCell(data);
+            delete item.colId;
+            delete item.element;
             undoOperations.push({
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
-                keyID: item.colId,
+                keyID,
                 rowID,
                 data: item
             });
-            item.element.innerHTML = renderCell(data);
         })
     });
     focusBlock(nodeElement);

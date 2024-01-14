@@ -735,5 +735,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         })
     });
     focusBlock(nodeElement);
-    transaction(protyle, doOperations, undoOperations);
+    if (doOperations.length > 0) {
+        transaction(protyle, doOperations, undoOperations);
+    }
 }

@@ -2035,16 +2035,14 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 		switch blockRefMode {
 		case 2: // 锚文本块链
 			var blockRefLink *ast.Node
-			blockRefLink = &ast.Node{Type: ast.NodeLink}
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(linkText)})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("siyuan://blocks/" + defID)})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+			blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
+			blockRefLink.KramdownIAL = n.KramdownIAL
 			n.InsertBefore(blockRefLink)
 		case 3: // 仅锚文本
-			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
+			var blockRefLink *ast.Node
+			blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
+			blockRefLink.KramdownIAL = n.KramdownIAL
+			n.InsertBefore(blockRefLink)
 		case 4: // 脚注
 			refFoot := getRefAsFootnotes(defID, &refFootnotes)
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})

@@ -865,11 +865,13 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 			}
 		}
 
+		oldRoot := ret.Root
 		ret = parse.Parse("", []byte(""), luteEngine.ParseOptions)
 		first := ret.Root.FirstChild
 		for _, node := range nodes {
 			first.InsertBefore(node)
 		}
+		ret.Root.KramdownIAL = oldRoot.KramdownIAL
 	}
 	ret.Path = bt.Path
 	ret.HPath = bt.HPath

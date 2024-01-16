@@ -26,14 +26,15 @@
   }
 
   &__diff {
-    width: 200px;
+    width: 256px;
     border-right: 1px solid var(--b3-border-color);
     padding: 8px 0;
     overflow: auto;
+    user-select: none;
   }
 
-  &__panel > .b3-list,
-  &__panel > .history__diff {
+  &__panel > .b3-list {
     width: 256px;
+    user-select: none;
   }
 }

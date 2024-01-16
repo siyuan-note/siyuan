@@ -58,6 +58,7 @@ export const openWechatNotify = (nodeElement: Element) => {
             focusByRange(range);
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
@@ -120,6 +121,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`
         });
+        dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
@@ -240,6 +242,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             focusByRange(range);
         }
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
     (dialog.element.querySelector('.b3-text-field[data-name="alias"]') as HTMLInputElement).value = attrs.alias || "";
@@ -309,6 +312,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
 </div>`,
                     width: isMobile() ? "92vw" : "520px",
                 });
+                addDialog.element.setAttribute("data-key", Constants.DIALOG_SETCUSTOMATTR);
                 const inputElement = addDialog.element.querySelector("input") as HTMLInputElement;
                 const btnsElement = addDialog.element.querySelectorAll(".b3-button");
                 addDialog.bindInput(inputElement, () => {
@@ -452,6 +456,7 @@ export const exportMd = (id: string) => {
 </div>`,
                     width: isMobile() ? "92vw" : "520px",
                 });
+                dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTTEMPLATE);
                 const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
                 const btnsElement = dialog.element.querySelectorAll(".b3-button");
                 dialog.bindInput(inputElement, () => {

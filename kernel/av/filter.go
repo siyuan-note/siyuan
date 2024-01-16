@@ -139,6 +139,23 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		case FilterOperatorIsNotEmpty:
 			ret.Date = &ValueDate{Content: util.CurrentTimeMillis(), IsNotEmpty: true}
 		}
+	case KeyTypeSelect:
+		switch filter.Operator {
+		case FilterOperatorIsEqual:
+			if 0 < len(filter.Value.MSelect) {
+				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content, Color: filter.Value.MSelect[0].Color}}
+			}
+		case FilterOperatorIsNotEqual:
+			if 0 < len(filter.Value.MSelect) {
+				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content + " Untitled", Color: "1"}}
+			}
+		case FilterOperatorIsEmpty:
+			ret.MSelect = []*ValueSelect{}
+		case FilterOperatorIsNotEmpty:
+			if 0 < len(key.Options) {
+				ret.MSelect = []*ValueSelect{{Content: key.Options[0].Name, Color: key.Options[0].Color}}
+			}
+		}
 	case KeyTypeMSelect:
 		switch filter.Operator {
 		case FilterOperatorIsEqual, FilterOperatorContains:

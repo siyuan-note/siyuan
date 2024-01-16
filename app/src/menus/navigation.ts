@@ -28,6 +28,7 @@ import {openEditorTab} from "./util";
 import {makeCard} from "../card/makeCard";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import {emitOpenMenu} from "../plugin/EventBus";
+import {openByMobile} from "../protyle/util/compatibility";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -322,7 +323,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     path: "/"
                 }, response => {
                     hideMessage(msgId);
-                    window.open(response.data.zip);
+                    openByMobile(response.data.zip);
                 });
             }
         }, {
@@ -334,7 +335,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     id: notebookId,
                 }, response => {
                     hideMessage(msgId);
-                    window.open(response.data.zip);
+                    openByMobile(response.data.zip);
                 });
             }
         }]

@@ -261,6 +261,7 @@ export class Background {
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
                     });
+                    dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDRANDOM);
                     dialog.element.addEventListener("click", (event) => {
                         const target = event.target as HTMLElement;
                         if (target.classList.contains("b3-card")) {
@@ -349,6 +350,7 @@ export class Background {
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
                     });
+                    dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
                     const btnsElement = dialog.element.querySelectorAll(".b3-button");
                     btnsElement[0].addEventListener("click", () => {
                         dialog.destroy();

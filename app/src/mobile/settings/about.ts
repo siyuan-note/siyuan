@@ -173,6 +173,7 @@ export const initAbout = () => {
 </div>`,
                             width: "92vw",
                         });
+                        passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
                         const textAreaElement = passwordDialog.element.querySelector("textarea");
                         textAreaElement.focus();
                         const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
@@ -272,6 +273,7 @@ export const initAbout = () => {
 </div>`,
                                 width: "92vw",
                             });
+                            openWorkspaceDialog.element.setAttribute("data-key", Constants.SIYUAN_OPEN_WORKSPACE);
                             const btnsElement = openWorkspaceDialog.element.querySelectorAll(".b3-button");
                             btnsElement[0].addEventListener("click", () => {
                                 openWorkspaceDialog.destroy();
@@ -306,6 +308,7 @@ export const initAbout = () => {
 </div>`,
                             width: "92vw",
                         });
+                        createWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_CREATEWORKSPACE);
                         const inputElement = createWorkspaceDialog.element.querySelector("input");
                         inputElement.focus();
                         const btnsElement = createWorkspaceDialog.element.querySelectorAll(".b3-button");

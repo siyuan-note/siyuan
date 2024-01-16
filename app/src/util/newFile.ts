@@ -13,6 +13,8 @@ import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import {App} from "../index";
+import {insertHTML} from "../protyle/util/insertHTML";
+import {escapeHtml} from "./escape";
 
 export const getNewFilePath = (useSavePath: boolean) => {
     let notebookId = "";
@@ -94,7 +96,7 @@ export const newFile = (optios: {
             if (data.data.path.startsWith("/") || optios.currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: optios.notebookId,
-                    path: pathPosix().join(data.data.path, optios.name || ""),
+                    path: pathPosix().join(data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
                     // 根目录时无法确定 parentID
                     markdown: ""
                 }, response => {
@@ -115,7 +117,7 @@ export const newFile = (optios: {
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: optios.notebookId,
-                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || ""),
+                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
                         parentID: getDisplayName(optios.currentPath, true, true),
                         markdown: ""
                     }, response => {
@@ -132,8 +134,7 @@ export const newFile = (optios: {
                 });
             }
         } else {
-            let title = data.data.path || "Untitled";
-            title = title.substring(title.lastIndexOf("/") + 1);
+            const title = pathPosix().basename(data.data.path || "Untitled");
             if (!validateName(title)) {
                 return;
             }
@@ -191,5 +192,29 @@ export const newFileByName = (app: App, value: string) => {
         app,
         useSavePath: true,
         name: replaceFileName(value.trim()) || "Untitled"
+    });
+};
+
+export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeElement: HTMLElement, pathDir: string) => {
+    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
+    const hPath = pathPosix().join(pathDir, newFileName);
+    fetchPost("/api/filetree/getIDsByHPath", {
+        path: hPath,
+        notebook: protyle.notebookId
+    }, (idResponse) => {
+        const refText = escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen));
+        if (idResponse.data && idResponse.data.length > 0) {
+            insertHTML(`<span data-type="block-ref" data-id="${idResponse.data[0]}" data-subtype="d">${refText}</span>`, protyle, false, true);
+        } else {
+            fetchPost("/api/filetree/createDocWithMd", {
+                notebook: protyle.notebookId,
+                path: hPath,
+                parentID: protyle.block.rootID,
+                markdown: ""
+            }, response => {
+                insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${refText}</span>`, protyle, false, true);
+            });
+        }
+        hideElements(["toolbar"], protyle);
     });
 };

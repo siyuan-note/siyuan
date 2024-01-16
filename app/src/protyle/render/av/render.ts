@@ -1,7 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {popTextCell, renderCell} from "./cell";
+import {renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -98,7 +98,7 @@ data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}
 style="width: ${column.width || "200px"};">
     <div draggable="true" class="av__cellheader">
         ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
-        <span class="av__celltext">${column.name}</span>
+        <span class="av__celltext fn__flex-shrink">${column.name}</span>
         ${column.pin ? '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>' : ""}
     </div>
     <div class="av__widthdrag"></div>
@@ -264,7 +264,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, data.colum
 const refreshTimeouts: {
     [key: string]: number;
 } = {};
-export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
+export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
@@ -291,17 +291,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation, isUndo: bool
         } else {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
-                const isCurrent = item.querySelector(".av__pulse"); // ctrl+D 后点击添加行
                 avRender(item, protyle, () => {
-                    if (operation.action === "insertAttrViewBlock") {
-                        item.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
-                            cellElement.classList.remove("av__cell--select");
-                        });
-                        // https://github.com/siyuan-note/siyuan/issues/9599
-                        if (!isUndo && operation.isDetached && isCurrent) {
-                            popTextCell(protyle, [item.querySelector(`.av__row[data-id="${operation.srcIDs[0]}"] .av__cell[data-detached="true"]`)], "block");
-                        }
-                    } else if (operation.action === "addAttrViewCol" && isCurrent) {
+                    if (operation.action === "addAttrViewCol" && item.querySelector(".av__pulse")) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

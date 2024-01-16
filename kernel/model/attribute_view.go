@@ -38,6 +38,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeViewFilterSort(id string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(id)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", id, err)
+		return
+	}
+
+	filters = []*av.ViewFilter{}
+	sorts = []*av.ViewSort{}
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			filters = view.Table.Filters
+			sorts = view.Table.Sorts
+		}
+	}
+	return
+}
+
 func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
 	waitForSyncingStorages()
 
@@ -1553,20 +1574,28 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	blockValue := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
-	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
+	// 如果存在排序和过滤条件，则将排序和过滤条件应用到新添加的块上
 	view, _ := attrView.GetCurrentView()
-	if nil != view && 0 < len(view.Table.Filters) {
+	if nil != view && (0 < len(view.Table.Filters) || 0 < len(view.Table.Sorts)) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
 		viewable.SortRows()
 
-		addedVal := false
+		affectKeyIDs := map[string]bool{}
+		for _, f := range view.Table.Filters {
+			affectKeyIDs[f.Column] = true
+		}
+		for _, s := range view.Table.Sorts {
+			affectKeyIDs[s.Column] = true
+		}
+
+		addedValues := map[string]bool{}
 		if 0 < len(viewable.Rows) {
 			row := GetLastSortRow(viewable.Rows)
 			if nil != row {
-				for _, filter := range view.Table.Filters {
+				for affectKeyID, _ := range affectKeyIDs {
 					for _, cell := range row.Cells {
-						if nil != cell.Value && cell.Value.KeyID == filter.Column {
+						if nil != cell.Value && cell.Value.KeyID == affectKeyID {
 							if av.KeyTypeBlock == cell.ValueType {
 								blockValue.Block.Content = cell.Value.Block.Content
 								continue
@@ -1576,18 +1605,30 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 							newValue.ID = ast.NewNodeID()
 							newValue.BlockID = blockID
 							newValue.IsDetached = operation.IsDetached
-							values, _ := attrView.GetKeyValues(filter.Column)
+							values, _ := attrView.GetKeyValues(affectKeyID)
 							values.Values = append(values.Values, newValue)
+							addedValues[affectKeyID] = true
 							break
 						}
 					}
 				}
-				addedVal = true
 			}
 		}
 
-		if !addedVal {
+		notAddedValues := map[string]bool{}
+		for affectKeyID, _ := range affectKeyIDs {
+			if !addedValues[affectKeyID] {
+				notAddedValues[affectKeyID] = true
+				break
+			}
+		}
+
+		if 0 < len(notAddedValues) {
 			for _, filter := range view.Table.Filters {
+				if !notAddedValues[filter.Column] {
+					continue
+				}
+
 				for _, keyValues := range attrView.KeyValues {
 					if keyValues.Key.ID == filter.Column {
 						newValue := filter.GetAffectValue(keyValues.Key)
@@ -1600,6 +1641,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 					}
 				}
 			}
+
+			// 仅使用上面的过滤条件计算受影响的值并插入兜底，受影响的排序条件不进行计算值插入
 		}
 	}
 
@@ -1648,8 +1691,12 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
 	for i := len(rows) - 1; i >= 0; i-- {
 		row := rows[i]
-		block := row.GetBlockValue()
-		if nil != block {
+		blockVal := row.GetBlockValue()
+		if nil != blockVal {
+			if nil != blockVal.Block && blockVal.Block.Created == blockVal.Block.Updated {
+				// 说明是刚刚创建的块，跳过
+				continue
+			}
 			return row
 		}
 	}
@@ -1934,15 +1981,15 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := sortAttributeViewColumn(operation)
+	err := SortAttributeViewKey(operation.AvID, operation.ID, operation.PreviousID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func sortAttributeViewColumn(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
@@ -1957,7 +2004,7 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 		var col *av.ViewTableColumn
 		var index, previousIndex int
 		for i, column := range view.Table.Columns {
-			if column.ID == operation.ID {
+			if column.ID == keyID {
 				col = column
 				index = i
 				break
@@ -1969,7 +2016,7 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 
 		view.Table.Columns = append(view.Table.Columns[:index], view.Table.Columns[index+1:]...)
 		for i, column := range view.Table.Columns {
-			if column.ID == operation.PreviousID {
+			if column.ID == previousKeyID {
 				previousIndex = i + 1
 				break
 			}
@@ -1982,30 +2029,32 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := addAttributeViewColumn(operation)
+	var icon string
+	if nil != operation.Data {
+		icon = operation.Data.(string)
+	}
+	err := AddAttributeViewKey(operation.AvID, operation.ID, operation.Name, operation.Typ, icon, operation.PreviousID)
+
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func addAttributeViewColumn(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
-	keyType := av.KeyType(operation.Typ)
-	switch keyType {
+	keyTyp := av.KeyType(keyType)
+	switch keyTyp {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
 		av.KeyTypeRelation, av.KeyTypeRollup:
-		var icon string
-		if nil != operation.Data {
-			icon = operation.Data.(string)
-		}
-		key := av.NewKey(operation.ID, operation.Name, icon, keyType)
-		if av.KeyTypeRollup == keyType {
+
+		key := av.NewKey(keyID, keyName, keyIcon, keyTyp)
+		if av.KeyTypeRollup == keyTyp {
 			key.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
 		}
 
@@ -2014,14 +2063,14 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		for _, view := range attrView.Views {
 			switch view.LayoutType {
 			case av.LayoutTypeTable:
-				if "" == operation.PreviousID {
+				if "" == previousKeyID {
 					view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
 					break
 				}
 
 				added := false
 				for i, column := range view.Table.Columns {
-					if column.ID == operation.PreviousID {
+					if column.ID == previousKeyID {
 						view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
 						added = true
 						break
@@ -2129,22 +2178,22 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := removeAttributeViewColumn(operation)
+	err := RemoveAttributeViewKey(operation.AvID, operation.ID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func removeAttributeViewColumn(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func RemoveAttributeViewKey(avID, keyID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
 	var removedKey *av.Key
 	for i, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID == operation.ID {
+		if keyValues.Key.ID == keyID {
 			attrView.KeyValues = append(attrView.KeyValues[:i], attrView.KeyValues[i+1:]...)
 			removedKey = keyValues.Key
 			break
@@ -2191,7 +2240,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 
 			srcAvRelDestAv := false
 			for _, keyValues := range attrView.KeyValues {
-				if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
+				if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.AvID == removedKey.Relation.AvID {
 					srcAvRelDestAv = true
 				}
 			}
@@ -2205,7 +2254,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			for i, column := range view.Table.Columns {
-				if column.ID == operation.ID {
+				if column.ID == keyID {
 					view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
 					break
 				}

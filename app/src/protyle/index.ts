@@ -58,7 +58,7 @@ export class Protyle {
             if (item.protyleOptions) {
                 pluginsOptions = merge(pluginsOptions, item.protyleOptions);
             }
-        })
+        });
         const getOptions = new Options(pluginsOptions);
         const mergedOptions = getOptions.merge();
         this.protyle = {

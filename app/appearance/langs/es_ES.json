@@ -1337,7 +1337,7 @@
     "169": "Cargando archivo de repositorio de datos %v/%v",
     "170": "Cargando fragmento de repositorio de datos %v/%v",
     "171": "Cargando referencia de repositorio de datos %s",
-    "172": "Si olvida el código de autorización, puede buscar <code class=\"b3-code\">accessAuthCode</code> en el archivo <br>conf/conf.json del espacio de trabajo",
+    "172": "Si olvida el código de autorización, busque ayuda <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">aquí</a>",
     "173": "Por favor ingrese el codigo de autorizacion de acceso",
     "174": "Desbloquear acceso",
     "175": "Por favor ingrese el código de verificación",

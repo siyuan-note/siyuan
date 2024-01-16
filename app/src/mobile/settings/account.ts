@@ -9,6 +9,7 @@ import md5 from "blueimp-md5";
 import {getCloudURL} from "../../config/util/about";
 import {Dialog} from "../../dialog";
 import {hideElements} from "../../protyle/ui/hideElements";
+import {Constants} from "../../constants";
 
 export const showAccountInfo = () => {
     let userTitlesHTML = "";
@@ -19,6 +20,32 @@ export const showAccountInfo = () => {
         });
         userTitlesHTML += "</div>";
     }
+    let subscriptionHTML = "";
+    if (window.siyuan.user.userSiYuanProExpireTime === -1) {
+        // 终身会员
+        subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
+    } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
+        // 订阅中
+        if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+            subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>`;
+        }
+        const renewHTML = `<div class="fn__hr--b"></div>
+<div class="ft__on-surface ft__smaller">
+    ${window.siyuan.languages.account6} 
+    ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} 
+    ${window.siyuan.languages.day} 
+    <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
+</div>`;
+        if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+            // 订阅试用
+            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
+${renewHTML}`;
+        } else {
+            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
+        }
+    } else if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+        subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>`;
+    }
     openModel({
         title: window.siyuan.languages.manage,
         icon: "iconAccount",
@@ -26,10 +53,16 @@ export const showAccountInfo = () => {
 <div class="config-account__bg">
     <div class="config-account__cover" style="background-image: url(${window.siyuan.user.userHomeBImgURL})"></div>
     <a href="${getCloudURL("settings/avatar")}" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
-    <h1 class="config-account__name">
-        <a target="_blank" class="fn__a" href="${getCloudURL("member/" + window.siyuan.user.userName)}">${window.siyuan.user.userName}</a>
-        <span class="ft__on-surface ft__smaller">${0 === window.siyuan.config.cloudRegion ? "ld246.com" : "liuyun.io"}</span>
-    </h1>
+    <div class="config-account__name">
+        <div class="fn__hr--b"></div>
+        <h1>
+            <a target="_blank" class="fn__a" href="${getCloudURL("member/" + window.siyuan.user.userName)}">${window.siyuan.user.userName}</a>
+            <span class="ft__on-surface ft__smaller">${0 === window.siyuan.config.cloudRegion ? "ld246.com" : "liuyun.io"}</span>
+        </h1>
+        <div class="fn__hr--b"></div>
+        <div class="fn__hr--b"></div>
+        <div>${subscriptionHTML}</div>
+    </div>
     ${userTitlesHTML}
 </div>
 <div class="config-account__info">
@@ -65,6 +98,7 @@ export const showAccountInfo = () => {
                     content: getLoginHTML(true),
                 });
                 bindLoginEvent(dialog.element.querySelector(".b3-dialog__body"), true);
+                dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
             });
             const refreshElement = modelMainElement.querySelector("#refresh");
             refreshElement.addEventListener("click", () => {

@@ -612,10 +612,6 @@ func getDocCreateSavePath(c *gin.Context) {
 	if "../" == docCreateSavePathTpl {
 		docCreateSavePathTpl = "../Untitled"
 	}
-	for strings.HasSuffix(docCreateSavePathTpl, "/") {
-		docCreateSavePathTpl = strings.TrimSuffix(docCreateSavePathTpl, "/")
-		docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
-	}
 
 	p, err := model.RenderGoTemplate(docCreateSavePathTpl)
 	if nil != err {

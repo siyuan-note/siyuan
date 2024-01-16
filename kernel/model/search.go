@@ -28,6 +28,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -906,6 +907,17 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	} else {
 		stmt += " IN " + Conf.Search.TypeFilter()
 	}
+
+	if ignoreLines := getRefSearchIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		notLike := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			notLike.WriteString(" AND ")
+			notLike.WriteString(line)
+		}
+		stmt += notLike.String()
+	}
+
 	orderBy := ` order by case
              when name = '${keyword}' then 10
              when alias = '${keyword}' then 20
@@ -998,6 +1010,17 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
+
+	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		notLike := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			notLike.WriteString(" AND ")
+			notLike.WriteString(line)
+		}
+		stmt += notLike.String()
+	}
+
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
@@ -1356,5 +1379,105 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 		buf.WriteString(replacementEnd)
 	}
 	ret = buf.String()
+	return
+}
+
+var (
+	searchIgnoreLastModified int64
+	searchIgnore             []string
+	searchIgnoreLock         = sync.Mutex{}
+)
+
+func getSearchIgnoreLines() (ret []string) {
+	// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+
+	now := time.Now().UnixMilli()
+	if now-searchIgnoreLastModified < 30*1000 {
+		return searchIgnore
+	}
+
+	searchIgnoreLock.Lock()
+	defer searchIgnoreLock.Unlock()
+
+	searchIgnoreLastModified = now
+
+	searchIgnorePath := filepath.Join(util.DataDir, ".siyuan", "searchignore")
+	err := os.MkdirAll(filepath.Dir(searchIgnorePath), 0755)
+	if nil != err {
+		return
+	}
+	if !gulu.File.IsExist(searchIgnorePath) {
+		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); nil != err {
+			logging.LogErrorf("create searchignore [%s] failed: %s", searchIgnorePath, err)
+			return
+		}
+	}
+	data, err := os.ReadFile(searchIgnorePath)
+	if nil != err {
+		logging.LogErrorf("read searchignore [%s] failed: %s", searchIgnorePath, err)
+		return
+	}
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	ret = strings.Split(dataStr, "\n")
+
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	if 0 < len(ret) && "" == ret[0] {
+		ret = ret[1:]
+	}
+	searchIgnore = nil
+	for _, line := range ret {
+		searchIgnore = append(searchIgnore, line)
+	}
+	return
+}
+
+var (
+	refSearchIgnoreLastModified int64
+	refSearchIgnore             []string
+	refSearchIgnoreLock         = sync.Mutex{}
+)
+
+func getRefSearchIgnoreLines() (ret []string) {
+	// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+
+	now := time.Now().UnixMilli()
+	if now-refSearchIgnoreLastModified < 30*1000 {
+		return refSearchIgnore
+	}
+
+	refSearchIgnoreLock.Lock()
+	defer refSearchIgnoreLock.Unlock()
+
+	refSearchIgnoreLastModified = now
+
+	searchIgnorePath := filepath.Join(util.DataDir, ".siyuan", "refsearchignore")
+	err := os.MkdirAll(filepath.Dir(searchIgnorePath), 0755)
+	if nil != err {
+		return
+	}
+	if !gulu.File.IsExist(searchIgnorePath) {
+		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); nil != err {
+			logging.LogErrorf("create refsearchignore [%s] failed: %s", searchIgnorePath, err)
+			return
+		}
+	}
+	data, err := os.ReadFile(searchIgnorePath)
+	if nil != err {
+		logging.LogErrorf("read refsearchignore [%s] failed: %s", searchIgnorePath, err)
+		return
+	}
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	ret = strings.Split(dataStr, "\n")
+
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	if 0 < len(ret) && "" == ret[0] {
+		ret = ret[1:]
+	}
+	refSearchIgnore = nil
+	for _, line := range ret {
+		refSearchIgnore = append(refSearchIgnore, line)
+	}
 	return
 }

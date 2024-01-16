@@ -168,6 +168,7 @@ export const kernelError = () => {
 </div>`
     });
     dialog.element.id = "errorLog";
+    dialog.element.setAttribute("data-key", Constants.DIALOG_KERNELFAULT);
     const restartElement = dialog.element.querySelector(".b3-button");
     if (restartElement) {
         restartElement.addEventListener("click", () => {
@@ -257,6 +258,7 @@ export const transactionError = () => {
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_STATEEXCEPTED);
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         /// #if MOBILE
@@ -355,6 +357,7 @@ export const bootSync = () => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.syncNow}</button>
 </div>`
             });
+            dialog.element.setAttribute("data-key", Constants.DIALOG_BOOTSYNCFAILED);
             const btnsElement = dialog.element.querySelectorAll(".b3-button");
             btnsElement[0].addEventListener("click", () => {
                 dialog.destroy();

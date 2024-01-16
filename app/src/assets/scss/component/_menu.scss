@@ -214,7 +214,7 @@
       background-color: var(--b3-list-hover);
 
       & > .b3-menu__action {
-        opacity: .68;
+        opacity: 1;
       }
     }
 
@@ -236,15 +236,23 @@
 
   &__action {
     opacity: 0;
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
     align-self: center;
     margin-left: 8px;
-    color: var(--b3-theme-on-surface);
+    color: var(--b3-theme-on-surface-light);
+    border-radius: var(--b3-border-radius);
+    padding: 4px;
+    box-sizing: border-box;
+    translate: var(--b3-transition);
 
     &:hover {
-      opacity: 1;
       color: var(--b3-theme-on-background);
+      background-color: var(--b3-list-icon-hover);
+    }
+
+    &--close:hover {
+      background-color: transparent;
     }
   }
 

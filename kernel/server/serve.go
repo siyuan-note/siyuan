@@ -392,6 +392,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 }
 
 func serveDebug(ginServer *gin.Engine) {
+	if "prod" == util.Mode {
+		// The production environment will no longer register `/debug/pprof/` https://github.com/siyuan-note/siyuan/issues/10152
+		return
+	}
+
 	ginServer.GET("/debug/pprof/", gin.WrapF(pprof.Index))
 	ginServer.GET("/debug/pprof/allocs", gin.WrapF(pprof.Index))
 	ginServer.GET("/debug/pprof/block", gin.WrapF(pprof.Index))

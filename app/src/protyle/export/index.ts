@@ -51,6 +51,7 @@ export const saveExport = (option: IExportOptions) => {
 </div>`,
             width: "520px",
         });
+        wordDialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTWORD);
         const btnsElement = wordDialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             wordDialog.destroy();

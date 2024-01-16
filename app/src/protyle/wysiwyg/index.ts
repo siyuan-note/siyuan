@@ -1326,6 +1326,17 @@ export class WYSIWYG {
                 /// #endif
                 return false;
             }
+            // 在 span 前面，防止单元格哪 block-ref 被修改
+            const avRowElement = hasClosestByClassName(target, "av__row");
+            if (avRowElement && avContextmenu(protyle, avRowElement, {
+                x: event.clientX,
+                y: avRowElement.getBoundingClientRect().bottom,
+                h: avRowElement.clientHeight
+            })) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             protyle.toolbar.range = getEditorRange(protyle.element);
             if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
                 let types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
@@ -1372,17 +1383,6 @@ export class WYSIWYG {
                     clientY: y
                 });
                 return false;
-            }
-
-            const avRowElement = hasClosestByClassName(target, "av__row");
-            if (avRowElement && avContextmenu(protyle, avRowElement, {
-                x: event.clientX,
-                y: avRowElement.getBoundingClientRect().bottom,
-                h: avRowElement.clientHeight
-            })) {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
             }
             const nodeElement = hasClosestBlock(target);
             if (!nodeElement) {

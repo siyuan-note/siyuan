@@ -49,6 +49,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
 </div>`,
                 width: isMobile() ? "92vw" : "520px",
             });
+            dialog.element.setAttribute("data-key", Constants.DIALOG_AICUSTOMACTION);
             const nameElement = dialog.element.querySelector("input");
             const customElement = dialog.element.querySelector("textarea");
             const btnsElement = dialog.element.querySelectorAll(".b3-button");
@@ -111,6 +112,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
 </div>`,
                             width: isMobile() ? "92vw" : "520px",
                         });
+                        dialog.element.setAttribute("data-key", Constants.DIALOG_AIUPDATECUSTOMACTION);
                         const nameElement = dialog.element.querySelector("input");
                         nameElement.value = item.name;
                         const customElement = dialog.element.querySelector("textarea");

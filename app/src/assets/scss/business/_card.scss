@@ -31,7 +31,7 @@
   }
 
   &__action {
-    padding: 8px 4px;
+    padding: 8px;
 
     .b3-button {
       padding: 8px 0;
@@ -48,7 +48,11 @@
 
     & > div {
       flex: 1;
-      margin: 0 4px;
+      margin-right: 8px;
+
+      &:last-child {
+        margin-right: 0;
+      }
 
       & > span {
         display: flex;
@@ -80,6 +84,7 @@
       }
     }
 
+    &--hideli .list[custom-riff-decks] .li > .list ,
     &--hideli .li[custom-riff-decks] > .list {
       display: none;
     }

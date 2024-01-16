@@ -192,7 +192,9 @@
 
   .toolbar__text {
     min-height: 48px;
+    line-height: 48px;
   }
+
   .config-about__logo {
     display: flex;
     align-items: center;
@@ -205,27 +207,24 @@
   .config-account {
     &__bg {
       position: relative;
-      margin-bottom: 82px;
       width: 100%;
       flex: 1;
     }
 
     &__cover {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 50vh;
       background-size: cover;
       background-position: center center;
     }
 
     &__avatar {
       position: absolute;
-      bottom: 24px;
+      top: 50vh;
       width: 128px;
       height: 128px;
       left: 50%;
-      margin-left: -64px;
+      margin: -160px 0 0 -64px;
       background-repeat: no-repeat;
       background-position: 50%;
       background-size: cover;
@@ -239,12 +238,9 @@
       width: 100%;
       box-sizing: border-box;
       padding: 16px;
-      margin-top: 10vh;
     }
 
     &__name {
-      bottom: -58px;
-      position: absolute;
       width: 100%;
       text-align: center;
     }

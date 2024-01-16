@@ -1040,8 +1040,6 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 						unreviewedOldCardCountInRound++
 					}
 				}
-			} else { // 已经复习过了 Cards expired no longer appear in the same review round https://github.com/siyuan-note/siyuan/issues/10087
-				continue
 			}
 		} else {
 			unreviewedCount++

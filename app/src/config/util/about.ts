@@ -1,6 +1,7 @@
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
+import {Constants} from "../../constants";
 
 export const setAccessAuthCode = () => {
     const dialog = new Dialog({
@@ -17,6 +18,7 @@ export const setAccessAuthCode = () => {
     });
     const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.element.setAttribute("data-key", Constants.DIALOG_ACCESSAUTHCODE);
     dialog.bindInput(inputElement, () => {
         (btnsElement[1] as HTMLButtonElement).click();
     });

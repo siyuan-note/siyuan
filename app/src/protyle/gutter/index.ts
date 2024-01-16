@@ -217,6 +217,9 @@ export class Gutter {
                     return;
                 }
                 if (buttonElement.dataset.type === "NodeAttributeViewRow") {
+                    blockElement.querySelectorAll(".av__cell--select").forEach((cellElement: HTMLElement) => {
+                        cellElement.classList.remove("av__cell--select");
+                    });
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
@@ -231,7 +234,7 @@ export class Gutter {
                         srcIDs,
                         avID,
                     }]);
-                    insertAttrViewBlockAnimation(blockElement, srcIDs, previousID, avID);
+                    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
@@ -713,15 +716,11 @@ export class Gutter {
             accelerator: "⌘C",
             click() {
                 if (isNotEditBlock(selectsElement[0])) {
-                    let html = "";
-                    selectsElement.forEach(item => {
-                        html += removeEmbed(item);
-                    });
-                    writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
+                    focusBlock(selectsElement[0]);
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
-                    document.execCommand("copy");
                 }
+                document.execCommand("copy");
             }
         }, {
             label: window.siyuan.languages.copyPlainText,
@@ -1154,11 +1153,11 @@ export class Gutter {
             accelerator: "⌘C",
             click() {
                 if (isNotEditBlock(nodeElement)) {
-                    writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
+                    focusBlock(nodeElement);
                 } else {
                     focusByRange(getEditorRange(nodeElement));
-                    document.execCommand("copy");
                 }
+                document.execCommand("copy");
             }
         }, {
             label: window.siyuan.languages.copyPlainText,

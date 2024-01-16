@@ -15,6 +15,7 @@ import {ai} from "./ai";
 import {flashcard} from "./flashcard";
 import {App} from "../index";
 import {isHuawei} from "../protyle/util/compatibility";
+import {Constants} from "../constants";
 
 export const genItemPanel = (type: string, containerElement: Element, app: App) => {
     switch (type) {
@@ -137,6 +138,7 @@ export const openSetting = (app: App) => {
         width: "90vw",
         height: "90vh",
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SETTING);
 
     initConfigSearch(dialog.element, app);
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1280px";

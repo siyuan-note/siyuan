@@ -252,6 +252,7 @@ export const about = {
 </div>`,
                 width: "520px",
             });
+            passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
             const textAreaElement = passwordDialog.element.querySelector("textarea");
             textAreaElement.focus();
             const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");

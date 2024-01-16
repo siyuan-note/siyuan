@@ -124,6 +124,7 @@ const setHTML = (options: {
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
+    const isUpdate = protyle.wysiwyg.element.innerHTML !== ""
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
@@ -198,7 +199,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle);
+        setReadonlyByConfig(protyle, isUpdate);
     }
 
     focusElementById(protyle, options.action, options.scrollAttr);
@@ -395,6 +396,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }
+    // 下一个请求过来前需断开，否则 observerLoad 重新赋值后无法 disconnect https://ld246.com/article/1704612002446
+    protyle.observerLoad?.disconnect();
     if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_SCROLL) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         const contentRect = protyle.contentElement.getBoundingClientRect();
         const focusRect = focusElement.getBoundingClientRect();
@@ -402,7 +405,6 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             scrollCenter(protyle, focusElement, true);
         }
     } else {
-        protyle.observerLoad?.disconnect();
         return;
     }
     // 加强定位
@@ -430,9 +432,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
 };
 
-export const setReadonlyByConfig = (protyle: IProtyle) => {
+export const setReadonlyByConfig = (protyle: IProtyle, isUpdate: boolean) => {
     let readOnly = window.siyuan.config.readonly ? "true" : "false";
-    if (readOnly === "false") {
+    if (isUpdate) {
+        readOnly = protyle.disabled ? "true" : "false";
+    } else if (readOnly === "false") {
         readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
         if (readOnly === "false") {
             readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);

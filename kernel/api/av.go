@@ -26,6 +26,89 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func addAttributeViewCol(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyID := arg["keyID"].(string)
+	keyName := arg["keyName"].(string)
+	keyType := arg["keyType"].(string)
+	keyIcon := arg["keyIcon"].(string)
+	previousKeyID := arg["previousKeyID"].(string)
+
+	err := model.AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func removeAttributeViewCol(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyID := arg["keyID"].(string)
+
+	err := model.RemoveAttributeViewKey(avID, keyID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func sortAttributeViewCol(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyID := arg["keyID"].(string)
+	previousKeyID := arg["previousKeyID"].(string)
+
+	err := model.SortAttributeViewKey(avID, keyID, previousKeyID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func getAttributeViewFilterSort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["id"].(string)
+
+	filters, sorts := model.GetAttributeViewFilterSort(avID)
+	ret.Data = map[string]interface{}{
+		"filters": filters,
+		"sorts":   sorts,
+	}
+}
+
 func searchAttributeViewNonRelationKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -72,9 +155,8 @@ func getAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	av := model.GetAttributeView(id)
 	ret.Data = map[string]interface{}{
-		"av": av,
+		"av": model.GetAttributeView(id),
 	}
 }
 

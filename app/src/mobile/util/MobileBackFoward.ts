@@ -92,7 +92,7 @@ const focusStack = (backStack: IBackStack) => {
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else {
-            setReadonlyByConfig(protyle);
+            setReadonlyByConfig(protyle, true);
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
     });

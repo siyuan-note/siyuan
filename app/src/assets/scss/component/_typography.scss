@@ -386,6 +386,9 @@
 
   [data-subtype="mermaid"] {
     overflow: auto;
+    // https://github.com/siyuan-note/siyuan/issues/10186
+    min-height: 32px;
+    display: table;
   }
 
   [data-subtype="plantuml"] img {

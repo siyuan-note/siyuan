@@ -97,7 +97,7 @@ export class Scroll {
         if (protyle.block.showAll) {
             this.element.classList.add("fn__none");
         } else {
-            if (protyle.block.scroll) {
+            if (protyle.block.scroll && !protyle.contentElement.classList.contains("fn__none")) {
                 this.element.classList.remove("fn__none");
             } else {
                 this.element.classList.add("fn__none");

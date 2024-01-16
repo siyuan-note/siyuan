@@ -129,6 +129,7 @@ const renderPDF = (id: string) => {
           position: absolute;
           right: 232px;
           left: 0;
+          box-sizing: border-box;
         }
         
         #preview.exporting {
@@ -256,8 +257,7 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" 
-id="preview">
+<div style="zoom:${localData.scale || 1}" id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
@@ -372,28 +372,29 @@ id="preview">
         })
     }
     const renderPreview = (data) => {
-        previewElement.innerHTML = data.content;
-        previewElement.setAttribute("data-doc-type", data.type || "NodeDocument");
+        previewElement.innerHTML = '<div style="padding:0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
+        const wysElement = previewElement.querySelector(".protyle-wysiwyg");
+        wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
         if (data.attrs.memo) {
-            previewElement.setAttribute("memo", data.attrs.memo);
+            wysElement.setAttribute("memo", data.attrs.memo);
         }
         if (data.attrs.name) {
-            previewElement.setAttribute("name", data.attrs.name);
+            wysElement.setAttribute("name", data.attrs.name);
         }
         if (data.attrs.bookmark) {
-            previewElement.setAttribute("bookmark", data.attrs.bookmark);
+            wysElement.setAttribute("bookmark", data.attrs.bookmark);
         }
         if (data.attrs.alias) {
-            previewElement.setAttribute("alias", data.attrs.alias);
+            wysElement.setAttribute("alias", data.attrs.alias);
         }
-        Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.htmlRender(previewElement);
-        Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.mermaidRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.flowchartRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.graphvizRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.chartRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.mindmapRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.abcRender(wysElement, "${servePath}/stage/protyle");
+        Protyle.htmlRender(wysElement);
+        Protyle.plantumlRender(wysElement, "${servePath}/stage/protyle");
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",

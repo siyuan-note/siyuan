@@ -399,7 +399,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     if (headerValue) {
         updateHeaderCell(cellElement, headerValue);
     } else {
-        cellElement.innerHTML = renderCell(value, cellElement.dataset.wrap === "true");
+        cellElement.innerHTML = renderCell(value);
     }
 };
 

@@ -1375,7 +1375,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length < 2) {
+            if (selectsElement.length < 2 || selectsElement[0]?.classList.contains("li")) {
                 return;
             }
             turnsIntoOneTransaction({
@@ -1390,7 +1390,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length < 2) {
+            if (selectsElement.length < 2 || selectsElement[0]?.classList.contains("li")) {
                 return;
             }
             turnsIntoOneTransaction({

@@ -1,14 +1,14 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {fixTableRange, focusBlock, focusByWbr, getEditorRange} from "./selection";
-import {mathRender} from "../render/mathRender";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAVName} from "../render/av/action";
 import {updateCellsValue} from "../render/av/cell";
+import {input} from "../wysiwyg/input";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: Element) => {
     const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);
@@ -145,36 +145,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
-            blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            // 使用 innerHTML,避免行内元素为代码块
-            const trimStartText = editableElement ? editableElement.innerHTML.trimStart() : "";
-            if (editableElement && (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
-                trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
-                if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
-                    // ```test` 不处理
-                } else {
-                    let replaceInnerHTML = editableElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
-                    if (!replaceInnerHTML.endsWith("\n```")) {
-                        replaceInnerHTML += "\n```";
-                    }
-                    const languageIndex = replaceInnerHTML.indexOf("```") + 3;
-                    replaceInnerHTML = replaceInnerHTML.substring(0, languageIndex) + (localStorage["local-codelang"] || "") + replaceInnerHTML.substring(languageIndex);
-
-                    editableElement.innerHTML = replaceInnerHTML;
-                }
-            }
-            const editWbrElement = editableElement.querySelector("wbr");
-            if (editWbrElement && editableElement && !trimStartText.endsWith("\n")) {
-                // 数学公式后无换行，后期渲染后添加导致 rang 错误，中文输入错误 https://github.com/siyuan-note/siyuan/issues/9054
-                const previousElement = hasPreviousSibling(editWbrElement) as HTMLElement;
-                if (previousElement && previousElement.nodeType !== 3 && (previousElement.dataset.type || "").indexOf("inline-math") > -1 &&
-                    !hasNextSibling(editWbrElement)) {
-                    editWbrElement.insertAdjacentText("afterend", "\n");
-                }
-            }
-            mathRender(blockElement);
-            updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
-            focusByWbr(protyle.wysiwyg.element, range);
+            blockElement.querySelector("wbr")?.remove();
+            input(protyle, blockElement as HTMLElement, range);
             return;
         }
     }

@@ -82,6 +82,7 @@ import {openViewMenu} from "../render/av/view";
 import {avRender} from "../render/av/render";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {
+    dragFillCellsValue,
     genCellValueByElement,
     getCellText,
     getPositionByCellElement,
@@ -451,18 +452,18 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
-                const originData: { [key: string]: IAVCellValue[] } = {}
-                let lastOriginCellElement
-                const lastOriginCellId: string[] = []
-                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement, index: number) => {
+                const originData: { [key: string]: IAVCellValue[] } = {};
+                let lastOriginCellElement;
+                const originCellIds: string[] = [];
+                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     const rowElement = hasClosestByClassName(item, "av__row");
                     if (rowElement) {
                         if (!originData[rowElement.dataset.id]) {
                             originData[rowElement.dataset.id] = [];
                         }
                         originData[rowElement.dataset.id].push(genCellValueByElement(getTypeByCellElement(item), item));
-                        lastOriginCellElement = item
-                        lastOriginCellId.push(item.dataset.id)
+                        lastOriginCellElement = item;
+                        originCellIds.push(item.dataset.id);
                     }
                 });
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
@@ -478,12 +479,12 @@ export class WYSIWYG {
                     if (moveCellElement && moveCellElement.dataset.id) {
                         const newIndex = getPositionByCellElement(moveCellElement);
                         nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                            if (!lastOriginCellId.includes(item.dataset.id)) {
+                            if (!originCellIds.includes(item.dataset.id)) {
                                 item.classList.remove("av__cell--active");
                             }
                         });
                         if (newIndex.celIndex !== dragFillCellIndex.celIndex || dragFillCellIndex.rowIndex >= newIndex.rowIndex) {
-                            lastCellElement = undefined
+                            lastCellElement = undefined;
                             return;
                         }
                         nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
@@ -506,14 +507,12 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     if (lastCellElement) {
-                        nodeElement.querySelector(".av__drag-fill")?.remove();
-                        selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
-                        focusBlock(nodeElement);
+                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
                         lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
-                        this.preventClick = true;
                     }
                     return false;
                 };
+                this.preventClick = true;
                 return false;
             }
             // av cell select

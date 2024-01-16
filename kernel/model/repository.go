@@ -483,6 +483,30 @@ func ResetRepo() (err error) {
 	return
 }
 
+func PurgeCloud() (err error) {
+	// TODO https://github.com/siyuan-note/siyuan/issues/10081
+	msg := Conf.Language(223)
+	util.PushEndlessProgress(msg)
+	defer util.PushClearProgress()
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	stat, err := repo.PurgeCloud()
+	if nil != err {
+		return
+	}
+
+	deletedIndexes := stat.Indexes
+	deletedObjects := stat.Objects
+	deletedSize := humanize.Bytes(uint64(stat.Size))
+	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
+	util.PushMsg(msg, 5000)
+	return
+}
+
 func PurgeRepo() (err error) {
 	msg := Conf.Language(202)
 	util.PushEndlessProgress(msg)

@@ -692,23 +692,23 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         const value: IAVCellValue & {
             colId?: string,
             element?: HTMLElement
-        } = genCellValueByElement(getTypeByCellElement(item), item)
+        } = genCellValueByElement(getTypeByCellElement(item), item);
         value.colId = item.dataset.colId;
         value.element = item;
         newData[rowElement.dataset.id].push(value);
-    })
+    });
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    const avID = nodeElement.dataset.avId
+    const avID = nodeElement.dataset.avId;
     const originKeys = Object.keys(originData);
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
             if (["rollup", "template", "created", "updated"].includes(item.type)) {
                 return;
             }
-            const data = originData[originKeys[index % originKeys.length]][cellIndex]
+            const data = originData[originKeys[index % originKeys.length]][cellIndex];
             data.id = item.id;
-            const keyID = item.colId
+            const keyID = item.colId;
             if (data.type === "block") {
                 data.isDetached = true;
                 delete data.block.id;
@@ -732,10 +732,10 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data: item
             });
-        })
+        });
     });
     focusBlock(nodeElement);
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
     }
-}
+};

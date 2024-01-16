@@ -452,18 +452,18 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
-                const originData: { [key: string]: IAVCellValue[] } = {}
-                let lastOriginCellElement
-                const originCellIds: string[] = []
-                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement, index: number) => {
+                const originData: { [key: string]: IAVCellValue[] } = {};
+                let lastOriginCellElement;
+                const originCellIds: string[] = [];
+                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     const rowElement = hasClosestByClassName(item, "av__row");
                     if (rowElement) {
                         if (!originData[rowElement.dataset.id]) {
                             originData[rowElement.dataset.id] = [];
                         }
                         originData[rowElement.dataset.id].push(genCellValueByElement(getTypeByCellElement(item), item));
-                        lastOriginCellElement = item
-                        originCellIds.push(item.dataset.id)
+                        lastOriginCellElement = item;
+                        originCellIds.push(item.dataset.id);
                     }
                 });
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
@@ -484,7 +484,7 @@ export class WYSIWYG {
                             }
                         });
                         if (newIndex.celIndex !== dragFillCellIndex.celIndex || dragFillCellIndex.rowIndex >= newIndex.rowIndex) {
-                            lastCellElement = undefined
+                            lastCellElement = undefined;
                             return;
                         }
                         nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {

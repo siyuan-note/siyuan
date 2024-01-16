@@ -275,7 +275,7 @@ export const setFilter = async (options: {
     if (filterType === "select" || filterType === "mSelect") {
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
-            options.filter.value?.mSelect.find((optionItem) => {
+            options.filter.value?.mSelect?.find((optionItem) => {
                 if (optionItem.content === option.name) {
                     icon = "iconCheck";
                 }

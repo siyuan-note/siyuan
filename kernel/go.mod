@@ -9,7 +9,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c
-	github.com/88250/lute v1.7.6-0.20240115144346-d66c956e0189
+	github.com/88250/lute v1.7.6-0.20240116093422-2de70d715a4d
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4

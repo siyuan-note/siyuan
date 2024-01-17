@@ -257,6 +257,7 @@
       align-items: center;
       transition: background 20ms ease-in 0s;
       overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
+      border-right-color: transparent;
 
       &:hover {
         background-color: var(--b3-av-hover);
@@ -358,7 +359,7 @@
     display: flex;
 
     &.av__firstcol,
-    & > div:not(.av__cell--select):not(.av__cell--active) {
+    & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
       background-color: var(--av-background);
     }
   }

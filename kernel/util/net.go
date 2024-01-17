@@ -100,10 +100,6 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 
 	for i := 0; i < 3; i++ {
 		resp, err := c.R().Get(checkURL)
-		if 401 == resp.StatusCode {
-			// Improve data sync cloud storage availability check logic https://github.com/siyuan-note/siyuan/pull/10206
-			return true
-		}
 
 		if resp.GetHeader("Location") != "" {
 			return true

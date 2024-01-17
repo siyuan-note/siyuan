@@ -109,7 +109,7 @@
         background-color: var(--b3-av-background-hl) !important;
       }
 
-      .av__firstcol svg {
+      .av__firstcol .av__firstcol--icon {
         opacity: 1;
       }
     }
@@ -178,10 +178,15 @@
       display: flex;
 
       .b3-button {
-        margin: 3px 0 3px 24px;
+        padding: 4px 8px;
+        margin: 4px;
         color: var(--b3-theme-on-surface);
         background-color: transparent;
         font-size: 75%;
+
+        > div {
+          background-color: transparent;
+        }
 
         &:hover,
         &:focus {
@@ -203,6 +208,23 @@
             background-color: var(--b3-theme-background);
           }
         }
+      }
+    }
+
+    &,
+    &--util,
+    &--footer {
+      &:hover {
+        .av__firstcol--icon {
+          opacity: 1;
+        }
+      }
+    }
+
+    &,
+    &--footer {
+      .av__colsticky {
+        box-shadow: 2px 0 4px var(--b3-theme-surface-lighter);
       }
     }
   }
@@ -239,6 +261,10 @@
 
     &.dragover__right {
       border-right-color: var(--b3-theme-primary-lighter);
+    }
+
+    &--add {
+      padding-left: 0.5em;
     }
 
     &--select {
@@ -339,15 +365,16 @@
   }
 
   &__firstcol {
-    svg {
+    border-right: 1px solid var(--b3-theme-surface-lighter);
+
+    &--icon {
       @extend .av__checkbox;
-      opacity: 0;
       padding: 9.5px 5px;
-      cursor: pointer;
+      opacity: 0;
     }
 
-    &:hover svg {
-      opacity: 1;
+    &--checkbox {
+      cursor: pointer;
     }
   }
 
@@ -357,7 +384,6 @@
     z-index: 2; // 需大于 av__widthdrag，否则横行滚动后，拖拽会悬浮于 stick 列上
     display: flex;
 
-    &.av__firstcol,
     & > div:not(.av__cell--select):not(.av__cell--active) {
       background-color: var(--av-background);
     }

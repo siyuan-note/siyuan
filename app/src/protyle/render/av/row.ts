@@ -13,7 +13,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
-            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol--checkbox").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
@@ -21,7 +21,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
                 }
             });
         } else {
-            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+            rowElement.parentElement.querySelectorAll(".av__firstcol--checkbox").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
@@ -81,10 +81,10 @@ export const updateHeader = (rowElement: HTMLElement) => {
  */
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
-    let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+    let colHTML = '<div class="av__colsticky"><div class="av__firstcol><svg class="av__firstcol--icon"><use xlink:href="#iconUncheck"></use></svg></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
-    if (pinIndex > -1) {
-        colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+    if (pinIndex <= 0) {
+        colHTML += "</div>";
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 

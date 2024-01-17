@@ -202,7 +202,7 @@ export class WYSIWYG {
         protyle.wysiwyg.element.querySelectorAll(".img--select, .av__cell--select, .av__cell--active, .av__row--select").forEach((item: HTMLElement) => {
             if (item.classList.contains("av__row--select") && !hasClosestByClassName(element, "av")) {
                 item.classList.remove("av__row--select");
-                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+                item.querySelector(".av__firstcol--checkbox use").setAttribute("xlink:href", "#iconUncheck");
                 updateHeader(item);
             } else {
                 item.classList.remove("img--select", "av__cell--select", "av__cell--active");

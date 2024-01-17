@@ -1883,7 +1883,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         nodeElement.querySelectorAll(".img--select, .av__cell--select, .av__cell--active, .av__row--select").forEach((item: HTMLElement) => {
             if (item.classList.contains("av__row--select")) {
                 item.classList.remove("av__row--select");
-                item.querySelector(".av__firstcol--checkbox use").setAttribute("xlink:href", "#iconUncheck");
+                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
                 updateHeader(item);
             } else {
                 item.querySelector(".av__drag-fill")?.remove();

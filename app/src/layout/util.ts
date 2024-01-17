@@ -198,9 +198,9 @@ export const saveLayout = () => {
                 right: dockToJSON(window.siyuan.layout.rightDock),
             };
             layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
+            window.siyuan.config.uiLayout = layoutJSON;
         }
     }
-
     if (Object.keys(breakObj).length > 0 && saveCount < 10) {
         saveCount++;
         setTimeout(() => {

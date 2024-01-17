@@ -290,8 +290,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         } else {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
+                const isPulse = item.querySelector(".av__pulse");
                 avRender(item, protyle, () => {
-                    if (operation.action === "addAttrViewCol" && item.querySelector(".av__pulse")) {
+                    if (operation.action === "addAttrViewCol" && isPulse) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :

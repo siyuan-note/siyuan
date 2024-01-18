@@ -452,30 +452,44 @@ func (value *Value) compareOperator(other *Value, operator FilterOperator, attrV
 		}
 	}
 
-	if nil != value.MSelect && nil != other.MSelect {
+	if nil != value.MSelect {
+		if nil != other.MSelect {
+			switch operator {
+			case FilterOperatorIsEqual, FilterOperatorContains:
+				contains := false
+				for _, v := range value.MSelect {
+					for _, v2 := range other.MSelect {
+						if v.Content == v2.Content {
+							contains = true
+							break
+						}
+					}
+				}
+				return contains
+			case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
+				contains := false
+				for _, v := range value.MSelect {
+					for _, v2 := range other.MSelect {
+						if v.Content == v2.Content {
+							contains = true
+							break
+						}
+					}
+				}
+				return !contains
+			case FilterOperatorIsEmpty:
+				return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
+			case FilterOperatorIsNotEmpty:
+				return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
+			}
+			return false
+		}
+
+		// 没有设置比较值
+
 		switch operator {
-		case FilterOperatorIsEqual, FilterOperatorContains:
-			contains := false
-			for _, v := range value.MSelect {
-				for _, v2 := range other.MSelect {
-					if v.Content == v2.Content {
-						contains = true
-						break
-					}
-				}
-			}
-			return contains
-		case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
-			contains := false
-			for _, v := range value.MSelect {
-				for _, v2 := range other.MSelect {
-					if v.Content == v2.Content {
-						contains = true
-						break
-					}
-				}
-			}
-			return !contains
+		case FilterOperatorIsEqual, FilterOperatorIsNotEqual, FilterOperatorContains, FilterOperatorDoesNotContain:
+			return true
 		case FilterOperatorIsEmpty:
 			return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
 		case FilterOperatorIsNotEmpty:

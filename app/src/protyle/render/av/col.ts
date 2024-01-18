@@ -439,10 +439,11 @@ const addAttrViewColAnimation = (options: {
         }
         let html = "";
         if (index === 0) {
+            // av__pulse 用于检测是否新增，和 render 中 isPulse 配合弹出菜单
             html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${options.name}</span>
-    <div class="av__widthdrag"></div>
+    <div class="av__widthdrag av__pulse"></div>
 </div>`;
         } else {
             html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';

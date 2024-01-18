@@ -483,6 +483,10 @@ html[lang="zh_CN"] .protyle-wysiwyg [data-node-id]:last-child [spellcheck][conte
   opacity: 1;
 }
 
+.b3-dialog__container {
+  max-width: 100vw;
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

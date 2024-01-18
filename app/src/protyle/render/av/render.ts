@@ -105,7 +105,7 @@ style="width: ${column.width || "200px"};">
                         tableHTML += "</div>";
                     }
                     calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
-style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
                     if (pinIndex === index) {
                         calcHTML += "</div>";
                     }

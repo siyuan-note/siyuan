@@ -384,11 +384,10 @@
     text-align: center;
   }
 
-  [data-subtype="mermaid"] {
+  [data-subtype="mermaid"] > [spin="1"] {
+    // 不能加到上一级，否则属性会跟随滚动
     overflow: auto;
-    // https://github.com/siyuan-note/siyuan/issues/10186
-    min-height: 32px;
-    display: table;
+    line-height: initial;
   }
 
   [data-subtype="plantuml"] img {

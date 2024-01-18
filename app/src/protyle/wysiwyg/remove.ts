@@ -446,7 +446,9 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             }
             return;
         }
-        if (editableElement.textContent !== "") {
+        if (editableElement.textContent !== "" ||
+            // https://github.com/siyuan-note/siyuan/issues/10207
+            blockElement.classList.contains("av")) {
             focusBlock(previousLastElement, undefined, false);
             return;
         }

@@ -427,7 +427,7 @@ const addAttrViewColAnimation = (options: {
     icon?: string,
     previousID: string
 }) => {
-    if (!options.blockElement) {
+    if (!options.blockElement || !options.blockElement.classList.contains("av")) {
         return;
     }
     options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {

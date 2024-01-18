@@ -75,12 +75,14 @@ export const openMenuPanel = (options: {
         } else if (options.type === "relation") {
             html = getRelationHTML(data, options.cellElements);
             if (!html) {
-                openMenuPanel({
-                    protyle: options.protyle,
-                    blockElement: options.blockElement,
-                    type: "edit",
-                    colId: options.cellElements[0].dataset.colId
-                });
+                if (options.blockElement.classList.contains("av")) {
+                    openMenuPanel({
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        type: "edit",
+                        colId: options.cellElements[0].dataset.colId
+                    });
+                }
                 return;
             }
         }

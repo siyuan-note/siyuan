@@ -1,8 +1,9 @@
 import {fetchPost} from "../../../util/fetch";
-import {getColIconByType} from "./col";
+import {addCol, getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
+import {hasClosestBlock} from "../../util/hasClosest";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -149,9 +150,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avName: string
         }) => {
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
-<div class="block__logo custom-attr__avheader popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
-    <svg><use xlink:href="#iconDatabase"></use></svg>
-    <span>${table.avName || window.siyuan.languages.database}</span>
+<div class="fn__flex custom-attr__avheader">
+    <div class="block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
+        <svg><use xlink:href="#iconDatabase"></use></svg>
+        <span>${table.avName || window.siyuan.languages.database}</span>
+    </div>
+    <div class="fn__flex-1"></div>
+    <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
 </div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons av__row" data-id="${id}">
@@ -195,6 +200,27 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                         break;
                     } else if (type === "relation") {
                         popTextCell(protyle, [target], "relation");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "template") {
+                        popTextCell(protyle, [target], "template");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "rollup") {
+                        popTextCell(protyle, [target], "rollup");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "addColumn") {
+                        const addMenu = addCol(protyle, hasClosestBlock(target) as HTMLElement, "");
+                        const addRect = target.getBoundingClientRect();
+                        addMenu.open({
+                            x: addRect.left,
+                            y: addRect.bottom,
+                            h: addRect.height
+                        });
                         event.stopPropagation();
                         event.preventDefault();
                         break;

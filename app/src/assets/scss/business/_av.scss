@@ -225,7 +225,7 @@
     &--footer {
       .av__colsticky {
         > div:last-child {
-          border-right: 1px solid var(--b3-theme-surface-lighter);
+          border-right: 1px solid var(--custom-block-av-cell-color);
           box-shadow: 2px 0 4px var(--b3-theme-surface-lighter);
         }
       }

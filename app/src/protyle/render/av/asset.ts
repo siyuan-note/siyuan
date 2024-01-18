@@ -53,7 +53,7 @@ export const bindAssetEvent = (options: {
 
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
-    genCellValueByElement(getTypeByCellElement(cellElements[0]), cellElements[0]).mAsset.forEach(item => {
+    genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach(item => {
         if (!item.content) {
             return;
         }

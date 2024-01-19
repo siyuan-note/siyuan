@@ -6,6 +6,9 @@ declare const NODE_ENV: string;
 const _SIYUAN_VERSION = SIYUAN_VERSION;
 const _NODE_ENV = NODE_ENV;
 
+// const altNumber = navigator.platform.toUpperCase().indexOf("MAC") === -1 ? "⌃" : "⌥";
+const altNumber = "⌥";
+
 export abstract class Constants {
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
@@ -301,16 +304,16 @@ export abstract class Constants {
             stickSearch: {default: "⇧⌘F", custom: "⇧⌘F"},
             replace: {default: "⌘R", custom: "⌘R"},
             closeTab: {default: "⌘W", custom: "⌘W"},
-            fileTree: {default: "⌥1", custom: "⌥1"},
-            outline: {default: "⌥2", custom: "⌥2"},
-            bookmark: {default: "⌥3", custom: "⌥3"},
-            tag: {default: "⌥4", custom: "⌥4"},
-            dailyNote: {default: "⌥5", custom: "⌥5"},
-            inbox: {default: "⌥6", custom: "⌥6"},
-            backlinks: {default: "⌥7", custom: "⌥7"},
-            graphView: {default: "⌥8", custom: "⌥8"},
-            globalGraph: {default: "⌥9", custom: "⌥9"},
-            riffCard: {default: "⌥0", custom: "⌥0"},
+            fileTree: {default: altNumber + "1", custom: altNumber + "1"},
+            outline: {default: altNumber + "2", custom: altNumber + "2"},
+            bookmark: {default: altNumber + "3", custom: altNumber + "3"},
+            tag: {default: altNumber + "4", custom: altNumber + "4"},
+            dailyNote: {default: altNumber + "5", custom: altNumber + "5"},
+            inbox: {default: altNumber + "6", custom: altNumber + "6"},
+            backlinks: {default: altNumber + "7", custom: altNumber + "7"},
+            graphView: {default: altNumber + "8", custom: altNumber + "8"},
+            globalGraph: {default: altNumber + "9", custom: altNumber + "9"},
+            riffCard: {default: altNumber + "0", custom: altNumber + "0"},
             config: {default: "⌥P", custom: "⌥P"},
             dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},

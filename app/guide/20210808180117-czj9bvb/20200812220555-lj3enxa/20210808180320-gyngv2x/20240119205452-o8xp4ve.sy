@@ -1,0 +1,164 @@
+{
+	"ID": "20240119205452-o8xp4ve",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119205452-o8xp4ve",
+		"title": "忽略索引",
+		"updated": "20240119211220"
+	},
+	"Children": [
+		{
+			"ID": "20240119205452-ju6zl5c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119205452-ju6zl5c",
+				"updated": "20240119205608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240119205609-mwjn7tr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119205609-mwjn7tr",
+				"updated": "20240119205942"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略索引指的是不将文档数据编入数据库，这样数据将完全无法搜索到，并且减小数据库大小。"
+				}
+			]
+		},
+		{
+			"ID": "20240119205942-35rq58s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119205942-35rq58s",
+				"updated": "20240119210019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240119210032-ssghohe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119210032-ssghohe",
+				"updated": "20240119210347"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文件系统上手动创建或编辑 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/.siyuan/indexignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文本文件，其中每一行作为一个忽略路径，支持 gitignore 语法。例如："
+				}
+			]
+		},
+		{
+			"ID": "20240119210347-nq9fqio",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119210347-nq9fqio",
+				"updated": "20240119211220"
+			},
+			"Children": [
+				{
+					"ID": "20240119210737-wgocfvl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119210737-wgocfvl",
+						"updated": "20240119211220"
+					},
+					"Children": [
+						{
+							"ID": "20240119210737-utr9ej3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119210737-utr9ej3",
+								"updated": "20240119211220"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 data/20210808180117-6v0mkxr 笔记本下的 20200923234011-ieuun1p.sy​ 文档编入索引"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119210352-7wp8xjy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119210352-7wp8xjy",
+						"updated": "20240119210352"
+					},
+					"Children": [
+						{
+							"ID": "20240119210352-3ib6o3n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119210352-3ib6o3n",
+								"updated": "20240119210730"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 data/20210808180117-6v0mkxr 笔记本下的所有文档编入索引"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

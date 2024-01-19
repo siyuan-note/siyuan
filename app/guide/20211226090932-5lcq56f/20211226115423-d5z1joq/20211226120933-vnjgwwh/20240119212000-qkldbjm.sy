@@ -1,0 +1,195 @@
+{
+	"ID": "20240119212000-qkldbjm",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119212000-qkldbjm",
+		"title": "忽略搜尋",
+		"updated": "20240119212033"
+	},
+	"Children": [
+		{
+			"ID": "20240119212033-qqfglhx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119212033-qqfglhx",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-ryqu9u6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212033-ryqu9u6",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略搜尋指的是搜尋時過濾掉某些不需要的結果。"
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-a0oemkx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119212033-a0oemkx",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-si92v9w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212033-si92v9w",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略全域搜尋和忽略引用搜尋需要分開配置："
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-h40yiqw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119212033-h40yiqw",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"ID": "20240119212033-36v821v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119212033-36v821v",
+						"updated": "20240119212033"
+					},
+					"Children": [
+						{
+							"ID": "20240119212033-8ikiokg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119212033-8ikiokg",
+								"updated": "20240119212033"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "忽略全域搜尋：在檔案系統上手動建立或編輯 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空間/data/.siyuan/searchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文字文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119212033-tpmvwte",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119212033-tpmvwte",
+						"updated": "20240119212033"
+					},
+					"Children": [
+						{
+							"ID": "20240119212033-uyyi0mv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119212033-uyyi0mv",
+								"updated": "20240119212033"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "忽略引用搜尋：在檔案系統上手動建立或編輯 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空間/data/.siyuan/refsearchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文字文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-ju37jxr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212033-ju37jxr",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "這些 ignore 設定檔中的每一行會被當作 SQL path NOT LIKE 的條件，例如："
+				}
+			]
+		},
+		{
+			"ID": "20240119212033-1xy7a3a",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240119212033-1xy7a3a",
+				"updated": "20240119212033"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nid != '20200923234011-ieuun1p'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		}
+	]
+}

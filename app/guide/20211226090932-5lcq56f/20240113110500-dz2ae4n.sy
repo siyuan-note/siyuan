@@ -6,7 +6,7 @@
 		"icon": "1f4f1",
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
-		"updated": "20240113111013"
+		"updated": "20240119205404"
 	},
 	"Children": [
 		{
@@ -288,12 +288,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110513-8lwzed3",
-				"updated": "20240113110513"
+				"updated": "20240119205404"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "apk 下載： "
+					"Data": "APK 下載： "
 				},
 				{
 					"Type": "NodeTextMark",

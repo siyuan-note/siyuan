@@ -43,7 +43,11 @@ func RemoveElem[T any](s []T, index int) []T {
 }
 
 func EscapeHTML(s string) string {
-	if strings.ContainsAny(s, "<>\"'") {
+	if strings.Contains(s, "&amp;") {
+		return s
+	}
+
+	if strings.ContainsAny(s, "<>\"'&") {
 		return html.EscapeString(s)
 	}
 	return s

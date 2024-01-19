@@ -1298,12 +1298,15 @@ func stringQuery(query string) string {
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
 	text := n.Content()
 	if ast.NodeText == n.Type {
-		text = util.EscapeHTML(text)
+		escapedText := util.EscapeHTML(text)
 		escapedKeywords := make([]string, len(keywords))
 		for i, keyword := range keywords {
 			escapedKeywords[i] = util.EscapeHTML(keyword)
 		}
-		text = search.EncloseHighlighting(text, escapedKeywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		hText := search.EncloseHighlighting(escapedText, escapedKeywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		if hText != escapedText {
+			text = hText
+		}
 		n.Tokens = gulu.Str.ToBytes(text)
 		if bytes.Contains(n.Tokens, []byte(search.MarkDataType)) {
 			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)

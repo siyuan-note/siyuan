@@ -94,7 +94,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     };
     sorts.forEach((item: IAVSort) => {
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.column}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <select class="b3-select" style="margin: 4px 0">
         ${genSortItem(item.column)}
     </select>

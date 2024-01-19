@@ -1080,7 +1080,7 @@ const getPropertiesHTML = (data: IAVTable) => {
     data.columns.forEach((item: IAVColumn) => {
         if (item.hidden) {
             hideHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
@@ -1092,7 +1092,7 @@ const getPropertiesHTML = (data: IAVTable) => {
 </button>`;
         } else {
             showHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}

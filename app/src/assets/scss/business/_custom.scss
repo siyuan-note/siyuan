@@ -50,6 +50,14 @@
     padding: 4px 8px;
     font-size: 100%;
     border-bottom: 0;
+
+    & > .block__icon {
+      cursor: grab;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
   }
 
   .b3-text-field--text {

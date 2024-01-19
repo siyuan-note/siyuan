@@ -18,7 +18,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${item.name}</span>

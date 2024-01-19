@@ -70,6 +70,10 @@
     cursor: pointer;
   }
 
+  &__grab {
+    cursor: grab;
+  }
+
   &__none {
     display: none !important;
   }

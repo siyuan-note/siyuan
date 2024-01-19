@@ -162,7 +162,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons av__row" data-id="${id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo ariaLabel" aria-label="${escapeAttr(item.key.name)}"">
+    <div class="block__logo ariaLabel" data-position="parentW" aria-label="${escapeAttr(item.key.name)}"">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
         <span>${item.key.name}</span>
     </div>

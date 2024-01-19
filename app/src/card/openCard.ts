@@ -457,6 +457,10 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     if (exit) {
         return;
     }
+    let lastRange: Range;
+    if (getSelection().rangeCount > 0) {
+        lastRange = getSelection().getRangeAt(0)
+    }
     const dialog = new Dialog({
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
@@ -468,6 +472,9 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
                 if (window.siyuan.mobile) {
                     window.siyuan.mobile.popEditor = null;
                 }
+            }
+            if (lastRange) {
+                focusByRange(lastRange)
             }
         }
     });

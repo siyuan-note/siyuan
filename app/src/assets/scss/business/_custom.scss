@@ -23,10 +23,6 @@
       transition: var(--b3-transition);
       cursor: pointer;
 
-      svg {
-        margin-right: 4px;
-      }
-
       &:hover {
         opacity: 1;
       }
@@ -41,10 +37,6 @@
   .block__logo:not(.popover__block) {
     width: 160px;
     color: var(--b3-theme-on-surface);
-
-    svg {
-      margin-right: 4px;
-    }
 
     span {
       text-overflow: ellipsis;

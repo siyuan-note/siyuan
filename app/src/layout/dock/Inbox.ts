@@ -55,9 +55,8 @@ export class Inbox extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
-        <svg><use xlink:href="#iconInbox"></use></svg>
-        ${window.siyuan.languages.inbox}&nbsp;
-         <span class="inboxSelectCount"></span>
+        <svg class="block__logoicon"><use xlink:href="#iconInbox"></use></svg>${window.siyuan.languages.inbox}&nbsp;
+        <span class="inboxSelectCount"></span>
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
@@ -210,7 +209,7 @@ ${data.shorthandContent}
         }
         return `<div class="block__icons">
     <div class="block__logo fn__pointer fn__flex-1" data-type="back">
-        <svg><use xlink:href="#iconLeft"></use></svg><span class="ft__breakword">${data.shorthandTitle}</span>
+        <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg><span class="ft__breakword">${data.shorthandTitle}</span>
     </div>
     ${linkHTML}
 </div>

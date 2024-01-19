@@ -258,8 +258,7 @@ export class Graph extends Model {
         this.element.innerHTML = `
 <div class="block__icons"> 
     <div class="block__logo">
-        <svg><use xlink:href="#icon${this.type === "global" ? "GlobalGraph" : "Graph"}"></use></svg>
-        ${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}
+        <svg class="block__logoicon"><use xlink:href="#icon${this.type === "global" ? "GlobalGraph" : "Graph"}"></use></svg>${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>

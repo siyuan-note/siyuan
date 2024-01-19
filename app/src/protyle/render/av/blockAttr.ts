@@ -4,6 +4,7 @@ import {escapeAttr} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
 import {hasClosestBlock} from "../../util/hasClosest";
+import {unicode2Emoji} from "../../../emoji";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -133,6 +134,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 key: {
                     type: TAVCol,
                     name: string,
+                    icon: string,
                     options?: {
                         name: string,
                         color: string
@@ -152,16 +154,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
 <div class="fn__flex custom-attr__avheader">
     <div class="block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
-        <svg><use xlink:href="#iconDatabase"></use></svg>
-        <span>${table.avName || window.siyuan.languages.database}</span>
+        <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
 </div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons av__row" data-id="${id}">
-    <div class="block__logo">
-        <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
+    <div class="block__icon"><svg><use xlink:href="#iconDrag"></use></svg></div>
+    <div class="block__logo ariaLabel" aria-label="${escapeAttr(item.key.name)}"">
+        ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
         <span>${item.key.name}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 

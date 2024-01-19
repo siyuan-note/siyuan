@@ -107,16 +107,17 @@
   }
 
   &__logo {
-    svg {
-      height: 16px;
-      width: 16px;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-
     white-space: nowrap;
     margin-right: 8px;
     display: flex;
     align-items: center;
+  }
+
+  &__logoicon {
+    margin-right: 4px;
+    height: 16px;
+    width: 16px;
+    padding: 4px;
+    flex-shrink: 0;
   }
 }

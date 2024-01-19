@@ -106,24 +106,25 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "relation":
             value.relation?.blockIDs?.forEach((item, index) => {
-                html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index]}</span>`;
+                html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index] || "Untitled"}</span>`;
             });
             break;
         case "rollup":
-            value?.rollup?.contents?.forEach((item, index) => {
+            value?.rollup?.contents?.forEach((item) => {
                 const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
-                if (!rollupText && html) {
-                    html = html.substring(0, html.length - 2);
-                } else {
-                    html += rollupText + ((index === value.rollup.contents.length - 1 || !rollupText) ? "" : ",&nbsp;");
+                if (rollupText) {
+                    html += rollupText + ", ";
                 }
             });
+            if (html && html.endsWith(", ")) {
+                html = html.substring(0, html.length - 2);
+            }
             break;
     }
     return html;
 };
 
-export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IProtyle) => {
+export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle) => {
     fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
         let html = "";
         response.data.forEach((table: {
@@ -167,40 +168,42 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             });
             html += "</div>";
         });
-        element.innerHTML = html;
-        element.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && !element.isSameNode(target)) {
-                const type = target.getAttribute("data-type");
-                if (type === "date") {
-                    popTextCell(protyle, [target], "date");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "select" || type === "mSelect") {
-                    popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "mAsset") {
-                    popTextCell(protyle, [target], "mAsset");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "checkbox") {
-                    popTextCell(protyle, [target], "checkbox");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "relation") {
-                    popTextCell(protyle, [target], "relation");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
+        if (element.innerHTML === "") {
+            element.addEventListener("click", (event) => {
+                let target = event.target as HTMLElement;
+                while (target && !element.isSameNode(target)) {
+                    const type = target.getAttribute("data-type");
+                    if (type === "date") {
+                        popTextCell(protyle, [target], "date");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "select" || type === "mSelect") {
+                        popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "mAsset") {
+                        popTextCell(protyle, [target], "mAsset");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "checkbox") {
+                        popTextCell(protyle, [target], "checkbox");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    } else if (type === "relation") {
+                        popTextCell(protyle, [target], "relation");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    }
+                    target = target.parentElement;
                 }
-                target = target.parentElement;
-            }
-        });
+            });
+        }
+        element.innerHTML = html;
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

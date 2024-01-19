@@ -212,7 +212,7 @@ export class MenuItem {
         if (options.element) {
             this.element.append(options.element);
         } else {
-            let html = `<span class="b3-menu__label">${options.label}</span>`;
+            let html = `<span class="b3-menu__label">${options.label || "&nbsp;"}</span>`;
             if (typeof options.iconHTML === "string") {
                 html = options.iconHTML + html;
             } else {

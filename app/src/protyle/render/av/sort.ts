@@ -88,7 +88,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     const genSortItem = (id: string) => {
         let sortHTML = "";
         columns.forEach((item) => {
-            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`;
+            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.icon && unicode2Emoji(item.icon)}${item.name}</option>`;
         });
         return sortHTML;
     };

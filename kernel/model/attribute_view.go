@@ -219,11 +219,6 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
-			if av.KeyTypeBlock == kv.Key.Type {
-				// The primary key are no longer shown in the attribute panel database https://github.com/siyuan-note/siyuan/issues/10027
-				continue
-			}
-
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {

@@ -543,7 +543,7 @@ const initKernel = (workspace, port, lang) => {
         let apiData;
         let count = 0;
         writeLog("checking kernel version");
-        while (true) {
+        for (; ;) {
             try {
                 const apiResult = await net.fetch(getServer() + "/api/system/version");
                 apiData = await apiResult.json();

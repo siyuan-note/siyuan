@@ -154,6 +154,10 @@ func resetDuplicateBlocksOnFileSys() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var duplicatedTrees []*parse.Tree
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if nil == info {
+				return nil
+			}
+
 			if info.IsDir() {
 				if boxPath == path {
 					// 跳过根路径（笔记本文件夹）

@@ -459,7 +459,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     }
     let lastRange: Range;
     if (getSelection().rangeCount > 0) {
-        lastRange = getSelection().getRangeAt(0)
+        lastRange = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
         positionId: Constants.DIALOG_OPENCARD,
@@ -474,7 +474,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
                 }
             }
             if (lastRange) {
-                focusByRange(lastRange)
+                focusByRange(lastRange);
             }
         }
     });

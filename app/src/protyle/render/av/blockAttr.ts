@@ -186,7 +186,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                 dragBlockElement = hasClosestBlock(window.siyuan.dragElement) as HTMLElement;
 
                 const ghostElement = document.createElement("div");
-                ghostElement.className = "block__icons"
+                ghostElement.className = "block__icons";
                 ghostElement.innerHTML = target.nextElementSibling.outerHTML;
                 ghostElement.setAttribute("style", "width: 160px;position:fixed;opacity:.1;");
                 document.body.append(ghostElement);
@@ -197,7 +197,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             });
             element.addEventListener("drop", () => {
                 window.siyuan.dragElement.style.opacity = "";
-                const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement
+                const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {
                     const isBottom = targetElement.classList.contains("dragover__bottom");
                     transaction(protyle, [{
@@ -212,9 +212,9 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                         id
                     }]);
                     if (isBottom) {
-                        targetElement.after(window.siyuan.dragElement)
+                        targetElement.after(window.siyuan.dragElement);
                     } else {
-                        targetElement.before(window.siyuan.dragElement)
+                        targetElement.before(window.siyuan.dragElement);
                     }
                     targetElement.classList.remove("dragover__bottom", "dragover__top");
                 }

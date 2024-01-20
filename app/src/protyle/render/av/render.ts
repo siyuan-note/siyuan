@@ -69,7 +69,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 }
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = '';
+                let calcHTML = "";
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
@@ -297,7 +297,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
                     if (["updateAttrViewColRollup","updateAttrViewColTemplate", "updateAttrViewCell", "addAttrViewCol"].includes(operation.action)) {
-                        const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement
+                        const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
                         if (attrElement) {
                             // 更新属性面板
                             renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);

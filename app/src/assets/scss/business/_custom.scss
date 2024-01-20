@@ -79,4 +79,8 @@
   .av__cellassetimg {
     max-height: 24px;
   }
+
+  .dragover__top.av__row {
+    box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
+  }
 }

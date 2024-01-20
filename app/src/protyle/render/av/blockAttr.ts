@@ -3,8 +3,9 @@ import {addCol, getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
-import {hasClosestBlock} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {unicode2Emoji} from "../../../emoji";
+import {transaction} from "../../wysiwyg/transaction";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -135,6 +136,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     type: TAVCol,
                     name: string,
                     icon: string,
+                    id: string,
                     options?: {
                         name: string,
                         color: string
@@ -160,7 +162,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons av__row" data-id="${id}">
+                html += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo ariaLabel" data-position="parentW" aria-label="${escapeAttr(item.key.name)}"">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
@@ -176,6 +178,75 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             html += "</div>";
         });
         if (element.innerHTML === "") {
+            let dragBlockElement: HTMLElement;
+            element.addEventListener("dragstart", (event: DragEvent) => {
+                const target = event.target as HTMLElement;
+                window.siyuan.dragElement = target.parentElement;
+                window.siyuan.dragElement.style.opacity = ".1";
+                dragBlockElement = hasClosestBlock(window.siyuan.dragElement) as HTMLElement;
+
+                const ghostElement = document.createElement("div");
+                ghostElement.className = "block__icons"
+                ghostElement.innerHTML = target.nextElementSibling.outerHTML;
+                ghostElement.setAttribute("style", "width: 160px;position:fixed;opacity:.1;");
+                document.body.append(ghostElement);
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
+                setTimeout(() => {
+                    ghostElement.remove();
+                });
+            });
+            element.addEventListener("drop", (event) => {
+                window.siyuan.dragElement.style.opacity = "";
+                const id = window.siyuan.dragElement.dataset.colId;
+                window.siyuan.dragElement = null;
+                const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement
+                if (!targetElement) {
+                    return;
+                }
+                const previousID = targetElement.classList.contains("dragover__bottom") ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id");
+                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                if (dragBlockElement) {
+                    transaction(protyle, [{
+                        action: "sortAttrViewCol",
+                        avID: dragBlockElement.dataset.avId,
+                        previousID,
+                        id
+                    }]);
+                }
+            });
+            element.addEventListener("dragover", (event: DragEvent) => {
+                const target = event.target as HTMLElement;
+                let targetElement = hasClosestByClassName(target, "av__row");
+                if (!targetElement) {
+                    targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 1), "av__row");
+                }
+                if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement) || !dragBlockElement) {
+                    return;
+                }
+                const targetBlockElement = hasClosestBlock(targetElement);
+                if (!targetBlockElement || !targetBlockElement.isSameNode(dragBlockElement)) {
+                    return;
+                }
+                event.preventDefault();
+                const nodeRect = targetElement.getBoundingClientRect();
+                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                    targetElement.classList.add("dragover__bottom");
+                } else {
+                    targetElement.classList.add("dragover__top");
+                }
+            });
+            element.addEventListener("dragleave", () => {
+                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
+            });
+            element.addEventListener("dragend", () => {
+                if (window.siyuan.dragElement) {
+                    window.siyuan.dragElement.style.opacity = "";
+                    window.siyuan.dragElement = undefined;
+                }
+            });
             element.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 while (target && !element.isSameNode(target)) {

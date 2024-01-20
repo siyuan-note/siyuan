@@ -6,8 +6,7 @@ declare const NODE_ENV: string;
 const _SIYUAN_VERSION = SIYUAN_VERSION;
 const _NODE_ENV = NODE_ENV;
 
-// const altNumber = navigator.platform.toUpperCase().indexOf("MAC") === -1 ? "⌃" : "⌥";
-const altNumber = "⌥";
+const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
 
 export abstract class Constants {
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;

@@ -1330,7 +1330,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥1"
+									"TextMarkTextContent": "⌃1"
 								},
 								{
 									"Type": "NodeText",
@@ -1378,7 +1378,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥2"
+									"TextMarkTextContent": "⌃2"
 								},
 								{
 									"Type": "NodeText",
@@ -1426,7 +1426,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥3"
+									"TextMarkTextContent": "⌃3"
 								},
 								{
 									"Type": "NodeText",
@@ -1474,7 +1474,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥4"
+									"TextMarkTextContent": "⌃4"
 								},
 								{
 									"Type": "NodeText",
@@ -1522,7 +1522,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥5"
+									"TextMarkTextContent": "⌃5"
 								},
 								{
 									"Type": "NodeText",
@@ -1570,7 +1570,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥6"
+									"TextMarkTextContent": "⌃6"
 								},
 								{
 									"Type": "NodeText",
@@ -1618,7 +1618,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥7"
+									"TextMarkTextContent": "⌃7"
 								},
 								{
 									"Type": "NodeText",
@@ -1666,7 +1666,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥8"
+									"TextMarkTextContent": "⌃8"
 								},
 								{
 									"Type": "NodeText",
@@ -1714,7 +1714,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥9"
+									"TextMarkTextContent": "⌃9"
 								},
 								{
 									"Type": "NodeText",
@@ -1762,7 +1762,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥0"
+									"TextMarkTextContent": "⌃0"
 								},
 								{
 									"Type": "NodeText",

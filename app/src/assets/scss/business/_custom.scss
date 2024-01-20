@@ -46,7 +46,7 @@
   }
 
   .block__icons {
-    min-height: auto;
+    box-sizing: border-box;
     padding: 4px 8px;
     font-size: 100%;
     border-bottom: 0;

@@ -195,24 +195,30 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                     ghostElement.remove();
                 });
             });
-            element.addEventListener("drop", (event) => {
+            element.addEventListener("drop", () => {
                 window.siyuan.dragElement.style.opacity = "";
-                const id = window.siyuan.dragElement.dataset.colId;
-                window.siyuan.dragElement = null;
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement
-                if (!targetElement) {
-                    return;
-                }
-                const previousID = targetElement.classList.contains("dragover__bottom") ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id");
-                targetElement.classList.remove("dragover__bottom", "dragover__top");
-                if (dragBlockElement) {
+                if (targetElement && dragBlockElement) {
+                    const isBottom = targetElement.classList.contains("dragover__bottom");
                     transaction(protyle, [{
                         action: "sortAttrViewCol",
                         avID: dragBlockElement.dataset.avId,
-                        previousID,
+                        previousID:isBottom ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id"),
+                        id: window.siyuan.dragElement.dataset.colId,
+                    }, {
+                        action: "sortAttrViewCol",
+                        avID: dragBlockElement.dataset.avId,
+                        previousID: window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id"),
                         id
                     }]);
+                    if (isBottom) {
+                        targetElement.after(window.siyuan.dragElement)
+                    } else {
+                        targetElement.before(window.siyuan.dragElement)
+                    }
+                    targetElement.classList.remove("dragover__bottom", "dragover__top");
                 }
+                window.siyuan.dragElement = null;
             });
             element.addEventListener("dragover", (event: DragEvent) => {
                 const target = event.target as HTMLElement;

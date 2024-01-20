@@ -1374,19 +1374,24 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	// 有数据变更，需要重建索引
 	var upserts, removes []string
 	var upsertTrees int
-	var needReloadFlashcard, needReloadOcrTexts, needReloadFiletree bool
+	// 可能需要重新加载部分功能
+	var needReloadFlashcard, needReloadOcrTexts, needReloadFiletree, needReloadPlugin bool
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/data/assets/ocr-texts.json") {
+		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
 			needReloadOcrTexts = true
 		}
 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
+		}
+
+		if strings.HasPrefix(file.Path, "/storage/petal/") {
+			needReloadPlugin = true
 		}
 
 		if strings.HasSuffix(file.Path, ".sy") {
@@ -1399,12 +1404,16 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/data/assets/ocr-texts.json") {
+		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
 			needReloadOcrTexts = true
 		}
 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
+		}
+
+		if strings.HasPrefix(file.Path, "/storage/petal/") {
+			needReloadPlugin = true
 		}
 	}
 
@@ -1414,6 +1423,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	if needReloadOcrTexts {
 		LoadAssetsTexts()
+	}
+
+	if needReloadPlugin {
+		pushReloadPlugin()
 	}
 
 	syncingFiles = sync.Map{}
@@ -1950,4 +1963,8 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 		return
 	}
 	return
+}
+
+func pushReloadPlugin() {
+	util.BroadcastByType("main", "reloadPlugin", 0, "", nil)
 }

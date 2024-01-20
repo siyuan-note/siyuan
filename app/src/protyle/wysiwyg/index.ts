@@ -537,9 +537,8 @@ export class WYSIWYG {
                     if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
                         return;
                     }
-                    moveCellElement = tempCellElement;
-                    if (moveCellElement && moveCellElement.dataset.id) {
-                        const newIndex = getPositionByCellElement(moveCellElement);
+                    if (tempCellElement && tempCellElement.dataset.id && (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY)) {
+                        const newIndex = getPositionByCellElement(tempCellElement);
                         nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             item.classList.remove("av__cell--active");
                         });
@@ -553,6 +552,7 @@ export class WYSIWYG {
                                 });
                             }
                         });
+                        moveCellElement = tempCellElement;
                     }
                 };
 

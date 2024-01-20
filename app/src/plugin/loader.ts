@@ -7,6 +7,7 @@ import {resizeTopBar, saveLayout} from "../layout/util";
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
+import {uninstall} from "./uninstall";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -230,4 +231,15 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     });
     saveLayout();
     /// #endif
+};
+
+export const reloadPlugin = (app: App) => {
+    app.plugins.forEach((item) => {
+        uninstall(this, item.name);
+    });
+    loadPlugins(this).then(() => {
+        app.plugins.forEach(item => {
+            afterLoadPlugin(item);
+        });
+    });
 };

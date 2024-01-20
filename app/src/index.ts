@@ -25,8 +25,7 @@ import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
-import {afterLoadPlugin, loadPlugins} from "./plugin/loader";
-import {uninstall} from "./plugin/uninstall";
+import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 
 export class App {
@@ -61,14 +60,7 @@ export class App {
                     if (data) {
                         switch (data.cmd) {
                             case "reloadPlugin":
-                                this.plugins.forEach((plugin) => {
-                                    uninstall(this, plugin.name);
-                                });
-                                loadPlugins(this).then(() => {
-                                    this.plugins.forEach(item => {
-                                        afterLoadPlugin(item);
-                                    });
-                                });
+                                reloadPlugin(this);
                                 break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);

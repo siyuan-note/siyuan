@@ -212,6 +212,12 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
+		if strings.HasPrefix(c.Request.RequestURI, "/api/sync/performSync") {
+			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+				c.Next()
+				return
+			}
+		}
 	}
 
 	// 通过 Cookie

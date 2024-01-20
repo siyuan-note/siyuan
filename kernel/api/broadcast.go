@@ -61,6 +61,7 @@ func broadcast(c *gin.Context) {
 	} else {
 		// channel not found, create a new one
 		broadcastChannel := melody.New()
+		broadcastChannel.Config.MaxMessageSize = 1024 * 1024 * 128 // 128 MiB
 		BroadcastChannels.Store(channel, broadcastChannel)
 		subscribe(c, broadcastChannel, channel)
 

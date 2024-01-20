@@ -307,6 +307,10 @@ func fixBlockTreeByFileSys() {
 				return nil
 			}
 
+			if nil == info {
+				return nil
+			}
+
 			if info.IsDir() {
 				if strings.HasPrefix(info.Name(), ".") {
 					return filepath.SkipDir

@@ -97,11 +97,10 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		if group.IsDir() {
 			var templateBlocks []*Block
 			templateDir := filepath.Join(templates, group.Name())
-			// filepath.Walk 与 filepath.WalkDir 均不支持跟踪符号链接
-			filepath.WalkDir(templateDir, func(path string, entry fs.DirEntry, err error) error {
-				name := strings.ToLower(entry.Name())
+			filelock.Walk(templateDir, func(path string, info fs.FileInfo, err error) error {
+				name := strings.ToLower(info.Name())
 				if strings.HasPrefix(name, ".") {
-					if entry.IsDir() {
+					if info.IsDir() {
 						return filepath.SkipDir
 					}
 					return nil

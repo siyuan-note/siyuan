@@ -51,10 +51,10 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.18.3
 	github.com/shirou/gopsutil/v3 v3.23.12
-	github.com/siyuan-note/dejavu v0.0.0-20240119140435-482c6e65a120
+	github.com/siyuan-note/dejavu v0.0.0-20240121131528-548f9d316a86
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240114153055-cf4c124ddf6d
-	github.com/siyuan-note/filelock v0.0.0-20231211015131-3b3dfabdce9c
+	github.com/siyuan-note/filelock v0.0.0-20240121131032-ac31019859ab
 	github.com/siyuan-note/httpclient v0.0.0-20240105083729-70d0557bc690
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
 	github.com/siyuan-note/riff v0.0.0-20231226152006-8833f8b9a6c1
@@ -156,7 +156,7 @@ require (
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
+	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect

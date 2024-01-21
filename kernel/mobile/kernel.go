@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -77,6 +78,10 @@ func ShowMsg(msg string, timeout int) {
 
 func IsHttpServing() bool {
 	return util.HttpServing
+}
+
+func SetHttpServerPort(port int) {
+	filelock.AndroidServerPort = port
 }
 
 func SetTimezone(container, appDir, timezoneID string) {

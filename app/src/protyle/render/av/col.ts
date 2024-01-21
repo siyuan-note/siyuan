@@ -84,7 +84,8 @@ export const duplicateCol = (options: {
 export const getEditHTML = (options: {
     protyle: IProtyle,
     colId: string,
-    data: IAV
+    data: IAV,
+    isCustomAttr: boolean
 }) => {
     let colData: IAVColumn;
     options.data.view.columns.find((item) => {
@@ -94,7 +95,7 @@ export const getEditHTML = (options: {
         }
     });
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
+    <span class="block__icon${options.isCustomAttr ? " fn__none" : ""}" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
@@ -165,7 +166,7 @@ export const getEditHTML = (options: {
     return `<div class="b3-menu__items">
     ${html}
     <button class="b3-menu__separator"></button>
-    <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    <button class="b3-menu__item${options.isCustomAttr ? " fn__none" : ""}" data-type="${colData.hidden ? "showCol" : "hideCol"}">
         <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
         <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
     </button>
@@ -207,7 +208,8 @@ export const getEditHTML = (options: {
 export const bindEditEvent = (options: {
     protyle: IProtyle,
     data: IAV,
-    menuElement: HTMLElement
+    menuElement: HTMLElement,
+    isCustomAttr: boolean
 }) => {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
@@ -316,8 +318,18 @@ export const bindEditEvent = (options: {
                     avID,
                     data: addOptionElement.value
                 }]);
-                options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
-                bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
+                options.menuElement.innerHTML = getEditHTML({
+                    protyle: options.protyle,
+                    colId,
+                    data: options.data,
+                    isCustomAttr: options.isCustomAttr
+                });
+                bindEditEvent({
+                    protyle: options.protyle,
+                    menuElement: options.menuElement,
+                    data: options.data,
+                    isCustomAttr: options.isCustomAttr
+                });
                 (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
             }
         });

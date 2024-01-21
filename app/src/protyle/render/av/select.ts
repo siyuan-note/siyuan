@@ -110,7 +110,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
     target.remove();
 };
 
-export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, cellElements?: HTMLElement[]) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean, cellElements?: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
         return;
@@ -168,8 +168,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             }
         });
         if (!cellElements) {
-            menuElement.innerHTML = getEditHTML({protyle, data, colId});
-            bindEditEvent({protyle, data, menuElement});
+            menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
+            bindEditEvent({protyle, data, menuElement, isCustomAttr});
         } else {
             cellElements.forEach((cellElement: HTMLMediaElement) => {
                 data.view.rows.find(row => {
@@ -246,8 +246,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     }
                 });
                 if (!cellElements) {
-                    menuElement.innerHTML = getEditHTML({protyle, data, colId});
-                    bindEditEvent({protyle, data, menuElement});
+                    menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
+                    bindEditEvent({protyle, data, menuElement, isCustomAttr});
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
@@ -325,8 +325,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     }
                 });
                 if (!cellElements) {
-                    menuElement.innerHTML = getEditHTML({protyle, data, colId});
-                    bindEditEvent({protyle, data, menuElement});
+                    menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
+                    bindEditEvent({protyle, data, menuElement, isCustomAttr});
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {

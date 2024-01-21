@@ -16,16 +16,13 @@
   &__avheader {
     border-bottom: 1px solid var(--b3-border-color);
     padding: 8px;
+    color: var(--b3-protyle-inline-blockref-color);
+    opacity: .86;
+    transition: var(--b3-transition);
+    cursor: pointer;
 
-    .block__logo {
-      color: var(--b3-protyle-inline-blockref-color);
-      opacity: .86;
-      transition: var(--b3-transition);
-      cursor: pointer;
-
-      &:hover {
-        opacity: 1;
-      }
+    &:hover {
+      opacity: 1;
     }
   }
 

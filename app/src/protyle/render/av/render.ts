@@ -296,12 +296,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     if (operation.action === "addAttrViewCol" && isPulse) {
                         openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
                     }
-                    if (["updateAttrViewColRollup","updateAttrViewColTemplate", "updateAttrViewCell", "addAttrViewCol"].includes(operation.action)) {
-                        const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
-                        if (attrElement) {
-                            // 更新属性面板
-                            renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
-                        }
+
+                    const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
+                    if (attrElement) {
+                        // 更新属性面板
+                        renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle, (newElment) => {
+                            if (operation.action === "addAttrViewCol") {
+                                openMenuPanel({protyle, blockElement: newElment.querySelector(`div[data-av-id="${operation.avID}"]`), type: "edit", colId: operation.id});
+                            }
+                        });
                     }
                 }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
                     (operation.action === "removeAttrViewView" ? null : undefined));

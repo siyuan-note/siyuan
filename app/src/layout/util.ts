@@ -443,9 +443,6 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         }
         /// #endif
     }
-    app.plugins.forEach(item => {
-        afterLoadPlugin(item);
-    });
     // 移除没有插件的 tab
     document.querySelectorAll('li[data-type="tab-header"]').forEach((item: HTMLElement) => {
         const initData = item.getAttribute("data-initdata");
@@ -484,6 +481,10 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             tab.parent.switchTab(item, false, false, true, false);
         });
     }
+    // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个
+    app.plugins.forEach(item => {
+        afterLoadPlugin(item);
+    });
     resizeTopBar();
 };
 

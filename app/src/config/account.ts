@@ -29,8 +29,7 @@ const genSVGBG = () => {
 export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
-        const payHTML = `
-<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
+        const payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
 <div class="fn__hr--b"></div>

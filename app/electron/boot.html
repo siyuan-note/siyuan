@@ -30,10 +30,6 @@
          style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;padding: 8px;height: 16px;line-height: 16px;"></div>
 </div>
 <script>
-    const sleep = (ms) => {
-        return new Promise(resolve => setTimeout(resolve, ms))
-    }
-
     const getSearch = (key) => {
         if (window.location.search.indexOf('?') === -1) {
             return ''
@@ -49,36 +45,9 @@
         })
         return value
     }
-
-    const redirect = () => {
-        const uri = 'http://127.0.0.1:' + location.port
-        if (navigator.userAgent.match(/Android/i))
-            document.location = uri
-        else
-            window.location.replace(uri)
-    }
     (async () => {
         const v = getSearch('v')
         document.getElementById('details').textContent = "v" + v + ' Booting kernel...'
-        let progressing = false
-        while (!progressing) {
-            try {
-                const progressResult = await fetch('http://127.0.0.1:' + location.port + '/api/system/bootProgress')
-                const progressData = await progressResult.json()
-                document.getElementById('progress').style.width = progressData.data.progress + '%'
-                document.getElementById('details').textContent = progressData.data.details
-                if (progressData.data.progress >= 100) {
-                    progressing = true
-                    if (navigator.userAgent.indexOf('Electron') === -1) {
-                        redirect()
-                    }
-                } else {
-                    await sleep(100)
-                }
-            } catch (e) {
-                await sleep(100)
-            }
-        }
     })()
 </script>
 </body>

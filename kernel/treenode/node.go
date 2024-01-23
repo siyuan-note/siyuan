@@ -287,7 +287,10 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 		lastSpace = false
 		return ast.WalkContinue
 	})
-	return strings.TrimSpace(buf.String())
+
+	// 这里不要 trim，否则无法搜索首尾空格
+	// Improve search and replace for spaces https://github.com/siyuan-note/siyuan/issues/10231
+	return buf.String()
 }
 
 func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {

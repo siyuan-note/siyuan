@@ -1,7 +1,9 @@
 import {App} from "../index";
 import {Plugin} from "../plugin";
+/// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
+/// #endif
 
 export const uninstall = (app: App, name: string, isUninstall = false) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -16,19 +18,21 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
             }
             // rm tab
+            /// #if !MOBILE
             const modelsKeys = Object.keys(plugin.models);
             getAllModels().custom.forEach(custom => {
                 if (modelsKeys.includes(custom.type)) {
                     custom.parent.parent.removeTab(custom.parent.id);
                 }
             });
+            /// #endif
             // rm topBar
             plugin.topBarIcons.forEach(item => {
                 item.remove();
             });
+            /// #if !MOBILE
             resizeTopBar();
             // rm statusBar
-            /// #if !MOBILE
             plugin.statusBarIcons.forEach(item => {
                 item.remove();
             });

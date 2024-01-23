@@ -86,7 +86,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
     });
 };
 
-export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string) => void, exts?: string[]) => {
+export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void, exts?: string[]) => {
     const menu = new Menu("background-asset");
     if (menu.isOpen) {
         return;
@@ -135,11 +135,11 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
 
                 if (event.key === "Enter") {
                     if (!isEmpty) {
-                        const currentURL = element.querySelector(".b3-list-item--focus").getAttribute("data-value");
+                        const currentElement = element.querySelector(".b3-list-item--focus");
                         if (callback) {
-                            callback(currentURL);
+                            callback(currentElement.getAttribute("data-value"), currentElement.textContent);
                         } else {
-                            hintRenderAssets(currentURL, protyle);
+                            hintRenderAssets(currentElement.getAttribute("data-value"), protyle);
                             window.siyuan.menus.menu.remove();
                         }
                     } else if (!callback) {
@@ -155,7 +155,14 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                     }
                 }
             });
-            inputElement.addEventListener("input", (event) => {
+            inputElement.addEventListener("input", (event: InputEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                event.stopPropagation();
+                renderAssetList(element, inputElement.value, position, exts);
+            });
+            inputElement.addEventListener("compositionend", (event: InputEvent) => {
                 event.stopPropagation();
                 renderAssetList(element, inputElement.value, position, exts);
             });
@@ -178,7 +185,7 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                     event.stopPropagation();
                     const currentURL = listItemElement.getAttribute("data-value");
                     if (callback) {
-                        callback(currentURL);
+                        callback(currentURL, listItemElement.textContent);
                     } else {
                         hintRenderAssets(currentURL, protyle);
                         window.siyuan.menus.menu.remove();

@@ -975,7 +975,7 @@ export const openMenuPanel = (options: {
                         y: rect.bottom,
                         w: target.parentElement.clientWidth + 8,
                         h: rect.height
-                    }, (url) => {
+                    }, (url, name) => {
                         let value: IAVCellAssetValue;
                         if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
                             value = {
@@ -987,7 +987,7 @@ export const openMenuPanel = (options: {
                             value = {
                                 type: "file",
                                 content: url,
-                                name: pathPosix().basename(url).substring(0, Constants.SIZE_LINK_TEXT_MAX)
+                                name
                             };
                         }
                         updateAssetCell({

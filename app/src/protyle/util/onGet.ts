@@ -24,6 +24,7 @@ export const onGet = (options: {
     protyle: IProtyle,
     action?: string[],
     scrollAttr?: IScrollAttr
+    updateReadonly?: boolean
     afterCB?: () => void
 }) => {
     if (!options.action) {
@@ -79,6 +80,7 @@ export const onGet = (options: {
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
+            updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
             afterCB: options.afterCB,
         }, options.protyle);
@@ -104,6 +106,7 @@ export const onGet = (options: {
             expand: options.data.data.isBacklinkExpand,
             action: options.action,
             scrollAttr: options.scrollAttr,
+            updateReadonly: options.updateReadonly,
             isSyncing: options.data.data.isSyncing,
             afterCB: options.afterCB,
         }, options.protyle);
@@ -116,6 +119,7 @@ const setHTML = (options: {
     action?: string[],
     isSyncing: boolean,
     expand: boolean,
+    updateReadonly?: boolean,
     scrollAttr?: IScrollAttr
     afterCB?: () => void
 }, protyle: IProtyle) => {
@@ -124,7 +128,7 @@ const setHTML = (options: {
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
-    const isUpdate = protyle.wysiwyg.element.innerHTML !== "";
+    const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
@@ -199,7 +203,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle, isUpdate);
+        setReadonlyByConfig(protyle, updateReadonly);
     }
 
     focusElementById(protyle, options.action, options.scrollAttr);
@@ -432,9 +436,9 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     }
 };
 
-export const setReadonlyByConfig = (protyle: IProtyle, isUpdate: boolean) => {
+export const setReadonlyByConfig = (protyle: IProtyle, updateReadonly: boolean) => {
     let readOnly = window.siyuan.config.readonly ? "true" : "false";
-    if (isUpdate) {
+    if (!updateReadonly) {
         readOnly = protyle.disabled ? "true" : "false";
     } else if (readOnly === "false") {
         readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";

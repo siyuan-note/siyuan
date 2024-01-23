@@ -158,15 +158,21 @@ export const bindCardEvent = async (options: {
         window.siyuan.mobile.popEditor = editor;
     }
     if (options.cardsData.cards.length > 0) {
-        fetchPost("/api/filetree/getDoc", {
+        fetchPost("/api/block/getDocInfo", {
             id: options.cardsData.cards[index].blockID,
-            mode: 0,
-            size: Constants.SIZE_GET_MAX
         }, (response) => {
-            onGet({
-                data: response,
-                protyle: editor.protyle,
-                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            editor.protyle.wysiwyg.renderCustom(response.data.ial);
+            fetchPost("/api/filetree/getDoc", {
+                id: options.cardsData.cards[index].blockID,
+                mode: 0,
+                size: Constants.SIZE_GET_MAX
+            }, (response) => {
+                onGet({
+                    updateReadonly: true,
+                    data: response,
+                    protyle: editor.protyle,
+                    action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                });
             });
         });
     }
@@ -531,15 +537,21 @@ const nextCard = (options: {
     } else {
         options.actionElements[0].firstElementChild.removeAttribute("disabled");
     }
-    fetchPost("/api/filetree/getDoc", {
+    fetchPost("/api/block/getDocInfo", {
         id: options.blocks[options.index].blockID,
-        mode: 0,
-        size: Constants.SIZE_GET_MAX
     }, (response) => {
-        onGet({
-            data: response,
-            protyle: options.editor.protyle,
-            action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+        options.editor.protyle.wysiwyg.renderCustom(response.data.ial);
+        fetchPost("/api/filetree/getDoc", {
+            id: options.blocks[options.index].blockID,
+            mode: 0,
+            size: Constants.SIZE_GET_MAX
+        }, (response) => {
+            onGet({
+                updateReadonly: true,
+                data: response,
+                protyle: options.editor.protyle,
+                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            });
         });
     });
 };

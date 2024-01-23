@@ -301,7 +301,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         event.preventDefault();
                         break;
                     } else if (type === "addColumn") {
-                        const rowElements = blockElement.querySelectorAll(".av__row")
+                        const rowElements = blockElement.querySelectorAll(".av__row");
                         const addMenu = addCol(protyle, blockElement, rowElements[rowElements.length - 1].getAttribute("data-col-id"));
                         const addRect = target.getBoundingClientRect();
                         addMenu.open({

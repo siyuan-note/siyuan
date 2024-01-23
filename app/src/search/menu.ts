@@ -11,7 +11,7 @@ import {updateSearchResult} from "../mobile/menu/search";
 
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
-        title: window.siyuan.languages.replaceType,
+        title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconMath"></use></svg>

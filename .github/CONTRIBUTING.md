@@ -16,15 +16,15 @@ Install pnpm: `npm install -g pnpm`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@28.1.4 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/ pnpm install electron@28.1.4 -D`
 * Windows:
-    * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
+    * `SET ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/`
     * `pnpm install electron@28.1.4 -D`
 
 NPM mirror:
 
-* Use npmmirror China mirror repository `pnpm --registry https://r.cnpmjs.org/ i`
-* Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
+* Use npmmirror China mirror repository `pnpm --registry https://registry.npmmirror.com/ i`
+* Revert to using official repository `pnpm --registry https://registry.npmmirror.com i`
 
 </details>
 

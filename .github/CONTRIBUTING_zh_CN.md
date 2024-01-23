@@ -18,16 +18,16 @@
 
 * macOS/Linux: 
  ```
- ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@28.1.4 -D
+ ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/ pnpm install electron@28.1.4 -D
  ```
 * Windows:
-    * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
+    * `SET ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/`
     * `pnpm install electron@28.1.4 -D`
 
 NPM 镜像：
 
-* 使用 npmmirror 中国镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i`
-* 恢复使用官方仓库 `pnpm --registry https://registry.npmjs.org i`
+* 使用 npmmirror 中国镜像仓库 `pnpm --registry https://registry.npmmirror.com/ i`
+* 恢复使用官方仓库 `pnpm --registry https://registry.npmmirror.com i`
 </details>
 
 桌面端进入 app 文件夹运行：

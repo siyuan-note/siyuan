@@ -40,25 +40,16 @@ const initFlowchart = (flowchartElements: Element[]) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
-        //  preview 不需要进行设置
-        if (item.getAttribute("data-node-id")) {
-            if (!item.firstElementChild.classList.contains("protyle-icons")) {
-                item.insertAdjacentHTML("afterbegin", genIconHTML());
-            }
-            if (item.childElementCount < 4) {
-                item.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
-            }
+        if (!item.firstElementChild.classList.contains("protyle-icons")) {
+            item.insertAdjacentHTML("afterbegin", genIconHTML());
         }
-        const renderElement = (item.firstElementChild.nextElementSibling || item.firstElementChild) as HTMLElement;
-        const flowchartObj = flowchart.parse(Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
-        renderElement.innerHTML = "";
+        const renderElement = item.firstElementChild.nextElementSibling;
+        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false"></div>`;
         try {
-            flowchartObj.drawSVG(renderElement);
+            flowchart.parse(Lute.UnEscapeHTMLStr(item.getAttribute("data-content"))).drawSVG(renderElement.lastElementChild);
         } catch (error) {
-            renderElement.classList.add("ft__error");
-            renderElement.innerHTML = `Flow Chart render error: <br>${error}`;
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">Flow Chart render error: <br>${error}</div>`;
         }
-        renderElement.setAttribute("contenteditable", "false");
         item.setAttribute("data-render", "true");
     });
 };

@@ -22,14 +22,11 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                 if(!e.firstElementChild.classList.contains("protyle-icons")) {
                     e.insertAdjacentHTML("afterbegin", genIconHTML());
                 }
-                if (e.childElementCount < 4) {
-                    e.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
-                }
                 const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
-                window.ABCJS.renderAbc(renderElement, Lute.UnEscapeHTMLStr(e.getAttribute("data-content")), {
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"></div>`;
+                window.ABCJS.renderAbc(renderElement.lastElementChild, Lute.UnEscapeHTMLStr(e.getAttribute("data-content")), {
                     responsive: "resize"
                 });
-                renderElement.setAttribute("contenteditable", "false");
                 e.setAttribute("data-render", "true");
             });
         });

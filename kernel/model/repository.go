@@ -1841,13 +1841,11 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtCloudPurgeListRefs, func(context map[string]interface{}) {
 		util.ContextPushMsg(context, Conf.language(226))
 	})
-	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadIndex, func(context map[string]interface{}, id string) {
-		msg := fmt.Sprintf(Conf.language(227), id)
-		util.ContextPushMsg(context, msg)
+	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadIndexes, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, fmt.Sprintf(Conf.language(227)))
 	})
 	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadFiles, func(context map[string]interface{}) {
-		msg := Conf.language(228)
-		util.ContextPushMsg(context, msg)
+		util.ContextPushMsg(context, Conf.language(228))
 	})
 	eventbus.Subscribe(eventbus.EvtCloudPurgeRemoveIndexes, func(context map[string]interface{}) {
 		util.ContextPushMsg(context, Conf.language(229))

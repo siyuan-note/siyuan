@@ -1391,6 +1391,15 @@
     "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube",
     "221": "La operación de reemplazo no es compatible después de agrupar por documento. Utilice desagrupar y luego reemplazar",
     "222": "La sincronización de datos está en curso. Espere hasta que se complete la sincronización de datos e inténtelo de nuevo",
-    "223": "Limpiando el almacenamiento en la nube..."
+    "223": "Borrar almacenamiento en la nube...",
+    "224": "Lista de objetos de datos de almacenamiento en la nube...",
+    "225": "Listado de instantáneas de almacenamiento en la nube...",
+    "226": "Listado de referencias de instantáneas de almacenamiento en la nube...",
+    "227": "Descargando instantánea de almacenamiento en la nube [%s]...",
+    "228": "Descargando archivos de datos de almacenamiento en la nube...",
+    "229": "Eliminando instantáneas sin referencia del almacenamiento en la nube...",
+    "230": "Eliminando instantáneas de verificación sin referencia del almacenamiento en la nube...",
+    "231": "Eliminar objetos de datos no referenciados en el almacenamiento en la nube...",
+    "232": "Se ha eliminado el almacenamiento de datos en la nube. Se han eliminado [%d] instantáneas y [%d] objetos de datos, y se ha liberado un total de [%s] espacio en disco"
   }
 }

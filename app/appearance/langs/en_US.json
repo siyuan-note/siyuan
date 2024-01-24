@@ -1391,6 +1391,15 @@
     "220": "Due to a defect in the previous version, the cloud data is corrupted. Please refer to the User Guide-FAQ-Lost Key steps to reset the local data repo and cloud directory",
     "221": "The replacement operation is not supported after grouping by document. Please use ungrouping and then replace",
     "222": "Data sync is in progress, please wait until data sync is completed and try again",
-    "223": "Cleaning cloud storage..."
+    "223": "Purging cloud storage...",
+    "224": "Listing cloud storage data objects...",
+    "225": "Listing cloud storage snapshots...",
+    "226": "Listing cloud storage snapshot references...",
+    "227": "Downloading cloud storage snapshot [%s]...",
+    "228": "Downloading cloud storage data files...",
+    "229": "Deleting cloud storage unreferenced snapshots...",
+    "230": "Deleting cloud storage unreferenced verification snapshots...",
+    "231": "Deleting unreferenced data objects in cloud storage...",
+    "232": "The cloud data storage has been purged. [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released"
   }
 }

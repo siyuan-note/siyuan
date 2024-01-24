@@ -3,7 +3,7 @@ import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
-import {exportLayout} from "../layout/util";
+import {exportLayout, saveLayout} from "../layout/util";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {shell} from "electron";
@@ -813,6 +813,7 @@ export const bazaar = {
                                         afterLoadPlugin(item);
                                     });
                                 });
+                                saveLayout();
                             }
                         });
                     }

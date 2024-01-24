@@ -1,4 +1,5 @@
 import {MenuItem} from "./Menu";
+import {saveLayout} from "../layout/util";
 
 const moveMenuItem = (label: string, target: Element) => {
     return new MenuItem({
@@ -12,6 +13,7 @@ const moveMenuItem = (label: string, target: Element) => {
             } else if (label.indexOf("moveToBottom") > -1) {
                 window.siyuan.layout.bottomDock.add(label.endsWith("Left") ? 0 : 1, target);
             }
+            saveLayout();
         }
     });
 };

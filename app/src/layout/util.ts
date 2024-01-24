@@ -485,6 +485,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     app.plugins.forEach(item => {
         afterLoadPlugin(item);
     });
+    saveLayout();
     resizeTopBar();
 };
 

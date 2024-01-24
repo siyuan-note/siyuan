@@ -81,6 +81,7 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     styleElement.textContent = item.css;
     document.head.append(styleElement);
     afterLoadPlugin(plugin);
+    saveLayout();
     return plugin;
 };
 
@@ -229,7 +230,6 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
         }
     });
-    saveLayout();
     /// #endif
 };
 
@@ -242,4 +242,7 @@ export const reloadPlugin = (app: App) => {
             afterLoadPlugin(item);
         });
     });
+    /// #if !MOBILE
+    saveLayout();
+    /// #endif
 };

@@ -117,7 +117,7 @@ export const openMenuPanel = (options: {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
             } else if (options.type === "relation") {
-                bindRelationEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                bindRelationEvent({menuElement, cellElements: options.cellElements});
             } else if (options.type === "rollup") {
                 bindRollupEvent({protyle: options.protyle, data, menuElement});
             }

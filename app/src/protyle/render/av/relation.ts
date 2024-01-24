@@ -7,6 +7,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
+import {setPosition} from "../../../util/setPosition";
 
 const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {keyword}, (response) => {
@@ -214,8 +215,6 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
 };
 
 export const bindRelationEvent = (options: {
-    protyle: IProtyle,
-    data: IAV,
     menuElement: HTMLElement,
     cellElements: HTMLElement[]
 }) => {
@@ -251,6 +250,8 @@ export const bindRelationEvent = (options: {
         options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML("empty")}</div>`;
+        const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
+        setPosition( options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
     });
 };
 

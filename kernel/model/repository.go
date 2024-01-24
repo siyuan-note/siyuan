@@ -484,7 +484,6 @@ func ResetRepo() (err error) {
 }
 
 func PurgeCloud() (err error) {
-	// TODO https://github.com/siyuan-note/siyuan/issues/10081
 	msg := Conf.Language(223)
 	util.PushEndlessProgress(msg)
 	defer util.PushClearProgress()

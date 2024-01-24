@@ -1048,7 +1048,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     // https://github.com/siyuan-note/siyuan/issues/9848 忘记为什么要阻止了 .av__mask 的情况，测了下没问题就先移除
-    if (document.getElementById("errorLog") || event.isComposing) {
+    if (document.getElementById("progress") || document.getElementById("errorLog") || event.isComposing) {
         return;
     }
     const target = event.target as HTMLElement;

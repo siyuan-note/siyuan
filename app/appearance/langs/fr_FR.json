@@ -1,6 +1,6 @@
 {
   "cloudStoragePurge": "Purger le stockage cloud",
-  "cloudStoragePurgeConfirm": "Remarque :<ul class='fn__list'><li>Veuillez vous assurer que la synchronisation des autres appareils a été suspendue avant l'exécution.</li><li>L'opération de purge prend beaucoup de temps, veuillez vous assurer que le réseau est stable</li></ul>Êtes-vous sûr de l'exécuter maintenant ?",
+  "cloudStoragePurgeConfirm": "Remarque :<ul class='fn__list'><li>Veuillez vous assurer que la synchronisation des autres appareils a été suspendue avant l'exécution</li><li>L'opération de purge prend beaucoup de temps, veuillez vous assurer que le réseau est stable</li></ul>Êtes-vous sûr de l'exécuter maintenant ?",
   "dragFill": "Arrastra verticalmente para rellenar el valor",
   "switchReadonly": "Changer de mode lecture seule",
   "original": "Originale",
@@ -1400,7 +1400,7 @@
     "227": "Téléchargement de l'instantané de stockage cloud...",
     "228": "Téléchargement des fichiers de données de stockage cloud...",
     "229": "Suppression des instantanés non référencés du stockage cloud...",
-    "230": "Suppression des instantanés de vérification non référencés du stockage cloud...",
+    "230": "Suppression des index de vérification non référencés du stockage cloud...",
     "231": "Suppression des objets de données non référencés dans le stockage cloud...",
     "232": "Le stockage de données cloud a été purgé. [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré"
   }

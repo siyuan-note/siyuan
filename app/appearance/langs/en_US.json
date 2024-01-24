@@ -1,6 +1,6 @@
 {
   "cloudStoragePurge": "Purge cloud storage",
-  "cloudStoragePurgeConfirm": "Note:<ul class='fn__list'><li>Please ensure that other devices have paused sync before execution.</li><li>The purge operation is very time-consuming, please ensure that the network is stable</li></ul>Are you sure to execute it now?",
+  "cloudStoragePurgeConfirm": "Note:<ul class='fn__list'><li>Please ensure that other devices have paused sync before execution</li><li>The purge operation is very time-consuming, please ensure that the network is stable</li></ul>Are you sure to execute it now?",
   "dragFill": "Drag vertically to fill value",
   "switchReadonly": "Switch read-only mode",
   "original": "Original",
@@ -1400,7 +1400,7 @@
     "227": "Downloading cloud storage snapshot...",
     "228": "Downloading cloud storage data files...",
     "229": "Deleting cloud storage unreferenced snapshots...",
-    "230": "Deleting cloud storage unreferenced verification snapshots...",
+    "230": "Deleting cloud storage unreferenced check indexes...",
     "231": "Deleting unreferenced data objects in cloud storage...",
     "232": "The cloud data storage has been purged. [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released"
   }

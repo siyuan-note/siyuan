@@ -419,3 +419,15 @@ func purgeRepo(c *gin.Context) {
 		return
 	}
 }
+
+func purgeCloudRepo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if err := model.PurgeCloud(); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(201), err.Error())
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}

@@ -75,7 +75,7 @@
     }
 
     &--hidemark span[data-type~=mark] {
-      font-size: 0;
+      font-size: 0 !important;
 
       &::before {
         content: " [...] ";

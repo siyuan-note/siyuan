@@ -30,7 +30,7 @@ export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
         const payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
-    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user?.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
 </a>
 <div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">

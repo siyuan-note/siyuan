@@ -226,8 +226,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `<div class="b3-menu__label">${window.siyuan.languages.title}</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>`,
+            label: `${window.siyuan.languages.title}<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>`,
         });
     } else {
         menu.addItem({
@@ -296,10 +295,10 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="b3-menu__label">${window.siyuan.languages.link}</div>
+        label: `${window.siyuan.languages.link}
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.title}</div>
+${window.siyuan.languages.title}
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
     });
     const rect = target.getBoundingClientRect();

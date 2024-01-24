@@ -214,11 +214,24 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     }
 };
 
+const filterItem = (listElement: Element, key: string) => {
+    Array.from(listElement.children).forEach((item: HTMLElement) => {
+        if (item.dataset.id) {
+            if (item.textContent.includes(key)) {
+                item.classList.remove("fn__none");
+            } else {
+                item.classList.add("fn__none")
+            }
+        }
+    })
+}
 export const bindRelationEvent = (options: {
     menuElement: HTMLElement,
+    protyle: IProtyle,
+    blockElement: Element,
     cellElements: HTMLElement[]
 }) => {
-    const hasIds = options.menuElement.textContent.split(",");
+    const hasIds = options.menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
     fetchPost("/api/av/renderAttributeView", {
         id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
     }, response => {
@@ -247,11 +260,51 @@ export const bindRelationEvent = (options: {
                 html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.isDetached, item.cells[cellIndex].value.block.content || "Untitled");
             }
         });
-        options.menuElement.innerHTML = `<div class="b3-menu__items">${selectHTML || genSelectItemHTML("empty")}
-<button class="b3-menu__separator"></button>
-${html || genSelectItemHTML("empty")}</div>`;
+        options.menuElement.innerHTML = `<div class="fn__flex-column">
+<div class="b3-menu__item fn__flex-column" data-type="nobg">
+    <div class="b3-menu__label">${avData.name}</div>
+    <input class="b3-text-field fn__flex-shrink"/>
+</div>
+<div class="fn__hr"></div>
+<div class="b3-menu__items">
+    ${selectHTML || genSelectItemHTML("empty")}
+    <button class="b3-menu__separator"></button>
+    ${html || genSelectItemHTML("empty")}
+</div>`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-        setPosition( options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+        options.menuElement.querySelector(".b3-menu__items .b3-menu__item").classList.add("b3-menu__item--current");
+        const inputElement = options.menuElement.querySelector("input")
+        inputElement.focus();
+        const listElement = options.menuElement.querySelector(".b3-menu__items")
+        inputElement.addEventListener("keydown", (event) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            upDownHint(listElement, event, "b3-menu__item--current");
+            const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
+            if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
+                setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === "Escape") {
+                options.menuElement.parentElement.remove();
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        })
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (event.isComposing) {
+                return;
+            }
+            filterItem(listElement, inputElement.value);
+            event.stopPropagation();
+        })
+        inputElement.addEventListener("compositionend", (event) => {
+            event.stopPropagation();
+            filterItem(listElement, inputElement.value);
+        })
     });
 };
 
@@ -268,7 +321,15 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         cellElements[0].querySelectorAll("span").forEach((item) => {
             ids += `${item.getAttribute("data-id")},`;
         });
-        return `<span data-av-id="${colRelationData.avID}">${ids}</span>`;
+        return `<div data-av-id="${colRelationData.avID}" data-cell-ids="${ids}" class="fn__flex-column">
+<div class="b3-menu__item fn__flex-column" data-type="nobg">
+    <div class="b3-menu__label">&nbsp;</div>
+    <input class="b3-text-field fn__flex-shrink"/>
+</div>
+<div class="fn__hr"></div>
+<div class="b3-menu__items">
+    <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+</div>`;
     } else {
         return "";
     }
@@ -320,6 +381,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
         }
+        menuElement.firstElementChild.classList.add("b3-menu__item--current")
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

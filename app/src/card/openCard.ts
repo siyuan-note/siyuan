@@ -45,7 +45,7 @@ export const genCardHTML = (options: {
     /// #else
     iconsHTML = `<div class="block__icons">
         ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__logo">
-            <svg><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
+            <svg class="block__logoicon"><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
         </div>`}
         <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
@@ -158,15 +158,21 @@ export const bindCardEvent = async (options: {
         window.siyuan.mobile.popEditor = editor;
     }
     if (options.cardsData.cards.length > 0) {
-        fetchPost("/api/filetree/getDoc", {
+        fetchPost("/api/block/getDocInfo", {
             id: options.cardsData.cards[index].blockID,
-            mode: 0,
-            size: Constants.SIZE_GET_MAX
         }, (response) => {
-            onGet({
-                data: response,
-                protyle: editor.protyle,
-                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            editor.protyle.wysiwyg.renderCustom(response.data.ial);
+            fetchPost("/api/filetree/getDoc", {
+                id: options.cardsData.cards[index].blockID,
+                mode: 0,
+                size: Constants.SIZE_GET_MAX
+            }, (response) => {
+                onGet({
+                    updateReadonly: true,
+                    data: response,
+                    protyle: editor.protyle,
+                    action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                });
             });
         });
     }
@@ -457,6 +463,10 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     if (exit) {
         return;
     }
+    let lastRange: Range;
+    if (getSelection().rangeCount > 0) {
+        lastRange = getSelection().getRangeAt(0);
+    }
     const dialog = new Dialog({
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
@@ -468,6 +478,9 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
                 if (window.siyuan.mobile) {
                     window.siyuan.mobile.popEditor = null;
                 }
+            }
+            if (lastRange) {
+                focusByRange(lastRange);
             }
         }
     });
@@ -524,15 +537,21 @@ const nextCard = (options: {
     } else {
         options.actionElements[0].firstElementChild.removeAttribute("disabled");
     }
-    fetchPost("/api/filetree/getDoc", {
+    fetchPost("/api/block/getDocInfo", {
         id: options.blocks[options.index].blockID,
-        mode: 0,
-        size: Constants.SIZE_GET_MAX
     }, (response) => {
-        onGet({
-            data: response,
-            protyle: options.editor.protyle,
-            action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+        options.editor.protyle.wysiwyg.renderCustom(response.data.ial);
+        fetchPost("/api/filetree/getDoc", {
+            id: options.blocks[options.index].blockID,
+            mode: 0,
+            size: Constants.SIZE_GET_MAX
+        }, (response) => {
+            onGet({
+                updateReadonly: true,
+                data: response,
+                protyle: options.editor.protyle,
+                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            });
         });
     });
 };

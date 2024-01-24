@@ -12,7 +12,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     }
     const useElement = checkElement.querySelector("use");
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
-        if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
+        if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
@@ -87,7 +87,9 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
         colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
-        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" style="width: ${item.style.width}" ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
+        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 
+style="width: ${item.style.width};text-align: ${item.style.textAlign}" 
+${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
         if (pinIndex === index) {
             colHTML += "</div>";
         }
@@ -107,12 +109,12 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
                 response.data.filters.forEach((item: IAVFilter) => {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
-                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
+                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement));
                 });
                 response.data.sorts.forEach((item: IAVSort) => {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
-                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement), sideRowCellElement.dataset.wrap === "true");
+                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement));
                 });
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             });

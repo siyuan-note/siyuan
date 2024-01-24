@@ -55,7 +55,7 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
-  - from: "appearance/fonts"
+  - from: "src/assets/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-darwin-amd64.zip"

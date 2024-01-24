@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/88250/lute/editor"
 	"io"
 	"io/fs"
 	"mime"
@@ -35,6 +34,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
@@ -472,7 +472,7 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	// 在笔记本下搜索
 	for _, notebook := range notebooks {
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
-		filepath.Walk(notebookAbsPath, func(path string, info fs.FileInfo, _ error) error {
+		filelock.Walk(notebookAbsPath, func(path string, info fs.FileInfo, _ error) error {
 			if isSkipFile(info.Name()) {
 				if info.IsDir() {
 					return filepath.SkipDir
@@ -1190,7 +1190,7 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 	// 笔记本 assets
 	for _, notebook := range notebooks {
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
-		filepath.Walk(notebookAbsPath, func(path string, info fs.FileInfo, err error) error {
+		filelock.Walk(notebookAbsPath, func(path string, info fs.FileInfo, err error) error {
 			if notebookAbsPath == path {
 				return nil
 			}
@@ -1202,7 +1202,7 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 			}
 
 			if info.IsDir() && "assets" == info.Name() {
-				filepath.Walk(path, func(assetPath string, info fs.FileInfo, err error) error {
+				filelock.Walk(path, func(assetPath string, info fs.FileInfo, err error) error {
 					if path == assetPath {
 						return nil
 					}
@@ -1228,7 +1228,7 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 
 	// 全局 assets
 	dataAssetsAbsPath := util.GetDataAssetsAbsPath()
-	filepath.Walk(dataAssetsAbsPath, func(assetPath string, info fs.FileInfo, err error) error {
+	filelock.Walk(dataAssetsAbsPath, func(assetPath string, info fs.FileInfo, err error) error {
 		if dataAssetsAbsPath == assetPath {
 			return nil
 		}
@@ -1265,7 +1265,7 @@ func copyDocAssetsToDataAssets(boxID, parentDocPath string) {
 
 func copyAssetsToDataAssets(rootPath string) {
 	var assetsDirPaths []string
-	filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
 		if rootPath == path || nil == info {
 			return nil
 		}

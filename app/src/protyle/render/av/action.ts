@@ -197,8 +197,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__cellheader")) {
-            showColMenu(protyle, blockElement, target.parentElement);
+        } else if (target.classList.contains("av__cell--header")) {
+            showColMenu(protyle, blockElement, target);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -256,8 +256,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (!blockElement) {
         return false;
     }
-    blockElement.querySelectorAll(".av__cell--select").forEach(item => {
-        item.classList.remove("av__cell--select");
+    blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+        item.classList.remove("av__cell--select", "av__cell--active");
+        item.querySelector(".av__drag-fill")?.remove();
     });
     if (!rowElement.classList.contains("av__row--select")) {
         blockElement.querySelectorAll(".av__row--select").forEach(item => {
@@ -398,7 +399,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     if (headerValue) {
         updateHeaderCell(cellElement, headerValue);
     } else {
-        cellElement.innerHTML = renderCell(value, cellElement.dataset.wrap === "true");
+        cellElement.innerHTML = renderCell(value);
     }
 };
 

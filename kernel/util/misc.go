@@ -43,10 +43,10 @@ func RemoveElem[T any](s []T, index int) []T {
 }
 
 func EscapeHTML(s string) string {
-	if strings.ContainsAny(s, "<>\"'") {
-		return html.EscapeString(s)
+	if ContainsSubStr(s, []string{"&amp;", "&#39;", "&lt;", "&gt;", "&#34;", "&#13;"}) {
+		return s
 	}
-	return s
+	return html.EscapeString(s)
 }
 
 func Reverse(s string) string {
@@ -87,4 +87,13 @@ func RemoveRedundantSpace(str string) string {
 func IsNumeric(s string) bool {
 	_, err := strconv.ParseFloat(s, 64)
 	return err == nil
+}
+
+func ContainsSubStr(s string, subStrs []string) bool {
+	for _, v := range subStrs {
+		if strings.Contains(s, v) {
+			return true
+		}
+	}
+	return false
 }

@@ -50,6 +50,7 @@ export const openMenuPanel = (options: {
         id: avID,
         pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
     }, (response) => {
+        const isCustomAttr = !options.blockElement.classList.contains("av");
         const data = response.data as IAV;
         let html;
         if (options.type === "config") {
@@ -67,7 +68,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
-            html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
+            html = getEditHTML({protyle: options.protyle, data, colId: options.colId, isCustomAttr});
         } else if (options.type === "date") {
             html = getDateHTML(data.view, options.cellElements);
         } else if (options.type === "rollup") {
@@ -91,7 +92,7 @@ export const openMenuPanel = (options: {
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
-        const tabRect = options.blockElement.querySelector(".av__views")?.getBoundingClientRect();
+        const tabRect = options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
         if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
@@ -133,7 +134,7 @@ export const openMenuPanel = (options: {
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data);
             } else if (options.type === "edit") {
-                bindEditEvent({protyle: options.protyle, data, menuElement});
+                bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
             } else if (options.type === "config") {
                 bindViewEvent({protyle: options.protyle, data, menuElement});
             }
@@ -320,9 +321,10 @@ export const openMenuPanel = (options: {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
                         data,
-                        colId
+                        colId,
+                        isCustomAttr
                     });
-                    bindEditEvent({protyle: options.protyle, data, menuElement});
+                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
                 }
                 return;
             }
@@ -676,7 +678,12 @@ export const openMenuPanel = (options: {
                             data: target.dataset.icon,
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(target.dataset.colType as TAVCol)}"></use></svg>`;
-                        updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
+                        if (isCustomAttr) {
+                            const iconElement = options.blockElement.querySelector(`.av__row[data-col-id="${colId}"] .block__logoicon`);
+                            iconElement.outerHTML = unicode ? unicode2Emoji(unicode, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(iconElement.nextElementSibling.getAttribute("data-type") as TAVCol)}"></use></svg>`;
+                        } else {
+                            updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
+                        }
                         target.dataset.icon = unicode;
                     });
                     event.preventDefault();
@@ -742,9 +749,10 @@ export const openMenuPanel = (options: {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
                         data,
-                        colId: target.parentElement.dataset.id
+                        colId: target.parentElement.dataset.id,
+                        isCustomAttr
                     });
-                    bindEditEvent({protyle: options.protyle, data, menuElement});
+                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
@@ -852,9 +860,10 @@ export const openMenuPanel = (options: {
                         menuElement.innerHTML = getEditHTML({
                             protyle: options.protyle,
                             data,
-                            colId
+                            colId,
+                            isCustomAttr
                         });
-                        bindEditEvent({protyle: options.protyle, data, menuElement});
+                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(data.view);
                     }
@@ -881,9 +890,10 @@ export const openMenuPanel = (options: {
                         menuElement.innerHTML = getEditHTML({
                             protyle: options.protyle,
                             data,
-                            colId
+                            colId,
+                            isCustomAttr
                         });
-                        bindEditEvent({protyle: options.protyle, data, menuElement});
+                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(data.view);
                     }
@@ -933,7 +943,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setColOption") {
-                    setColOption(options.protyle, data, target, options.blockElement, options.cellElements);
+                    setColOption(options.protyle, data, target, options.blockElement, isCustomAttr, options.cellElements);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -965,7 +975,7 @@ export const openMenuPanel = (options: {
                         y: rect.bottom,
                         w: target.parentElement.clientWidth + 8,
                         h: rect.height
-                    }, (url) => {
+                    }, (url, name) => {
                         let value: IAVCellAssetValue;
                         if (Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(url).toLowerCase())) {
                             value = {
@@ -977,7 +987,7 @@ export const openMenuPanel = (options: {
                             value = {
                                 type: "file",
                                 content: url,
-                                name: pathPosix().basename(url).substring(0, Constants.SIZE_LINK_TEXT_MAX)
+                                name
                             };
                         }
                         updateAssetCell({
@@ -1078,7 +1088,7 @@ const getPropertiesHTML = (data: IAVTable) => {
     data.columns.forEach((item: IAVColumn) => {
         if (item.hidden) {
             hideHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
@@ -1090,7 +1100,7 @@ const getPropertiesHTML = (data: IAVTable) => {
 </button>`;
         } else {
             showHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}

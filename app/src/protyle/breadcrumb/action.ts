@@ -8,6 +8,7 @@ import {hideAllElements, hideElements} from "../ui/hideElements";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
 import {resize} from "../util/resize";
+import {disabledProtyle, enableProtyle} from "../util/onGet";
 
 export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
@@ -80,4 +81,24 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         }
     });
     /// #endif
+};
+
+export const updateReadonly = (target: Element, protyle: IProtyle) => {
+    if (!window.siyuan.config.readonly) {
+        const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock";
+        if (window.siyuan.config.editor.readOnly) {
+            if (isReadonly) {
+                enableProtyle(protyle);
+            } else {
+                disabledProtyle(protyle);
+            }
+        } else {
+            fetchPost("/api/attr/setBlockAttrs", {
+                id: protyle.block.rootID,
+                attrs: {
+                    [Constants.CUSTOM_SY_READONLY]: isReadonly ? "false" : "true"
+                }
+            });
+        }
+    }
 };

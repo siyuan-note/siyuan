@@ -81,8 +81,7 @@ export class Backlink extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__backlink");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
-        <svg><use xlink:href="#iconLink"></use></svg>
-        ${window.siyuan.languages.backlinks}
+        <svg class="block__logoicon"><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.backlinks}
     </div>
     <span class="counter listCount" style="margin-left: 0"></span>
     <span class="fn__flex-1"></span>
@@ -107,8 +106,7 @@ export class Backlink extends Model {
 <div class="backlinkList fn__flex-1"></div>
 <div class="block__icons">
     <div class="block__logo">
-        <svg><use xlink:href="#iconLink"></use></svg>
-        ${window.siyuan.languages.mentions}
+        <svg class="block__logoicon"><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.mentions}
     </div>
     <span class="counter listMCount" style="margin-left: 0;"></span>
     <span class="fn__flex-1"></span>

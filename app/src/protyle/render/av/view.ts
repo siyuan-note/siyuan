@@ -157,8 +157,8 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     let html = "";
     views.forEach((item) => {
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.id}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-     <div class="fn__flex-1">
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+    <div class="fn__flex-1">
         <span class="b3-chip${item.id === viewId ? " b3-chip--primary" : ""}">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : '<svg class="icon"><use xlink:href="#iconTable"></use></svg>'}
             <span class="fn__ellipsis">${item.name}</span>

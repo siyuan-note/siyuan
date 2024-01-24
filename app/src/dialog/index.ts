@@ -38,7 +38,7 @@ export class Dialog {
         if (!isMobile() && options.positionId) {
             const dialogPosition = window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION][options.positionId];
             if (dialogPosition) {
-                if (dialogPosition.left + dialogPosition.width <= window.innerWidth &&
+                if (dialogPosition.left + dialogPosition.width + 34 <= window.innerWidth &&
                     dialogPosition.top + dialogPosition.height <= window.innerHeight) {
                     left = dialogPosition.left + "px";
                     top = dialogPosition.top + "px";

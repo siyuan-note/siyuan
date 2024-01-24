@@ -65,6 +65,9 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         if (window.siyuan.mobile.editor) {
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);
+            if (window.siyuan.mobile.editor.protyle.block.rootID !== data.data.rootID) {
+                window.siyuan.mobile.editor.protyle.wysiwyg.element.innerHTML = "";
+            }
             if (action.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
@@ -77,7 +80,11 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                     size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                     mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
                 }, getResponse => {
-                    onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action});
+                    onGet({
+                        data: getResponse,
+                        protyle: window.siyuan.mobile.editor.protyle,
+                        action
+                    });
                 });
             }
             window.siyuan.mobile.editor.protyle.undo.clear();

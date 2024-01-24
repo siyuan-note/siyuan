@@ -567,7 +567,7 @@ var boxLatestHistoryTime = map[string]time.Time{}
 
 func (box *Box) recentModifiedDocs() (ret []string) {
 	latestHistoryTime := boxLatestHistoryTime[box.ID]
-	filepath.Walk(filepath.Join(util.DataDir, box.ID), func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(filepath.Join(util.DataDir, box.ID), func(path string, info fs.FileInfo, err error) error {
 		if nil == info {
 			return nil
 		}
@@ -666,7 +666,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 
 	entryPath := filepath.Join(util.HistoryDir, name)
 	var docs, assets []string
-	filepath.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
+	filelock.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(info.Name(), ".sy") {
 			docs = append(docs, path)
 		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {

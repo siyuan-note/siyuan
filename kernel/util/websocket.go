@@ -168,6 +168,8 @@ type BlockStatResult struct {
 
 func ContextPushMsg(context map[string]interface{}, msg string) {
 	switch context[eventbus.CtxPushMsg].(int) {
+	case eventbus.CtxPushMsgToNone:
+		break
 	case eventbus.CtxPushMsgToProgress:
 		PushEndlessProgress(msg)
 	case eventbus.CtxPushMsgToStatusBar:

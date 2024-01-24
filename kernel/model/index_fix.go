@@ -31,6 +31,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -153,7 +154,11 @@ func resetDuplicateBlocksOnFileSys() {
 
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var duplicatedTrees []*parse.Tree
-		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+		filelock.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if nil == info {
+				return nil
+			}
+
 			if info.IsDir() {
 				if boxPath == path {
 					// 跳过根路径（笔记本文件夹）
@@ -297,9 +302,13 @@ func fixBlockTreeByFileSys() {
 	for _, box := range boxes {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
-		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+		filelock.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
 			if boxPath == path {
 				// 跳过根路径（笔记本文件夹）
+				return nil
+			}
+
+			if nil == info {
 				return nil
 			}
 

@@ -39,6 +39,10 @@ export const showTooltip = (message: string, target: Element, error = false) => 
         // file tree and outline、backlink
         top = parentRect.top;
         left = parentRect.right + 8;
+    } else if (position === "parentW") {
+        // 数据库属性视图
+        top = parentRect.top + 8;
+        left = parentRect.left - messageElement.clientWidth;
     }
     const topHeight = position === "parentE" ? top : targetRect.top;
     const bottomHeight = window.innerHeight - top;

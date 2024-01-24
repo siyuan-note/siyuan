@@ -25,7 +25,7 @@ import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
-import {loadPlugins} from "./plugin/loader";
+import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 
 export class App {
@@ -59,6 +59,9 @@ export class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "reloadPlugin":
+                                reloadPlugin(this);
+                                break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
                                 break;
@@ -151,7 +154,7 @@ export class App {
             window.siyuan.config = response.data.conf;
             await loadPlugins(this);
             getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages:IObject) => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
                     bootSync();

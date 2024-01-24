@@ -1,4 +1,6 @@
 {
+  "dragFill": "Arrastra verticalmente para rellenar el valor",
+  "switchReadonly": "Cambiar modo de sólo lectura",
   "original": "Original",
   "selectRelation": "Seleccione primero la columna relacionada",
   "backRelation": "Bidireccional",
@@ -848,7 +850,8 @@
   "refreshUser": "Información del usuario actualizada",
   "insertBottom": "Abrir debajo de la pestaña",
   "insertRight": "Abrir a la derecha la pestaña",
-  "account1": "Haga clic para suscribirse",
+  "account1": "Conviértete en miembro pago",
+  "account4": "Actualizar a miembro suscrito",
   "account2": "Copia de seguridad y sincronización de datos cifrados de extremo a extremo",
   "account3": "Suscripción de prueba",
   "account5": "Alojamiento de activos en la nube",
@@ -1385,6 +1388,9 @@
     "217": "[%d/%d] Índice de datos de contenido de activos creado",
     "218": "Se han detectado demasiadas instantáneas del repositorio de datos, lo que ralentiza el inicio del programa y la sincronización de datos. Considere ejecutar [Configuración - Acerca de - Purga del repositorio de datos]",
     "219": "El servicio de almacenamiento en la nube no está disponible, inténtalo de nuevo más tarde",
-    "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube"
+    "220": "Debido a un defecto en la versión anterior, los datos de la nube están dañados. Consulte los pasos de la User Guide-FAQ-Lost Key para restablecer el repositorio de datos local y el directorio de la nube",
+    "221": "La operación de reemplazo no es compatible después de agrupar por documento. Utilice desagrupar y luego reemplazar",
+    "222": "La sincronización de datos está en curso. Espere hasta que se complete la sincronización de datos e inténtelo de nuevo",
+    "223": "Limpiando el almacenamiento en la nube..."
   }
 }

@@ -107,7 +107,7 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
 	ret = map[int][]string{}
 	page := 1
-	filepath.Walk(localPath, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(localPath, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			if strings.HasPrefix(info.Name(), ".") {
 				return filepath.SkipDir

@@ -19,7 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -80,7 +80,7 @@ func RemoveIndexes(paths []string) {
 
 func listSyFiles(dir string) (ret []string) {
 	dirPath := filepath.Join(util.DataDir, dir)
-	err := filepath.WalkDir(dirPath, func(path string, d os.DirEntry, err error) error {
+	err := filelock.Walk(dirPath, func(path string, d fs.FileInfo, err error) error {
 		if nil != err {
 			logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
 			return err

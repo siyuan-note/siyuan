@@ -195,7 +195,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
 const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string) => {
     if (type === "selected") {
         return `<button data-id="${id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>
 </button>`;

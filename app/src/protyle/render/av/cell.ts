@@ -18,13 +18,16 @@ export const getCellText = (cellElement: HTMLElement | false) => {
         return "";
     }
     let cellText = "";
-    const textElement = cellElement.querySelector(".av__celltext");
-    if (textElement) {
-        if (textElement.querySelector(".av__cellicon")) {
-            cellText = `${textElement.firstChild.textContent} → ${textElement.lastChild.textContent}`;
-        } else {
-            cellText = textElement.textContent;
-        }
+    const textElements = cellElement.querySelectorAll(".b3-chip, .av__celltext--ref, .av__celltext");
+    if (textElements.length > 0) {
+        textElements.forEach(item => {
+            if (item.querySelector(".av__cellicon")) {
+                cellText += `${item.firstChild.textContent} → ${item.lastChild.textContent}, `;
+            } else if (item.getAttribute("data-type") !== "block-more") {
+                cellText += item.textContent + ", ";
+            }
+        });
+        cellText = cellText.substring(0, cellText.length - 2);
     } else {
         cellText = cellElement.textContent;
     }
@@ -43,9 +46,13 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             isNotEmpty: !!value
         };
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+        const textElement = cellElement.querySelector(".av__celltext") as HTMLElement;
         cellValue[colType as "text"] = {
-            content: cellElement.querySelector(".av__celltext").textContent
+            content: textElement.textContent
         };
+        if (colType === "block" && textElement.dataset.id) {
+            cellValue.block.id = textElement.dataset.id;
+        }
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
         cellElement.querySelectorAll(".b3-chip").forEach((item: HTMLElement) => {
@@ -510,7 +517,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     return text;
 };
 
-export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
+export const renderCell = (cellValue: IAVCellValue) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
         text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
@@ -531,7 +538,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
 <span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
-        text = `<span style="float: right;${wrap ? "word-break: break-word;" : ""}" class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
+        text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
         cellValue?.mSelect?.forEach((item) => {
             text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
@@ -565,7 +572,7 @@ export const renderCell = (cellValue: IAVCellValue, wrap: boolean) => {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, wrap) : renderRollup(item);
+            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item) : renderRollup(item);
             if (rollupText) {
                 text += rollupText + ", ";
             }
@@ -636,14 +643,99 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
     if (typeof headerValue.pin !== "undefined") {
         const textElement = cellElement.querySelector(".av__celltext");
         if (headerValue.pin) {
-            if (!textElement.nextElementSibling) {
-                textElement.insertAdjacentHTML("afterend", '<div class="fn__flex-1"></div><svg class="av__cellheadericon"><use xlink:href="#iconPin"></use></svg>');
+            if (!cellElement.querySelector(".av__cellheadericon--pin")) {
+                textElement.insertAdjacentHTML("afterend", '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>');
             }
         } else {
-            if (textElement.nextElementSibling) {
-                textElement.nextElementSibling.nextElementSibling.remove();
-                textElement.nextElementSibling.remove();
-            }
+            cellElement.querySelector(".av__cellheadericon--pin")?.remove();
         }
+    }
+};
+
+export const getPositionByCellElement = (cellElement: HTMLElement) => {
+    let rowElement = hasClosestByClassName(cellElement, "av__row");
+    if (!rowElement) {
+        return;
+    }
+    let rowIndex = -1;
+    while (rowElement) {
+        rowElement = rowElement.previousElementSibling as HTMLElement;
+        rowIndex++;
+    }
+    let celIndex = -2;
+    while (cellElement) {
+        cellElement = cellElement.previousElementSibling as HTMLElement;
+        if (cellElement && cellElement.classList.contains("av__colsticky")) {
+            cellElement = cellElement.lastElementChild as HTMLElement;
+        }
+        celIndex++;
+    }
+    return {rowIndex, celIndex};
+};
+
+export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, originData: {
+    [key: string]: IAVCellValue[]
+}, originCellIds: string[]) => {
+    nodeElement.querySelector(".av__drag-fill")?.remove();
+    const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
+    nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+        if (originCellIds.includes(item.dataset.id)) {
+            return;
+        }
+        const rowElement = hasClosestByClassName(item, "av__row");
+        if (!rowElement) {
+            return;
+        }
+        if (!newData[rowElement.dataset.id]) {
+            newData[rowElement.dataset.id] = [];
+        }
+        const value: IAVCellValue & {
+            colId?: string,
+            element?: HTMLElement
+        } = genCellValueByElement(getTypeByCellElement(item), item);
+        value.colId = item.dataset.colId;
+        value.element = item;
+        newData[rowElement.dataset.id].push(value);
+    });
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const avID = nodeElement.dataset.avId;
+    const originKeys = Object.keys(originData);
+    Object.keys(newData).forEach((rowID, index) => {
+        newData[rowID].forEach((item, cellIndex) => {
+            if (["rollup", "template", "created", "updated"].includes(item.type)) {
+                return;
+            }
+            const data = originData[originKeys[index % originKeys.length]][cellIndex];
+            data.id = item.id;
+            const keyID = item.colId;
+            if (data.type === "block") {
+                data.isDetached = true;
+                delete data.block.id;
+            }
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: item.id,
+                avID,
+                keyID,
+                rowID,
+                data
+            });
+            item.element.innerHTML = renderCell(data);
+            delete item.colId;
+            delete item.element;
+            undoOperations.push({
+                action: "updateAttrViewCell",
+                id: item.id,
+                avID,
+                keyID,
+                rowID,
+                data: item
+            });
+        });
+    });
+    focusBlock(nodeElement);
+    if (doOperations.length > 0) {
+        transaction(protyle, doOperations, undoOperations);
     }
 };

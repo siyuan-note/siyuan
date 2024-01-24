@@ -84,7 +84,8 @@ export const duplicateCol = (options: {
 export const getEditHTML = (options: {
     protyle: IProtyle,
     colId: string,
-    data: IAV
+    data: IAV,
+    isCustomAttr: boolean
 }) => {
     let colData: IAVColumn;
     options.data.view.columns.find((item) => {
@@ -94,7 +95,7 @@ export const getEditHTML = (options: {
         }
     });
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
+    <span class="block__icon${options.isCustomAttr ? " fn__none" : ""}" style="padding: 8px;margin-left: -4px;" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
@@ -119,7 +120,7 @@ export const getEditHTML = (options: {
 </button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${item.name}</span>
@@ -165,7 +166,7 @@ export const getEditHTML = (options: {
     return `<div class="b3-menu__items">
     ${html}
     <button class="b3-menu__separator"></button>
-    <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    <button class="b3-menu__item${options.isCustomAttr ? " fn__none" : ""}" data-type="${colData.hidden ? "showCol" : "hideCol"}">
         <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
         <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
     </button>
@@ -207,7 +208,8 @@ export const getEditHTML = (options: {
 export const bindEditEvent = (options: {
     protyle: IProtyle,
     data: IAV,
-    menuElement: HTMLElement
+    menuElement: HTMLElement,
+    isCustomAttr: boolean
 }) => {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
@@ -316,8 +318,18 @@ export const bindEditEvent = (options: {
                     avID,
                     data: addOptionElement.value
                 }]);
-                options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
-                bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
+                options.menuElement.innerHTML = getEditHTML({
+                    protyle: options.protyle,
+                    colId,
+                    data: options.data,
+                    isCustomAttr: options.isCustomAttr
+                });
+                bindEditEvent({
+                    protyle: options.protyle,
+                    menuElement: options.menuElement,
+                    data: options.data,
+                    isCustomAttr: options.isCustomAttr
+                });
                 (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
             }
         });
@@ -427,7 +439,7 @@ const addAttrViewColAnimation = (options: {
     icon?: string,
     previousID: string
 }) => {
-    if (!options.blockElement) {
+    if (!options.blockElement || !options.blockElement.classList.contains("av")) {
         return;
     }
     options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
@@ -439,12 +451,11 @@ const addAttrViewColAnimation = (options: {
         }
         let html = "";
         if (index === 0) {
-            html = `<div class="av__cell" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
-    <div draggable="true" class="av__cellheader">
-        ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
-        <span class="av__celltext">${options.name}</span>
-    </div>
-    <div class="av__widthdrag"></div>
+            // av__pulse 用于检测是否新增，和 render 中 isPulse 配合弹出菜单
+            html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
+    ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
+    <span class="av__celltext fn__flex-1">${options.name}</span>
+    <div class="av__widthdrag av__pulse"></div>
 </div>`;
         } else {
             html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';

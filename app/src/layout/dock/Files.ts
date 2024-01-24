@@ -86,8 +86,7 @@ export class Files extends Model {
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__file");
         options.tab.panelElement.innerHTML = `<div class="block__icons">
     <div class="block__logo">
-        <svg><use xlink:href="#iconFiles"></use></svg>
-        ${window.siyuan.languages.fileTree}
+        <svg class="block__logoicon"><use xlink:href="#iconFiles"></use></svg>${window.siyuan.languages.fileTree}
     </div>
     <span class="fn__flex-1 fn__space"></span>
     <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1} ${updateHotkeyTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>

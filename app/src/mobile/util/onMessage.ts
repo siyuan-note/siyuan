@@ -2,10 +2,14 @@ import {openMobileFileById} from "../editor";
 import {processSync, progressLoading, progressStatus, reloadSync, transactionError} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {App} from "../../index";
+import {reloadPlugin} from "../../plugin/loader";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "reloadPlugin":
+                reloadPlugin(app);
+                break;
             case "syncMergeResult":
                 reloadSync(app, data.data);
                 break;

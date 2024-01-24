@@ -10,7 +10,7 @@ import {processSync} from "../dialog/processSystem";
 import {needSubscribe} from "../util/needSubscribe";
 import {syncGuide} from "../sync/syncGuide";
 import {hideElements} from "../protyle/ui/hideElements";
-import {getCloudURL} from "./util/about";
+import {getCloudURL, getIndexURL} from "./util/about";
 
 const genSVGBG = () => {
     let html = "";
@@ -29,10 +29,9 @@ const genSVGBG = () => {
 export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
-        const payHTML = `
-<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
-    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
-</a>      
+        const payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user?.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
+</a>
 <div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>

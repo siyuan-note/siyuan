@@ -53,7 +53,7 @@ export const bindAssetEvent = (options: {
 
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
-    genCellValueByElement(getTypeByCellElement(cellElements[0]), cellElements[0]).mAsset.forEach(item => {
+    genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach(item => {
         if (!item.content) {
             return;
         }
@@ -67,7 +67,7 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
         }
 
         html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
-<svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
 </button>`;

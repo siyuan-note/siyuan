@@ -106,7 +106,7 @@
     &--hl {
       &:not(.av__row--header) .av__cell,
       &:not(.av__row--header) .av__firstcol {
-        background-color: var(--b3-av-background-hl);
+        background-color: var(--b3-av-background-hl) !important;
       }
 
       .av__firstcol svg {
@@ -116,17 +116,6 @@
 
     &--header {
       z-index: 3;
-
-      .av__cell {
-        padding: 0;
-        transition: background 20ms ease-in 0s;
-        display: flex;
-        overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
-
-        &:hover {
-          background-color: var(--b3-av-hover);
-        }
-      }
     }
 
     &--header,
@@ -253,9 +242,45 @@
     }
 
     &--select {
-      background-color: var(--b3-theme-primary-lightest);
+      background-color: var(--b3-menu-background);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0px var(--b3-theme-primary-lighter) inset;
       border-radius: var(--b3-border-radius);
+    }
+
+    &--active {
+      background-color: var(--b3-menu-background);
+    }
+
+    &--header {
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      transition: background 20ms ease-in 0s;
+      overflow: inherit; // 保证列宽和顺序调整的拖拽点样式
+      border-right-color: transparent;
+
+      &:hover {
+        background-color: var(--b3-av-hover);
+      }
+
+      .av__celltext {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .av__cellheadericon {
+        height: 1em;
+        width: 1em;
+        color: var(--b3-theme-on-surface);
+        margin: 0 5px 0 0;
+        flex-shrink: 0;
+        line-height: 1em;
+        font-size: inherit;
+
+        &--pin {
+          margin: 0 0 0 5px;
+        }
+      }
     }
 
     .block__icon {
@@ -275,22 +300,16 @@
     }
   }
 
-  &__cellheader {
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    flex: 1;
-    overflow: hidden;
-
-    .av__cellheadericon {
-      height: 1em;
-      width: 1em;
-      color: var(--b3-theme-on-surface);
-      margin: 0 5px 0 0;
-      flex-shrink: 0;
-      line-height: 1em;
-      font-size: inherit;
-    }
+  &__drag-fill {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--b3-theme-primary-lighter);
+    border-radius: 50%;
+    box-sizing: border-box;
+    cursor: ns-resize;
   }
 
   &__celltext {
@@ -340,7 +359,7 @@
     display: flex;
 
     &.av__firstcol,
-    & > div {
+    & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
       background-color: var(--av-background);
     }
   }
@@ -432,8 +451,10 @@
   .av__row--select .av__cell,
   .av__colsticky.av__firstcol,
   .av__colsticky > div,
+  .av__cell--select,
+  .av__cell--active,
   .av__counter {
-    background-color: var(--b3-av-background-hl);
+    background-color: var(--b3-av-background-hl) !important;
   }
 }
 

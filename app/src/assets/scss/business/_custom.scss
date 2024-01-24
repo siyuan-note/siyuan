@@ -1,45 +1,60 @@
 .custom-attr {
+
+  &__avvalue {
+    cursor: pointer;
+    transition: var(--b3-transition);
+    border-radius: var(--b3-border-radius);
+    padding: 4px 8px;
+    line-height: 26px;
+    min-height: 26px;
+
+    &:hover {
+      background-color: var(--b3-theme-background);
+    }
+  }
+
+  &__avheader {
+    border-bottom: 1px solid var(--b3-border-color);
+    padding: 8px;
+    color: var(--b3-protyle-inline-blockref-color);
+    opacity: .86;
+    transition: var(--b3-transition);
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
   .b3-label {
     display: block;
     padding: 8px 16px;
   }
 
-  .block__logo {
+  .block__logo:not(.popover__block) {
     width: 160px;
     color: var(--b3-theme-on-surface);
-
-    svg {
-      margin-right: 4px;
-    }
 
     span {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
     }
-
-    &.custom-attr__avheader {
-      color: var(--b3-protyle-inline-blockref-color);
-      opacity: .86;
-      transition: var(--b3-transition);
-      width: 100%;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid var(--b3-border-color);
-      padding: 8px 0;
-      cursor: pointer;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
   }
 
   .block__icons {
-    min-height: auto;
+    box-sizing: border-box;
     padding: 4px 8px;
     font-size: 100%;
     border-bottom: 0;
+
+    & > .block__icon {
+      cursor: grab;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
   }
 
   .b3-text-field--text {
@@ -54,24 +69,15 @@
     }
   }
 
-  .custom-attr__avvalue {
-    cursor: pointer;
-    transition: var(--b3-transition);
-    border-radius: var(--b3-border-radius);
-    padding: 4px 8px;
-    line-height: 26px;
-    min-height: 26px;
-
-    &:hover {
-      background-color: var(--b3-theme-background);
-    }
-  }
-
   .b3-chip {
     margin: 1px 2px;
   }
 
   .av__cellassetimg {
     max-height: 24px;
+  }
+
+  .dragover__top.av__row {
+    box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
   }
 }

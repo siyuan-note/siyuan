@@ -1,4 +1,6 @@
 {
+  "dragFill": "Drag vertically to fill value",
+  "switchReadonly": "Switch read-only mode",
   "original": "Original",
   "selectRelation": "Please select the related column first",
   "backRelation": "Bidirectional",
@@ -848,7 +850,8 @@
   "refreshUser": "User information refreshed",
   "insertBottom": "Open Below the Tab",
   "insertRight": "Open Right the Tab",
-  "account1": "Click to subscribe",
+  "account1": "Become a paid member",
+  "account4": "Upgrade to a subscription member",
   "account2": "End-to-end encrypted data sync and backup",
   "account3": "Trial Subscription",
   "account5": "Cloud assets hosting",
@@ -1385,6 +1388,9 @@
     "217": "[%d/%d] Created asset content data index",
     "218": "Too many snapshots of the data repo have been detected, which slows down program startup and data sync. Please consider executing [Settings - About - Data repo purge]",
     "219": "The cloud storage service is unavailable, please try again later",
-    "220": "Due to a defect in the previous version, the cloud data is corrupted. Please refer to the User Guide-FAQ-Lost Key steps to reset the local data repo and cloud directory"
+    "220": "Due to a defect in the previous version, the cloud data is corrupted. Please refer to the User Guide-FAQ-Lost Key steps to reset the local data repo and cloud directory",
+    "221": "The replacement operation is not supported after grouping by document. Please use ungrouping and then replace",
+    "222": "Data sync is in progress, please wait until data sync is completed and try again",
+    "223": "Cleaning cloud storage..."
   }
 }

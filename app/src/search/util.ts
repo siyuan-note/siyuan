@@ -1108,26 +1108,32 @@ export const getArticle = (options: {
     checkFold(options.id, (zoomIn) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
-        fetchPost("/api/filetree/getDoc", {
+        fetchPost("/api/block/getDocInfo", {
             id: options.id,
-            query: options.value,
-            queryMethod: options.config.method,
-            queryTypes: options.config.types,
-            mode: zoomIn ? 0 : 3,
-            size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-            zoom: zoomIn,
-        }, getResponse => {
-            onGet({
-                data: getResponse,
-                protyle: options.edit.protyle,
-                action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+        }, (response) => {
+            options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
+            fetchPost("/api/filetree/getDoc", {
+                id: options.id,
+                query: options.value,
+                queryMethod: options.config.method,
+                queryTypes: options.config.types,
+                mode: zoomIn ? 0 : 3,
+                size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+                zoom: zoomIn,
+            }, getResponse => {
+                onGet({
+                    updateReadonly: true,
+                    data: getResponse,
+                    protyle: options.edit.protyle,
+                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+                });
+                const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
+                if (matchElement) {
+                    matchElement.classList.add("search-mark--hl");
+                    const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
+                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                }
             });
-            const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
-            if (matchElement) {
-                matchElement.classList.add("search-mark--hl");
-                const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
-            }
         });
     });
 };

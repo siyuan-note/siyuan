@@ -56,8 +56,7 @@ export class Bookmark extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
-        <svg><use xlink:href="#iconBookmark"></use></svg>
-        ${window.siyuan.languages.bookmark}
+        <svg class="block__logoicon"><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.bookmark}
     </div>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>

@@ -540,34 +540,28 @@ const initKernel = (workspace, port, lang) => {
             });
         }
 
-        let gotVersion = false;
         let apiData;
         let count = 0;
         writeLog("checking kernel version");
-        while (!gotVersion && count < 15) {
+        for (; ;) {
             try {
                 const apiResult = await net.fetch(getServer() + "/api/system/version");
                 apiData = await apiResult.json();
-                gotVersion = true;
                 bootWindow.setResizable(false);
                 bootWindow.loadURL(getServer() + "/appearance/boot/index.html");
                 bootWindow.show();
+                break;
             } catch (e) {
                 writeLog("get kernel version failed: " + e.message);
-                await sleep(200);
-            } finally {
-                count++;
-                if (14 < count) {
+                if (14 < ++count) {
                     writeLog("get kernel ver failed");
                     showErrorWindow("⚠️ 获取内核服务端口失败 Failed to get kernel serve port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to get kernel serve port, please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                     bootWindow.destroy();
                     resolve(false);
+                    return;
                 }
+                await sleep(200);
             }
-        }
-
-        if (!gotVersion) {
-            return;
         }
 
         if (0 === apiData.code) {

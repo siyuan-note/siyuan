@@ -1,4 +1,6 @@
 {
+  "dragFill": "Arrastra verticalmente para rellenar el valor",
+  "switchReadonly": "Changer de mode lecture seule",
   "original": "Originale",
   "selectRelation": "Veuillez d'abord sélectionner la colonne associée",
   "backRelation": "Bidirectionnel",
@@ -848,7 +850,8 @@
   "refreshUser": "Les informations sur l'utilisateur ont été actualisées",
   "insertBottom": "Ouvrir en bas de l'onglet",
   "insertRight": "Ouvrir en droit de l'onglet",
-  "account1": "Cliquez pour vous abonner",
+  "account1": "Devenez membre payant",
+  "account4": "Mise à niveau vers un Membre abonné",
   "account2": "Synchronisation et sauvegarde des données cryptées de bout en bout",
   "account3": "Abonnement d'essai",
   "account5": "Hébergement d'actifs cloud",
@@ -1385,6 +1388,9 @@
     "217": "[%d/%d] Création d'un index de données de contenu d'actif",
     "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",
     "219": "Le service de stockage cloud n'est pas disponible, veuillez réessayer plus tard",
-    "220": "En raison d'un défaut dans la version précédente, les données cloud sont corrompues. Veuillez vous référer aux étapes User Guide-FAQ-Lost Key pour réinitialiser le référentiel de données local et le répertoire cloud"
+    "220": "En raison d'un défaut dans la version précédente, les données cloud sont corrompues. Veuillez vous référer aux étapes User Guide-FAQ-Lost Key pour réinitialiser le référentiel de données local et le répertoire cloud",
+    "221": "L'opération de remplacement n'est pas prise en charge après le regroupement par document. Veuillez utiliser le dissociation puis remplacer",
+    "222": "La synchronisation des données est en cours, veuillez attendre que la synchronisation des données soit terminée et réessayer",
+    "223": "Nettoyage du stockage cloud..."
   }
 }

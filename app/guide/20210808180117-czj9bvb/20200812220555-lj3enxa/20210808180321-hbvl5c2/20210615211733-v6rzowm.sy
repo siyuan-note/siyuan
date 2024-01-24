@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20230422102226"
+		"updated": "20240119210241"
 	},
 	"Children": [
 		{
@@ -1708,7 +1708,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210928094612-rymbb43",
-				"updated": "20220708101301"
+				"updated": "20240119210241"
 			},
 			"Children": [
 				{
@@ -1718,11 +1718,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": " 工作空间/data/.siyuan/syncignore"
+					"TextMarkTextContent": "工作空间/data/.siyuan/syncignore"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "， 其中每一行使用 data 文件夹的相对路径进行配置，表示忽略文件或文件夹的路径，支持通配符。例如："
+					"Data": "​， 其中每一行使用 data 文件夹的相对路径进行配置，表示忽略文件或文件夹的路径，支持通配符。例如："
 				}
 			]
 		},

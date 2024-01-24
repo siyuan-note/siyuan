@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
 
@@ -215,7 +216,7 @@ func IsSubPath(absPath, toCheckPath string) bool {
 }
 
 func SizeOfDirectory(path string) (size int64, err error) {
-	err = filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+	err = filelock.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if nil != err {
 			return err
 		}
@@ -234,7 +235,7 @@ func SizeOfDirectory(path string) (size int64, err error) {
 }
 
 func DataSize() (dataSize, assetsSize int64) {
-	filepath.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
+	filelock.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
 		if nil != err {
 			if os.IsNotExist(err) {
 				return nil
@@ -283,7 +284,7 @@ func WalkWithSymlinks(root string, fn filepath.WalkFunc) error {
 	}
 
 	visitedDirs := make(map[string]struct{})
-	return filepath.Walk(rr, getWalkFn(visitedDirs, fn))
+	return filelock.Walk(rr, getWalkFn(visitedDirs, fn))
 }
 
 func getWalkFn(visitedDirs map[string]struct{}, fn filepath.WalkFunc) filepath.WalkFunc {
@@ -319,7 +320,7 @@ func getWalkFn(visitedDirs map[string]struct{}, fn filepath.WalkFunc) filepath.W
 		}
 
 		if ri.IsDir() {
-			return filepath.Walk(rp, getWalkFn(visitedDirs, fn))
+			return filelock.Walk(rp, getWalkFn(visitedDirs, fn))
 		}
 
 		return nil

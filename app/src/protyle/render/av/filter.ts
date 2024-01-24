@@ -275,7 +275,7 @@ export const setFilter = async (options: {
     if (filterType === "select" || filterType === "mSelect") {
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
-            options.filter.value?.mSelect.find((optionItem) => {
+            options.filter.value?.mSelect?.find((optionItem) => {
                 if (optionItem.content === option.name) {
                     icon = "iconCheck";
                 }
@@ -508,7 +508,7 @@ export const getFiltersHTML = (data: IAVTable) => {
 
     data.filters.forEach((item: IAVFilter) => {
         html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">${genFilterItem(item)}</div>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;

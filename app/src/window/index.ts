@@ -19,7 +19,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
-import {loadPlugins} from "../plugin/loader";
+import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 
 class App {
@@ -51,6 +51,9 @@ class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "reloadPlugin":
+                                reloadPlugin(this);
+                                break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
                                 break;

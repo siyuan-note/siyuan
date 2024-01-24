@@ -67,15 +67,10 @@ const initMermaid = (mermaidElements: Element[]) => {
 </div>`);
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
-        renderElement.removeAttribute("data-processed");
-        renderElement.textContent = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
+        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false">${Lute.UnEscapeHTMLStr(item.getAttribute("data-content"))}</div>`;
         setTimeout(() => {
-            window.mermaid.init(undefined, renderElement);
+            window.mermaid.init(undefined, renderElement.lastElementChild);
         }, Constants.TIMEOUT_LOAD * index);
         item.setAttribute("data-render", "true");
-        renderElement.setAttribute("contenteditable", "false");
-        if (!item.textContent.endsWith(Constants.ZWSP)) {
-            item.insertAdjacentHTML("beforeend", `<span style="position: absolute">${Constants.ZWSP}</span>`);
-        }
     });
 };

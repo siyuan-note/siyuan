@@ -101,7 +101,7 @@ const renderProvider = (provider: number) => {
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
-    <button class="b3-button b3-button--outline fn__size200" data-action="removeData">
+    <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
     <div class="fn__space"></div>
@@ -155,7 +155,7 @@ const renderProvider = (provider: number) => {
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
-    <button class="b3-button b3-button--outline fn__size200" data-action="removeData">
+    <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
     <div class="fn__space"></div>
@@ -477,8 +477,8 @@ export const repos = {
                         openByMobile(response.data.zip);
                     });
                     break;
-                } else if (action === "removeData") {
-                    confirmDialog(window.siyuan.languages.cloudStoragePurge, window.siyuan.languages.cloudStoragePurgeConfirm, () => {
+                } else if (action === "purgeData") {
+                    confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, window.siyuan.languages.cloudStoragePurgeConfirm, () => {
                         fetchPost("/api/repo/purgeCloudRepo");
                     });
                     break;

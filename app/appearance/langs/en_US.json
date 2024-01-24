@@ -1395,7 +1395,7 @@
     "224": "Listing cloud storage data objects...",
     "225": "Listing cloud storage snapshots...",
     "226": "Listing cloud storage snapshot references...",
-    "227": "Downloading cloud storage snapshot [%s]...",
+    "227": "Downloading cloud storage snapshot...",
     "228": "Downloading cloud storage data files...",
     "229": "Deleting cloud storage unreferenced snapshots...",
     "230": "Deleting cloud storage unreferenced verification snapshots...",

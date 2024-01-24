@@ -478,7 +478,7 @@ export const repos = {
                     });
                     break;
                 } else if (action === "purgeData") {
-                    confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, window.siyuan.languages.cloudStoragePurgeConfirm, () => {
+                    confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
                         fetchPost("/api/repo/purgeCloudRepo");
                     });
                     break;

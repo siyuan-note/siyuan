@@ -57,7 +57,7 @@ export const onGet = (options: {
             return;
         }
     }
-    hideElements(["gutter"], options.protyle);
+    hideElements(["gutterOnly"], options.protyle);
     options.protyle.block.parentID = options.data.data.parentID;
     options.protyle.block.parent2ID = options.data.data.parent2ID;
     options.protyle.block.rootID = options.data.data.rootID;

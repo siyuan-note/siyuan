@@ -33,7 +33,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
 
         if (!window.siyuan.dragElement) { // https://ld246.com/article/1649638389841
-            hideElements(["gutter"], protyle);
+            hideElements(["gutterOnly"], protyle);
         }
 
         if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {

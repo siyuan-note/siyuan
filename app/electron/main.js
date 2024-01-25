@@ -807,7 +807,7 @@ app.whenReady().then(() => {
                 currentWindow.setAlwaysOnTop(false);
                 break;
             case "setAlwaysOnTopTrue":
-                currentWindow.setAlwaysOnTop(true, "pop-up-menu");
+                currentWindow.setAlwaysOnTop(true);
                 break;
             case "clearCache":
                 event.sender.session.clearCache();

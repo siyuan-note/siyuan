@@ -23,15 +23,19 @@ export const AIChat = (protyle: IProtyle, element: Element) => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        let inputValue = inputElement.value;
         fetchPost("/api/ai/chatGPT", {
-            msg: inputElement.value,
+            msg: inputValue,
         }, (response) => {
             dialog.destroy();
             let respContent = "";
             if (response.data && "" !== response.data) {
                 respContent = "\n\n" + response.data;
             }
-            fillContent(protyle, `${inputElement.value}${respContent}`, [element]);
+            if (inputValue === "Clear context") {
+                inputValue = "";
+            }
+            fillContent(protyle, `${inputValue}${respContent}`, [element]);
         });
     });
 };

@@ -176,9 +176,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             });
             html += `<div class="fn__hr"></div>
 <div class="fn__flex">
-    <div class="fn__flex-1"></div>
+    <div class="fn__space"></div><div class="fn__space"></div>
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
-    <div class="fn__space"></div>
 </div></div>`;
         });
         if (element.innerHTML === "") {

@@ -2432,6 +2432,14 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if err = gulu.JSON.UnmarshalJSON(data, &val); nil != err {
 		return
 	}
+
+	if av.KeyTypeNumber == val.Type {
+		if nil != val.Number && !val.Number.IsNotEmpty {
+			// 删除内容为空值
+			val.Number.Content = 0
+		}
+	}
+
 	relationChangeMode := 0 // 0：不变（仅排序），1：增加，2：减少
 	if av.KeyTypeRelation == val.Type {
 		// 关联列得 content 是自动渲染的，所以不需要保存

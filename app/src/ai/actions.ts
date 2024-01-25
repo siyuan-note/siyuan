@@ -307,7 +307,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             }
         }, {
             iconHTML: "",
-            label: window.siyuan.languages.aiFixGrammarSpell,
+            label: window.siyuan.languages.clearContext,
             click() {
                 fetchPost("/api/ai/chatGPTWithAction", {
                     ids,

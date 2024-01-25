@@ -1,4 +1,5 @@
 {
+  "clearContext": "Clear context",
   "cloudStoragePurge": "Purge cloud storage",
   "cloudStoragePurgeConfirm": "Note:<ul class='fn__list'><li>Please ensure that other devices have paused sync before execution</li><li>The purge operation is very time-consuming, please ensure that the network is stable</li></ul>Are you sure to execute it now?",
   "dragFill": "Drag vertically to fill value",

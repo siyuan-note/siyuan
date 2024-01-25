@@ -160,7 +160,7 @@
     & > .b3-button {
       width: 100%;
 
-      &:last-child {
+      &:not(:first-child) {
         margin-top: 16px;
       }
     }

@@ -161,7 +161,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     <div class="fn__flex-1"></div>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons av__row" data-col-id="${item.key.id}">
+                html += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo ariaLabel${item.values[0].type === "block" ? "" : " fn__pointer"}" data-type="editCol" data-position="parentW" aria-label="${escapeAttr(item.key.name)}"">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}

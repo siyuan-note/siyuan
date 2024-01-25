@@ -53,7 +53,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.5",
-    "electron": "28.1.4",
+    "electron": "28.2.0",
     "electron-builder": "^24.9.1",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",
@@ -74,6 +74,6 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.1.1"
+    "@electron/remote": "^2.1.2"
   }
 }

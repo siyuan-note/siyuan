@@ -310,6 +310,7 @@ func isICloudPath(workspaceAbsPath string) (ret bool) {
 
 		if strings.HasPrefix(workspaceAbsPathLower, strings.ToLower(path)) {
 			ret = true
+			logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, path)
 			return io.EOF
 		}
 		return nil

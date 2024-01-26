@@ -517,6 +517,23 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     return text;
 };
 
+export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
+    if (value.type === "checkbox") {
+        if (value.checkbox.checked) {
+            cellElement.classList.add("av__cell-check");
+            cellElement.classList.remove("av__cell-uncheck");
+        } else {
+            cellElement.classList.remove("av__cell-check");
+            cellElement.classList.add("av__cell-uncheck");
+        }
+    } else if (value.type === "block") {
+        cellElement.setAttribute("data-block-id", value.block.id || "");
+        if (value.isDetached) {
+            cellElement.setAttribute("data-detached", "true");
+        }
+    }
+}
+
 export const renderCell = (cellValue: IAVCellValue) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
@@ -722,6 +739,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 data
             });
             item.element.innerHTML = renderCell(data);
+            renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;
             undoOperations.push({

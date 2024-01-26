@@ -2,7 +2,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell, renderCellAttr} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
@@ -108,13 +108,17 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             fetchPost("/api/av/getAttributeViewFilterSort", {id: avId}, (response) => {
                 response.data.filters.forEach((item: IAVFilter) => {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
-                    currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
-                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement));
+                    const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
+                    const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
+                    cellElement.innerHTML = renderCell(cellValue);
+                    renderCellAttr(cellElement, cellValue);
                 });
                 response.data.sorts.forEach((item: IAVSort) => {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
-                    currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`).innerHTML =
-                        renderCell(genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement));
+                    const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
+                    const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
+                    cellElement.innerHTML = renderCell(cellValue);
+                    renderCellAttr(cellElement, cellValue);
                 });
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             });

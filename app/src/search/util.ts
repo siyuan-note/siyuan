@@ -699,11 +699,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
                     window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: Constants.ZWSP,
+                        iconHTML: "",
                         label: window.siyuan.languages.layout,
                         type: "submenu",
                         submenu: [{
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: window.siyuan.languages.topBottomLayout,
                             current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
                             click() {
@@ -724,7 +724,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
                             }
                         }, {
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: window.siyuan.languages.leftRightLayout,
                             current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
                             click() {

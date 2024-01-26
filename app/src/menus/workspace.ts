@@ -185,7 +185,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             workspaceSubMenu.push({type: "separator"});
             response.data.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push({
-                    iconHTML: Constants.ZWSP,
+                    iconHTML: "",
                     action: "iconCloseRound",
                     current: window.siyuan.config.system.workspaceDir === item.path,
                     label: pathPosix().basename(item.path),
@@ -223,7 +223,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }
         const layoutSubMenu: IMenu[] = [{
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.save,
             click() {
                 const saveDialog = new Dialog({
@@ -278,7 +278,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
-                iconHTML: Constants.ZWSP,
+                iconHTML: "",
                 action: "iconCloseRound",
                 label: item.name,
                 bind(menuElement) {
@@ -348,14 +348,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 type: "submenu",
                 icon: "iconRiffCard",
                 submenu: [{
-                    iconHTML: Constants.ZWSP,
+                    iconHTML: "",
                     label: window.siyuan.languages.spaceRepetition,
                     accelerator: window.siyuan.config.keymap.general.riffCard.custom,
                     click: () => {
                         openCard(app);
                     }
                 }, {
-                    iconHTML: Constants.ZWSP,
+                    iconHTML: "",
                     label: window.siyuan.languages.manage,
                     click: () => {
                         viewCards(app, "", window.siyuan.languages.all, "");
@@ -455,7 +455,7 @@ const workspaceItem = (item: IWorkspace) => {
     ${originalPath().basename(item.path)}
 </div>`,
         current: !item.closed,
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         type: "submenu",
         submenu: [{
             icon: "iconOpenWindow",

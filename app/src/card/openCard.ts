@@ -285,7 +285,7 @@ export const bindCardEvent = async (options: {
                 fetchPost("/api/riff/getRiffDecks", {}, (response) => {
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: Constants.ZWSP,
+                        iconHTML: "",
                         label: window.siyuan.languages.all,
                         click() {
                             filterElement.setAttribute("data-id", "");
@@ -294,7 +294,7 @@ export const bindCardEvent = async (options: {
                         },
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: Constants.ZWSP,
+                        iconHTML: "",
                         label: window.siyuan.languages.fileTree,
                         click() {
                             movePathTo((toPath, toNotebook) => {
@@ -309,7 +309,7 @@ export const bindCardEvent = async (options: {
                     }
                     if (options.title) {
                         window.siyuan.menus.menu.append(new MenuItem({
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: escapeHtml(options.title),
                             click() {
                                 filterElement.setAttribute("data-id", options.id);
@@ -321,7 +321,7 @@ export const bindCardEvent = async (options: {
                     }
                     response.data.forEach((deck: { id: string, name: string }) => {
                         window.siyuan.menus.menu.append(new MenuItem({
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: escapeHtml(deck.name),
                             click() {
                                 filterElement.setAttribute("data-id", deck.id);

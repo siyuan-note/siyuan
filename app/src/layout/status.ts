@@ -48,7 +48,7 @@ export const initStatus = (isWindow = false) => {
                 JSON.parse(target.getAttribute("data-tasks")).forEach((item: { action: string }) => {
                     window.siyuan.menus.menu.append(new MenuItem({
                         type: "readonly",
-                        iconHTML: Constants.ZWSP,
+                        iconHTML: "",
                         label: item.action
                     }).element);
                 });

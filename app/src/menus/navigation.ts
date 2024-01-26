@@ -63,7 +63,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     }
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     const riffCardMenu = [{
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
         label: window.siyuan.languages.quickMakeCard,
         click: () => {
@@ -78,7 +78,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             }]);
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
         click: () => {
             transaction(undefined, [{
@@ -94,7 +94,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     }];
     if (window.siyuan.config.flashcard.deck) {
         riffCardMenu.push({
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.addToDeck,
             click: () => {
                 makeCard(app, blockIDs);
@@ -193,7 +193,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         type: "submenu",
         icon: "iconRiffCard",
         submenu: [{
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.spaceRepetition,
             accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
             click: () => {
@@ -205,7 +205,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 /// #endif
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.manage,
             click: () => {
                 viewCards(app, notebookId, name, "Notebook");
@@ -467,7 +467,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }
         }).element);
         const riffCardMenu = [{
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.spaceRepetition,
             accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
             click: () => {
@@ -479,7 +479,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 /// #endif
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.manage,
             click: () => {
                 fetchPost("/api/filetree/getHPathByID", {
@@ -492,7 +492,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 /// #endif
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
             label: window.siyuan.languages.quickMakeCard,
             click: () => {
@@ -507,7 +507,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }]);
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
             click: () => {
                 transaction(undefined, [{
@@ -523,7 +523,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }];
         if (window.siyuan.config.flashcard.deck) {
             riffCardMenu.push({
-                iconHTML: Constants.ZWSP,
+                iconHTML: "",
                 label: window.siyuan.languages.addToDeck,
                 click: () => {
                     makeCard(app, [id]);

@@ -28,6 +28,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -87,7 +88,7 @@ func IALStr(n *ast.Node) string {
 	if 1 > len(n.KramdownIAL) {
 		return ""
 	}
-	return string(parse.IAL2Tokens(n.KramdownIAL))
+	return html.UnescapeString(string(parse.IAL2Tokens(n.KramdownIAL)))
 }
 
 func RootChildIDs(rootID string) (ret []string) {

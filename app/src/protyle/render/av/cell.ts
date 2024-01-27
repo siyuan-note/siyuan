@@ -130,6 +130,18 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     checked: true
                 }
             };
+        } else if (colType === "date") {
+            cellValue = {
+                type: colType,
+                date: {
+                    content: null,
+                    isNotEmpty: false,
+                    content2: null,
+                    isNotEmpty2: false,
+                    hasEndDate: false,
+                    isNotTime: true,
+                }
+            };
         }
     } else if (typeof value === "undefined" || !value) {
         if (colType === "number") {

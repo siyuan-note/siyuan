@@ -532,8 +532,23 @@ export class WYSIWYG {
                 const originIndex = getPositionByCellElement(avCellElement);
                 let moveCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
+                const nodeRect = nodeElement.getBoundingClientRect();
+                const scrollElement = nodeElement.querySelector(".av__scroll");
+                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
+                    if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
+                        if (moveEvent.clientX > nodeRect.right - 10) {
+                            scrollElement.scrollLeft += 10;
+                        } else if (moveEvent.clientX < nodeRect.left + 34) {
+                            scrollElement.scrollLeft -= 10;
+                        }
+                        if (moveEvent.clientY < contentRect.top + 48) {
+                            protyle.contentElement.scrollTop -= 5;
+                        } else if (moveEvent.clientY > contentRect.bottom - 48) {
+                            protyle.contentElement.scrollTop += 5;
+                        }
+                    }
                     if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
                         return;
                     }

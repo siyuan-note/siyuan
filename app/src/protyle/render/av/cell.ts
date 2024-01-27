@@ -76,6 +76,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = [];
         Array.from(cellElement.children).forEach((item) => {
+            if (item.classList.contains("av__drag-fill")) {
+                return;
+            }
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
@@ -420,11 +423,12 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
     let text = "";
+    const json: IAVCellValue[] = [];
     let cellElements: Element[];
     if (cElements?.length > 0) {
         cellElements = cElements;
     } else {
-        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--select"));
+        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
         if (cellElements.length === 0) {
             nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                 rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
@@ -451,8 +455,9 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const cellId = item.getAttribute("data-id");
         const colId = item.getAttribute("data-col-id");
 
-        text += getCellText(item);
+        text += getCellText(item) + " ";
         const oldValue = genCellValueByElement(type, item);
+        json.push(oldValue);
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {
@@ -514,7 +519,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         });
         transaction(protyle, doOperations, undoOperations);
     }
-    return text;
+    return {text: text.substring(0, text.length - 1), json};
 };
 
 export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {

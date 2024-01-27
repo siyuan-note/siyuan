@@ -294,7 +294,7 @@ export class WYSIWYG {
                     });
                 }
             } else if (selectAVElement) {
-                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
+                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
                 if (cellElements.length === 0) {
                     nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                         rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
@@ -302,11 +302,16 @@ export class WYSIWYG {
                         });
                     });
                 }
-                cellElements.forEach((item: HTMLElement) => {
-                    const cellText = getCellText(item);
-                    html += cellText;
-                    textPlain += cellText;
-                });
+                if (cellElements.length > 0) {
+                    html = "[";
+                    cellElements.forEach((item: HTMLElement) => {
+                        const cellText = getCellText(item);
+                        html += JSON.stringify(genCellValueByElement(getTypeByCellElement(item), item)) + ",";
+                        textPlain += cellText + " ";
+                    });
+                    textPlain = textPlain.substring(0, textPlain.length - 1);
+                    html = html.substring(0, html.length - 1) + "]";
+                }
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
@@ -369,7 +374,7 @@ export class WYSIWYG {
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/html", selectAVElement ? html : protyle.lute.BlockDOM2HTML(html));
             event.clipboardData.setData("text/siyuan", html);
         });
 
@@ -1269,6 +1274,7 @@ export class WYSIWYG {
                 selectElements = [nodeElement];
             }
             let html = "";
+            let textPlain = "";
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
@@ -1294,7 +1300,9 @@ export class WYSIWYG {
                     focusBlock(nextElement);
                 }
             } else if (selectAVElement) {
-                html = updateCellsValue(protyle, nodeElement);
+                const cellsValue = updateCellsValue(protyle, nodeElement);
+                html = JSON.stringify(cellsValue.json)
+                textPlain = cellsValue.text;
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
                 const oldHTML = nodeElement.outerHTML;
@@ -1439,10 +1447,12 @@ export class WYSIWYG {
                 }
             }
             protyle.hint.render(protyle);
-            let textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+            if (!selectAVElement) {
+                textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+            }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/html", selectAVElement ? html : protyle.lute.BlockDOM2HTML(html));
             event.clipboardData.setData("text/siyuan", html);
         });
 

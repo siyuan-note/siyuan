@@ -3,9 +3,6 @@ name: Release Docker Image
 on:
   workflow_dispatch:
   push:
-    branches:
-      - master
-
 jobs:
   build:
     name: build

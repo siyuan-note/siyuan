@@ -45,7 +45,7 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     }
 };
 
-export const openSearchAV = (avId: string, target: HTMLElement) => {
+export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
@@ -72,19 +72,34 @@ export const openSearchAV = (avId: string, target: HTMLElement) => {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
-                    setDatabase(avId, target, listElement.querySelector(".b3-list-item--focus"));
+                    const listItemElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                    if (cb) {
+                        cb(listItemElement);
+                    } else {
+                        setDatabase(avId, target, listItemElement);
+                    }
                     window.siyuan.menus.menu.remove();
                 }
             });
-            inputElement.addEventListener("input", (event) => {
+            inputElement.addEventListener("input", (event: InputEvent) => {
                 event.stopPropagation();
+                if (event.isComposing) {
+                    return;
+                }
+                genSearchList(listElement, inputElement.value, avId);
+            });
+            inputElement.addEventListener("compositionend", () => {
                 genSearchList(listElement, inputElement.value, avId);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                 if (listItemElement) {
                     event.stopPropagation();
-                    setDatabase(avId, target, listItemElement);
+                    if (cb) {
+                        cb(listItemElement);
+                    } else {
+                        setDatabase(avId, target, listItemElement);
+                    }
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -225,6 +240,7 @@ const filterItem = (listElement: Element, key: string) => {
         }
     })
 }
+
 export const bindRelationEvent = (options: {
     menuElement: HTMLElement,
     protyle: IProtyle,

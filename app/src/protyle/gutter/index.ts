@@ -46,6 +46,7 @@ import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu} from "../render/av/action";
+import {openSearchAV} from "../render/av/relation";
 
 export class Gutter {
     public element: HTMLElement;
@@ -786,6 +787,29 @@ export class Gutter {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.addToDatabase,
+            icon: "iconDatabase",
+            click: () => {
+                openSearchAV("", this.element, (listItemElement) => {
+                    const sourceIds: string[] = []
+                    selectsElement.forEach(item => {
+                        sourceIds.push(item.getAttribute("data-node-id"));
+                    });
+                    const avID = listItemElement.dataset.avId;
+                    transaction(protyle, [{
+                        action: "insertAttrViewBlock",
+                        avID,
+                        srcIDs: sourceIds,
+                        isDetached: false,
+                    }], [{
+                        action: "removeAttrViewBlock",
+                        srcIDs: sourceIds,
+                        avID,
+                    }]);
+                });
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.delete,
             icon: "iconTrashcan",
             accelerator: "⌫",
@@ -1211,6 +1235,26 @@ export class Gutter {
                 click: () => {
                     movePathTo((toPath) => {
                         hintMoveBlock(toPath[0], [nodeElement], protyle);
+                    });
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.addToDatabase,
+                icon: "iconDatabase",
+                click: () => {
+                    openSearchAV("", this.element, (listItemElement) => {
+                        const sourceIds: string[] = [nodeElement.getAttribute("data-node-id")];
+                        const avID = listItemElement.dataset.avId;
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            avID,
+                            srcIDs: sourceIds,
+                            isDetached: false,
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: sourceIds,
+                            avID,
+                        }]);
                     });
                 }
             }).element);

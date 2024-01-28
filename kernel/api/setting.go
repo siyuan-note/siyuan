@@ -29,6 +29,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setEditorReadOnly(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	readOnly := arg["readonly"].(bool)
+
+	oldReadOnly := model.Conf.Editor.ReadOnly
+	model.Conf.Editor.ReadOnly = readOnly
+	model.Conf.Save()
+
+	if oldReadOnly != model.Conf.Editor.ReadOnly {
+		util.BroadcastByType("protyle", "readonly", 0, "", model.Conf.Editor.ReadOnly)
+		util.BroadcastByType("main", "readonly", 0, "", model.Conf.Editor.ReadOnly)
+	}
+}
+
 func setConfSnippet(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

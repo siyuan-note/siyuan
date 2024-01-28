@@ -46,6 +46,7 @@ export const exportConfig = {
         <option value="2" ${window.siyuan.config.export.blockRefMode === 2 ? "selected" : ""}>${window.siyuan.languages.export2}</option>
         <option value="3" ${window.siyuan.config.export.blockRefMode === 3 ? "selected" : ""}>${window.siyuan.languages.export3}</option>
         <option value="4" ${window.siyuan.config.export.blockRefMode === 4 ? "selected" : ""}>${window.siyuan.languages.export4}</option>
+        <option value="5" ${window.siyuan.config.export.blockRefMode === 5 ? "selected" : ""}>${window.siyuan.languages.export9}</option>
     </select>
 </div>
 <div class="fn__flex b3-label config__item">
@@ -88,7 +89,7 @@ export const exportConfig = {
     <textarea class="b3-text-field fn__block" id="pdfWatermarkDesc"></textarea>
 </div>
 <div class="b3-label config__item">
-    ${window.siyuan.languages.export9}
+    ${window.siyuan.languages.export30}
     <div class="b3-label__text">${window.siyuan.languages.export28}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="imageWatermarkStr">

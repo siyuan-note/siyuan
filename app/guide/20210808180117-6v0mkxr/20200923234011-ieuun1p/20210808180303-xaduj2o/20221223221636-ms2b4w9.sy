@@ -3,9 +3,10 @@
 	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
+		"icon": "1f4f8",
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20231013104018"
+		"updated": "20240128113415"
 	},
 	"Children": [
 		{
@@ -519,6 +520,217 @@
 			]
 		},
 		{
+			"ID": "20240128112003-595bhoa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240128112003-595bhoa",
+				"updated": "20240128112005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Settings"
+				}
+			]
+		},
+		{
+			"ID": "20240128112016-je04b7i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112016-je04b7i",
+				"updated": "20240128112236"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can adjust the global configuration related to flashcards in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, including "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New Card Limit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Review Card Limit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ can be overridden using document block custom attributes:"
+				}
+			]
+		},
+		{
+			"ID": "20240128112016-aa4ipl9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240128112016-aa4ipl9",
+				"updated": "20240128112016"
+			},
+			"Children": [
+				{
+					"ID": "20240128112016-ta1n5t2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112016-ta1n5t2",
+						"updated": "20240128112016"
+					},
+					"Children": [
+						{
+							"ID": "20240128112016-jm62abq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112016-jm62abq",
+								"updated": "20240128112016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-new-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128112016-3s0opfu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112016-3s0opfu",
+						"updated": "20240128112016"
+					},
+					"Children": [
+						{
+							"ID": "20240128112016-ozz5ukr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112016-ozz5ukr",
+								"updated": "20240128112016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-review-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240128112146-85828oq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112146-85828oq",
+				"updated": "20240128113415"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20240128113001-pee8l86.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240128112208-ulxm0sf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112208-ulxm0sf",
+				"updated": "20240128112214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "They are configured separately on different documents and do not affect each other. For example, if the parent document is configured as 5 and the sub-document is 10, then it will be 5 when reviewing from the parent document, and the configuration of the sub-document will not be superimposed."
+				}
+			]
+		},
+		{
 			"ID": "20221223221639-djlafd4",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -548,7 +760,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221223221639-ycrps4p",
-				"updated": "20221223221824"
+				"updated": "20240128112834"
 			},
 			"Children": [
 				{
@@ -574,6 +786,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "After the content block is deleted (or the ID is changed), the corresponding flashcard will become invalid"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128112355-nzfivrh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112355-nzfivrh",
+						"updated": "20240128112834"
+					},
+					"Children": [
+						{
+							"ID": "20240128112355-ie927dm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112355-ie927dm",
+								"updated": "20240128112834"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is not recommended to enable card decks. This method has been deprecated. If you continue to use it, you may encounter unsolvable problems"
 								}
 							]
 						}

@@ -28,7 +28,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -88,7 +87,9 @@ func IALStr(n *ast.Node) string {
 	if 1 > len(n.KramdownIAL) {
 		return ""
 	}
-	return html.UnescapeString(string(parse.IAL2Tokens(n.KramdownIAL)))
+	// 这里不能进行转义，否则会导致从数据库中读取后转换为 IAL 时解析错误
+	// 所以 Some symbols should not be escaped to avoid inaccurate searches https://github.com/siyuan-note/siyuan/issues/10185 无法被修复了
+	return string(parse.IAL2Tokens(n.KramdownIAL))
 }
 
 func RootChildIDs(rootID string) (ret []string) {

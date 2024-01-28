@@ -1838,8 +1838,9 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 				// 如果是定义块，则在开头处添加锚点
 				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
 				if ast.NodeDocument != n.Type {
-					if nil != n.FirstChild {
-						n.FirstChild.InsertBefore(anchorSpan)
+					firstLeaf := treenode.FirstLeafBlock(n)
+					if nil != firstLeaf && nil != firstLeaf.FirstChild {
+						firstLeaf.FirstChild.InsertBefore(anchorSpan)
 					} else {
 						n.AppendChild(anchorSpan)
 					}

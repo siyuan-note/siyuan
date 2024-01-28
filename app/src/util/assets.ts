@@ -133,11 +133,26 @@ export const initAssets = () => {
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
         }, async response => {
-            if (window.siyuan.config.appearance.themeJS && window.destroyTheme) {
-                try {
-                    await window.destroyTheme();
-                } catch (e) {
-                    console.error("destroyTheme error: " + e);
+            if (window.siyuan.config.appearance.themeJS) {
+                if (window.destroyTheme) {
+                    try {
+                        await window.destroyTheme();
+                        window.destroyTheme = undefined;
+                    } catch (e) {
+                        console.error("destroyTheme error: " + e);
+                    }
+                } else {
+                    /// #if !MOBILE
+                    exportLayout({
+                        cb() {
+                            window.location.reload();
+                        },
+                        errorExit: false,
+                    });
+                    /// #else
+                    window.location.reload();
+                    /// #endif
+                    return;
                 }
             }
             window.siyuan.config.appearance = response.data.appearance;
@@ -256,11 +271,40 @@ export const setMode = (modeElementValue: number) => {
         mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
         modeOS: modeElementValue === 2,
     }), async response => {
-        if (window.siyuan.config.appearance.themeJS && window.destroyTheme) {
-            try {
-                await window.destroyTheme();
-            } catch (e) {
-                console.error("destroyTheme error: " + e);
+        if (window.siyuan.config.appearance.themeJS) {
+            if (window.destroyTheme) {
+                try {
+                    await window.destroyTheme();
+                    window.destroyTheme = undefined;
+                } catch (e) {
+                    console.error("destroyTheme error: " + e);
+                }
+            } else {
+                if (!response.data.modeOS && (
+                    response.data.mode !== window.siyuan.config.appearance.mode ||
+                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                )) {
+                    exportLayout({
+                        cb() {
+                            window.location.reload();
+                        },
+                        errorExit: false,
+                    });
+                    return;
+                }
+                const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                if (response.data.modeOS && (
+                    (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
+                )) {
+                    exportLayout({
+                        cb() {
+                            window.location.reload();
+                        },
+                        errorExit: false,
+                    });
+                    return;
+                }
             }
         }
         appearance.onSetappearance(response.data);

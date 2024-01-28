@@ -630,17 +630,21 @@ export const bazaar = {
                                 if (window.destroyTheme) {
                                     try {
                                         await window.destroyTheme();
+                                        window.destroyTheme = undefined;
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }
-                                }
-                                window.siyuan.config.appearance.mode = dataObj.themeMode === "dark" ? 1 : 0;
-                                if (dataObj.themeMode === "dark") {
-                                    window.siyuan.config.appearance.themeDark = dataObj.name;
+                                    window.siyuan.config.appearance = response.data.appearance
+                                    loadAssets(window.siyuan.config.appearance);
                                 } else {
-                                    window.siyuan.config.appearance.themeLight = dataObj.name;
+                                    exportLayout({
+                                        cb() {
+                                            window.location.reload();
+                                        },
+                                        errorExit: false,
+                                    });
+                                    return;
                                 }
-                                loadAssets(window.siyuan.config.appearance);
                             }
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                             bazaar._genMyHTML(bazaarType, app);
@@ -698,13 +702,22 @@ export const bazaar = {
                                         if (window.destroyTheme) {
                                             try {
                                                 await window.destroyTheme();
+                                                window.destroyTheme = undefined;
                                             } catch (e) {
                                                 console.error("destroyTheme error: " + e);
                                             }
+                                            const themeScriptElement = document.getElementById("themeScript") as HTMLScriptElement;
+                                            themeScriptElement.remove();
+                                            addScript(themeScriptElement.src + "1", "themeScript");
+                                        } else {
+                                            exportLayout({
+                                                cb() {
+                                                    window.location.reload();
+                                                },
+                                                errorExit: false,
+                                            });
+                                            return;
                                         }
-                                        const themeScriptElement = document.getElementById("themeScript") as HTMLScriptElement;
-                                        themeScriptElement.remove();
-                                        addScript(themeScriptElement.src + "1", "themeScript");
                                     }
                                     const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
                                     linkElement.href = linkElement.href + "1";
@@ -779,17 +792,21 @@ export const bazaar = {
                                 if (window.destroyTheme) {
                                     try {
                                         await window.destroyTheme();
+                                        window.destroyTheme = undefined;
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }
-                                }
-                                window.siyuan.config.appearance.mode = mode;
-                                if (mode === 1) {
-                                    window.siyuan.config.appearance.themeDark = dataObj.name;
+                                    window.siyuan.config.appearance = appearanceResponse.data
+                                    loadAssets(window.siyuan.config.appearance);
                                 } else {
-                                    window.siyuan.config.appearance.themeLight = dataObj.name;
+                                    exportLayout({
+                                        cb() {
+                                            window.location.reload();
+                                        },
+                                        errorExit: false,
+                                    });
+                                    return;
                                 }
-                                loadAssets(window.siyuan.config.appearance);
                             }
                             this._genMyHTML("themes", app);
                             fetchPost("/api/bazaar/getBazaarTheme", {}, response => {

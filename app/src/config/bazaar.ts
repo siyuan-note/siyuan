@@ -17,6 +17,8 @@ import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
+import {loadAssets} from "../util/assets";
+import {addScript} from "../protyle/util/addScript";
 
 export const bazaar = {
     element: undefined as Element,
@@ -623,15 +625,22 @@ export const bazaar = {
                             repoHash: dataObj.repoHash,
                             mode: dataObj.themeMode === "dark" ? 1 : 0,
                             frontend: getFrontend()
-                        }, response => {
+                        }, async response => {
                             if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
-                                exportLayout({
-                                    cb() {
-                                        window.location.reload();
-                                    },
-                                    errorExit: false,
-                                });
-                                return;
+                                if (window.destroyTheme) {
+                                    try {
+                                        await window.destroyTheme();
+                                    } catch (e) {
+                                        console.error("destroyTheme error: " + e);
+                                    }
+                                }
+                                window.siyuan.config.appearance.mode = dataObj.themeMode === "dark" ? 1 : 0;
+                                if (dataObj.themeMode === "dark") {
+                                    window.siyuan.config.appearance.themeDark = dataObj.name;
+                                } else {
+                                    window.siyuan.config.appearance.themeLight = dataObj.name;
+                                }
+                                loadAssets(window.siyuan.config.appearance);
                             }
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                             bazaar._genMyHTML(bazaarType, app);
@@ -676,7 +685,7 @@ export const bazaar = {
                                 mode: dataObj.themeMode === "dark" ? 1 : 0,
                                 update: true,
                                 frontend: getFrontend()
-                            }, response => {
+                            }, async response => {
                                 // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
@@ -686,16 +695,19 @@ export const bazaar = {
                                     (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === dataObj.name)
                                 )) {
                                     if (window.siyuan.config.appearance.themeJS) {
-                                        exportLayout({
-                                            cb() {
-                                                window.location.reload();
-                                            },
-                                            errorExit: false,
-                                        });
-                                    } else {
-                                        const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
-                                        linkElement.href = linkElement.href + "1";
+                                        if (window.destroyTheme) {
+                                            try {
+                                                await window.destroyTheme();
+                                            } catch (e) {
+                                                console.error("destroyTheme error: " + e);
+                                            }
+                                        }
+                                        const themeScriptElement = document.getElementById("themeScript") as HTMLScriptElement;
+                                        themeScriptElement.remove();
+                                        addScript(themeScriptElement.src + "1", "themeScript");
                                     }
+                                    const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+                                    linkElement.href = linkElement.href + "1";
                                 }
                             });
                         });
@@ -759,25 +771,32 @@ export const bazaar = {
                             modeOS: false,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
-                        }), (appearanceResponse) => {
+                        }), async (appearanceResponse) => {
                             if ((mode !== window.siyuan.config.appearance.mode ||
                                     (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&
                                 window.siyuan.config.appearance.themeJS) {
-                                exportLayout({
-                                    cb() {
-                                        window.location.reload();
-                                    },
-                                    errorExit: false,
-                                });
-                            } else {
-                                this._genMyHTML("themes", app);
-                                fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
-                                    response.data.appearance = appearanceResponse.data;
-                                    bazaar._onBazaar(response, "themes", true);
-                                    bazaar._data.themes = response.data.packages;
-                                });
+                                if (window.destroyTheme) {
+                                    try {
+                                        await window.destroyTheme();
+                                    } catch (e) {
+                                        console.error("destroyTheme error: " + e);
+                                    }
+                                }
+                                window.siyuan.config.appearance.mode = mode;
+                                if (mode === 1) {
+                                    window.siyuan.config.appearance.themeDark = dataObj.name;
+                                } else {
+                                    window.siyuan.config.appearance.themeLight = dataObj.name;
+                                }
+                                loadAssets(window.siyuan.config.appearance);
                             }
+                            this._genMyHTML("themes", app);
+                            fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
+                                response.data.appearance = appearanceResponse.data;
+                                bazaar._onBazaar(response, "themes", true);
+                                bazaar._data.themes = response.data.packages;
+                            });
                         });
                     }
                     event.preventDefault();

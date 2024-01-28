@@ -37,10 +37,7 @@ export const loadAssets = (data: IAppearance) => {
     }
 
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
-    let defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
-    if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
-        defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
-    }
+    const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
             defaultStyleElement.remove();
@@ -135,19 +132,13 @@ export const initAssets = () => {
         }
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
-        }, response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                /// #if !MOBILE
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                /// #else
-                window.location.reload();
-                /// #endif
-                return;
+        }, async response => {
+            if (window.siyuan.config.appearance.themeJS && window.destroyTheme) {
+                try {
+                    await window.destroyTheme();
+                } catch (e) {
+                    console.error("destroyTheme error: " + e);
+                }
             }
             window.siyuan.config.appearance = response.data.appearance;
             loadAssets(response.data.appearance);
@@ -264,32 +255,12 @@ export const setMode = (modeElementValue: number) => {
     fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
         mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
         modeOS: modeElementValue === 2,
-    }), response => {
-        if (window.siyuan.config.appearance.themeJS) {
-            if (!response.data.modeOS && (
-                response.data.mode !== window.siyuan.config.appearance.mode ||
-                window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                window.siyuan.config.appearance.themeDark !== response.data.themeDark
-            )) {
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                return;
-            }
-            const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-            if (response.data.modeOS && (
-                (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
-            )) {
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                return;
+    }), async response => {
+        if (window.siyuan.config.appearance.themeJS && window.destroyTheme) {
+            try {
+                await window.destroyTheme();
+            } catch (e) {
+                console.error("destroyTheme error: " + e);
             }
         }
         appearance.onSetappearance(response.data);

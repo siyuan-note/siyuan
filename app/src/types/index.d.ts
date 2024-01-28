@@ -183,6 +183,8 @@ interface Window {
     hideKeyboardToolbar(): void
 
     openFileByURL(URL: string): boolean
+
+    destroyTheme(): Promise<void>
 }
 
 interface IPosition {

@@ -1338,7 +1338,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 
-	zipPath = exportPandocConvertZip(false, boxID, baseFolderName, docPaths, Conf.Export.BlockRefMode, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(false, boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
 	return
 }
@@ -1366,7 +1366,7 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(true, boxID, baseFolderName, docPaths, Conf.Export.BlockRefMode, "", "", ".md")
+	zipPath = exportPandocConvertZip(true, boxID, baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -2583,7 +2583,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, docPaths []string, exportRefMode int,
+func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
@@ -2600,6 +2600,12 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 	if err := os.MkdirAll(exportFolder, 0755); nil != err {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
+	}
+
+	exportRefMode := Conf.Export.BlockRefMode
+	if !exportNotebook && 5 == exportRefMode {
+		// 非笔记本导出不支持锚点哈希，将其切换为锚文本块链
+		exportRefMode = 2
 	}
 
 	var defBlockIDs []string

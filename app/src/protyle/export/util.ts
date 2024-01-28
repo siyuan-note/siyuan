@@ -42,7 +42,7 @@ export const exportImage = (id: string) => {
         <input id="keepFold" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold ? "checked" : ""}>
     </label>
     <label class="fn__flex" style="margin-left: 24px">
-        ${window.siyuan.languages.export9}
+        ${window.siyuan.languages.export30}
         <span class="fn__space"></span>
         <input id="watermark" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark ? "checked" : ""}>
     </label>

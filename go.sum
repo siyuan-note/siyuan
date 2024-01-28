@@ -1,0 +1,8 @@
+golang.org/x/mobile v0.0.0-20240112133503-c713f31d574b h1:kfWLZgb8iUBHdE9WydD5V5dHIS/F6HjlBZNyJfn2bs4=
+golang.org/x/mobile v0.0.0-20240112133503-c713f31d574b/go.mod h1:4efzQnuA1nICq6h4kmZRMGzbPiP06lZvgADUu1VpJCE=
+golang.org/x/mod v0.14.0 h1:dGoOF9QVLYng8IHTm7BAyWqCqSheQ5pYWGhzW00YJr0=
+golang.org/x/mod v0.14.0/go.mod h1:hTbmBsO62+eylJbnUtE2MGJUyE7QWk4xUqPFrRgJ+7c=
+golang.org/x/sync v0.6.0 h1:5BMeUDZ7vkXGfEr1x9B4bRcTH4lpkTkpdh0T/J+qjbQ=
+golang.org/x/sync v0.6.0/go.mod h1:Czt+wKu1gCyEFDUtn0jG5QVvpJ6rzVqr5aXyt9drQfk=
+golang.org/x/tools v0.17.0 h1:FvmRgNOcs3kOa+T20R1uhfP9F6HgG2mfxDv1vrx1Htc=
+golang.org/x/tools v0.17.0/go.mod h1:xsh6VxdV005rRVaS6SSAf9oiAqljS7UZUacMZ8Bnsps=

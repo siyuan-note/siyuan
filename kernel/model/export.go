@@ -328,6 +328,14 @@ func ExportSystemLog() (zipPath string) {
 		}
 	}
 
+	mobileLog := filepath.Join(util.TempDir, "mobile.log")
+	if gulu.File.IsExist(mobileLog) {
+		to := filepath.Join(exportFolder, "mobile.log")
+		if err := filelock.Copy(mobileLog, to); nil != err {
+			logging.LogErrorf("copy mobile log from [%s] to [%s] failed: %s", err, mobileLog, to)
+		}
+	}
+
 	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {

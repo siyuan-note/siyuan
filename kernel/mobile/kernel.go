@@ -84,6 +84,10 @@ func SetHttpServerPort(port int) {
 	filelock.AndroidServerPort = port
 }
 
+func GetCurrentWorkspacePath() string {
+	return util.WorkspaceDir
+}
+
 func SetTimezone(container, appDir, timezoneID string) {
 	if "ios" == container {
 		os.Setenv("ZONEINFO", filepath.Join(appDir, "app", "zoneinfo.zip"))

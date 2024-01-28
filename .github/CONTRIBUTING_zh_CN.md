@@ -27,7 +27,7 @@
 NPM 镜像：
 
 * 使用 npmmirror 中国镜像仓库 `pnpm --registry https://registry.npmmirror.com/ i`
-* 恢复使用官方仓库 `pnpm --registry https://registry.npmmirror.com i`
+* 恢复使用官方仓库 `pnpm --registry https://registry.npmjs.org i`
 </details>
 
 桌面端进入 app 文件夹运行：

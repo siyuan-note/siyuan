@@ -24,7 +24,7 @@ Set the Electron mirror environment variable and install Electron:
 NPM mirror:
 
 * Use npmmirror China mirror repository `pnpm --registry https://registry.npmmirror.com/ i`
-* Revert to using official repository `pnpm --registry https://registry.npmmirror.com i`
+* Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
 
 </details>
 

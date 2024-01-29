@@ -791,7 +791,7 @@ export class Gutter {
             icon: "iconDatabase",
             click: () => {
                 openSearchAV("", this.element, (listItemElement) => {
-                    const sourceIds: string[] = []
+                    const sourceIds: string[] = [];
                     selectsElement.forEach(item => {
                         sourceIds.push(item.getAttribute("data-node-id"));
                     });

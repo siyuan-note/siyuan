@@ -549,7 +549,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
             cellElement.setAttribute("data-detached", "true");
         }
     }
-}
+};
 
 export const renderCell = (cellValue: IAVCellValue) => {
     let text = "";

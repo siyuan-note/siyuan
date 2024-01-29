@@ -34,7 +34,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const avID = blockElement.dataset.avId;
             const id = blockElement.dataset.nodeId;
             cellElements.forEach((item: HTMLElement, elementIndex) => {
-                let cellValue: IAVCellValue = values[elementIndex]
+                let cellValue: IAVCellValue = values[elementIndex];
                 if (!cellValue) {
                     return;
                 }
@@ -60,7 +60,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         // 类型不能转换时就不进行替换
                         return;
                     }
-                    const content = cellValue[cellValue.type as "text"].content
+                    const content = cellValue[cellValue.type as "text"].content;
                     if (!content) {
                         return;
                     }
@@ -110,7 +110,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             }
             return;
         } catch (e) {
-            console.warn("insert cell: JSON.parse error")
+            console.warn("insert cell: JSON.parse error");
         }
     }
     const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);

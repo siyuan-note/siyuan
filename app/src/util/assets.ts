@@ -315,7 +315,7 @@ export const setMode = (modeElementValue: number) => {
 const updateMobileTheme = (OSTheme: string) => {
     if (isInIOS() || isInAndroid()) {
         setTimeout(() => {
-            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim();
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim().replace(" ", "");
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (OSTheme === "dark") {

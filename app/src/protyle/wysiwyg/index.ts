@@ -1301,7 +1301,7 @@ export class WYSIWYG {
                 }
             } else if (selectAVElement) {
                 const cellsValue = updateCellsValue(protyle, nodeElement);
-                html = JSON.stringify(cellsValue.json)
+                html = JSON.stringify(cellsValue.json);
                 textPlain = cellsValue.text;
             } else {
                 const id = nodeElement.getAttribute("data-node-id");

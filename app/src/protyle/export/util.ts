@@ -188,7 +188,7 @@ export const exportImage = (id: string) => {
             item.innerHTML = symbolElements[symbolElements.length - 1].innerHTML;
         });
         previewElement.querySelectorAll(".img img").forEach((item: HTMLImageElement) => {
-            const imgSrc = item.getAttribute("src")
+            const imgSrc = item.getAttribute("src");
             if (imgSrc.endsWith(".svg")) {
                 fetchGet(item.src, (response: string) => {
                     item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;

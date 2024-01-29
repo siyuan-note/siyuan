@@ -131,7 +131,7 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
                             return;
                         }
                         // https://github.com/siyuan-note/siyuan/issues/10262
-                        let checkClass = ""
+                        let checkClass = "";
                         if (cell.valueType === "checkbox") {
                             checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                         }

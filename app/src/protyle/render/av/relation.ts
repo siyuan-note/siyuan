@@ -235,11 +235,11 @@ const filterItem = (listElement: Element, key: string) => {
             if (item.textContent.includes(key)) {
                 item.classList.remove("fn__none");
             } else {
-                item.classList.add("fn__none")
+                item.classList.add("fn__none");
             }
         }
-    })
-}
+    });
+};
 
 export const bindRelationEvent = (options: {
     menuElement: HTMLElement,
@@ -290,9 +290,9 @@ export const bindRelationEvent = (options: {
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
         setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item").classList.add("b3-menu__item--current");
-        const inputElement = options.menuElement.querySelector("input")
+        const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();
-        const listElement = options.menuElement.querySelector(".b3-menu__items")
+        const listElement = options.menuElement.querySelector(".b3-menu__items");
         inputElement.addEventListener("keydown", (event) => {
             event.stopPropagation();
             if (event.isComposing) {
@@ -309,18 +309,18 @@ export const bindRelationEvent = (options: {
                 event.preventDefault();
                 event.stopPropagation();
             }
-        })
+        });
         inputElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
             filterItem(listElement, inputElement.value);
             event.stopPropagation();
-        })
+        });
         inputElement.addEventListener("compositionend", (event) => {
             event.stopPropagation();
             filterItem(listElement, inputElement.value);
-        })
+        });
     });
 };
 
@@ -397,7 +397,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
         }
-        menuElement.firstElementChild.classList.add("b3-menu__item--current")
+        menuElement.firstElementChild.classList.add("b3-menu__item--current");
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

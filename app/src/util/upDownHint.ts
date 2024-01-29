@@ -1,6 +1,6 @@
 const isNormalItem = (currentHintElement: HTMLElement, className: string) => {
-    return currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className)
-}
+    return currentHintElement.classList.contains("fn__none") || !currentHintElement.classList.contains(className);
+};
 
 export const upDownHint = (listElement: Element, event: KeyboardEvent, classActiveName = "b3-list-item--focus") => {
     let currentHintElement: HTMLElement = listElement.querySelector("." + classActiveName);

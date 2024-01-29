@@ -634,7 +634,7 @@ export const bazaar = {
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }
-                                    window.siyuan.config.appearance = response.data.appearance
+                                    window.siyuan.config.appearance = response.data.appearance;
                                     loadAssets(window.siyuan.config.appearance);
                                 } else {
                                     exportLayout({
@@ -796,7 +796,7 @@ export const bazaar = {
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }
-                                    window.siyuan.config.appearance = appearanceResponse.data
+                                    window.siyuan.config.appearance = appearanceResponse.data;
                                     loadAssets(window.siyuan.config.appearance);
                                 } else {
                                     exportLayout({

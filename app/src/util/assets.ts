@@ -312,10 +312,29 @@ export const setMode = (modeElementValue: number) => {
     /// #endif
 };
 
+const rgba2hex = (rgba: string) => {
+    let a: any;
+    const rgb: any = rgba.replace(/\s/g, "").match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
+    const alpha = (rgb && rgb[4] || "").trim();
+    let hex = rgb ?
+        (rgb[1] | 1 << 8).toString(16).slice(1) +
+        (rgb[2] | 1 << 8).toString(16).slice(1) +
+        (rgb[3] | 1 << 8).toString(16).slice(1) : rgba;
+
+    if (alpha !== "") {
+        a = alpha;
+    } else {
+        a = 0o1;
+    }
+    a = ((a * 255) | 1 << 8).toString(16).slice(1);
+    hex = hex + a;
+    return hex;
+};
+
 const updateMobileTheme = (OSTheme: string) => {
     if (isInIOS() || isInAndroid()) {
         setTimeout(() => {
-            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim().replace(" ", "");
+            const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim().replace(" ", ""));
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (OSTheme === "dark") {

@@ -649,7 +649,7 @@ export const bazaar = {
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                             bazaar._genMyHTML(bazaarType, app);
                             if (bazaarType === "plugins") {
-                                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip, () => {
+                                confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
                                     fetchPost("/api/petal/setPetalEnabled", {
                                         packageName: dataObj.name,
                                         enabled: true,

@@ -15,7 +15,7 @@
     margin: 0 auto;
 
     &.emoji {
-      width: 1lh;
+      width: .7lh;
       cursor: auto;
       max-width: none;
       vertical-align: sub; // text-top windows 不兼容
@@ -148,6 +148,10 @@
     margin: 4px 0;
     font-weight: 600;
     line-height: 1.25;
+
+    .emoji {
+      width: 1lh;
+    }
   }
 
   .h1,

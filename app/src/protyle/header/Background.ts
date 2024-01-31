@@ -201,7 +201,7 @@ export class Background {
 
             while (target && !target.isEqualNode(this.element)) {
                 const type = target.getAttribute("data-type");
-                if (target.tagName === "IMG") {
+                if (target.tagName === "IMG" && target.parentElement.classList.contains("protyle-background__img")) {
                     const imgSrc = target.getAttribute("src");
                     if (event.detail > 1 && !imgSrc.startsWith("data:image/png;base64")) {
                         previewImage(imgSrc);

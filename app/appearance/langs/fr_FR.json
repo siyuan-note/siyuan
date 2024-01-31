@@ -204,6 +204,7 @@
   "pinTableHead": "Épingler la tête du tableau",
   "unpinTableHead": "Désépingler l'en-tête du tableau",
   "enablePluginTip": "Avez-vous besoin d'activer ce plugin maintenant ? Vous pouvez l'activer, le désactiver ou le désinstaller plus tard dans [Téléchargé - Plugin]",
+  "enablePluginTip2": "Tous les plugins sont désactivés. Vous pourrez l'activer plus tard dans [Téléchargé - Plugin]",
   "color": "Couleur",
   "confirmPassword": "J'ai déjà retenu le mot de passe",
   "passwordNoMatch": "Les mots de passe saisis deux fois ne correspondent pas",

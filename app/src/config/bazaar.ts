@@ -649,16 +649,20 @@ export const bazaar = {
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                             bazaar._genMyHTML(bazaarType, app);
                             if (bazaarType === "plugins") {
-                                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip, () => {
-                                    fetchPost("/api/petal/setPetalEnabled", {
-                                        packageName: dataObj.name,
-                                        enabled: true,
-                                        frontend: getFrontend()
-                                    }, (response) => {
-                                        loadPlugin(app, response.data);
-                                        bazaar._genMyHTML(bazaarType, app);
+                                if (window.siyuan.config.bazaar.petalDisabled) {
+                                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                                } else {
+                                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip, () => {
+                                        fetchPost("/api/petal/setPetalEnabled", {
+                                            packageName: dataObj.name,
+                                            enabled: true,
+                                            frontend: getFrontend()
+                                        }, (response) => {
+                                            loadPlugin(app, response.data);
+                                            bazaar._genMyHTML(bazaarType, app);
+                                        });
                                     });
-                                });
+                                }
                             }
                         });
                     }

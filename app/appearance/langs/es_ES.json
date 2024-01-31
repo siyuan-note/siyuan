@@ -204,6 +204,7 @@
   "pinTableHead": "Cabeza de la tabla de clavijas",
   "unpinTableHead": "Desanclar el encabezado de la tabla",
   "enablePluginTip": "¿Necesita habilitar este complemento ahora? Puede habilitarlo, deshabilitarlo o desinstalarlo más tarde en [Descargado - Complemento]",
+  "enablePluginTip2": "Todos los complementos están deshabilitados. Puedes habilitarlos más tarde en [Descargado - Complemento]",
   "color": "Color",
   "confirmPassword": "Ya he recordado la contraseña",
   "passwordNoMatch": "Las contraseñas ingresadas dos veces no coinciden",

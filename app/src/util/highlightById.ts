@@ -44,7 +44,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         if (blockElement) {
             // undo 时禁止数据库滚动
             if (blockElement.classList.contains("av") && blockElement.dataset.render === "true" &&
-                (blockElement.querySelector(".av__row--header").getAttribute("style").indexOf("transform") > -1 || blockElement.querySelector(".av__row--footer").getAttribute("style").indexOf("transform") > -1)) {
+                (blockElement.querySelector(".av__row--header").getAttribute("style")?.indexOf("transform") > -1 || blockElement.querySelector(".av__row--footer").getAttribute("style")?.indexOf("transform") > -1)) {
                 return;
             }
             const editorElement = protyle.contentElement;

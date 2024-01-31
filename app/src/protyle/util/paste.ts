@@ -271,7 +271,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.setAttribute("contenteditable", "true");
         });
         const tempInnerHTML = tempElement.innerHTML;
-        insertHTML(tempInnerHTML, protyle, isBlock);
+        if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[{") && tempInnerHTML.endsWith("}]")) {
+            try {
+                const json = JSON.parse(tempInnerHTML);
+                if (json.length > 0 && json[0].id && json[0].type) {
+                    insertHTML(textPlain, protyle, isBlock);
+                } else {
+                    insertHTML(tempInnerHTML, protyle, isBlock);
+                }
+            } catch (e) {
+                insertHTML(tempInnerHTML, protyle, isBlock);
+            }
+        } else {
+            insertHTML(tempInnerHTML, protyle, isBlock);
+        }
         filterClipboardHint(protyle, protyle.lute.BlockDOM2StdMd(tempInnerHTML));
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);

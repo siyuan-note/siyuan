@@ -304,12 +304,12 @@ export class WYSIWYG {
                 }
                 if (cellElements.length > 0) {
                     html = "[";
-                    cellElements.forEach((item: HTMLElement) => {
+                    cellElements.forEach((item: HTMLElement, index) => {
                         const cellText = getCellText(item);
                         html += JSON.stringify(genCellValueByElement(getTypeByCellElement(item), item)) + ",";
-                        textPlain += cellText + " ";
+                        textPlain += cellText + ((cellElements[index + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[index + 1])) ? "\t" : "\n\n");
                     });
-                    textPlain = textPlain.substring(0, textPlain.length - 1);
+                    textPlain = textPlain.substring(0, textPlain.length - 2);
                     html = html.substring(0, html.length - 1) + "]";
                 }
             } else {

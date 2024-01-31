@@ -467,7 +467,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const cellId = item.getAttribute("data-id");
         const colId = item.getAttribute("data-col-id");
 
-        text += getCellText(item) + " ";
+        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
         json.push(oldValue);
         // relation 为全部更新，以下类型为添加
@@ -531,7 +531,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         });
         transaction(protyle, doOperations, undoOperations);
     }
-    return {text: text.substring(0, text.length - 1), json};
+    return {text: text.substring(0, text.length - 2), json};
 };
 
 export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {

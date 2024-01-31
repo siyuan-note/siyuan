@@ -652,7 +652,7 @@ export const bazaar = {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
                                     confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                                 } else {
-                                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip, () => {
+                                    confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
                                         fetchPost("/api/petal/setPetalEnabled", {
                                             packageName: dataObj.name,
                                             enabled: true,

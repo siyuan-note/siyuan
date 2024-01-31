@@ -15,6 +15,7 @@
     margin: 0 auto;
 
     &.emoji {
+      width: 1lh;
       cursor: auto;
       max-width: none;
       vertical-align: sub; // text-top windows 不兼容

@@ -171,7 +171,10 @@ img {
   height: auto;
   -ms-interpolation-mode: bicubic;
   overflow: hidden;
-  font-size: 12px;
+
+  &:not(.emoji) {
+    font-size: 12px;
+  }
 }
 
 button,

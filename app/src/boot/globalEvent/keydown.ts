@@ -407,7 +407,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             });
             copyPlainText(html.trimEnd());
         } else {
-            writeText(range.toString());
+            copyPlainText(range.toString());
         }
         event.preventDefault();
         return true;

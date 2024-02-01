@@ -513,10 +513,20 @@ var exitLock = sync.Mutex{}
 // Close 退出内核进程.
 //
 // force：是否不执行同步过程而直接退出
+//
 // execInstallPkg：是否执行新版本安装包
-// 0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
-// 1：不执行新版本安装
-// 2：执行新版本安装
+//
+//	0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//	1：不执行新版本安装
+//	2：执行新版本安装
+//
+// 返回值 exitCode：
+//
+//	0：正常退出
+//	1：同步执行失败
+//	2：提示新安装包
+//
+// 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且同步失败并且新版本安装版已经准备就绪时，执行新版本安装 https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
@@ -539,18 +549,17 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
-		newVerInstallPkgPath := getNewVerInstallPkgPath()
-		if "" != newVerInstallPkgPath {
-			if 0 == execInstallPkg { // 新版本安装包已经准备就绪
-				exitCode = 2
-				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
-				return
-			} else if 2 == execInstallPkg { // 执行新版本安装
+		if newVerInstallPkgPath := getNewVerInstallPkgPath(); "" != newVerInstallPkgPath {
+			if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
 				waitSecondForExecInstallPkg = true
 				if gulu.OS.IsWindows() {
 					util.PushMsg(Conf.Language(130), 1000*30)
 				}
 				go execNewVerInstallPkg(newVerInstallPkgPath)
+			} else if 0 == execInstallPkg { // 新版本安装包已经准备就绪
+				exitCode = 2
+				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
+				return
 			}
 		}
 	}

@@ -89,6 +89,7 @@ import {
     getTypeByCellElement,
     updateCellsValue
 } from "../render/av/cell";
+import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2296,6 +2297,35 @@ export class WYSIWYG {
                 // 需等待 range 更新再次进行渲染
                 if (protyle.options.render.breadcrumb) {
                     protyle.breadcrumb.render(protyle);
+                }
+                return;
+            }
+
+            const emojiElement = hasTopClosestByClassName(event.target, "emoji");
+            if (!event.shiftKey && !ctrlIsPressed && emojiElement) {
+                const nodeElement = hasClosestBlock(emojiElement);
+                if (nodeElement) {
+                    const emojiRect = emojiElement.getBoundingClientRect()
+                    openEmojiPanel("", "av", {
+                        x: emojiRect.left,
+                        y: emojiRect.bottom,
+                        h: emojiRect.height,
+                        w: emojiRect.width
+                    }, (unicode) => {
+                        emojiElement.insertAdjacentHTML("afterend", "<wbr>")
+                        const oldHTML = nodeElement.outerHTML;
+                        let emojiHTML;
+                        if (unicode.indexOf(".") > -1) {
+                            const emojiList = unicode.split(".");
+                            emojiHTML = `<img alt="${emojiList[0]}" class="emoji" src="/emojis/${unicode}" title="${emojiList[0]}">`;
+                        } else {
+                            emojiHTML = unicode2Emoji(unicode);
+                        }
+                        emojiElement.outerHTML = emojiHTML;
+                        hideElements(["dialog"]);
+                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        focusByWbr(nodeElement, range);
+                    });
                 }
                 return;
             }

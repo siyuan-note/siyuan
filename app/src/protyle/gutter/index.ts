@@ -442,7 +442,7 @@ export class Gutter {
                         }], [{
                             action: "foldHeading",
                             id: itemId
-                        }]);
+                        }], options.protyle);
                         item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
                     }
                 }

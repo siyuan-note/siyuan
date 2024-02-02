@@ -1027,9 +1027,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         protyle.updated = true;
 
         if (needDebounce) {
-            protyle.undo.replace(doOperations);
+            protyle.undo.replace(doOperations, protyle);
         } else {
-            protyle.undo.add(doOperations, undoOperations);
+            protyle.undo.add(doOperations, undoOperations, protyle);
         }
     }
     if (needDebounce) {

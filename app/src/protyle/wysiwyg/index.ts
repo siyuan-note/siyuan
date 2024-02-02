@@ -1823,6 +1823,19 @@ export class WYSIWYG {
                     if (range.toString() === "") {
                         countSelectWord(range, protyle.block.rootID);
                     }
+                    if (protyle.breadcrumb) {
+                        const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
+                        if (indentElement) {
+                            const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
+                            if (nodeElement.parentElement.classList.contains("li")) {
+                                indentElement.removeAttribute("disabled");
+                                outdentElement.removeAttribute("disabled");
+                            } else {
+                                indentElement.setAttribute("disabled", "true");
+                                outdentElement.setAttribute("disabled", "true");
+                            }
+                        }
+                    }
                 }
                 event.stopPropagation();
             }
@@ -2351,6 +2364,20 @@ export class WYSIWYG {
                 /// #if !MOBILE
                 pushBack(protyle, newRange);
                 /// #endif
+                if (protyle.breadcrumb) {
+                    const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
+                    const blockElement = hasClosestBlock(newRange.startContainer);
+                    if (indentElement && blockElement) {
+                        const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
+                        if (blockElement.parentElement.classList.contains("li")) {
+                            indentElement.removeAttribute("disabled");
+                            outdentElement.removeAttribute("disabled");
+                        } else {
+                            indentElement.setAttribute("disabled", "true");
+                            outdentElement.setAttribute("disabled", "true");
+                        }
+                    }
+                }
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
             protyle.hint.enableExtend = false;
             if (event.shiftKey) {

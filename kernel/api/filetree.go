@@ -730,7 +730,11 @@ func listDocsByPath(c *gin.Context) {
 		return
 	}
 	if maxListCount < totals {
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
+		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
+		if nil == ignoreMaxListHintArg || !ignoreMaxListHintArg.(bool) {
+			util.PushMsg(fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+		}
 	}
 
 	ret.Data = map[string]interface{}{

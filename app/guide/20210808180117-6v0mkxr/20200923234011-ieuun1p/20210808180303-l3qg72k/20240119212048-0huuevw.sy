@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20240119212048-0huuevw",
 		"title": "Ignore search",
-		"updated": "20240119212145"
+		"updated": "20240202105500"
 	},
 	"Children": [
 		{
@@ -188,6 +188,20 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240202105459-q4d3ttn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105459-q4d3ttn",
+				"updated": "20240202105500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It will take 30 seconds to take effect after modifying the configuration file."
 				}
 			]
 		}

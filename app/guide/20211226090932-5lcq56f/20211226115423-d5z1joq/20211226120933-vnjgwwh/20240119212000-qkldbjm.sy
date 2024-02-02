@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20240119212000-qkldbjm",
 		"title": "忽略搜尋",
-		"updated": "20240119212033"
+		"updated": "20240202105512"
 	},
 	"Children": [
 		{
@@ -188,6 +188,20 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240202105512-12u06gl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105512-12u06gl",
+				"updated": "20240202105512"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定檔修改儲存後需要等待 30 秒才會生效。"
 				}
 			]
 		}

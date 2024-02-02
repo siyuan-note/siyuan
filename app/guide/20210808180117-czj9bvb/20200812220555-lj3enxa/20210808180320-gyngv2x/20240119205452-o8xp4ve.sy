@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20240119205452-o8xp4ve",
 		"title": "忽略索引",
-		"updated": "20240119211220"
+		"updated": "20240202105353"
 	},
 	"Children": [
 		{
@@ -157,6 +157,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105353-qaj8ahd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105353-qaj8ahd",
+				"updated": "20240202105353"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "调整完以后需要手动重建索引。"
 				}
 			]
 		}

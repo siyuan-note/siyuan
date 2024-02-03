@@ -1607,6 +1607,28 @@ export class WYSIWYG {
             } else {
                 beforeContextmenuRange = undefined;
             }
+            /// #if BROWSER && !MOBILE
+            if (protyle.breadcrumb) {
+                const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
+                if (indentElement && getSelection().rangeCount > 0) {
+                    setTimeout(() => {
+                        const newRange = getSelection().getRangeAt(0);
+                        const blockElement = hasClosestBlock(newRange.startContainer);
+                        if (!blockElement) {
+                            return
+                        }
+                        const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
+                        if (blockElement.parentElement.classList.contains("li")) {
+                            indentElement.removeAttribute("disabled");
+                            outdentElement.removeAttribute("disabled");
+                        } else {
+                            indentElement.setAttribute("disabled", "true");
+                            outdentElement.setAttribute("disabled", "true");
+                        }
+                    }, 520);
+                }
+            }
+            /// #endif
         });
 
         let preventGetTopHTML = false;
@@ -2394,20 +2416,6 @@ export class WYSIWYG {
                 /// #if !MOBILE
                 pushBack(protyle, newRange);
                 /// #endif
-                if (protyle.breadcrumb) {
-                    const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
-                    const blockElement = hasClosestBlock(newRange.startContainer);
-                    if (indentElement && blockElement) {
-                        const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
-                        if (blockElement.parentElement.classList.contains("li")) {
-                            indentElement.removeAttribute("disabled");
-                            outdentElement.removeAttribute("disabled");
-                        } else {
-                            indentElement.setAttribute("disabled", "true");
-                            outdentElement.setAttribute("disabled", "true");
-                        }
-                    }
-                }
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
             protyle.hint.enableExtend = false;
             if (event.shiftKey) {

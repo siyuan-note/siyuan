@@ -41,7 +41,7 @@ export class Breadcrumb {
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
-        let padHTML = ""
+        let padHTML = "";
         /// #if BROWSER
         if (isIPad() || isInAndroid()) {
             padHTML = `<button class="block__icon fn__flex-center ariaLabel" disabled aria-label="${window.siyuan.languages.undo}" data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>

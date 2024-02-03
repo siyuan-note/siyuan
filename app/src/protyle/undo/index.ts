@@ -33,7 +33,7 @@ export class Undo {
         this.hasUndo = true;
         this.redoStack.push(state);
         if (protyle.breadcrumb) {
-            const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]')
+            const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
             if (undoElement) {
                 if (this.undoStack.length === 0) {
                     undoElement.setAttribute("disabled", "true");
@@ -54,7 +54,7 @@ export class Undo {
         this.render(protyle, state, true);
         this.undoStack.push(state);
         if (protyle.breadcrumb) {
-            const redoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]')
+            const redoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]');
             if (redoElement) {
                 protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]').removeAttribute("disabled");
                 if (this.redoStack.length === 0) {
@@ -89,7 +89,7 @@ export class Undo {
             this.redoStack = [];
             this.hasUndo = false;
             if (protyle.breadcrumb) {
-                const redoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]')
+                const redoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]');
                 if (redoElement) {
                     redoElement.setAttribute("disabled", "true");
                 }
@@ -110,7 +110,7 @@ export class Undo {
             this.hasUndo = false;
         }
         if (protyle.breadcrumb) {
-            const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]')
+            const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
             if (undoElement) {
                 undoElement.removeAttribute("disabled");
             }

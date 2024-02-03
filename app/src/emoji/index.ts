@@ -278,7 +278,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         if (event.key.indexOf("Arrow") === -1 && event.key !== "Enter") {
             return;
         }
-        const currentElement = dialog.element.querySelector(".emojis__item--current");
+        const currentElement: HTMLElement = dialog.element.querySelector(".emojis__item--current");
         if (!currentElement) {
             return;
         }
@@ -311,7 +311,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             return;
         }
         let newCurrentElement: HTMLElement;
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        if (event.key === "ArrowLeft") {
             if (currentElement.previousElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.previousElementSibling as HTMLElement;
@@ -323,7 +323,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 event.preventDefault();
                 event.stopPropagation();
             }
-        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        } else if (event.key === "ArrowRight") {
             if (currentElement.nextElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.nextElementSibling as HTMLElement;
@@ -335,12 +335,48 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 event.preventDefault();
                 event.stopPropagation();
             }
+        } else if (event.key === "ArrowDown") {
+            if (!currentElement.nextElementSibling) {
+                const nextContentElement = currentElement.parentElement.nextElementSibling?.nextElementSibling;
+                if (nextContentElement) {
+                    newCurrentElement = nextContentElement.firstElementChild as HTMLElement;
+                    currentElement.classList.remove("emojis__item--current");
+                }
+            } else {
+                currentElement.classList.remove("emojis__item--current");
+                let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
+                newCurrentElement = currentElement;
+                while (newCurrentElement.nextElementSibling && counter > 0) {
+                    newCurrentElement = newCurrentElement.nextElementSibling as HTMLElement;
+                    counter--;
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        } else if (event.key === "ArrowUp") {
+            if (!currentElement.previousElementSibling) {
+                const prevContentElement = currentElement.parentElement.previousElementSibling?.previousElementSibling;
+                if (prevContentElement) {
+                    newCurrentElement = prevContentElement.lastElementChild as HTMLElement;
+                    currentElement.classList.remove("emojis__item--current");
+                }
+            } else {
+                currentElement.classList.remove("emojis__item--current");
+                let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
+                newCurrentElement = currentElement;
+                while (newCurrentElement.previousElementSibling && counter > 0) {
+                    newCurrentElement = newCurrentElement.previousElementSibling as HTMLElement;
+                    counter--;
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
         }
         if (newCurrentElement) {
             newCurrentElement.classList.add("emojis__item--current");
             const inputHeight = inputElement.clientHeight + 6;
             if (newCurrentElement.offsetTop - inputHeight < emojisContentElement.scrollTop) {
-                emojisContentElement.scrollTop = newCurrentElement.offsetTop - inputHeight;
+                emojisContentElement.scrollTop = newCurrentElement.offsetTop - inputHeight - 6;
             } else if (newCurrentElement.offsetTop - inputHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight > emojisContentElement.scrollTop) {
                 emojisContentElement.scrollTop = newCurrentElement.offsetTop - inputHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight;
             }

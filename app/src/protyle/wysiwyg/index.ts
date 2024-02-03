@@ -1609,13 +1609,13 @@ export class WYSIWYG {
             }
             /// #if BROWSER && !MOBILE
             if (protyle.breadcrumb) {
-                const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
+                const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]');
                 if (indentElement && getSelection().rangeCount > 0) {
                     setTimeout(() => {
                         const newRange = getSelection().getRangeAt(0);
                         const blockElement = hasClosestBlock(newRange.startContainer);
                         if (!blockElement) {
-                            return
+                            return;
                         }
                         const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
                         if (blockElement.parentElement.classList.contains("li")) {
@@ -1847,7 +1847,7 @@ export class WYSIWYG {
                         countSelectWord(range, protyle.block.rootID);
                     }
                     if (protyle.breadcrumb) {
-                        const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]')
+                        const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]');
                         if (indentElement) {
                             const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
                             if (nodeElement.parentElement.classList.contains("li")) {
@@ -2327,14 +2327,14 @@ export class WYSIWYG {
             if (!event.shiftKey && !ctrlIsPressed && emojiElement) {
                 const nodeElement = hasClosestBlock(emojiElement);
                 if (nodeElement) {
-                    const emojiRect = emojiElement.getBoundingClientRect()
+                    const emojiRect = emojiElement.getBoundingClientRect();
                     openEmojiPanel("", "av", {
                         x: emojiRect.left,
                         y: emojiRect.bottom,
                         h: emojiRect.height,
                         w: emojiRect.width
                     }, (unicode) => {
-                        emojiElement.insertAdjacentHTML("afterend", "<wbr>")
+                        emojiElement.insertAdjacentHTML("afterend", "<wbr>");
                         const oldHTML = nodeElement.outerHTML;
                         let emojiHTML;
                         if (unicode.indexOf(".") > -1) {

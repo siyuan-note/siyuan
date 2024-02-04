@@ -82,11 +82,8 @@ export const bazaar = {
     <div data-type="widget" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.widget}</span><span class="fn__flex-1"></span></div>
 </div>
 <div class="fn__flex-1">
-    <div class="bazaarPanel" data-type="downloaded" data-init="true">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
+        <div class="fn__flex config-bazaar__title">
             <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
             <div class="fn__space"></div>
             <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
@@ -103,19 +100,15 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
+            <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch" style="margin: 8px 16px">
             <div class="counter fn__none fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarDownloaded">
+        <div id="configBazaarDownloaded" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
-    <div data-type="theme" class="bazaarPanel fn__none">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div data-type="theme" class="config-bazaar__panel fn__none">
+        <div class="fn__flex config-bazaar__title">
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
             <select class="b3-select">
@@ -138,18 +131,13 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarTheme">
+        <div id="configBazaarTheme" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
-    <div class="fn__none bazaarPanel" data-type="template">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div class="fn__none config-bazaar__panel" data-type="template">
+        <div class="fn__flex config-bazaar__title">
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
             <select class="b3-select">
@@ -166,18 +154,13 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarTemplate">
+        <div id="configBazaarTemplate" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
-    <div class="fn__none bazaarPanel" data-type="plugin">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div class="fn__none config-bazaar__panel" data-type="plugin">
+        <div class="fn__flex config-bazaar__title">
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
             <select class="b3-select">
@@ -194,18 +177,13 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarPlugin">
+        <div id="configBazaarPlugin" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
-    <div class="fn__none bazaarPanel" data-type="icon">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div class="fn__none config-bazaar__panel" data-type="icon">
+        <div class="fn__flex config-bazaar__title">
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
             <select class="b3-select">
@@ -222,18 +200,13 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarIcon">
+        <div id="configBazaarIcon" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
-    <div class="fn__none bazaarPanel" data-type="widget">
-        <div class="fn__hr--b"></div>
-        <div class="fn__flex">
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
+    <div class="fn__none config-bazaar__panel" data-type="widget">
+        <div class="fn__flex config-bazaar__title">
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
             <select class="b3-select">
@@ -250,10 +223,8 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}" style="background: var(--b3-theme-surface)"></div>
-            <div class="fn__space"></div>
-            <div class="fn__space"></div>
         </div>
-        <div id="configBazaarWidget">
+        <div id="configBazaarWidget" class="config-bazaar__content">
             ${loadingHTML}
         </div>
     </div>
@@ -408,11 +379,11 @@ export const bazaar = {
                 });
             }
             bazaar._data.downloaded = response.data.packages;
+            const checkElement = contentElement.parentElement.querySelector(".b3-switch")
             if (bazaarType === "plugins") {
-                html = `<div class="fn__flex">
-    <div class="fn__flex-1"></div>
-    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch" style="margin: 8px 32px">
-</div>${html}`;
+                checkElement.classList.remove("fn__none");
+            } else {
+                checkElement.classList.add("fn__none");
             }
             contentElement.innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
@@ -897,7 +868,7 @@ export const bazaar = {
                     // switch tab
                     bazaar.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
-                    bazaar.element.querySelectorAll(".bazaarPanel").forEach(item => {
+                    bazaar.element.querySelectorAll(".config-bazaar__panel").forEach(item => {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
                             if (!item.getAttribute("data-init")) {
@@ -948,14 +919,14 @@ export const bazaar = {
             }
         });
 
-        bazaar.element.querySelectorAll(".bazaarPanel .b3-form__icon > .b3-text-field").forEach((inputElement: HTMLInputElement) => {
+        bazaar.element.querySelectorAll(".config-bazaar__panel .b3-form__icon > .b3-text-field").forEach((inputElement: HTMLInputElement) => {
             inputElement.addEventListener("keydown", (event) => {
                 if (event.isComposing) {
                     return;
                 }
                 if (event.key === "Enter") {
                     const keyword = inputElement.value.trim();
-                    const type = (hasClosestByClassName(inputElement, "bazaarPanel") as HTMLElement).getAttribute("data-type");
+                    const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement).getAttribute("data-type");
                     if (type === "template") {
                         fetchPost("/api/bazaar/getBazaarTemplate", {keyword}, response => {
                             bazaar._onBazaar(response, "templates", false);

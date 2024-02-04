@@ -612,6 +612,9 @@ func getDocCreateSavePath(c *gin.Context) {
 	if "../" == docCreateSavePathTpl {
 		docCreateSavePathTpl = "../Untitled"
 	}
+	if "/" == docCreateSavePathTpl {
+		docCreateSavePathTpl = "/Untitled"
+	}
 
 	p, err := model.RenderGoTemplate(docCreateSavePathTpl)
 	if nil != err {

@@ -398,6 +398,9 @@ func setFiletree(c *gin.Context) {
 	if "../" == fileTree.DocCreateSavePath {
 		fileTree.DocCreateSavePath = "../Untitled"
 	}
+	if "/" == fileTree.DocCreateSavePath {
+		fileTree.DocCreateSavePath = "/Untitled"
+	}
 
 	if 1 > fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 8

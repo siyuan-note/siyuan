@@ -208,6 +208,9 @@ func InitConf() {
 	if "../" == Conf.FileTree.DocCreateSavePath {
 		Conf.FileTree.DocCreateSavePath = "../Untitled"
 	}
+	if "/" == Conf.FileTree.DocCreateSavePath {
+		Conf.FileTree.DocCreateSavePath = "/Untitled"
+	}
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion

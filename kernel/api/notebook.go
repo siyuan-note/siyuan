@@ -329,6 +329,9 @@ func setNotebookConf(c *gin.Context) {
 	if "../" == boxConf.DocCreateSavePath {
 		boxConf.DocCreateSavePath = "../Untitled"
 	}
+	if "/" == boxConf.DocCreateSavePath {
+		boxConf.DocCreateSavePath = "/Untitled"
+	}
 
 	box.SaveConf(boxConf)
 	ret.Data = boxConf

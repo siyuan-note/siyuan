@@ -264,7 +264,6 @@ export class Files extends Model {
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__toggle")) {
                         this.getLeaf(target.parentElement, notebookId);
-                        this.setCurrent(target.parentElement);
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();

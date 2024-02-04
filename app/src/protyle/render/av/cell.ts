@@ -243,9 +243,9 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         } else {
             const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
             if (contentElement) {
-                const contentBottom = contentElement.getBoundingClientRect().bottom;
-                if (cellRect.bottom > contentBottom) {
-                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - contentBottom);
+                const contentRect = contentElement.getBoundingClientRect();
+                if (cellRect.bottom > contentRect.bottom) {
+                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.top - contentRect.top - 33);
                 }
             }
         }
@@ -278,8 +278,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         return;
     }
     let cellRect = cellElements[0].getBoundingClientRect();
-    /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+    /// #if MOBILE
     if (contentElement) {
         contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
     }
@@ -288,7 +288,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${cellRect.height}px"`;
+    let height = cellRect.height
+    if (contentElement) {
+        const contentRect = contentElement.getBoundingClientRect();
+        if (cellRect.bottom > contentRect.bottom) {
+            height = contentRect.bottom - cellRect.top;
+        }
+    }
+    const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     if (["text", "url", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {

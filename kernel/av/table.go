@@ -17,6 +17,7 @@
 package av
 
 import (
+	"bytes"
 	"math"
 	"sort"
 	"strconv"
@@ -210,8 +211,19 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeRollup:
 		if nil != value.Rollup && nil != other.Rollup {
-			vContent := strings.TrimSpace(strings.Join(value.Relation.Contents, " "))
-			oContent := strings.TrimSpace(strings.Join(other.Relation.Contents, " "))
+			vContentBuf := bytes.Buffer{}
+			for _, c := range value.Rollup.Contents {
+				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteByte(' ')
+			}
+			vContent := strings.TrimSpace(vContentBuf.String())
+			oContentBuf := bytes.Buffer{}
+			for _, c := range other.Rollup.Contents {
+				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteByte(' ')
+			}
+			oContent := strings.TrimSpace(oContentBuf.String())
+
 			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
 				v1, _ := strconv.ParseFloat(vContent, 64)
 				v2, _ := strconv.ParseFloat(oContent, 64)

@@ -132,9 +132,6 @@ export const bindCardEvent = async (options: {
     dialog?: Dialog,
     index?: number
 }) => {
-    for (let i = 0; i < options.app.plugins.length; i++) {
-        options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
-    }
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
             options.element.querySelector('[data-type="fullscreen"]'));
@@ -466,6 +463,9 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     let lastRange: Range;
     if (getSelection().rangeCount > 0) {
         lastRange = getSelection().getRangeAt(0);
+    }
+    for (let i = 0; i < app.plugins.length; i++) {
+        cardsData = await app.plugins[i].updateCards(cardsData);
     }
     const dialog = new Dialog({
         positionId: Constants.DIALOG_OPENCARD,

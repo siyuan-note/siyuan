@@ -494,7 +494,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         path: liElement.getAttribute("data-path"),
         flashcard,
     }, response => {
-        if (response.data.path === "/" && response.data.files.length === 0) {
+        if (response.data.files.length === 0) {
             showMessage(window.siyuan.languages.emptyContent);
             return;
         }

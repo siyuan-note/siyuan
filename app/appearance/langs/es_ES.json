@@ -214,6 +214,7 @@
   "scrollGetMore": "No se asuste... desplácese hacia arriba y hacia abajo para cargar más",
   "flashcardNewCard": "Nueva Tarjeta",
   "flashcardReviewCard": "Revisar Tarjeta",
+  "flashcardDueCard": "Tarjeta debida",
   "flashcardCard": "Todos",
   "plugin": "Complemento",
   "attrBookmarkTip": "Asociar este bloque con un marcador para verlo posteriormente a través del panel de marcadores",

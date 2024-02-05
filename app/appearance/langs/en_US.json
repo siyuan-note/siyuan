@@ -214,6 +214,7 @@
   "scrollGetMore": "Don't panic... scroll up and down to load more",
   "flashcardNewCard": "New",
   "flashcardReviewCard": "Review",
+  "flashcardDueCard": "Due",
   "flashcardCard": "Total",
   "plugin": "Plugin",
   "attrBookmarkTip": "Associate this block with a bookmark for subsequent viewing through the bookmark panel",

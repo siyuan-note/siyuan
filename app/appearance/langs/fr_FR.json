@@ -214,6 +214,7 @@
   "scrollGetMore": "Ne paniquez pas... faites défiler de haut en bas pour en charger plus",
   "flashcardNewCard": "Nouvelle carte",
   "flashcardReviewCard": "Revoir la carte",
+  "flashcardDueCard": "Carte due",
   "flashcardCard": "Tous",
   "plugin": "Plugin",
   "attrBookmarkTip": "Associez ce bloc à un signet pour un affichage ultérieur via le panneau des signets",

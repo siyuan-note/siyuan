@@ -177,8 +177,8 @@ export const bindCardEvent = async (options: {
         });
     }
     options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
-    const countElement = options.element.querySelector('[data-type="count"] span');
-    countElement.innerHTML = (index + 1).toString();
+    const countElement = options.element.querySelector('[data-type="count"]');
+    countElement.firstElementChild.innerHTML = (index + 1).toString();
     const actionElements = options.element.querySelectorAll(".card__action");
     if (options.index === 0) {
         actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
@@ -530,8 +530,8 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.parentElement.innerHTML =  genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount, options.index + 1);
-    options.countElement.parentElement.classList.remove("fn__none");
+    options.countElement.innerHTML =  genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount, options.index + 1);
+    options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
     } else {
@@ -557,7 +557,7 @@ const nextCard = (options: {
 };
 
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
-    countElement.parentElement.classList.add("fn__none");
+    countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
     emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`;
@@ -567,7 +567,7 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {
-    countElement.parentElement.classList.add("fn__none");
+    countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
     emptyElement.innerHTML = `<div>♻️ </div>

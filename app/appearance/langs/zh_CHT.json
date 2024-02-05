@@ -214,6 +214,7 @@
   "scrollGetMore": "不要驚慌...上下滾動即可加載更多內容",
   "flashcardNewCard": "新卡",
   "flashcardReviewCard": "複習卡",
+  "flashcardDueCard": "到期卡",
   "flashcardCard": "所有",
   "plugin": "插件",
   "attrBookmarkTip": "將該塊和一個書籤進行關聯，以便後續通過書籤面板查看",

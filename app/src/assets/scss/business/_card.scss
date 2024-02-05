@@ -70,7 +70,7 @@
   }
 
   &__block {
-    .protyle-wysiwyg [data-node-id][custom-riff-decks] {
+    .protyle-wysiwyg:not([data-doc-type="NodeDocument"]) [data-node-id][custom-riff-decks] {
       box-shadow: none;
     }
 

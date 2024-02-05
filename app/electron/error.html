@@ -36,11 +36,11 @@
 
         .svg {
             position: fixed;
-            right: 22px;
+            right: 32px;
             top: 0;
-            width: 12px;
+            width: 13px;
             fill: #5f6368;
-            padding: 5px;
+            padding: 9.5px;
             cursor: pointer;
             z-index: 1;
         }
@@ -52,8 +52,8 @@
 
         #close {
             right: 0;
-            width: 8px;
-            padding: 7px 7px;
+            width: 10px;
+            padding: 11px 11px;
         }
 
         #close:hover {
@@ -110,11 +110,17 @@
         }
 
         #icon {
-            height: 22px;
-            width: 22px;
             position: fixed;
-            left: 5px;
+            left: 4px;
             top: 0;
+            line-height: 32px;
+            color: #5f6368;
+        }
+
+        #icon img {
+            height: 32px;
+            width: 32px;
+            vertical-align: top;
         }
 
         pre code {
@@ -154,7 +160,7 @@
 <svg class="svg" id="close" viewBox="0 0 32 32">
     <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
 </svg>
-<img id="icon">
+<div id="icon"></div>
 <div class="drag"></div>
 <script>
     const getSearch = (key) => {
@@ -173,22 +179,21 @@
         return value
     }
 
-    document.querySelector('#icon').src = decodeURIComponent(`${getSearch('icon')}`)
+    (() => {
+        document.querySelector('#icon').innerHTML = `<img src="${decodeURIComponent(getSearch('icon'))}"> SiYuan v${getSearch('v')}`
 
-    document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
-    document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
-    document.querySelectorAll('.version').forEach(item => {
-        item.textContent = `v${getSearch('v')}`
-    })
+        document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
+        document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
 
-    document.getElementById('close').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
-        ipcRenderer.send("siyuan-cmd", "destroy");
-    })
-    document.getElementById('min').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
-        ipcRenderer.send("siyuan-cmd", "minimize");
-    })
+        document.getElementById('close').addEventListener('click', () => {
+            const {ipcRenderer} = require('electron')
+            ipcRenderer.send("siyuan-cmd", "destroy");
+        })
+        document.getElementById('min').addEventListener('click', () => {
+            const {ipcRenderer} = require('electron')
+            ipcRenderer.send("siyuan-cmd", "minimize");
+        })
+    })()
 </script>
 </body>
 </html>

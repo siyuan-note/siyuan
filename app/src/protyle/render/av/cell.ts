@@ -288,7 +288,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    let height = cellRect.height
+    let height = cellRect.height;
     if (contentElement) {
         const contentRect = contentElement.getBoundingClientRect();
         if (cellRect.bottom > contentRect.bottom) {

@@ -379,7 +379,7 @@ export const bazaar = {
                 });
             }
             bazaar._data.downloaded = response.data.packages;
-            const checkElement = contentElement.parentElement.querySelector(".b3-switch")
+            const checkElement = contentElement.parentElement.querySelector(".b3-switch");
             if (bazaarType === "plugins") {
                 checkElement.classList.remove("fn__none");
             } else {

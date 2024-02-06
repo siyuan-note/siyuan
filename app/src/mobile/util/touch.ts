@@ -154,7 +154,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         time = 0;
         event.stopImmediatePropagation();
     }
-    scrollBlock = false
+    scrollBlock = false;
 };
 
 let previousClientX: number;
@@ -229,7 +229,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 (xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
             )) {
-                scrollBlock = true
+                scrollBlock = true;
                 return;
             }
             if (scrollBlock) {

@@ -42,7 +42,7 @@ export class Breadcrumb {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         let padHTML = "";
-        /// #if BROWSER
+        /// #if BROWSER && !MOBILE
         if (isIPad() || isInAndroid()) {
             padHTML = `<button class="block__icon fn__flex-center ariaLabel" disabled aria-label="${window.siyuan.languages.undo}" data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
 <button class="block__icon fn__flex-center ariaLabel" disabled aria-label="${window.siyuan.languages.redo}" data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>

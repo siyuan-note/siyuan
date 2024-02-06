@@ -112,7 +112,7 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator" style="margin-left: 0">${getColNameByType(colData.type)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
-    if (colData.options && colData.options.length > 0) {
+    if (["mSelect", "select"].includes(colData.type) && colData.options && colData.options.length > 0) {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>

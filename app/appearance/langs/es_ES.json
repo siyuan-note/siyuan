@@ -1157,7 +1157,6 @@
     "task.history.database.index.commit": "Ejecutar la confirmación del índice de la base de datos del historial",
     "task.database.index.embedBlock": "Ejecutar bloque de incrustación de índice de base de datos",
     "task.reload.ui": "IU de recarga de tareas",
-    "task.upgrade.userGuide": "Ejecutar la guía de usuario de actualización",
     "task.asset.database.index.full": "Ejecutar índice de reconstrucción de base de datos de activos",
     "task.asset.database.index.commit": "Ejecutar confirmación del índice de la base de datos de activos"
   },
@@ -1408,6 +1407,7 @@
     "229": "Eliminando instantáneas sin referencia del almacenamiento en la nube...",
     "230": "Eliminando índices de verificación sin referencia del almacenamiento en la nube...",
     "231": "Eliminar objetos de datos no referenciados en el almacenamiento en la nube...",
-    "232": "Se ha eliminado el almacenamiento de datos en la nube. Se han eliminado [%d] instantáneas y [%d] objetos de datos, y se ha liberado un total de [%s] espacio en disco"
+    "232": "Se ha eliminado el almacenamiento de datos en la nube. Se han eliminado [%d] instantáneas y [%d] objetos de datos, y se ha liberado un total de [%s] espacio en disco",
+    "233": "Cerrando la guía del usuario..."
   }
 }

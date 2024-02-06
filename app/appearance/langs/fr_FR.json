@@ -1157,7 +1157,6 @@
     "task.history.database.index.commit": "Effectuer la validation de l'index de la base de données d'historique",
     "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données",
     "task.reload.ui": "Interface utilisateur de rechargement de tâche",
-    "task.upgrade.userGuide": "Mise à niveau de la tâche de guide utilisateur",
     "task.asset.database.index.full": "Exécuter l'index de reconstruction de la base de données d'actifs",
     "task.asset.database.index.commit": "Exécuter la validation de l'index de la base de données des actifs"
   },
@@ -1408,6 +1407,7 @@
     "229": "Suppression des instantanés non référencés du stockage cloud...",
     "230": "Suppression des index de vérification non référencés du stockage cloud...",
     "231": "Suppression des objets de données non référencés dans le stockage cloud...",
-    "232": "Le stockage de données cloud a été purgé. [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré"
+    "232": "Le stockage de données cloud a été purgé. [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré",
+    "233": "Fermeture du guide de l'utilisateur..."
   }
 }

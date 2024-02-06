@@ -40,7 +40,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
@@ -284,7 +283,6 @@ func InitConf() {
 
 		Conf.System.KernelVersion = util.Ver
 		Conf.System.IsInsider = util.IsInsider
-		task.AppendTask(task.UpgradeUserGuide, upgradeUserGuide)
 	}
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
@@ -533,7 +531,6 @@ var exitLock = sync.Mutex{}
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
-	util.IsExiting.Store(true)
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 	util.PushMsg(Conf.Language(95), 10000*60)
@@ -550,6 +547,10 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
+	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
+	closeUserGuide()
+
+	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
 		if newVerInstallPkgPath := getNewVerInstallPkgPath(); "" != newVerInstallPkgPath {
@@ -945,7 +946,7 @@ func clearWorkspaceTemp() {
 	logging.LogInfof("cleared workspace temp")
 }
 
-func upgradeUserGuide() {
+func closeUserGuide() {
 	defer logging.Recover()
 
 	dirs, err := os.ReadDir(util.DataDir)
@@ -976,10 +977,20 @@ func upgradeUserGuide() {
 		data, readErr := filelock.ReadFile(boxConfPath)
 		if nil != readErr {
 			logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
+			} else {
+				logging.LogInfof("removed corrupted user guide box [%s]", boxDirPath)
+			}
 			continue
 		}
 		if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
 			logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
+			} else {
+				logging.LogInfof("removed corrupted user guide box [%s]", boxDirPath)
+			}
 			continue
 		}
 
@@ -987,19 +998,14 @@ func upgradeUserGuide() {
 			continue
 		}
 
-		logging.LogInfof("upgrading user guide box [%s]", boxID)
+		msgId := util.PushMsg(Conf.language(233), 30000)
 		unindex(boxID)
-
-		if err = filelock.Remove(boxDirPath); nil != err {
-			return
+		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
 		}
-		p := filepath.Join(util.WorkingDir, "guide", boxID)
-		if err = filelock.Copy(p, boxDirPath); nil != err {
-			return
-		}
-
-		index(boxID)
-		logging.LogInfof("upgraded user guide box [%s]", boxID)
+		sql.WaitForWritingDatabase()
+		util.PushClearMsg(msgId)
+		logging.LogInfof("closed user guide box [%s]", boxID)
 	}
 }
 

@@ -1157,7 +1157,6 @@
     "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",
     "task.reload.ui": "Execute reload UI",
-    "task.upgrade.userGuide": "Execute upgrade user guide",
     "task.asset.database.index.full": "Execute asset database rebuild index",
     "task.asset.database.index.commit": "Execute asset database index commit"
   },
@@ -1408,6 +1407,7 @@
     "229": "Deleting cloud storage unreferenced snapshots...",
     "230": "Deleting cloud storage unreferenced check indexes...",
     "231": "Deleting unreferenced data objects in cloud storage...",
-    "232": "The cloud data storage has been purged. [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released"
+    "232": "The cloud data storage has been purged. [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released",
+    "233": "Closing user guide..."
   }
 }

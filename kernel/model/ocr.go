@@ -1,7 +1,6 @@
 package model
 
 import (
-	"os"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
@@ -128,7 +127,7 @@ func LoadAssetsTexts() {
 	util.AssetsTextsLock.Lock()
 	if err = gulu.JSON.UnmarshalJSON(data, &util.AssetsTexts); nil != err {
 		logging.LogErrorf("unmarshal assets texts failed: %s", err)
-		if err = os.RemoveAll(assetsTextsPath); nil != err {
+		if err = filelock.Remove(assetsTextsPath); nil != err {
 			logging.LogErrorf("removed corrupted assets texts failed: %s", err)
 		}
 		return

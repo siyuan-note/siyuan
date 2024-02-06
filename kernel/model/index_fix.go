@@ -173,9 +173,9 @@ func resetDuplicateBlocksOnFileSys() {
 					return nil
 				}
 
-				if util.IsEmptyDir(filepath.Join(path)) {
+				if util.IsEmptyDir(path) {
 					// 删除空的子文档文件夹
-					if removeErr := os.RemoveAll(path); nil != removeErr {
+					if removeErr := filelock.Remove(path); nil != removeErr {
 						logging.LogErrorf("remove empty folder failed: %s", removeErr)
 					}
 					return nil
@@ -283,7 +283,7 @@ func recreateTree(tree *parse.Tree, absPath string) {
 		}
 	}
 
-	if err := os.RemoveAll(absPath); nil != err {
+	if err := filelock.Remove(absPath); nil != err {
 		logging.LogWarnf("remove [%s] failed: %s", absPath, err)
 		return
 	}
@@ -411,7 +411,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	}
 
 	var rootIDs []string
-	for rootID, _ := range dbRootUpdatedMap {
+	for rootID := range dbRootUpdatedMap {
 		if _, ok := rootUpdatedMap[rootID]; !ok {
 			rootIDs = append(rootIDs, rootID)
 		}

@@ -27,6 +27,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -176,7 +177,7 @@ func InstallTemplate(repoURL, repoHash, installPath string, systemID string) err
 }
 
 func UninstallTemplate(installPath string) error {
-	if err := os.RemoveAll(installPath); nil != err {
+	if err := filelock.Remove(installPath); nil != err {
 		logging.LogErrorf("remove template [%s] failed: %s", installPath, err)
 		return errors.New("remove community template failed")
 	}

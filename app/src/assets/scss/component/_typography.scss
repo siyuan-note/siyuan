@@ -352,7 +352,9 @@
   }
 
   .katex {
-    // https://github.com/siyuan-note/siyuan/issues/10251 font-size: 113%;
+    // https://github.com/siyuan-note/siyuan/issues/10251
+    // https://github.com/siyuan-note/siyuan/issues/10321
+    font-size: 1.36em;
     line-height: normal; // https://ld246.com/article/1649890278771
 
     .mathnormal {

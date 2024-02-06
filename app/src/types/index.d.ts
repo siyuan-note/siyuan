@@ -54,7 +54,7 @@ type TOperation =
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
-    "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
+    "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" | "click-flashcard-action" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
@@ -219,7 +219,7 @@ interface ICard {
     nextDues: IObject
 }
 
-interface ICardData  {
+interface ICardData {
     cards: ICard[],
     unreviewedCount: number
     unreviewedNewCardCount: number

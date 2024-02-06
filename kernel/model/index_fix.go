@@ -161,7 +161,7 @@ func resetDuplicateBlocksOnFileSys() {
 
 			if info.IsDir() {
 				if boxPath == path {
-					// 跳过根路径（笔记本文件夹）
+					// 跳过笔记本文件夹
 					return nil
 				}
 
@@ -170,14 +170,6 @@ func resetDuplicateBlocksOnFileSys() {
 				}
 
 				if !ast.IsNodeIDPattern(info.Name()) {
-					return nil
-				}
-
-				if util.IsEmptyDir(path) {
-					// 删除空的子文档文件夹
-					if removeErr := filelock.Remove(path); nil != removeErr {
-						logging.LogErrorf("remove empty folder failed: %s", removeErr)
-					}
 					return nil
 				}
 				return nil

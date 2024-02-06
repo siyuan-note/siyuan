@@ -190,7 +190,10 @@ func syncData(exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 		logging.LogInfof("sync before exit")
-		util.PushMsg(Conf.Language(81), 1000*60*15)
+		msgId := util.PushMsg(Conf.Language(81), 1000*60*15)
+		defer func() {
+			util.PushClearMsg(msgId)
+		}()
 	}
 
 	now := util.CurrentTimeMillis()

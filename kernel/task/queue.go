@@ -97,7 +97,6 @@ const (
 	HistoryDatabaseIndexCommit      = "task.history.database.index.commit" // 历史数据库索引提交
 	DatabaseIndexEmbedBlock         = "task.database.index.embedBlock"     // 数据库索引嵌入块
 	ReloadUI                        = "task.reload.ui"                     // 重载 UI
-	UpgradeUserGuide                = "task.upgrade.userGuide"             // 升级用户指南文档笔记本
 	AssetContentDatabaseIndexFull   = "task.asset.database.index.full"     // 资源文件数据库重建索引
 	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
 )

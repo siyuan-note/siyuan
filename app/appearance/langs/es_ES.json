@@ -1311,7 +1311,7 @@
     "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Palabra clave] o [Regex]",
     "133": "Descargando paquete de instalación de actualización [%s]",
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
-    "135": "No se pueden descifrar los datos. Asegúrese de usar la misma clave en varios dispositivos, luego cree un nuevo directorio en la nube para sincronizar",
+    "135": "La clave del repositorio de datos es incorrecta y los datos no se pueden descifrar. Consulte los pasos User Guide-FAQ-Lost Key para resolver el problema",
     "136": "Inicializando la clave del repositorio de datos...",
     "137": "Fallo en la inicialización de la clave del repositorio de datos: %s",
     "138": "La clave del repositorio de datos está configurada",

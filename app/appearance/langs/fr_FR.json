@@ -1311,7 +1311,7 @@
     "132": "La méthode de recherche actuelle ne prend pas en charge l'opération de remplacement, veuillez utiliser la méthode de recherche [Mot-clé] ou [Regex]",
     "133": "Téléchargement du package d'installation de la mise à jour [%s]",
     "134": "Afin d'éviter que les données nouvellement restaurées ne soient écrasées par la synchronisation, la fonction de synchronisation des données a été automatiquement suspendue",
-    "135": "Impossible de déchiffrer les données. Assurez-vous d'utiliser la même clé sur plusieurs appareils, puis créez un nouveau répertoire cloud à synchroniser",
+    "135": "La clé du dépôt de données est incorrecte et les données ne peuvent pas être déchiffrées. Veuillez vous référer aux étapes du User Guide-FAQ-Lost Key pour résoudre le problème",
     "136": "Initialisation de la clé du référentiel de données...",
     "137": "Échec de l'initialisation de la clé du référentiel de données: %s",
     "138": "La clé du référentiel de données est définie",

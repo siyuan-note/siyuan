@@ -365,6 +365,7 @@ export const bindCardEvent = async (options: {
                     element.previousElementSibling.textContent = options.cardsData.cards[index].nextDues[btnIndex];
                 });
                 actionElements[1].classList.remove("fn__none");
+                emitEvent(options.app, options.cardsData.cards, type);
                 return;
             }
         } else if (type === "-2") {    // 上一步
@@ -380,6 +381,7 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
+                emitEvent(options.app, options.cardsData.cards, type);
             }
             return;
         }
@@ -410,6 +412,7 @@ export const bindCardEvent = async (options: {
                     }, async (result) => {
                         index = 0;
                         options.cardsData = result.data;
+                        emitEvent(options.app, options.cardsData.cards, type);
                         for (let i = 0; i < options.app.plugins.length; i++) {
                             options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
                         }
@@ -438,10 +441,20 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
+                emitEvent(options.app, options.cardsData.cards, type);
             });
         }
     });
     return editor;
+};
+
+const emitEvent = (app: App, cards: ICard[], type: string) => {
+    app.plugins.forEach(item => {
+        item.eventBus.emit("click-flashcard-action", {
+            type,
+            cards
+        });
+    });
 };
 
 export const openCard = (app: App) => {
@@ -530,7 +543,7 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.innerHTML =  genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount, options.index + 1);
+    options.countElement.innerHTML = genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount, options.index + 1);
     options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");

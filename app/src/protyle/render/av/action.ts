@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getCellText, getTypeByCellElement, popTextCell, renderCell, updateHeaderCell} from "./cell";
+import {getCellText, getTypeByCellElement, popTextCell, renderCell, renderCellAttr, updateHeaderCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {deleteRow, insertAttrViewBlockAnimation, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -400,6 +400,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         updateHeaderCell(cellElement, headerValue);
     } else {
         cellElement.innerHTML = renderCell(value);
+        renderCellAttr(cellElement, value);
     }
 };
 

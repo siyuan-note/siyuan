@@ -111,9 +111,9 @@ const renderPDF = (id: string) => {
         }
         
         #action {
-          width: 200px;
+          width: 232px;
           background: var(--b3-theme-surface);
-          padding: 16px;
+          padding: 16px 0;
           position: fixed;
           right: 0;
           top: 0;
@@ -121,6 +121,8 @@ const renderPDF = (id: string) => {
           bottom: 0;
           overflow-x: hidden;
           z-index: 1;
+          display: flex;
+          flex-direction: column;
         }
         
         #preview {
@@ -156,8 +158,12 @@ const renderPDF = (id: string) => {
           border-bottom: 1px solid var(--b3-theme-surface-lighter);
           display: block;
           color: var(--b3-theme-on-surface);
-          padding-bottom: 12px;
-          margin-bottom: 12px;
+          padding-bottom: 16px;
+          margin: 0 16px 16px 16px;
+        }
+        
+        .b3-label:last-child {
+            border-bottom: none;
         }
         ${setInlineStyle(false)}
         ${document.getElementById("pluginsStyle").innerHTML}
@@ -166,91 +172,93 @@ const renderPDF = (id: string) => {
 </head>
 <body style="-webkit-print-color-adjust: exact;">
 <div id="action">
-    <div class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF0}
+    <div style="flex: 1;overflow: auto;">
+        <div class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF0}
+            </div>
+            <span class="fn__hr"></span>
+            <select class="b3-select" id="pageSize">
+                <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
+                <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
+                <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
+                <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
+                <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
+                <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
+            </select>
         </div>
-        <span class="fn__hr"></span>
-        <select class="b3-select" id="pageSize">
-            <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
-            <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
-            <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
-            <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
-            <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
-            <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
-        </select>
+        <div class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF2}
+            </div>
+            <span class="fn__hr"></span>
+            <select class="b3-select" id="marginsType">
+                <option ${localData.marginType === "default" ? "selected" : ""} value="default">${window.siyuan.languages.defaultMargin}</option>
+                <option ${localData.marginType === "none" ? "selected" : ""} value="none">${window.siyuan.languages.noneMargin}</option>
+                <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">${window.siyuan.languages.minimalMargin}</option>
+                <option ${localData.marginType === "custom" ? "selected" : ""} value="custom">${window.siyuan.languages.customMargin}</option>
+            </select>
+            <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
+                <span class="fn__hr"></span>
+                <div>${window.siyuan.languages.marginTop}</div>
+                <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
+                <span class="fn__hr"></span>
+                <div>${window.siyuan.languages.marginRight}</div>
+                <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
+                <span class="fn__hr"></span>
+                <div>${window.siyuan.languages.marginBottom}</div>
+                <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
+                <span class="fn__hr"></span>
+                <div>${window.siyuan.languages.marginLeft}</div>
+                <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+            </div>
+        </div>
+        <div class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF3}
+                <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
+            </div>
+            <span class="fn__hr"></span>
+            <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+        </div>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF1}
+            </div>
+            <span class="fn__hr"></span>
+          <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
+        </label>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF4}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
+        </label>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.exportPDF5}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="keepFold" class="b3-switch" type="checkbox" ${localData.keepFold ? "checked" : ""}>
+        </label>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.mergeSubdocs}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
+        </label>
+        <label class="b3-label">
+            <div>
+                ${window.siyuan.languages.export27}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
+            <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214]}</div>
+        </label>
     </div>
-    <div class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF2}
-        </div>
-        <span class="fn__hr"></span>
-        <select class="b3-select" id="marginsType">
-            <option ${localData.marginType === "default" ? "selected" : ""} value="default">${window.siyuan.languages.defaultMargin}</option>
-            <option ${localData.marginType === "none" ? "selected" : ""} value="none">${window.siyuan.languages.noneMargin}</option>
-            <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">${window.siyuan.languages.minimalMargin}</option>
-            <option ${localData.marginType === "custom" ? "selected" : ""} value="custom">${window.siyuan.languages.customMargin}</option>
-        </select>
-        <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
-            <span class="fn__hr"></span>
-            <div>${window.siyuan.languages.marginTop}</div>
-            <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
-            <span class="fn__hr"></span>
-            <div>${window.siyuan.languages.marginRight}</div>
-            <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
-            <span class="fn__hr"></span>
-            <div>${window.siyuan.languages.marginBottom}</div>
-            <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
-            <span class="fn__hr"></span>
-            <div>${window.siyuan.languages.marginLeft}</div>
-            <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
-        </div>
-    </div>
-    <div class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF3}
-            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
-        </div>
-        <span class="fn__hr"></span>
-        <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
-    </div>
-    <label class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF1}
-        </div>
-        <span class="fn__hr"></span>
-      <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
-    </label>
-    <label class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF4}
-        </div>
-        <span class="fn__hr"></span>
-        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
-    </label>
-    <label class="b3-label">
-        <div>
-            ${window.siyuan.languages.exportPDF5}
-        </div>
-        <span class="fn__hr"></span>
-        <input id="keepFold" class="b3-switch" type="checkbox" ${localData.keepFold ? "checked" : ""}>
-    </label>
-    <label class="b3-label">
-        <div>
-            ${window.siyuan.languages.mergeSubdocs}
-        </div>
-        <span class="fn__hr"></span>
-        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
-    </label>
-    <label class="b3-label">
-        <div>
-            ${window.siyuan.languages.export27}
-        </div>
-        <span class="fn__hr"></span>
-        <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
-        <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214]}</div>
-    </label>
-    <div class="fn__flex">
+    <div class="fn__flex" style="padding: 0 16px">
       <div class="fn__flex-1"></div>
       <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
       <div class="fn__space"></div>

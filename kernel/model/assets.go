@@ -671,7 +671,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
-			if err := os.RemoveAll(unusedAsset); nil != err {
+			if err := filelock.Remove(unusedAsset); nil != err {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
 			}
 		}
@@ -709,7 +709,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		sql.BatchRemoveAssetsQueue([]string{hash})
 	}
 
-	if err = os.RemoveAll(absPath); nil != err {
+	if err = filelock.Remove(absPath); nil != err {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
 	ret = absPath

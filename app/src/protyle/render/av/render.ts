@@ -130,7 +130,12 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
                         if (data.columns[index].hidden) {
                             return;
                         }
-                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
+                        // https://github.com/siyuan-note/siyuan/issues/10262
+                        let checkClass = "";
+                        if (cell.valueType === "checkbox") {
+                            checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
+                        }
+                        tableHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-wrap="${data.columns[index].wrap}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
@@ -302,7 +307,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         // 更新属性面板
                         renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle, (newElment) => {
                             if (operation.action === "addAttrViewCol") {
-                                openMenuPanel({protyle, blockElement: newElment.querySelector(`div[data-av-id="${operation.avID}"]`), type: "edit", colId: operation.id});
+                                openMenuPanel({
+                                    protyle,
+                                    blockElement: newElment.querySelector(`div[data-av-id="${operation.avID}"]`),
+                                    type: "edit",
+                                    colId: operation.id
+                                });
                             }
                         });
                     }

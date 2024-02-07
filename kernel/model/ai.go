@@ -40,6 +40,12 @@ func ChatGPTWithAction(ids []string, action string) (ret string) {
 		return
 	}
 
+	if "Clear context" == action {
+		// AI clear context action https://github.com/siyuan-note/siyuan/issues/10255
+		cachedContextMsg = nil
+		return
+	}
+
 	msg := getBlocksContent(ids)
 	ret = chatGPTWithAction(msg, action, false)
 	return
@@ -48,6 +54,12 @@ func ChatGPTWithAction(ids []string, action string) (ret string) {
 var cachedContextMsg []string
 
 func chatGPT(msg string, cloud bool) (ret string) {
+	if "Clear context" == strings.TrimSpace(msg) {
+		// AI clear context action https://github.com/siyuan-note/siyuan/issues/10255
+		cachedContextMsg = nil
+		return
+	}
+
 	ret, retCtxMsgs, err := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
 	if nil != err {
 		return

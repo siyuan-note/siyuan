@@ -76,6 +76,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = [];
         Array.from(cellElement.children).forEach((item) => {
+            if (item.classList.contains("av__drag-fill")) {
+                return;
+            }
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
@@ -125,6 +128,18 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 checkbox: {
                     checked: true
+                }
+            };
+        } else if (colType === "date") {
+            cellValue = {
+                type: colType,
+                date: {
+                    content: null,
+                    isNotEmpty: false,
+                    content2: null,
+                    isNotEmpty2: false,
+                    hasEndDate: false,
+                    isNotTime: true,
                 }
             };
         }
@@ -228,9 +243,9 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         } else {
             const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
             if (contentElement) {
-                const contentBottom = contentElement.getBoundingClientRect().bottom;
-                if (cellRect.bottom > contentBottom) {
-                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - contentBottom);
+                const contentRect = contentElement.getBoundingClientRect();
+                if (cellRect.bottom > contentRect.bottom) {
+                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.top - contentRect.top - 33);
                 }
             }
         }
@@ -263,8 +278,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         return;
     }
     let cellRect = cellElements[0].getBoundingClientRect();
-    /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+    /// #if MOBILE
     if (contentElement) {
         contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
     }
@@ -273,7 +288,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
-    const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${cellRect.height}px"`;
+    let height = cellRect.height;
+    if (contentElement) {
+        const contentRect = contentElement.getBoundingClientRect();
+        if (cellRect.bottom > contentRect.bottom) {
+            height = contentRect.bottom - cellRect.top;
+        }
+    }
+    const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     if (["text", "url", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
@@ -420,11 +442,12 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
     let text = "";
+    const json: IAVCellValue[] = [];
     let cellElements: Element[];
     if (cElements?.length > 0) {
         cellElements = cElements;
     } else {
-        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--select"));
+        cellElements = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select"));
         if (cellElements.length === 0) {
             nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                 rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
@@ -451,8 +474,9 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const cellId = item.getAttribute("data-id");
         const colId = item.getAttribute("data-col-id");
 
-        text += getCellText(item);
+        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
+        json.push(oldValue);
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {
@@ -514,7 +538,24 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         });
         transaction(protyle, doOperations, undoOperations);
     }
-    return text;
+    return {text: text.substring(0, text.length - 2), json};
+};
+
+export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
+    if (value.type === "checkbox") {
+        if (value.checkbox.checked) {
+            cellElement.classList.add("av__cell-check");
+            cellElement.classList.remove("av__cell-uncheck");
+        } else {
+            cellElement.classList.remove("av__cell-check");
+            cellElement.classList.add("av__cell-uncheck");
+        }
+    } else if (value.type === "block") {
+        cellElement.setAttribute("data-block-id", value.block.id || "");
+        if (value.isDetached) {
+            cellElement.setAttribute("data-detached", "true");
+        }
+    }
 };
 
 export const renderCell = (cellValue: IAVCellValue) => {
@@ -722,6 +763,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 data
             });
             item.element.innerHTML = renderCell(data);
+            renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;
             undoOperations.push({

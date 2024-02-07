@@ -26,7 +26,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
@@ -511,24 +510,22 @@ func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
 }
 
 var (
-	indexIgnoreLastModified int64
-	indexIgnore             []string
-	indexIgnoreLock         = sync.Mutex{}
+	IndexIgnoreCached bool
+	indexIgnore       []string
+	indexIgnoreLock   = sync.Mutex{}
 )
 
 func getIndexIgnoreLines() (ret []string) {
 	// Support ignore index https://github.com/siyuan-note/siyuan/issues/9198
 
-	now := time.Now().UnixMilli()
-	if now-indexIgnoreLastModified < 30*1000 {
+	if IndexIgnoreCached {
 		return indexIgnore
 	}
 
 	indexIgnoreLock.Lock()
 	defer indexIgnoreLock.Unlock()
 
-	indexIgnoreLastModified = now
-
+	IndexIgnoreCached = true
 	indexIgnorePath := filepath.Join(util.DataDir, ".siyuan", "indexignore")
 	err := os.MkdirAll(filepath.Dir(indexIgnorePath), 0755)
 	if nil != err {

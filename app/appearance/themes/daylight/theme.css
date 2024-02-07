@@ -179,6 +179,6 @@
     mix-blend-mode: multiply;
 }
 
-.b3-typography div.hljs, .protyle-wysiwyg div.hljs {
+.b3-typography .hljs, .protyle-wysiwyg .hljs {
     background-color: #f8f9fa;
 }

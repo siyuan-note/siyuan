@@ -17,6 +17,7 @@ let yDiff: number;
 let time: number;
 let firstDirection: "toLeft" | "toRight";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
+let scrollBlock: boolean;
 
 const popSide = (render = true) => {
     if (render) {
@@ -53,26 +54,8 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     clientX = null;
     // 有些事件不经过 touchmove
 
-    let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
-        hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
-        hasClosestByAttribute(target, "data-type", "NodeTable") ||
-        hasTopClosestByClassName(target, "list");
-    if (scrollElement) {
-        if (scrollElement.classList.contains("table")) {
-            scrollElement = scrollElement.firstElementChild as HTMLElement;
-        } else if (scrollElement.classList.contains("code-block")) {
-            scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
-        } else if (scrollElement.classList.contains("av")) {
-            scrollElement = hasClosestByClassName(target, "layout-tab-bar") || hasClosestByClassName(target, "av__scroll");
-        }
-        if (scrollElement && (
-            (xDiff <= 0 && scrollElement.scrollLeft > 0) ||
-            (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
-        )) {
-            // 左滑拉出菜单后右滑至代码块右侧有空间时，需关闭菜单
-            closePanel();
-            return;
-        }
+    if (scrollBlock) {
+        return;
     }
 
     let scrollEnable = false;
@@ -171,6 +154,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         time = 0;
         event.stopImmediatePropagation();
     }
+    scrollBlock = false;
 };
 
 let previousClientX: number;
@@ -221,6 +205,7 @@ export const handleTouchMove = (event: TouchEvent) => {
         }
         let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
             hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
+            hasClosestByAttribute(target, "data-type", "NodeMathBlock") ||
             hasClosestByAttribute(target, "data-type", "NodeTable") ||
             hasTopClosestByClassName(target, "list");
         if (scrollElement) {
@@ -230,11 +215,24 @@ export const handleTouchMove = (event: TouchEvent) => {
                 scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
             } else if (scrollElement.classList.contains("av")) {
                 scrollElement = hasClosestByClassName(target, "layout-tab-bar") || hasClosestByClassName(target, "av__scroll");
+            } else if (scrollElement.dataset.type === "NodeMathBlock") {
+                scrollElement = target;
+                while (scrollElement && scrollElement.dataset.type !== "NodeMathBlock") {
+                    if (scrollElement.nodeType === 1 && scrollElement.scrollWidth > scrollElement.clientWidth) {
+                        break;
+                    }
+                    scrollElement = scrollElement.parentElement;
+                }
             }
+
             if (scrollElement && (
                 (xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
             )) {
+                scrollBlock = true;
+                return;
+            }
+            if (scrollBlock) {
                 return;
             }
         }

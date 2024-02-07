@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20240119211017-1vbbt95",
 		"title": "Ignore indexing",
-		"updated": "20240119211442"
+		"updated": "20240202105426"
 	},
 	"Children": [
 		{
@@ -157,6 +157,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105425-d8fq0vu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105425-d8fq0vu",
+				"updated": "20240202105426"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the adjustment, you need to manually rebuild the index."
 				}
 			]
 		}

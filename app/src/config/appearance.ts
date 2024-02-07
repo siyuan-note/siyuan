@@ -161,32 +161,41 @@ export const appearance = {
             lang: (appearance.element.querySelector("#lang") as HTMLSelectElement).value,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
-        }, response => {
+        }, async response => {
             if (window.siyuan.config.appearance.themeJS) {
-                if (!response.data.modeOS && (
-                    response.data.mode !== window.siyuan.config.appearance.mode ||
-                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
-                )) {
-                    exportLayout({
-                        errorExit: false,
-                        cb() {
-                            window.location.reload();
-                        },
-                    });
-                    return;
-                }
-                const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                if (response.data.modeOS && (
-                    (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
-                )) {
-                    exportLayout({
-                        cb() {
-                            window.location.reload();
-                        },
-                        errorExit: false,
-                    });
-                    return;
+                if (window.destroyTheme) {
+                    try {
+                        await window.destroyTheme();
+                        window.destroyTheme = undefined;
+                    } catch (e) {
+                        console.error("destroyTheme error: " + e);
+                    }
+                } else {
+                    if (!response.data.modeOS && (
+                        response.data.mode !== window.siyuan.config.appearance.mode ||
+                        window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                        window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                    )) {
+                        exportLayout({
+                            errorExit: false,
+                            cb() {
+                                window.location.reload();
+                            },
+                        });
+                        return;
+                    }
+                    const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                    if (response.data.modeOS && (
+                        (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
+                    )) {
+                        exportLayout({
+                            cb() {
+                                window.location.reload();
+                            },
+                            errorExit: false,
+                        });
+                        return;
+                    }
                 }
             }
             appearance.onSetappearance(response.data);

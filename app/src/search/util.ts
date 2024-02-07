@@ -295,7 +295,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         </div>
         <div class="block__icons">
-            <span id="searchFilter" aria-label="${window.siyuan.languages.replaceType}" class="block__icon ariaLabel" data-position="9bottom">
+            <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9bottom">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span> 
             <span class="fn__space"></span>
@@ -699,11 +699,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
                     window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: Constants.ZWSP,
+                        iconHTML: "",
                         label: window.siyuan.languages.layout,
                         type: "submenu",
                         submenu: [{
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: window.siyuan.languages.topBottomLayout,
                             current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
                             click() {
@@ -724,7 +724,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
                             }
                         }, {
-                            iconHTML: Constants.ZWSP,
+                            iconHTML: "",
                             label: window.siyuan.languages.leftRightLayout,
                             current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
                             click() {

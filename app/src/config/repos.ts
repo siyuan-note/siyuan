@@ -5,6 +5,7 @@ import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
 import {openByMobile} from "../protyle/util/compatibility";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -100,6 +101,10 @@ const renderProvider = (provider: number) => {
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
+    <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+    </button>
+    <div class="fn__space"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
         <input id="importData" class="b3-form__upload" type="file" data-type="s3">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
@@ -150,6 +155,10 @@ const renderProvider = (provider: number) => {
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
+    <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+    </button>
+    <div class="fn__space"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
         <input id="importData" class="b3-form__upload" type="file" data-type="webdav">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
@@ -466,6 +475,11 @@ export const repos = {
                 } else if (action === "exportData") {
                     fetchPost(target.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, response => {
                         openByMobile(response.data.zip);
+                    });
+                    break;
+                } else if (action === "purgeData") {
+                    confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
+                        fetchPost("/api/repo/purgeCloudRepo");
                     });
                     break;
                 }

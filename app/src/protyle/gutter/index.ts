@@ -46,6 +46,7 @@ import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu} from "../render/av/action";
+import {openSearchAV} from "../render/av/relation";
 
 export class Gutter {
     public element: HTMLElement;
@@ -441,7 +442,7 @@ export class Gutter {
                         }], [{
                             action: "foldHeading",
                             id: itemId
-                        }]);
+                        }], options.protyle);
                         item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
                     }
                 }
@@ -782,6 +783,29 @@ export class Gutter {
             click: () => {
                 movePathTo((toPath) => {
                     hintMoveBlock(toPath[0], selectsElement, protyle);
+                });
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.addToDatabase,
+            icon: "iconDatabase",
+            click: () => {
+                openSearchAV("", this.element, (listItemElement) => {
+                    const sourceIds: string[] = [];
+                    selectsElement.forEach(item => {
+                        sourceIds.push(item.getAttribute("data-node-id"));
+                    });
+                    const avID = listItemElement.dataset.avId;
+                    transaction(protyle, [{
+                        action: "insertAttrViewBlock",
+                        avID,
+                        srcIDs: sourceIds,
+                        isDetached: false,
+                    }], [{
+                        action: "removeAttrViewBlock",
+                        srcIDs: sourceIds,
+                        avID,
+                    }]);
                 });
             }
         }).element);
@@ -1211,6 +1235,26 @@ export class Gutter {
                 click: () => {
                     movePathTo((toPath) => {
                         hintMoveBlock(toPath[0], [nodeElement], protyle);
+                    });
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.addToDatabase,
+                icon: "iconDatabase",
+                click: () => {
+                    openSearchAV("", this.element, (listItemElement) => {
+                        const sourceIds: string[] = [nodeElement.getAttribute("data-node-id")];
+                        const avID = listItemElement.dataset.avId;
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            avID,
+                            srcIDs: sourceIds,
+                            isDetached: false,
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: sourceIds,
+                            avID,
+                        }]);
                     });
                 }
             }).element);
@@ -1683,7 +1727,7 @@ export class Gutter {
             updateHTML = `${window.siyuan.languages.modifiedAt} ${dayjs(updateHTML).format("YYYY-MM-DD HH:mm:ss")}<br>`;
         }
         window.siyuan.menus.menu.append(new MenuItem({
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             type: "readonly",
             label: `${updateHTML}${window.siyuan.languages.createdAt} ${dayjs(id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`,
         }).element);

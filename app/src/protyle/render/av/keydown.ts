@@ -23,10 +23,18 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (!rowElement) {
             return false;
         }
-        nodeElement.querySelectorAll(".av__cell--active").forEach(item => {
-            item.classList.remove("av__cell--active");
-            item.querySelector(".av__drag-fill")?.remove();
-        });
+        if (event.key === "Backspace" || event.key === "Delete") {
+            updateCellsValue(protyle, nodeElement, undefined, Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")));
+            event.preventDefault();
+            return true;
+        }
+        // 复制、粘贴
+        if (!event.ctrlKey && !event.metaKey) {
+            nodeElement.querySelectorAll(".av__cell--active").forEach(item => {
+                item.classList.remove("av__cell--active");
+                item.querySelector(".av__drag-fill")?.remove();
+            });
+        }
         if (event.key === "Escape") {
             selectCellElement.classList.remove("av__cell--select");
             selectRow(rowElement.querySelector(".av__firstcol"), "select");
@@ -35,11 +43,6 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
         if (event.key === "Enter") {
             popTextCell(protyle, [selectCellElement]);
-            event.preventDefault();
-            return true;
-        }
-        if (event.key === "Backspace" || event.key === "Delete") {
-            updateCellsValue(protyle, nodeElement, undefined, [selectCellElement]);
             event.preventDefault();
             return true;
         }

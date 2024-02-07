@@ -16,21 +16,21 @@ Install pnpm: `npm install -g pnpm`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/ pnpm install electron@28.1.4 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@28.2.1 -D`
 * Windows:
-    * `SET ELECTRON_MIRROR=https://registry.npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@28.1.4 -D`
+    * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
+    * `pnpm install electron@28.2.1 -D`
 
 NPM mirror:
 
 * Use npmmirror China mirror repository `pnpm --registry https://registry.npmmirror.com/ i`
-* Revert to using official repository `pnpm --registry https://registry.npmmirror.com i`
+* Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
 
 </details>
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@28.1.4 -D`
+* `pnpm install electron@28.2.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

@@ -115,6 +115,15 @@
   min-height: 30px;
   z-index: 1;
 
+  .block__icon {
+    opacity: 1;
+    margin-left: 8px;
+
+    &:disabled {
+        opacity: .38;
+    }
+  }
+
   &__space {
     min-width: 8px;
     transition: var(--b3-transition);
@@ -153,7 +162,6 @@
   }
 
   &__icon {
-    margin-right: 8px;
     opacity: 1;
     border: 0;
     line-height: 24px;

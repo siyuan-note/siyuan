@@ -97,4 +97,15 @@
       opacity: 1;
     }
   }
+
+  &__loading {
+    position: fixed;
+    top: 45vh;
+    width: 70vw;
+    left: 15vw;
+    color: var(--b3-theme-on-surface);
+    background: var(--b3-theme-background);
+    padding: 10px;
+    border-radius: var(--b3-border-radius-b);
+  }
 }

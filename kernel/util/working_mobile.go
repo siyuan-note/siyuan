@@ -50,7 +50,6 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 			logging.LogErrorf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(logging.ExitCodeInitWorkspaceErr)
 		}
-
 	}
 
 	defaultWorkspaceDir := filepath.Join(workspaceBaseDir, "siyuan")

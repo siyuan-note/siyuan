@@ -3,9 +3,10 @@
 	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
+		"icon": "1f4f8",
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20231013103850"
+		"updated": "20240128112938"
 	},
 	"Children": [
 		{
@@ -515,6 +516,217 @@
 			]
 		},
 		{
+			"ID": "20240128110946-hctldlf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240128110946-hctldlf",
+				"updated": "20240128110950"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "设置"
+				}
+			]
+		},
+		{
+			"ID": "20240128110950-exhbssa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128110950-exhbssa",
+				"updated": "20240128111232"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "闪卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中可以调整闪卡相关的全局配置，其中 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新卡上限"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复习卡上限"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 可以使用文档块自定义属性进行覆盖："
+				}
+			]
+		},
+		{
+			"ID": "20240128111227-ttw7ui4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240128111227-ttw7ui4",
+				"updated": "20240128111227"
+			},
+			"Children": [
+				{
+					"ID": "20240128111227-dgd3209",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128111227-dgd3209",
+						"updated": "20240128111227"
+					},
+					"Children": [
+						{
+							"ID": "20240128111227-as4jg1c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128111227-as4jg1c",
+								"updated": "20240128111227"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-new-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128111227-x47dpnk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128111227-x47dpnk",
+						"updated": "20240128111227"
+					},
+					"Children": [
+						{
+							"ID": "20240128111227-tbrfobt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128111227-tbrfobt",
+								"updated": "20240128111227"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-review-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240128111414-hbbh5a9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128111414-hbbh5a9",
+				"updated": "20240128112938"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20240128111414-l8l7d89.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240128111245-8s2qyli",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128111245-8s2qyli",
+				"updated": "20240128111317"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不同文档上单独配置，相互独立不影响，比如父文档上配置为 5，子文档为 10，那么从父文档复习的时候就是 5，不会叠加子文档的配置。"
+				}
+			]
+		},
+		{
 			"ID": "20221223221214-wr48h8b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -544,7 +756,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221223221217-uwk0y7w",
-				"updated": "20221223221400"
+				"updated": "20240128112803"
 			},
 			"Children": [
 				{
@@ -570,6 +782,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "内容块被删除（或者 ID 改变）后对应的闪卡会失效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128112311-auszyjt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112311-auszyjt",
+						"updated": "20240128112803"
+					},
+					"Children": [
+						{
+							"ID": "20240128112311-vuu0rg4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112311-vuu0rg4",
+								"updated": "20240128112803"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不建议启用卡包，该方式已经弃用，继续使用可能会遇到无法解决的问题"
 								}
 							]
 						}

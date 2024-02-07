@@ -89,6 +89,7 @@ import {
     getTypeByCellElement,
     updateCellsValue
 } from "../render/av/cell";
+import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -294,7 +295,7 @@ export class WYSIWYG {
                     });
                 }
             } else if (selectAVElement) {
-                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--select")) || [];
+                const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
                 if (cellElements.length === 0) {
                     nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
                         rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
@@ -302,11 +303,16 @@ export class WYSIWYG {
                         });
                     });
                 }
-                cellElements.forEach((item: HTMLElement) => {
-                    const cellText = getCellText(item);
-                    html += cellText;
-                    textPlain += cellText;
-                });
+                if (cellElements.length > 0) {
+                    html = "[";
+                    cellElements.forEach((item: HTMLElement, index) => {
+                        const cellText = getCellText(item);
+                        html += JSON.stringify(genCellValueByElement(getTypeByCellElement(item), item)) + ",";
+                        textPlain += cellText + ((cellElements[index + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[index + 1])) ? "\t" : "\n\n");
+                    });
+                    textPlain = textPlain.substring(0, textPlain.length - 2);
+                    html = html.substring(0, html.length - 1) + "]";
+                }
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
@@ -369,7 +375,7 @@ export class WYSIWYG {
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
             event.clipboardData.setData("text/siyuan", html);
         });
 
@@ -532,8 +538,23 @@ export class WYSIWYG {
                 const originIndex = getPositionByCellElement(avCellElement);
                 let moveCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
+                const nodeRect = nodeElement.getBoundingClientRect();
+                const scrollElement = nodeElement.querySelector(".av__scroll");
+                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
+                    if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
+                        if (moveEvent.clientX > nodeRect.right - 10) {
+                            scrollElement.scrollLeft += 10;
+                        } else if (moveEvent.clientX < nodeRect.left + 34) {
+                            scrollElement.scrollLeft -= 10;
+                        }
+                        if (moveEvent.clientY < contentRect.top + 48) {
+                            protyle.contentElement.scrollTop -= 5;
+                        } else if (moveEvent.clientY > contentRect.bottom - 48) {
+                            protyle.contentElement.scrollTop += 5;
+                        }
+                    }
                     if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
                         return;
                     }
@@ -1254,6 +1275,7 @@ export class WYSIWYG {
                 selectElements = [nodeElement];
             }
             let html = "";
+            let textPlain = "";
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
@@ -1279,7 +1301,9 @@ export class WYSIWYG {
                     focusBlock(nextElement);
                 }
             } else if (selectAVElement) {
-                html = updateCellsValue(protyle, nodeElement);
+                const cellsValue = updateCellsValue(protyle, nodeElement);
+                html = JSON.stringify(cellsValue.json);
+                textPlain = cellsValue.text;
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
                 const oldHTML = nodeElement.outerHTML;
@@ -1424,10 +1448,12 @@ export class WYSIWYG {
                 }
             }
             protyle.hint.render(protyle);
-            let textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+            if (!selectAVElement) {
+                textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+            }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
             event.clipboardData.setData("text/siyuan", html);
         });
 
@@ -1581,6 +1607,28 @@ export class WYSIWYG {
             } else {
                 beforeContextmenuRange = undefined;
             }
+            /// #if BROWSER && !MOBILE
+            if (protyle.breadcrumb) {
+                const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]');
+                if (indentElement && getSelection().rangeCount > 0) {
+                    setTimeout(() => {
+                        const newRange = getSelection().getRangeAt(0);
+                        const blockElement = hasClosestBlock(newRange.startContainer);
+                        if (!blockElement) {
+                            return;
+                        }
+                        const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
+                        if (blockElement.parentElement.classList.contains("li")) {
+                            indentElement.removeAttribute("disabled");
+                            outdentElement.removeAttribute("disabled");
+                        } else {
+                            indentElement.setAttribute("disabled", "true");
+                            outdentElement.setAttribute("disabled", "true");
+                        }
+                    }, 520);
+                }
+            }
+            /// #endif
         });
 
         let preventGetTopHTML = false;
@@ -1797,6 +1845,19 @@ export class WYSIWYG {
                     this.setEmptyOutline(protyle, nodeElement);
                     if (range.toString() === "") {
                         countSelectWord(range, protyle.block.rootID);
+                    }
+                    if (protyle.breadcrumb) {
+                        const indentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]');
+                        if (indentElement) {
+                            const outdentElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]');
+                            if (nodeElement.parentElement.classList.contains("li")) {
+                                indentElement.removeAttribute("disabled");
+                                outdentElement.removeAttribute("disabled");
+                            } else {
+                                indentElement.setAttribute("disabled", "true");
+                                outdentElement.setAttribute("disabled", "true");
+                            }
+                        }
                     }
                 }
                 event.stopPropagation();
@@ -2258,6 +2319,35 @@ export class WYSIWYG {
                 // 需等待 range 更新再次进行渲染
                 if (protyle.options.render.breadcrumb) {
                     protyle.breadcrumb.render(protyle);
+                }
+                return;
+            }
+
+            const emojiElement = hasTopClosestByClassName(event.target, "emoji");
+            if (!event.shiftKey && !ctrlIsPressed && emojiElement) {
+                const nodeElement = hasClosestBlock(emojiElement);
+                if (nodeElement) {
+                    const emojiRect = emojiElement.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: emojiRect.left,
+                        y: emojiRect.bottom,
+                        h: emojiRect.height,
+                        w: emojiRect.width
+                    }, (unicode) => {
+                        emojiElement.insertAdjacentHTML("afterend", "<wbr>");
+                        const oldHTML = nodeElement.outerHTML;
+                        let emojiHTML;
+                        if (unicode.indexOf(".") > -1) {
+                            const emojiList = unicode.split(".");
+                            emojiHTML = `<img alt="${emojiList[0]}" class="emoji" src="/emojis/${unicode}" title="${emojiList[0]}">`;
+                        } else {
+                            emojiHTML = unicode2Emoji(unicode);
+                        }
+                        emojiElement.outerHTML = emojiHTML;
+                        hideElements(["dialog"]);
+                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        focusByWbr(nodeElement, range);
+                    });
                 }
                 return;
             }

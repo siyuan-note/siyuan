@@ -6,7 +6,7 @@ import {lineNumberRender} from "../render/highlightRender";
 import {stickyRow} from "../render/av/row";
 
 export const resize = (protyle: IProtyle) => {
-    hideElements(["gutter"], protyle);
+    hideElements(["gutterOnly"], protyle);
     const abs = setPadding(protyle);
     const MIN_ABS = 4;
     // 不能 clearTimeout，否则 split 时左侧无法 resize

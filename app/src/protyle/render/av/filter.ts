@@ -270,6 +270,7 @@ export const setFilter = async (options: {
     }
     menu.addItem({
         iconHTML: "",
+        type: "readonly",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
     if (filterType === "select" || filterType === "mSelect") {
@@ -308,21 +309,25 @@ export const setFilter = async (options: {
         }
         menu.addItem({
             iconHTML: "",
+            type: "readonly",
             label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200">`
         });
     } else if (filterType === "number") {
         menu.addItem({
             iconHTML: "",
+            type: "readonly",
             label: `<input style="margin: 4px 0" value="${options.filter.value?.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
         });
     } else if (["date", "updated", "created"].includes(filterType)) {
         const dateValue = options.filter.value ? options.filter.value[filterType as "date"] : null;
         menu.addItem({
             iconHTML: "",
+            type: "readonly",
             label: `<input style="margin: 4px 0" value="${(dateValue.isNotEmpty || filterType !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
         menu.addItem({
             iconHTML: "",
+            type: "readonly",
             label: `<input style="margin: 4px 0" value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__size200">`
         });
     }

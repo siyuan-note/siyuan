@@ -57,7 +57,7 @@ export const onGet = (options: {
             return;
         }
     }
-    hideElements(["gutter"], options.protyle);
+    hideElements(["gutterOnly"], options.protyle);
     options.protyle.block.parentID = options.data.data.parentID;
     options.protyle.block.parent2ID = options.data.data.parent2ID;
     options.protyle.block.rootID = options.data.data.rootID;
@@ -314,6 +314,13 @@ export const disabledProtyle = (protyle: IProtyle) => {
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
+        const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
+        if (undoElement && !undoElement.classList.contains("fn__none")) {
+            undoElement.classList.add("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]').classList.add("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]').classList.add("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]').classList.add("fn__none");
+        }
     }
     hideTooltip();
 };
@@ -357,6 +364,13 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.cancelTempUnlock : window.siyuan.languages.lockEdit);
+        const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
+        if (undoElement && undoElement.classList.contains("fn__none")) {
+            undoElement.classList.remove("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="redo"]').classList.remove("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="indent"]').classList.remove("fn__none");
+            protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]').classList.remove("fn__none");
+        }
     }
     hideTooltip();
 };

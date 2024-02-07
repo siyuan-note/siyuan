@@ -42,11 +42,11 @@ export const exportImage = (id: string) => {
         <input id="keepFold" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold ? "checked" : ""}>
     </label>
     <label class="fn__flex" style="margin-left: 24px">
-        ${window.siyuan.languages.export9}
+        ${window.siyuan.languages.export30}
         <span class="fn__space"></span>
         <input id="watermark" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark ? "checked" : ""}>
     </label>
-    <span class="fn__flex-1"></span>
+    <span class="fn__flex-1 export-img__space"></span>
     <button disabled class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button disabled class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>
@@ -65,7 +65,9 @@ export const exportImage = (id: string) => {
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         setTimeout(() => {
             addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                window.html2canvas(exportDialog.element.querySelector(".b3-dialog__content"), {useCORS: true}).then((canvas) => {
+                window.html2canvas(exportDialog.element.querySelector(".b3-dialog__content"), {
+                    useCORS: true,
+                }).then((canvas) => {
                     canvas.toBlob((blob: Blob) => {
                         const formData = new FormData();
                         formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
@@ -186,10 +188,13 @@ export const exportImage = (id: string) => {
             item.innerHTML = symbolElements[symbolElements.length - 1].innerHTML;
         });
         previewElement.querySelectorAll(".img img").forEach((item: HTMLImageElement) => {
-            if (item.src.endsWith(".svg")) {
+            const imgSrc = item.getAttribute("src");
+            if (imgSrc.endsWith(".svg")) {
                 fetchGet(item.src, (response: string) => {
                     item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;
                 });
+            } else if (imgSrc.startsWith("assets/")) {
+                item.src = location.origin + "/" + imgSrc;
             }
         });
         updateWatermark();

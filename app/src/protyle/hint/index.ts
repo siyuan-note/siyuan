@@ -357,7 +357,7 @@ ${genHintItemHTML(item)}
             }
             lazyLoadEmojiImg(panelElement);
         } else {
-            this.element.innerHTML = `<div style="padding: 0;${value ? "" : "height:402px"}" class="emojis">
+            this.element.innerHTML = `<div style="padding: 0;max-height:402px" class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     <button data-type="0" class="emojis__type ariaLabel" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</button>
@@ -835,12 +835,12 @@ ${genHintItemHTML(item)}
             return true;
         }
         if (isEmojiPanel) {
-            const currentElement = this.element.querySelector(".emojis__item--current");
+            const currentElement: HTMLElement = this.element.querySelector(".emojis__item--current");
             if (!currentElement) {
                 return false;
             }
             let newCurrentElement: HTMLElement;
-            if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+            if (event.key === "ArrowLeft") {
                 if (currentElement.previousElementSibling) {
                     currentElement.classList.remove("emojis__item--current");
                     newCurrentElement = currentElement.previousElementSibling as HTMLElement;
@@ -848,7 +848,7 @@ ${genHintItemHTML(item)}
                     currentElement.classList.remove("emojis__item--current");
                     newCurrentElement = currentElement.parentElement.previousElementSibling.previousElementSibling.lastElementChild as HTMLElement;
                 }
-            } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+            } else if (event.key === "ArrowRight") {
                 if (currentElement.nextElementSibling) {
                     currentElement.classList.remove("emojis__item--current");
                     newCurrentElement = currentElement.nextElementSibling as HTMLElement;
@@ -856,15 +856,53 @@ ${genHintItemHTML(item)}
                     currentElement.classList.remove("emojis__item--current");
                     newCurrentElement = currentElement.parentElement.nextElementSibling.nextElementSibling.firstElementChild as HTMLElement;
                 }
+            } else if (event.key === "ArrowDown") {
+                if (!currentElement.nextElementSibling) {
+                    const nextContentElement = currentElement.parentElement.nextElementSibling?.nextElementSibling;
+                    if (nextContentElement) {
+                        newCurrentElement = nextContentElement.firstElementChild as HTMLElement;
+                        currentElement.classList.remove("emojis__item--current");
+                    }
+                } else {
+                    currentElement.classList.remove("emojis__item--current");
+                    let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
+                    newCurrentElement = currentElement;
+                    while (newCurrentElement.nextElementSibling && counter > 0) {
+                        newCurrentElement = newCurrentElement.nextElementSibling as HTMLElement;
+                        counter--;
+                    }
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === "ArrowUp") {
+                if (!currentElement.previousElementSibling) {
+                    const prevContentElement = currentElement.parentElement.previousElementSibling?.previousElementSibling;
+                    if (prevContentElement) {
+                        newCurrentElement = prevContentElement.lastElementChild as HTMLElement;
+                        currentElement.classList.remove("emojis__item--current");
+                    }
+                } else {
+                    currentElement.classList.remove("emojis__item--current");
+                    let counter = Math.floor(currentElement.parentElement.clientWidth / (currentElement.clientWidth + 2));
+                    newCurrentElement = currentElement;
+                    while (newCurrentElement.previousElementSibling && counter > 0) {
+                        newCurrentElement = newCurrentElement.previousElementSibling as HTMLElement;
+                        counter--;
+                    }
+                }
+                event.preventDefault();
+                event.stopPropagation();
             }
             if (newCurrentElement) {
                 newCurrentElement.classList.add("emojis__item--current");
-                const topHeight = 4;
                 const emojisContentElement = this.element.querySelector(".emojis__panel");
-                if (newCurrentElement.offsetTop - topHeight < emojisContentElement.scrollTop) {
-                    emojisContentElement.scrollTop = newCurrentElement.offsetTop - topHeight;
-                } else if (newCurrentElement.offsetTop - topHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight > emojisContentElement.scrollTop) {
-                    emojisContentElement.scrollTop = newCurrentElement.offsetTop - topHeight - emojisContentElement.clientHeight + newCurrentElement.clientHeight;
+                if (newCurrentElement.offsetTop - 8 < emojisContentElement.scrollTop) {
+                    emojisContentElement.scrollTop = newCurrentElement.offsetTop - 8;
+                } else {
+                    const topHeight = emojisContentElement.nextElementSibling.classList.contains("fn__none") ? 8 : 36;
+                    if (newCurrentElement.offsetTop + topHeight - this.element.clientHeight + newCurrentElement.clientHeight > emojisContentElement.scrollTop) {
+                        emojisContentElement.scrollTop = newCurrentElement.offsetTop + topHeight - this.element.clientHeight + newCurrentElement.clientHeight;
+                    }
                 }
             }
             event.preventDefault();

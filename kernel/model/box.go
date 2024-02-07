@@ -120,7 +120,7 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
 				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-				os.RemoveAll(boxConfPath)
+				filelock.Remove(boxConfPath)
 				continue
 			}
 		}
@@ -513,6 +513,7 @@ func fullReindex() {
 	}
 	treenode.InitBlockTree(true)
 
+	sql.IndexIgnoreCached = false
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)

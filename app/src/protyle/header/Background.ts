@@ -201,7 +201,7 @@ export class Background {
 
             while (target && !target.isEqualNode(this.element)) {
                 const type = target.getAttribute("data-type");
-                if (target.tagName === "IMG") {
+                if (target.tagName === "IMG" && target.parentElement.classList.contains("protyle-background__img")) {
                     const imgSrc = target.getAttribute("src");
                     if (event.detail > 1 && !imgSrc.startsWith("data:image/png;base64")) {
                         previewImage(imgSrc);
@@ -253,11 +253,11 @@ export class Background {
                 } else if (type === "show-random") {
                     let html = "";
                     bgs.forEach((item: string, index: number) => {
-                        html += `<div data-index="${index}" style="height: 148px;width: 148px;${item}" class="b3-card"></div>`;
+                        html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card b3-card--wrap"></div>`;
                     });
                     const dialog = new Dialog({
                         title: window.siyuan.languages.random,
-                        content: `<div class="b3-cards" style="margin-right: 0">${html}</div>`,
+                        content: `<div class="b3-cards">${html}</div>`,
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
                     });

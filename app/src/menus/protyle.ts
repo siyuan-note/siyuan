@@ -210,10 +210,10 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="b3-menu__label">ID</div>
+        label: `<div>ID</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" readonly>${refElement.getAttribute("data-id") || ""}</textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.anchor}</div>
+<div>${window.siyuan.languages.anchor}</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>`,
         bind(menuItemElement) {
             menuItemElement.style.maxWidth = "none";
@@ -886,13 +886,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: "",
             type: "readonly",
-            label: `<div class="b3-menu__label">${window.siyuan.languages.imageURL}</div>
+            label: `<div>${window.siyuan.languages.imageURL}</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.title}</div>
+<div>${window.siyuan.languages.title}</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.tooltipText}</div>
+<div>${window.siyuan.languages.tooltipText}</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
@@ -1113,13 +1113,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="b3-menu__label">${window.siyuan.languages.link}</div>
+        label: `<div>${window.siyuan.languages.link}</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.anchor}</div>
+<div>${window.siyuan.languages.anchor}</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div class="b3-menu__label">${window.siyuan.languages.title}</div>
+<div>${window.siyuan.languages.title}</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
         bind(element) {
             element.style.maxWidth = "none";

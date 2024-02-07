@@ -87,6 +87,8 @@ func IALStr(n *ast.Node) string {
 	if 1 > len(n.KramdownIAL) {
 		return ""
 	}
+	// 这里不能进行转义，否则会导致从数据库中读取后转换为 IAL 时解析错误
+	// 所以 Some symbols should not be escaped to avoid inaccurate searches https://github.com/siyuan-note/siyuan/issues/10185 无法被修复了
 	return string(parse.IAL2Tokens(n.KramdownIAL))
 }
 

@@ -407,7 +407,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             });
             copyPlainText(html.trimEnd());
         } else {
-            writeText(range.toString());
+            copyPlainText(range.toString());
         }
         event.preventDefault();
         return true;
@@ -1048,13 +1048,13 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     // https://github.com/siyuan-note/siyuan/issues/9848 忘记为什么要阻止了 .av__mask 的情况，测了下没问题就先移除
-    if (document.getElementById("errorLog") || event.isComposing) {
+    if (document.getElementById("progress") || document.getElementById("errorLog") || event.isComposing) {
         return;
     }
     const target = event.target as HTMLElement;
     if (isNotCtrl(event) && !event.shiftKey && !event.altKey &&
         !["INPUT", "TEXTAREA"].includes(target.tagName) &&
-        ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p", "enter"].includes(event.key.toLowerCase())) {
+        ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p", "enter", "a", "s", "d", "f", "q", "x"].includes(event.key.toLowerCase())) {
         let cardElement: Element;
         window.siyuan.dialogs.find(item => {
             if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {

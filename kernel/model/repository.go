@@ -484,7 +484,6 @@ func ResetRepo() (err error) {
 }
 
 func PurgeCloud() (err error) {
-	// TODO https://github.com/siyuan-note/siyuan/issues/10081
 	msg := Conf.Language(223)
 	util.PushEndlessProgress(msg)
 	defer util.PushClearProgress()
@@ -502,7 +501,7 @@ func PurgeCloud() (err error) {
 	deletedIndexes := stat.Indexes
 	deletedObjects := stat.Objects
 	deletedSize := humanize.Bytes(uint64(stat.Size))
-	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
+	msg = fmt.Sprintf(Conf.Language(232), deletedIndexes, deletedObjects, deletedSize)
 	util.PushMsg(msg, 5000)
 	return
 }
@@ -1832,6 +1831,30 @@ func subscribeRepoEvents() {
 	})
 	eventbus.Subscribe(eventbus.EvtCloudCorrupted, func() {
 		util.PushErrMsg(Conf.language(220), 30000)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeListObjects, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(224))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeListIndexes, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(225))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeListRefs, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(226))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadIndexes, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, fmt.Sprintf(Conf.language(227)))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadFiles, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(228))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeRemoveIndexes, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(229))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeRemoveIndexesV2, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(230))
+	})
+	eventbus.Subscribe(eventbus.EvtCloudPurgeRemoveObjects, func(context map[string]interface{}) {
+		util.ContextPushMsg(context, Conf.language(231))
 	})
 }
 

@@ -253,7 +253,7 @@ export class Background {
                 } else if (type === "show-random") {
                     let html = "";
                     bgs.forEach((item: string, index: number) => {
-                        html += `<div data-index="${index}" style="${item}" class="b3-card b3-card--wrap"></div>`;
+                        html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card b3-card--wrap"></div>`;
                     });
                     const dialog = new Dialog({
                         title: window.siyuan.languages.random,

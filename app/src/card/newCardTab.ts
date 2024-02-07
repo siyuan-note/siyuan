@@ -55,13 +55,14 @@ export const newCardModel = (options: {
                     deckID: this.data.id,
                     notebook: this.data.id,
                 }, async (response) => {
+                    let cardsData: ICardData = response.data;
                     for (let i = 0; i < options.app.plugins.length; i++) {
-                        options.data.cardsData = await options.app.plugins[i].updateCards(options.data.cardsData);
+                        cardsData = await options.app.plugins[i].updateCards(response.data);
                     }
                     this.element.innerHTML = genCardHTML({
                         id: this.data.id,
                         cardType: this.data.cardType,
-                        cardsData: response.data,
+                        cardsData,
                         isTab: true,
                     });
 
@@ -71,7 +72,7 @@ export const newCardModel = (options: {
                         id: this.data.id,
                         title: this.data.title,
                         cardType: this.data.cardType,
-                        cardsData: response.data,
+                        cardsData,
                     });
                     customObj.data.editor = editor;
                 });

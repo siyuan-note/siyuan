@@ -365,7 +365,7 @@ export const bindCardEvent = async (options: {
                     element.previousElementSibling.textContent = options.cardsData.cards[index].nextDues[btnIndex];
                 });
                 actionElements[1].classList.remove("fn__none");
-                emitEvent(options.app, options.cardsData.cards, type);
+                emitEvent(options.app, options.cardsData.cards[index], type);
                 return;
             }
         } else if (type === "-2") {    // 上一步
@@ -381,7 +381,7 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
-                emitEvent(options.app, options.cardsData.cards, type);
+                emitEvent(options.app, options.cardsData.cards[index + 1], type);
             }
             return;
         }
@@ -410,9 +410,9 @@ export const bindCardEvent = async (options: {
                         notebook: filterElement.getAttribute("data-id"),
                         reviewedCards: options.cardsData.cards
                     }, async (result) => {
+                        emitEvent(options.app, options.cardsData.cards[index - 1], type);
                         index = 0;
                         options.cardsData = result.data;
-                        emitEvent(options.app, options.cardsData.cards, type);
                         for (let i = 0; i < options.app.plugins.length; i++) {
                             options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
                         }
@@ -441,18 +441,18 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
-                emitEvent(options.app, options.cardsData.cards, type);
+                emitEvent(options.app, options.cardsData.cards[index - 1], type);
             });
         }
     });
     return editor;
 };
 
-const emitEvent = (app: App, cards: ICard[], type: string) => {
+const emitEvent = (app: App, card: ICard, type: string) => {
     app.plugins.forEach(item => {
         item.eventBus.emit("click-flashcard-action", {
             type,
-            cards
+            card
         });
     });
 };

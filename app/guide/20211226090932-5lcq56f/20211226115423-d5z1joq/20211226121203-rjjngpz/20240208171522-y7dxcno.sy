@@ -6,7 +6,7 @@
 		"icon": "1f5c3-fe0f",
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
-		"updated": "20240208172311"
+		"updated": "20240208174001"
 	},
 	"Children": [
 		{
@@ -338,12 +338,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240208171620-h5pdt3a",
-				"updated": "20240208171621"
+				"updated": "20240208174001"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "兩個資料庫之間可以透過 \u003ckbd\u003e關聯\u003c/kbd\u003e 建立聯繫，以便聯動管理。 例如 "
+					"Data": "兩個資料庫之間可以透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關聯"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 建立聯繫，以便聯動管理。 例如 "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -85,10 +85,9 @@ export const loadAssets = (data: IAppearance) => {
     const themeScriptElement = document.getElementById("themeScript");
     const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
     if (themeScriptElement) {
-        if (!themeScriptElement.getAttribute("src").startsWith(themeScriptAddress)) {
-            themeScriptElement.remove();
-            addScript(themeScriptAddress, "themeScript");
-        }
+        // https://github.com/siyuan-note/siyuan/issues/10341
+        themeScriptElement.remove();
+        addScript(themeScriptAddress, "themeScript");
     } else {
         addScript(themeScriptAddress, "themeScript");
     }

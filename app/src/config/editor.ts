@@ -76,12 +76,12 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.floatWindowMode}
-        <div class="b3-label__text">${window.siyuan.languages.floatWindowModeTip.replace("${hotkey}", updateHotkeyTip("⌘"))}</div>
+        <div class="b3-label__text">${window.siyuan.languages.floatWindowModeTip}</div>
     </div>
     <span class="fn__space"></span>
     <select class="b3-select fn__flex-center fn__size200" id="floatWindowMode">
       <option value="0" ${window.siyuan.config.editor.floatWindowMode === 0 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode0}</option>
-      <option value="1" ${window.siyuan.config.editor.floatWindowMode === 1 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode1}</option>
+      <option value="1" ${window.siyuan.config.editor.floatWindowMode === 1 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode1.replace("${hotkey}", updateHotkeyTip("⌘"))}</option>
       <option value="2" ${window.siyuan.config.editor.floatWindowMode === 2 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode2}</option>
     </select>    
 </label>

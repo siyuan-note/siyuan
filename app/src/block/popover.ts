@@ -198,7 +198,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
 };
 
 const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false | HTMLElement) => {
-    if (hasClosestByClassName(event.target, "history__repo", true)) {
+    if (window.siyuan.config.editor.floatWindowMode === 2 || hasClosestByClassName(event.target, "history__repo", true)) {
         return false;
     }
     popoverTargetElement = hasClosestByAttribute(event.target, "data-type", "block-ref") as HTMLElement ||

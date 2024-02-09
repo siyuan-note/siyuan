@@ -309,25 +309,44 @@ const setRelation = (pdf: any) => {
 </div>`,
         width: "520px",
     });
+
+    const addRelation = () => {
+        if (/\d{14}-\w{7}/.test(inputElement.value)) {
+            if (!configItem.ids.includes(inputElement.value)) {
+                configItem.ids.push(inputElement.value);
+                updateRelation(pdf, config);
+                rectElement.dataset.relations = configItem.ids;
+                dialog.element.querySelector(".b3-list").innerHTML = getRelationHTML(configItem.ids);
+            }
+            inputElement.value = "";
+        } else {
+            showMessage("ID " + window.siyuan.languages.invalid);
+        }
+    }
+
+    const updateRelation = (pdf: any, config: any) => {
+        fetchPost("/api/asset/setFileAnnotation", {
+            path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
+            data: JSON.stringify(config),
+        });
+    }
+
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
     inputElement.focus();
-
+    inputElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return
+        }
+        if (event.key === "Enter") {
+            addRelation();
+        }
+    })
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.classList.contains("b3-dialog__content")) {
             const type = target.getAttribute("data-type");
             if (type === "add") {
-                if (/\d{14}-\w{7}/.test(inputElement.value)) {
-                    if (!configItem.ids.includes(inputElement.value)) {
-                        configItem.ids.push(inputElement.value);
-                        updateRelation(pdf, config);
-                        rectElement.dataset.relations = configItem.ids;
-                        dialog.element.querySelector(".b3-list").innerHTML = getRelationHTML(configItem.ids);
-                    }
-                    inputElement.value = "";
-                } else {
-                    showMessage("ID " + window.siyuan.languages.invalid);
-                }
+                addRelation();
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -339,13 +358,6 @@ const setRelation = (pdf: any) => {
             }
             target = target.parentElement;
         }
-    });
-}
-
-const updateRelation = (pdf: any, config: any) => {
-    fetchPost("/api/asset/setFileAnnotation", {
-        path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-        data: JSON.stringify(config),
     });
 }
 

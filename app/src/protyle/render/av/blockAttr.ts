@@ -339,11 +339,21 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         }
                     };
                 } else if (item.parentElement.dataset.type === "number") {
-                    value = {
-                        number: {
-                            content: parseFloat(item.value)
-                        }
-                    };
+                    if ("undefined" === item.value || !item.value) {
+                        value = {
+                            number: {
+                                content: null,
+                                isNotEmpty: false
+                            }
+                        };
+                    } else {
+                        value = {
+                            number: {
+                                content: parseFloat(item.value) || 0,
+                                isNotEmpty: true
+                            }
+                        };
+                    }
                 }
                 fetchPost("/api/av/setAttributeViewBlockAttr", {
                     avID: item.parentElement.dataset.avId,

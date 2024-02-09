@@ -278,7 +278,7 @@ const getRelationHTML = (ids: string[]) => {
     if (!ids) {
         return `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
-    let html = ""
+    let html = "";
     ids.forEach((id: string) => {
         html += `<li data-id="${id}" class="popover__block b3-list-item b3-list-item--narrow b3-list-item--hide-action">
     <span class="b3-list-item__text">${id}</span>
@@ -286,9 +286,9 @@ const getRelationHTML = (ids: string[]) => {
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
 </li>`;
-    })
-    return html
-}
+    });
+    return html;
+};
 
 const setRelation = (pdf: any) => {
     const config = getConfig(pdf);
@@ -322,25 +322,25 @@ const setRelation = (pdf: any) => {
         } else {
             showMessage("ID " + window.siyuan.languages.invalid);
         }
-    }
+    };
 
     const updateRelation = (pdf: any, config: any) => {
         fetchPost("/api/asset/setFileAnnotation", {
             path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
             data: JSON.stringify(config),
         });
-    }
+    };
 
-    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
     inputElement.addEventListener("keydown", (event) => {
         if (event.isComposing) {
-            return
+            return;
         }
         if (event.key === "Enter") {
             addRelation();
         }
-    })
+    });
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.classList.contains("b3-dialog__content")) {
@@ -359,7 +359,7 @@ const setRelation = (pdf: any) => {
             target = target.parentElement;
         }
     });
-}
+};
 
 const hideToolbar = (element: HTMLElement) => {
     element.querySelector(".pdf__util").classList.add("fn__none");
@@ -656,7 +656,7 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
         textLayerElement.insertAdjacentHTML("beforeend", "<div></div>");
     }
     textLayerElement = textLayerElement.lastElementChild;
-    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids}" data-mode="${selected.mode}">`;
+    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids || ""}" data-mode="${selected.mode}">`;
     selected.coords.forEach((rect) => {
         const bounds = viewport.convertToViewportRectangle(rect);
         const width = Math.abs(bounds[0] - bounds[2]);

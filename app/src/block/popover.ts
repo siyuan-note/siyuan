@@ -278,7 +278,7 @@ export const showPopover = async (app: App, showRef = false) => {
             // 编辑器中的引用数
             targetId = popoverTargetElement.parentElement.parentElement.getAttribute("data-node-id");
         } else if (popoverTargetElement.classList.contains("pdf__rect")) {
-            const relationIds = popoverTargetElement.getAttribute("data-relations")
+            const relationIds = popoverTargetElement.getAttribute("data-relations");
             if (relationIds) {
                 ids = relationIds.split(",");
                 url = "";

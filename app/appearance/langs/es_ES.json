@@ -1,4 +1,5 @@
 {
+  "fileAnnoRefPlaceholder": "Ingrese el ID del bloque",
   "addToDatabase": "Agregar a la base de datos",
   "clearContext": "Borrar contexto",
   "cloudStoragePurge": "Borrar almacenamiento en la nube",

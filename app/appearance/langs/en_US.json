@@ -1,4 +1,5 @@
 {
+  "fileAnnoRefPlaceholder": "Please enter block ID",
   "addToDatabase": "Add to Database",
   "clearContext": "Clear context",
   "cloudStoragePurge": "Purge cloud storage",

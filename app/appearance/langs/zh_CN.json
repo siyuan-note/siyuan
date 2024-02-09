@@ -1,4 +1,5 @@
 {
+  "fileAnnoRefPlaceholder": "请输入块 ID",
   "addToDatabase": "添加到数据库",
   "clearContext": "清空上下文",
   "cloudStoragePurge": "清理云端存储",

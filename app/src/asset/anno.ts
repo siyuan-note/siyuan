@@ -300,7 +300,7 @@ const setRelation = (pdf: any) => {
         title: window.siyuan.languages.relation,
         content: `<div class="b3-dialog__content">
     <div class="fn__flex">
-        <input class="b3-text-field fn__flex-1" placeholder="Enter">
+        <input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.fileAnnoRefPlaceholder}">
         <div class="fn__space"></div>
         <button class="b3-button b3-button--text" data-type="add">${window.siyuan.languages.addAttr}</button>
     </div>

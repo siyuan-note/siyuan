@@ -1,4 +1,5 @@
 {
+  "fileAnnoRefPlaceholder": "Veuillez saisir l'ID de bloc",
   "addToDatabase": "Ajouter à la base de données",
   "clearContext": "Effacer le contexte",
   "cloudStoragePurge": "Purger le stockage cloud",

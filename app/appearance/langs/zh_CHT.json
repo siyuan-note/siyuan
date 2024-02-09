@@ -1,4 +1,5 @@
 {
+  "fileAnnoRefPlaceholder": "請輸入區塊 ID",
   "addToDatabase": "新增至資料庫",
   "clearContext": "清空上下文",
   "cloudStoragePurge": "清理雲端儲存",

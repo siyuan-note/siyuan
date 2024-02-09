@@ -79,7 +79,11 @@ export const editor = {
         <div class="b3-label__text">${window.siyuan.languages.floatWindowModeTip.replace("${hotkey}", updateHotkeyTip("⌘"))}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="floatWindowMode" type="checkbox"${window.siyuan.config.editor.floatWindowMode === 0 ? " checked" : ""}/>
+    <select class="b3-select fn__flex-center fn__size200" id="floatWindowMode">
+      <option value="0" ${window.siyuan.config.editor.floatWindowMode === 0 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode0}</option>
+      <option value="1" ${window.siyuan.config.editor.floatWindowMode === 1 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode1}</option>
+      <option value="2" ${window.siyuan.config.editor.floatWindowMode === 2 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode2}</option>
+    </select>    
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -296,7 +300,7 @@ export const editor = {
                 listLogicalOutdent: (editor.element.querySelector("#listLogicalOutdent") as HTMLInputElement).checked,
                 spellcheck: (editor.element.querySelector("#spellcheck") as HTMLInputElement).checked,
                 onlySearchForDoc: (editor.element.querySelector("#onlySearchForDoc") as HTMLInputElement).checked,
-                floatWindowMode: (editor.element.querySelector("#floatWindowMode") as HTMLInputElement).checked ? 0 : 1,
+                floatWindowMode: parseInt((editor.element.querySelector("#floatWindowMode") as HTMLSelectElement).value),
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,

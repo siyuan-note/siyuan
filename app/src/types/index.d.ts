@@ -319,6 +319,7 @@ interface IPdfAnno {
     mode: string,
     id?: string,
     coords?: number[]
+    ids?: string[]
 }
 
 interface IBackStack {

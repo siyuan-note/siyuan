@@ -278,15 +278,23 @@ export const showPopover = async (app: App, showRef = false) => {
             // 编辑器中的引用数
             targetId = popoverTargetElement.parentElement.parentElement.getAttribute("data-node-id");
         } else if (popoverTargetElement.classList.contains("pdf__rect")) {
-            targetId = popoverTargetElement.getAttribute("data-node-id");
-            url = "/api/block/getRefIDsByFileAnnotationID";
+            const relationIds = popoverTargetElement.getAttribute("data-relations")
+            if (relationIds) {
+                ids = relationIds.split(",");
+                url = "";
+            } else {
+                targetId = popoverTargetElement.getAttribute("data-node-id");
+                url = "/api/block/getRefIDsByFileAnnotationID";
+            }
         } else if (!targetId) {
             // 文件树中的引用数
             targetId = popoverTargetElement.parentElement.getAttribute("data-node-id");
         }
-        const postResponse = await fetchSyncPost(url, {id: targetId});
-        ids = postResponse.data.refIDs;
-        defIds = postResponse.data.defIDs;
+        if (url) {
+            const postResponse = await fetchSyncPost(url, {id: targetId});
+            ids = postResponse.data.refIDs;
+            defIds = postResponse.data.defIDs;
+        }
     }
 
     let hasPin = false;

@@ -95,6 +95,49 @@ func SetBlockReminder(id string, timed string) (err error) {
 	return
 }
 
+func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
+	if util.ReadOnly {
+		return
+	}
+
+	WaitForWritingFiles()
+	trees := map[string]*parse.Tree{}
+	for _, blockAttr := range blockAttrs {
+		id := blockAttr["id"].(string)
+		if nil == trees[id] {
+			tree, e := loadTreeByBlockID(id)
+			if nil != e {
+				return e
+			}
+			trees[id] = tree
+		}
+	}
+
+	var nodes []*ast.Node
+	for _, blockAttr := range blockAttrs {
+		id := blockAttr["id"].(string)
+		attrs := blockAttr["attrs"].(map[string]string)
+		tree := trees[id]
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		}
+
+		oldAttrs, e := setNodeAttrs0(node, attrs)
+		if nil != e {
+			return e
+		}
+
+		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+		pushBroadcastAttrTransactions(oldAttrs, node)
+		nodes = append(nodes, node)
+	}
+
+	IncSync()
+	// 不做锚文本刷新
+	return
+}
+
 func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	if util.ReadOnly {
 		return

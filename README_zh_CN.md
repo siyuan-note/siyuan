@@ -103,12 +103,18 @@
 
 ### 应用市场
 
+移动端：
+
 * [App Store](https://apps.apple.com/cn/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
-* [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
+* [F-Droid](https://f-droid.org/packages/org.b3log.siyuan)
 * [华为应用市场](https://appgallery.huawei.com/app/C105558879)
 * [小米应用商店](https://app.mi.com/details?id=org.b3log.siyuan)
 * [酷安](https://www.coolapk.com/apk/292664)
+
+桌面端：
+
+* [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
 
 ### Docker 部署
 

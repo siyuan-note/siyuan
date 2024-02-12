@@ -103,8 +103,14 @@ It is recommended to give priority to installing through the application market 
 
 ### App Market
 
+Mobile:
+
 * [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
+* [F-Droid](https://f-droid.org/packages/org.b3log.siyuan)
+
+Desktop:
+
 * [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
 
 ### Docker Hosting

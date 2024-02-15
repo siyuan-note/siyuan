@@ -36,6 +36,7 @@ type OpenAI struct {
 	APIMaxTokens int    `json:"apiMaxTokens"`
 	APIBaseURL   string `json:"apiBaseURL"`
 	APIUserAgent string `json:"apiUserAgent"`
+	APIProvider  string `json:"apiProvider"` // OpenAI, Azure
 }
 
 func NewAI() *AI {
@@ -44,6 +45,7 @@ func NewAI() *AI {
 		APIModel:     openai.GPT3Dot5Turbo,
 		APIBaseURL:   "https://api.openai.com/v1",
 		APIUserAgent: util.UserAgent,
+		APIProvider:  "OpenAI",
 	}
 
 	openAI.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")

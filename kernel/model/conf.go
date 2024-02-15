@@ -408,6 +408,9 @@ func InitConf() {
 	if "" == Conf.AI.OpenAI.APIUserAgent {
 		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
 	}
+	if "" == Conf.AI.OpenAI.APIProvider {
+		Conf.AI.OpenAI.APIProvider = "OpenAI"
+	}
 
 	if "" != Conf.AI.OpenAI.APIKey {
 		logging.LogInfof("OpenAI API enabled\n"+

@@ -6,10 +6,16 @@ export const ai = {
         let responsiveHTML = "";
         /// #if MOBILE
         responsiveHTML = `<div class="b3-label">
-    ${window.siyuan.languages.apiTimeout}
-    <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>     
-    <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
+    ${window.siyuan.languages.apiProvider}
+    <div class="b3-label__text">
+        ${window.siyuan.languages.apiProviderTip}
+    </div>
+    <div class="b3-label__text fn__flex config__item" style="padding: 4px 0 4px 4px;">
+        <select id="apiProvider" class="b3-select">
+            <option value="OpenAI" ${window.siyuan.config.ai.openAI.apiProvider === "OpenAI" ? "selected" : ""}>OpenAI</option>
+            <option value="Azure" ${window.siyuan.config.ai.openAI.apiProvider === "Azure" ? "selected" : ""}>Azure</option>
+        </select>
+    </div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.apiModel}
@@ -26,6 +32,12 @@ export const ai = {
             <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
         </select>
     </div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.apiTimeout}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>     
+    <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.apiMaxTokens}
@@ -58,13 +70,16 @@ export const ai = {
     <div class="b3-label__text">${window.siyuan.languages.apiUserAgentTip}</div>
 </div>`;
         /// #else
-        responsiveHTML = `<div class="fn__flex b3-label">
+        responsiveHTML = `<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.apiTimeout}
-        <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
+        ${window.siyuan.languages.apiProvider}
+        <div class="b3-label__text">${window.siyuan.languages.apiProviderTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+    <select id="apiProvider" class="b3-select fn__flex-center fn__size200">
+        <option value="OpenAI" ${window.siyuan.config.ai.openAI.apiProvider === "OpenAI" ? "selected" : ""}>OpenAI</option>
+        <option value="Azure" ${window.siyuan.config.ai.openAI.apiProvider === "Azure" ? "selected" : ""}>Azure</option>
+    </select>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
@@ -80,6 +95,14 @@ export const ai = {
         <option value="gpt-3.5-turbo-16k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-16k" ? "selected" : ""}>gpt-3.5-turbo-16k</option>
         <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
     </select>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.apiTimeout}
+        <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">

@@ -20,7 +20,6 @@ import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
 import {avRender} from "../render/av/render";
-import {isPaidUser} from "../../util/needSubscribe";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -48,13 +47,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: Constants.ZWSP + 5,
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
     }];
-    if (isPaidUser()) {
-        allList.push({
-            filter: ["数据库", "属性视图", "shujuku", "shuxingshitu", "sjk", "sxst", "database", "attribute view"],
-            value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
-            html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
-        });
-    }
+    allList.push({
+        filter: ["数据库", "属性视图", "shujuku", "shuxingshitu", "sjk", "sxst", "database", "attribute view"],
+        value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
+    });
     [{
         filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
         value: Constants.ZWSP + 4,

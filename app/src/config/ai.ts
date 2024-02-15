@@ -18,22 +18,6 @@ export const ai = {
     </div>
 </div>
 <div class="b3-label">
-    ${window.siyuan.languages.apiModel}
-    <div class="b3-label__text">
-        ${window.siyuan.languages.apiModelTip}
-    </div>
-    <div class="b3-label__text fn__flex config__item" style="padding: 4px 0 4px 4px;">
-        <select id="apiModel" class="b3-select">
-            <option value="gpt-4" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4" ? "selected" : ""}>gpt-4</option>
-            <option value="gpt-4-32k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-32k" ? "selected" : ""}>gpt-4-32k</option>
-            <option value="gpt-4-1106-preview" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-1106-preview" ? "selected" : ""}>gpt-4-1106-preview</option>
-            <option value="gpt-3.5-turbo" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo" ? "selected" : ""}>gpt-3.5-turbo</option>
-            <option value="gpt-3.5-turbo-16k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-16k" ? "selected" : ""}>gpt-3.5-turbo-16k</option>
-            <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
-        </select>
-    </div>
-</div>
-<div class="b3-label">
     ${window.siyuan.languages.apiTimeout}
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>     
@@ -44,6 +28,12 @@ export const ai = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
     <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.apiModel}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="apiModel" value="${window.siyuan.config.ai.openAI.apiModel}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiModelTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.apiKey}
@@ -81,21 +71,6 @@ export const ai = {
         <option value="Azure" ${window.siyuan.config.ai.openAI.apiProvider === "Azure" ? "selected" : ""}>Azure</option>
     </select>
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.apiModel}
-        <div class="b3-label__text">${window.siyuan.languages.apiModelTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <select id="apiModel" class="b3-select fn__flex-center fn__size200">
-        <option value="gpt-4" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4" ? "selected" : ""}>gpt-4</option>
-        <option value="gpt-4-32k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-32k" ? "selected" : ""}>gpt-4-32k</option>
-        <option value="gpt-4-1106-preview" ${window.siyuan.config.ai.openAI.apiModel === "gpt-4-1106-preview" ? "selected" : ""}>gpt-4-1106-preview</option>
-        <option value="gpt-3.5-turbo" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo" ? "selected" : ""}>gpt-3.5-turbo</option>
-        <option value="gpt-3.5-turbo-16k" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-16k" ? "selected" : ""}>gpt-3.5-turbo-16k</option>
-        <option value="gpt-3.5-turbo-1106" ${window.siyuan.config.ai.openAI.apiModel === "gpt-3.5-turbo-1106" ? "selected" : ""}>gpt-3.5-turbo-1106</option>
-    </select>
-</div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.apiTimeout}
@@ -111,6 +86,14 @@ export const ai = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__block">
+        ${window.siyuan.languages.apiModel}
+        <div class="b3-label__text">${window.siyuan.languages.apiModelTip}</div>
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block" id="apiModel" value="${window.siyuan.config.ai.openAI.apiModel}"/>
+    </div>
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__block">

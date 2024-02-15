@@ -50,6 +50,12 @@ export const ai = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
     <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
+</div>
+<div class="b3-label">
+    User-Agent
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="apiUserAgent" value="${window.siyuan.config.ai.openAI.apiUserAgent}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiUserAgentTip}</div>
 </div>`;
         /// #else
         responsiveHTML = `<div class="fn__flex b3-label">
@@ -106,6 +112,14 @@ export const ai = {
         <span class="fn__hr"></span>
         <input class="b3-text-field fn__block" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
     </div>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__block">
+        User-Agent
+        <div class="b3-label__text">${window.siyuan.languages.apiUserAgentTip}</div>
+        <span class="fn__hr"></span>
+        <input class="b3-text-field fn__block" id="apiUserAgent" value="${window.siyuan.config.ai.openAI.apiUserAgent}"/>
+    </div>
 </div>`;
         /// #endif
         return `<div class="fn__flex-column" style="height: 100%">
@@ -124,6 +138,7 @@ export const ai = {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setAI", {
                     openAI: {
+                        apiUserAgent: (ai.element.querySelector("#apiUserAgent") as HTMLInputElement).value,
                         apiBaseURL: (ai.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
                         apiModel: (ai.element.querySelector("#apiModel") as HTMLSelectElement).value,

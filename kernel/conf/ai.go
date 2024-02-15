@@ -17,6 +17,7 @@
 package conf
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"os"
 	"strconv"
 
@@ -34,13 +35,15 @@ type OpenAI struct {
 	APIModel     string `json:"apiModel"`
 	APIMaxTokens int    `json:"apiMaxTokens"`
 	APIBaseURL   string `json:"apiBaseURL"`
+	APIUserAgent string `json:"apiUserAgent"`
 }
 
 func NewAI() *AI {
 	openAI := &OpenAI{
-		APITimeout: 30,
-		APIModel:   openai.GPT3Dot5Turbo,
-		APIBaseURL: "https://api.openai.com/v1",
+		APITimeout:   30,
+		APIModel:     openai.GPT3Dot5Turbo,
+		APIBaseURL:   "https://api.openai.com/v1",
+		APIUserAgent: util.UserAgent,
 	}
 
 	openAI.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -67,5 +70,8 @@ func NewAI() *AI {
 		openAI.APIBaseURL = baseURL
 	}
 
+	if userAgent := os.Getenv("SIYUAN_OPENAI_API_USER_AGENT"); "" != userAgent {
+		openAI.APIUserAgent = userAgent
+	}
 	return &AI{OpenAI: openAI}
 }

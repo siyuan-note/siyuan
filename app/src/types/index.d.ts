@@ -722,6 +722,7 @@ interface IConfig {
     }
     ai: {
         openAI: {
+            apiUserAgent: string
             apiBaseURL: string
             apiKey: string
             apiModel: string

@@ -273,6 +273,7 @@
   "apiMaxTokensTip": "请求 API 时传入的 <code class='fn__code'>max_tokens</code> 参数，用于控制生成的文本长度",
   "apiBaseURL": "API 基础地址",
   "apiBaseURLTip": "发起请求的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
+  "apiUserAgentTip": "发起请求的用户代理，即 HTTP 标头 <code class='fn__code'>User-Agent</code>",
   "skip": "跳过",
   "nextRound": "下一轮",
   "save": "保存",

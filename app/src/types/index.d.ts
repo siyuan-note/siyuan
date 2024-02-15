@@ -722,6 +722,8 @@ interface IConfig {
     }
     ai: {
         openAI: {
+            apiProvider: string // OpenAI, Azure
+            apiUserAgent: string
             apiBaseURL: string
             apiKey: string
             apiModel: string

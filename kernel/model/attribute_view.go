@@ -370,6 +370,15 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				}
 			}
 			if 1 > len(blockIDs) {
+				tree, _ := loadTreeByBlockID(blockID)
+				if nil != tree {
+					node := treenode.GetNodeInTree(tree, blockID)
+					if nil != node {
+						if removeErr := removeNodeAvID(node, avID, nil, tree); nil != removeErr {
+							logging.LogErrorf("remove node avID [%s] failed: %s", avID, removeErr)
+						}
+					}
+				}
 				continue
 			}
 			blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
@@ -1755,32 +1764,8 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 					if nil != tree {
 						trees[bt.RootID] = tree
 						if node := treenode.GetNodeInTree(tree, values.BlockID); nil != node {
-							attrs := parse.IAL2Map(node.KramdownIAL)
-							if ast.NodeDocument == node.Type {
-								delete(attrs, "custom-hidden")
-								node.RemoveIALAttr("custom-hidden")
-							}
-
-							if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
-								avIDs := strings.Split(avs, ",")
-								avIDs = gulu.Str.RemoveElem(avIDs, avID)
-								if 0 == len(avIDs) {
-									delete(attrs, av.NodeAttrNameAvs)
-									node.RemoveIALAttr(av.NodeAttrNameAvs)
-								} else {
-									attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-									node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
-								}
-							}
-
-							if nil != tx {
-								if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-									return
-								}
-							} else {
-								if err = setNodeAttrs(node, tree, attrs); nil != err {
-									return
-								}
+							if err = removeNodeAvID(node, avID, tx, tree); nil != err {
+								return
 							}
 						}
 					}
@@ -1797,6 +1782,45 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tree) (err error) {
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	if ast.NodeDocument == node.Type {
+		delete(attrs, "custom-hidden")
+		node.RemoveIALAttr("custom-hidden")
+	}
+
+	if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
+		avIDs := strings.Split(avs, ",")
+		avIDs = gulu.Str.RemoveElem(avIDs, avID)
+		var existAvIDs []string
+		for _, attributeViewID := range avIDs {
+			if av.IsAttributeViewExist(attributeViewID) {
+				existAvIDs = append(existAvIDs, attributeViewID)
+			}
+		}
+		avIDs = existAvIDs
+
+		if 0 == len(avIDs) {
+			delete(attrs, av.NodeAttrNameAvs)
+			node.RemoveIALAttr(av.NodeAttrNameAvs)
+		} else {
+			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+			node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
+		}
+	}
+
+	if nil != tx {
+		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+			return
+		}
+	} else {
+		if err = setNodeAttrs(node, tree, attrs); nil != err {
+			return
+		}
+	}
 	return
 }
 

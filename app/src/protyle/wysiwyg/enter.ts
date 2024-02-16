@@ -139,11 +139,19 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         removeEmptyNode(newElement);
         return true;
     }
-    if ((range.toString() === "" || range.toString() === Constants.ZWSP) && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
+    if ((range.toString() === "" || range.toString() === Constants.ZWSP) && range.startContainer.nodeType === 3 && range.startOffset === 0) {
         // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
         // 列表中的图片后双击换行图片光标错误 https://ld246.com/article/1660987186727/comment/1662181221732?r=Vanessa#comments
-        range.setStart(range.startContainer, 1);
-        range.collapse(false);
+        let nextSibling = range.startContainer;
+        while (nextSibling) {
+            if (nextSibling.textContent === Constants.ZWSP) {
+                range.setStart(nextSibling, 1);
+                range.collapse(false);
+                break;
+            } else {
+                nextSibling = nextSibling.nextSibling;
+            }
+        }
     }
     range.insertNode(document.createElement("wbr"));
     const listItemHTML = listItemElement.outerHTML;

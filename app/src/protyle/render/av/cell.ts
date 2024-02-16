@@ -142,6 +142,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     isNotTime: true,
                 }
             };
+        } else if (colType === "relation") {
+            cellValue = {
+                type: colType,
+                relation: {blockIDs: [], contents: [value]}
+            };
         }
     } else if (typeof value === "undefined" || !value) {
         if (colType === "number") {

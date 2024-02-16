@@ -2398,7 +2398,7 @@ export class WYSIWYG {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
                 // https://github.com/siyuan-note/siyuan/issues/10357
-                const attrElement = hasClosestByClassName(newRange.endContainer, "protyle-attr")
+                const attrElement = hasClosestByClassName(newRange.endContainer, "protyle-attr");
                 if (attrElement) {
                     newRange = setLastNodeRange(attrElement.previousElementSibling, newRange, false);
                 }

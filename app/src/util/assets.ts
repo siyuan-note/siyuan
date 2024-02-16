@@ -40,7 +40,7 @@ export const loadAssets = (data: IAppearance) => {
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
-            defaultStyleElement.setAttribute("href", defaultThemeAddress)
+            defaultStyleElement.setAttribute("href", defaultThemeAddress);
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
@@ -50,7 +50,7 @@ export const loadAssets = (data: IAppearance) => {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
         if (styleElement) {
             if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
-                styleElement.setAttribute("href", themeAddress)
+                styleElement.setAttribute("href", themeAddress);
             }
         } else {
             addStyle(themeAddress, "themeStyle");

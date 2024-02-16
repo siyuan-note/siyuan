@@ -210,6 +210,11 @@ func NewAttributeView(id string) (ret *AttributeView) {
 	return
 }
 
+func IsAttributeViewExist(avID string) bool {
+	avJSONPath := GetAttributeViewDataPath(avID)
+	return filelock.IsExist(avJSONPath)
+}
+
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := GetAttributeViewDataPath(avID)
 	if !filelock.IsExist(avJSONPath) {

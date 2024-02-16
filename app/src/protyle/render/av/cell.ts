@@ -752,7 +752,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             if (["rollup", "template", "created", "updated"].includes(item.type)) {
                 return;
             }
-            const data = originData[originKeys[index % originKeys.length]][cellIndex];
+            // https://ld246.com/article/1707975507571 数据库下拉填充数据后异常
+            const data = JSON.parse(JSON.stringify(originData[originKeys[index % originKeys.length]][cellIndex]));
             data.id = item.id;
             const keyID = item.colId;
             if (data.type === "block") {

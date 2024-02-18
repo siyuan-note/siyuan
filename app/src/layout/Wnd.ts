@@ -37,6 +37,8 @@ import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {fullscreen} from "../protyle/breadcrumb/action";
+import {setPadding} from "../protyle/ui/initUI";
 
 export class Wnd {
     private app: App;
@@ -488,6 +490,10 @@ export class Wnd {
                     reload: false,
                     resize,
                 });
+            }
+            if (window.siyuan.editorIsFullscreen) {
+                fullscreen(currentTab.model.editor.protyle.element);
+                setPadding(currentTab.model.editor.protyle);
             }
         } else {
             updatePanelByEditor({

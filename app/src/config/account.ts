@@ -132,11 +132,11 @@ ${renewHTML}
             </button>
             <span class="fn__flex-1"></span>
             <button class="b3-button b3-button--cancel b3-tooltips b3-tooltips__n" id="refresh" aria-label="${window.siyuan.languages.refresh}">
-                <svg><use xlink:href="#iconRefresh"></use></svg>
+                <svg style="margin-right: 0"><use xlink:href="#iconRefresh"></use></svg>
             </button>
         </div>
         <div class="fn__hr--b"></div>
-        <div class="fn__flex">
+        <div class="fn__flex">  
             <label>
                 ${window.siyuan.languages.accountDisplayTitle}
                 <input class="b3-switch fn__flex-center" id="displayTitle" type="checkbox"${window.siyuan.config.account.displayTitle ? " checked" : ""}/>

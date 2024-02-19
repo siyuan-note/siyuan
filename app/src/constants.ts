@@ -105,6 +105,7 @@ export abstract class Constants {
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
+    public static readonly LOCAL_OUTLINE = "local-outline";
 
     // dialog
     public static readonly DIALOG_OPENCARD = "dialog-opencard";

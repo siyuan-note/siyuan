@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123130-jpeg5b2",
 		"title": "書籤和標籤",
-		"updated": "20231205225753"
+		"updated": "20240220134633"
 	},
 	"Children": [
 		{
@@ -42,7 +42,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-3rhy0b6",
-				"updated": "20211226014020"
+				"updated": "20240220134633"
 			},
 			"Children": [
 				{
@@ -52,20 +52,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt 3"
+					"TextMarkTextContent": "Alt+3"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " / "
+					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌘ 3"
+					"TextMarkTextContent": "⌃3"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）中列出。如果要取消收藏，在該內容塊標識下拉菜單中選擇刪除即可。"
+					"Data": "​）中列出。如果要取消收藏，在該內容塊標識下拉菜單中選擇刪除即可。"
 				}
 			]
 		},
@@ -153,7 +153,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-ucilhpd",
-				"updated": "20211226014104"
+				"updated": "20240220134619"
 			},
 			"Children": [
 				{
@@ -163,7 +163,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt 4"
+					"TextMarkTextContent": "Alt+4"
 				},
 				{
 					"Type": "NodeText",
@@ -172,7 +172,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌘ 4"
+					"TextMarkTextContent": "⌃4"
 				},
 				{
 					"Type": "NodeText",

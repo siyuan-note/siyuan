@@ -37,6 +37,8 @@ import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {fullscreen} from "../protyle/breadcrumb/action";
+import {setPadding} from "../protyle/ui/initUI";
 
 export class Wnd {
     private app: App;
@@ -489,6 +491,10 @@ export class Wnd {
                     resize,
                 });
             }
+            if (window.siyuan.editorIsFullscreen) {
+                fullscreen(currentTab.model.editor.protyle.element);
+                setPadding(currentTab.model.editor.protyle);
+            }
         } else {
             updatePanelByEditor({
                 protyle: undefined,
@@ -696,7 +702,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, animate = true) => {
+    private removeTabAction = (id: string, closeAll = false, animate = true, isSaveLayout = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -792,7 +798,9 @@ export class Wnd {
                 setTitle(window.siyuan.languages.siyuanNote);
             }
         }
-        saveLayout();
+        if (isSaveLayout) {
+            saveLayout();
+        }
         /// #if !BROWSER
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");
@@ -800,7 +808,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, animate = true) {
+    public removeTab(id: string, closeAll = false, animate = true, isSaveLayout = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -809,9 +817,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, animate);
+                    this.removeTabAction(id, closeAll, animate, isSaveLayout);
                 } else {
-                    this.removeTabAction(id, closeAll, animate);
+                    this.removeTabAction(id, closeAll, animate, isSaveLayout);
                 }
                 return;
             }

@@ -428,7 +428,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         if (!sessionStorage.getItem(Constants.LOCAL_SESSION_FIRSTLOAD)) {
             getAllTabs().forEach(item => {
                 if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                    item.parent.removeTab(item.id, false, false);
+                    item.parent.removeTab(item.id, false, false, false);
                 }
             });
             sessionStorage.setItem(Constants.LOCAL_SESSION_FIRSTLOAD, "true");
@@ -437,7 +437,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         if (isStart) {
             getAllTabs().forEach(item => {
                 if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                    item.parent.removeTab(item.id, false, false);
+                    item.parent.removeTab(item.id, false, false, false);
                 }
             });
         }
@@ -460,7 +460,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                     const tabId = item.getAttribute("data-id");
                     const tab = getInstanceById(tabId) as Tab;
                     if (tab) {
-                        tab.parent.removeTab(tabId, false, false);
+                        tab.parent.removeTab(tabId, false, false, false);
                     }
                 }
             }

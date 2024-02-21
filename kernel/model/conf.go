@@ -405,15 +405,27 @@ func InitConf() {
 	if "" == Conf.AI.OpenAI.APIModel {
 		Conf.AI.OpenAI.APIModel = openai.GPT3Dot5Turbo
 	}
+	if "" == Conf.AI.OpenAI.APIUserAgent {
+		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
+	}
+	if "" == Conf.AI.OpenAI.APIProvider {
+		Conf.AI.OpenAI.APIProvider = "OpenAI"
+	}
 
 	if "" != Conf.AI.OpenAI.APIKey {
 		logging.LogInfof("OpenAI API enabled\n"+
+			"    userAgent=%s\n"+
 			"    baseURL=%s\n"+
 			"    timeout=%ds\n"+
 			"    proxy=%s\n"+
 			"    model=%s\n"+
 			"    maxTokens=%d",
-			Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APITimeout, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIModel, Conf.AI.OpenAI.APIMaxTokens)
+			Conf.AI.OpenAI.APIUserAgent,
+			Conf.AI.OpenAI.APIBaseURL,
+			Conf.AI.OpenAI.APITimeout,
+			Conf.AI.OpenAI.APIProxy,
+			Conf.AI.OpenAI.APIModel,
+			Conf.AI.OpenAI.APIMaxTokens)
 	}
 
 	Conf.ReadOnly = util.ReadOnly

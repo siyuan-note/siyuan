@@ -176,7 +176,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
 			logging.LogErrorf(msg)
 
-			if 0 == tx.state.Load() {
+			if 1 == tx.state.Load() {
 				tx.rollback()
 				return
 			}
@@ -1250,12 +1250,12 @@ type Transaction struct {
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
-	state      atomic.Int32 // 0: 未提交，1: 已提交，2: 已回滚
+	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
 }
 
 func (tx *Transaction) WaitForCommit() {
 	for {
-		if 0 == tx.state.Load() {
+		if 1 == tx.state.Load() {
 			time.Sleep(10 * time.Millisecond)
 			continue
 		}
@@ -1271,7 +1271,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.nodes = map[string]*ast.Node{}
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
-	tx.state.Store(0)
+	tx.state.Store(1)
 	return
 }
 
@@ -1284,14 +1284,14 @@ func (tx *Transaction) commit() (err error) {
 	refreshDynamicRefTexts(tx.nodes, tx.trees)
 	IncSync()
 	tx.trees = nil
-	tx.state.Store(1)
+	tx.state.Store(2)
 	tx.m.Unlock()
 	return
 }
 
 func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes = nil, nil
-	tx.state.Store(2)
+	tx.state.Store(3)
 	tx.m.Unlock()
 	return
 }

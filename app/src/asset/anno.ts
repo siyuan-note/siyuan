@@ -6,6 +6,8 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
+import {Dialog} from "../dialog";
+import {showMessage} from "../dialog/message";
 
 export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
     getConfig(pdf);
@@ -214,6 +216,13 @@ export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
                 event.stopPropagation();
                 processed = true;
                 break;
+            } else if (type === "relate") {
+                setRelation(pdf);
+                hideToolbar(element);
+                event.preventDefault();
+                event.stopPropagation();
+                processed = true;
+                break;
             } else if (type === "toggle") {
                 const config = getConfig(pdf);
                 const annoItem = config[rectElement.getAttribute("data-node-id")];
@@ -263,6 +272,93 @@ export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
         });
     });
     return pdf;
+};
+
+const getRelationHTML = (ids: string[]) => {
+    if (!ids) {
+        return `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+    }
+    let html = "";
+    ids.forEach((id: string) => {
+        html += `<li data-id="${id}" class="popover__block b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+    <span class="b3-list-item__text">${id}</span>
+    <span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    </span>
+</li>`;
+    });
+    return html;
+};
+
+const setRelation = (pdf: any) => {
+    const config = getConfig(pdf);
+    const configItem = config[rectElement.getAttribute("data-node-id")];
+    if (!configItem.ids) {
+        configItem.ids = [];
+    }
+    const dialog = new Dialog({
+        title: window.siyuan.languages.relation,
+        content: `<div class="b3-dialog__content">
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.fileAnnoRefPlaceholder}">
+        <div class="fn__space"></div>
+        <button class="b3-button b3-button--text" data-type="add">${window.siyuan.languages.addAttr}</button>
+    </div>
+    <div class="fn__hr"></div>
+    <ul class="b3-list b3-list--background">${getRelationHTML(configItem.ids)}</ul>
+</div>`,
+        width: "520px",
+    });
+
+    const addRelation = () => {
+        if (/\d{14}-\w{7}/.test(inputElement.value)) {
+            if (!configItem.ids.includes(inputElement.value)) {
+                configItem.ids.push(inputElement.value);
+                updateRelation(pdf, config);
+                rectElement.dataset.relations = configItem.ids;
+                dialog.element.querySelector(".b3-list").innerHTML = getRelationHTML(configItem.ids);
+            }
+            inputElement.value = "";
+        } else {
+            showMessage("ID " + window.siyuan.languages.invalid);
+        }
+    };
+
+    const updateRelation = (pdf: any, config: any) => {
+        fetchPost("/api/asset/setFileAnnotation", {
+            path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
+            data: JSON.stringify(config),
+        });
+    };
+
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    inputElement.focus();
+    inputElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Enter") {
+            addRelation();
+        }
+    });
+    dialog.element.addEventListener("click", (event) => {
+        let target = event.target as HTMLElement;
+        while (target && !target.classList.contains("b3-dialog__content")) {
+            const type = target.getAttribute("data-type");
+            if (type === "add") {
+                addRelation();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (type === "clear") {
+                configItem.ids.splice(configItem.ids.indexOf(target.parentElement.textContent.trim()), 1);
+                updateRelation(pdf, config);
+                rectElement.dataset.relations = configItem.ids;
+                dialog.element.querySelector(".b3-list").innerHTML = getRelationHTML(configItem.ids);
+            }
+            target = target.parentElement;
+        }
+    });
 };
 
 const hideToolbar = (element: HTMLElement) => {
@@ -540,7 +636,8 @@ export const getHighlight = (element: HTMLElement) => {
                 color: item.color,
                 content: item.content,
                 type: item.type,
-                mode: item.mode || ""
+                mode: item.mode || "",
+                ids: item.ids
             }, pdfInstance, pdfInstance.annoId === key);
         }
     });
@@ -559,7 +656,7 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
         textLayerElement.insertAdjacentHTML("beforeend", "<div></div>");
     }
     textLayerElement = textLayerElement.lastElementChild;
-    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-mode="${selected.mode}">`;
+    let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids || ""}" data-mode="${selected.mode}">`;
     selected.coords.forEach((rect) => {
         const bounds = viewport.convertToViewportRectangle(rect);
         const width = Math.abs(bounds[0] - bounds[2]);
@@ -676,11 +773,10 @@ async function getRectImgData(pdfObj: any) {
 }
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
-    const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
     const config = getConfig(pdf);
     config[id] = data;
     fetchPost("/api/asset/setFileAnnotation", {
-        path: urlPath + ".sya",
+        path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
         data: JSON.stringify(config),
     });
 };

@@ -323,16 +323,6 @@ const getUnInitTab = (options: IOpenFileOptions) => {
 };
 
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
-    allModels.editor.forEach((item) => {
-        if (!item.element.isSameNode(editor.element) && window.siyuan.editorIsFullscreen && item.element.classList.contains("fullscreen")) {
-            item.element.classList.remove("fullscreen");
-            resize(item.editor.protyle);
-        }
-    });
-    if (window.siyuan.editorIsFullscreen) {
-        editor.element.classList.add("fullscreen");
-        resize(editor.editor.protyle);
-    }
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);
         return true;

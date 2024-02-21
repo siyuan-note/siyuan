@@ -1,5 +1,5 @@
 /// #if !MOBILE
-import {getAllModels} from "../../layout/getAll";
+import {getAllModels, getAllWnds} from "../../layout/getAll";
 /// #endif
 import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
@@ -9,6 +9,8 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
 import {resize} from "../util/resize";
 import {disabledProtyle, enableProtyle} from "../util/onGet";
+import {isWindow} from "../../util/functions";
+import {Wnd} from "../../layout/Wnd";
 
 export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
@@ -62,6 +64,20 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
             }
         }
         return;
+    } else if (isWindow()) {
+        // 编辑器全屏
+        /// #if !MOBILE
+        const wndsTemp: Wnd[] = [];
+        getAllWnds(window.siyuan.layout.layout, wndsTemp);
+        wndsTemp.find(async item => {
+            const headerElement = item.headersElement.parentElement;
+            if (headerElement.getBoundingClientRect().top <= 0) {
+                // @ts-ignore
+                (headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement).style.WebkitAppRegion = isFullscreen ? "drag" : "";
+                return;
+            }
+        });
+        /// #endif
     }
     /// #if !MOBILE
     if (element.classList.contains("protyle")) {

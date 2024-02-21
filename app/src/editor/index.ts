@@ -2,13 +2,12 @@ import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {Model} from "../layout/Model";
 import {setPadding} from "../protyle/ui/initUI";
-import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
 import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
 import {App} from "../index";
-import {resize} from "../protyle/util/resize";
+import {fullscreen} from "../protyle/breadcrumb/action";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -54,14 +53,8 @@ export class Editor extends Model {
             typewriterMode: true,
             after: (editor) => {
                 if (window.siyuan.editorIsFullscreen) {
-                    editor.protyle.element.classList.add("fullscreen");
+                    fullscreen(editor.protyle.element);
                     setPadding(editor.protyle);
-                    getAllModels().editor.forEach(item => {
-                        if (!editor.protyle.element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
-                            item.element.classList.remove("fullscreen");
-                            resize(item.editor.protyle);
-                        }
-                    });
                 }
                 countBlockWord([], editor.protyle.block.rootID);
                 /// #if !BROWSER

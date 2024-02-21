@@ -164,6 +164,13 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			return
 		}
 
+		avDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
+		if filelock.IsExist(avDirPath) {
+			if err = filelock.Copy(avDirPath, filepath.Join(util.DataDir, "storage", "av")); nil != err {
+				return
+			}
+		}
+
 		if box := Conf.Box(boxID); nil != box {
 			boxConf := box.GetConf()
 			boxConf.Closed = true

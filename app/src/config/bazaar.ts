@@ -474,7 +474,7 @@ export const bazaar = {
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconStar"></use></svg>
         <span class="fn__space"></span>
-        <a href="${data.repoURL}/stargazers" target="_blank" title="Starts">${data.stars}</a>
+        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${data.stars}</a>
         <span class="fn__space"></span>
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGitHubI"></use></svg>

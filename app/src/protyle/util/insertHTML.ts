@@ -248,6 +248,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.querySelector("wbr")?.remove();
+            protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range);
             return;
         }

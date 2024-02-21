@@ -436,6 +436,10 @@ export class Asset extends Model {
             <svg class="b3-menu__icon"><use xlink:href="#iconRef"></use></svg>
             <span class="b3-menu__label">${window.siyuan.languages.copyAnnotation}</span>
         </button>
+        <button class="b3-menu__item pdf__util__hide" data-type="relate">
+            <svg class="b3-menu__icon"><use xlink:href="#iconParagraph"></use></svg>
+            <span class="b3-menu__label">${window.siyuan.languages.relation}</span>
+        </button>
         <button class="b3-menu__item pdf__util__hide" data-type="remove">
             <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
             <span class="b3-menu__label">${window.siyuan.languages.remove}</span>

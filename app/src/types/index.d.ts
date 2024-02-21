@@ -319,6 +319,7 @@ interface IPdfAnno {
     mode: string,
     id?: string,
     coords?: number[]
+    ids?: string[]
 }
 
 interface IBackStack {
@@ -721,6 +722,8 @@ interface IConfig {
     }
     ai: {
         openAI: {
+            apiProvider: string // OpenAI, Azure
+            apiUserAgent: string
             apiBaseURL: string
             apiKey: string
             apiModel: string

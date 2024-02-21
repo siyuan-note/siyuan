@@ -92,7 +92,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 	if cloud {
 		gpt = &CloudGPT{}
 	} else {
-		gpt = &OpenAIGPT{c: util.NewOpenAIClient(Conf.AI.OpenAI.APIKey, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIBaseURL)}
+		gpt = &OpenAIGPT{c: util.NewOpenAIClient(Conf.AI.OpenAI.APIKey, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APIUserAgent)}
 	}
 
 	buf := &bytes.Buffer{}

@@ -113,8 +113,14 @@
 
 ### 应用市场
 
-* [App Store](https://apps.apple.com/cn/app/siyuan/id1583226508)
+Mobile:
+
+* [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
+* [F-Droid](https://f-droid.org/packages/org.b3log.siyuan)
+
+Desktop:
+
 * [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
 * [华为应用市场](https://appgallery.huawei.com/app/C105558879)
 * [小米应用商店](https://app.mi.com/details?id=org.b3log.siyuan)

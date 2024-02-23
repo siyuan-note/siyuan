@@ -16,7 +16,7 @@ import {popSearch} from "../mobile/menu/search";
 /// #endif
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
-import {hasClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByTag, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
@@ -376,7 +376,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     let name = liElement.getAttribute("data-name");
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
-        if (window.siyuan.config.fileTree.sort === 6) {
+        const topElement = hasTopClosestByTag(liElement, "UL");
+        if (window.siyuan.config.fileTree.sort === 6 || (topElement && topElement.dataset.sortmode === "6")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconBefore",
                 label: window.siyuan.languages.newDocAbove,

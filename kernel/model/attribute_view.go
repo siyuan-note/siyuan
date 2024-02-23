@@ -38,7 +38,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (ret *av.KeyValues, err error) {
+func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attributeViewName string, keyValues *av.KeyValues, err error) {
 	waitForSyncingStorages()
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -46,17 +46,35 @@ func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (ret *av.
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	attributeViewName = attrView.Name
 
-	ret = attrView.GetBlockKeyValues()
+	keyValues = attrView.GetBlockKeyValues()
+	// 不在视图中的值要过滤掉
+	tmp := map[string]*av.Value{}
+	for _, kv := range keyValues.Values {
+		for _, view := range attrView.Views {
+			switch view.LayoutType {
+			case av.LayoutTypeTable:
+				if gulu.Str.Contains(kv.Block.ID, view.Table.RowIDs) {
+					tmp[kv.Block.ID] = kv
+				}
+			}
+		}
+	}
+	keyValues.Values = []*av.Value{}
+	for _, v := range tmp {
+		keyValues.Values = append(keyValues.Values, v)
+	}
+
 	if 1 > pageSize {
 		pageSize = 50
 	}
 	start := (page - 1) * pageSize
 	end := start + pageSize
-	if len(ret.Values) < end {
-		end = len(ret.Values)
+	if len(keyValues.Values) < end {
+		end = len(keyValues.Values)
 	}
-	ret.Values = ret.Values[start:end]
+	keyValues.Values = keyValues.Values[start:end]
 	return
 }
 

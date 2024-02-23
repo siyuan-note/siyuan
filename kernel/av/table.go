@@ -1298,50 +1298,54 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
-		var isNotTime bool
+		var isNotTime, hasEndDate bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == earliest || earliest > row.Cells[colIndex].Value.Date.Content {
 					earliest = row.Cells[colIndex].Value.Date.Content
 					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
+					hasEndDate = row.Cells[colIndex].Value.Date.HasEndDate
 				}
 			}
 		}
 		if 0 != earliest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
-		var isNotTime bool
+		var isNotTime, hasEndDate bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == latest || latest < row.Cells[colIndex].Value.Date.Content {
 					latest = row.Cells[colIndex].Value.Date.Content
 					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
+					hasEndDate = row.Cells[colIndex].Value.Date.HasEndDate
 				}
 			}
 		}
 		if 0 != latest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
 		latest := int64(0)
-		var isNotTime bool
+		var isNotTime, hasEndDate bool
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
 				if 0 == earliest || earliest > row.Cells[colIndex].Value.Date.Content {
 					earliest = row.Cells[colIndex].Value.Date.Content
 					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
+					hasEndDate = row.Cells[colIndex].Value.Date.HasEndDate
 				}
 				if 0 == latest || latest < row.Cells[colIndex].Value.Date.Content {
 					latest = row.Cells[colIndex].Value.Date.Content
 					isNotTime = row.Cells[colIndex].Value.Date.IsNotTime
+					hasEndDate = row.Cells[colIndex].Value.Date.HasEndDate
 				}
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}
 		}
 	}
 }

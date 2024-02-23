@@ -56,7 +56,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 };
 
 const initMermaid = (mermaidElements: Element[]) => {
-    mermaidElements.forEach((item, index) => {
+    mermaidElements.forEach(async (item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
@@ -67,10 +67,10 @@ const initMermaid = (mermaidElements: Element[]) => {
 </div>`);
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
-        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false">${Lute.UnEscapeHTMLStr(item.getAttribute("data-content"))}</div>`;
-        setTimeout(() => {
-            window.mermaid.init(undefined, renderElement.lastElementChild);
-        }, Constants.TIMEOUT_LOAD * index);
+        const id = "mermaid" + item.dataset.nodeId;
+        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
+        const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
+        renderElement.lastElementChild.innerHTML = mermaidData.svg;
         item.setAttribute("data-render", "true");
     });
 };

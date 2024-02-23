@@ -147,7 +147,7 @@ interface Window {
     }
     mermaid: {
         initialize(options: any): void,
-        init(options: any, element: Element): void
+        render(id: string, text: string): { svg:string }
     };
     plantumlEncoder: {
         encode(options: string): string,

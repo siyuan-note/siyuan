@@ -8,6 +8,14 @@ const _NODE_ENV = NODE_ENV;
 
 const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
 
+const getFunctionKey = () => {
+    const fData: { [key: number]: string } = {}
+    for (let i = 1; i <= 32; i++) {
+        fData[i + 111] = "F" + i;
+    }
+    return fData;
+}
+
 export abstract class Constants {
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
@@ -180,7 +188,7 @@ export abstract class Constants {
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
-    public static readonly KEYCODELIST: { [key: number]: string } = {
+    public static KEYCODELIST: { [key: number]: string } = Object.assign(getFunctionKey(), {
         8: "⌫",
         9: "⇥",
         13: "↩",
@@ -256,18 +264,6 @@ export abstract class Constants {
         109: "-",
         110: ".",
         111: "/",
-        112: "F1",
-        113: "F2",
-        114: "F3",
-        115: "F4",
-        116: "F5",
-        117: "F6",
-        118: "F7",
-        119: "F8",
-        120: "F9",
-        121: "F10",
-        122: "F11",
-        123: "F12",
         144: "NumLock",
         145: "ScrollLock",
         182: "MyComputer",
@@ -283,7 +279,7 @@ export abstract class Constants {
         220: "\\",
         221: "]",
         222: "'",
-    };
+    });
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
     // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",

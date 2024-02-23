@@ -248,37 +248,30 @@ export const bindRelationEvent = (options: {
     cellElements: HTMLElement[]
 }) => {
     const hasIds = options.menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
-    fetchPost("/api/av/renderAttributeView", {
+    fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
         id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
     }, response => {
-        const avData = response.data as IAV;
-        let cellIndex = 0;
-        avData.view.columns.find((item, index) => {
-            if (item.type === "block") {
-                cellIndex = index;
-                return true;
-            }
-        });
+        const cells=response.data.rows.values as IAVCellValue[];
         let html = "";
         let selectHTML = "";
         hasIds.forEach(hasId => {
             if (hasId) {
-                avData.view.rows.find((item) => {
-                    if (item.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.id, item.cells[cellIndex].value.isDetached, item.cells[cellIndex].value.block.content || "Untitled");
+                cells.find((item) => {
+                    if (item.block.id === hasId) {
+                        selectHTML += genSelectItemHTML("selected", item.block.id, item.isDetached, item.block.content || "Untitled");
                         return true;
                     }
                 });
             }
         });
-        avData.view.rows.forEach((item) => {
-            if (!hasIds.includes(item.id)) {
-                html += genSelectItemHTML("unselect", item.id, item.cells[cellIndex].value.isDetached, item.cells[cellIndex].value.block.content || "Untitled");
+        cells.forEach((item) => {
+            if (!hasIds.includes(item.block.id)) {
+                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || "Untitled");
             }
         });
         options.menuElement.innerHTML = `<div class="fn__flex-column">
 <div class="b3-menu__item fn__flex-column" data-type="nobg">
-    <div class="b3-menu__label">${avData.name}</div>
+    <div class="b3-menu__label">${response.data.name}</div>
     <input class="b3-text-field fn__flex-shrink"/>
 </div>
 <div class="fn__hr"></div>

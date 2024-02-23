@@ -151,6 +151,7 @@ export const ai = {
                         apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
                         apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
                         apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
+                        apiProvider: (ai.element.querySelector("#apiProvider") as HTMLSelectElement).value,
                     }
                 }, response => {
                     window.siyuan.config.ai = response.data;

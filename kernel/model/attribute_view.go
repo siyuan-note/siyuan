@@ -38,6 +38,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (ret *av.KeyValues, err error) {
+	waitForSyncingStorages()
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	ret = attrView.GetBlockKeyValues()
+	if 1 > pageSize {
+		pageSize = 50
+	}
+	start := (page - 1) * pageSize
+	end := start + pageSize
+	if len(ret.Values) < end {
+		end = len(ret.Values)
+	}
+	ret.Values = ret.Values[start:end]
+	return
+}
+
 func GetAttributeViewFilterSort(id string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
 	waitForSyncingStorages()
 

@@ -305,6 +305,27 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	// 数据订正
+
+	// 值去重
+	blockValues := av.GetBlockKeyValues()
+	blockIDs := map[string]bool{}
+	var duplicatedValueIDs []string
+	for _, blockValue := range blockValues.Values {
+		if !blockIDs[blockValue.BlockID] {
+			blockIDs[blockValue.BlockID] = true
+		} else {
+			duplicatedValueIDs = append(duplicatedValueIDs, blockValue.ID)
+		}
+	}
+	var tmp []*Value
+	for _, blockValue := range blockValues.Values {
+		if !gulu.Str.Contains(blockValue.ID, duplicatedValueIDs) {
+			tmp = append(tmp, blockValue)
+		}
+	}
+	blockValues.Values = tmp
+
+	// 视图值去重
 	for _, view := range av.Views {
 		if nil != view.Table {
 			// 行去重

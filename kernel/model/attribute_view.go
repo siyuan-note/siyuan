@@ -49,12 +49,18 @@ func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attribut
 	attributeViewName = attrView.Name
 
 	keyValues = attrView.GetBlockKeyValues()
-	// 不在视图中的值要过滤掉
+	// 过滤掉不在视图中的值
 	tmp := map[string]*av.Value{}
 	for _, kv := range keyValues.Values {
 		for _, view := range attrView.Views {
 			switch view.LayoutType {
 			case av.LayoutTypeTable:
+				if !kv.IsDetached {
+					if nil == treenode.GetBlockTree(kv.BlockID) {
+						break
+					}
+				}
+
 				if gulu.Str.Contains(kv.Block.ID, view.Table.RowIDs) {
 					tmp[kv.Block.ID] = kv
 				}

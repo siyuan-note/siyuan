@@ -104,25 +104,34 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 	trees := map[string]*parse.Tree{}
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
-		if nil == trees[id] {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		}
+
+		if nil == trees[bt.RootID] {
 			tree, e := loadTreeByBlockID(id)
 			if nil != e {
 				return e
 			}
-			trees[id] = tree
+			trees[bt.RootID] = tree
 		}
 	}
 
 	var nodes []*ast.Node
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
-		attrs := blockAttr["attrs"].(map[string]string)
-		tree := trees[id]
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		}
+		tree := trees[bt.RootID]
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			return errors.New(fmt.Sprintf(Conf.Language(15), id))
 		}
 
+		attrs := blockAttr["attrs"].(map[string]string)
 		oldAttrs, e := setNodeAttrs0(node, attrs)
 		if nil != e {
 			return e
@@ -131,6 +140,12 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 		pushBroadcastAttrTransactions(oldAttrs, node)
 		nodes = append(nodes, node)
+	}
+
+	for _, tree := range trees {
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
 	}
 
 	IncSync()

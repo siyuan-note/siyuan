@@ -1,4 +1,9 @@
 {
+  "reviewMode": "Modo de revisión",
+  "reviewModeTip": "Seleccione el orden en que aparecen las tarjetas nuevas y antiguas durante la revisión",
+  "reviewMode0": "Nuevo y viejo mezclado",
+  "reviewMode1": "Nuevo primero",
+  "reviewMode2": "Viejo primero",
   "fileAnnoRefPlaceholder": "Ingrese el ID del bloque",
   "addToDatabase": "Agregar a la base de datos",
   "clearContext": "Borrar contexto",

@@ -1,4 +1,9 @@
 {
+  "reviewMode": "Review mode",
+  "reviewModeTip": "Select the order in which new and old cards appear during review",
+  "reviewMode0": "New and old mix",
+  "reviewMode1": "New first",
+  "reviewMode2": "Old first",
   "fileAnnoRefPlaceholder": "Please enter block ID",
   "addToDatabase": "Add to Database",
   "clearContext": "Clear context",

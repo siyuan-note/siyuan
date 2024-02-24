@@ -1,4 +1,9 @@
 {
+  "reviewMode": "复习模式",
+  "reviewModeTip": "选择复习时新卡和旧卡出现的顺序",
+  "reviewMode0": "新旧混合",
+  "reviewMode1": "新卡优先",
+  "reviewMode2": "旧卡优先",
   "fileAnnoRefPlaceholder": "请输入块 ID",
   "addToDatabase": "添加到数据库",
   "clearContext": "清空上下文",

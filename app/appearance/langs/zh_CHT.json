@@ -1,4 +1,9 @@
 {
+  "reviewMode": "複習模式",
+  "reviewModeTip": "選擇複習時新卡和舊卡出現的順序",
+  "reviewMode0": "新舊混合",
+  "reviewMode1": "新卡優先",
+  "reviewMode2": "舊卡優先",
   "fileAnnoRefPlaceholder": "請輸入區塊 ID",
   "addToDatabase": "新增至資料庫",
   "clearContext": "清空上下文",

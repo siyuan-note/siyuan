@@ -490,7 +490,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
@@ -535,7 +535,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 		}
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
@@ -606,7 +606,7 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, card.BlockID(), deckID, now))
@@ -623,7 +623,7 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int) {
 	now := time.Now()
 	for _, deck := range Decks {
-		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 		unreviewedCount += unreviewedCnt
 		unreviewedNewCardCount += unreviewedNewCardCnt
 		unreviewedOldCardCount += unreviewedOldCardCnt
@@ -988,8 +988,10 @@ func getDeckIDs() (deckIDs []string) {
 	return
 }
 
-func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCountInRound, unreviewedOldCardCountInRound int) {
+func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit, reviewMode int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCountInRound, unreviewedOldCardCountInRound int) {
 	ret = []riff.Card{}
+	var retNew, retOld []riff.Card
+
 	dues := deck.Dues()
 
 	var tmp []riff.Card
@@ -1060,15 +1062,28 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			}
 
 			newCount++
+			retNew = append(retNew, c)
 		} else {
 			if reviewCount >= reviewCardLimit {
 				continue
 			}
 
 			reviewCount++
+			retOld = append(retOld, c)
 		}
 
 		ret = append(ret, c)
+	}
+
+	switch reviewMode {
+	case 1: // 优先复习新卡
+		ret = nil
+		ret = append(ret, retNew...)
+		ret = append(ret, retOld...)
+	case 2: // 优先复习旧卡
+		ret = nil
+		ret = append(ret, retOld...)
+		ret = append(ret, retNew...)
 	}
 	return
 }

@@ -249,7 +249,7 @@
   "flashcardNewCardLimit": "Nouvelle limite de carte",
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",
   "flashcardReviewCardLimit": "Ancienne limite de carte",
-  "flashcardReviewCardLimitTip": "S'il existe de nombreuses anciennes cartes, vous pouvez définir le nombre d'avis via cet élément",
+  "flashcardReviewCardLimitTip": "S'il y a beaucoup d'anciennes cartes, vous pouvez définir le nombre d'anciennes cartes à examiner via cet élément",
   "flashcardMark": "Carte de marque",
   "flashcardMarkTip": "Après l'activation, la marque est reconnue comme remplissant le blanc",
   "flashcardList": "Fiche de liste",

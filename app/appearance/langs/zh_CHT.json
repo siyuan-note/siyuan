@@ -249,7 +249,7 @@
   "flashcardNewCardLimit": "新卡上限",
   "flashcardNewCardLimitTip": "如果新卡較多，可以通過該項設置新卡複習的數量",
   "flashcardReviewCardLimit": "舊卡上限",
-  "flashcardReviewCardLimitTip": "如果舊卡較多，可以通過該項設置復習的數量",
+  "flashcardReviewCardLimitTip": "如果舊卡較多，可以通過該項設置舊卡復習的數量",
   "flashcardMark": "標記制卡",
   "flashcardMarkTip": "啟用後支持標記制卡，標記的文字被識別為挖空填空",
   "flashcardList": "列表塊制卡",

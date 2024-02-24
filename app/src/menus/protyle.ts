@@ -2,7 +2,7 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasClosestByMatchTag
+    hasClosestByMatchTag, hasTopClosestByClassName
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
@@ -294,7 +294,8 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     anchorElement.select();
     window.siyuan.menus.menu.removeCB = () => {
         if (nodeElement.outerHTML !== oldHTML) {
@@ -601,7 +602,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         window.siyuan.menus.menu.element.querySelector("input").select();
         window.siyuan.menus.menu.removeCB = () => {
@@ -1080,7 +1082,8 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }
 
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
         textElements[0].focus();
@@ -1275,7 +1278,8 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         inputElements[1].select();
     } else {
@@ -1415,7 +1419,8 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 

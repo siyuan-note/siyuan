@@ -57,7 +57,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772
 	github.com/siyuan-note/httpclient v0.0.0-20240218075040-36250ac08e54
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
-	github.com/siyuan-note/riff v0.0.0-20231226152006-8833f8b9a6c1
+	github.com/siyuan-note/riff v0.0.0-20240224132914-ccd13f66ed24
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -114,7 +114,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
 	github.com/juju/errors v1.0.0 // indirect
-	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
@@ -135,7 +135,7 @@ require (
 	github.com/qiniu/go-sdk/v7 v7.19.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/quic-go v0.41.0 // indirect
-	github.com/refraction-networking/utls v1.6.2 // indirect
+	github.com/refraction-networking/utls v1.6.3 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
@@ -156,7 +156,7 @@ require (
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
-	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect

@@ -716,6 +716,7 @@ interface IConfig {
         superBlock: boolean
         heading: boolean
         deck: boolean
+        reviewMode: number
         requestRetention: number
         maximumInterval: number
         weights: string

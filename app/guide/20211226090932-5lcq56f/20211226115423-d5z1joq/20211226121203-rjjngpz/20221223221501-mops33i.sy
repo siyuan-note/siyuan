@@ -6,7 +6,7 @@
 		"icon": "1f4f8",
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20240128113519"
+		"updated": "20240224103933"
 	},
 	"Children": [
 		{
@@ -535,7 +535,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240128111910-2n2j702",
-				"updated": "20240128111941"
+				"updated": "20240224103933"
 			},
 			"Children": [
 				{
@@ -572,7 +572,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "複習卡上限"
+					"TextMarkTextContent": "舊卡上限"
 				},
 				{
 					"Type": "NodeText",

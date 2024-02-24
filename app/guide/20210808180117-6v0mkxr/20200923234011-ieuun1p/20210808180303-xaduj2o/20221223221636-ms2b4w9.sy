@@ -6,7 +6,7 @@
 		"icon": "1f4f8",
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20240128113415"
+		"updated": "20240224103857"
 	},
 	"Children": [
 		{
@@ -539,7 +539,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240128112016-je04b7i",
-				"updated": "20240128112236"
+				"updated": "20240224103857"
 			},
 			"Children": [
 				{
@@ -576,7 +576,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Review Card Limit"
+					"TextMarkTextContent": "Old Card Limit"
 				},
 				{
 					"Type": "NodeText",

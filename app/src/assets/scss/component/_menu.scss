@@ -25,6 +25,12 @@
     }
   }
 
+  &__filter {
+    min-width: 260px;
+    max-width: 420px;
+    max-height: 50vh;
+  }
+
   &--fullscreen {
     top: 100vh;
     left: 0;

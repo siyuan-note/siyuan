@@ -51,7 +51,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column" style = "min-width: 260px;max-width:420px;max-height: 50vh">
+        label: `<div class="fn__flex-column b3-menu__filter">
     <input class="b3-text-field fn__flex-shrink"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">

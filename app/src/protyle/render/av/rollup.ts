@@ -4,7 +4,6 @@ import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {genIconHTML} from "../util";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {showMessage} from "../../../dialog/message";

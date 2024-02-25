@@ -16,7 +16,7 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     }
     if (abcElements.length > 0) {
         addScript(`${cdn}/js/abcjs/abcjs-basic-min.js?v=6.2.2`, "protyleAbcjsScript").then(() => {
-            const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true)
+            const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
             abcElements.forEach((e: HTMLDivElement) => {
                 if (e.getAttribute("data-render") === "true") {
                     return;

@@ -30,7 +30,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                         });
                     }
                 }
-                const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true)
+                const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
                 echartsElements.forEach(async (e: HTMLDivElement) => {
                     if (e.getAttribute("data-render") === "true") {
                         return;

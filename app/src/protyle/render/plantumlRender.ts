@@ -15,7 +15,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
         return;
     }
     addScript(`${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`, "protylePlantumlScript").then(() => {
-        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true)
+        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         plantumlElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;

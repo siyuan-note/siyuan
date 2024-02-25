@@ -57,7 +57,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 };
 
 const initMermaid = (mermaidElements: Element[]) => {
-    const wysiswgElement = hasClosestByClassName(mermaidElements[0], "protyle-wysiwyg", true)
+    const wysiswgElement = hasClosestByClassName(mermaidElements[0], "protyle-wysiwyg", true);
     mermaidElements.forEach(async (item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
             return;

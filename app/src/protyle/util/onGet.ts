@@ -299,7 +299,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
         item.classList.add("fn__none");
         if (item.classList.contains("protyle-icon--first")) {
-            item.nextElementSibling?.classList.add("protyle-icon--first")
+            item.nextElementSibling?.classList.add("protyle-icon--first");
         }
     });
     protyle.wysiwyg.element.style.userSelect = "text";
@@ -357,7 +357,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
         item.classList.remove("fn__none");
         if (item.classList.contains("protyle-icon--first")) {
-            item.nextElementSibling?.classList.remove("protyle-icon--first")
+            item.nextElementSibling?.classList.remove("protyle-icon--first");
         }
     });
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {

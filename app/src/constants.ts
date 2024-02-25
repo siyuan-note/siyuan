@@ -9,12 +9,12 @@ const _NODE_ENV = NODE_ENV;
 const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
 
 const getFunctionKey = () => {
-    const fData: { [key: number]: string } = {}
+    const fData: { [key: number]: string } = {};
     for (let i = 1; i <= 32; i++) {
         fData[i + 111] = "F" + i;
     }
     return fData;
-}
+};
 
 export abstract class Constants {
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;

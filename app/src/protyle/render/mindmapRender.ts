@@ -27,7 +27,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 });
             }
         }
-        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true)
+        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         mindmapElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;

@@ -15,7 +15,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
         return;
     }
     addScript(`${cdn}/js/graphviz/viz.js?v=0.0.0`, "protyleGraphVizScript").then(() => {
-        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true)
+        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         graphvizElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;

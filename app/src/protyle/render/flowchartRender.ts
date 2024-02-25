@@ -36,7 +36,7 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
 };
 
 const initFlowchart = (flowchartElements: Element[]) => {
-    const wysiswgElement = hasClosestByClassName(flowchartElements[0], "protyle-wysiwyg", true)
+    const wysiswgElement = hasClosestByClassName(flowchartElements[0], "protyle-wysiwyg", true);
     flowchartElements.forEach((item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
             return;

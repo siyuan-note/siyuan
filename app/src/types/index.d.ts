@@ -620,6 +620,7 @@ interface IEditor {
     rtl: boolean;
     readOnly: boolean;
     listLogicalOutdent: boolean;
+    listItemDotNumberClickFocus: boolean;
     spellcheck: boolean;
     onlySearchForDoc: boolean;
     katexMacros: string;

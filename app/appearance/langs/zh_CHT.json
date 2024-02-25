@@ -1,4 +1,6 @@
 {
+  "listItemDotNumberClickFocus": "清單項目圓點/數字點選聚焦",
+  "listItemDotNumberClickFocusTip": "啟用後點選清單項目的圓點/數字將進入聚焦",
   "reviewMode": "複習模式",
   "reviewModeTip": "選擇複習時新卡和舊卡出現的順序",
   "reviewMode0": "新舊混合",

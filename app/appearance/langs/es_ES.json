@@ -1,4 +1,6 @@
 {
+  "listItemDotNumberClickFocus": "Punto/número de elemento de lista, haga clic para enfocar",
+  "listItemDotNumberClickFocusTip": "Después de habilitarlo, hacer clic en el punto/número del elemento de la lista se centrará en el elemento de la lista",
   "reviewMode": "Modo de revisión",
   "reviewModeTip": "Seleccione el orden en que aparecen las tarjetas nuevas y antiguas durante la revisión",
   "reviewMode0": "Nuevo y viejo mezclado",

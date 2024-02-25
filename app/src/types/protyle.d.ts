@@ -172,6 +172,8 @@ declare class Lute {
 
     public SetTextMark(enable: boolean): void;
 
+    public SetHTMLTag2TextMark(enable: boolean): void;
+
     public SetHeadingID(enable: boolean): void;
 
     public SetProtyleMarkNetImg(enable: boolean): void;

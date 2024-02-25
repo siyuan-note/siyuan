@@ -3,6 +3,7 @@ export const setLute = (options: ILuteOptions) => {
     lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     lute.SetFileAnnotationRef(true);
+    lute.SetHTMLTag2TextMark(true);
     lute.SetTextMark(true);
     lute.SetHeadingID(false);
     lute.SetYamlFrontMatter(false);

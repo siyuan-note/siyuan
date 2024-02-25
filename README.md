@@ -36,6 +36,8 @@ Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
 ![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
 
+![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+
 ## 🔮 Features
 
 Most features are free, even for commercial use.

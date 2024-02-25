@@ -33,9 +33,11 @@
 
 ![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
 
-欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
+![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
 
-![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+[欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
+
+![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)](![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png))
 
 ## 🔮 特性
 

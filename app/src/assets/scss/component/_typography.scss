@@ -259,7 +259,7 @@
     display: inline-block !important;
     position: absolute !important;
     width: 1px !important;
-    right: 0 !important;
+    right: 6px !important;
     outline: 0 !important;
     background: 0 0 !important;
     text-decoration: initial !important;
@@ -487,6 +487,10 @@
     right: 4px;
     top: 4px;
     display: flex;
+
+    &--show {
+      opacity: .86;
+    }
   }
 
   &-icon {

@@ -627,3 +627,12 @@
     opacity: 0;
   }
 }
+
+// https://ld246.com/article/1708826665603
+.protyle-wysiwyg[contenteditable="false"] {
+  .img:hover .protyle-icons,
+  .render-node:hover > .protyle-icons,
+  .protyle-icons--show {
+    display: none;
+  }
+}

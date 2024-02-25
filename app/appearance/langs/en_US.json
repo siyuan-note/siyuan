@@ -1,4 +1,6 @@
 {
+  "listItemDotNumberClickFocus": "List item dot/number click to focus",
+  "listItemDotNumberClickFocusTip": "After enabling, clicking the list item dot/number will focus on the list item",
   "reviewMode": "Review mode",
   "reviewModeTip": "Select the order in which new and old cards appear during review",
   "reviewMode0": "New and old mix",

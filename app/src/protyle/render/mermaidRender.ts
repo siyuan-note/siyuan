@@ -67,7 +67,7 @@ const initMermaid = (mermaidElements: Element[]) => {
 </div>`);
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
-        const id = "mermaid" + item.dataset.nodeId;
+        const id = "mermaid" + Lute.NewNodeID();
         renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
         try {
             const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));

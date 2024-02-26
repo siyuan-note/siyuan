@@ -630,8 +630,8 @@
   }
 }
 
-.protyle-wysiwyg:not([custom-sy-readonly]),
-.protyle-wysiwyg[custom-sy-readonly="true"] {
+.protyle-wysiwyg:not([contenteditable]),
+.protyle-wysiwyg[contenteditable="false"] {
   .img:hover .protyle-icons {
     display: none;
   }

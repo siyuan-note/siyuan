@@ -1,9 +1,9 @@
 export const genIconHTML = (element?: false|HTMLElement) => {
     let enable = true;
     if (element) {
-        const readonly =  element.getAttribute("custom-sy-readonly");
+        const readonly =  element.getAttribute("contenteditable");
         if (typeof readonly === "string") {
-            enable = element.getAttribute("custom-sy-readonly") === "false";
+            enable = element.getAttribute("contenteditable") === "true";
         } else {
             return '<div class="protyle-icons"></div>';
         }

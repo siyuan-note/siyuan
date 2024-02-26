@@ -784,7 +784,9 @@ ${genHintItemHTML(item)}
                 } else if (value === "---") {
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {
-                    avRender(nodeElement, protyle);
+                    avRender(nodeElement, protyle, () => {
+                        focusBlock(nodeElement);
+                    });
                 } else {
                     focusByWbr(nodeElement, range);
                 }

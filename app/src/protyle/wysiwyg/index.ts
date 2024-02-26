@@ -1295,7 +1295,7 @@ export class WYSIWYG {
                     }
                 }
                 const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
-                removeBlock(protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range, "remove");
                 if (nextElement) {
                     // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                     focusBlock(nextElement);

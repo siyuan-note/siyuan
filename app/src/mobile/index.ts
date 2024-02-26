@@ -122,7 +122,7 @@ class App {
                         const nodeElement = hasClosestBlock(range.startContainer);
                         if (nodeElement && isNotEditBlock(nodeElement)) {
                             nodeElement.classList.add("protyle-wysiwyg--select");
-                            removeBlock(editor.protyle, nodeElement, range);
+                            removeBlock(editor.protyle, nodeElement, range, event.key);
                             event.stopPropagation();
                             event.preventDefault();
                             return;

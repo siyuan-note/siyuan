@@ -62,7 +62,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         click() {
             document.querySelector(".av__panel")?.remove();
             if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length === 1) {
-                removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement));
+                removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement), "remove");
             } else {
                 transaction(options.protyle, [{
                     action: "removeAttrViewView",

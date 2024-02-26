@@ -771,7 +771,7 @@ export class Gutter {
                     });
                     writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "remove");
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                     document.execCommand("cut");
@@ -817,7 +817,7 @@ export class Gutter {
             accelerator: "⌫",
             click: () => {
                 protyle.breadcrumb?.hide();
-                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
             }
         }).element);
 
@@ -1222,7 +1222,7 @@ export class Gutter {
                 click: () => {
                     if (isNotEditBlock(nodeElement)) {
                         writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
-                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "remove");
                         protyle.breadcrumb?.hide();
                     } else {
                         focusByRange(getEditorRange(nodeElement));
@@ -1266,7 +1266,7 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "Backspace");
                 }
             }).element);
         }

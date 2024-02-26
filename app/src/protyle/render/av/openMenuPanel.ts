@@ -650,7 +650,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "delete-view") {
                     if (data.views.length === 1) {
-                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement));
+                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement), "remove");
                     } else {
                         transaction(options.protyle, [{
                             action: "removeAttrViewView",

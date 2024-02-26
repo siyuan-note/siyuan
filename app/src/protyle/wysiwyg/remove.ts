@@ -186,14 +186,29 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
     focusByWbr(previousLastElement.parentElement, range);
 };
 
-export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
+export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     // 删除后，防止滚动条滚动后调用 get 请求，因为返回的请求已查找不到内容块了
     preventScroll(protyle);
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
     if (selectElements?.length > 0) {
         const deletes: IOperation[] = [];
         const inserts: IOperation[] = [];
-        let sideElement = selectElements[0].previousElementSibling || selectElements[selectElements.length - 1].nextElementSibling;
+        let sideElement;
+        let sideIsNext = false;
+        if (type === "Backspace") {
+            sideElement = selectElements[0].previousElementSibling;
+            if (!sideElement) {
+                sideIsNext = true;
+                sideElement = selectElements[selectElements.length - 1].nextElementSibling
+            }
+        } else {
+            sideElement = selectElements[selectElements.length - 1].nextElementSibling;
+            sideIsNext = true;
+            if (!sideElement) {
+                sideIsNext = false;
+                sideElement = selectElements[0].previousElementSibling;
+            }
+        }
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
@@ -205,7 +220,24 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 action: "delete",
                 id,
             });
-            sideElement = getNextBlock(topElement) || getPreviousBlock(topElement) || topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
+            if (type === "Backspace") {
+                sideElement = getPreviousBlock(topElement);
+                if (!sideElement) {
+                    sideIsNext = true;
+                    sideElement = getNextBlock(topElement);
+                }
+            } else {
+                sideElement = getNextBlock(topElement)
+                sideIsNext = true;
+                if (!sideElement) {
+                    sideIsNext = false;
+                    sideElement = getPreviousBlock(topElement);
+                }
+            }
+            if (!sideElement) {
+                sideElement = topElement.parentElement || protyle.wysiwyg.element.firstElementChild;
+                sideIsNext = false;
+            }
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
                 // https://github.com/siyuan-note/siyuan/issues/2188
                 setFold(protyle, topElement, undefined, true);
@@ -271,7 +303,12 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     focusByWbr(emptyElement, range);
                 }
                 // https://github.com/siyuan-note/siyuan/issues/5485
-                focusBlock(sideElement);
+                // https://github.com/siyuan-note/siyuan/issues/10389
+                if (type === "remove" && sideIsNext) {
+                    focusBlock(sideElement);
+                } else {
+                    focusBlock(sideElement, undefined, false);
+                }
                 scrollCenter(protyle, sideElement);
                 if (listElement) {
                     inserts.push({
@@ -303,7 +340,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     // 空代码块直接删除
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
         blockElement.classList.add("protyle-wysiwyg--select");
-        removeBlock(protyle, blockElement, range);
+        removeBlock(protyle, blockElement, range, type);
         return;
     }
     // 设置 bq 和代码块光标
@@ -364,7 +401,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     }
 
     if (blockElement.parentElement.classList.contains("li") && blockElement.previousElementSibling.classList.contains("protyle-action")) {
-        removeLi(protyle, blockElement, range, isDelete);
+        removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
 

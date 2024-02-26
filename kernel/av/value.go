@@ -145,7 +145,7 @@ func (value *Value) String() string {
 		for _, v := range value.Relation.Contents {
 			ret = append(ret, v)
 		}
-		return strings.Join(ret, " ")
+		return strings.TrimSpace(strings.Join(ret, ", "))
 	case KeyTypeRollup:
 		if nil == value.Rollup || nil == value.Rollup.Contents {
 			return ""
@@ -154,7 +154,7 @@ func (value *Value) String() string {
 		for _, v := range value.Rollup.Contents {
 			ret = append(ret, v.String())
 		}
-		return strings.Join(ret, " ")
+		return strings.TrimSpace(strings.Join(ret, ", "))
 	default:
 		return ""
 	}

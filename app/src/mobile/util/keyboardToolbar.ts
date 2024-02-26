@@ -208,6 +208,15 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
+    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
+    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
+    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
+    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
+    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
     ${getSlashItem("# " + Lute.Caret, "iconH1", window.siyuan.languages.heading1, "true")}
     ${getSlashItem("## " + Lute.Caret, "iconH2", window.siyuan.languages.heading2, "true")}
     ${getSlashItem("### " + Lute.Caret, "iconH3", window.siyuan.languages.heading3, "true")}
@@ -223,29 +232,6 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("---", "iconLine", window.siyuan.languages.line, "true")}
     ${getSlashItem("$$", "iconMath", window.siyuan.languages.math)}
     ${getSlashItem("<div>", "iconHTML5", "HTML")}
-</div>
-<div class="keyboard__slash-title"></div>
-<div class="keyboard__slash-block">
-    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
-    ${getSlashItem("a", "iconLink", window.siyuan.languages.link)}
-    ${getSlashItem("strong", "iconBold", window.siyuan.languages.bold, "true")}
-    ${getSlashItem("em", "iconItalic", window.siyuan.languages.italic, "true")}
-    ${getSlashItem("u", "iconUnderline", window.siyuan.languages.underline, "true")}
-    ${getSlashItem("s", "iconStrike", window.siyuan.languages.strike, "true")}
-    ${getSlashItem("mark", "iconMark", window.siyuan.languages.mark, "true")}
-    ${getSlashItem("sup", "iconSup", window.siyuan.languages.sup, "true")}
-    ${getSlashItem("sub", "iconSub", window.siyuan.languages.sub, "true")}
-    ${getSlashItem("tag", "iconTags", window.siyuan.languages.tag, "true")}
-    ${getSlashItem("code", "iconInlineCode", window.siyuan.languages["inline-code"], "true")}
-    ${getSlashItem("inline-math", "iconMath", window.siyuan.languages["inline-math"])}
-</div>
-<div class="keyboard__slash-title"></div>
-<div class="keyboard__slash-block">
-    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
-    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
-    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
-    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
-    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">

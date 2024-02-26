@@ -9,7 +9,7 @@ import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action"
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
-import {bindRollupEvent, getRollupHTML} from "./rollup";
+import {bindRollupData, getRollupHTML} from "./rollup";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -166,7 +166,7 @@ export const getEditHTML = (options: {
     return `<div class="b3-menu__items">
     ${html}
     <button class="b3-menu__separator"></button>
-    <button class="b3-menu__item${options.isCustomAttr ? " fn__none" : ""}" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
         <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
         <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
     </button>
@@ -362,7 +362,7 @@ export const bindEditEvent = (options: {
             toggleUpdateRelationBtn(options.menuElement, avID);
         }
     }
-    bindRollupEvent(options);
+    bindRollupData(options);
 };
 
 export const getColNameByType = (type: TAVCol) => {
@@ -439,28 +439,52 @@ const addAttrViewColAnimation = (options: {
     icon?: string,
     previousID: string
 }) => {
-    if (!options.blockElement || !options.blockElement.classList.contains("av")) {
+    if (!options.blockElement) {
         return;
     }
-    options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
-        let previousElement;
-        if (options.previousID) {
-            previousElement = item.querySelector(`[data-col-id="${options.previousID}"]`);
-        } else {
-            previousElement = item.lastElementChild.previousElementSibling;
-        }
-        let html = "";
-        if (index === 0) {
-            // av__pulse 用于检测是否新增，和 render 中 isPulse 配合弹出菜单
-            html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
+    if (options.blockElement.classList.contains("av")) {
+        options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
+            let previousElement;
+            if (options.previousID) {
+                previousElement = item.querySelector(`[data-col-id="${options.previousID}"]`);
+            } else {
+                previousElement = item.lastElementChild.previousElementSibling;
+            }
+            let html = "";
+            if (index === 0) {
+                // av__pulse 用于检测是否新增，和 render 中 isPulse 配合弹出菜单
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${options.name}</span>
     <div class="av__widthdrag av__pulse"></div>
 </div>`;
-        } else {
-            html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';
+            } else {
+                html = '<div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>';
+            }
+            previousElement.insertAdjacentHTML("afterend", html);
+        });
+    } else {
+        const nodeId= options.blockElement.getAttribute("data-node-id");
+        options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", `<div class="block__icons av__row" data-id="${nodeId}" data-col-id="${options.id}">
+    <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
+    <div class="block__logo ariaLabel" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
+        <svg class="block__logoicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
+        <span>${getColNameByType(options.type)}</span>
+    </div>
+    <div data-col-id="${options.id}" data-block-id="${nodeId}" data-type="${options.type}" data-options="[]" class="fn__flex-1 fn__flex">
+        <div class="fn__flex-1"></div>
+    </div>
+</div>`);
+    }
+    openMenuPanel({
+        protyle: options.protyle,
+        blockElement: options.blockElement,
+        type: "edit",
+        colId: options.id,
+        editData: {
+            previousID: options.previousID,
+            colData: genColDataByType(options.type, options.id),
         }
-        previousElement.insertAdjacentHTML("afterend", html);
     });
     window.siyuan.menus.menu.remove();
 };
@@ -1196,3 +1220,20 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     });
     return menu;
 };
+
+const genColDataByType = (type: TAVCol, id: string) => {
+    const colData: IAVColumn = {
+        hidden: false,
+        icon: "",
+        id,
+        name: getColNameByType(type),
+        numberFormat: "",
+        pin: false,
+        template: "",
+        type,
+        width: "",
+        wrap: false,
+        calc: null
+    }
+    return colData
+}

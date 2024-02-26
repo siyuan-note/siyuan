@@ -173,7 +173,7 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
 </button>`;
 };
 
-export const bindRollupEvent = (options: {
+export const bindRollupData = (options: {
     protyle: IProtyle,
     data: IAV,
     menuElement: HTMLElement

@@ -27,7 +27,7 @@ import {focusBlock, getEditorRange} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
-import {bindRollupEvent, getRollupHTML, goSearchRollupCol} from "./rollup";
+import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 
@@ -36,6 +36,11 @@ export const openMenuPanel = (options: {
     blockElement: Element,
     type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation" | "rollup",
     colId?: string, // for edit, rollup
+    // 使用前端构造的数据
+    editData?: {
+        previousID: string,
+        colData: IAVColumn,
+    },
     cellElements?: HTMLElement[],   // for select & date & relation & asset
     cb?: (avPanelElement: Element) => void
 }) => {
@@ -68,6 +73,18 @@ export const openMenuPanel = (options: {
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
+            if (options.editData) {
+                if (options.editData.previousID) {
+                    data.view.columns.find((item, index) => {
+                        if (item.id === options.editData.previousID) {
+                            data.view.columns.splice(index + 1, 0, options.editData.colData);
+                            return true;
+                        }
+                    });
+                } else {
+                    data.view.columns.splice(0, 0, options.editData.colData);
+                }
+            }
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId, isCustomAttr});
         } else if (options.type === "date") {
             html = getDateHTML(data.view, options.cellElements);
@@ -124,7 +141,7 @@ export const openMenuPanel = (options: {
                     blockElement: options.blockElement
                 });
             } else if (options.type === "rollup") {
-                bindRollupEvent({protyle: options.protyle, data, menuElement});
+                bindRollupData({protyle: options.protyle, data, menuElement});
             }
             if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
@@ -311,12 +328,12 @@ export const openMenuPanel = (options: {
                 transaction(options.protyle, [{
                     action: "updateAttrViewColOptions",
                     id: colId,
-                    avID: data.id,
+                    avID,
                     data: changeData,
                 }], [{
                     action: "updateAttrViewColOptions",
                     id: colId,
-                    avID: data.id,
+                    avID,
                     data: oldData,
                 }]);
                 if (options.cellElements) {

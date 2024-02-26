@@ -109,7 +109,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	switch typ {
 	case "notebook":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
+			pagedBlocks, _, _ := GetNotebookFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -120,7 +120,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 		}
 	case "tree":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
+			pagedBlocks, _, _ := GetTreeFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -131,7 +131,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 		}
 	case "deck":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
+			pagedBlocks, _, _ := GetDeckFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -232,7 +232,7 @@ var (
 	deckLock = sync.Mutex{}
 )
 
-func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, pageCount int) {
+func GetNotebookFlashcards(boxID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
@@ -276,14 +276,14 @@ func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, page
 	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
 	cards := deck.GetCardsByBlockIDs(allBlockIDs)
 
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
-func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
+func GetTreeFlashcards(rootID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	cards := getTreeSubTreeFlashcards(rootID)
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
@@ -325,7 +325,7 @@ func getTreeFlashcards(rootID string) (ret []riff.Card) {
 	return
 }
 
-func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
+func GetDeckFlashcards(deckID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	var cards []riff.Card
 	if "" == deckID {
@@ -343,11 +343,11 @@ func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCou
 		cards = append(cards, deck.GetCardsByBlockIDs(blockIDs)...)
 	}
 
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
-func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
+func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
 	sort.Slice(cards, func(i, j int) bool {
 		due1 := cards[i].(*riff.FSRSCard).C.Due
@@ -355,7 +355,6 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		return due1.Before(due2)
 	})
 
-	const pageSize = 20
 	total = len(cards)
 	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
 	start := (page - 1) * pageSize

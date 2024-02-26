@@ -50,6 +50,135 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+	refBlockMap := map[string][]string{}
+	blockMap := map[string]bool{}
+	var invalidBlockIDs []string
+	notebooks, err := ListNotebooks()
+	if nil != err {
+		return
+	}
+	luteEngine := util.NewLute()
+	for _, notebook := range notebooks {
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		for _, paths := range pages {
+			var trees []*parse.Tree
+			for _, localPath := range paths {
+				tree, loadTreeErr := loadTree(localPath, luteEngine)
+				if nil != loadTreeErr {
+					continue
+				}
+				trees = append(trees, tree)
+			}
+			for _, tree := range trees {
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if entering {
+						if n.IsBlock() {
+							blockMap[n.ID] = true
+							return ast.WalkContinue
+						}
+
+						if ast.NodeTextMark == n.Type {
+							if n.IsTextMarkType("a") {
+								if strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/") {
+									defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+									if strings.Contains(defID, "?") {
+										defID = strings.Split(defID, "?")[0]
+									}
+									refID := treenode.ParentBlock(n).ID
+									if defIDs := refBlockMap[refID]; 1 > len(defIDs) {
+										refBlockMap[refID] = []string{defID}
+									} else {
+										refBlockMap[refID] = append(defIDs, defID)
+									}
+								}
+							} else if n.IsTextMarkType("block-ref") {
+								defID := n.TextMarkBlockRefID
+								refID := treenode.ParentBlock(n).ID
+								if defIDs := refBlockMap[refID]; 1 > len(defIDs) {
+									refBlockMap[refID] = []string{defID}
+								} else {
+									refBlockMap[refID] = append(defIDs, defID)
+								}
+							}
+						}
+					}
+					return ast.WalkContinue
+				})
+			}
+		}
+	}
+
+	invalidDefIDs := map[string]bool{}
+	for _, refDefIDs := range refBlockMap {
+		for _, defID := range refDefIDs {
+			invalidDefIDs[defID] = true
+		}
+	}
+
+	var toRemoves []string
+	for defID, _ := range invalidDefIDs {
+		if _, ok := blockMap[defID]; ok {
+			toRemoves = append(toRemoves, defID)
+		}
+	}
+	for _, toRemove := range toRemoves {
+		delete(invalidDefIDs, toRemove)
+	}
+
+	toRemoves = nil
+	for refID, defIDs := range refBlockMap {
+		var tmp []string
+		for _, defID := range defIDs {
+			if _, ok := invalidDefIDs[defID]; !ok {
+				tmp = append(tmp, defID)
+			}
+		}
+
+		for _, toRemove := range tmp {
+			defIDs = gulu.Str.RemoveElem(defIDs, toRemove)
+		}
+
+		if 1 > len(defIDs) {
+			toRemoves = append(toRemoves, refID)
+		}
+	}
+	for _, toRemove := range toRemoves {
+		delete(refBlockMap, toRemove)
+	}
+
+	for refID, _ := range refBlockMap {
+		invalidBlockIDs = append(invalidBlockIDs, refID)
+	}
+	invalidBlockIDs = gulu.Str.RemoveDuplicatedElem(invalidBlockIDs)
+
+	sort.Strings(invalidBlockIDs)
+
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if end > len(invalidBlockIDs) {
+		end = len(invalidBlockIDs)
+	}
+	invalidBlockIDs = invalidBlockIDs[start:end]
+
+	sqlBlocks := sql.GetBlocks(invalidBlockIDs)
+	ret = fromSQLBlocks(&sqlBlocks, "", 36)
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
+	matchedBlockCount = len(ret)
+	rootCount := map[string]bool{}
+	for _, block := range ret {
+		if nil == block {
+			continue
+		}
+		rootCount[block.RootID] = true
+	}
+	matchedRootCount = len(rootCount)
+	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	return
+}
+
 type EmbedBlock struct {
 	Block      *Block       `json:"block"`
 	BlockPaths []*BlockPath `json:"blockPaths"`

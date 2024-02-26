@@ -26,6 +26,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func listInvalidBlockRefs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	if 0 >= page {
+		page = 1
+	}
+
+	pageSize := 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
+	}
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.ListInvalidBlockRefs(page, pageSize)
+	ret.Data = map[string]interface{}{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+	}
+}
+
 func getAssetContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

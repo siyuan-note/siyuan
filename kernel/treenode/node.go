@@ -740,22 +740,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
-	// 渲染自动生成的列值，比如模板列、关联列、汇总列、创建时间列和更新时间列
+	// 渲染自动生成的列值，比如关联列、汇总列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
-			case av.KeyTypeTemplate: // 渲染模板列
-				keyValues := rows[row.ID]
-				ial := map[string]string{}
-				block := row.GetBlockValue()
-				if nil != block && !block.IsDetached {
-					ial = cache.GetBlockIAL(row.ID)
-					if nil == ial {
-						ial = map[string]string{}
-					}
-				}
-				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
-				cell.Value.Template.Content = content
 			case av.KeyTypeRollup: // 渲染汇总列
 				rollupKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil == rollupKey || nil == rollupKey.Rollup {
@@ -796,6 +784,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 
 				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
+
+				// 将汇总列的值保存到 rows 中，后续渲染模板列的时候会用到，下同
+				// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
+				keyValues := rows[row.ID]
+				keyValues = append(keyValues, &av.KeyValues{Key: rollupKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: rollupKey.ID, BlockID: row.ID, Type: av.KeyTypeRollup, Rollup: cell.Value.Rollup}}})
+				rows[row.ID] = keyValues
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {
@@ -819,6 +813,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				} else {
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
+
+				keyValues := rows[row.ID]
+				createdKey, _ := attrView.GetKey(cell.Value.KeyID)
+				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: createdKey.ID, BlockID: row.ID, Type: av.KeyTypeCreated, Created: cell.Value.Created}}})
+				rows[row.ID] = keyValues
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := map[string]string{}
 				block := row.GetBlockValue()
@@ -841,6 +840,32 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 						cell.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
 					}
 				}
+
+				keyValues := rows[row.ID]
+				updatedKey, _ := attrView.GetKey(cell.Value.KeyID)
+				keyValues = append(keyValues, &av.KeyValues{Key: updatedKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: updatedKey.ID, BlockID: row.ID, Type: av.KeyTypeUpdated, Updated: cell.Value.Updated}}})
+				rows[row.ID] = keyValues
+			}
+		}
+	}
+
+	// 最后单独渲染模板列，这样模板列就可以使用汇总、关联、创建时间和更新时间列的值了
+	// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
+	for _, row := range ret.Rows {
+		for _, cell := range row.Cells {
+			switch cell.ValueType {
+			case av.KeyTypeTemplate: // 渲染模板列
+				keyValues := rows[row.ID]
+				ial := map[string]string{}
+				block := row.GetBlockValue()
+				if nil != block && !block.IsDetached {
+					ial = cache.GetBlockIAL(row.ID)
+					if nil == ial {
+						ial = map[string]string{}
+					}
+				}
+				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
+				cell.Value.Template.Content = content
 			}
 		}
 	}

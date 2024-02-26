@@ -14,7 +14,7 @@ import {
     hasClosestByMatchTag,
     hasTopClosestByAttribute
 } from "../util/hasClosest";
-import {removeBlock} from "./remove";
+import {removeBlock, removeImage} from "./remove";
 import {
     getContenteditableElement,
     getFirstBlock,
@@ -766,11 +766,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (imgSelectElement) {
                 imgSelectElement.classList.remove("img--select");
                 if (nodeElement.contains(imgSelectElement)) {
-                    imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
-                    const oldHTML = nodeElement.outerHTML;
-                    imgSelectElement.remove();
-                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                    focusByWbr(nodeElement, range);
+                    removeImage(imgSelectElement, nodeElement, range, protyle);
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -828,11 +824,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     // 图片后为 br，在 br 后删除 https://github.com/siyuan-note/siyuan/issues/4963
                     if (currentNode && currentNode.nodeType !== 3 && currentNode.classList.contains("img")) {
-                        range.insertNode(document.createElement("wbr"));
-                        const oldHTML = nodeElement.outerHTML;
-                        currentNode.remove();
-                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                        focusByWbr(nodeElement, range);
+                        removeImage(currentNode, nodeElement, range, protyle);
                         event.stopPropagation();
                         event.preventDefault();
                         return;

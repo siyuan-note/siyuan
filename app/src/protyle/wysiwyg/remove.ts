@@ -11,7 +11,7 @@ import {
     getNextBlock,
     getPreviousBlock,
     getTopAloneElement,
-    getTopEmptyElement, hasNextSibling
+    getTopEmptyElement, hasNextSibling, hasPreviousSibling
 } from "./getBlock";
 import {transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
@@ -563,3 +563,20 @@ export const moveToPrevious = (blockElement: Element, range: Range, isDelete: bo
         }
     }
 };
+
+// https://github.com/siyuan-note/siyuan/issues/10393
+export const removeImage = (imgSelectElement: Element, nodeElement:HTMLElement, range:Range, protyle:IProtyle) => {
+    const oldHTML = nodeElement.outerHTML;
+    const imgPreviousSibling = hasPreviousSibling(imgSelectElement);
+    if (imgPreviousSibling && imgPreviousSibling.textContent.endsWith(Constants.ZWSP)) {
+        imgPreviousSibling.textContent = imgPreviousSibling.textContent.substring(0, imgPreviousSibling.textContent.length - 1);
+    }
+    const imgNextSibling = hasNextSibling(imgSelectElement);
+    if (imgNextSibling && imgNextSibling.textContent.startsWith(Constants.ZWSP)) {
+        imgNextSibling.textContent = imgNextSibling.textContent.replace(Constants.ZWSP, "");
+    }
+    imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
+    imgSelectElement.remove();
+    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+    focusByWbr(nodeElement, range);
+}

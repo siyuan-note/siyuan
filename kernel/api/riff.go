@@ -86,7 +86,11 @@ func getNotebookRiffCards(c *gin.Context) {
 
 	notebookID := arg["id"].(string)
 	page := int(arg["page"].(float64))
-	blockIDs, total, pageCount := model.GetNotebookFlashcards(notebookID, page)
+	pageSize := 20
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	blockIDs, total, pageCount := model.GetNotebookFlashcards(notebookID, page, pageSize)
 	ret.Data = map[string]interface{}{
 		"blocks":    blockIDs,
 		"total":     total,
@@ -105,7 +109,11 @@ func getTreeRiffCards(c *gin.Context) {
 
 	rootID := arg["id"].(string)
 	page := int(arg["page"].(float64))
-	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page)
+	pageSize := 20
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page, pageSize)
 	ret.Data = map[string]interface{}{
 		"blocks":    blockIDs,
 		"total":     total,
@@ -124,7 +132,11 @@ func getRiffCards(c *gin.Context) {
 
 	deckID := arg["id"].(string)
 	page := int(arg["page"].(float64))
-	blocks, total, pageCount := model.GetDeckFlashcards(deckID, page)
+	pageSize := 20
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	blocks, total, pageCount := model.GetDeckFlashcards(deckID, page, pageSize)
 	ret.Data = map[string]interface{}{
 		"blocks":    blocks,
 		"total":     total,

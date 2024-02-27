@@ -38,13 +38,6 @@
       padding: 8px 0;
       display: block;
       width: 100%;
-
-      & > div {
-        font-size: 32px;
-        display: block;
-        line-height: 46px;
-        margin-bottom: 4px;
-      }
     }
 
     & > div {
@@ -67,6 +60,13 @@
         align-items: center;
       }
     }
+  }
+
+  &__icon {
+    font-size: 32px;
+    display: block;
+    line-height: 46px;
+    margin-bottom: 4px;
   }
 
   &__block {

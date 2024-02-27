@@ -25,6 +25,7 @@ import {loadPlugins} from "../plugin/loader";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
+import {updateCardHV} from "../card/util";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -79,6 +80,10 @@ class App {
         window.addEventListener("pagehide", () => {
             saveScroll(window.siyuan.mobile.editor.protyle);
         }, false);
+        // 判断手机横竖屏状态
+        window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
+            updateCardHV();
+        });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;

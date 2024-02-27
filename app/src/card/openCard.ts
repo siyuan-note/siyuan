@@ -18,6 +18,7 @@ import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {focusByRange} from "../protyle/util/selection";
+import {updateCardHV} from "./util";
 
 const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: number, index = 1) => {
     return `<span class="ft__error">${index}</span>
@@ -86,35 +87,35 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
         <div>
             <span>${window.siyuan.languages.nextRound}</span>
             <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--cancel b3-tooltips__n b3-tooltips">
-                <div>💤</div>
+                <div class="card__icon">💤</div>
                 ${window.siyuan.languages.skip} (0)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="1" aria-label="1 / j / a" class="b3-button b3-button--error b3-tooltips__n b3-tooltips">
-                <div>🙈</div>
+                <div class="card__icon">🙈</div>
                 ${window.siyuan.languages.cardRatingAgain} (1)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="2" aria-label="2 / k / s" class="b3-button b3-button--warning b3-tooltips__n b3-tooltips">
-                <div>😬</div>
+                <div class="card__icon">😬</div>
                 ${window.siyuan.languages.cardRatingHard} (2)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="3" aria-label="3 / l / d / ${window.siyuan.languages.space} / Enter" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
-                <div>😊</div>
+                <div class="card__icon">😊</div>
                 ${window.siyuan.languages.cardRatingGood} (3)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="4" aria-label="4 / ; / f" class="b3-button b3-button--success b3-tooltips__n b3-tooltips">
-                <div>🌈</div>
+                <div class="card__icon">🌈</div>
                 ${window.siyuan.languages.cardRatingEasy} (4)
             </button>
         </div>
@@ -517,6 +518,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     range.collapse();
     focusByRange(range);
     /// #endif
+    updateCardHV();
 };
 
 const nextCard = (options: {

@@ -169,6 +169,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
             <div class="fn__space"></div>
             <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
+                <span class="fn__space"></span>
+                <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}">

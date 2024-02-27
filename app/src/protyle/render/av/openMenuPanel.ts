@@ -1119,11 +1119,9 @@ const getPropertiesHTML = (data: IAVTable) => {
         if (item.hidden) {
             hideHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">
-        <span class="b3-chip">
-            ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-            <span class="fn__ellipsis">${item.name}</span>
-        </span>
+    <div class="b3-menu__label fn__flex">
+        ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
+        ${item.name}
     </div>
     <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEyeoff"></use></svg>
     <svg class="b3-menu__action" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>
@@ -1131,11 +1129,9 @@ const getPropertiesHTML = (data: IAVTable) => {
         } else {
             showHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">
-        <span class="b3-chip">
-            ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-            <span class="fn__ellipsis">${item.name}</span>
-        </span>
+    <div class="b3-menu__label fn__flex">
+        ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
+        ${item.name}
     </div>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEye"></use></svg>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>

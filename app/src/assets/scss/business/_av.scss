@@ -424,6 +424,10 @@
         overflow: hidden;
       }
 
+      &__icon.fn__grab {
+        color: var(--b3-theme-on-surface-light);
+      }
+
       &__item {
         transition: margin .2s cubic-bezier(0, 0, .2, 1) 0ms;
       }
@@ -436,7 +440,8 @@
         cursor: auto;
       }
 
-      &__item:not([data-type="nobg"]):hover {
+      &__item:not([data-type="nobg"]):hover,
+      &__item--current:not([data-type="nobg"]) {
         background-color: var(--b3-list-hover);
       }
     }

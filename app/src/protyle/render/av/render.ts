@@ -7,7 +7,6 @@ import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
-import {openMenuPanel} from "./openMenuPanel";
 import {renderAVAttribute} from "./blockAttr";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {

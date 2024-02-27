@@ -1234,6 +1234,6 @@ const genColDataByType = (type: TAVCol, id: string) => {
         width: "",
         wrap: false,
         calc: null
-    }
-    return colData
-}
+    };
+    return colData;
+};

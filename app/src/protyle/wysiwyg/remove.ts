@@ -199,7 +199,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             sideElement = selectElements[0].previousElementSibling;
             if (!sideElement) {
                 sideIsNext = true;
-                sideElement = selectElements[selectElements.length - 1].nextElementSibling
+                sideElement = selectElements[selectElements.length - 1].nextElementSibling;
             }
         } else {
             sideElement = selectElements[selectElements.length - 1].nextElementSibling;
@@ -227,7 +227,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     sideElement = getNextBlock(topElement);
                 }
             } else {
-                sideElement = getNextBlock(topElement)
+                sideElement = getNextBlock(topElement);
                 sideIsNext = true;
                 if (!sideElement) {
                     sideIsNext = false;
@@ -579,4 +579,4 @@ export const removeImage = (imgSelectElement: Element, nodeElement:HTMLElement, 
     imgSelectElement.remove();
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
     focusByWbr(nodeElement, range);
-}
+};

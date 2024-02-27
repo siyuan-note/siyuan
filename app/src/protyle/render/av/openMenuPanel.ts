@@ -1075,6 +1075,14 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "av-view-switch") {
+                    if (!target.querySelector(".b3-chip--primary")) {
+                        options.blockElement.removeAttribute("data-render");
+                        avRender(options.blockElement, options.protyle, undefined, target.parentElement.dataset.id);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "av-view-edit") {
                     if (target.parentElement.querySelector(".b3-chip--primary")) {
                         openViewMenu({

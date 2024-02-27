@@ -101,6 +101,16 @@ export const bindViewEvent = (options: {
             inputElement.dataset.value = inputElement.value;
         }
     });
+    inputElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Enter") {
+            event.preventDefault();
+            inputElement.blur();
+            options.menuElement.parentElement.remove();
+        }
+    });
     inputElement.select();
 };
 
@@ -158,7 +168,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     views.forEach((item) => {
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">
+    <div class="fn__flex-1" data-type="av-view-switch">
         <span class="b3-chip${item.id === viewId ? " b3-chip--primary" : ""}">
             ${item.icon ? unicode2Emoji(item.icon, "icon", true) : '<svg class="icon"><use xlink:href="#iconTable"></use></svg>'}
             <span class="fn__ellipsis">${item.name}</span>

@@ -96,6 +96,7 @@ export abstract class Constants {
     public static readonly LOCAL_SEARCHDATA = "local-searchdata";
     public static readonly LOCAL_SEARCHKEYS = "local-searchkeys";
     public static readonly LOCAL_SEARCHASSET = "local-searchasset";
+    public static readonly LOCAL_SEARCHUNREF = "local-searchunref";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORYNOTEID = "local-historynoteid"; // string

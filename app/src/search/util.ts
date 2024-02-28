@@ -49,6 +49,7 @@ import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
+import {openSearchUnRef} from "./unRef";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -282,6 +283,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <svg><use xlink:href="#iconLayoutRight"></use></svg>
         </span>
         <span class="fn__space"></span>
+        <span id="searchUnRef" aria-label="${window.siyuan.languages.unref}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconLinkOff"></use></svg>
+        </span>
+        <span class="fn__space"></span>
         <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
             <svg><use xlink:href="#iconExact"></use></svg>
         </span>
@@ -357,6 +362,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     </div>
 </div>
 <div class="fn__flex-column fn__none" id="searchAssets" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
+<div class="fn__flex-column fn__none" id="searchUnRefPanel" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: ISearchOption[] = [];
@@ -444,6 +450,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
 
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     const assetsElement = element.querySelector("#searchAssets");
+    const unRefPanelElement = element.querySelector("#searchUnRefPanel");
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -629,7 +636,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchAsset") {
+            } else if (target.id === "searchUnRef") {
+                openSearchUnRef(unRefPanelElement, !closeCB);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            }  else if (target.id === "searchAsset") {
                 openSearchAsset(assetsElement, !closeCB);
                 event.stopPropagation();
                 event.preventDefault();
@@ -637,6 +649,14 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchAssetClose") {
                 window.siyuan.menus.menu.remove();
                 assetsElement.classList.add("fn__none");
+                assetsElement.previousElementSibling.classList.remove("fn__none");
+                searchInputElement.select();
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchUnRefClose") {
+                window.siyuan.menus.menu.remove();
+                unRefPanelElement.classList.add("fn__none");
                 assetsElement.previousElementSibling.classList.remove("fn__none");
                 searchInputElement.select();
                 event.stopPropagation();

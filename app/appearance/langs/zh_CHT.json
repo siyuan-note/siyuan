@@ -282,6 +282,8 @@
   "apiBaseURL": "API 基礎地址",
   "apiBaseURLTip": "發起請求的基礎地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "發起請求的使用者代理，即 HTTP 標頭 <code class='fn__code'>User-Agent</code>",
+  "apiVersion": "API 版本",
+  "apiVersionTip": "僅在使用 Azure OpenAI 服務時需要設定",
   "apiProvider": "API 提供商",
   "apiProviderTip": "選擇後將使用該提供商的 API 服務實現 AI 相關功能",
   "skip": "跳過",

@@ -147,7 +147,7 @@ interface Window {
     }
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): { svg:string }
+        render(id: string, text: string): { svg: string }
     };
     plantumlEncoder: {
         encode(options: string): string,
@@ -727,6 +727,7 @@ interface IConfig {
             apiProvider: string // OpenAI, Azure
             apiUserAgent: string
             apiBaseURL: string
+            apiVersion: string
             apiKey: string
             apiModel: string
             apiMaxTokens: number

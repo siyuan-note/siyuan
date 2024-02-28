@@ -37,6 +37,7 @@ type OpenAI struct {
 	APIBaseURL   string `json:"apiBaseURL"`
 	APIUserAgent string `json:"apiUserAgent"`
 	APIProvider  string `json:"apiProvider"` // OpenAI, Azure
+	APIVersion   string `json:"apiVersion"`  // Azure API version
 }
 
 func NewAI() *AI {

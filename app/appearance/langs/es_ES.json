@@ -282,6 +282,8 @@
   "apiBaseURL": "URL base de la API",
   "apiBaseURLTip": "La dirección base de la solicitud, como <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "El agente de usuario que inició la solicitud, es decir, el encabezado HTTP <code class='fn__code'>User-Agent</code>",
+  "apiVersion": "Versión API",
+  "apiVersionTip": "Sólo es necesario cuando se utiliza el servicio Azure OpenAI",
   "apiProvider": "API proveedor",
   "apiProviderTip": "Utilice el proveedor de API seleccionado para implementar funciones relacionadas con la IA",
   "skip": "barco",

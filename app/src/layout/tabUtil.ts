@@ -108,7 +108,11 @@ export const resizeTabs = (isSaveLayout = true) => {
             });
         });
         models.search.forEach(item => {
-            item.edit.resize();
+            if (item.element.querySelector("#searchUnRefPanel").classList.contains("fn__none")) {
+                item.editors.edit.resize();
+            } else {
+                item.editors.unRefEdit.resize();
+            }
         });
         models.custom.forEach(item => {
             if (item.resize) {

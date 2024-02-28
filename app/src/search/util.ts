@@ -253,6 +253,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
     });
     const data = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+    const unRefLocal = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF];
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}">
     <div class="block__icons" style="overflow: auto">
         <span data-position="9bottom" data-type="previous" class="block__icon block__icon--show ariaLabel" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
@@ -362,7 +363,35 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     </div>
 </div>
 <div class="fn__flex-column fn__none" id="searchAssets" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
-<div class="fn__flex-column fn__none" id="searchUnRefPanel" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
+<div class="fn__flex-column fn__none" id="searchUnRefPanel" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}">
+    <div class="block__icons">
+        <span data-type="unRefPrevious" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="unRefNext" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+        <span class="fn__space"></span>
+        <span id="searchUnRefResult" class="ft__selectnone"></span>
+        <span class="fn__flex-1"></span>
+        <span class="fn__space"></span>
+        <span id="unRefMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconMore"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span id="searchUnRefClose" aria-label="${!closeCB ? window.siyuan.languages.stickSearch : window.siyuan.languages.globalSearch}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+            <svg><use xlink:href="#iconBack"></use></svg>
+        </span>
+    </div>
+    <div class="search__layout${unRefLocal.layout === 1 ? " search__layout--row" : ""}">
+        <div id="searchUnRefList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
+        <div class="search__drag"></div>
+        <div id="searchUnRefPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px"></div>
+    </div>
+    <div class="search__tip${closeCB ? "" : " fn__none"}">
+        <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
+        <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
+        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
+        <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
+    </div>
+</div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: ISearchOption[] = [];
@@ -372,6 +401,13 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
 
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
+        blockId: "",
+        render: {
+            gutter: true,
+            breadcrumbDocName: true
+        },
+    });
+    const unRefEdit = new Protyle(app, element.querySelector("#searchUnRefPreview") as HTMLElement, {
         blockId: "",
         render: {
             gutter: true,
@@ -451,7 +487,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     const assetsElement = element.querySelector("#searchAssets");
     const unRefPanelElement = element.querySelector("#searchUnRefPanel");
-    let unRefEdit: Protyle;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -545,7 +580,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.idPath = [];
                 config.hPath = "";
                 config.page = 1;
-                searchPathInputElement.innerHTML = config.hPath;
+                searchPathInputElement.textContent = "";
                 searchPathInputElement.setAttribute("aria-label", "");
                 inputEvent(element, config, edit, true);
                 const includeElement = element.querySelector("#searchInclude");
@@ -594,7 +629,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         }
                         config.hPath = hPathList.join(" ");
                         config.page = 1;
-                        searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+                        searchPathInputElement.innerHTML = `${escapeGreat(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
                         searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
                         const includeElement = element.querySelector("#searchInclude");
                         includeElement.firstElementChild.classList.add("ft__primary");
@@ -638,7 +673,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchUnRef") {
-                unRefEdit = openSearchUnRef(app, unRefPanelElement, !closeCB);
+                openSearchUnRef(unRefPanelElement, unRefEdit);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -657,10 +692,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (type === "unRefPrevious") {
                 if (!target.getAttribute("disabled")) {
-                    let currentPage = parseInt(assetsElement.querySelector("#searchUnRefResult").textContent);
+                    let currentPage = parseInt(unRefPanelElement.querySelector("#searchUnRefResult").textContent);
                     if (currentPage > 1) {
                         currentPage--;
-                        getUnRefList(assetsElement, unRefEdit, currentPage);
+                        getUnRefList(unRefPanelElement, unRefEdit, currentPage);
                     }
                 }
                 event.stopPropagation();
@@ -668,10 +703,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (type === "unRefNext") {
                 if (!target.getAttribute("disabled")) {
-                    let currentPage = parseInt(assetsElement.querySelector("#searchUnRefResult").textContent);
-                    if (currentPage < parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
+                    let currentPage = parseInt(unRefPanelElement.querySelector("#searchUnRefResult").textContent);
+                    if (currentPage < parseInt(unRefPanelElement.querySelector("#searchUnRefResult").textContent.split("/")[1])) {
                         currentPage++;
-                        getUnRefList(assetsElement, unRefEdit, currentPage);
+                        getUnRefList(unRefPanelElement, unRefEdit, currentPage);
                     }
                 }
                 event.stopPropagation();
@@ -1040,7 +1075,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         height: searchInputElement.clientHeight,
     });
     inputEvent(element, config, edit);
-    return edit;
+    return {edit, unRefEdit};
 };
 
 export const getQueryTip = (method: number) => {
@@ -1079,7 +1114,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     }
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (item.hPath) {
-        searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+        searchPathInputElement.innerHTML = `${escapeGreat(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
         searchPathInputElement.setAttribute("aria-label", escapeHtml(item.hPath));
     } else {
         searchPathInputElement.innerHTML = "";

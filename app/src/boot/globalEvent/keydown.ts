@@ -187,11 +187,18 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (range) {
         window.siyuan.dialogs.find(item => {
-            if (item.editor && item.editor.protyle.element.contains(range.startContainer)) {
-                protyle = item.editor.protyle;
-                // https://github.com/siyuan-note/siyuan/issues/9384
-                isFileFocus = false;
-                return true;
+            if (item.editors) {
+                Object.keys(item.editors).find(key => {
+                    if (item.editors[key].protyle.element.contains(range.startContainer)) {
+                        protyle = item.editors[key].protyle;
+                        // https://github.com/siyuan-note/siyuan/issues/9384
+                        isFileFocus = false;
+                        return true;
+                    }
+                });
+                if (protyle) {
+                    return true;
+                }
             }
         });
     }
@@ -200,7 +207,11 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         if (activeTab.model instanceof Editor) {
             protyle = activeTab.model.editor.protyle;
         } else if (activeTab.model instanceof Search) {
-            protyle = activeTab.model.edit.protyle;
+            if (activeTab.model.element.querySelector("#searchUnRefPanel").classList.contains("fn__none")) {
+                protyle = activeTab.model.editors.edit.protyle;
+            } else {
+                protyle = activeTab.model.editors.unRefEdit.protyle;
+            }
         } else if (activeTab.model instanceof Custom && activeTab.model.data?.editor instanceof Protyle) {
             protyle = activeTab.model.data.editor.protyle;
         } else {

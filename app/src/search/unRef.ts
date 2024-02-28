@@ -10,65 +10,30 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {Protyle} from "../protyle";
-import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 
-export const openSearchUnRef = (app: App, element: Element, isStick: boolean) => {
+export const openSearchUnRef = (element: Element, editor: Protyle) => {
     window.siyuan.menus.menu.remove();
     element.previousElementSibling.previousElementSibling.classList.add("fn__none");
     element.classList.remove("fn__none");
-    if (element.innerHTML) {
+    if (element.querySelector("#searchUnRefResult").innerHTML) {
         return;
     }
-    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF] as ISearchAssetOption;
     element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");
-    element.innerHTML = `<div class="block__icons">
-    <span data-type="unRefPrevious" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-    <span class="fn__space"></span>
-    <span data-type="unRefNext" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
-    <span class="fn__space"></span>
-    <span id="searchUnRefResult" class="ft__selectnone"></span>
-    <span class="fn__flex-1"></span>
-    <span class="fn__space"></span>
-    <span id="unRefMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
-        <svg><use xlink:href="#iconMore"></use></svg>
-    </span>
-    <span class="fn__space"></span>
-    <span id="searchUnRefClose" aria-label="${isStick ? window.siyuan.languages.stickSearch : window.siyuan.languages.globalSearch}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
-        <svg><use xlink:href="#iconBack"></use></svg>
-    </span>
-</div>
-<div class="search__layout${localSearch.layout === 1 ? " search__layout--row" : ""}">
-    <div id="searchUnRefList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
-    <div class="search__drag"></div>
-    <div id="searchUnRefPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px"></div>
-</div>
-<div class="search__tip${isStick ? " fn__none" : ""}">
-    <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
-    <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
-    <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
-    <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
-</div>`;
     if (element.querySelector("#searchUnRefList").innerHTML !== "") {
         return;
     }
-    const edit = new Protyle(app, element.querySelector("#searchUnRefPreview") as HTMLElement, {
-        blockId: "",
-        render: {
-            gutter: true,
-            breadcrumbDocName: true
-        },
-    });
+    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF] as ISearchAssetOption;
     if (localSearch.layout === 1) {
         if (localSearch.col) {
-            edit.protyle.element.style.width = localSearch.col;
-            edit.protyle.element.classList.remove("fn__flex-1");
+            editor.protyle.element.style.width = localSearch.col;
+            editor.protyle.element.classList.remove("fn__flex-1");
         }
     } else {
         if (localSearch.row) {
-            edit.protyle.element.classList.remove("fn__flex-1");
-            edit.protyle.element.style.height = localSearch.row;
+            editor.protyle.element.classList.remove("fn__flex-1");
+            editor.protyle.element.style.height = localSearch.row;
         }
     }
 
@@ -105,12 +70,11 @@ export const openSearchUnRef = (app: App, element: Element, isStick: boolean) =>
             window.siyuan.storage[Constants.LOCAL_SEARCHUNREF][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
             setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
             if (direction === "lr") {
-                resize(edit.protyle);
+                resize(editor.protyle);
             }
         };
     });
-    getUnRefList(element, edit);
-    return edit;
+    getUnRefList(element, editor);
 };
 
 export const getUnRefList = (element: Element, edit: Protyle, page = 1) => {

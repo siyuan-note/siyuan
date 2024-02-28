@@ -509,7 +509,9 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardType,
         dialog
     });
-    dialog.editor = editor;
+    dialog.editors = {
+        card: editor
+    };
     /// #if !MOBILE
     const focusElement = dialog.element.querySelector(".block__icons button.block__icon") as HTMLElement;
     focusElement.focus();

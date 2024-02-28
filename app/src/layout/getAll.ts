@@ -20,7 +20,8 @@ export const getAllEditor = () => {
         editors.push(item.editor);
     });
     models.search.forEach(item => {
-        editors.push(item.edit);
+        editors.push(item.editors.edit);
+        editors.push(item.editors.unRefEdit);
     });
     models.custom.forEach(item => {
         if (item.data?.editor instanceof Protyle) {
@@ -33,8 +34,10 @@ export const getAllEditor = () => {
         });
     });
     window.siyuan.dialogs.forEach(item => {
-        if (item.editor) {
-            editors.push(item.editor);
+        if (item.editors) {
+            Object.keys(item.editors).forEach(key => {
+                editors.push(item.editors[key]);
+            });
         }
     });
     window.siyuan.blockPanels.forEach(item => {

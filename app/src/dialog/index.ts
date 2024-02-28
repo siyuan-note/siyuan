@@ -12,7 +12,7 @@ export class Dialog {
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
-    public editor: Protyle;
+    public editors: { [key: string]: Protyle };
     public data: any;
 
     constructor(options: {

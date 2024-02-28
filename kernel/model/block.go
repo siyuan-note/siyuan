@@ -205,7 +205,6 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	}
 
 	sql.WaitForWritingDatabase()
-	util.ReloadUI()
 	return
 }
 

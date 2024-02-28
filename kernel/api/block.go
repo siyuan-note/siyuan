@@ -62,6 +62,11 @@ func transferBlockRef(c *gin.Context) {
 		return
 	}
 
+	reloadUI := true
+	if nil != arg["reloadUI"] {
+		reloadUI = arg["reloadUI"].(bool)
+	}
+
 	var refIDs []string
 	if nil != arg["refIDs"] {
 		for _, refID := range arg["refIDs"].([]interface{}) {
@@ -75,6 +80,10 @@ func transferBlockRef(c *gin.Context) {
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
+	}
+
+	if reloadUI {
+		util.ReloadUI()
 	}
 }
 

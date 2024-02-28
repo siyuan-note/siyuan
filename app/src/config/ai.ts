@@ -54,6 +54,12 @@ export const ai = {
     <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
 </div>
 <div class="b3-label">
+    ${window.siyuan.languages.apiVersion}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="apiVersion" value="${window.siyuan.config.ai.openAI.apiVersion}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiVersionTip}</div>
+</div>
+<div class="b3-label">
     User-Agent
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="apiUserAgent" value="${window.siyuan.config.ai.openAI.apiUserAgent}"/>
@@ -121,6 +127,14 @@ export const ai = {
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__block">
+        ${window.siyuan.languages.apiVersion}
+        <div class="b3-label__text">${window.siyuan.languages.apiVersionTip}</div>
+        <span class="fn__hr"></span>
+        <input class="b3-text-field fn__block" id="apiVersion" value="${window.siyuan.config.ai.openAI.apiVersion}"/>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__block">
         User-Agent
         <div class="b3-label__text">${window.siyuan.languages.apiUserAgentTip}</div>
         <span class="fn__hr"></span>
@@ -146,6 +160,7 @@ export const ai = {
                     openAI: {
                         apiUserAgent: (ai.element.querySelector("#apiUserAgent") as HTMLInputElement).value,
                         apiBaseURL: (ai.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
+                        apiVersion: (ai.element.querySelector("#apiVersion") as HTMLInputElement).value,
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
                         apiModel: (ai.element.querySelector("#apiModel") as HTMLSelectElement).value,
                         apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),

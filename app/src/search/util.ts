@@ -641,7 +641,15 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            }  else if (target.id === "searchAsset") {
+            } else if (target.id === "searchUnRefClose") {
+                window.siyuan.menus.menu.remove();
+                unRefPanelElement.classList.add("fn__none");
+                assetsElement.previousElementSibling.classList.remove("fn__none");
+                searchInputElement.select();
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchAsset") {
                 openSearchAsset(assetsElement, !closeCB);
                 event.stopPropagation();
                 event.preventDefault();
@@ -649,14 +657,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchAssetClose") {
                 window.siyuan.menus.menu.remove();
                 assetsElement.classList.add("fn__none");
-                assetsElement.previousElementSibling.classList.remove("fn__none");
-                searchInputElement.select();
-                event.stopPropagation();
-                event.preventDefault();
-                break;
-            } else if (target.id === "searchUnRefClose") {
-                window.siyuan.menus.menu.remove();
-                unRefPanelElement.classList.add("fn__none");
                 assetsElement.previousElementSibling.classList.remove("fn__none");
                 searchInputElement.select();
                 event.stopPropagation();
@@ -1308,7 +1308,7 @@ export const inputEvent = (element: Element, config: ISearchOption, edit: Protyl
     element.setAttribute("data-timeout", inputTimeout.toString());
 };
 
-const getAttr = (block: IBlock) => {
+export const getAttr = (block: IBlock) => {
     let attrHTML = "";
     if (block.name) {
         attrHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span class="b3-list-item__hinttext">${block.name}</span></span>`;

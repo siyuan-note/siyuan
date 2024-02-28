@@ -1,19 +1,16 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-/// #if !MOBILE
-import {getQueryTip} from "./util";
-/// #endif
+import {getAttr} from "./util";
 import {MenuItem} from "../menus/Menu";
-import {Dialog} from "../dialog";
-import {Menu} from "../plugin/Menu";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {addClearButton} from "../util/addClearButton";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
+import {escapeAriaLabel, escapeGreat} from "../util/escape";
+import {getIconByType} from "../editor/getIcon";
+import {unicode2Emoji} from "../emoji";
+import {getDisplayName, getNotebookName} from "../util/pathName";
 
 export const openSearchUnRef = (element: Element, isStick: boolean) => {
-    /// #if !MOBILE
     window.siyuan.menus.menu.remove();
     element.previousElementSibling.previousElementSibling.classList.add("fn__none");
     element.classList.remove("fn__none");
@@ -21,18 +18,13 @@ export const openSearchUnRef = (element: Element, isStick: boolean) => {
         return;
     }
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF] as ISearchAssetOption;
-    const loadingElement = element.parentElement.querySelector(".fn__loading--top");
-    loadingElement.classList.remove("fn__none");
-    let enterTip = "";
-    /// #if !BROWSER
-    enterTip = `<kbd>Enter/Double Click</kbd> ${window.siyuan.languages.showInFolder}`;
-    /// #endif
+    element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");
     element.innerHTML = `<div class="block__icons">
     <span data-type="unRefPrevious" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="unRefNext" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
     <span class="fn__space"></span>
-    <span id="searchAssetResult" class="ft__selectnone"></span>
+    <span id="searchUnRefResult" class="ft__selectnone"></span>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
     <span id="unRefMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
@@ -50,8 +42,8 @@ export const openSearchUnRef = (element: Element, isStick: boolean) => {
 </div>
 <div class="search__tip${isStick ? " fn__none" : ""}">
     <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
-    ${enterTip}
-    <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
+    <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
+    <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
 </div>`;
     if (element.querySelector("#searchUnRefList").innerHTML !== "") {
@@ -104,19 +96,50 @@ export const openSearchUnRef = (element: Element, isStick: boolean) => {
             setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
         };
     });
-    /// #endif
+    getList(element);
 };
 
-export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
-    fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
-        element.innerHTML = `<p style="white-space: pre-wrap;">${response.data.assetContent.content}</p>`;
-        const matchElement = element.querySelector("mark");
-        if (matchElement) {
-            matchElement.classList.add("mark--hl");
-            const contentRect = element.getBoundingClientRect();
-            element.scrollTop = element.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+const getList = (element: Element, page = 1) => {
+    fetchPost("/api/search/listInvalidBlockRefs", {
+        page,
+    }, (response) => {
+        element.parentElement.querySelector(".fn__loading--top").classList.add("fn__none");
+        const nextElement = element.querySelector('[data-type="unRefNext"]');
+        if (page < response.data.pageCount) {
+            nextElement.removeAttribute("disabled");
+        } else {
+            nextElement.setAttribute("disabled", "disabled");
         }
+        let resultHTML = "";
+        response.data.blocks.forEach((item:IBlock, index: number) => {
+            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
+<svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
+${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
+<span class="b3-list-item__text">${item.content}</span>
+${getAttr(item)}
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+</div>`;
+        });
+        const previewElement = element.querySelector("#searchUnRefPreview");
+        if (response.data.blocks.length > 0) {
+            previewElement.classList.remove("fn__none");
+            element.querySelector(".search__drag")?.classList.remove("fn__none");
+            renderPreview(previewElement, response.data.blocks[0].id);
+        } else {
+            previewElement.classList.add("fn__none");
+            element.querySelector(".search__drag")?.classList.add("fn__none");
+        }
+        element.querySelector("#searchUnRefResult").innerHTML = `${page}/${response.data.pageCount || 1}<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
+        element.querySelector("#searchUnRefList").innerHTML = resultHTML || `<div class="search__empty">
+    ${window.siyuan.languages.emptyContent}
+</div>`;
     });
+}
+
+export const renderPreview = (element: Element, id: string) => {
+
 };
 
 export const renderNextAssetMark = (element: Element) => {
@@ -240,7 +263,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
             }
             element.nextElementSibling.classList.remove("fn__none");
             fetchPost("/api/asset/fullReindexAssetContent", {}, () => {
-                assetInputEvent(element, localData);
+                // assetInputEvent(element, localData);
             });
         },
     }).element);

@@ -205,7 +205,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     }, flashcard);
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    /// #if !MOBILE
     inputElement.focus();
+    /// #endif
     const inputEvent = (event?: InputEvent) => {
         if (event && event.isComposing) {
             return;
@@ -469,7 +471,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
             target = target.parentElement;
         }
+        /// #if !MOBILE
         inputElement.focus();
+        /// #endif
     });
 };
 

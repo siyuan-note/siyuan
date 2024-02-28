@@ -43,7 +43,7 @@ func listInvalidBlockRefs(c *gin.Context) {
 		page = 1
 	}
 
-	pageSize := 32
+	pageSize := 6
 	if nil != arg["pageSize"] {
 		pageSize = int(arg["pageSize"].(float64))
 	}

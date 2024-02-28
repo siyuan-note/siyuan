@@ -1104,21 +1104,21 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !isRelativePath(n.Tokens) {
+			if !treenode.IsRelativePath(n.Tokens) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
+			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
 				return ast.WalkContinue
 			}
 
@@ -1136,24 +1136,14 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if "" == dataAssets || !isRelativePath([]byte(dataAssets)) {
+				if "" == dataAssets || !treenode.IsRelativePath([]byte(dataAssets)) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				if index := bytes.Index(n.Tokens, []byte("src=\"")); 0 < index {
-					src := n.Tokens[index+len("src=\""):]
-					if index = bytes.Index(src, []byte("\"")); 0 < index {
-						src = src[:bytes.Index(src, []byte("\""))]
-						if !isRelativePath(src) {
-							return ast.WalkContinue
-						}
-
-						dest := strings.TrimSpace(string(src))
-						ret = append(ret, dest)
-					} else {
-						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", node.Box+node.Path)
-					}
+				dest := treenode.GetNodeSrcTokens(n)
+				if "" != dest {
+					ret = append(ret, dest)
 				}
 			}
 		}
@@ -1167,16 +1157,6 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		}
 	}
 	return
-}
-
-func isRelativePath(dest []byte) bool {
-	if 1 > len(dest) {
-		return false
-	}
-	if '/' == dest[0] {
-		return false
-	}
-	return !bytes.Contains(dest, []byte(":"))
 }
 
 // allAssetAbsPaths 返回 asset 相对路径（assets/xxx）到绝对路径（F:\SiYuan\data\assets\xxx）的映射。

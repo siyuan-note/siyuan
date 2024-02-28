@@ -1620,7 +1620,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 					for _, value := range keyValues.Values {
 						for _, asset := range value.MAsset {
-							if !isRelativePath([]byte(asset.Content)) {
+							if !treenode.IsRelativePath([]byte(asset.Content)) {
 								continue
 							}
 

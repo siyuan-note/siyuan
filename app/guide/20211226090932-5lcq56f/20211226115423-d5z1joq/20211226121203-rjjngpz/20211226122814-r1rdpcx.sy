@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122814-r1rdpcx",
 		"title": "虛擬引用",
-		"updated": "20221003215039"
+		"updated": "20240228164030"
 	},
 	"Children": [
 		{
@@ -119,6 +119,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "根據已有塊引的錨文本/定義塊文本、塊的命名和別名作為關鍵字搜索，如果在當前內容塊的純文本元素上搜索到這些關鍵字，那麽就會作為虛擬引用。"
+				}
+			]
+		},
+		{
+			"ID": "20240228163908-37qjtmk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240228163908-37qjtmk",
+				"updated": "20240228164030"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "虛擬引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中調整關鍵字搜尋範圍。"
 				}
 			]
 		},

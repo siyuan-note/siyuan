@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
-		"updated": "20221003214924"
+		"updated": "20240228163846"
 	},
 	"Children": [
 		{
@@ -119,6 +119,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "根据已有块引的锚文本/定义块文本、块的命名和别名作为关键字搜索，如果在当前内容块的纯文本元素上搜索到这些关键字，那么就会作为虚拟引用。"
+				}
+			]
+		},
+		{
+			"ID": "20240228163645-zvlgahq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240228163645-zvlgahq",
+				"updated": "20240228163846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "虚拟引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中调整关键字搜索范围。"
 				}
 			]
 		},

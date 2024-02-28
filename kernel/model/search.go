@@ -153,6 +153,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	invalidBlockIDs = gulu.Str.RemoveDuplicatedElem(invalidBlockIDs)
 
 	sort.Strings(invalidBlockIDs)
+	allInvalidBlockIDs := invalidBlockIDs
 
 	start := (page - 1) * pageSize
 	end := page * pageSize
@@ -162,17 +163,26 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	invalidBlockIDs = invalidBlockIDs[start:end]
 
 	sqlBlocks := sql.GetBlocks(invalidBlockIDs)
+	var tmp []*sql.Block
+	for _, sqlBlock := range sqlBlocks {
+		if nil != sqlBlock {
+			tmp = append(tmp, sqlBlock)
+		}
+	}
+	sqlBlocks = tmp
+
 	ret = fromSQLBlocks(&sqlBlocks, "", 36)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
-	matchedBlockCount = len(ret)
+	matchedBlockCount = len(allInvalidBlockIDs)
 	rootCount := map[string]bool{}
-	for _, block := range ret {
-		if nil == block {
+	for _, id := range allInvalidBlockIDs {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
 			continue
 		}
-		rootCount[block.RootID] = true
+		rootCount[bt.RootID] = true
 	}
 	matchedRootCount = len(rootCount)
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize

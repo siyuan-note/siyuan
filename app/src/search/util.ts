@@ -49,7 +49,7 @@ import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
-import {openSearchUnRef} from "./unRef";
+import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -643,10 +643,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "unRefMore") {
-                assetMoreMenu(target, assetsElement, () => {
-                    assetInputEvent(assetsElement);
-                    setStorageVal(Constants.LOCAL_SEARCHASSET, localSearch);
-                });
+                unRefMoreMenu(target, unRefPanelElement, unRefEdit);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -655,6 +652,28 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 unRefPanelElement.classList.add("fn__none");
                 assetsElement.previousElementSibling.classList.remove("fn__none");
                 searchInputElement.select();
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "unRefPrevious") {
+                if (!target.getAttribute("disabled")) {
+                    let currentPage = parseInt(assetsElement.querySelector("#searchUnRefResult").textContent);
+                    if (currentPage > 1) {
+                        currentPage--;
+                        getUnRefList(assetsElement, unRefEdit, currentPage);
+                    }
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "unRefNext") {
+                if (!target.getAttribute("disabled")) {
+                    let currentPage = parseInt(assetsElement.querySelector("#searchUnRefResult").textContent);
+                    if (currentPage < parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1])) {
+                        currentPage++;
+                        getUnRefList(assetsElement, unRefEdit, currentPage);
+                    }
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;

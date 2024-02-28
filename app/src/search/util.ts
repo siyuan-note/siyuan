@@ -451,6 +451,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     const assetsElement = element.querySelector("#searchAssets");
     const unRefPanelElement = element.querySelector("#searchUnRefPanel");
+    let unRefEdit: Protyle;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -637,7 +638,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchUnRef") {
-                openSearchUnRef(unRefPanelElement, !closeCB);
+               unRefEdit = openSearchUnRef(app, unRefPanelElement, !closeCB);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -885,7 +886,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         newFileByName(app, searchInputElement.value);
                     }
                 } else if (type === "search-item") {
-                    const isAsset = target.dataset.id;
+                    const searchType = target.dataset.id ? "asset" : (unRefPanelElement.classList.contains("fn__none") ? "doc" : "unRef");
                     let isClick = event.detail === 1;
                     let isDblClick = event.detail === 2;
                     /// #if BROWSER
@@ -896,7 +897,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     /// #endif
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {
-                            if (isAsset) {
+                            if (searchType === "asset") {
                                 if (!target.classList.contains("b3-list-item--focus")) {
                                     assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
@@ -922,16 +923,16 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                         }
                                     });
                                 } else if (!target.classList.contains("b3-list-item--focus")) {
-                                    searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
+                                    (searchType === "doc" ? searchPanelElement : unRefPanelElement).querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
                                     getArticle({
-                                        edit,
+                                        edit: searchType === "doc" ? edit : unRefEdit,
                                         id: target.getAttribute("data-node-id"),
-                                        config,
-                                        value: searchInputElement.value,
+                                        config: searchType === "doc" ? config : null,
+                                        value: searchType === "doc" ? searchInputElement.value : null,
                                     });
                                     searchInputElement.focus();
-                                } else if (target.classList.contains("b3-list-item--focus")) {
+                                } else if (searchType === "doc" && target.classList.contains("b3-list-item--focus")) {
                                     renderNextSearchMark({
                                         edit,
                                         id: target.getAttribute("data-node-id"),
@@ -943,7 +944,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         }, Constants.TIMEOUT_DBLCLICK);
                     } else if (isDblClick && isNotCtrl(event)) {
                         clearTimeout(clickTimeout);
-                        if (isAsset) {
+                        if (searchType === "asset") {
                             /// #if !BROWSER
                             showFileInFolder(path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
                             /// #endif
@@ -1121,9 +1122,9 @@ const renderNextSearchMark = (options: {
 
 export const getArticle = (options: {
     id: string,
-    config: ISearchOption,
+    config?: ISearchOption,
     edit: Protyle
-    value: string,
+    value?: string,
 }) => {
     checkFold(options.id, (zoomIn) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
@@ -1134,9 +1135,9 @@ export const getArticle = (options: {
             options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
-                query: options.value,
-                queryMethod: options.config.method,
-                queryTypes: options.config.types,
+                query: options.value || null,
+                queryMethod: options.config?.method || null,
+                queryTypes: options.config?.types || null,
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,

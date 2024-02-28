@@ -1,7 +1,7 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {getAttr} from "./util";
+import {getArticle, getAttr} from "./util";
 import {MenuItem} from "../menus/Menu";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
@@ -9,8 +9,11 @@ import {escapeAriaLabel, escapeGreat} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getDisplayName, getNotebookName} from "../util/pathName";
+import {Protyle} from "../protyle";
+import {App} from "../index";
+import {resize} from "../protyle/util/resize";
 
-export const openSearchUnRef = (element: Element, isStick: boolean) => {
+export const openSearchUnRef = (app: App, element: Element, isStick: boolean) => {
     window.siyuan.menus.menu.remove();
     element.previousElementSibling.previousElementSibling.classList.add("fn__none");
     element.classList.remove("fn__none");
@@ -49,16 +52,22 @@ export const openSearchUnRef = (element: Element, isStick: boolean) => {
     if (element.querySelector("#searchUnRefList").innerHTML !== "") {
         return;
     }
-    const previewElement = element.querySelector("#searchUnRefPreview") as HTMLElement;
+    const edit = new Protyle(app, element.querySelector("#searchUnRefPreview") as HTMLElement, {
+        blockId: "",
+        render: {
+            gutter: true,
+            breadcrumbDocName: true
+        },
+    });
     if (localSearch.layout === 1) {
         if (localSearch.col) {
-            previewElement.style.width = localSearch.col;
-            previewElement.classList.remove("fn__flex-1");
+            edit.protyle.element.style.width = localSearch.col;
+            edit.protyle.element.classList.remove("fn__flex-1");
         }
     } else {
         if (localSearch.row) {
-            previewElement.classList.remove("fn__flex-1");
-            previewElement.style.height = localSearch.row;
+            edit.protyle.element.classList.remove("fn__flex-1");
+            edit.protyle.element.style.height = localSearch.row;
         }
     }
 
@@ -94,12 +103,16 @@ export const openSearchUnRef = (element: Element, isStick: boolean) => {
             documentSelf.onselect = null;
             window.siyuan.storage[Constants.LOCAL_SEARCHUNREF][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
             setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
+            if (direction === "lr") {
+                resize(edit.protyle);
+            }
         };
     });
-    getList(element);
+    getList(element, edit);
+    return edit;
 };
 
-const getList = (element: Element, page = 1) => {
+const getList = (element: Element, edit: Protyle, page = 1) => {
     fetchPost("/api/search/listInvalidBlockRefs", {
         page,
     }, (response) => {
@@ -111,7 +124,7 @@ const getList = (element: Element, page = 1) => {
             nextElement.setAttribute("disabled", "disabled");
         }
         let resultHTML = "";
-        response.data.blocks.forEach((item:IBlock, index: number) => {
+        response.data.blocks.forEach((item: IBlock, index: number) => {
             const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
             resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
@@ -121,13 +134,15 @@ ${getAttr(item)}
 <span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
 </div>`;
         });
-        const previewElement = element.querySelector("#searchUnRefPreview");
         if (response.data.blocks.length > 0) {
-            previewElement.classList.remove("fn__none");
+            edit.protyle.element.classList.remove("fn__none");
             element.querySelector(".search__drag")?.classList.remove("fn__none");
-            renderPreview(previewElement, response.data.blocks[0].id);
+            getArticle({
+                edit,
+                id: response.data.blocks[0].id,
+            });
         } else {
-            previewElement.classList.add("fn__none");
+            edit.protyle.element.classList.add("fn__none");
             element.querySelector(".search__drag")?.classList.add("fn__none");
         }
         element.querySelector("#searchUnRefResult").innerHTML = `${page}/${response.data.pageCount || 1}<span class="fn__space"></span>
@@ -161,7 +176,6 @@ export const renderNextAssetMark = (element: Element) => {
         element.scrollTop = element.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     }
 };
-
 
 export const assetMoreMenu = (target: Element, element: Element, cb: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&

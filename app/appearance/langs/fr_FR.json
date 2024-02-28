@@ -1,4 +1,5 @@
 {
+  "listInvalidRefBlocks": "Liste des blocs avec des références invalides",
   "listItemDotNumberClickFocus": "Cliquez sur le point/numéro de l'élément de la liste pour vous concentrer",
   "listItemDotNumberClickFocusTip": "Après activation, cliquer sur le point/numéro de l'élément de liste se concentrera sur l'élément de liste",
   "reviewMode": "Mode de révision",

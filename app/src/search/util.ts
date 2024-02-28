@@ -283,7 +283,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <svg><use xlink:href="#iconLayoutRight"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="searchUnRef" aria-label="${window.siyuan.languages.unref}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
+        <span id="searchUnRef" aria-label="${window.siyuan.languages.listInvalidRefBlocks}" class="block__icon block__icon--show ariaLabel" data-position="9bottom">
             <svg><use xlink:href="#iconLinkOff"></use></svg>
         </span>
         <span class="fn__space"></span>

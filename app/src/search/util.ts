@@ -638,7 +638,15 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchUnRef") {
-               unRefEdit = openSearchUnRef(app, unRefPanelElement, !closeCB);
+                unRefEdit = openSearchUnRef(app, unRefPanelElement, !closeCB);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "unRefMore") {
+                assetMoreMenu(target, assetsElement, () => {
+                    assetInputEvent(assetsElement);
+                    setStorageVal(Constants.LOCAL_SEARCHASSET, localSearch);
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

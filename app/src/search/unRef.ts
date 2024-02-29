@@ -1,10 +1,7 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 import {getArticle, getAttr} from "./util";
-import {MenuItem} from "../menus/Menu";
-import {isPaidUser} from "../util/needSubscribe";
-import {showMessage} from "../dialog/message";
 import {escapeAriaLabel, escapeGreat} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";

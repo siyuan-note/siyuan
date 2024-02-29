@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {updateSearchResult} from "../mobile/menu/search";
+import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -371,6 +371,14 @@ export const moreMenu = async (config: ISearchOption,
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchMore");
     /// #if MOBILE
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
+        label: window.siyuan.languages.listInvalidRefBlocks,
+        click() {
+            goUnRef();
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
         label: window.siyuan.languages.searchType,

@@ -496,6 +496,11 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
             if (lastRange) {
                 focusByRange(lastRange);
             }
+        },
+        resizeCallback(type: string) {
+            if (type !== "d" && type !== "t" && editor) {
+                editor.resize();
+            }
         }
     });
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
@@ -509,6 +514,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardType,
         dialog
     });
+    editor.resize();
     dialog.editors = {
         card: editor
     };

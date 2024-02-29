@@ -407,6 +407,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             breadcrumbDocName: true
         },
     });
+    edit.resize();
     const unRefEdit = new Protyle(app, element.querySelector("#searchUnRefPreview") as HTMLElement, {
         blockId: "",
         render: {
@@ -414,6 +415,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             breadcrumbDocName: true
         },
     });
+    unRefEdit.resize();
     if (closeCB) {
         if (data.layout === 1) {
             if (data.col) {

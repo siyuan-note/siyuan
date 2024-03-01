@@ -1080,6 +1080,14 @@ interface IAVFilter {
     operator: TAVFilterOperator,
     value: IAVCellValue,
     type?: TAVCol   // 仅用于标识新增时的类型，用于区分 rollup
+    relativeDate?: relativeDate
+    relativeDate2?: relativeDate
+}
+
+interface relativeDate {
+    count: number   // 数量
+    unit: number    // 单位：0: 天、1: 周、2: 月、3: 年
+    direction: number   // 方向：-1: 前、0: 现在、1: 后
 }
 
 interface IAVSort {

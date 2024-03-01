@@ -1319,9 +1319,11 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 	for _, filter := range masterView.Table.Filters {
 		view.Table.Filters = append(view.Table.Filters, &av.ViewFilter{
-			Column:   filter.Column,
-			Operator: filter.Operator,
-			Value:    filter.Value,
+			Column:        filter.Column,
+			Operator:      filter.Operator,
+			Value:         filter.Value,
+			RelativeDate:  filter.RelativeDate,
+			RelativeDate2: filter.RelativeDate2,
 		})
 	}
 
@@ -1481,7 +1483,9 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 			return
 		}
 
-		filter.Value.Type = key.Type
+		if nil != filter.Value {
+			filter.Value.Type = key.Type
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

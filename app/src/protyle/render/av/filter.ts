@@ -84,7 +84,7 @@ export const setFilter = async (options: {
         let hasMatch = false;
         if (textElements.length > 0) {
             if (["date", "updated", "created"].includes(filterType)) {
-                const typeElements = menu.element.querySelectorAll('.b3-select[data-type="dataType"]') as NodeListOf<HTMLSelectElement>;
+                const typeElements = menu.element.querySelectorAll('.b3-select[data-type="dateType"]') as NodeListOf<HTMLSelectElement>;
                 const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
                 if (typeElements[0].value === "custom") {
                     newFilter.relativeDate = {
@@ -92,7 +92,8 @@ export const setFilter = async (options: {
                         unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
                         direction: parseInt(directElements[0].value)
                     }
-                } else if (typeElements[1].value === "custom") {
+                }
+                if (typeElements[1].value === "custom") {
                     newFilter.relativeDate2 = {
                         count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
                         unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
@@ -341,29 +342,31 @@ export const setFilter = async (options: {
         });
     } else if (["date", "updated", "created"].includes(filterType)) {
         const dateValue = options.filter.value ? options.filter.value[filterType as "date"] : null;
+        const showToday = !options.filter.relativeDate?.direction && options.filter.operator === "Is between"
+        const showToday2 = !options.filter.relativeDate2?.direction && options.filter.operator === "Is between"
         menu.addItem({
             iconHTML: "",
             type: "readonly",
             label: `<div data-type="filter1">
     <div class="fn__size200">
-        <select class="b3-select fn__block" data-type="dataType">
+        <select class="b3-select fn__block" data-type="dateType">
             <option value="time"${!options.filter.relativeDate ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
             <option value="custom"${options.filter.relativeDate ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
         </select>
     </div>
     <div class="fn__hr"></div>
     <div class="fn__size200 ${options.filter.relativeDate ? "fn__none" : ""}">
-        <input value="${(dateValue.isNotEmpty || filterType !== "date") ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
+        <input value="${(dateValue && (dateValue.isNotEmpty || filterType !== "date")) ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
     </div>
     <div class="fn__flex fn__size200 ${options.filter.relativeDate ? "" : "fn__none"}">
         <select class="b3-select" data-type="dataDirection">
             <option value="-1"${options.filter.relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
             <option value="1"${options.filter.relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
-            <option value="0" data-type="current"${!options.filter.relativeDate?.direction ? " selected" : ""}>${window.siyuan.languages.current}</option>
+            <option value="0" data-type="current"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
-        <input type="number" min="1" step="1" value="${options.filter.relativeDate?.count || 1}" class="b3-text-field fn__flex-1${!options.filter.relativeDate?.direction ? " fn__none" : ""}"/>
-        <span class="fn__space${!options.filter.relativeDate?.direction ? " fn__none" : ""}"></span>
+        <input type="number" min="1" step="1" value="${options.filter.relativeDate?.count || 1}" class="b3-text-field fn__flex-1${showToday ? " fn__none" : ""}"/>
+        <span class="fn__space${showToday ? " fn__none" : ""}"></span>
         <select class="b3-select fn__flex-1">
             <option value="0"${options.filter.relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
             <option value="1"${(!options.filter.relativeDate || options.filter.relativeDate?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
@@ -376,29 +379,29 @@ export const setFilter = async (options: {
 <div data-type="filter2 fn__none">
     <div class="fn__hr--small"></div>
     <div class="fn__size200">
-        <select class="b3-select fn__block" data-type="dataType">
+        <select class="b3-select fn__block" data-type="dateType">
             <option value="time"${!options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
             <option value="custom"${options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
         </select>
     </div>
     <div class="fn__hr"></div>
     <div class="fn__size200 ${options.filter.relativeDate2 ? "fn__none" : ""}">
-        <input value="${dateValue.isNotEmpty2 ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
+        <input value="${(dateValue && dateValue.isNotEmpty2) ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
     </div>
     <div class="fn__flex fn__size200 ${options.filter.relativeDate2 ? "" : "fn__none"}">
         <select class="b3-select" data-type="dataDirection">
-            <option value="-1"${options.filter.relativeDate2?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.before}</option>
-            <option value="1"${options.filter.relativeDate2?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.after}</option>
-            <option value="0" data-type="current"${!options.filter.relativeDate2?.direction ? " selected" : ""}>${window.siyuan.languages.current}</option>
+            <option value="-1"${options.filter.relativeDate2?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
+            <option value="1"${options.filter.relativeDate2?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
+            <option value="0" data-type="current"${showToday2 ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
-        <input type="number" min="1" step="1" value="${options.filter.relativeDate2?.count || 1}" class="b3-text-field fn__flex-1${!options.filter.relativeDate2?.direction ? " fn__none" : ""}"/>
-        <span class="fn__space${!options.filter.relativeDate2?.direction ? " fn__none" : ""}"></span>
+        <input type="number" min="1" step="1" value="${options.filter.relativeDate2?.count || 1}" class="b3-text-field fn__flex-1${showToday2 ? " fn__none" : ""}"/>
+        <span class="fn__space${showToday2 ? " fn__none" : ""}"></span>
         <select class="b3-select fn__flex-1">
-            <option${options.filter.relativeDate2?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
-            <option${(!options.filter.relativeDate2 || options.filter.relativeDate2?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
-            <option${options.filter.relativeDate2?.unit === 2 ? " selected" : ""}>${window.siyuan.languages.month}</option>
-            <option${options.filter.relativeDate2?.unit === 3 ? " selected" : ""}>${window.siyuan.languages.year}</option>
+            <option value="0"${options.filter.relativeDate2?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
+            <option value="1"${(!options.filter.relativeDate2 || options.filter.relativeDate2?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
+            <option value="2"${options.filter.relativeDate2?.unit === 2 ? " selected" : ""}>${window.siyuan.languages.month}</option>
+            <option value="3"${options.filter.relativeDate2?.unit === 3 ? " selected" : ""}>${window.siyuan.languages.year}</option>
         </select>
     </div>
     <div class="fn__hr--small"></div>
@@ -431,25 +434,36 @@ export const setFilter = async (options: {
             }
         }
     });
-    const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
+    const selectElement = (menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
         toggleEmpty(selectElement, selectElement.value, filterType);
     });
-    window.siyuan.menus.menu.element.querySelectorAll('.b3-select[data-type="dataType"]').forEach((item: HTMLSelectElement) => {
+    const dateTypeElements = menu.element.querySelectorAll('.b3-select[data-type="dateType"]') as NodeListOf<HTMLSelectElement>;
+    dateTypeElements.forEach((item) => {
         item.addEventListener("change", () => {
-            const filterElement = item.parentElement.parentElement;
-            const customElement = filterElement.querySelector('[data-type="dataDirection"]').parentElement
-            const timeElement = customElement.previousElementSibling;
+            const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]')
+            const customerElement = directionElements[0].parentElement;
+            const customer2Element = directionElements[1].parentElement;
+            const timeElement = customerElement.previousElementSibling;
+            const time2Element = customer2Element.previousElementSibling;
             if (item.value === "custom") {
-                customElement.classList.remove("fn__none");
+                customerElement.classList.remove("fn__none");
+                customer2Element.classList.remove("fn__none");
                 timeElement.classList.add("fn__none");
+                time2Element.classList.add("fn__none");
+                dateTypeElements[0].value = "custom";
+                dateTypeElements[1].value = "custom";
             } else {
-                customElement.classList.add("fn__none");
+                customerElement.classList.add("fn__none");
+                customer2Element.classList.add("fn__none");
                 timeElement.classList.remove("fn__none");
+                time2Element.classList.remove("fn__none");
+                dateTypeElements[0].value = "time";
+                dateTypeElements[1].value = "time";
             }
         });
     })
-    window.siyuan.menus.menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]').forEach((item: HTMLSelectElement) => {
+    menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]').forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
             const countElement = item.nextElementSibling.nextElementSibling;
             if (item.value === "0") {
@@ -462,7 +476,7 @@ export const setFilter = async (options: {
         });
     })
 
-    const textElements: NodeListOf<HTMLInputElement> = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field");
+    const textElements: NodeListOf<HTMLInputElement> = menu.element.querySelectorAll(".b3-text-field");
     textElements.forEach(item => {
         item.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing) {
@@ -552,17 +566,32 @@ export const getFiltersHTML = (data: IAVTable) => {
                     filterValue = ": " + window.siyuan.languages.unchecked;
                 } else if (filter.operator === "Is true") {
                     filterValue = ": " + window.siyuan.languages.checked;
-                } else if (filter.value?.date?.content) {
-                    if (filter.value?.date?.content2 && filter.operator === "Is between") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD")}`;
+                } else if (filter.value?.date?.content || filter.relativeDate || filter.relativeDate2) {
+                    let dateValue = "";
+                    let dateValue2 = "";
+                    if (filter.relativeDate) {
+                        dateValue = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate.direction + 1]]}
+ ${filter.relativeDate.direction ? filter.relativeDate.count : ""}
+ ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate.unit]]}`;
+                    }
+                    if (filter.relativeDate2) {
+                        dateValue2 = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate2.direction + 1]]}
+ ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
+ ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`
+                    } else {
+                        dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
+                        dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");
+                    }
+                    if (filter.operator === "Is between") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                     } else if ("=" === filter.operator) {
-                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
+                        filterValue = `: ${dateValue}`;
                     } else if ([">", "<"].includes(filter.operator)) {
-                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
+                        filterValue = ` ${filter.operator} ${dateValue}`;
                     } else if (">=" === filter.operator) {
-                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
+                        filterValue = ` ≥ ${dateValue}`;
                     } else if ("<=" === filter.operator) {
-                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD")}`;
+                        filterValue = ` ≤ ${dateValue}`;
                     }
                 } else if (filter.value?.mSelect?.length > 0) {
                     let selectContent = "";

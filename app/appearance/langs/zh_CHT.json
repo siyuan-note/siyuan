@@ -1,4 +1,10 @@
 {
+  "current": "當前",
+  "week": "週",
+  "month": "月",
+  "year": "年",
+  "pastDate": "前",
+  "nextDate": "後",
   "listInvalidRefBlocks": "列出引用失效的區塊",
   "listItemDotNumberClickFocus": "清單項目圓點/數字點選聚焦",
   "listItemDotNumberClickFocusTip": "啟用後點選清單項目的圓點/數字將進入聚焦",

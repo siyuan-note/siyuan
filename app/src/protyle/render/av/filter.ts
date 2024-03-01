@@ -341,8 +341,8 @@ export const setFilter = async (options: {
     </div>
     <div class="fn__flex fn__size200 ${options.filter.relativeDate ? "" : "fn__none"}">
         <select class="b3-select" data-type="dataDirection">
-            <option value="-1"${options.filter.relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.before}</option>
-            <option value="1"${options.filter.relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.after}</option>
+            <option value="-1"${options.filter.relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
+            <option value="1"${options.filter.relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
             <option value="0" data-type="current"${!options.filter.relativeDate?.direction ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>

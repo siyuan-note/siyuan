@@ -1,4 +1,10 @@
 {
+  "current": "This",
+  "week": "week",
+  "month": "month",
+  "year": "year",
+  "pastDate": "Past",
+  "nextDate": "Next",
   "listInvalidRefBlocks": "List blocks with invalid references",
   "listItemDotNumberClickFocus": "List item dot/number click to focus",
   "listItemDotNumberClickFocusTip": "After enabling, clicking the list item dot/number will focus on the list item",

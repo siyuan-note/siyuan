@@ -26,30 +26,46 @@ type Filterable interface {
 }
 
 type ViewFilter struct {
-	Column   string         `json:"column"`
-	Operator FilterOperator `json:"operator"`
-	Value    *Value         `json:"value"`
+	Column        string         `json:"column"`
+	Operator      FilterOperator `json:"operator"`
+	Value         *Value         `json:"value"`
+	RelativeDate  *RelativeDate  `json:"relativeDate"`
+	RelativeDate2 *RelativeDate  `json:"relativeDate2"`
+}
+
+type RelativeDateUnit int
+
+const (
+	RelativeDateUnitDay = iota
+	RelativeDateUnitWeek
+	RelativeDateUnitMonth
+	RelativeDateUnitYear
+)
+
+type RelativeDate struct {
+	Count     int              // 数量
+	Unit      RelativeDateUnit // 单位：天、周、月、年
+	Direction int              // 方向：前、现在、后
 }
 
 type FilterOperator string
 
 const (
-	FilterOperatorIsEqual           FilterOperator = "="
-	FilterOperatorIsNotEqual        FilterOperator = "!="
-	FilterOperatorIsGreater         FilterOperator = ">"
-	FilterOperatorIsGreaterOrEqual  FilterOperator = ">="
-	FilterOperatorIsLess            FilterOperator = "<"
-	FilterOperatorIsLessOrEqual     FilterOperator = "<="
-	FilterOperatorContains          FilterOperator = "Contains"
-	FilterOperatorDoesNotContain    FilterOperator = "Does not contains"
-	FilterOperatorIsEmpty           FilterOperator = "Is empty"
-	FilterOperatorIsNotEmpty        FilterOperator = "Is not empty"
-	FilterOperatorStartsWith        FilterOperator = "Starts with"
-	FilterOperatorEndsWith          FilterOperator = "Ends with"
-	FilterOperatorIsBetween         FilterOperator = "Is between"
-	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
-	FilterOperatorIsTrue            FilterOperator = "Is true"
-	FilterOperatorIsFalse           FilterOperator = "Is false"
+	FilterOperatorIsEqual          FilterOperator = "="
+	FilterOperatorIsNotEqual       FilterOperator = "!="
+	FilterOperatorIsGreater        FilterOperator = ">"
+	FilterOperatorIsGreaterOrEqual FilterOperator = ">="
+	FilterOperatorIsLess           FilterOperator = "<"
+	FilterOperatorIsLessOrEqual    FilterOperator = "<="
+	FilterOperatorContains         FilterOperator = "Contains"
+	FilterOperatorDoesNotContain   FilterOperator = "Does not contains"
+	FilterOperatorIsEmpty          FilterOperator = "Is empty"
+	FilterOperatorIsNotEmpty       FilterOperator = "Is not empty"
+	FilterOperatorStartsWith       FilterOperator = "Starts with"
+	FilterOperatorEndsWith         FilterOperator = "Ends with"
+	FilterOperatorIsBetween        FilterOperator = "Is between"
+	FilterOperatorIsTrue           FilterOperator = "Is true"
+	FilterOperatorIsFalse          FilterOperator = "Is false"
 )
 
 func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {

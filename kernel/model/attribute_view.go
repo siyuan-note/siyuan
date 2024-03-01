@@ -2534,8 +2534,13 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	if av.KeyTypeNumber == val.Type {
 		if nil != val.Number && !val.Number.IsNotEmpty {
-			// 删除内容为空值
 			val.Number.Content = 0
+			val.Number.FormattedContent = ""
+		}
+	} else if av.KeyTypeDate == val.Type {
+		if nil != val.Date && !val.Date.IsNotEmpty {
+			val.Date.Content = 0
+			val.Date.FormattedContent = ""
 		}
 	}
 

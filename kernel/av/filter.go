@@ -42,10 +42,18 @@ const (
 	RelativeDateUnitYear
 )
 
+type RelativeDateDirection int
+
+const (
+	RelativeDateDirectionBefore = -1
+	RelativeDateDirectionThis   = 0
+	RelativeDateDirectionAfter  = 1
+)
+
 type RelativeDate struct {
-	Count     int              // 数量
-	Unit      RelativeDateUnit // 单位：天、周、月、年
-	Direction int              // 方向：前、现在、后
+	Count     int                   // 数量
+	Unit      RelativeDateUnit      // 单位：0 天、1 周、2 月、3 年
+	Direction RelativeDateDirection // 方向：-1 前、0 这、1 后
 }
 
 type FilterOperator string

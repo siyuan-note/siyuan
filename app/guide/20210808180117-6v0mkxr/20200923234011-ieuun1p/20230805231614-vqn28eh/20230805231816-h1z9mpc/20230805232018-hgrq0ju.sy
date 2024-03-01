@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232018-hgrq0ju",
 		"title": "Connect with third-party cloud storage",
-		"updated": "20231217111119"
+		"updated": "20240301091400"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805232156-kbi85az",
-				"updated": "20230805232156"
+				"updated": "20240301091400"
 			},
 			"Children": [
 				{
@@ -121,7 +121,7 @@
 					},
 					"Properties": {
 						"id": "20230805232156-vqfp7fz",
-						"updated": "20230805232156"
+						"updated": "20240301091400"
 					},
 					"Children": [
 						{
@@ -129,7 +129,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230805232156-tliw65p",
-								"updated": "20230805232156"
+								"updated": "20240301091400"
 							},
 							"Children": [
 								{
@@ -151,6 +151,20 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://koofr.eu/",
 									"TextMarkTextContent": "Koofr"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (Nutstore WebDAV is not supported because of its "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
+									"TextMarkTextContent": "interface limitations"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ")"
 								}
 							]
 						}

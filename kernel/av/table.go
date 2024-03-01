@@ -101,6 +101,18 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other.Number {
+			if value.Number.IsNotEmpty {
+				if !other.Number.IsNotEmpty {
+					return 1
+				}
+				return 0
+			} else {
+				if other.Number.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+
 			if value.Number.Content > other.Number.Content {
 				return 1
 			} else if value.Number.Content < other.Number.Content {
@@ -111,6 +123,18 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
+			if value.Date.IsNotEmpty {
+				if !other.Date.IsNotEmpty {
+					return 1
+				}
+				return 0
+			} else {
+				if other.Date.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+
 			if value.Date.Content > other.Date.Content {
 				return 1
 			} else if value.Date.Content < other.Date.Content {
@@ -384,13 +408,34 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			var relativeTime time.Time
 			switch unit {
 			case RelativeDateUnitDay:
-				relativeTime = now.AddDate(0, 0, count*direction)
+				relativeTime = now.AddDate(0, 0, count*int(direction))
+				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
+					// 计算今天的起始时间
+					relativeTime = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+				}
+
 			case RelativeDateUnitWeek:
-				relativeTime = now.AddDate(0, 0, count*7*direction)
+				relativeTime = now.AddDate(0, 0, count*7*int(direction))
+				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
+					// 计算本周的起始时间
+					weekday := int(now.Weekday())
+					if 0 == weekday {
+						weekday = 7
+					}
+					relativeTime = time.Date(now.Year(), now.Month(), now.Day()-weekday+1, 0, 0, 0, 0, now.Location())
+				}
 			case RelativeDateUnitMonth:
-				relativeTime = now.AddDate(0, count*direction, 0)
+				relativeTime = now.AddDate(0, count*int(direction), 0)
+				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
+					// 计算本月的起始时间
+					relativeTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+				}
 			case RelativeDateUnitYear:
-				relativeTime = now.AddDate(count*direction, 0, 0)
+				relativeTime = now.AddDate(count*int(direction), 0, 0)
+				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
+					// 计算今年的起始时间
+					relativeTime = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+				}
 			}
 
 			valueTime := time.UnixMilli(value.Date.Content)
@@ -412,13 +457,33 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 				unit2 := filter.RelativeDate2.Unit
 				switch unit2 {
 				case RelativeDateUnitDay:
-					relativeTime2 = now.AddDate(0, 0, count*direction)
+					relativeTime2 = now.AddDate(0, 0, count*int(direction))
+					if RelativeDateDirectionThis == direction {
+						// 计算今天的结束时间
+						relativeTime2 = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
+					}
 				case RelativeDateUnitWeek:
-					relativeTime2 = now.AddDate(0, 0, count*7*direction)
+					relativeTime2 = now.AddDate(0, 0, count*7*int(direction))
+					if RelativeDateDirectionThis == direction {
+						// 计算本周的结束时间
+						weekday := int(now.Weekday())
+						if 0 == weekday {
+							weekday = 7
+						}
+						relativeTime2 = time.Date(now.Year(), now.Month(), now.Day()-weekday+7, 23, 59, 59, 999999999, now.Location())
+					}
 				case RelativeDateUnitMonth:
-					relativeTime2 = now.AddDate(0, count*direction, 0)
+					relativeTime2 = now.AddDate(0, count*int(direction), 0)
+					if RelativeDateDirectionThis == direction {
+						// 计算本月的结束时间
+						relativeTime2 = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
+					}
 				case RelativeDateUnitYear:
-					relativeTime2 = now.AddDate(count*direction, 0, 0)
+					relativeTime2 = now.AddDate(count*int(direction), 0, 0)
+					if RelativeDateDirectionThis == direction {
+						// 计算今年的结束时间
+						relativeTime2 = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
+					}
 				}
 				return (valueTime.After(relativeTime) || valueTime.Equal(relativeTime)) && (valueTime.Before(relativeTime2) || valueTime.Equal(relativeTime2))
 			}

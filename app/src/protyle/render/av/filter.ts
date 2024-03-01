@@ -72,7 +72,7 @@ export const setFilter = async (options: {
     }
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const selectElement = window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement;
+        const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: undefined,
@@ -84,14 +84,30 @@ export const setFilter = async (options: {
         let hasMatch = false;
         if (textElements.length > 0) {
             if (["date", "updated", "created"].includes(filterType)) {
-                newFilter.value = genCellValue(filterType, {
-                    isNotEmpty2: textElements[1].value !== "",
-                    isNotEmpty: textElements[0].value !== "",
-                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
-                    content2: textElements[1].value ? new Date(textElements[1].value + " 00:00").getTime() : null,
-                    hasEndDate: newFilter.operator === "Is between",
-                    isNotTime: true,
-                });
+                const typeElements = menu.element.querySelectorAll('.b3-select[data-type="dataType"]') as NodeListOf<HTMLSelectElement>;
+                const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
+                if (typeElements[0].value === "custom") {
+                    newFilter.relativeDate = {
+                        count: parseInt((directElements[0].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                        unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
+                        direction: parseInt(directElements[0].value)
+                    }
+                } else if (typeElements[1].value === "custom") {
+                    newFilter.relativeDate2 = {
+                        count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                        unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
+                        direction: parseInt(directElements[1].value)
+                    };
+                } else {
+                    newFilter.value = genCellValue(filterType, {
+                        isNotEmpty2: textElements[1].value !== "",
+                        isNotEmpty: textElements[0].value !== "",
+                        content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
+                        content2: textElements[1].value ? new Date(textElements[1].value + " 00:00").getTime() : null,
+                        hasEndDate: newFilter.operator === "Is between",
+                        isNotTime: true,
+                    });
+                }
             } else {
                 newFilter.value = genCellValue(filterType, textElements[0].value);
             }

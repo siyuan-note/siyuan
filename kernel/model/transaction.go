@@ -277,6 +277,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUpdateAttrViewColRelation(op)
 		case "updateAttrViewColRollup":
 			ret = tx.doUpdateAttrViewColRollup(op)
+		case "hideAttrViewName":
+			ret = tx.doHideAttrViewName(op)
 		}
 
 		if nil != ret {

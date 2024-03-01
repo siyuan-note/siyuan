@@ -663,6 +663,7 @@ export const openMenuPanel = (options: {
                             id: data.viewID,
                             data: false
                         }]);
+                        options.blockElement.querySelector(".av__title").classList.add("av__title--hide");
                     } else {
                         transaction(options.protyle, [{
                             action: "hideAttrViewName",
@@ -675,8 +676,8 @@ export const openMenuPanel = (options: {
                             id: data.viewID,
                             data: true
                         }]);
+                        options.blockElement.querySelector(".av__title").classList.remove("av__title--hide");
                     }
-                    options.blockElement.querySelector(".av__title").classList.add("fn__none");
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

@@ -57,6 +57,13 @@
       color: var(--b3-theme-on-surface);
       content: attr(data-tip);
     }
+
+    &--hide {
+      width: 0.1px;
+      overflow: hidden;
+      height: 0;
+      min-height: 0.1px !important;
+    }
   }
 
   &__counter {

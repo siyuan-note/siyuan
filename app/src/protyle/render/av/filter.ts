@@ -348,7 +348,7 @@ export const setFilter = async (options: {
     <div class="fn__size200">
         <select class="b3-select fn__block" data-type="dataType">
             <option value="time"${!options.filter.relativeDate ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
-            <option value="custom"${options.filter.relativeDate ? " selected" : ""}>${window.siyuan.languages.custom}</option>
+            <option value="custom"${options.filter.relativeDate ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
         </select>
     </div>
     <div class="fn__hr"></div>
@@ -378,7 +378,7 @@ export const setFilter = async (options: {
     <div class="fn__size200">
         <select class="b3-select fn__block" data-type="dataType">
             <option value="time"${!options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
-            <option value="custom"${options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.custom}</option>
+            <option value="custom"${options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
         </select>
     </div>
     <div class="fn__hr"></div>

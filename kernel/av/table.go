@@ -101,6 +101,18 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other.Number {
+			if value.Number.IsNotEmpty {
+				if !other.Number.IsNotEmpty {
+					return 1
+				}
+				return 0
+			} else {
+				if other.Number.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+
 			if value.Number.Content > other.Number.Content {
 				return 1
 			} else if value.Number.Content < other.Number.Content {
@@ -111,6 +123,18 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
+			if value.Date.IsNotEmpty {
+				if !other.Date.IsNotEmpty {
+					return 1
+				}
+				return 0
+			} else {
+				if other.Date.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+
 			if value.Date.Content > other.Date.Content {
 				return 1
 			} else if value.Date.Content < other.Date.Content {

@@ -149,6 +149,13 @@ export const getViewHTML = (data: IAVTable) => {
     <span class="b3-menu__accelerator">${data.pageSize}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
+<button class="b3-menu__item">
+    <div class="b3-menu__label fn__flex">
+        <svg class="b3-menu__icon"></svg>
+        <span class="b3-menu__label">${window.siyuan.languages.title}</span>
+    </div>
+    <svg class="b3-menu__action" data-type="toggle-view-title"><use xlink:href="#iconEye${data.hideAttrViewName ? "" : "off"}"></use></svg>
+</button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="duplicate-view">
     <svg class="b3-menu__icon">

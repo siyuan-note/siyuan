@@ -649,6 +649,38 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "toggle-view-title") {
+                    if (target.firstElementChild.getAttribute("xlink:href") === "#iconEyeoff") {
+                        // hide
+                        transaction(options.protyle, [{
+                            action: "hideAttrViewName",
+                            avID,
+                            id: data.viewID,
+                            data: true
+                        }], [{
+                            action: "hideAttrViewName",
+                            avID,
+                            id: data.viewID,
+                            data: false
+                        }]);
+                    } else {
+                        transaction(options.protyle, [{
+                            action: "hideAttrViewName",
+                            avID,
+                            id: data.viewID,
+                            data: false
+                        }], [{
+                            action: "hideAttrViewName",
+                            avID,
+                            id: data.viewID,
+                            data: true
+                        }]);
+                    }
+                    options.blockElement.querySelector(".av__title").classList.add("fn__none");
+                    avPanelElement.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "duplicate-view") {
                     const id = Lute.NewNodeID();
                     transaction(options.protyle, [{
@@ -1123,7 +1155,7 @@ const getPropertiesHTML = (data: IAVTable) => {
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${item.name}
     </div>
-    <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEyeoff"></use></svg>
+    <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEye"></use></svg>
     <svg class="b3-menu__action" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         } else {
@@ -1133,7 +1165,7 @@ const getPropertiesHTML = (data: IAVTable) => {
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${item.name}
     </div>
-    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEye"></use></svg>
+    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEyeoff"></use></svg>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         }

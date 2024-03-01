@@ -99,6 +99,8 @@ export class Dialog {
                 return true;
             }
         });
+        // https://github.com/siyuan-note/siyuan/issues/10475
+        document.getElementById("drag")?.classList.remove("fn__hidden");
     }
 
     public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void, bindEnter = true) {

@@ -729,13 +729,14 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
-		ID:      view.ID,
-		Icon:    view.Icon,
-		Name:    view.Name,
-		Columns: []*av.TableColumn{},
-		Rows:    []*av.TableRow{},
-		Filters: view.Table.Filters,
-		Sorts:   view.Table.Sorts,
+		ID:               view.ID,
+		Icon:             view.Icon,
+		Name:             view.Name,
+		HideAttrViewName: view.HideAttrViewName,
+		Columns:          []*av.TableColumn{},
+		Rows:             []*av.TableRow{},
+		Filters:          view.Table.Filters,
+		Sorts:            view.Table.Sorts,
 	}
 
 	// 组装列
@@ -1332,6 +1333,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	view.Icon = masterView.Icon
 	view.Name = attrView.GetDuplicateViewName(masterView.Name)
 	view.LayoutType = masterView.LayoutType
+	view.HideAttrViewName = masterView.HideAttrViewName
 
 	for _, col := range masterView.Table.Columns {
 		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{

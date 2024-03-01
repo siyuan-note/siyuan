@@ -815,15 +815,16 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 
 // Table 描述了表格实例的结构。
 type Table struct {
-	ID       string         `json:"id"`       // 表格布局 ID
-	Icon     string         `json:"icon"`     // 表格图标
-	Name     string         `json:"name"`     // 表格名称
-	Filters  []*ViewFilter  `json:"filters"`  // 过滤规则
-	Sorts    []*ViewSort    `json:"sorts"`    // 排序规则
-	Columns  []*TableColumn `json:"columns"`  // 表格列
-	Rows     []*TableRow    `json:"rows"`     // 表格行
-	RowCount int            `json:"rowCount"` // 表格总行数
-	PageSize int            `json:"pageSize"` // 每页行数
+	ID               string         `json:"id"`               // 表格布局 ID
+	Icon             string         `json:"icon"`             // 表格图标
+	Name             string         `json:"name"`             // 表格名称
+	HideAttrViewName bool           `json:"hideAttrViewName"` // 是否隐藏属性视图名称
+	Filters          []*ViewFilter  `json:"filters"`          // 过滤规则
+	Sorts            []*ViewSort    `json:"sorts"`            // 排序规则
+	Columns          []*TableColumn `json:"columns"`          // 表格列
+	Rows             []*TableRow    `json:"rows"`             // 表格行
+	RowCount         int            `json:"rowCount"`         // 表格总行数
+	PageSize         int            `json:"pageSize"`         // 每页行数
 }
 
 type TableColumn struct {

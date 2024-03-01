@@ -304,7 +304,7 @@ func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView,
 }
 
 func (value *Value) compareOperator(filter *ViewFilter) bool {
-	if nil == filter || nil == filter.RelativeDate || nil == filter.Value {
+	if nil == filter || nil == filter.Value {
 		return true
 	}
 

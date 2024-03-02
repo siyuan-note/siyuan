@@ -1933,7 +1933,8 @@ func processKaTexMacros(n *ast.Node) {
 	mathContent = escapeKaTexSupportedFunctions(mathContent)
 	usedMacros := extractUsedMacros(mathContent, &keys)
 	for _, usedMacro := range usedMacros {
-		expanded := resolveKaTexMacro(usedMacro, &macros, &keys)
+		depth := 1
+		expanded := resolveKaTexMacro(usedMacro, &macros, &keys, &depth)
 		expanded = unescapeKaTexSupportedFunctions(expanded)
 		mathContent = strings.ReplaceAll(mathContent, usedMacro, expanded)
 	}

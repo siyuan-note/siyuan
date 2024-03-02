@@ -908,13 +908,19 @@ func init() {
 	sort.Slice(katexSupportedFunctions, func(i, j int) bool { return len(katexSupportedFunctions[i]) > len(katexSupportedFunctions[j]) })
 }
 
-func resolveKaTexMacro(macroName string, macros *map[string]string, keys *[]string) string {
+func resolveKaTexMacro(macroName string, macros *map[string]string, keys *[]string, depth *int) string {
 	v := (*macros)[macroName]
+	if *depth > 16 {
+		// Limit KaTex macro maximum recursive parsing depth is 16 https://github.com/siyuan-note/siyuan/issues/10484
+		return v
+	}
+
 	sort.Slice(*keys, func(i, j int) bool { return len((*keys)[i]) > len((*keys)[j]) })
+	*depth++
 	for _, k := range *keys {
 		escaped := escapeKaTexSupportedFunctions(v)
 		if strings.Contains(escaped, k) {
-			escaped = strings.ReplaceAll(escaped, k, resolveKaTexMacro(k, macros, keys))
+			escaped = strings.ReplaceAll(escaped, k, resolveKaTexMacro(k, macros, keys, depth))
 			v = unescapeKaTexSupportedFunctions(escaped)
 			(*macros)[macroName] = v
 		}

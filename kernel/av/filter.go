@@ -17,8 +17,9 @@
 package av
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Filterable interface {
@@ -51,8 +52,8 @@ const (
 )
 
 type RelativeDate struct {
-	Count     int             `json:"count"`      // 数量
-	Unit      RelativeDateUnit `json:"unit"`     // 单位：0 天、1 周、2 月、3 年
+	Count     int                   `json:"count"`     // 数量
+	Unit      RelativeDateUnit      `json:"unit"`      // 单位：0 天、1 周、2 月、3 年
 	Direction RelativeDateDirection `json:"direction"` // 方向：-1 前、0 这、1 后
 }
 

@@ -628,59 +628,6 @@
 			"AttributeViewType": "table"
 		},
 		{
-			"ID": "20240208163259-grav8dt",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240208163259-grav8dt",
-				"updated": "20240208163743"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "限制："
-				}
-			]
-		},
-		{
-			"ID": "20240208163744-adnusw0",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20240208163744-adnusw0",
-				"updated": "20240208164314"
-			},
-			"Children": [
-				{
-					"ID": "20240208163744-wqpsu75",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240208163744-wqpsu75",
-						"updated": "20240208164314"
-					},
-					"Children": [
-						{
-							"ID": "20240208163744-mvchkvw",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240208163744-mvchkvw",
-								"updated": "20240208164314"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "模板不支持访问汇总和其他模板属性"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20240208164400-bj6bcvj",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -304,6 +304,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 
 			// 补全值的创建时间和更新时间
+			if "" == v.ID {
+				v.ID = ast.NewNodeID()
+			}
 			createdStr := v.ID[:len("20060102150405")]
 			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 			if nil == parseErr {

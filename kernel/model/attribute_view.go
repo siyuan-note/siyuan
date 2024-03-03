@@ -612,6 +612,10 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 
 		// 补全值的创建时间和更新时间
 		for _, v := range kv.Values {
+			if "" == v.ID {
+				v.ID = ast.NewNodeID()
+			}
+
 			createdStr := v.ID[:len("20060102150405")]
 			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 			if nil == parseErr {

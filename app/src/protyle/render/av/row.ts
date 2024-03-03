@@ -113,13 +113,6 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
                     cellElement.innerHTML = renderCell(cellValue);
                     renderCellAttr(cellElement, cellValue);
                 });
-                response.data.sorts.forEach((item: IAVSort) => {
-                    const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
-                    const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
-                    const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
-                    cellElement.innerHTML = renderCell(cellValue);
-                    renderCellAttr(cellElement, cellValue);
-                });
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             });
         } else {

@@ -79,21 +79,19 @@ export const setFilter = async (options: {
         let hasMatch = false;
         if (textElements.length > 0) {
             if (["date", "updated", "created"].includes(filterType)) {
-                const typeElements = menu.element.querySelectorAll('.b3-select[data-type="dateType"]') as NodeListOf<HTMLSelectElement>;
+                const typeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
                 const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
-                if (typeElements[0].value === "custom") {
+                if (typeElement.value === "custom") {
                     newFilter.relativeDate = {
                         count: parseInt((directElements[0].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
                         unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
                         direction: parseInt(directElements[0].value)
                     };
-                    if (typeElements[1].value === "custom") {
-                        newFilter.relativeDate2 = {
-                            count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
-                            unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
-                            direction: parseInt(directElements[1].value)
-                        };
-                    }
+                    newFilter.relativeDate2 = {
+                        count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                        unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
+                        direction: parseInt(directElements[1].value)
+                    };
                 } else {
                     newFilter.value = genCellValue(filterType, {
                         isNotEmpty2: textElements[1].value !== "",
@@ -373,13 +371,6 @@ export const setFilter = async (options: {
 </div>
 <div data-type="filter2 fn__none">
     <div class="fn__hr--small"></div>
-    <div class="fn__size200">
-        <select class="b3-select fn__block" data-type="dateType">
-            <option value="time"${!options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
-            <option value="custom"${options.filter.relativeDate2 ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
-        </select>
-    </div>
-    <div class="fn__hr"></div>
     <div class="fn__size200 ${options.filter.relativeDate2 ? "fn__none" : ""}">
         <input value="${(dateValue && dateValue.isNotEmpty2) ? dayjs(dateValue.content2).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
     </div>
@@ -433,30 +424,24 @@ export const setFilter = async (options: {
     selectElement.addEventListener("change", () => {
         toggleEmpty(selectElement, selectElement.value, filterType);
     });
-    const dateTypeElements = menu.element.querySelectorAll('.b3-select[data-type="dateType"]') as NodeListOf<HTMLSelectElement>;
-    dateTypeElements.forEach((item) => {
-        item.addEventListener("change", () => {
-            const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]');
-            const customerElement = directionElements[0].parentElement;
-            const customer2Element = directionElements[1].parentElement;
-            const timeElement = customerElement.previousElementSibling;
-            const time2Element = customer2Element.previousElementSibling;
-            if (item.value === "custom") {
-                customerElement.classList.remove("fn__none");
-                customer2Element.classList.remove("fn__none");
-                timeElement.classList.add("fn__none");
-                time2Element.classList.add("fn__none");
-                dateTypeElements[0].value = "custom";
-                dateTypeElements[1].value = "custom";
-            } else {
-                customerElement.classList.add("fn__none");
-                customer2Element.classList.add("fn__none");
-                timeElement.classList.remove("fn__none");
-                time2Element.classList.remove("fn__none");
-                dateTypeElements[0].value = "time";
-                dateTypeElements[1].value = "time";
-            }
-        });
+    const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
+    dateTypeElement.addEventListener("change", () => {
+        const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]');
+        const customerElement = directionElements[0].parentElement;
+        const customer2Element = directionElements[1].parentElement;
+        const timeElement = customerElement.previousElementSibling;
+        const time2Element = customer2Element.previousElementSibling;
+        if (dateTypeElement.value === "custom") {
+            customerElement.classList.remove("fn__none");
+            customer2Element.classList.remove("fn__none");
+            timeElement.classList.add("fn__none");
+            time2Element.classList.add("fn__none");
+        } else {
+            customerElement.classList.add("fn__none");
+            customer2Element.classList.add("fn__none");
+            timeElement.classList.remove("fn__none");
+            time2Element.classList.remove("fn__none");
+        }
     });
     menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]').forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {

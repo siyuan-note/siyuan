@@ -84,10 +84,18 @@ const (
 
 func (value *Value) Compare(other *Value) int {
 	if nil == value {
-		return -1
+		return 1
 	}
 	if nil == other {
+		return -1
+	}
+
+	if !value.IsEdited() {
 		return 1
+	}
+
+	if !other.IsEdited() {
+		return -1
 	}
 
 	switch value.Type {

@@ -37,6 +37,9 @@ type Value struct {
 	Type       KeyType `json:"type,omitempty"`
 	IsDetached bool    `json:"isDetached,omitempty"`
 
+	CreatedAt int64 `json:"createdAt,omitempty"`
+	UpdatedAt int64 `json:"updatedAt,omitempty"`
+
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
 	Number   *ValueNumber   `json:"number,omitempty"`
@@ -178,6 +181,14 @@ func (value *Value) Clone() (ret *Value) {
 		return
 	}
 	return
+}
+
+func (value *Value) IsEdited() bool {
+	if value.CreatedAt == value.UpdatedAt {
+		// 说明是刚刚创建的块
+		return false
+	}
+	return true
 }
 
 type ValueBlock struct {

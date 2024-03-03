@@ -269,7 +269,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					}
 				}
 				if 0 == v.Block.Updated {
-					v.Block.Updated = now
+					v.Block.Updated = v.Block.Created
 				}
 			}
 		case KeyTypeNumber:
@@ -301,6 +301,19 @@ func SaveAttributeView(av *AttributeView) (err error) {
 						}
 					}
 				}
+			}
+
+			// 补全值的创建时间和更新时间
+			createdStr := v.ID[:len("20060102150405")]
+			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+			if nil == parseErr {
+				v.CreatedAt = created.UnixMilli()
+			} else {
+				v.CreatedAt = now
+			}
+
+			if 0 == v.UpdatedAt {
+				v.UpdatedAt = v.CreatedAt
 			}
 		}
 	}

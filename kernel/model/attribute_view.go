@@ -1728,6 +1728,10 @@ func addAttributeViewBlock(avID, previousBlockID, blockID string, isDetached boo
 								continue
 							}
 
+							if av.KeyTypeRollup == cell.ValueType || av.KeyTypeRelation == cell.ValueType || av.KeyTypeCreated == cell.ValueType || av.KeyTypeUpdated == cell.ValueType || av.KeyTypeTemplate == cell.ValueType {
+								continue
+							}
+
 							newValue := cell.Value.Clone()
 							newValue.ID = ast.NewNodeID()
 							newValue.BlockID = blockID

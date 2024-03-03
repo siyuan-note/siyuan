@@ -410,7 +410,8 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			case FilterOperatorIsLessOrEqual:
 				return valueTime.Before(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
 			case FilterOperatorIsBetween:
-				return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
+				_, relativeTime2End := calcRelativeTimeRegion(filter.RelativeDate2.Count, filter.RelativeDate2.Unit, filter.RelativeDate2.Direction)
+				return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTime2End) || valueTime.Equal(relativeTime2End))
 			}
 		} else { // 使用具体时间比较
 			if nil != filter.Value.Date {

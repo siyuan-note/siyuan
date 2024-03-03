@@ -1738,6 +1738,9 @@ func addAttributeViewBlock(avID, previousBlockID, blockID string, isDetached boo
 			for _, keyValues := range attrView.KeyValues {
 				if keyValues.Key.ID == filter.Column {
 					newValue := filter.GetAffectValue(keyValues.Key)
+					if nil == newValue {
+						continue
+					}
 					newValue.ID = ast.NewNodeID()
 					newValue.KeyID = keyValues.Key.ID
 					newValue.BlockID = blockID

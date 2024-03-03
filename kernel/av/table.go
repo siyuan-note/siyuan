@@ -294,7 +294,7 @@ func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView,
 }
 
 func (value *Value) compareOperator(filter *ViewFilter) bool {
-	if nil == filter || nil == filter.Value {
+	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
 
@@ -403,7 +403,6 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 					// 计算今天的起始时间
 					relativeTime = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 				}
-
 			case RelativeDateUnitWeek:
 				relativeTime = now.AddDate(0, 0, count*7*int(direction))
 				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {

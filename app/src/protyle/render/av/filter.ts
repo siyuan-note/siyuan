@@ -568,15 +568,16 @@ export const getFiltersHTML = (data: IAVTable) => {
                         dateValue = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate.direction + 1]]}
  ${filter.relativeDate.direction ? filter.relativeDate.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate.unit]]}`;
+                    } else if (filter.value?.date?.content) {
+                        dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
+                        dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");
                     }
                     if (filter.relativeDate2) {
                         dateValue2 = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate2.direction + 1]]}
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
-                    } else {
-                        dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");
                     }
+
                     if (filter.operator === "Is between") {
                         filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                     } else if ("=" === filter.operator) {

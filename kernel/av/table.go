@@ -387,96 +387,36 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 		}
 	}
 
-	if nil != value.Date && nil != filter.Value.Date {
+	if nil != value.Date {
 		if nil != filter.RelativeDate {
 			// 使用相对时间比较
 
 			count := filter.RelativeDate.Count
 			unit := filter.RelativeDate.Unit
 			direction := filter.RelativeDate.Direction
-			now := time.Now()
-			var relativeTime time.Time
-			switch unit {
-			case RelativeDateUnitDay:
-				relativeTime = now.AddDate(0, 0, count*int(direction))
-				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
-					// 计算今天的起始时间
-					relativeTime = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-				}
-			case RelativeDateUnitWeek:
-				relativeTime = now.AddDate(0, 0, count*7*int(direction))
-				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
-					// 计算本周的起始时间
-					weekday := int(now.Weekday())
-					if 0 == weekday {
-						weekday = 7
-					}
-					relativeTime = time.Date(now.Year(), now.Month(), now.Day()-weekday+1, 0, 0, 0, 0, now.Location())
-				}
-			case RelativeDateUnitMonth:
-				relativeTime = now.AddDate(0, count*int(direction), 0)
-				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
-					// 计算本月的起始时间
-					relativeTime = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-				}
-			case RelativeDateUnitYear:
-				relativeTime = now.AddDate(count*int(direction), 0, 0)
-				if FilterOperatorIsBetween == operator && RelativeDateDirectionThis == direction {
-					// 计算今年的起始时间
-					relativeTime = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-				}
-			}
-
 			valueTime := time.UnixMilli(value.Date.Content)
+			relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
 			switch operator {
 			case FilterOperatorIsEqual:
-				return valueTime.Equal(relativeTime)
+				return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
 			case FilterOperatorIsNotEqual:
-				return !valueTime.Equal(relativeTime)
+				return !(valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) || !(valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
 			case FilterOperatorIsGreater:
-				return valueTime.After(relativeTime)
+				return valueTime.After(relativeTimeEnd)
 			case FilterOperatorIsGreaterOrEqual:
-				return valueTime.After(relativeTime) || valueTime.Equal(relativeTime)
+				return valueTime.After(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd)
 			case FilterOperatorIsLess:
-				return valueTime.Before(relativeTime)
+				return valueTime.Before(relativeTimeStart)
 			case FilterOperatorIsLessOrEqual:
-				return valueTime.Before(relativeTime) || valueTime.Equal(relativeTime)
+				return valueTime.Before(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
 			case FilterOperatorIsBetween:
-				var relativeTime2 time.Time // 如果是区间查询，需要计算第二个相对时间
-				unit2 := filter.RelativeDate2.Unit
-				switch unit2 {
-				case RelativeDateUnitDay:
-					relativeTime2 = now.AddDate(0, 0, count*int(direction))
-					if RelativeDateDirectionThis == direction {
-						// 计算今天的结束时间
-						relativeTime2 = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
-					}
-				case RelativeDateUnitWeek:
-					relativeTime2 = now.AddDate(0, 0, count*7*int(direction))
-					if RelativeDateDirectionThis == direction {
-						// 计算本周的结束时间
-						weekday := int(now.Weekday())
-						if 0 == weekday {
-							weekday = 7
-						}
-						relativeTime2 = time.Date(now.Year(), now.Month(), now.Day()-weekday+7, 23, 59, 59, 999999999, now.Location())
-					}
-				case RelativeDateUnitMonth:
-					relativeTime2 = now.AddDate(0, count*int(direction), 0)
-					if RelativeDateDirectionThis == direction {
-						// 计算本月的结束时间
-						relativeTime2 = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
-					}
-				case RelativeDateUnitYear:
-					relativeTime2 = now.AddDate(count*int(direction), 0, 0)
-					if RelativeDateDirectionThis == direction {
-						// 计算今年的结束时间
-						relativeTime2 = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
-					}
-				}
-				return (valueTime.After(relativeTime) || valueTime.Equal(relativeTime)) && (valueTime.Before(relativeTime2) || valueTime.Equal(relativeTime2))
+				return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
 			}
-		} else {
+		} else { // 使用具体时间比较
+			if nil != filter.Value.Date {
+				return true
+			}
+
 			switch operator {
 			case FilterOperatorIsEqual:
 				if !filter.Value.Date.IsNotEmpty {
@@ -798,8 +738,91 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			return 0 != len(value.Relation.Contents) && !(1 == len(value.Relation.Contents) && "" == value.Relation.Contents[0])
 		}
 	}
-
 	return false
+}
+
+// 根据 Count、Unit 和 Direction 计算相对当前时间的开始时间和结束时间
+func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction RelativeDateDirection) (start, end time.Time) {
+	now := time.Now()
+	switch unit {
+	case RelativeDateUnitDay:
+		switch direction {
+		case RelativeDateDirectionBefore:
+			// 结束时间使用今天的开始时间
+			end = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+			// 开始时间使用结束时间减去 count 天
+			start = end.AddDate(0, 0, -count)
+		case RelativeDateDirectionThis:
+			// 开始时间使用今天的开始时间
+			start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+			// 结束时间使用开始时间加上 count 天
+			end = start.AddDate(0, 0, count)
+		case RelativeDateDirectionAfter:
+			// 开始时间使用今天的结束时间
+			start = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
+			// 结束时间使用开始时间加上 count 天
+			end = start.AddDate(0, 0, count)
+		}
+	case RelativeDateUnitWeek:
+		weekday := int(now.Weekday())
+		if 0 == weekday {
+			weekday = 7
+		}
+		switch direction {
+		case RelativeDateDirectionBefore:
+			// 结束时间使用本周的开始时间
+			end = time.Date(now.Year(), now.Month(), now.Day()-weekday, 0, 0, 0, 0, now.Location())
+			// 开始时间使用结束时间减去 count*7 天
+			start = end.AddDate(0, 0, -count*7)
+		case RelativeDateDirectionThis:
+			// 开始时间使用本周的开始时间
+			start = time.Date(now.Year(), now.Month(), now.Day()-weekday, 0, 0, 0, 0, now.Location())
+			// 结束时间使用开始时间加上 count*7 天
+			end = start.AddDate(0, 0, count*7)
+		case RelativeDateDirectionAfter:
+			//  开始时间使用本周的结束时间
+			start = time.Date(now.Year(), now.Month(), now.Day()-weekday+7, 23, 59, 59, 999999999, now.Location())
+			// 结束时间使用开始时间加上 count*7 天
+			end = start.AddDate(0, 0, count*7)
+		}
+	case RelativeDateUnitMonth:
+		switch direction {
+		case RelativeDateDirectionBefore:
+			// 结束时间使用本月的开始时间
+			end = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+			// 开始时间使用结束时间减去 count 个月
+			start = end.AddDate(0, -count, 0)
+		case RelativeDateDirectionThis:
+			// 开始时间使用本月的开始时间
+			start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+			// 结束时间使用开始时间加上 count 个月
+			end = start.AddDate(0, count, 0)
+		case RelativeDateDirectionAfter:
+			// 开始时间使用本月的结束时间
+			start = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
+			// 结束时间使用开始时间加上 count 个月
+			end = start.AddDate(0, count, 0)
+		}
+	case RelativeDateUnitYear:
+		switch direction {
+		case RelativeDateDirectionBefore:
+			// 结束时间使用今年的开始时间
+			end = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+			// 开始时间使用结束时间减去 count 年
+			start = end.AddDate(-count, 0, 0)
+		case RelativeDateDirectionThis:
+			// 开始时间使用今年的开始时间
+			start = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+			// 结束时间使用开始时间加上 count 年
+			end = start.AddDate(count, 0, 0)
+		case RelativeDateDirectionAfter:
+			// 开始时间使用今年的结束时间
+			start = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
+			// 结束时间使用开始时间加上 count 年
+			end = start.AddDate(count, 0, 0)
+		}
+	}
+	return
 }
 
 // Table 描述了表格实例的结构。

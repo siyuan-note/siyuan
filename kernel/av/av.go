@@ -321,8 +321,6 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	// 数据订正
-
 	// 值去重
 	blockValues := av.GetBlockKeyValues()
 	blockIDs := map[string]bool{}

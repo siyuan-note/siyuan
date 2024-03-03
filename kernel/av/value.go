@@ -189,10 +189,95 @@ func (value *Value) IsEdited() bool {
 		return true
 	}
 
-	if value.CreatedAt == value.UpdatedAt {
+	if value.IsGenerated() {
+		// 所有生成的数据都认为是编辑过的
+		return true
+	}
+
+	if value.IsEmpty() {
+		// 空数据认为是未编辑过的
 		return false
 	}
-	return true
+	return value.CreatedAt != value.UpdatedAt
+}
+
+func (value *Value) IsGenerated() bool {
+	return KeyTypeTemplate == value.Type || KeyTypeRollup == value.Type || KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type
+}
+
+func (value *Value) IsEmpty() bool {
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil == value.Block {
+			return true
+		}
+		return "" == value.Block.Content
+	case KeyTypeText:
+		if nil == value.Text {
+			return true
+		}
+		return "" == value.Text.Content
+	case KeyTypeNumber:
+		if nil == value.Number {
+			return true
+		}
+		return !value.Number.IsNotEmpty
+	case KeyTypeDate:
+		if nil == value.Date {
+			return true
+		}
+		return !value.Date.IsNotEmpty
+	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return true
+		}
+		return "" == value.MSelect[0].Content
+	case KeyTypeMSelect:
+		return 1 > len(value.MSelect)
+	case KeyTypeURL:
+		if nil == value.URL {
+			return true
+		}
+		return "" == value.URL.Content
+	case KeyTypeEmail:
+		if nil == value.Email {
+			return true
+		}
+		return "" == value.Email.Content
+	case KeyTypePhone:
+		if nil == value.Phone {
+			return true
+		}
+		return "" == value.Phone.Content
+	case KeyTypeMAsset:
+		return 1 > len(value.MAsset)
+	case KeyTypeTemplate:
+		if nil == value.Template {
+			return true
+		}
+		return "" == value.Template.Content
+	case KeyTypeCreated:
+		if nil == value.Created {
+			return true
+		}
+		return !value.Created.IsNotEmpty
+	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return true
+		}
+		return !value.Updated.IsNotEmpty
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return true
+		}
+		return !value.Checkbox.Checked
+	case KeyTypeRelation:
+		return 1 > len(value.Relation.Contents)
+	case KeyTypeRollup:
+		return 1 > len(value.Rollup.Contents)
+	}
+
+	return false
 }
 
 type ValueBlock struct {

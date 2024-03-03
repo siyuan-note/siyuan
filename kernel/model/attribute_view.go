@@ -2594,12 +2594,15 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 
+	now := time.Now().UnixMilli()
 	if nil != blockVal {
-		blockVal.Block.Updated = time.Now().UnixMilli()
+		blockVal.Block.Updated = now
+		blockVal.UpdatedAt = now
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
 		}
 	}
+	val.UpdatedAt = now
 
 	key, _ := attrView.GetKey(val.KeyID)
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation {

@@ -91,10 +91,11 @@ func (value *Value) Compare(other *Value) int {
 	}
 
 	if !value.IsEdited() {
-		return 1
-	}
-
-	if !other.IsEdited() {
+		if other.IsEdited() {
+			return 1
+		}
+		return int(value.CreatedAt - other.CreatedAt)
+	} else if !other.IsEdited() {
 		return -1
 	}
 

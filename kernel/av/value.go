@@ -184,8 +184,12 @@ func (value *Value) Clone() (ret *Value) {
 }
 
 func (value *Value) IsEdited() bool {
+	if 1709454120000 > value.CreatedAt {
+		// 说明是旧数据，认为都是编辑过的
+		return true
+	}
+
 	if value.CreatedAt == value.UpdatedAt {
-		// 说明是刚刚创建的块
 		return false
 	}
 	return true

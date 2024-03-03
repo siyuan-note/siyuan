@@ -504,7 +504,7 @@ export const addFilter = (options: {
     options.data.view.columns.forEach((column) => {
         let filter: IAVFilter;
         options.data.view.filters.find((item) => {
-            if (filter.column === column.id) {
+            if (item.column === column.id) {
                 filter = item;
                 return true;
             }

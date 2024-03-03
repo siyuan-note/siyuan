@@ -87,13 +87,13 @@ export const setFilter = async (options: {
                         unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
                         direction: parseInt(directElements[0].value)
                     };
-                }
-                if (typeElements[1].value === "custom") {
-                    newFilter.relativeDate2 = {
-                        count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
-                        unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
-                        direction: parseInt(directElements[1].value)
-                    };
+                    if (typeElements[1].value === "custom") {
+                        newFilter.relativeDate2 = {
+                            count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                            unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
+                            direction: parseInt(directElements[1].value)
+                        };
+                    }
                 } else {
                     newFilter.value = genCellValue(filterType, {
                         isNotEmpty2: textElements[1].value !== "",
@@ -568,14 +568,14 @@ export const getFiltersHTML = (data: IAVTable) => {
                         dateValue = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate.direction + 1]]}
  ${filter.relativeDate.direction ? filter.relativeDate.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate.unit]]}`;
+                        if (filter.relativeDate2) {
+                            dateValue2 = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate2.direction + 1]]}
+ ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
+ ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
+                        }
                     } else if (filter.value?.date?.content) {
                         dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
                         dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");
-                    }
-                    if (filter.relativeDate2) {
-                        dateValue2 = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate2.direction + 1]]}
- ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
- ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                     }
 
                     if (filter.operator === "Is between") {

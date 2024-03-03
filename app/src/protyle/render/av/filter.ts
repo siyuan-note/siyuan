@@ -29,20 +29,15 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
         if (["date", "updated", "created"].includes(type)) {
             const filterElement = menuElement.querySelector('.b3-menu__item div[data-type="filter1"]');
             const filter2Element = filterElement.nextElementSibling
-            const thisOptionElement = filterElement.querySelector('option[data-type="current"]')
-            const thisOption2Element = filter2Element.querySelector('option[data-type="current"]')
             if (operator === "Is between") {
                 filter2Element.classList.remove("fn__none")
                 filterElement.classList.remove("fn__none")
-                thisOptionElement.classList.remove("fn__none")
-                thisOption2Element.classList.remove("fn__none")
             } else if (operator === "Is empty" || operator === "Is not empty") {
                 filter2Element.classList.add("fn__none")
                 filterElement.classList.add("fn__none")
             } else {
                 filterElement.classList.remove("fn__none")
                 filter2Element.classList.add("fn__none")
-                thisOptionElement.classList.add("fn__none")
             }
             return;
         }
@@ -342,8 +337,8 @@ export const setFilter = async (options: {
         });
     } else if (["date", "updated", "created"].includes(filterType)) {
         const dateValue = options.filter.value ? options.filter.value[filterType as "date"] : null;
-        const showToday = !options.filter.relativeDate?.direction && options.filter.operator === "Is between"
-        const showToday2 = !options.filter.relativeDate2?.direction && options.filter.operator === "Is between"
+        const showToday = !options.filter.relativeDate?.direction;
+        const showToday2 = !options.filter.relativeDate2?.direction;
         menu.addItem({
             iconHTML: "",
             type: "readonly",
@@ -362,7 +357,7 @@ export const setFilter = async (options: {
         <select class="b3-select" data-type="dataDirection">
             <option value="-1"${options.filter.relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
             <option value="1"${options.filter.relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
-            <option value="0" data-type="current"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
+            <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
         <input type="number" min="1" step="1" value="${options.filter.relativeDate?.count || 1}" class="b3-text-field fn__flex-1${showToday ? " fn__none" : ""}"/>
@@ -392,7 +387,7 @@ export const setFilter = async (options: {
         <select class="b3-select" data-type="dataDirection">
             <option value="-1"${options.filter.relativeDate2?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
             <option value="1"${options.filter.relativeDate2?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
-            <option value="0" data-type="current"${showToday2 ? " selected" : ""}>${window.siyuan.languages.current}</option>
+            <option value="0"${showToday2 ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
         <input type="number" min="1" step="1" value="${options.filter.relativeDate2?.count || 1}" class="b3-text-field fn__flex-1${showToday2 ? " fn__none" : ""}"/>

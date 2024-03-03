@@ -644,7 +644,7 @@ export class Wnd {
     private removeOverCounter(isSaveLayout = false) {
         let removeId: string;
         let openTime: string;
-        let removeCount = 0
+        let removeCount = 0;
         this.children.forEach((item, index) => {
             if (item.headElement.classList.contains("item--pin") || item.headElement.classList.contains("item--focus")) {
                 return;

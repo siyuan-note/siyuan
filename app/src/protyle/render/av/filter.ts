@@ -28,16 +28,16 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
     if (menuElement) {
         if (["date", "updated", "created"].includes(type)) {
             const filterElement = menuElement.querySelector('.b3-menu__item div[data-type="filter1"]');
-            const filter2Element = filterElement.nextElementSibling
+            const filter2Element = filterElement.nextElementSibling;
             if (operator === "Is between") {
-                filter2Element.classList.remove("fn__none")
-                filterElement.classList.remove("fn__none")
+                filter2Element.classList.remove("fn__none");
+                filterElement.classList.remove("fn__none");
             } else if (operator === "Is empty" || operator === "Is not empty") {
-                filter2Element.classList.add("fn__none")
-                filterElement.classList.add("fn__none")
+                filter2Element.classList.add("fn__none");
+                filterElement.classList.add("fn__none");
             } else {
-                filterElement.classList.remove("fn__none")
-                filter2Element.classList.add("fn__none")
+                filterElement.classList.remove("fn__none");
+                filter2Element.classList.add("fn__none");
             }
             return;
         }
@@ -86,7 +86,7 @@ export const setFilter = async (options: {
                         count: parseInt((directElements[0].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
                         unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
                         direction: parseInt(directElements[0].value)
-                    }
+                    };
                 }
                 if (typeElements[1].value === "custom") {
                     newFilter.relativeDate2 = {
@@ -436,7 +436,7 @@ export const setFilter = async (options: {
     const dateTypeElements = menu.element.querySelectorAll('.b3-select[data-type="dateType"]') as NodeListOf<HTMLSelectElement>;
     dateTypeElements.forEach((item) => {
         item.addEventListener("change", () => {
-            const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]')
+            const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]');
             const customerElement = directionElements[0].parentElement;
             const customer2Element = directionElements[1].parentElement;
             const timeElement = customerElement.previousElementSibling;
@@ -457,7 +457,7 @@ export const setFilter = async (options: {
                 dateTypeElements[1].value = "time";
             }
         });
-    })
+    });
     menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]').forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
             const countElement = item.nextElementSibling.nextElementSibling;
@@ -469,7 +469,7 @@ export const setFilter = async (options: {
                 countElement.nextElementSibling.classList.remove("fn__none");
             }
         });
-    })
+    });
 
     const textElements: NodeListOf<HTMLInputElement> = menu.element.querySelectorAll(".b3-text-field");
     textElements.forEach(item => {
@@ -572,7 +572,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     if (filter.relativeDate2) {
                         dateValue2 = `${window.siyuan.languages[["pastDate", "current", "nextDate"][filter.relativeDate2.direction + 1]]}
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
- ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`
+ ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                     } else {
                         dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
                         dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");

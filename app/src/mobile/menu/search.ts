@@ -528,7 +528,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 event.preventDefault();
                 break;
             } else if (type === "unRefNext") {
-                const unRefRageElement = unRefElement.querySelector("#searchUnRefResult").lastElementChild
+                const unRefRageElement = unRefElement.querySelector("#searchUnRefResult").lastElementChild;
                 let currentPage = parseInt(unRefRageElement.textContent);
                 if (currentPage < parseInt(unRefRageElement.textContent.split("/")[1])) {
                     currentPage++;
@@ -779,7 +779,7 @@ export const goUnRef = () => {
         return;
     }
     getUnRefListMobile(unRefElement);
-}
+};
 
 const getUnRefListMobile = (element: Element, page = 1) => {
     const previousElement = element.querySelector('[data-type="unRefPrevious"]');
@@ -817,4 +817,4 @@ const getUnRefListMobile = (element: Element, page = 1) => {
     ${window.siyuan.languages.emptyContent}
 </div>`;
     });
-}
+};

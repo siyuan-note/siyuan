@@ -119,7 +119,7 @@ ${getAttr(item)}
     ${window.siyuan.languages.emptyContent}
 </div>`;
     });
-}
+};
 
 export const unRefMoreMenu = (target: Element, element: Element, edit: Protyle) => {
     const menu = new Menu("searchUnRefMore");

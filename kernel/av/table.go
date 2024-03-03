@@ -84,10 +84,18 @@ const (
 
 func (value *Value) Compare(other *Value) int {
 	if nil == value {
-		return -1
+		return 1
 	}
 	if nil == other {
+		return -1
+	}
+
+	if !value.IsEdited() {
 		return 1
+	}
+
+	if !other.IsEdited() {
+		return -1
 	}
 
 	switch value.Type {
@@ -105,20 +113,19 @@ func (value *Value) Compare(other *Value) int {
 				if !other.Number.IsNotEmpty {
 					return 1
 				}
-				return 0
+
+				if value.Number.Content > other.Number.Content {
+					return 1
+				} else if value.Number.Content < other.Number.Content {
+					return -1
+				} else {
+					return 0
+				}
 			} else {
 				if other.Number.IsNotEmpty {
 					return -1
 				}
-				return 0
-			}
-
-			if value.Number.Content > other.Number.Content {
-				return 1
-			} else if value.Number.Content < other.Number.Content {
-				return -1
-			} else {
-				return 0
+				return int(value.CreatedAt - other.CreatedAt)
 			}
 		}
 	case KeyTypeDate:
@@ -127,20 +134,18 @@ func (value *Value) Compare(other *Value) int {
 				if !other.Date.IsNotEmpty {
 					return 1
 				}
-				return 0
+				if value.Date.Content > other.Date.Content {
+					return 1
+				} else if value.Date.Content < other.Date.Content {
+					return -1
+				} else {
+					return 0
+				}
 			} else {
 				if other.Date.IsNotEmpty {
 					return -1
 				}
-				return 0
-			}
-
-			if value.Date.Content > other.Date.Content {
-				return 1
-			} else if value.Date.Content < other.Date.Content {
-				return -1
-			} else {
-				return 0
+				return int(value.CreatedAt - other.CreatedAt)
 			}
 		}
 	case KeyTypeCreated:
@@ -263,7 +268,7 @@ func (value *Value) Compare(other *Value) int {
 			return strings.Compare(vContent, oContent)
 		}
 	}
-	return 0
+	return int(value.CreatedAt - other.CreatedAt)
 }
 
 func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView, rowID string) bool {

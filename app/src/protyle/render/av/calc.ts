@@ -399,6 +399,7 @@ export const getCalcValue = (column: IAVColumn) => {
 
 export const getNameByOperator = (operator: string, isRollup: boolean) => {
     switch (operator) {
+        case undefined:
         case "":
             return isRollup ? window.siyuan.languages.original : window.siyuan.languages.calcOperatorNone;
         case "Count all":

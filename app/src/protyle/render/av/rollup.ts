@@ -200,7 +200,9 @@ export const bindRollupData = (options: {
                         goSearchRollupTargetElement.querySelector(".b3-menu__accelerator").textContent = item.key.name;
                         const goSearchRollupCalcElement = options.menuElement.querySelector('[data-type="goSearchRollupCalc"]') as HTMLElement;
                         goSearchRollupCalcElement.dataset.colType = item.key.type;
-                        goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
+                        if (oldValue.calc) {
+                            goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
+                        }
                         return true;
                     }
                 });

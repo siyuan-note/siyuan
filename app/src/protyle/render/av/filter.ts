@@ -502,34 +502,31 @@ export const addFilter = (options: {
 }) => {
     const menu = new Menu("av-add-filter");
     options.data.view.columns.forEach((column) => {
-        let hasFilter = false;
-        options.data.view.filters.find((filter) => {
+        let filter: IAVFilter;
+        options.data.view.filters.find((item) => {
             if (filter.column === column.id) {
-                hasFilter = true;
+                filter = item;
                 return true;
             }
         });
-        if (!hasFilter && column.type !== "mAsset") {
+        if (!filter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
                     const cellValue = genCellValue(column.type, "");
-                    options.data.view.filters.push({
+                    filter = {
                         column: column.id,
                         operator: getDefaultOperatorByType(column.type),
                         value: cellValue,
                         type: column.type
-                    });
+                    }
+                    options.data.view.filters.push(filter);
                     options.menuElement.innerHTML = getFiltersHTML(options.data.view);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
-                        filter: {
-                            operator: getDefaultOperatorByType(column.type),
-                            column: column.id,
-                            value: cellValue
-                        },
+                        filter,
                         protyle: options.protyle,
                         data: options.data,
                         target: filterElement,

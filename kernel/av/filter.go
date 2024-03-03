@@ -78,7 +78,15 @@ const (
 )
 
 func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
-	// Improve adding rows of the filtered database table view https://github.com/siyuan-note/siyuan/issues/10025
+	if nil != filter.Value && filter.Value.IsGenerated() {
+		// 自动生成类型的过滤条件不设置默认值
+		return nil
+	}
+
+	if nil == filter.Value && nil != filter.RelativeDate {
+		// 相对日期今天的动态日期不设置默认值
+		return nil
+	}
 
 	ret = filter.Value.Clone()
 	switch filter.Value.Type {

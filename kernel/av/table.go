@@ -83,22 +83,6 @@ const (
 )
 
 func (value *Value) Compare(other *Value) int {
-	if nil == value {
-		return 1
-	}
-	if nil == other {
-		return -1
-	}
-
-	if !value.IsEdited() {
-		if other.IsEdited() {
-			return 1
-		}
-		return int(value.CreatedAt - other.CreatedAt)
-	} else if !other.IsEdited() {
-		return -1
-	}
-
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
@@ -273,7 +257,7 @@ func (value *Value) Compare(other *Value) int {
 }
 
 func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView, rowID string) bool {
-	if nil != value.Rollup && nil != filter.Value.Rollup {
+	if nil != value.Rollup && KeyTypeRollup == filter.Value.Type {
 		rollupKey, _ := attrView.GetKey(value.KeyID)
 		if nil == rollupKey {
 			return false
@@ -904,9 +888,53 @@ func (table *Table) SortRows() {
 		}
 	}
 
-	sort.Slice(table.Rows, func(i, j int) bool {
+	includeUneditedRows := map[string]bool{}
+	for i, row := range table.Rows {
 		for _, colIndexSort := range colIndexSorts {
-			result := table.Rows[i].Cells[colIndexSort.Index].Value.Compare(table.Rows[j].Cells[colIndexSort.Index].Value)
+			val := table.Rows[i].Cells[colIndexSort.Index].Value
+			if !val.IsEdited() {
+				// 如果该行的某个列的值是未编辑的，则该行不参与排序
+				includeUneditedRows[row.ID] = true
+				break
+			}
+		}
+	}
+
+	// 将包含未编辑的行和全部已编辑的行分开排序
+	var uneditedRows, editedRows []*TableRow
+	for _, row := range table.Rows {
+		if _, ok := includeUneditedRows[row.ID]; ok {
+			uneditedRows = append(uneditedRows, row)
+		} else {
+			editedRows = append(editedRows, row)
+		}
+	}
+
+	sort.Slice(uneditedRows, func(i, j int) bool {
+		val1 := uneditedRows[i].GetBlockValue()
+		if nil == val1 {
+			return true
+		}
+		val2 := uneditedRows[j].GetBlockValue()
+		if nil == val2 {
+			return false
+		}
+		return val1.CreatedAt < val2.CreatedAt
+	})
+
+	sort.Slice(editedRows, func(i, j int) bool {
+		for _, colIndexSort := range colIndexSorts {
+			val1 := editedRows[i].Cells[colIndexSort.Index].Value
+			if nil == val1 {
+				return colIndexSort.Order == SortOrderAsc
+			}
+
+			val2 := editedRows[j].Cells[colIndexSort.Index].Value
+			if nil == val2 {
+				return colIndexSort.Order != SortOrderAsc
+			}
+
+			result := val1.Compare(val2)
 			if 0 == result {
 				continue
 			}
@@ -918,6 +946,9 @@ func (table *Table) SortRows() {
 		}
 		return false
 	})
+
+	// 将包含未编辑的行放在最后
+	table.Rows = append(editedRows, uneditedRows...)
 }
 
 func (table *Table) FilterRows(attrView *AttributeView) {

@@ -976,7 +976,23 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 }
 
 func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ av.KeyType) (ret *av.Value) {
+	if "" == valueID {
+		valueID = ast.NewNodeID()
+	}
+
 	ret = &av.Value{ID: valueID, KeyID: keyID, BlockID: blockID, Type: typ}
+
+	createdStr := valueID[:len("20060102150405")]
+	created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+	if nil == parseErr {
+		ret.CreatedAt = created.UnixMilli()
+	} else {
+		ret.CreatedAt = time.Now().UnixMilli()
+	}
+	if 0 == ret.UpdatedAt {
+		ret.UpdatedAt = ret.CreatedAt
+	}
+
 	switch typ {
 	case av.KeyTypeText:
 		ret.Text = &av.ValueText{}

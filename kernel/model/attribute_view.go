@@ -38,6 +38,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func SetDatabaseBlockView(blockID, viewID string) (err error) {
+	node, tree, err := getNodeByBlockID(nil, blockID)
+	if nil != err {
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrView] = viewID
+	err = setNodeAttrs(node, tree, attrs)
+	if nil != err {
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		return
+	}
+	return
+}
+
 func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attributeViewName string, keyValues *av.KeyValues, err error) {
 	waitForSyncingStorages()
 
@@ -564,8 +580,12 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 	var view *av.View
 	if "" != viewID {
 		view = attrView.GetView(viewID)
-		if nil != view && viewID != attrView.ViewID {
-			attrView.ViewID = viewID
+		if nil == view {
+			view, _ = attrView.GetCurrentView()
+		}
+
+		if nil != view && view.ID != attrView.ViewID {
+			attrView.ViewID = view.ID
 			if err = av.SaveAttributeView(attrView); nil != err {
 				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
 				return

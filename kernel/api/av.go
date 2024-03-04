@@ -26,6 +26,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setDatabaseBlockView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	blockID := arg["id"].(string)
+	viewID := arg["viewID"].(string)
+
+	err := model.SetDatabaseBlockView(blockID, viewID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

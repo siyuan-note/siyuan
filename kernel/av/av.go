@@ -524,5 +524,6 @@ var (
 )
 
 const (
-	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrNameAvs = "custom-avs"     // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrView    = "custom-av-view" // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
 )

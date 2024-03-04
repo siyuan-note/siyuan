@@ -91,9 +91,9 @@ func addAttributeViewValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	viewID := ""
-	if viewIDArg := arg["viewID"]; nil != viewIDArg {
-		viewID = viewIDArg.(string)
+	blockID := ""
+	if blockIDArg := arg["blockID"]; nil != blockIDArg {
+		blockID = blockIDArg.(string)
 	}
 	var srcIDs []string
 	for _, v := range arg["srcIDs"].([]interface{}) {
@@ -105,7 +105,7 @@ func addAttributeViewValues(c *gin.Context) {
 	}
 	isDetached := arg["isDetached"].(bool)
 
-	err := model.AddAttributeViewBlock(nil, srcIDs, avID, viewID, previousID, isDetached)
+	err := model.AddAttributeViewBlock(nil, srcIDs, avID, blockID, previousID, isDetached)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

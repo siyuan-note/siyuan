@@ -1345,7 +1345,12 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	if 0 > index {
 		index = 0
 	}
+
 	attrView.ViewID = attrView.Views[index].ID
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
+	}
 
 	mirrorBlocks := av.GetMirrorBlockIDs(avID)
 	mirrorBlockTree := map[string]*parse.Tree{}
@@ -1398,11 +1403,6 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		if err = indexWriteJSONQueue(tree); nil != err {
 			return
 		}
-	}
-
-	if err = av.SaveAttributeView(attrView); nil != err {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
 	}
 	return
 }

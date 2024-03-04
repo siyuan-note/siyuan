@@ -972,6 +972,9 @@ func (table *Table) SortRows() {
 
 	// 将包含未编辑的行放在最后
 	table.Rows = append(editedRows, uneditedRows...)
+	if 1 > len(table.Rows) {
+		table.Rows = []*TableRow{}
+	}
 }
 
 func (table *Table) FilterRows(attrView *AttributeView) {

@@ -2,7 +2,7 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {getInstanceById, getWndByLayout, switchWnd} from "../util";
+import {getInstanceById, getWndByLayout, saveLayout, switchWnd} from "../util";
 import {resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
@@ -158,10 +158,12 @@ export const openOutline = async (protyle: IProtyle) => {
                 isPreview: !protyle.preview.element.classList.contains("fn__none")
             }));
         }
-    }));
-    newWnd.element.classList.remove("fn__flex-1");
-    newWnd.element.style.width = "200px";
+    }), false, false);
     switchWnd(newWnd, wnd);
+    // https://github.com/siyuan-note/siyuan/issues/10500
+    wnd.element.classList.remove("fn__flex-1");
+    wnd.element.style.width = wnd.element.parentElement.clientWidth - 200 + "px";
+    saveLayout();
 };
 
 export const resetFloatDockSize = () => {

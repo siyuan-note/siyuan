@@ -54,6 +54,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 avID: options.blockElement.dataset.avId,
                 id
             }]);
+            options.blockElement.setAttribute("custom-sy-av-view", id)
         }
     });
     menu.addItem({
@@ -204,4 +205,5 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         avID,
         id
     }]);
+    blockElement.setAttribute("custom-sy-av-view", id);
 };

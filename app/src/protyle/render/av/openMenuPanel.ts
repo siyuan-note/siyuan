@@ -694,6 +694,7 @@ export const openMenuPanel = (options: {
                         avID,
                         id
                     }]);
+                    options.blockElement.setAttribute("custom-sy-av-view", id)
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

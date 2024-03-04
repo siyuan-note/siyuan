@@ -54,8 +54,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 newViewID = viewID;
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
                 e.setAttribute("custom-sy-av-view", newViewID);
-            } else if (typeof viewID === "undefined") {
-                newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id");
             }
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
@@ -309,8 +307,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         // 更新属性面板
                         renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                     }
-                }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
-                    (operation.action === "removeAttrViewView" ? null : undefined));
+                });
             });
         }
     }, ["insertAttrViewBlock"].includes(operation.action) ? 2 : 100);

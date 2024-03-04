@@ -53,6 +53,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (typeof viewID === "string") {
                 newViewID = viewID;
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
+                e.setAttribute("custom-sy-av-view", newViewID);
             } else if (typeof viewID === "undefined") {
                 newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id");
             }
@@ -61,7 +62,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
-                viewID: newViewID
+                viewID: newViewID || e.getAttribute("custom-sy-av-view")
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {

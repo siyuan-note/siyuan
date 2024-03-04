@@ -1343,6 +1343,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	mirrorBlocks := av.GetMirrorBlockIDs(avID)
+	mirrorBlockTree := map[string]*parse.Tree{}
 	trees := map[string]*parse.Tree{}
 	for _, mirrorBlock := range mirrorBlocks {
 		bt := treenode.GetBlockTree(mirrorBlock)
@@ -1351,20 +1352,21 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		tree := trees[mirrorBlock]
+		tree := mirrorBlockTree[mirrorBlock]
 		if nil == tree {
 			tree, _ = loadTreeByBlockID(mirrorBlock)
 			if nil == tree {
 				logging.LogErrorf("load tree by block ID [%s] failed", mirrorBlock)
 				continue
 			}
-			trees[mirrorBlock] = tree
+			trees[tree.ID] = tree
+			mirrorBlockTree[mirrorBlock] = tree
 		}
 	}
 
 	var nodes []*ast.Node
 	for _, mirrorBlock := range mirrorBlocks {
-		tree := trees[mirrorBlock]
+		tree := mirrorBlockTree[mirrorBlock]
 		node := treenode.GetNodeInTree(tree, mirrorBlock)
 		if nil == node {
 			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlock)

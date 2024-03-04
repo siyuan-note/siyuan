@@ -425,7 +425,7 @@ export const setFilter = async (options: {
         toggleEmpty(selectElement, selectElement.value, filterType);
     });
     const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
-    dateTypeElement.addEventListener("change", () => {
+    dateTypeElement?.addEventListener("change", () => {
         const directionElements = menu.element.querySelectorAll('[data-type="dataDirection"]');
         const customerElement = directionElements[0].parentElement;
         const customer2Element = directionElements[1].parentElement;

@@ -49,7 +49,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             }
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
-            let newViewID = "";
+            let newViewID = e.getAttribute("custom-sy-av-view") || "";
             if (typeof viewID === "string") {
                 newViewID = viewID;
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});

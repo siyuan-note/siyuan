@@ -400,7 +400,8 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// Attribute Panel - Database sort attributes by view column order https://github.com/siyuan-note/siyuan/issues/9319
-		view, _ := attrView.GetCurrentView()
+		viewID := attrs[av.NodeAttrView]
+		view, _ := attrView.GetCurrentView(viewID)
 		if nil != view {
 			sorts := map[string]int{}
 			for i, col := range view.Table.Columns {
@@ -580,11 +581,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 
 	var view *av.View
 	if "" != viewID {
-		view = attrView.GetView(viewID)
-		if nil == view {
-			view, _ = attrView.GetCurrentView()
-		}
-
+		view, _ = attrView.GetCurrentView(viewID)
 		if nil != view && view.ID != attrView.ViewID {
 			attrView.ViewID = view.ID
 			if err = av.SaveAttributeView(attrView); nil != err {
@@ -593,9 +590,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 			}
 		}
 	} else {
-		if "" != attrView.ViewID {
-			view, _ = attrView.GetCurrentView()
-		}
+		view = attrView.GetView(attrView.ViewID)
 	}
 
 	if nil == view {
@@ -1073,7 +1068,7 @@ func hideAttrViewName(operation *Operation) (err error) {
 		return
 	}
 
-	viewID := operation.ID
+	viewID := operation.ViewID
 	view := attrView.GetView(viewID)
 	if nil == view {
 		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
@@ -1279,7 +1274,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 
-	viewID := operation.ID
+	viewID := operation.ViewID
 	previewViewID := operation.PreviousID
 
 	if viewID == previewViewID {
@@ -1325,11 +1320,11 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	if 1 >= len(attrView.Views) {
-		logging.LogWarnf("can't remove last view [%s] of attribute view [%s]", operation.ID, avID)
+		logging.LogWarnf("can't remove last view [%s] of attribute view [%s]", operation.ViewID, avID)
 		return
 	}
 
-	viewID := operation.ID
+	viewID := operation.ViewID
 	var index int
 	for i, view := range attrView.Views {
 		if viewID == view.ID {
@@ -1419,7 +1414,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	}
 
 	view := av.NewTableView()
-	view.ID = operation.ID
+	view.ID = operation.ViewID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
 
@@ -1482,7 +1477,7 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	view := av.NewTableView()
-	view.ID = operation.ID
+	view.ID = operation.ViewID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
 
@@ -1508,7 +1503,7 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	viewID := operation.ID
+	viewID := operation.ViewID
 	view := attrView.GetView(viewID)
 	if nil == view {
 		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
@@ -1532,7 +1527,7 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	viewID := operation.ID
+	viewID := operation.ViewID
 	view := attrView.GetView(viewID)
 	if nil == view {
 		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
@@ -1580,7 +1575,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -1628,7 +1623,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ID)
 	if nil != err {
 		return
 	}
@@ -1664,7 +1659,7 @@ func setAttributeViewPageSize(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ID)
 	if nil != err {
 		return
 	}
@@ -1692,7 +1687,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -1723,14 +1718,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.PreviousID, operation.IsDetached)
+	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.ViewID, operation.PreviousID, operation.IsDetached)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, previousBlockID string, isDetached bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, viewID, previousBlockID string, isDetached bool) (err error) {
 	for _, id := range srcIDs {
 		var tree *parse.Tree
 		if !isDetached {
@@ -1746,14 +1741,14 @@ func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, previousBlock
 			}
 		}
 
-		if avErr := addAttributeViewBlock(avID, previousBlockID, id, isDetached, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(avID, viewID, previousBlockID, id, isDetached, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(avID, previousBlockID, blockID string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(avID, viewID, previousBlockID, blockID string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, blockID)
@@ -1803,7 +1798,7 @@ func addAttributeViewBlock(avID, previousBlockID, blockID string, isDetached boo
 	blockValues.Values = append(blockValues.Values, blockValue)
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
-	view, _ := attrView.GetCurrentView()
+	view, _ := attrView.GetCurrentView(viewID)
 	if nil != view && (0 < len(view.Table.Filters) || 0 < len(view.Table.Sorts)) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
@@ -1998,7 +1993,7 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -2031,7 +2026,7 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -2064,7 +2059,7 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -2097,7 +2092,7 @@ func setAttributeViewColPin(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -2155,7 +2150,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -2192,20 +2187,20 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := SortAttributeViewKey(operation.AvID, operation.ID, operation.PreviousID)
+	err := SortAttributeViewKey(operation.AvID, operation.ViewID, operation.ID, operation.PreviousID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
+func SortAttributeViewKey(avID, viewID, keyID, previousKeyID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(viewID)
 	if nil != err {
 		return
 	}

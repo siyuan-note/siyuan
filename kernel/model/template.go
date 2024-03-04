@@ -299,7 +299,8 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 					}
 				} else {
 					// 预览时使用简单表格渲染
-					view, getErr := attrView.GetCurrentView()
+					viewID := n.IALAttr(av.NodeAttrView)
+					view, getErr := attrView.GetCurrentView(viewID)
 					if nil != getErr {
 						logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
 						return ast.WalkContinue

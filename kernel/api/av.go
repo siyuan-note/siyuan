@@ -91,6 +91,10 @@ func addAttributeViewValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
+	viewID := ""
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	var srcIDs []string
 	for _, v := range arg["srcIDs"].([]interface{}) {
 		srcIDs = append(srcIDs, v.(string))
@@ -101,7 +105,7 @@ func addAttributeViewValues(c *gin.Context) {
 	}
 	isDetached := arg["isDetached"].(bool)
 
-	err := model.AddAttributeViewBlock(nil, srcIDs, avID, previousID, isDetached)
+	err := model.AddAttributeViewBlock(nil, srcIDs, avID, viewID, previousID, isDetached)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -194,10 +198,14 @@ func sortAttributeViewCol(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
+	viewID := ""
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	keyID := arg["keyID"].(string)
 	previousKeyID := arg["previousKeyID"].(string)
 
-	err := model.SortAttributeViewKey(avID, keyID, previousKeyID)
+	err := model.SortAttributeViewKey(avID, viewID, keyID, previousKeyID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

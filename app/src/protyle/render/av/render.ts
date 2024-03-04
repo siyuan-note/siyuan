@@ -52,6 +52,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             let newViewID = "";
             if (typeof viewID === "string") {
                 newViewID = viewID;
+                fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
             } else if (typeof viewID === "undefined") {
                 newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id");
             }

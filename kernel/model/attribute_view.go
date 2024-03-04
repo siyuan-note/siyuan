@@ -1380,7 +1380,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 		blockViewID := attrs[av.NodeAttrView]
 		if blockViewID == viewID {
-			delete(attrs, av.NodeAttrView)
+			attrs[av.NodeAttrView] = attrView.ViewID
 			oldAttrs, e := setNodeAttrs0(node, attrs)
 			if nil != e {
 				logging.LogErrorf("set node attrs failed: %s", e)
@@ -1701,7 +1701,7 @@ func setAttributeViewPageSize(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView(operation.ID)
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
 	if nil != err {
 		return
 	}

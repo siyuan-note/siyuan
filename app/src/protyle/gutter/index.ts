@@ -231,6 +231,7 @@ export class Gutter {
                         previousID,
                         srcIDs,
                         isDetached: true,
+                        blockID: id,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs,
@@ -803,6 +804,7 @@ export class Gutter {
                         avID,
                         srcIDs: sourceIds,
                         isDetached: false,
+                        blockID: listItemElement.dataset.blockId
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: sourceIds,
@@ -1245,13 +1247,14 @@ export class Gutter {
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {
-                        const sourceIds: string[] = [nodeElement.getAttribute("data-node-id")];
+                        const sourceIds: string[] = [id];
                         const avID = listItemElement.dataset.avId;
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
                             srcIDs: sourceIds,
                             isDetached: false,
+                            blockID: listItemElement.dataset.blockId
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,
@@ -1408,7 +1411,8 @@ export class Gutter {
                 label: window.siyuan.languages.export + " CSV",
                 click() {
                     fetchPost("/api/export/exportAttributeView", {
-                        id: nodeElement.getAttribute("data-av-id")
+                        id: nodeElement.getAttribute("data-av-id"),
+                        blockID: id,
                     }, response => {
                         openByMobile(response.data.zip);
                     });
@@ -1705,7 +1709,7 @@ export class Gutter {
                     label: window.siyuan.languages.addToDeck,
                     icon: "iconRiffCard",
                     click() {
-                        makeCard(protyle.app, [nodeElement.getAttribute("data-node-id")]);
+                        makeCard(protyle.app, [id]);
                     }
                 }).element);
             }

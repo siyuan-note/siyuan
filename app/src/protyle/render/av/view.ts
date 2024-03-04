@@ -48,11 +48,13 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 action: "duplicateAttrViewView",
                 avID: options.blockElement.dataset.avId,
                 previousID: options.element.dataset.id,
-                id
+                id,
+                blockID: options.blockElement.dataset.nodeId
             }], [{
                 action: "removeAttrViewView",
                 avID: options.blockElement.dataset.avId,
-                id
+                id,
+                blockID: options.blockElement.dataset.nodeId
             }]);
             options.blockElement.setAttribute("custom-sy-av-view", id)
         }
@@ -68,7 +70,8 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 transaction(options.protyle, [{
                     action: "removeAttrViewView",
                     avID: options.blockElement.dataset.avId,
-                    id: options.element.dataset.id
+                    id: options.element.dataset.id,
+                    blockID: options.blockElement.dataset.nodeId
                 }]);
             }
         }
@@ -199,11 +202,13 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
     transaction(protyle, [{
         action: "addAttrViewView",
         avID,
-        id
+        id,
+        blockID: blockElement.getAttribute("data-node-id")
     }], [{
         action: "removeAttrViewView",
         avID,
-        id
+        id,
+        blockID: blockElement.getAttribute("data-node-id")
     }]);
     blockElement.setAttribute("custom-sy-av-view", id);
 };

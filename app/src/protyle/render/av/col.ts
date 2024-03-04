@@ -496,6 +496,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
+    const blockID = blockElement.getAttribute("data-node-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const menu = new Menu("av-header-cell", () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
@@ -598,11 +599,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     data: [{
                         column: colId,
                         order: "ASC"
-                    }]
+                    }],
+                    blockID
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    data: response.data.view.sorts
+                    data: response.data.view.sorts,
+                    blockID
                 }]);
             });
         }
@@ -620,11 +623,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     data: [{
                         column: colId,
                         order: "DESC"
-                    }]
+                    }],
+                    blockID
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    data: response.data.view.sorts
+                    data: response.data.view.sorts,
+                    blockID
                 }]);
             });
         }
@@ -702,12 +707,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID,
-                    data: true
+                    data: true,
+                    blockID
                 }], [{
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID,
-                    data: false
+                    data: false,
+                    blockID
                 }]);
             }
         });
@@ -721,12 +728,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 action: "setAttrViewColPin",
                 id: colId,
                 avID,
-                data: !isPin
+                data: !isPin,
+                blockID
             }], [{
                 action: "setAttrViewColPin",
                 id: colId,
                 avID,
-                data: isPin
+                data: isPin,
+                blockID
             }]);
             updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
         }
@@ -779,12 +788,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID,
-                    data: inputElement.checked
+                    data: inputElement.checked,
+                    blockID
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID,
-                    data: !inputElement.checked
+                    data: !inputElement.checked,
+                    blockID
                 }]);
             });
         }

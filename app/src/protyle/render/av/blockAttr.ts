@@ -208,11 +208,13 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         avID: dragBlockElement.dataset.avId,
                         previousID: isBottom ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id"),
                         id: window.siyuan.dragElement.dataset.colId,
+                        blockID: id
                     }, {
                         action: "sortAttrViewCol",
                         avID: dragBlockElement.dataset.avId,
                         previousID: window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id"),
-                        id
+                        id,
+                        blockID: id
                     }]);
                     if (isBottom) {
                         targetElement.after(window.siyuan.dragElement);

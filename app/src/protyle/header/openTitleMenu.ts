@@ -62,6 +62,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                             avID,
                             srcIDs: sourceIds,
                             isDetached: false,
+                            blockID: listItemElement.dataset.nodeId
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,

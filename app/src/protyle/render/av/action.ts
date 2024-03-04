@@ -80,6 +80,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 avID,
                 srcIDs,
                 isDetached: true,
+                blockID: blockElement.dataset.nodeId,
             }], [{
                 action: "removeAttrViewBlock",
                 srcIDs,
@@ -150,6 +151,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 previousID,
                 srcIDs,
                 isDetached: true,
+                blockID: blockElement.dataset.nodeId,
             }], [{
                 action: "removeAttrViewBlock",
                 srcIDs,

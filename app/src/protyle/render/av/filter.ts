@@ -65,6 +65,7 @@ export const setFilter = async (options: {
     if (rectTarget.height === 0) {
         rectTarget = options.protyle.wysiwyg.element.querySelector(`[data-col-id="${options.target.dataset.colId}"]`).getBoundingClientRect();
     }
+    const blockID = options.blockElement.getAttribute("data-node-id")
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
@@ -153,11 +154,13 @@ export const setFilter = async (options: {
         transaction(options.protyle, [{
             action: "setAttrViewFilters",
             avID: options.data.id,
-            data: options.data.view.filters
+            data: options.data.view.filters,
+            blockID
         }], [{
             action: "setAttrViewFilters",
             avID: options.data.id,
-            data: oldFilters
+            data: oldFilters,
+            blockID
         }]);
         const menuElement = hasClosestByClassName(options.target, "b3-menu");
         if (menuElement) {
@@ -408,11 +411,13 @@ export const setFilter = async (options: {
             transaction(options.protyle, [{
                 action: "setAttrViewFilters",
                 avID: options.data.id,
-                data: options.data.view.filters
+                data: options.data.view.filters,
+                blockID
             }], [{
                 action: "setAttrViewFilters",
                 avID: options.data.id,
-                data: oldFilters
+                data: oldFilters,
+                blockID
             }]);
             const menuElement = hasClosestByClassName(options.target, "b3-menu");
             if (menuElement) {

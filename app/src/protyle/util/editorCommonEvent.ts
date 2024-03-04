@@ -847,11 +847,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             avID,
                             previousID,
                             id: gutterTypes[2],
+                            blockID: blockElement.dataset.nodeId,
                         }], [{
                             action: "sortAttrViewCol",
                             avID,
                             previousID: oldPreviousID,
                             id: gutterTypes[2],
+                            blockID: blockElement.dataset.nodeId,
                         }]);
                     }
                 } else if (targetElement.classList.contains("av__row")) {
@@ -876,12 +878,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     avID,
                                     previousID,
                                     id: item,
+                                    blockID: blockElement.dataset.nodeId,
                                 });
                                 undoOperations.push({
                                     action: "sortAttrViewRow",
                                     avID,
                                     previousID: undoPreviousId,
                                     id: item,
+                                    blockID: blockElement.dataset.nodeId,
                                 });
                             });
                             transaction(protyle, doOperations, undoOperations);
@@ -892,6 +896,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 previousID,
                                 srcIDs: sourceIds,
                                 isDetached: false,
+                                blockID: blockElement.dataset.nodeId
                             }], [{
                                 action: "removeAttrViewBlock",
                                 srcIDs: sourceIds,
@@ -952,6 +957,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         previousID,
                         srcIDs: ids,
                         isDetached: false,
+                        blockID: blockElement.dataset.nodeId,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: ids,

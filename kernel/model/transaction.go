@@ -1227,11 +1227,11 @@ type Operation struct {
 	NextID     string      `json:"nextID"`
 	RetData    interface{} `json:"retData"`
 	BlockIDs   []string    `json:"blockIDs"`
+	BlockID    string      `json:"blockID"`
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
 	AvID              string   `json:"avID"`              // 属性视图 ID
-	ViewID            string   `json:"viewID"`            // 属性视图视图 ID
 	SrcIDs            []string `json:"srcIDs"`            // 用于将块拖拽到属性视图中
 	IsDetached        bool     `json:"isDetached"`        // 用于标识是否是脱离块，仅存在于属性视图中
 	Name              string   `json:"name"`              // 属性视图列名

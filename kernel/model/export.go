@@ -56,7 +56,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ExportAv2CSV(avID, viewID string) (zipPath string, err error) {
+func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -64,6 +64,11 @@ func ExportAv2CSV(avID, viewID string) (zipPath string, err error) {
 		return
 	}
 
+	node, _, err := getNodeByBlockID(nil, blockID)
+	if nil == node {
+		return
+	}
+	viewID := node.IALAttr(av.NodeAttrView)
 	view, err := attrView.GetCurrentView(viewID)
 	if nil != err {
 		return

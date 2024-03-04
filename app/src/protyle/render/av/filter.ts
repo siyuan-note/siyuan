@@ -65,7 +65,7 @@ export const setFilter = async (options: {
     if (rectTarget.height === 0) {
         rectTarget = options.protyle.wysiwyg.element.querySelector(`[data-col-id="${options.target.dataset.colId}"]`).getBoundingClientRect();
     }
-    const blockID = options.blockElement.getAttribute("data-node-id")
+    const blockID = options.blockElement.getAttribute("data-node-id");
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
@@ -510,7 +510,7 @@ export const addFilter = (options: {
                         operator: getDefaultOperatorByType(column.type),
                         value: cellValue,
                         type: column.type
-                    }
+                    };
                     options.data.view.filters.push(filter);
                     options.menuElement.innerHTML = getFiltersHTML(options.data.view);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);

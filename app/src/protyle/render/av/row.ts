@@ -169,7 +169,7 @@ const updatePageSize = (options: {
         return;
     }
     options.nodeElement.setAttribute("data-page-size", options.newPageSize);
-    const blockID = options.nodeElement.getAttribute("data-node-id")
+    const blockID = options.nodeElement.getAttribute("data-node-id");
     transaction(options.protyle, [{
         action: "setAttrViewPageSize",
         avID: options.avID,

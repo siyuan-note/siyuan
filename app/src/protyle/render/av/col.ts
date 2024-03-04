@@ -10,6 +10,7 @@ import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {toggleUpdateRelationBtn} from "./relation";
 import {bindRollupData, getRollupHTML} from "./rollup";
+import {Constants} from "../../../constants";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -18,6 +19,7 @@ export const duplicateCol = (options: {
     colId: string,
     newValue: string,
     icon: string
+    viewID: string
 }) => {
     const id = Lute.NewNodeID();
     const nameMatch = options.newValue.match(/^(.*) \((\d+)\)$/);
@@ -27,7 +29,10 @@ export const duplicateCol = (options: {
         options.newValue = `${options.newValue} (1)`;
     }
     if (["select", "mSelect", "rollup"].includes(options.type)) {
-        fetchPost("/api/av/renderAttributeView", {id: options.avID}, (response) => {
+        fetchPost("/api/av/renderAttributeView", {
+            id: options.avID,
+            viewID: options.viewID
+        }, (response) => {
             const data = response.data as IAV;
             let colOptions;
             data.view.columns.find((item) => {
@@ -747,6 +752,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 label: window.siyuan.languages.duplicate,
                 click() {
                     duplicateCol({
+                        viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                         protyle,
                         type,
                         avID,

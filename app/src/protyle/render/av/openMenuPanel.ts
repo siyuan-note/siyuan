@@ -55,6 +55,7 @@ export const openMenuPanel = (options: {
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
         const isCustomAttr = !options.blockElement.classList.contains("av");
         const data = response.data as IAV;
@@ -714,7 +715,7 @@ export const openMenuPanel = (options: {
                         id,
                         blockID
                     }]);
-                    options.blockElement.setAttribute("custom-sy-av-view", id)
+                    options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id)
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -995,7 +996,8 @@ export const openMenuPanel = (options: {
                         avID,
                         colId,
                         icon: colData.icon,
-                        newValue: colData.name
+                        newValue: colData.name,
+                        viewID: data.viewID,
                     });
                     avPanelElement.remove();
                     event.preventDefault();

@@ -49,18 +49,18 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             }
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
-            let newViewID = e.getAttribute("custom-sy-av-view") || "";
+            let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
             if (typeof viewID === "string") {
                 newViewID = viewID;
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
-                e.setAttribute("custom-sy-av-view", newViewID);
+                e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
             }
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
-                viewID: newViewID || e.getAttribute("custom-sy-av-view")
+                viewID: newViewID
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {

@@ -4,6 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {removeBlock} from "../../wysiwyg/remove";
 import {getEditorRange} from "../../util/selection";
+import {Constants} from "../../../constants";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     const menu = new Menu("av-view");
@@ -56,7 +57,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 id,
                 blockID: options.blockElement.dataset.nodeId
             }]);
-            options.blockElement.setAttribute("custom-sy-av-view", id)
+            options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id)
         }
     });
     menu.addItem({
@@ -210,5 +211,5 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         id,
         blockID: blockElement.getAttribute("data-node-id")
     }]);
-    blockElement.setAttribute("custom-sy-av-view", id);
+    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
 };

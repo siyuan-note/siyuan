@@ -56,7 +56,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ExportAv2CSV(avID string) (zipPath string, err error) {
+func ExportAv2CSV(avID, viewID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -64,7 +64,7 @@ func ExportAv2CSV(avID string) (zipPath string, err error) {
 		return
 	}
 
-	view, err := attrView.GetCurrentView()
+	view, err := attrView.GetCurrentView(viewID)
 	if nil != err {
 		return
 	}
@@ -2243,7 +2243,8 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		view, err := attrView.GetCurrentView()
+		viewID := n.IALAttr(av.NodeAttrView)
+		view, err := attrView.GetCurrentView(viewID)
 		if nil != err {
 			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue

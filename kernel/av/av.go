@@ -376,14 +376,26 @@ func (av *AttributeView) GetView(viewID string) (ret *View) {
 	return
 }
 
-func (av *AttributeView) GetCurrentView() (ret *View, err error) {
+func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
+	if "" != viewID {
+		ret = av.GetView(viewID)
+		if nil != ret {
+			return
+		}
+	}
+
 	for _, v := range av.Views {
 		if v.ID == av.ViewID {
 			ret = v
 			return
 		}
 	}
-	err = ErrViewNotFound
+
+	if 1 > len(av.Views) {
+		err = ErrViewNotFound
+		return
+	}
+	ret = av.Views[0]
 	return
 }
 

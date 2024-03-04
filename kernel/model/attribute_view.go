@@ -33,6 +33,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1339,6 +1340,57 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 	if 0 > index {
 		index = 0
+	}
+
+	mirrorBlocks := av.GetMirrorBlockIDs(avID)
+	trees := map[string]*parse.Tree{}
+	for _, mirrorBlock := range mirrorBlocks {
+		bt := treenode.GetBlockTree(mirrorBlock)
+		if nil == bt {
+			logging.LogErrorf("get block tree by block ID [%s] failed", mirrorBlock)
+			continue
+		}
+
+		tree := trees[mirrorBlock]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(mirrorBlock)
+			if nil == tree {
+				logging.LogErrorf("load tree by block ID [%s] failed", mirrorBlock)
+				continue
+			}
+			trees[mirrorBlock] = tree
+		}
+	}
+
+	var nodes []*ast.Node
+	for _, mirrorBlock := range mirrorBlocks {
+		tree := trees[mirrorBlock]
+		node := treenode.GetNodeInTree(tree, mirrorBlock)
+		if nil == node {
+			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlock)
+			continue
+		}
+
+		attrs := parse.IAL2Map(node.KramdownIAL)
+		blockViewID := attrs[av.NodeAttrView]
+		if blockViewID == viewID {
+			delete(attrs, av.NodeAttrView)
+			oldAttrs, e := setNodeAttrs0(node, attrs)
+			if nil != e {
+				logging.LogErrorf("set node attrs failed: %s", e)
+				continue
+			}
+
+			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+			pushBroadcastAttrTransactions(oldAttrs, node)
+			nodes = append(nodes, node)
+		}
+	}
+
+	for _, tree := range trees {
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
 	}
 
 	attrView.ViewID = attrView.Views[index].ID

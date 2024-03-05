@@ -469,11 +469,14 @@ func SkipReviewFlashcard(deckID, cardID string) (err error) {
 }
 
 type Flashcard struct {
-	DeckID   string                 `json:"deckID"`
-	CardID   string                 `json:"cardID"`
-	BlockID  string                 `json:"blockID"`
-	State    riff.State             `json:"state"`
-	NextDues map[riff.Rating]string `json:"nextDues"`
+	DeckID     string                 `json:"deckID"`
+	CardID     string                 `json:"cardID"`
+	BlockID    string                 `json:"blockID"`
+	Lapses     int                    `json:"lapses"`
+	Reps       int                    `json:"reps"`
+	State      riff.State             `json:"state"`
+	LastReview time.Time              `json:"lastReview"`
+	NextDues   map[riff.Rating]string `json:"nextDues"`
 }
 
 func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashcard {
@@ -483,11 +486,14 @@ func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashc
 	}
 
 	return &Flashcard{
-		DeckID:   deckID,
-		CardID:   card.ID(),
-		BlockID:  blockID,
-		State:    card.GetState(),
-		NextDues: nextDues,
+		DeckID:     deckID,
+		CardID:     card.ID(),
+		BlockID:    blockID,
+		Lapses:     card.GetLapses(),
+		Reps:       card.GetReps(),
+		State:      card.GetState(),
+		LastReview: card.GetLastReview(),
+		NextDues:   nextDues,
 	}
 }
 

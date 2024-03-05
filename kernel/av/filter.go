@@ -78,7 +78,7 @@ const (
 )
 
 func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
-	if nil != filter.Value && filter.Value.IsGenerated() {
+	if nil != filter.Value {
 		if filter.Value.IsGenerated() {
 			// 自动生成类型的过滤条件不设置默认值
 			return nil
@@ -89,8 +89,12 @@ func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 		}
 	}
 
-	if nil == filter.Value && nil != filter.RelativeDate {
-		// 相对日期今天的动态日期不设置默认值
+	if nil == filter.Value {
+		if nil != filter.RelativeDate {
+			// 相对日期今天的动态日期不设置默认值
+			return nil
+		}
+		// 两个值都空的情况下也不设置默认值
 		return nil
 	}
 

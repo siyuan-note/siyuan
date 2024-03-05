@@ -2036,6 +2036,26 @@ export class WYSIWYG {
                 /// #endif
                 return;
             }
+            /// #if MOBILE
+            // https://github.com/siyuan-note/siyuan/issues/10513
+            const virtualRefElement = hasClosestByAttribute(event.target, "data-type", "virtual-block-ref");
+            if (virtualRefElement) {
+                const blockElement = hasClosestBlock(virtualRefElement)
+                if (blockElement) {
+                    fetchPost("/api/block/getBlockDefIDsByRefText", {
+                        anchor: virtualRefElement.textContent,
+                        excludeIDs: [blockElement.getAttribute("data-node-id")]
+                    }, (response) => {
+                        checkFold(response.data[0], (zoomIn) => {
+                            openMobileFileById(protyle.app, response.data[0], zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                            activeBlur();
+                            hideKeyboardToolbar();
+                        });
+                    });
+                }
+                return;
+            }
+            /// #endif
 
             const fileElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref");
             if (fileElement && range.toString() === "") {

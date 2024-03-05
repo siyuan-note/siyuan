@@ -818,15 +818,17 @@ export const addResize = (obj: Layout | Wnd) => {
                     return;
                 }
                 if (window.siyuan.layout.leftDock?.layout.element.isSameNode(previousElement) &&
-                    previousNowSize < getMinSize(previousElement)) {
+                    previousNowSize < getMinSize(previousElement) &&
+                    // https://github.com/siyuan-note/siyuan/issues/10506
+                    previousNowSize < previousSize) {
                     return;
                 }
                 if (window.siyuan.layout.rightDock?.layout.element.isSameNode(nextElement) &&
-                    nextNowSize < getMinSize(nextElement)) {
+                    nextNowSize < getMinSize(nextElement) && nextNowSize < nextSize) {
                     return;
                 }
                 if (window.siyuan.layout.bottomDock?.layout.element.isSameNode(nextElement) &&
-                    nextNowSize < 64) {
+                    nextNowSize < 64 && nextNowSize < nextSize) {
                     return;
                 }
                 if (!previousElement.classList.contains("fn__flex-1")) {

@@ -315,7 +315,9 @@ export const bindCardEvent = async (options: {
                                 fetchNewRound();
                             },
                         }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                        if (response.data.length > 0) {
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                        }
                     }
                     response.data.forEach((deck: { id: string, name: string }) => {
                         window.siyuan.menus.menu.append(new MenuItem({

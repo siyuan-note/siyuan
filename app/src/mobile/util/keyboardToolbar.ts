@@ -195,7 +195,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
     protyle.hint.lastIndex = -1;
-    let pluginHTML = ""
+    let pluginHTML = "";
     protyle.app.plugins.forEach((plugin) => {
         plugin.protyleSlash.forEach(slash => {
             pluginHTML += getSlashItem(`plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
@@ -203,7 +203,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
         });
     });
     if (pluginHTML) {
-        pluginHTML = `<div class="keyboard__slash-title"></div><div class="keyboard__slash-block">${pluginHTML}</div>`
+        pluginHTML = `<div class="keyboard__slash-title"></div><div class="keyboard__slash-block">${pluginHTML}</div>`;
     }
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>

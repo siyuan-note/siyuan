@@ -79,8 +79,14 @@ const (
 
 func (filter *ViewFilter) GetAffectValue(key *Key) (ret *Value) {
 	if nil != filter.Value && filter.Value.IsGenerated() {
-		// 自动生成类型的过滤条件不设置默认值
-		return nil
+		if filter.Value.IsGenerated() {
+			// 自动生成类型的过滤条件不设置默认值
+			return nil
+		}
+		if KeyTypeRelation == filter.Value.Type {
+			// 关联类型的过滤条件不设置默认值 https://ld246.com/article/1709608533749
+			return nil
+		}
 	}
 
 	if nil == filter.Value && nil != filter.RelativeDate {

@@ -1841,7 +1841,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
-	if nil != view && (0 < len(view.Table.Filters) || 0 < len(view.Table.Sorts)) {
+	if nil != view && 0 < len(view.Table.Filters) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
 

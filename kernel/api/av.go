@@ -225,8 +225,9 @@ func getAttributeViewFilterSort(c *gin.Context) {
 	}
 
 	avID := arg["id"].(string)
+	blockID := arg["blockID"].(string)
 
-	filters, sorts := model.GetAttributeViewFilterSort(avID)
+	filters, sorts := model.GetAttributeViewFilterSort(avID, blockID)
 	ret.Data = map[string]interface{}{
 		"filters": filters,
 		"sorts":   sorts,

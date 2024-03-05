@@ -101,23 +101,30 @@ func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attribut
 	return
 }
 
-func GetAttributeViewFilterSort(id string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
+func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter, sorts []*av.ViewSort) {
 	waitForSyncingStorages()
 
-	attrView, err := av.ParseAttributeView(id)
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", id, err)
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if nil == view {
+		view, err = attrView.GetCurrentView(attrView.ViewID)
+		if nil != err {
+			logging.LogErrorf("get current view failed: %s", err)
+			return
+		}
 	}
 
 	filters = []*av.ViewFilter{}
 	sorts = []*av.ViewSort{}
-	for _, view := range attrView.Views {
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			filters = view.Table.Filters
-			sorts = view.Table.Sorts
-		}
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		filters = view.Table.Filters
+		sorts = view.Table.Sorts
 	}
 	return
 }
@@ -1909,20 +1916,6 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 
 	err = av.SaveAttributeView(attrView)
 	return
-}
-
-func GetLastSortRow(rows []*av.TableRow) *av.TableRow {
-	for i := len(rows) - 1; i >= 0; i-- {
-		row := rows[i]
-		blockVal := row.GetBlockValue()
-		if nil != blockVal {
-			if !blockVal.IsEdited() {
-				continue
-			}
-			return row
-		}
-	}
-	return nil
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {

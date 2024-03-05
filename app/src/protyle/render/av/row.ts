@@ -4,6 +4,7 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell, renderCellAttr} from "./cell";
 import {fetchPost} from "../../../util/fetch";
+import {showMessage} from "../../../dialog/message";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -71,6 +72,16 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
+const setPage = (blockElement: Element) => {
+    const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
+    if (pageSize) {
+        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
+        if (pageSize < currentCount) {
+            blockElement.setAttribute("data-page-size", currentCount.toString());
+        }
+    }
+}
+
 /**
  * 前端插入一假行
  * @param protyle
@@ -104,28 +115,32 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
     if (avId) {
         const currentRow = previousElement.nextElementSibling;
         const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
-        if (sideRow.classList.contains("av__row")) {
-            fetchPost("/api/av/getAttributeViewFilterSort", {id: avId}, (response) => {
-                response.data.filters.forEach((item: IAVFilter) => {
+        fetchPost("/api/av/getAttributeViewFilterSort", {id: avId}, (response) => {
+            // https://github.com/siyuan-note/siyuan/issues/10517
+            let hideTextCell = false;
+            response.data.filters.find((item: IAVFilter) => {
+                if (["relation", "rollup", "template", "created", "updated"].includes(item.type)) {
+                    hideTextCell = true;
+                    return true;
+                }
+                if (sideRow.classList.contains("av__row")) {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
                     const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
                     cellElement.innerHTML = renderCell(cellValue);
                     renderCellAttr(cellElement, cellValue);
-                });
-                popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
+                }
             });
-        } else {
-            popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
-        }
+            if (hideTextCell) {
+                currentRow.remove();
+                showMessage(window.siyuan.languages.insertRowTip);
+            } else {
+                popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
+            }
+            setPage(blockElement);
+        });
     }
-    const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
-    if (pageSize) {
-        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
-        if (pageSize < currentCount) {
-            blockElement.setAttribute("data-page-size", currentCount.toString());
-        }
-    }
+    setPage(blockElement);
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {

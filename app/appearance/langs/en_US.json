@@ -1,4 +1,5 @@
 {
+  "insertRowTip": "New rows have been filtered, you can cancel the filtering to view",
   "insertPhoto": "Take a photo and insert it",
   "relativeToToday": "Relative to today",
   "current": "This",

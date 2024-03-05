@@ -414,7 +414,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 				return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTime2End) || valueTime.Equal(relativeTime2End))
 			}
 		} else { // 使用具体时间比较
-			if nil != filter.Value.Date {
+			if nil == filter.Value.Date {
 				return true
 			}
 

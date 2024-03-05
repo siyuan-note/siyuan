@@ -656,7 +656,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
         }
         files.getLeaf(liElement, notebookId);
         window.siyuan.menus.menu.remove();
-    }
+    };
     /// #if !BROWSER
     const importstdmd = (label: string, isDoc?: boolean) => {
         return {

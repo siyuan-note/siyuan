@@ -2040,7 +2040,7 @@ export class WYSIWYG {
             // https://github.com/siyuan-note/siyuan/issues/10513
             const virtualRefElement = hasClosestByAttribute(event.target, "data-type", "virtual-block-ref");
             if (virtualRefElement) {
-                const blockElement = hasClosestBlock(virtualRefElement)
+                const blockElement = hasClosestBlock(virtualRefElement);
                 if (blockElement) {
                     fetchPost("/api/block/getBlockDefIDsByRefText", {
                         anchor: virtualRefElement.textContent,

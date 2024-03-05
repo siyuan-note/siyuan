@@ -80,7 +80,7 @@ const setPage = (blockElement: Element) => {
             blockElement.setAttribute("data-page-size", currentCount.toString());
         }
     }
-}
+};
 
 /**
  * 前端插入一假行
@@ -119,7 +119,7 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             // https://github.com/siyuan-note/siyuan/issues/10517
             let hideTextCell = false;
             response.data.filters.find((item: IAVFilter) => {
-                const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`)
+                const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
                 if (headerElement && ["relation", "rollup", "template", "created", "updated"].includes(headerElement.getAttribute("dtype"))) {
                     hideTextCell = true;
                     return true;

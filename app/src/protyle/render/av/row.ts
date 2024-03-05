@@ -115,12 +115,15 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
     if (avId) {
         const currentRow = previousElement.nextElementSibling;
         const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
-        fetchPost("/api/av/getAttributeViewFilterSort", {id: avId}, (response) => {
+        fetchPost("/api/av/getAttributeViewFilterSort", {
+            id: avId,
+            blockID: blockElement.getAttribute("data-node-id")
+        }, (response) => {
             // https://github.com/siyuan-note/siyuan/issues/10517
             let hideTextCell = false;
             response.data.filters.find((item: IAVFilter) => {
                 const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
-                if (headerElement && ["relation", "rollup", "template", "created", "updated"].includes(headerElement.getAttribute("dtype"))) {
+                if (headerElement && ["relation", "rollup", "template", "created", "updated"].includes(headerElement.getAttribute("data-dtype"))) {
                     hideTextCell = true;
                     return true;
                 }

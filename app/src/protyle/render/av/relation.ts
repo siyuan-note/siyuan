@@ -4,7 +4,7 @@ import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeGreat, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {updateCellsValue} from "./cell";
+import {genCellValueByElement, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
@@ -237,7 +237,7 @@ const filterItem = (menuElement: Element, keyword: string) => {
         id: menuElement.firstElementChild.getAttribute("data-av-id"),
         keyword,
     }, response => {
-        const cells = response.data.rows.values as IAVCellValue[];
+        const cells = response.data.rows.values as IAVCellValue[] || [];
         let html = "";
         let selectHTML = "";
         hasIds.forEach(hasId => {
@@ -272,7 +272,7 @@ export const bindRelationEvent = (options: {
         id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
         keyword: "",
     }, response => {
-        const cells = response.data.rows.values as IAVCellValue[];
+        const cells = response.data.rows.values as IAVCellValue[] || [];
         let html = "";
         let selectHTML = "";
         hasIds.forEach(hasId => {
@@ -363,20 +363,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (!menuElement) {
         return;
     }
-    const newValue: {
-        blockIDs: string[]
-        contents?: string[]
-    } = {
-        blockIDs: [],
-        contents: []
-    };
-    Array.from(menuElement.children).forEach((item) => {
-        const id = item.getAttribute("data-id");
-        if (item.getAttribute("draggable") && id) {
-            newValue.blockIDs.push(id);
-            newValue.contents.push(item.textContent.trim());
-        }
-    });
+    const newValue = genCellValueByElement("relation", cellElements[0]).relation;
     if (target.classList.contains("b3-menu__item")) {
         const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");

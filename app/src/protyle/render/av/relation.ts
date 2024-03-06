@@ -231,27 +231,11 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     }
 };
 
-const filterItem = (listElement: Element, key: string) => {
-    Array.from(listElement.children).forEach((item: HTMLElement) => {
-        if (item.dataset.id) {
-            if (item.textContent.includes(key)) {
-                item.classList.remove("fn__none");
-            } else {
-                item.classList.add("fn__none");
-            }
-        }
-    });
-};
-
-export const bindRelationEvent = (options: {
-    menuElement: HTMLElement,
-    protyle: IProtyle,
-    blockElement: Element,
-    cellElements: HTMLElement[]
-}) => {
-    const hasIds = options.menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
+const filterItem = (menuElement: Element, keyword: string) => {
+    const hasIds = menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
-        id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+        id: menuElement.firstElementChild.getAttribute("data-av-id"),
+        keyword,
     }, response => {
         const cells = response.data.rows.values as IAVCellValue[];
         let html = "";
@@ -271,17 +255,45 @@ export const bindRelationEvent = (options: {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || "Untitled");
             }
         });
-        options.menuElement.innerHTML = `<div class="fn__flex-column">
-<div class="b3-menu__item fn__flex-column" data-type="nobg">
-    <div class="b3-menu__label">${response.data.name}</div>
-    <input class="b3-text-field fn__flex-shrink"/>
-</div>
-<div class="fn__hr"></div>
-<div class="b3-menu__items">
-    ${selectHTML || genSelectItemHTML("empty")}
-    <button class="b3-menu__separator"></button>
-    ${html || genSelectItemHTML("empty")}
-</div>`;
+        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
+<button class="b3-menu__separator"></button>
+${html || genSelectItemHTML("empty")}`;
+    });
+};
+
+export const bindRelationEvent = (options: {
+    menuElement: HTMLElement,
+    protyle: IProtyle,
+    blockElement: Element,
+    cellElements: HTMLElement[]
+}) => {
+    const hasIds = options.menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
+    fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
+        id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
+        keyword: "",
+    }, response => {
+        const cells = response.data.rows.values as IAVCellValue[];
+        let html = "";
+        let selectHTML = "";
+        hasIds.forEach(hasId => {
+            if (hasId) {
+                cells.find((item) => {
+                    if (item.block.id === hasId) {
+                        selectHTML += genSelectItemHTML("selected", item.block.id, item.isDetached, item.block.content || "Untitled");
+                        return true;
+                    }
+                });
+            }
+        });
+        cells.forEach((item) => {
+            if (!hasIds.includes(item.block.id)) {
+                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || "Untitled");
+            }
+        });
+        options.menuElement.querySelector(".b3-menu__label").innerHTML = response.data.name;
+        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
+<button class="b3-menu__separator"></button>
+${html || genSelectItemHTML("empty")}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
         setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item").classList.add("b3-menu__item--current");
@@ -309,12 +321,12 @@ export const bindRelationEvent = (options: {
             if (event.isComposing) {
                 return;
             }
-            filterItem(listElement, inputElement.value);
+            filterItem(options.menuElement, inputElement.value);
             event.stopPropagation();
         });
         inputElement.addEventListener("compositionend", (event) => {
             event.stopPropagation();
-            filterItem(listElement, inputElement.value);
+            filterItem(options.menuElement, inputElement.value);
         });
     });
 };
@@ -394,5 +406,6 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
         }
         menuElement.firstElementChild.classList.add("b3-menu__item--current");
     }
+    menuElement.parentElement.setAttribute("data-cell-ids", newValue.blockIDs.join(","));
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

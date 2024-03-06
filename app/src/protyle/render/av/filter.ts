@@ -69,14 +69,14 @@ export const setFilter = async (options: {
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
+        if (!selectElement || !selectElement.value) {
+            return;
+        }
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: undefined,
             operator: selectElement.value as TAVFilterOperator
         };
-        if (!selectElement || !newFilter.operator) {
-            return;
-        }
         let hasMatch = false;
         if (textElements.length > 0) {
             if (["date", "updated", "created"].includes(filterType)) {

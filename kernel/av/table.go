@@ -307,7 +307,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 	operator := filter.Operator
 	switch value.Type {
 	case KeyTypeBlock:
-		if nil != value.Block && nil != filter.Value.Block {
+		if nil != value.Block && nil != filter.Value && nil != filter.Value.Block {
 			switch operator {
 			case FilterOperatorIsEqual:
 				return value.Block.Content == filter.Value.Block.Content
@@ -328,7 +328,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeText:
-		if nil != value.Text && nil != filter.Value.Text {
+		if nil != value.Text && nil != filter.Value && nil != filter.Value.Text {
 			switch operator {
 			case FilterOperatorIsEqual:
 				if "" == strings.TrimSpace(filter.Value.Text.Content) {
@@ -367,7 +367,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeNumber:
-		if nil != value.Number && nil != filter.Value.Number {
+		if nil != value.Number && nil != filter.Value && nil != filter.Value.Number {
 			switch operator {
 			case FilterOperatorIsEqual:
 				if !filter.Value.Number.IsNotEmpty {
@@ -459,7 +459,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeCreated:
-		if nil != value.Created && nil != filter.Value.Created {
+		if nil != value.Created && nil != filter.Value && nil != filter.Value.Created {
 			switch operator {
 			case FilterOperatorIsEqual:
 				start := time.UnixMilli(filter.Value.Created.Content)
@@ -502,7 +502,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeUpdated:
-		if nil != value.Updated && nil != filter.Value.Updated {
+		if nil != value.Updated && nil != filter.Value && nil != filter.Value.Updated {
 			switch operator {
 			case FilterOperatorIsEqual:
 				start := time.UnixMilli(filter.Value.Updated.Content)
@@ -546,7 +546,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
-			if nil != filter.Value.MSelect {
+			if nil != filter.Value && nil != filter.Value.MSelect {
 				switch operator {
 				case FilterOperatorIsEqual, FilterOperatorContains:
 					contains := false
@@ -590,7 +590,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeURL:
-		if nil != value.URL && nil != filter.Value.URL {
+		if nil != value.URL && nil != filter.Value && nil != filter.Value.URL {
 			switch operator {
 			case FilterOperatorIsEqual:
 				return value.URL.Content == filter.Value.URL.Content
@@ -611,7 +611,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeEmail:
-		if nil != value.Email && nil != filter.Value.Email {
+		if nil != value.Email && nil != filter.Value && nil != filter.Value.Email {
 			switch operator {
 			case FilterOperatorIsEqual:
 				return value.Email.Content == filter.Value.Email.Content
@@ -632,7 +632,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypePhone:
-		if nil != value.Phone && nil != filter.Value.Phone {
+		if nil != value.Phone && nil != filter.Value && nil != filter.Value.Phone {
 			switch operator {
 			case FilterOperatorIsEqual:
 				return value.Phone.Content == filter.Value.Phone.Content
@@ -653,7 +653,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeMAsset:
-		if nil != value.MAsset && nil != filter.Value.MAsset && 0 < len(value.MAsset) && 0 < len(filter.Value.MAsset) {
+		if nil != value.MAsset && nil != filter.Value && nil != filter.Value.MAsset && 0 < len(value.MAsset) && 0 < len(filter.Value.MAsset) {
 			switch operator {
 			case FilterOperatorIsEqual, FilterOperatorContains:
 				contains := false
@@ -684,7 +684,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeTemplate:
-		if nil != value.Template && nil != filter.Value.Template {
+		if nil != value.Template && nil != filter.Value && nil != filter.Value.Template {
 			switch operator {
 			case FilterOperatorIsEqual:
 				if "" == strings.TrimSpace(filter.Value.Template.Content) {
@@ -752,7 +752,7 @@ func (value *Value) compareOperator(filter *ViewFilter) bool {
 			}
 		}
 	case KeyTypeRelation:
-		if nil != value.Relation && nil != filter.Value.Relation {
+		if nil != value.Relation && nil != filter.Value && nil != filter.Value.Relation {
 			switch operator {
 			case FilterOperatorContains:
 				contains := false

@@ -97,6 +97,8 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Valu
 	}
 
 	ret = filter.Value.Clone()
+	ret.CreatedAt = util.CurrentTimeMillis()
+	ret.UpdatedAt = ret.CreatedAt + 1000
 
 	if nil != defaultVal {
 		// 如果有默认值则优先使用默认值

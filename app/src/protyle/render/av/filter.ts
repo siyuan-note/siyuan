@@ -74,7 +74,9 @@ export const setFilter = async (options: {
         }
         const newFilter: IAVFilter = {
             column: options.filter.column,
-            value: undefined,
+            value: {
+                type: options.filter.value.type
+            },
             operator: selectElement.value as TAVFilterOperator
         };
         let hasMatch = false;

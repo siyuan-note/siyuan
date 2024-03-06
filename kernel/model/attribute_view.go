@@ -1894,15 +1894,15 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	if nil != view && 0 < len(view.Table.Filters) {
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
+		viewable.SortRows()
+
+		var lastRow *av.TableRow
+		if 0 < len(viewable.Rows) {
+			lastRow = viewable.Rows[len(viewable.Rows)-1]
+		}
 
 		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
-		var lastRow *av.TableRow
 		if 0 < len(viewable.Sorts) {
-			viewable.SortRows()
-			if 0 < len(viewable.Rows) {
-				lastRow = viewable.Rows[len(viewable.Rows)-1]
-			}
-
 			filterKeys, sortKeys := map[string]bool{}, map[string]bool{}
 			for _, filter := range view.Table.Filters {
 				filterKeys[filter.Column] = true

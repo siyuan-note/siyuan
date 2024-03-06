@@ -577,9 +577,9 @@ export const getFiltersHTML = (data: IAVTable) => {
                             filterValue = ` ≤ ${dateValue}`;
                         }
                     }
-                } else if (["mSelect", "select"].includes(item.type)) {
+                } else if (["mSelect", "select"].includes(item.type) && filter.value.mSelect?.length > 0) {
                     let selectContent = "";
-                    filter.value.mSelect?.forEach((item, index) => {
+                    filter.value.mSelect.forEach((item, index) => {
                         selectContent += item.content;
                         if (index !== filter.value.mSelect.length - 1) {
                             selectContent += ", ";
@@ -589,8 +589,12 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = `: ${selectContent}`;
                     } else if (filter.operator === "Does not contains") {
                         filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                    } else if (filter.operator === "=") {
+                        filterValue = `: ${selectContent}`;
+                    } else if (filter.operator === "!=") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
-                } else if (filter.value.number?.content) {
+                } else if (item.type === "number" && filter.value.number) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
                         filterValue = ` ${filter.operator} ${filter.value.number.content}`;
                     } else if (">=" === filter.operator) {
@@ -598,7 +602,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
-                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type)) {
+                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type) && filter.value[item.type as "text"]) {
                     const content = filter.value[item.type as "text"].content ||
                         filter.value.relation?.contents[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
@@ -613,12 +617,10 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                     }
                 }
-                if (filterValue) {
-                    filterHTML += `<span data-type="setFilter" class="b3-chip b3-chip--primary">
+                filterHTML += `<span data-type="setFilter" class="b3-chip b3-chip--primary${filterValue ? " b3-chip--primary" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
     <span class="fn__ellipsis">${item.name}${filterValue}</span>
 </span>`;
-                }
                 return true;
             }
         });

@@ -112,7 +112,7 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
     });
     let html = "";
     srcIDs.forEach((id) => {
-        html += `<div class="av__row" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
+        html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
     ${colHTML}
 </div>`;
     });
@@ -128,9 +128,13 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             let hideTextCell = false;
             response.data.filters.find((item: IAVFilter) => {
                 const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
-                if (headerElement && ["relation", "rollup", "template", "created", "updated"].includes(headerElement.getAttribute("data-dtype"))) {
+                const filterType = headerElement.getAttribute("data-dtype")
+                if (headerElement && ["relation", "rollup", "template"].includes(filterType)) {
                     hideTextCell = true;
                     return true;
+                }
+                if (["created", "updated"].includes(filterType)) {
+                    currentRow.setAttribute("data-need-update", "true");
                 }
                 if (sideRow.classList.contains("av__row")) {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;

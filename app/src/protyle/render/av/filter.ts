@@ -538,7 +538,7 @@ export const getFiltersHTML = (data: IAVTable) => {
     const genFilterItem = (filter: IAVFilter) => {
         let filterHTML = "";
         data.columns.find((item) => {
-            if (item.id === filter.column) {
+            if (item.id === filter.column && item.type === filter.value.type) {
                 let filterValue = "";
                 if (filter.operator === "Is empty") {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty;
@@ -548,7 +548,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     filterValue = ": " + window.siyuan.languages.unchecked;
                 } else if (filter.operator === "Is true") {
                     filterValue = ": " + window.siyuan.languages.checked;
-                } else if (filter.value?.date?.content || filter.relativeDate || filter.relativeDate2) {
+                } else if (["created", "updated", "date"].includes(item.type)) {
                     let dateValue = "";
                     let dateValue2 = "";
                     if (filter.relativeDate) {
@@ -560,9 +560,9 @@ export const getFiltersHTML = (data: IAVTable) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filter.value?.date?.content) {
-                        dateValue = dayjs(filter.value.date.content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filter.value.date.content2).format("YYYY-MM-DD");
+                    } else if (filter.value && filter.value[item.type as "date"].content) {
+                        dateValue = dayjs(filter.value[item.type as "date"].content).format("YYYY-MM-DD");
+                        dateValue2 = dayjs(filter.value[item.type as "date"].content2).format("YYYY-MM-DD");
                     }
 
                     if (filter.operator === "Is between") {
@@ -576,9 +576,9 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterValue = ` ≤ ${dateValue}`;
                     }
-                } else if (filter.value?.mSelect?.length > 0) {
+                } else if (["mSelect", "select"].includes(item.type)) {
                     let selectContent = "";
-                    filter.value.mSelect.forEach((item, index) => {
+                    filter.value.mSelect?.forEach((item, index) => {
                         selectContent += item.content;
                         if (index !== filter.value.mSelect.length - 1) {
                             selectContent += ", ";
@@ -589,7 +589,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if (filter.operator === "Does not contains") {
                         filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
                     }
-                } else if (filter.value?.number?.content) {
+                } else if (filter.value.number?.content) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
                         filterValue = ` ${filter.operator} ${filter.value.number.content}`;
                     } else if (">=" === filter.operator) {
@@ -597,11 +597,9 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
-                } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content ||
-                    filter.value?.phone?.content || filter.value?.email?.content || filter.value?.relation?.contents.length > 0) {
-                    const content = filter.value?.text?.content || filter.value?.block?.content ||
-                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content ||
-                        filter.value?.relation?.contents[0];
+                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type)) {
+                    const content = filter.value[item.type as "text"].content ||
+                        filter.value.relation?.contents[0];
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {
@@ -625,11 +623,14 @@ export const getFiltersHTML = (data: IAVTable) => {
     };
 
     data.filters.forEach((item: IAVFilter) => {
-        html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}">
+        const filterHTML = genFilterItem(item);
+        if (filterHTML) {
+            html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">${genFilterItem(item)}</div>
+    <div class="fn__flex-1">${filterHTML}</div>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
+        }
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">

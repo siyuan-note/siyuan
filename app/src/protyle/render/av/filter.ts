@@ -547,9 +547,13 @@ export const getFiltersHTML = (data: IAVTable) => {
                 } else if (filter.operator === "Is not empty") {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.operator === "Is false") {
-                    filterValue = ": " + window.siyuan.languages.unchecked;
+                    if (filter.value.type !== "checkbox" || typeof filter.value.checkbox.checked === "boolean") {
+                        filterValue = ": " + window.siyuan.languages.unchecked;
+                    }
                 } else if (filter.operator === "Is true") {
-                    filterValue = ": " + window.siyuan.languages.checked;
+                    if (filter.value.type !== "checkbox" || typeof filter.value.checkbox.checked === "boolean") {
+                        filterValue = ": " + window.siyuan.languages.checked;
+                    }
                 } else if (["created", "updated", "date"].includes(item.type)) {
                     let dateValue = "";
                     let dateValue2 = "";

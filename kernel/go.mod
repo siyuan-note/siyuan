@@ -15,7 +15,7 @@ require (
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/PuerkitoBio/goquery v1.9.0
+	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/Xuanwo/go-locale v1.1.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
@@ -49,8 +49,8 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20240102050638-e741e9f54197
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/sashabaranov/go-openai v1.20.0
-	github.com/shirou/gopsutil/v3 v3.24.1
+	github.com/sashabaranov/go-openai v1.20.2
+	github.com/shirou/gopsutil/v3 v3.24.2
 	github.com/siyuan-note/dejavu v0.0.0-20240218075321-a488f36181cc
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255
@@ -80,8 +80,8 @@ require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.50.25 // indirect
-	github.com/bytedance/sonic v1.11.1 // indirect
+	github.com/aws/aws-sdk-go v1.50.32 // indirect
+	github.com/bytedance/sonic v1.11.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
@@ -93,7 +93,7 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.18.0 // indirect
+	github.com/go-playground/validator/v10 v10.19.0 // indirect
 	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
@@ -118,7 +118,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
-	github.com/lufia/plan9stats v0.0.0-20231016141302-07b5767bb0ed // indirect
+	github.com/lufia/plan9stats v0.0.0-20240226150601-1dcf7310316a // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -161,7 +161,7 @@ require (
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

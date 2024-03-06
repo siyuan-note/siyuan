@@ -204,11 +204,15 @@ export const setFilter = async (options: {
         });
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
-                item.value.rollup.contents = [{
-                    [filterType]: genCellValue(filterType, ""),
-                    type: filterType
-                }];
-                item.operator = getDefaultOperatorByType(filterType)
+                if (!item.value.rollup) {
+                    item.value.rollup = {
+                        contents: [{
+                            [filterType]: genCellValue(filterType, ""),
+                            type: filterType
+                        }]
+                    };
+                    item.operator = getDefaultOperatorByType(filterType)
+                }
                 return true;
             }
         });

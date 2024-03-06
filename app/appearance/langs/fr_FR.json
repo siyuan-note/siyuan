@@ -1,5 +1,6 @@
 {
   "insertRowTip": "De nouvelles lignes ont été filtrées, vous pouvez annuler le filtrage pour afficher",
+  "insertRowTip2": "Les nouvelles lignes ne participent pas au tri",
   "insertPhoto": "Prendre une photo et l'insérer",
   "relativeToToday": "Par rapport à aujourd'hui",
   "current": "Ceci",

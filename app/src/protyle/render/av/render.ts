@@ -74,7 +74,16 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
                 const eWidth = e.clientWidth;
+                let hasFilter = false;
                 data.columns.forEach((item, index) => {
+                    if (!hasFilter) {
+                        data.filters.find(filterItem => {
+                            if (filterItem.value.type === item.type && item.id === filterItem.column) {
+                                hasFilter = true
+                                return true
+                            }
+                        })
+                    }
                     if (!item.hidden) {
                         if (item.pin) {
                             pinIndex = index;
@@ -160,6 +169,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                         viewData = item;
                     }
                 });
+
                 e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
         <div class="fn__flex av__views">
@@ -178,7 +188,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-filter" class="block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
@@ -302,7 +312,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         } else {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
-                const updateRow =  item.querySelector('.av__row[data-need-update="true"]');
+                const updateRow = item.querySelector('.av__row[data-need-update="true"]');
                 avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
                     if (attrElement) {

@@ -572,7 +572,7 @@ export const openMenuPanel = (options: {
                     window.siyuan.menus.menu.remove();
                     const oldFilters = Object.assign([], data.view.filters);
                     data.view.filters.find((item: IAVFilter, index: number) => {
-                        if (item.column === target.parentElement.dataset.id) {
+                        if (item.column === target.parentElement.dataset.id && item.value.type === target.parentElement.dataset.filterType) {
                             data.view.filters.splice(index, 1);
                             return true;
                         }
@@ -595,7 +595,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "setFilter") {
                     data.view.filters.find((item: IAVFilter) => {
-                        if (item.column === target.parentElement.parentElement.dataset.id) {
+                        if (item.column === target.parentElement.parentElement.dataset.id && item.value.type === target.parentElement.parentElement.dataset.filterType) {
                             setFilter({
                                 filter: item,
                                 protyle: options.protyle,

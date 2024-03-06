@@ -131,7 +131,7 @@ export const setFilter = async (options: {
 
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
-            if (filter.column === options.filter.column) {
+            if (filter.column === options.filter.column && filter.value.type === options.filter.value.type) {
                 if (filter.type && filter.type === "checkbox") {
                     hasMatch = true;
                     delete filter.type;
@@ -205,7 +205,7 @@ export const setFilter = async (options: {
             }
         });
         options.data.view.filters.find(item => {
-            if (item.column === colData.id && item.type) {
+            if (item.column === colData.id && item.type === "rollup") {
                 item.operator = getDefaultOperatorByType(filterType);
                 item.value = genCellValue(filterType, "");
                 delete item.type;
@@ -594,7 +594,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if (filter.operator === "!=") {
                         filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
-                } else if (item.type === "number" && filter.value.number) {
+                } else if (item.type === "number" && filter.value.number && filter.value.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
                         filterValue = ` ${filter.operator} ${filter.value.number.content}`;
                     } else if (">=" === filter.operator) {
@@ -617,7 +617,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                     }
                 }
-                filterHTML += `<span data-type="setFilter" class="b3-chip b3-chip--primary${filterValue ? " b3-chip--primary" : ""}">
+                filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
     <span class="fn__ellipsis">${item.name}${filterValue}</span>
 </span>`;
@@ -630,7 +630,7 @@ export const getFiltersHTML = (data: IAVTable) => {
     data.filters.forEach((item: IAVFilter) => {
         const filterHTML = genFilterItem(item);
         if (filterHTML) {
-            html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}">
+            html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}" data-filter-type="${item.value.type}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">${filterHTML}</div>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>

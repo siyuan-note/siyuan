@@ -650,7 +650,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     const avData = response.data as IAV;
                     let filter: IAVFilter;
                     avData.view.filters.find((item) => {
-                        if (item.column === colId) {
+                        if (item.column === colId && item.value.type === type) {
                             filter = item;
                             return true;
                         }

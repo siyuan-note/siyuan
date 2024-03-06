@@ -91,7 +91,11 @@ const setPage = (blockElement: Element) => {
  * @param avId 还用于判断是否是插入的 block
  */
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
-    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+    let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+    // 有排序需要加入最后一行
+    if(blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
+        previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
+    }
     let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {

@@ -68,7 +68,11 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 		pageSize = int(pageSizeArg.(float64))
 	}
 
-	attributeViewName, rows, err := model.GetAttributeViewPrimaryKeyValues(id, page, pageSize)
+	keyword := ""
+	if keywordArg := arg["keyword"]; nil != keywordArg {
+		keyword = keywordArg.(string)
+	}
+	attributeViewName, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -55,7 +55,7 @@ func SetDatabaseBlockView(blockID, viewID string) (err error) {
 	return
 }
 
-func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attributeViewName string, keyValues *av.KeyValues, err error) {
+func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) (attributeViewName string, keyValues *av.KeyValues, err error) {
 	waitForSyncingStorages()
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -86,11 +86,13 @@ func GetAttributeViewPrimaryKeyValues(avID string, page, pageSize int) (attribut
 	}
 	keyValues.Values = []*av.Value{}
 	for _, v := range tmp {
-		keyValues.Values = append(keyValues.Values, v)
+		if strings.Contains(strings.ToLower(v.String()), strings.ToLower(keyword)) {
+			keyValues.Values = append(keyValues.Values, v)
+		}
 	}
 
 	if 1 > pageSize {
-		pageSize = 50
+		pageSize = 32
 	}
 	start := (page - 1) * pageSize
 	end := start + pageSize

@@ -921,6 +921,16 @@ func (row *TableRow) GetBlockValue() (ret *Value) {
 	return
 }
 
+func (row *TableRow) GetValue(keyID string) (ret *Value) {
+	for _, cell := range row.Cells {
+		if nil != cell.Value && keyID == cell.Value.KeyID {
+			ret = cell.Value
+			break
+		}
+	}
+	return
+}
+
 func (table *Table) GetType() LayoutType {
 	return LayoutTypeTable
 }

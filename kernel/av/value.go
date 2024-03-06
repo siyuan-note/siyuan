@@ -276,8 +276,82 @@ func (value *Value) IsEmpty() bool {
 	case KeyTypeRollup:
 		return 1 > len(value.Rollup.Contents)
 	}
-
 	return false
+}
+
+func (value *Value) SetValByType(typ KeyType, val interface{}) {
+	switch typ {
+	case KeyTypeBlock:
+		value.Block = val.(*ValueBlock)
+	case KeyTypeText:
+		value.Text = val.(*ValueText)
+	case KeyTypeNumber:
+		value.Number = val.(*ValueNumber)
+	case KeyTypeDate:
+		value.Date = val.(*ValueDate)
+	case KeyTypeSelect:
+		value.MSelect = val.([]*ValueSelect)
+	case KeyTypeMSelect:
+		value.MSelect = val.([]*ValueSelect)
+	case KeyTypeURL:
+		value.URL = val.(*ValueURL)
+	case KeyTypeEmail:
+		value.Email = val.(*ValueEmail)
+	case KeyTypePhone:
+		value.Phone = val.(*ValuePhone)
+	case KeyTypeMAsset:
+		value.MAsset = val.([]*ValueAsset)
+	case KeyTypeTemplate:
+		value.Template = val.(*ValueTemplate)
+	case KeyTypeCreated:
+		value.Created = val.(*ValueCreated)
+	case KeyTypeUpdated:
+		value.Updated = val.(*ValueUpdated)
+	case KeyTypeCheckbox:
+		value.Checkbox = val.(*ValueCheckbox)
+	case KeyTypeRelation:
+		value.Relation = val.(*ValueRelation)
+	case KeyTypeRollup:
+		value.Rollup = val.(*ValueRollup)
+	}
+}
+
+func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	switch typ {
+	case KeyTypeBlock:
+		return value.Block
+	case KeyTypeText:
+		return value.Text
+	case KeyTypeNumber:
+		return value.Number
+	case KeyTypeDate:
+		return value.Date
+	case KeyTypeSelect:
+		return value.MSelect
+	case KeyTypeMSelect:
+		return value.MSelect
+	case KeyTypeURL:
+		return value.URL
+	case KeyTypeEmail:
+		return value.Email
+	case KeyTypePhone:
+		return value.Phone
+	case KeyTypeMAsset:
+		return value.MAsset
+	case KeyTypeTemplate:
+		return value.Template
+	case KeyTypeCreated:
+		return value.Created
+	case KeyTypeUpdated:
+		return value.Updated
+	case KeyTypeCheckbox:
+		return value.Checkbox
+	case KeyTypeRelation:
+		return value.Relation
+	case KeyTypeRollup:
+		return value.Rollup
+	}
+	return
 }
 
 type ValueBlock struct {

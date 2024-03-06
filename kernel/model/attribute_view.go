@@ -1854,19 +1854,52 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		viewable, _ := renderAttributeViewTable(attrView, view)
 		viewable.FilterRows(attrView)
 
-		for _, filter := range view.Table.Filters {
-			for _, keyValues := range attrView.KeyValues {
-				if keyValues.Key.ID == filter.Column {
-					newValue := filter.GetAffectValue(keyValues.Key)
-					if nil == newValue {
-						continue
-					}
-					newValue.ID = ast.NewNodeID()
-					newValue.KeyID = keyValues.Key.ID
-					newValue.BlockID = addingBlockID
-					newValue.IsDetached = isDetached
-					keyValues.Values = append(keyValues.Values, newValue)
+		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
+		var lastRow *av.TableRow
+		if 0 < len(viewable.Sorts) {
+			viewable.SortRows()
+			if 0 < len(viewable.Rows) {
+				lastRow = viewable.Rows[len(viewable.Rows)-1]
+			}
+
+			filterKeys, sortKeys := map[string]bool{}, map[string]bool{}
+			for _, filter := range view.Table.Filters {
+				filterKeys[filter.Column] = true
+			}
+			for _, sort := range view.Table.Sorts {
+				sortKeys[sort.Column] = true
+			}
+
+			for key := range filterKeys {
+				if sortKeys[key] {
+					sameKeyFilterSort = true
 					break
+				}
+			}
+		}
+
+		if !sameKeyFilterSort {
+			// 如果在同一个字段上仅存在过滤条件，则将过滤条件应用到新添加的块上
+			for _, filter := range view.Table.Filters {
+				for _, keyValues := range attrView.KeyValues {
+					if keyValues.Key.ID == filter.Column {
+						var defaultVal *av.Value
+						if nil != lastRow {
+							defaultVal = lastRow.GetValue(filter.Column)
+						}
+
+						newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
+						if nil == newValue {
+							continue
+						}
+
+						newValue.ID = ast.NewNodeID()
+						newValue.KeyID = keyValues.Key.ID
+						newValue.BlockID = addingBlockID
+						newValue.IsDetached = isDetached
+						keyValues.Values = append(keyValues.Values, newValue)
+						break
+					}
 				}
 			}
 		}

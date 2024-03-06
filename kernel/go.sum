@@ -197,8 +197,8 @@ github.com/huandu/xstrings v1.4.0/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
-github.com/imroc/req/v3 v3.42.3 h1:ryPG2AiwouutAopwPxKpWKyxgvO8fB3hts4JXlh3PaE=
-github.com/imroc/req/v3 v3.42.3/go.mod h1:Axz9Y/a2b++w5/Jht3IhQsdBzrG1ftJd1OJhu21bB2Q=
+github.com/imroc/req/v3 v3.43.0 h1:TZDLMcuXEUFOvoyjKI2vMeimhq/OWnxvRJDPfEVCEhk=
+github.com/imroc/req/v3 v3.43.0/go.mod h1:SQIz5iYop16MJxbo8ib+4LnostGCok8NQf8ToyQc2xA=
 github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0/go.mod h1:CVKlgaMiht+LXvHG173ujK6JUhZXKb2u/BQtjPDIvyk=
 github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 h1:iCHtR9CQyktQ5+f3dMVZfwD2KWJUgm7M0gdL9NGr8KA=
 github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056/go.mod h1:CVKlgaMiht+LXvHG173ujK6JUhZXKb2u/BQtjPDIvyk=
@@ -359,8 +359,8 @@ github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255 h1:WTAUBlU2v7
 github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255/go.mod h1:1/nGgthl89FPA7GzAcEWKl6zRRnfgyTjzLZj9bW7kuw=
 github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772 h1:ceX49LJmN8FMwWpkCkZIV9dHG4Ya2ZMrhu9T6VyDiKs=
 github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772/go.mod h1:CYJQjSyKYLhEJJC+5I+R4uNcpyW0X2CaUYwMVbkelDk=
-github.com/siyuan-note/httpclient v0.0.0-20240218075040-36250ac08e54 h1:bQ90q5pHMltcbOcjdOqG8W34MRrdNM3V7YrOeyZvoxQ=
-github.com/siyuan-note/httpclient v0.0.0-20240218075040-36250ac08e54/go.mod h1:3LyWEfBASVOxFGvvvhmt573BoFjKyp0fbDVh5klGNas=
+github.com/siyuan-note/httpclient v0.0.0-20240306121400-b3af777a1f1b h1:t8xkj25nNOQXsS6grX2kpFcNeOydjrT250ahdzWosos=
+github.com/siyuan-note/httpclient v0.0.0-20240306121400-b3af777a1f1b/go.mod h1:mgg/IhCzGQ5h2k6QTTn0kFSR7cCMN/Xb313eTpAedic=
 github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0 h1:+XjUr9UMXsczdO2bGA72p/k9wa2ShPb8ybi7CDBJ7HQ=
 github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20240305012846-494c7fb46c45 h1:/ORGs2Llh98lXSiR3mt/8vZKrAOQAIB4LQkh1aslaow=

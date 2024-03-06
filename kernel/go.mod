@@ -35,7 +35,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
 	github.com/gorilla/websocket v1.5.1
-	github.com/imroc/req/v3 v3.42.3
+	github.com/imroc/req/v3 v3.43.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.11.0
@@ -55,7 +55,7 @@ require (
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255
 	github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772
-	github.com/siyuan-note/httpclient v0.0.0-20240218075040-36250ac08e54
+	github.com/siyuan-note/httpclient v0.0.0-20240306121400-b3af777a1f1b
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
 	github.com/siyuan-note/riff v0.0.0-20240305012846-494c7fb46c45
 	github.com/spf13/cast v1.6.0

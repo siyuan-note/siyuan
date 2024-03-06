@@ -26,6 +26,49 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func searchTableView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	viewID := arg["viewID"].(string)
+	keyword := arg["keyword"].(string)
+	view, attrView, err := model.SearchTableView(avID, viewID, keyword)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	var views []map[string]interface{}
+	for _, v := range attrView.Views {
+		view := map[string]interface{}{
+			"id":               v.ID,
+			"icon":             v.Icon,
+			"name":             v.Name,
+			"hideAttrViewName": v.HideAttrViewName,
+			"type":             v.LayoutType,
+		}
+
+		views = append(views, view)
+	}
+
+	ret.Data = map[string]interface{}{
+		"name":     attrView.Name,
+		"id":       attrView.ID,
+		"viewType": view.GetType(),
+		"viewID":   view.GetID(),
+		"views":    views,
+		"view":     view,
+		"isMirror": av.IsMirror(attrView.ID),
+	}
+}
+
 func setDatabaseBlockView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

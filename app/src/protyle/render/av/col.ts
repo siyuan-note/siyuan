@@ -660,7 +660,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             column: colId,
                             operator: getDefaultOperatorByType(type),
                             value: genCellValue(type, ""),
-                            type,
                         };
                         avData.view.filters.push(filter);
                     }

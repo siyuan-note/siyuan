@@ -132,13 +132,11 @@ export const setFilter = async (options: {
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column && filter.value.type === options.filter.value.type) {
-                if (filter.type && filter.type === "checkbox") {
+                if (filter.value.type === "checkbox") {
                     hasMatch = true;
-                    delete filter.type;
                     options.data.view.filters[index] = newFilter;
                     return true;
                 }
-                delete filter.type;
                 if (objEquals(filter, newFilter)) {
                     isSame = true;
                     return true;
@@ -205,20 +203,25 @@ export const setFilter = async (options: {
             }
         });
         options.data.view.filters.find(item => {
-            if (item.column === colData.id && item.type === "rollup") {
-                item.operator = getDefaultOperatorByType(filterType);
-                item.value = genCellValue(filterType, "");
-                delete item.type;
+            if (item.column === colData.id && item.value.type === "rollup") {
+                item.value.rollup.contents = [{
+                    [filterType]: genCellValue(filterType, ""),
+                    type: filterType
+                }];
+                item.operator = getDefaultOperatorByType(filterType)
                 return true;
             }
         });
     }
+    let checkboxInit = false;
+    if (filterType === "checkbox") {
+        checkboxInit = typeof options.filter.value.checkbox.checked === "boolean";
+    }
     switch (filterType) {
         case "checkbox":
-            selectHTML = `<option ${("Is true" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
-<option ${("Is false" === options.filter.operator && !options.filter.type) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
-            if (options.filter.type) {
-                // 初始化时有 type 字段
+            selectHTML = `<option ${("Is true" === options.filter.operator && checkboxInit) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
+<option ${("Is false" === options.filter.operator && checkboxInit) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            if (!checkboxInit) {
                 selectHTML = `<option selected></option>${selectHTML}`;
             }
             break;
@@ -403,7 +406,7 @@ export const setFilter = async (options: {
         click() {
             const oldFilters = Object.assign([], options.data.view.filters);
             options.data.view.filters.find((item: IAVFilter, index: number) => {
-                if (item.column === options.filter.column) {
+                if (item.column === options.filter.column && options.filter.value.type === item.value.type) {
                     options.data.view.filters.splice(index, 1);
                     return true;
                 }
@@ -504,12 +507,11 @@ export const addFilter = (options: {
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
                 click: () => {
-                    const cellValue = genCellValue(column.type, "");
+                    const cellValue = genCellValue(column.type, column.type === "checkbox" ? {checked: undefined} : "");
                     filter = {
                         column: column.id,
                         operator: getDefaultOperatorByType(column.type),
                         value: cellValue,
-                        type: column.type
                     };
                     options.data.view.filters.push(filter);
                     options.menuElement.innerHTML = getFiltersHTML(options.data.view);

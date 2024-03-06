@@ -1082,7 +1082,6 @@ interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
     value: IAVCellValue,
-    type?: TAVCol   // 仅用于标识新增时的类型，用于区分 rollup
     relativeDate?: relativeDate
     relativeDate2?: relativeDate
 }

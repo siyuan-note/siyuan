@@ -257,12 +257,12 @@ func (value *Value) Compare(other *Value) int {
 }
 
 func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView, rowID string) bool {
-	key, _ := attrView.GetKey(value.KeyID)
-	if nil == key {
-		return false
-	}
+	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type {
+		key, _ := attrView.GetKey(value.KeyID)
+		if nil == key {
+			return false
+		}
 
-	if nil != value.Rollup && KeyTypeRollup == key.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type {
 		relKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
 		if nil == relKey {
 			return false
@@ -284,24 +284,22 @@ func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView,
 				continue
 			}
 
-			if destVal.compareOperator(filter, key.Type) {
+			if destVal.compareOperator(filter) {
 				return true
 			}
 		}
 		return false
 	}
-
-	return value.compareOperator(filter, key.Type)
+	return value.compareOperator(filter)
 }
 
-func (value *Value) compareOperator(filter *ViewFilter, keyType KeyType) bool {
+func (value *Value) compareOperator(filter *ViewFilter) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
 
 	operator := filter.Operator
-
-	switch keyType {
+	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != filter.Value.Block {
 			switch operator {
@@ -458,21 +456,39 @@ func (value *Value) compareOperator(filter *ViewFilter, keyType KeyType) bool {
 		if nil != value.Created && nil != filter.Value.Created {
 			switch operator {
 			case FilterOperatorIsEqual:
-				return value.Created.Content == filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Created.Content >= start.UnixMilli() && value.Created.Content < end.UnixMilli()
 			case FilterOperatorIsNotEqual:
-				return value.Created.Content != filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Created.Content < start.UnixMilli() || value.Created.Content >= end.UnixMilli()
 			case FilterOperatorIsGreater:
-				return value.Created.Content > filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Created.Content >= end.UnixMilli()
 			case FilterOperatorIsGreaterOrEqual:
-				return value.Created.Content >= filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				return value.Created.Content >= start.UnixMilli()
 			case FilterOperatorIsLess:
-				return value.Created.Content < filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				return value.Created.Content < start.UnixMilli()
 			case FilterOperatorIsLessOrEqual:
-				return value.Created.Content <= filter.Value.Created.Content
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Created.Content < end.UnixMilli()
 			case FilterOperatorIsBetween:
-				start := value.Created.Content >= filter.Value.Created.Content
-				end := value.Created.Content <= filter.Value.Created.Content2
-				return start && end
+				start := time.UnixMilli(filter.Value.Created.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := time.UnixMilli(filter.Value.Created.Content2)
+				end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, time.Local)
+				return value.Created.Content >= start.UnixMilli() && value.Created.Content < end.UnixMilli()
 			case FilterOperatorIsEmpty:
 				return !value.Created.IsNotEmpty
 			case FilterOperatorIsNotEmpty:
@@ -483,21 +499,39 @@ func (value *Value) compareOperator(filter *ViewFilter, keyType KeyType) bool {
 		if nil != value.Updated && nil != filter.Value.Updated {
 			switch operator {
 			case FilterOperatorIsEqual:
-				return value.Updated.Content == filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Updated.Content >= start.UnixMilli() && value.Updated.Content < end.UnixMilli()
 			case FilterOperatorIsNotEqual:
-				return value.Updated.Content != filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Updated.Content < start.UnixMilli() || value.Updated.Content >= end.UnixMilli()
 			case FilterOperatorIsGreater:
-				return value.Updated.Content > filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Updated.Content >= end.UnixMilli()
 			case FilterOperatorIsGreaterOrEqual:
-				return value.Updated.Content >= filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				return value.Updated.Content >= start.UnixMilli()
 			case FilterOperatorIsLess:
-				return value.Updated.Content < filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				return value.Updated.Content < start.UnixMilli()
 			case FilterOperatorIsLessOrEqual:
-				return value.Updated.Content <= filter.Value.Updated.Content
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := start.AddDate(0, 0, 1)
+				return value.Updated.Content < end.UnixMilli()
 			case FilterOperatorIsBetween:
-				start := value.Updated.Content >= filter.Value.Updated.Content
-				end := value.Updated.Content <= filter.Value.Updated.Content2
-				return start && end
+				start := time.UnixMilli(filter.Value.Updated.Content)
+				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
+				end := time.UnixMilli(filter.Value.Updated.Content2)
+				end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, time.Local)
+				return value.Updated.Content >= start.UnixMilli() && value.Updated.Content < end.UnixMilli()
 			case FilterOperatorIsEmpty:
 				return !value.Updated.IsNotEmpty
 			case FilterOperatorIsNotEmpty:

@@ -37,8 +37,8 @@ func searchTableView(c *gin.Context) {
 
 	avID := arg["avID"].(string)
 	viewID := arg["viewID"].(string)
-	keyword := arg["keyword"].(string)
-	view, attrView, err := model.SearchTableView(avID, viewID, keyword)
+	query := arg["query"].(string)
+	view, attrView, err := model.SearchTableView(avID, viewID, query)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

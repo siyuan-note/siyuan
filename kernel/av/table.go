@@ -257,7 +257,8 @@ func (value *Value) Compare(other *Value) int {
 }
 
 func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView, rowID string) bool {
-	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type {
+	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter && nil != filter.Value && KeyTypeRollup == filter.Value.Type {
+		// 单独处理汇总类型的比较
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -295,6 +296,11 @@ func (value *Value) CompareOperator(filter *ViewFilter, attrView *AttributeView,
 
 func (value *Value) compareOperator(filter *ViewFilter) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
+		return true
+	}
+
+	if nil != filter.Value && value.Type != filter.Value.Type {
+		// 由于字段类型被用户编辑过导致和过滤器值类型不匹配，该情况下不过滤
 		return true
 	}
 

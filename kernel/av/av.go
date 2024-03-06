@@ -321,6 +321,21 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
+	// 补全过滤器 Value
+	for _, view := range av.Views {
+		if nil == view.Table {
+			for _, f := range view.Table.Filters {
+				if nil != f.Value {
+					continue
+				}
+
+				if k, _ := av.GetKey(f.Column); nil != k {
+					f.Value = &Value{Type: k.Type}
+				}
+			}
+		}
+	}
+
 	// 值去重
 	blockValues := av.GetBlockKeyValues()
 	blockIDs := map[string]bool{}

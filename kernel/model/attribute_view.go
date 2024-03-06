@@ -695,6 +695,19 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		}
 	}
 
+	// 补全过滤器 Value
+	if nil != view.Table {
+		for _, f := range view.Table.Filters {
+			if nil != f.Value {
+				continue
+			}
+
+			if k, _ := attrView.GetKey(f.Column); nil != k {
+				f.Value = &av.Value{Type: k.Type}
+			}
+		}
+	}
+
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		// 列删除以后需要删除设置的过滤和排序

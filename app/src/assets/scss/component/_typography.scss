@@ -417,8 +417,14 @@
     max-width: 100%;
     user-select: none;
 
+    & > span:nth-child(1),
+    & > span:nth-child(3) {
+      width: 4px;
+      display: inline-block;
+    }
+
     & > span:nth-child(2) {
-      max-width: calc(100% - 10px);
+      max-width: calc(100% - 8px);
       position: relative;
       display: inline-block;
       min-width: 22px;

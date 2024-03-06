@@ -80,8 +80,9 @@ export const setFilter = async (options: {
             operator: selectElement.value as TAVFilterOperator
         };
         let hasMatch = false;
+        let newValue;
         if (textElements.length > 0) {
-            if (["date", "updated", "created"].includes(filterType)) {
+            if (["date", "updated", "created"].includes(filterValue.type)) {
                 const typeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
                 const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
                 if (typeElement.value === "custom") {
@@ -96,7 +97,7 @@ export const setFilter = async (options: {
                         direction: parseInt(directElements[1].value)
                     };
                 } else {
-                    newFilter.value = genCellValue(filterType, {
+                    newValue = genCellValue(filterValue.type, {
                         isNotEmpty2: textElements[1].value !== "",
                         isNotEmpty: textElements[0].value !== "",
                         content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
@@ -106,9 +107,9 @@ export const setFilter = async (options: {
                     });
                 }
             } else {
-                newFilter.value = genCellValue(filterType, textElements[0].value);
+                newValue = genCellValue(filterValue.type, textElements[0].value);
             }
-        } else if (filterType === "select" || filterType === "mSelect") {
+        } else if (filterValue.type === "select" || filterValue.type === "mSelect") {
             const mSelect: {
                 color: string,
                 content: string
@@ -122,15 +123,24 @@ export const setFilter = async (options: {
                     });
                 }
             });
-            newFilter.value = genCellValue(filterType, mSelect);
-        } else if (filterType === "checkbox") {
-            newFilter.value = genCellValue(filterType, {
+            newValue = genCellValue(filterValue.type, mSelect);
+        } else if (filterValue.type === "checkbox") {
+            newValue = genCellValue(filterValue.type, {
                 checked: newFilter.operator === "Is true"
             });
         } else {
-            newFilter.value = genCellValue(filterType, undefined);
+            newValue = genCellValue(filterValue.type, undefined);
         }
-
+        if (options.filter.value.type === "rollup") {
+            newFilter.value = {
+                rollup: {
+                    contents: [newValue],
+                },
+                type: "rollup"
+            }
+        } else {
+            newFilter.value = newValue
+        }
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column && filter.value.type === options.filter.value.type) {
@@ -178,8 +188,8 @@ export const setFilter = async (options: {
             return true;
         }
     });
-    let filterType = colData.type;
-    if (filterType === "rollup") {
+    let filterValue = JSON.parse(JSON.stringify(options.filter.value));
+    if (colData.type === "rollup") {
         if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
             showMessage(window.siyuan.languages.plsChoose);
             openMenuPanel({
@@ -200,34 +210,33 @@ export const setFilter = async (options: {
         const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
         response.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
             if (item.key.id === colData.rollup.keyID) {
-                filterType = item.key.type;
+                filterValue.type = item.key.type;
                 return true;
             }
         });
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
                 if (!item.value.rollup) {
-                    item.value.rollup = {
-                        contents: [{
-                            [filterType]: genCellValue(filterType, ""),
-                            type: filterType
-                        }]
+                    filterValue = {
+                        [filterValue.type]: genCellValue(filterValue.type, filterValue.type === "checkbox" ? {checked: undefined} : ""),
+                        type: filterValue.type
                     };
-                    item.operator = getDefaultOperatorByType(filterType)
+                } else {
+                    filterValue = item.value.rollup.contents[0]
                 }
                 return true;
             }
         });
     }
     let checkboxInit = false;
-    if (filterType === "checkbox") {
-        checkboxInit = typeof options.filter.value.checkbox.checked === "boolean";
+    if (filterValue.type === "checkbox") {
+        checkboxInit = typeof filterValue.checkbox === "undefined" || typeof filterValue.checkbox.checked === "undefined";
     }
-    switch (filterType) {
+    switch (filterValue.type) {
         case "checkbox":
-            selectHTML = `<option ${("Is true" === options.filter.operator && checkboxInit) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
-<option ${("Is false" === options.filter.operator && checkboxInit) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
-            if (!checkboxInit) {
+            selectHTML = `<option ${("Is true" === options.filter.operator && !checkboxInit) ? "selected" : ""} value="Is true">${window.siyuan.languages.checked}</option>
+<option ${("Is false" === options.filter.operator && !checkboxInit) ? "selected" : ""} value="Is false">${window.siyuan.languages.unchecked}</option>`;
+            if (checkboxInit) {
                 selectHTML = `<option selected></option>${selectHTML}`;
             }
             break;
@@ -300,10 +309,10 @@ export const setFilter = async (options: {
         type: "readonly",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (filterType === "select" || filterType === "mSelect") {
+    if (filterValue.type === "select" || filterValue.type === "mSelect") {
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
-            options.filter.value?.mSelect?.find((optionItem) => {
+            filterValue?.mSelect?.find((optionItem: IAVCellSelectValue) => {
                 if (optionItem.content === option.name) {
                     icon = "iconCheck";
                 }
@@ -325,13 +334,13 @@ export const setFilter = async (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(filterType)) {
+    } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(filterValue.type)) {
         let value = "";
-        if (options.filter.value) {
-            if (filterType === "relation") {
-                value = options.filter.value.relation.contents[0] || "";
+        if (filterValue) {
+            if (filterValue.type === "relation") {
+                value = filterValue.relation.contents[0] || "";
             } else {
-                value = options.filter.value[filterType as "text"].content || "";
+                value = filterValue[filterValue.type as "text"].content || "";
             }
         }
         menu.addItem({
@@ -339,14 +348,14 @@ export const setFilter = async (options: {
             type: "readonly",
             label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200">`
         });
-    } else if (filterType === "number") {
+    } else if (filterValue.type === "number") {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `<input style="margin: 4px 0" value="${options.filter.value?.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${filterValue?.number.isNotEmpty ? filterValue.number.content : ""}" class="b3-text-field fn__size200">`
         });
-    } else if (["date", "updated", "created"].includes(filterType)) {
-        const dateValue = options.filter.value ? options.filter.value[filterType as "date"] : null;
+    } else if (["date", "updated", "created"].includes(filterValue.type)) {
+        const dateValue = filterValue ? filterValue[filterValue.type as "date"] : null;
         const showToday = !options.filter.relativeDate?.direction;
         const showToday2 = !options.filter.relativeDate2?.direction;
         menu.addItem({
@@ -361,7 +370,7 @@ export const setFilter = async (options: {
     </div>
     <div class="fn__hr"></div>
     <div class="fn__size200 ${options.filter.relativeDate ? "fn__none" : ""}">
-        <input value="${(dateValue && (dateValue.isNotEmpty || filterType !== "date")) ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
+        <input value="${(dateValue && (dateValue.isNotEmpty || filterValue.type !== "date")) ? dayjs(dateValue.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field fn__block">
     </div>
     <div class="fn__flex fn__size200 ${options.filter.relativeDate ? "" : "fn__none"}">
         <select class="b3-select" data-type="dataDirection">
@@ -436,7 +445,7 @@ export const setFilter = async (options: {
     });
     const selectElement = (menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value, filterType);
+        toggleEmpty(selectElement, selectElement.value, filterValue.type);
     });
     const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
     dateTypeElement?.addEventListener("change", () => {
@@ -483,7 +492,7 @@ export const setFilter = async (options: {
             }
         });
     });
-    toggleEmpty(selectElement, selectElement.value, filterType);
+    toggleEmpty(selectElement, selectElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {
         textElements[0].select();
@@ -547,18 +556,19 @@ export const getFiltersHTML = (data: IAVTable) => {
         let filterHTML = "";
         data.columns.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
-                let filterValue = "";
+                let filterText = "";
+                const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
                 if (filter.operator === "Is empty") {
-                    filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty;
+                    filterText = ": " + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
-                    filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
+                    filterText = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.operator === "Is false") {
-                    if (filter.value.type !== "checkbox" || typeof filter.value.checkbox.checked === "boolean") {
-                        filterValue = ": " + window.siyuan.languages.unchecked;
+                    if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
+                        filterText = ": " + window.siyuan.languages.unchecked;
                     }
                 } else if (filter.operator === "Is true") {
-                    if (filter.value.type !== "checkbox" || typeof filter.value.checkbox.checked === "boolean") {
-                        filterValue = ": " + window.siyuan.languages.checked;
+                    if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
+                        filterText = ": " + window.siyuan.languages.checked;
                     }
                 } else if (["created", "updated", "date"].includes(item.type)) {
                     let dateValue = "";
@@ -572,66 +582,66 @@ export const getFiltersHTML = (data: IAVTable) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filter.value && filter.value[item.type as "date"]?.content) {
-                        dateValue = dayjs(filter.value[item.type as "date"].content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filter.value[item.type as "date"].content2).format("YYYY-MM-DD");
+                    } else if (filterValue && filterValue[item.type as "date"]?.content) {
+                        dateValue = dayjs(filterValue[item.type as "date"].content).format("YYYY-MM-DD");
+                        dateValue2 = dayjs(filterValue[item.type as "date"].content2).format("YYYY-MM-DD");
                     }
                     if (dateValue) {
                         if (filter.operator === "Is between") {
-                            filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
+                            filterText = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                         } else if ("=" === filter.operator) {
-                            filterValue = `: ${dateValue}`;
+                            filterText = `: ${dateValue}`;
                         } else if ([">", "<"].includes(filter.operator)) {
-                            filterValue = ` ${filter.operator} ${dateValue}`;
+                            filterText = ` ${filter.operator} ${dateValue}`;
                         } else if (">=" === filter.operator) {
-                            filterValue = ` ≥ ${dateValue}`;
+                            filterText = ` ≥ ${dateValue}`;
                         } else if ("<=" === filter.operator) {
-                            filterValue = ` ≤ ${dateValue}`;
+                            filterText = ` ≤ ${dateValue}`;
                         }
                     }
-                } else if (["mSelect", "select"].includes(item.type) && filter.value.mSelect?.length > 0) {
+                } else if (["mSelect", "select"].includes(item.type) && filterValue.mSelect?.length > 0) {
                     let selectContent = "";
-                    filter.value.mSelect.forEach((item, index) => {
+                    filterValue.mSelect.forEach((item, index) => {
                         selectContent += item.content;
-                        if (index !== filter.value.mSelect.length - 1) {
+                        if (index !== filterValue.mSelect.length - 1) {
                             selectContent += ", ";
                         }
                     });
                     if ("Contains" === filter.operator) {
-                        filterValue = `: ${selectContent}`;
+                        filterText = `: ${selectContent}`;
                     } else if (filter.operator === "Does not contains") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
                     } else if (filter.operator === "=") {
-                        filterValue = `: ${selectContent}`;
+                        filterText = `: ${selectContent}`;
                     } else if (filter.operator === "!=") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
-                } else if (item.type === "number" && filter.value.number && filter.value.number.isNotEmpty) {
+                } else if (item.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
-                        filterValue = ` ${filter.operator} ${filter.value.number.content}`;
+                        filterText = ` ${filter.operator} ${filterValue.number.content}`;
                     } else if (">=" === filter.operator) {
-                        filterValue = ` ≥ ${filter.value.number.content}`;
+                        filterText = ` ≥ ${filterValue.number.content}`;
                     } else if ("<=" === filter.operator) {
-                        filterValue = ` ≤ ${filter.value.number.content}`;
+                        filterText = ` ≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type) && filter.value[item.type as "text"]) {
-                    const content = filter.value[item.type as "text"].content ||
-                        filter.value.relation?.contents[0] || "";
+                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type) && filterValue[item.type as "text"]) {
+                    const content = filterValue[item.type as "text"].content ||
+                        filterValue.relation?.contents[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
-                        filterValue = `: ${content}`;
+                        filterText = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
                     } else if (filter.operator === "!=") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
                     } else if ("Starts with" === filter.operator) {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
                     } else if ("Ends with" === filter.operator) {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                        filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                     }
                 }
-                filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
+                filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-    <span class="fn__ellipsis">${item.name}${filterValue}</span>
+    <span class="fn__ellipsis">${item.name}${filterText}</span>
 </span>`;
                 return true;
             }

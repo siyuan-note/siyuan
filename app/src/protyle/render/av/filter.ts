@@ -494,7 +494,7 @@ export const addFilter = (options: {
     options.data.view.columns.forEach((column) => {
         let filter: IAVFilter;
         options.data.view.filters.find((item) => {
-            if (item.column === column.id) {
+            if (item.column === column.id && item.value.type === column.type) {
                 filter = item;
                 return true;
             }
@@ -560,21 +560,22 @@ export const getFiltersHTML = (data: IAVTable) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filter.value && filter.value[item.type as "date"].content) {
+                    } else if (filter.value && filter.value[item.type as "date"]?.content) {
                         dateValue = dayjs(filter.value[item.type as "date"].content).format("YYYY-MM-DD");
                         dateValue2 = dayjs(filter.value[item.type as "date"].content2).format("YYYY-MM-DD");
                     }
-
-                    if (filter.operator === "Is between") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
-                    } else if ("=" === filter.operator) {
-                        filterValue = `: ${dateValue}`;
-                    } else if ([">", "<"].includes(filter.operator)) {
-                        filterValue = ` ${filter.operator} ${dateValue}`;
-                    } else if (">=" === filter.operator) {
-                        filterValue = ` ≥ ${dateValue}`;
-                    } else if ("<=" === filter.operator) {
-                        filterValue = ` ≤ ${dateValue}`;
+                    if (dateValue) {
+                        if (filter.operator === "Is between") {
+                            filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
+                        } else if ("=" === filter.operator) {
+                            filterValue = `: ${dateValue}`;
+                        } else if ([">", "<"].includes(filter.operator)) {
+                            filterValue = ` ${filter.operator} ${dateValue}`;
+                        } else if (">=" === filter.operator) {
+                            filterValue = ` ≥ ${dateValue}`;
+                        } else if ("<=" === filter.operator) {
+                            filterValue = ` ≤ ${dateValue}`;
+                        }
                     }
                 } else if (["mSelect", "select"].includes(item.type)) {
                     let selectContent = "";
@@ -599,7 +600,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     }
                 } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type)) {
                     const content = filter.value[item.type as "text"].content ||
-                        filter.value.relation?.contents[0];
+                        filter.value.relation?.contents[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {
@@ -612,10 +613,12 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                     }
                 }
-                filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
+                if (filterValue) {
+                    filterHTML += `<span data-type="setFilter" class="b3-chip b3-chip--primary">
     ${item.icon ? unicode2Emoji(item.icon, "icon", true) : `<svg class="icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
     <span class="fn__ellipsis">${item.name}${filterValue}</span>
 </span>`;
+                }
                 return true;
             }
         });

@@ -675,18 +675,34 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 			}
 		}
 
-		// 补全值的创建时间和更新时间
 		for _, v := range kv.Values {
+			// 校验日期 IsNotEmpty
+			if av.KeyTypeDate == kv.Key.Type {
+				if nil != v.Date && 0 != v.Date.Content && !v.Date.IsNotEmpty {
+					v.Date.IsNotEmpty = true
+				}
+			}
+
+			// 校验数字 IsNotEmpty
+			if av.KeyTypeNumber == kv.Key.Type {
+				if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
+					v.Number.IsNotEmpty = true
+				}
+			}
+
+			// 补全值的创建时间和更新时间
 			if "" == v.ID {
 				v.ID = ast.NewNodeID()
 			}
 
-			createdStr := v.ID[:len("20060102150405")]
-			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-			if nil == parseErr {
-				v.CreatedAt = created.UnixMilli()
-			} else {
-				v.CreatedAt = currentTimeMillis
+			if 0 == v.CreatedAt {
+				createdStr := v.ID[:len("20060102150405")]
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+				if nil == parseErr {
+					v.CreatedAt = created.UnixMilli()
+				} else {
+					v.CreatedAt = currentTimeMillis
+				}
 			}
 
 			if 0 == v.UpdatedAt {
@@ -1904,11 +1920,11 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
 		if 0 < len(viewable.Sorts) {
 			filterKeys, sortKeys := map[string]bool{}, map[string]bool{}
-			for _, filter := range view.Table.Filters {
-				filterKeys[filter.Column] = true
+			for _, f := range view.Table.Filters {
+				filterKeys[f.Column] = true
 			}
-			for _, sort := range view.Table.Sorts {
-				sortKeys[sort.Column] = true
+			for _, s := range view.Table.Sorts {
+				sortKeys[s.Column] = true
 			}
 
 			for key := range filterKeys {
@@ -2680,6 +2696,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 
+	now := time.Now().UnixMilli()
 	var val *av.Value
 	oldIsDetached := true
 	if nil != blockVal {
@@ -2699,7 +2716,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 
 		if nil == val {
-			val = &av.Value{ID: cellID, KeyID: keyValues.Key.ID, BlockID: rowID, Type: keyValues.Key.Type}
+			val = &av.Value{ID: cellID, KeyID: keyValues.Key.ID, BlockID: rowID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break
@@ -2777,15 +2794,20 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 
-	now := time.Now().UnixMilli()
 	if nil != blockVal {
 		blockVal.Block.Updated = now
 		blockVal.UpdatedAt = now
+		if val.CreatedAt == val.UpdatedAt {
+			val.UpdatedAt += 1000 // 防止更新时间和创建时间一样
+		}
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
 		}
 	}
 	val.UpdatedAt = now
+	if val.CreatedAt == val.UpdatedAt {
+		val.UpdatedAt += 1000 // 防止更新时间和创建时间一样
+	}
 
 	key, _ := attrView.GetKey(val.KeyID)
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation {

@@ -67,8 +67,11 @@ type Block struct {
 }
 
 type RiffCard struct {
-	Due  time.Time `json:"due"`
-	Reps uint64    `json:"reps"`
+	Due        time.Time  `json:"due"`
+	Reps       uint64     `json:"reps"`
+	Lapses     uint64     `json:"lapses"`
+	State      fsrs.State `json:"state"`
+	LastReview time.Time  `json:"lastReview"`
 }
 
 func getRiffCard(card *fsrs.Card) *RiffCard {
@@ -78,8 +81,11 @@ func getRiffCard(card *fsrs.Card) *RiffCard {
 	}
 
 	return &RiffCard{
-		Due:  due,
-		Reps: card.Reps,
+		Due:        due,
+		Reps:       card.Reps,
+		Lapses:     card.Lapses,
+		State:      card.State,
+		LastReview: card.LastReview,
 	}
 }
 

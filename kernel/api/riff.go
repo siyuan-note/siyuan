@@ -27,6 +27,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getRiffCardsByBlockIDs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	blockIDsArg := arg["blockIDs"].([]interface{})
+	var blockIDs []string
+	for _, blockID := range blockIDsArg {
+		blockIDs = append(blockIDs, blockID.(string))
+	}
+
+	blocks := model.GetFlashcardsByBlockIDs(blockIDs)
+	ret.Data = map[string]interface{}{
+		"blocks": blocks,
+	}
+}
+
 func batchSetRiffCardsDueTime(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

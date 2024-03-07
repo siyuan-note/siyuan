@@ -2795,6 +2795,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 	}
 	val.UpdatedAt = now
+	if val.CreatedAt == val.UpdatedAt {
+		val.UpdatedAt += 1000 // 防止更新时间和创建时间一样
+	}
 
 	key, _ := attrView.GetKey(val.KeyID)
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation {

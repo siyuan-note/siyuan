@@ -388,7 +388,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
         }
-        menuElement.querySelector(".b3-menu__item--current").classList.remove("b3-menu__item--current");
+        menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);

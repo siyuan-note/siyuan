@@ -12,7 +12,11 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "block":
-            html = value.block.content;
+            if (value?.isDetached) {
+                html = `<span>${value.block?.content || "Untitled"}</span>`;
+            } else {
+                html = `<span data-type="block-ref" data-id="${value.block?.id}" data-subtype="s" class="av__celltext--url">${value.block?.content || "Untitled"}</span>`;
+            }
             break;
         case "text":
             html = value.text.content;
@@ -109,19 +113,25 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
-            value.relation?.blockIDs?.forEach((item, index) => {
-                html += `<span class="av__celltext--url" style="margin-right: 8px" data-id="${item}">${value.relation?.contents[index] || "Untitled"}</span>`;
+            value?.relation?.contents?.forEach((item) => {
+                const rollupText =  genAVRollupHTML(item);
+                if (rollupText) {
+                    html += rollupText + ",&nbsp;";
+                }
             });
+            if (html && html.endsWith(",&nbsp;")) {
+                html = html.substring(0, html.length - 7);
+            }
             break;
         case "rollup":
             value?.rollup?.contents?.forEach((item) => {
                 const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
                 if (rollupText) {
-                    html += rollupText + ", ";
+                    html += rollupText + ",&nbsp;";
                 }
             });
-            if (html && html.endsWith(", ")) {
-                html = html.substring(0, html.length - 2);
+            if (html && html.endsWith(",&nbsp;")) {
+                html = html.substring(0, html.length - 7);
             }
             break;
     }

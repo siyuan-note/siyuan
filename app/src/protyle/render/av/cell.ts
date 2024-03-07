@@ -604,7 +604,7 @@ export const renderCell = (cellValue: IAVCellValue) => {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
+            text = `<span class="av__celltext">${cellValue.block.content || "Untitled"}</span>
 <span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || "Untitled"}</span>
@@ -657,7 +657,7 @@ export const renderCell = (cellValue: IAVCellValue) => {
         cellValue?.relation?.contents?.forEach((item) => {
             if (item && item.block) {
                 if (item.isDetached) {
-                    text += `<span class="av__celltext" data-id="${item.block.id}">${item.block.content || ""}</span>, `;
+                    text += `<span class="av__celltext" data-id="${item.block.id}">${item.block.content || "Untitled"}</span>, `;
                 } else {
                     text += `<span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${item.block.content || "Untitled"}</span>, `;
                 }
@@ -689,7 +689,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block?.content || ""}</span>`;
+            text = `<span class="av__celltext">${cellValue.block?.content || "Untitled"}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || "Untitled"}</span>`;
         }

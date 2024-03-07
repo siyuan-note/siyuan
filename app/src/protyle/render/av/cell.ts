@@ -416,7 +416,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (type === "template") {
         const colId = cellElements[0].getAttribute("data-col-id");
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-        if (textElement.value !== textElement.dataset.template) {
+        if (textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
             transaction(protyle, [{
                 action: "updateAttrViewColTemplate",
                 id: colId,
@@ -430,6 +430,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
                 data: textElement.dataset.template,
                 type: "template",
             }]);
+            blockElement.setAttribute("data-loading", "true");
         }
     } else {
         updateCellsValue(protyle, blockElement, type === "checkbox" ? {

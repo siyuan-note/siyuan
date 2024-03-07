@@ -324,6 +324,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             document.querySelector(".av__mask")?.remove();
                         }
                     }
+                    item.removeAttribute("data-loading");
                 });
             });
         }

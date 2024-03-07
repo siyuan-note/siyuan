@@ -232,7 +232,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 
 	ret = &AttributeView{}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		if strings.Contains(err.Error(), "cannot unmarshal string into Go struct field ValueRelation.keyValues.values.relation.contents of type av.Value") {
+		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
 			// v3.0.3 兼容之前旧版本，通过正则将 "relation":{"contents":[".*"],"blockIDs": 替换为 "relation":{"contents":null,"blockIDs":
 			data = regexp.MustCompile(`"relation":{"contents":\[".*"\],"blockIDs":`).ReplaceAll(data, []byte(`"relation":{"contents":null,"blockIDs":`))
 			if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {

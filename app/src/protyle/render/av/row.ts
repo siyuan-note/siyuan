@@ -93,7 +93,7 @@ const setPage = (blockElement: Element) => {
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     // 有排序需要加入最后一行
-    if(blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
+    if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
         previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
         showMessage(window.siyuan.languages.insertRowTip2);
     }

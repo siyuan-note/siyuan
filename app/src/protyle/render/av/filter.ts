@@ -216,7 +216,7 @@ export const setFilter = async (options: {
         });
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
-                if (!item.value.rollup) {
+                if (!item.value.rollup || !item.value.rollup.contents || item.value.rollup.contents.length === 0) {
                     filterValue = {
                         [filterValue.type]: genCellValue(filterValue.type, filterValue.type === "checkbox" ? {checked: undefined} : ""),
                         type: filterValue.type

@@ -193,6 +193,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 type: colType,
                 relation: {blockIDs: [], contents: []}
             };
+        } else if (colType === "rollup") {
+            cellValue = {
+                type: colType,
+                rollup: {contents: []}
+            };
         }
     }
     if (colType === "block") {
@@ -431,7 +436,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             checked: cellElements[0].querySelector("use").getAttribute("xlink:href") === "#iconUncheck"
         } : (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value, cellElements);
     }
-    if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+    if (cellElements[0] // 兼容新增行后台隐藏
+        && !hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
     }
     //  单元格编辑中 ctrl+p 光标定位
@@ -472,6 +478,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
         if (!nodeElement.contains(item)) {
             item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+        }
+        if (!item) {
+            // 兼容新增行后台隐藏
+            return;
         }
         const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template", "rollup"].includes(type)) {

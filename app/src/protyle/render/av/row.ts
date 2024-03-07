@@ -128,13 +128,28 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             let hideTextCell = false;
             response.data.filters.find((item: IAVFilter) => {
                 const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
-                const filterType = headerElement.getAttribute("data-dtype")
-                if (headerElement && ["relation", "rollup", "template"].includes(filterType)) {
+                if (!headerElement) {
+                    return;
+                }
+                const filterType = headerElement.getAttribute("data-dtype");
+                if (filterType !== item.value.type) {
+                    return;
+                }
+                if (["relation", "rollup", "template"].includes(filterType)) {
                     hideTextCell = true;
                     return true;
                 }
+
+                // 根据后台计算出显示与否的结果进行标识，以便于在 refreshAV 中更新 UI
                 if (["created", "updated"].includes(filterType)) {
                     currentRow.setAttribute("data-need-update", "true");
+                } else {
+                    response.data.sorts.find((sortItem: IAVSort) => {
+                        if (sortItem.column === item.column) {
+                            currentRow.setAttribute("data-need-update", "true");
+                            return true;
+                        }
+                    });
                 }
                 if (sideRow.classList.contains("av__row")) {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;

@@ -218,6 +218,7 @@ interface ICard {
     cardID: string
     blockID: string
     nextDues: IObject
+    state: number   // 0：新卡
 }
 
 interface ICardData {

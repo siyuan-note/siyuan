@@ -286,6 +286,7 @@
         font-size: 85%;
         color: var(--b3-theme-on-surface);
         margin-top: -4px;
+        align-self: center;
       }
 
       .protyle-icon,
@@ -307,7 +308,7 @@
 
   .hljs {
     border-radius: var(--b3-border-radius);
-    padding: 1.6em 4px;
+    padding: 2em 4px 1.6em 4px;
     font-size: 85%;
     overflow: auto;
     font-family: var(--b3-font-family-code);
@@ -557,7 +558,7 @@
       counter-reset: linenumber;
       font-size: 85%;
       background-color: var(--b3-theme-surface);
-      padding: 1.6em 4px;
+      padding: 2em 4px 1.6em 4px;
       box-sizing: border-box;
       border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
       width: 3.6em;

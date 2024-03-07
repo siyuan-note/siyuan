@@ -290,6 +290,13 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					v.KeyID = kv.Key.ID
 				}
 
+				// 校验日期 IsNotEmpty
+				if KeyTypeDate == kv.Key.Type {
+					if 0 != v.Date.Content && !v.Date.IsNotEmpty {
+						v.Date.IsNotEmpty = true
+					}
+				}
+
 				for _, view := range av.Views {
 					switch view.LayoutType {
 					case LayoutTypeTable:
@@ -307,12 +314,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			if "" == v.ID {
 				v.ID = ast.NewNodeID()
 			}
-			createdStr := v.ID[:len("20060102150405")]
-			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-			if nil == parseErr {
-				v.CreatedAt = created.UnixMilli()
-			} else {
-				v.CreatedAt = now
+
+			if 0 == v.CreatedAt {
+				createdStr := v.ID[:len("20060102150405")]
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+				if nil == parseErr {
+					v.CreatedAt = created.UnixMilli()
+				} else {
+					v.CreatedAt = now
+				}
 			}
 
 			if 0 == v.UpdatedAt {

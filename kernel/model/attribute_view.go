@@ -675,18 +675,27 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 			}
 		}
 
-		// 补全值的创建时间和更新时间
 		for _, v := range kv.Values {
+			// 校验日期 IsNotEmpty
+			if av.KeyTypeDate == kv.Key.Type {
+				if 0 != v.Date.Content && !v.Date.IsNotEmpty {
+					v.Date.IsNotEmpty = true
+				}
+			}
+
+			// 补全值的创建时间和更新时间
 			if "" == v.ID {
 				v.ID = ast.NewNodeID()
 			}
 
-			createdStr := v.ID[:len("20060102150405")]
-			created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-			if nil == parseErr {
-				v.CreatedAt = created.UnixMilli()
-			} else {
-				v.CreatedAt = currentTimeMillis
+			if 0 == v.CreatedAt {
+				createdStr := v.ID[:len("20060102150405")]
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+				if nil == parseErr {
+					v.CreatedAt = created.UnixMilli()
+				} else {
+					v.CreatedAt = currentTimeMillis
+				}
 			}
 
 			if 0 == v.UpdatedAt {
@@ -1904,11 +1913,11 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
 		if 0 < len(viewable.Sorts) {
 			filterKeys, sortKeys := map[string]bool{}, map[string]bool{}
-			for _, filter := range view.Table.Filters {
-				filterKeys[filter.Column] = true
+			for _, f := range view.Table.Filters {
+				filterKeys[f.Column] = true
 			}
-			for _, sort := range view.Table.Sorts {
-				sortKeys[sort.Column] = true
+			for _, s := range view.Table.Sorts {
+				sortKeys[s.Column] = true
 			}
 
 			for key := range filterKeys {

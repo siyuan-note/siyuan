@@ -187,7 +187,7 @@ func removeAttributeViewValues(c *gin.Context) {
 	pushRefreshAttrView(avID)
 }
 
-func addAttributeViewCol(c *gin.Context) {
+func addAttributeViewKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -213,7 +213,7 @@ func addAttributeViewCol(c *gin.Context) {
 	pushRefreshAttrView(avID)
 }
 
-func removeAttributeViewCol(c *gin.Context) {
+func removeAttributeViewKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -235,7 +235,7 @@ func removeAttributeViewCol(c *gin.Context) {
 	pushRefreshAttrView(avID)
 }
 
-func sortAttributeViewCol(c *gin.Context) {
+func sortAttributeViewKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

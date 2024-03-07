@@ -827,9 +827,9 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				if nil != relKey && nil != relKey.Relation {
 					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
 					if nil != destAv {
-						blocks := map[string]string{}
+						blocks := map[string]*av.Value{}
 						for _, blockValue := range destAv.GetBlockKeyValues().Values {
-							blocks[blockValue.BlockID] = blockValue.Block.Content
+							blocks[blockValue.BlockID] = blockValue
 						}
 						for _, blockID := range cell.Value.Relation.BlockIDs {
 							cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, blocks[blockID])

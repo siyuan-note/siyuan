@@ -300,7 +300,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Valu
 			}
 		case FilterOperatorDoesNotContain:
 		case FilterOperatorIsEmpty:
-			ret.Relation = &ValueRelation{Contents: []string{}}
+			ret.Relation = &ValueRelation{Contents: []*Value{}}
 		case FilterOperatorIsNotEmpty:
 		}
 	}

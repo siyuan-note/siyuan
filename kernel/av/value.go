@@ -141,16 +141,16 @@ func (value *Value) String() string {
 		}
 		return ""
 	case KeyTypeRelation:
-		if 1 > len(value.Relation.Contents) {
+		if nil == value.Relation || 1 > len(value.Relation.Contents) {
 			return ""
 		}
 		var ret []string
 		for _, v := range value.Relation.Contents {
-			ret = append(ret, v)
+			ret = append(ret, v.String())
 		}
 		return strings.TrimSpace(strings.Join(ret, ", "))
 	case KeyTypeRollup:
-		if nil == value.Rollup || nil == value.Rollup.Contents {
+		if nil == value.Rollup || 1 > len(value.Rollup.Contents) {
 			return ""
 		}
 		var ret []string
@@ -648,8 +648,8 @@ type ValueCheckbox struct {
 }
 
 type ValueRelation struct {
-	Contents []string `json:"contents"`
 	BlockIDs []string `json:"blockIDs"`
+	Contents []*Value `json:"contents"`
 }
 
 type ValueRollup struct {

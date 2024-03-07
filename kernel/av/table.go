@@ -219,8 +219,31 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeRelation:
 		if nil != value.Relation && nil != other.Relation {
-			vContent := strings.TrimSpace(strings.Join(value.Relation.Contents, " "))
-			oContent := strings.TrimSpace(strings.Join(other.Relation.Contents, " "))
+			vContentBuf := bytes.Buffer{}
+			for _, c := range value.Relation.Contents {
+				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteByte(' ')
+			}
+			vContent := strings.TrimSpace(vContentBuf.String())
+			oContentBuf := bytes.Buffer{}
+			for _, c := range other.Relation.Contents {
+				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteByte(' ')
+			}
+			oContent := strings.TrimSpace(oContentBuf.String())
+
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
+				if v1 > v2 {
+					return 1
+				}
+
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
 			return strings.Compare(vContent, oContent)
 		}
 	case KeyTypeRollup:
@@ -300,6 +323,12 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			}
 		}
 		return false
+	}
+
+	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.Contents) {
+		// 单独处理关联类型的比较
+		return value.filter(filter.Value.Relation.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
 	}
 
 	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator)
@@ -750,37 +779,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return value.Checkbox.Checked
 			case FilterOperatorIsFalse:
 				return !value.Checkbox.Checked
-			}
-		}
-	case KeyTypeRelation:
-		if nil != value.Relation && nil != other && nil != other.Relation {
-			switch operator {
-			case FilterOperatorContains:
-				contains := false
-				for _, c := range value.Relation.Contents {
-					for _, c1 := range other.Relation.Contents {
-						if strings.Contains(c, c1) {
-							contains = true
-							break
-						}
-					}
-				}
-				return contains
-			case FilterOperatorDoesNotContain:
-				contains := false
-				for _, c := range value.Relation.Contents {
-					for _, c1 := range other.Relation.Contents {
-						if strings.Contains(c, c1) {
-							contains = true
-							break
-						}
-					}
-				}
-				return !contains
-			case FilterOperatorIsEmpty:
-				return 0 == len(value.Relation.Contents) || 1 == len(value.Relation.Contents) && "" == value.Relation.Contents[0]
-			case FilterOperatorIsNotEmpty:
-				return 0 != len(value.Relation.Contents) && !(1 == len(value.Relation.Contents) && "" == value.Relation.Contents[0])
 			}
 		}
 	}

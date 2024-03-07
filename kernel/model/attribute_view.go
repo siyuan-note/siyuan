@@ -2790,6 +2790,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if nil != blockVal {
 		blockVal.Block.Updated = now
 		blockVal.UpdatedAt = now
+		if val.CreatedAt == val.UpdatedAt {
+			val.UpdatedAt += 1000 // 防止更新时间和创建时间一样
+		}
 		if isUpdatingBlockKey {
 			blockVal.IsDetached = val.IsDetached
 		}

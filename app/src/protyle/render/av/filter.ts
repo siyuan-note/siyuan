@@ -570,7 +570,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
                         filterText = ": " + window.siyuan.languages.checked;
                     }
-                } else if (["created", "updated", "date"].includes(item.type)) {
+                } else if (["created", "updated", "date"].includes(filterValue.type)) {
                     let dateValue = "";
                     let dateValue2 = "";
                     if (filter.relativeDate) {
@@ -582,9 +582,9 @@ export const getFiltersHTML = (data: IAVTable) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filterValue && filterValue[item.type as "date"]?.content) {
-                        dateValue = dayjs(filterValue[item.type as "date"].content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filterValue[item.type as "date"].content2).format("YYYY-MM-DD");
+                    } else if (filterValue && filterValue[filterValue.type as "date"]?.content) {
+                        dateValue = dayjs(filterValue[filterValue.type as "date"].content).format("YYYY-MM-DD");
+                        dateValue2 = dayjs(filterValue[filterValue.type as "date"].content2).format("YYYY-MM-DD");
                     }
                     if (dateValue) {
                         if (filter.operator === "Is between") {
@@ -599,7 +599,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                             filterText = ` ≤ ${dateValue}`;
                         }
                     }
-                } else if (["mSelect", "select"].includes(item.type) && filterValue.mSelect?.length > 0) {
+                } else if (["mSelect", "select"].includes(filterValue.type) && filterValue.mSelect?.length > 0) {
                     let selectContent = "";
                     filterValue.mSelect.forEach((item, index) => {
                         selectContent += item.content;
@@ -616,7 +616,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if (filter.operator === "!=") {
                         filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
-                } else if (item.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
+                } else if (filterValue.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
                         filterText = ` ${filter.operator} ${filterValue.number.content}`;
                     } else if (">=" === filter.operator) {
@@ -624,8 +624,8 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterText = ` ≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "phone", "email", "relation"].includes(item.type) && filterValue[item.type as "text"]) {
-                    const content = filterValue[item.type as "text"].content ||
+                } else if (["text", "block", "url", "phone", "email", "relation"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
+                    const content = filterValue[filterValue.type as "text"].content ||
                         filterValue.relation?.contents[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterText = `: ${content}`;

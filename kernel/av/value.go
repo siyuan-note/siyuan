@@ -58,6 +58,10 @@ type Value struct {
 }
 
 func (value *Value) String() string {
+	if nil == value {
+		return ""
+	}
+
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil == value.Block {

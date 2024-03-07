@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -231,8 +232,17 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 
 	ret = &AttributeView{}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
+		if strings.Contains(err.Error(), "cannot unmarshal string into Go struct field ValueRelation.keyValues.values.relation.contents of type av.Value") {
+			// v3.0.3 兼容之前旧版本，通过正则将 "relation":{"contents":[".*"],"blockIDs": 替换为 "relation":{"contents":null,"blockIDs":
+			data = regexp.MustCompile(`"relation":{"contents":\[".*"\],"blockIDs":`).ReplaceAll(data, []byte(`"relation":{"contents":null,"blockIDs":`))
+			if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+				return
+			}
+		} else {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 	return
 }
@@ -340,7 +350,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 补全过滤器 Value
 	for _, view := range av.Views {
-		if nil == view.Table {
+		if nil != view.Table {
 			for _, f := range view.Table.Filters {
 				if nil != f.Value {
 					continue

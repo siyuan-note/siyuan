@@ -325,10 +325,12 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		return false
 	}
 
-	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
-		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.Contents) {
+	if nil != value.Relation && KeyTypeRelation == value.Type && 0 < len(value.Relation.Contents) && nil != filter && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) && 0 < len(filter.Value.Relation.BlockIDs) {
 		// 单独处理关联类型的比较
-		return value.filter(filter.Value.Relation.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
+		relationValue := value.Relation.Contents[0]
+		filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}
+		return relationValue.filter(filterValue, filter.RelativeDate, filter.RelativeDate2, filter.Operator)
 	}
 
 	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator)

@@ -365,7 +365,24 @@ export const openMenuPanel = (options: {
                     targetElement.after(sourceElement);
                 }
                 targetElement.classList.remove("dragover__bottom", "dragover__top");
-                setRelationCell(options.protyle, options.blockElement as HTMLElement, sourceElement.parentElement, options.cellElements);
+                const blockIDs: string[] = [];
+                const contents: IAVCellValue[] = []
+                targetElement.parentElement.querySelectorAll(".fn__grab").forEach(item => {
+                    const dateElement = item.nextElementSibling as HTMLElement
+                    blockIDs.push(dateElement.dataset.id)
+                    contents.push({
+                        isDetached: !dateElement.style.color,
+                        type: "block",
+                        block: {
+                            content: dateElement.textContent,
+                            id: dateElement.dataset.id
+                        }
+                    })
+                })
+                updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+                    blockIDs,
+                    contents,
+                }, options.cellElements);
                 return;
             }
 

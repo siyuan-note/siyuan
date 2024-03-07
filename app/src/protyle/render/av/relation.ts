@@ -212,11 +212,9 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
 
 const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string) => {
     if (type === "selected") {
-        return `<button data-id="${id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
-    <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>
-</button>`;
+        return `<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+<span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
+<svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>`;
     }
     if (type === "empty") {
         return `<button class="b3-menu__item">
@@ -241,10 +239,8 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         let selectHTML = "";
         const hasIds: string[] = []
         cellElement.querySelectorAll("span").forEach((item) => {
-            if (item.textContent.indexOf(keyword) > -1) {
-                hasIds.push(item.dataset.id);
-                selectHTML += genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled");
-            }
+            hasIds.push(item.dataset.id);
+            selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled")}</button>`;
         })
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
@@ -254,6 +250,7 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML("empty")}`;
+        menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     });
 };
 
@@ -273,7 +270,7 @@ export const bindRelationEvent = (options: {
         const hasIds: string[] = []
         options.cellElements[0].querySelectorAll("span").forEach((item) => {
             hasIds.push(item.dataset.id);
-            selectHTML += genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled");
+            selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled")}</button>`;
         })
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
@@ -286,7 +283,7 @@ export const bindRelationEvent = (options: {
 ${html || genSelectItemHTML("empty")}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
         setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-        options.menuElement.querySelector(".b3-menu__items .b3-menu__item").classList.add("b3-menu__item--current");
+        options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();
         const listElement = options.menuElement.querySelector(".b3-menu__items");
@@ -386,12 +383,13 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 isDetached: !target.firstElementChild.getAttribute("style")
             });
             separatorElement.before(target);
-            target.outerHTML = genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent);
+            target.outerHTML = `<button data-id="${targetId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent)}</button>`;
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
         }
-        menuElement.firstElementChild.classList.add("b3-menu__item--current");
+        menuElement.querySelector(".b3-menu__item--current").classList.remove("b3-menu__item--current");
+        menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

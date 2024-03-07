@@ -79,7 +79,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
                     content: item.textContent,
                     id: item.dataset.id,
                 },
-                type:"block"
+                type: "block"
             });
         });
         cellValue.relation = {
@@ -656,11 +656,7 @@ export const renderCell = (cellValue: IAVCellValue) => {
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item) => {
             if (item && item.block) {
-                if (item.isDetached) {
-                    text += `<span class="av__celltext" data-id="${item.block.id}">${item.block.content || "Untitled"}</span>, `;
-                } else {
-                    text += `<span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${item.block.content || "Untitled"}</span>, `;
-                }
+                text += renderRollup(item) + ", ";
             }
         });
         if (text && text.endsWith(", ")) {
@@ -689,7 +685,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block?.content || "Untitled"}</span>`;
+            text = `<span class="av__celltext" data-id="${cellValue.block?.id}">${cellValue.block?.content || "Untitled"}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || "Untitled"}</span>`;
         }

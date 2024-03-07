@@ -96,6 +96,7 @@ export const setFilter = async (options: {
                         unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
                         direction: parseInt(directElements[1].value)
                     };
+                    newValue = {type: filterValue.type};
                 } else {
                     newValue = genCellValue(filterValue.type, {
                         isNotEmpty2: textElements[1].value !== "",

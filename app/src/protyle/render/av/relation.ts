@@ -231,8 +231,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     }
 };
 
-const filterItem = (menuElement: Element, keyword: string) => {
-    const hasIds = menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
+const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: string) => {
     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
         id: menuElement.firstElementChild.getAttribute("data-av-id"),
         keyword,
@@ -240,16 +239,13 @@ const filterItem = (menuElement: Element, keyword: string) => {
         const cells = response.data.rows.values as IAVCellValue[] || [];
         let html = "";
         let selectHTML = "";
-        hasIds.forEach(hasId => {
-            if (hasId) {
-                cells.find((item) => {
-                    if (item.block.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.block.id, item.isDetached, item.block.content || "Untitled");
-                        return true;
-                    }
-                });
+        const hasIds: string[] = []
+        cellElement.querySelectorAll("span").forEach((item) => {
+            if (item.textContent.indexOf(keyword) > -1) {
+                hasIds.push(item.dataset.id);
+                selectHTML += genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled");
             }
-        });
+        })
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || "Untitled");
@@ -267,7 +263,6 @@ export const bindRelationEvent = (options: {
     blockElement: Element,
     cellElements: HTMLElement[]
 }) => {
-    const hasIds = options.menuElement.firstElementChild.getAttribute("data-cell-ids").split(",");
     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
         id: options.menuElement.firstElementChild.getAttribute("data-av-id"),
         keyword: "",
@@ -275,16 +270,11 @@ export const bindRelationEvent = (options: {
         const cells = response.data.rows.values as IAVCellValue[] || [];
         let html = "";
         let selectHTML = "";
-        hasIds.forEach(hasId => {
-            if (hasId) {
-                cells.find((item) => {
-                    if (item.block.id === hasId) {
-                        selectHTML += genSelectItemHTML("selected", item.block.id, item.isDetached, item.block.content || "Untitled");
-                        return true;
-                    }
-                });
-            }
-        });
+        const hasIds: string[] = []
+        options.cellElements[0].querySelectorAll("span").forEach((item) => {
+            hasIds.push(item.dataset.id);
+            selectHTML += genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || "Untitled");
+        })
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || "Untitled");
@@ -321,12 +311,12 @@ ${html || genSelectItemHTML("empty")}`;
             if (event.isComposing) {
                 return;
             }
-            filterItem(options.menuElement, inputElement.value);
+            filterItem(options.menuElement, options.cellElements[0], inputElement.value);
             event.stopPropagation();
         });
         inputElement.addEventListener("compositionend", (event) => {
             event.stopPropagation();
-            filterItem(options.menuElement, inputElement.value);
+            filterItem(options.menuElement, options.cellElements[0], inputElement.value);
         });
     });
 };
@@ -340,11 +330,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         }
     });
     if (colRelationData && colRelationData.avID) {
-        let ids = "";
-        cellElements[0].querySelectorAll("span").forEach((item) => {
-            ids += `${item.getAttribute("data-id")},`;
-        });
-        return `<div data-av-id="${colRelationData.avID}" data-cell-ids="${ids}" class="fn__flex-column">
+        return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
 <div class="b3-menu__item fn__flex-column" data-type="nobg">
     <div class="b3-menu__label">&nbsp;</div>
     <input class="b3-text-field fn__flex-shrink"/>
@@ -362,6 +348,13 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     const menuElement = hasClosestByClassName(target, "b3-menu__items");
     if (!menuElement) {
         return;
+    }
+    const rowElement = hasClosestByClassName(cellElements[0], "av__row");
+    if (!rowElement) {
+        return;
+    }
+    if (!nodeElement.contains(cellElements[0])) {
+        cellElements[0] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
     }
     const newValue = genCellValueByElement("relation", cellElements[0]).relation;
     if (target.classList.contains("b3-menu__item")) {
@@ -384,7 +377,14 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 separatorElement.previousElementSibling.remove();
             }
             newValue.blockIDs.push(targetId);
-            newValue.contents.push(target.textContent.trim());
+            newValue.contents.push({
+                type: "block",
+                block: {
+                    id: targetId,
+                    content: target.firstElementChild.textContent
+                },
+                isDetached: !target.firstElementChild.getAttribute("style")
+            });
             separatorElement.before(target);
             target.outerHTML = genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent);
             if (!separatorElement.nextElementSibling) {
@@ -393,6 +393,5 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
         }
         menuElement.firstElementChild.classList.add("b3-menu__item--current");
     }
-    menuElement.parentElement.setAttribute("data-cell-ids", newValue.blockIDs.join(","));
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

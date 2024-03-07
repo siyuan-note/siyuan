@@ -1168,7 +1168,7 @@ interface IAVCellValue {
     }
     relation?: {
         blockIDs: string[]
-        contents?: string[]
+        contents?: IAVCellValue[]
     }
     rollup?: {
         contents?: IAVCellValue[]

@@ -69,9 +69,22 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
         };
     } else if (colType === "relation") {
+        const blockIDs: string[] = [];
+        const contents: IAVCellValue[] = [];
+        Array.from(cellElement.querySelectorAll("span")).forEach((item: HTMLElement) => {
+            blockIDs.push(item.dataset.id);
+            contents.push({
+                isDetached: !item.classList.contains("av__celltext--ref"),
+                block: {
+                    content: item.textContent,
+                    id: item.dataset.id,
+                },
+                type:"block"
+            });
+        });
         cellValue.relation = {
-            blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
-            contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
+            blockIDs,
+            contents
         };
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = [];
@@ -145,7 +158,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {blockIDs: [], contents: [value]}
+                relation: {blockIDs: [value], contents: []}
             };
         }
     } else if (typeof value === "undefined" || !value) {
@@ -641,9 +654,18 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text = text.substring(0, text.length - 2);
         }
     } else if (cellValue.type === "relation") {
-        cellValue?.relation?.contents?.forEach((item, index) => {
-            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item || "Untitled"}</span>`;
+        cellValue?.relation?.contents?.forEach((item) => {
+            if (item && item.block) {
+                if (item.isDetached) {
+                    text += `<span class="av__celltext" data-id="${item.block.id}">${item.block.content || ""}</span>, `;
+                } else {
+                    text += `<span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${item.block.content || "Untitled"}</span>, `;
+                }
+            }
         });
+        if (text && text.endsWith(", ")) {
+            text = text.substring(0, text.length - 2);
+        }
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {

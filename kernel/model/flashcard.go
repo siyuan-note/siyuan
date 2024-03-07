@@ -38,6 +38,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetFlashcardsByBlockIDs(blockIDs []string, page, pageSize int) (blocks []*Block, total, pageCount int) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	waitForSyncingStorages()
+
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	cards := deck.GetCardsByBlockIDs(blockIDs)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
+	return
+}
+
 type SetFlashcardDueTime struct {
 	ID  string `json:"id"`  // 卡片 ID
 	Due string `json:"due"` // 下次复习时间，格式为 YYYYMMDDHHmmss

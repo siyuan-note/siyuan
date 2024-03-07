@@ -38,19 +38,37 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetFlashcardsByBlockIDs(blockIDs []string, page, pageSize int) (blocks []*Block, total, pageCount int) {
+func GetFlashcardsByBlockIDs(blockIDs []string) (ret []*Block) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
 	waitForSyncingStorages()
 
+	ret = []*Block{}
 	deck := Decks[builtinDeckID]
 	if nil == deck {
 		return
 	}
 
 	cards := deck.GetCardsByBlockIDs(blockIDs)
-	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
+	blocks, _, _ := getCardsBlocks(cards, 1, math.MaxInt)
+
+	for _, blockID := range blockIDs {
+		found := false
+		for _, block := range blocks {
+			if blockID == block.ID {
+				found = true
+				ret = append(ret, block)
+				break
+			}
+		}
+		if !found {
+			ret = append(ret, &Block{
+				ID:      blockID,
+				Content: Conf.Language(180),
+			})
+		}
+	}
 	return
 }
 

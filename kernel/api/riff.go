@@ -40,17 +40,10 @@ func getRiffCardsByBlockIDs(c *gin.Context) {
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
-	page := int(arg["page"].(float64))
-	pageSize := 20
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
 
-	blocks, total, pageCount := model.GetFlashcardsByBlockIDs(blockIDs, page, pageSize)
+	blocks := model.GetFlashcardsByBlockIDs(blockIDs)
 	ret.Data = map[string]interface{}{
-		"blocks":    blocks,
-		"total":     total,
-		"pageCount": pageCount,
+		"blocks": blocks,
 	}
 }
 

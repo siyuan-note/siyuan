@@ -13,9 +13,9 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     switch (value.type) {
         case "block":
             if (value?.isDetached) {
-                html = `<span>${value.block?.content || "Untitled"}</span>`;
+                html = `<span data-id="${value.block?.id}">${value.block?.content || "Untitled"}</span>`;
             } else {
-                html = `<span data-type="block-ref" data-id="${value.block?.id}" data-subtype="s" class="av__celltext--url">${value.block?.content || "Untitled"}</span>`;
+                html = `<span data-type="block-ref" data-id="${value.block?.id}" data-subtype="s" class="av__celltext--ref">${value.block?.content || "Untitled"}</span>`;
             }
             break;
         case "text":
@@ -114,7 +114,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "relation":
             value?.relation?.contents?.forEach((item) => {
-                const rollupText =  genAVRollupHTML(item);
+                const rollupText = genAVRollupHTML(item);
                 if (rollupText) {
                     html += rollupText + ",&nbsp;";
                 }

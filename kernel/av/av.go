@@ -314,6 +314,16 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					}
 				}
 
+				// 清空关联实际值
+				if KeyTypeRelation == kv.Key.Type {
+					v.Relation.Contents = nil
+				}
+
+				// 清空汇总实际值
+				if KeyTypeRollup == kv.Key.Type {
+					v.Rollup.Contents = nil
+				}
+
 				for _, view := range av.Views {
 					switch view.LayoutType {
 					case LayoutTypeTable:

@@ -441,7 +441,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				case FilterOperatorIsGreater:
 					return valueTime.After(relativeTimeEnd)
 				case FilterOperatorIsGreaterOrEqual:
-					return valueTime.After(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd)
+					return valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
 				case FilterOperatorIsLess:
 					return valueTime.Before(relativeTimeStart)
 				case FilterOperatorIsLessOrEqual:
@@ -489,89 +489,127 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 			}
 		}
 	case KeyTypeCreated:
-		if nil != value.Created && nil != other && nil != other.Created {
-			switch operator {
-			case FilterOperatorIsEqual:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Created.Content >= start.UnixMilli() && value.Created.Content < end.UnixMilli()
-			case FilterOperatorIsNotEqual:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Created.Content < start.UnixMilli() || value.Created.Content >= end.UnixMilli()
-			case FilterOperatorIsGreater:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Created.Content >= end.UnixMilli()
-			case FilterOperatorIsGreaterOrEqual:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				return value.Created.Content >= start.UnixMilli()
-			case FilterOperatorIsLess:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				return value.Created.Content < start.UnixMilli()
-			case FilterOperatorIsLessOrEqual:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Created.Content < end.UnixMilli()
-			case FilterOperatorIsBetween:
-				start := time.UnixMilli(other.Created.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := time.UnixMilli(other.Created.Content2)
-				end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, time.Local)
-				return value.Created.Content >= start.UnixMilli() && value.Created.Content < end.UnixMilli()
-			case FilterOperatorIsEmpty:
-				return !value.Created.IsNotEmpty
-			case FilterOperatorIsNotEmpty:
-				return value.Created.IsNotEmpty
+		if nil != value.Created {
+			if nil != relativeDate {
+				// 使用相对时间比较
+
+				count := relativeDate.Count
+				unit := relativeDate.Unit
+				direction := relativeDate.Direction
+				valueTime := time.UnixMilli(value.Created.Content)
+				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
+				switch operator {
+				case FilterOperatorIsEqual:
+					return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
+				case FilterOperatorIsNotEqual:
+					return !(valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) || !(valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
+				case FilterOperatorIsGreater:
+					return valueTime.After(relativeTimeEnd)
+				case FilterOperatorIsGreaterOrEqual:
+					return valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
+				case FilterOperatorIsLess:
+					return valueTime.Before(relativeTimeStart)
+				case FilterOperatorIsLessOrEqual:
+					return valueTime.Before(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
+				case FilterOperatorIsBetween:
+					_, relativeTime2End := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+					return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTime2End) || valueTime.Equal(relativeTime2End))
+				}
+			} else { // 使用具体时间比较
+				if nil == other.Created {
+					return true
+				}
+
+				switch operator {
+				case FilterOperatorIsEqual:
+					if !other.Created.IsNotEmpty {
+						return true
+					}
+					return value.Created.Content == other.Created.Content
+				case FilterOperatorIsNotEqual:
+					if !other.Created.IsNotEmpty {
+						return true
+					}
+					return value.Created.Content != other.Created.Content
+				case FilterOperatorIsGreater:
+					return value.Created.Content > other.Created.Content
+				case FilterOperatorIsGreaterOrEqual:
+					return value.Created.Content >= other.Created.Content
+				case FilterOperatorIsLess:
+					return value.Created.Content < other.Created.Content
+				case FilterOperatorIsLessOrEqual:
+					return value.Created.Content <= other.Created.Content
+				case FilterOperatorIsBetween:
+					start := value.Created.Content >= other.Created.Content
+					end := value.Created.Content <= other.Created.Content2
+					return start && end
+				case FilterOperatorIsEmpty:
+					return !value.Created.IsNotEmpty
+				case FilterOperatorIsNotEmpty:
+					return value.Created.IsNotEmpty
+				}
 			}
 		}
 	case KeyTypeUpdated:
-		if nil != value.Updated && nil != other && nil != other.Updated {
-			switch operator {
-			case FilterOperatorIsEqual:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Updated.Content >= start.UnixMilli() && value.Updated.Content < end.UnixMilli()
-			case FilterOperatorIsNotEqual:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Updated.Content < start.UnixMilli() || value.Updated.Content >= end.UnixMilli()
-			case FilterOperatorIsGreater:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Updated.Content >= end.UnixMilli()
-			case FilterOperatorIsGreaterOrEqual:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				return value.Updated.Content >= start.UnixMilli()
-			case FilterOperatorIsLess:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				return value.Updated.Content < start.UnixMilli()
-			case FilterOperatorIsLessOrEqual:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := start.AddDate(0, 0, 1)
-				return value.Updated.Content < end.UnixMilli()
-			case FilterOperatorIsBetween:
-				start := time.UnixMilli(other.Updated.Content)
-				start = time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.Local)
-				end := time.UnixMilli(other.Updated.Content2)
-				end = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, time.Local)
-				return value.Updated.Content >= start.UnixMilli() && value.Updated.Content < end.UnixMilli()
-			case FilterOperatorIsEmpty:
-				return !value.Updated.IsNotEmpty
-			case FilterOperatorIsNotEmpty:
-				return value.Updated.IsNotEmpty
+		if nil != value.Updated {
+			if nil != relativeDate {
+				// 使用相对时间比较
+
+				count := relativeDate.Count
+				unit := relativeDate.Unit
+				direction := relativeDate.Direction
+				valueTime := time.UnixMilli(value.Updated.Content)
+				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
+				switch operator {
+				case FilterOperatorIsEqual:
+					return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
+				case FilterOperatorIsNotEqual:
+					return !(valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) || !(valueTime.Before(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd))
+				case FilterOperatorIsGreater:
+					return valueTime.After(relativeTimeEnd)
+				case FilterOperatorIsGreaterOrEqual:
+					return valueTime.After(relativeTimeEnd) || valueTime.Equal(relativeTimeEnd)
+				case FilterOperatorIsLess:
+					return valueTime.Before(relativeTimeStart)
+				case FilterOperatorIsLessOrEqual:
+					return valueTime.Before(relativeTimeStart) || valueTime.Equal(relativeTimeStart)
+				case FilterOperatorIsBetween:
+					_, relativeTime2End := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+					return (valueTime.After(relativeTimeStart) || valueTime.Equal(relativeTimeStart)) && (valueTime.Before(relativeTime2End) || valueTime.Equal(relativeTime2End))
+				}
+			} else { // 使用具体时间比较
+				if nil == other.Updated {
+					return true
+				}
+
+				switch operator {
+				case FilterOperatorIsEqual:
+					if !other.Updated.IsNotEmpty {
+						return true
+					}
+					return value.Updated.Content == other.Updated.Content
+				case FilterOperatorIsNotEqual:
+					if !other.Updated.IsNotEmpty {
+						return true
+					}
+					return value.Updated.Content != other.Updated.Content
+				case FilterOperatorIsGreater:
+					return value.Updated.Content > other.Updated.Content
+				case FilterOperatorIsGreaterOrEqual:
+					return value.Updated.Content >= other.Updated.Content
+				case FilterOperatorIsLess:
+					return value.Updated.Content < other.Updated.Content
+				case FilterOperatorIsLessOrEqual:
+					return value.Updated.Content <= other.Updated.Content
+				case FilterOperatorIsBetween:
+					start := value.Updated.Content >= other.Updated.Content
+					end := value.Updated.Content <= other.Updated.Content2
+					return start && end
+				case FilterOperatorIsEmpty:
+					return !value.Updated.IsNotEmpty
+				case FilterOperatorIsNotEmpty:
+					return value.Updated.IsNotEmpty
+				}
 			}
 		}
 	case KeyTypeSelect, KeyTypeMSelect:

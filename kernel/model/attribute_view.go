@@ -678,8 +678,15 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		for _, v := range kv.Values {
 			// 校验日期 IsNotEmpty
 			if av.KeyTypeDate == kv.Key.Type {
-				if 0 != v.Date.Content && !v.Date.IsNotEmpty {
+				if nil != v.Date && 0 != v.Date.Content && !v.Date.IsNotEmpty {
 					v.Date.IsNotEmpty = true
+				}
+			}
+
+			// 校验数字 IsNotEmpty
+			if av.KeyTypeNumber == kv.Key.Type {
+				if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
+					v.Number.IsNotEmpty = true
 				}
 			}
 

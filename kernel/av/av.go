@@ -292,8 +292,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 				// 校验日期 IsNotEmpty
 				if KeyTypeDate == kv.Key.Type {
-					if 0 != v.Date.Content && !v.Date.IsNotEmpty {
+					if nil != v.Date && 0 != v.Date.Content && !v.Date.IsNotEmpty {
 						v.Date.IsNotEmpty = true
+					}
+				}
+
+				// 校验数字 IsNotEmpty
+				if KeyTypeNumber == kv.Key.Type {
+					if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
+						v.Number.IsNotEmpty = true
 					}
 				}
 

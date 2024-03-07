@@ -132,7 +132,7 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
                     return;
                 }
                 const filterType = headerElement.getAttribute("data-dtype");
-                if (filterType !== item.value.type) {
+                if (item.value && filterType !== item.value.type) {
                     return;
                 }
                 if (["relation", "rollup", "template"].includes(filterType)) {

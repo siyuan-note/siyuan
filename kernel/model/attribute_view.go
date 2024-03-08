@@ -1007,7 +1007,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				for _, blockID := range relVal.Relation.BlockIDs {
 					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
 					if nil == destVal {
-						destVal = treenode.GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
+						continue
 					}
 					if av.KeyTypeNumber == destKey.Type {
 						destVal.Number.Format = destKey.NumberFormat
@@ -1034,7 +1034,9 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 							blocks[blockValue.BlockID] = blockValue
 						}
 						for _, blockID := range cell.Value.Relation.BlockIDs {
-							cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, blocks[blockID])
+							if val := blocks[blockID]; nil != val {
+								cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, val)
+							}
 						}
 					}
 				}

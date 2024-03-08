@@ -341,7 +341,7 @@ export const setFilter = async (options: {
         let value = "";
         if (filterValue) {
             if (filterValue.type === "relation") {
-                value = filterValue.relation.contents[0] || "";
+                value = filterValue.relation.blockIDs[0] || "";
             } else {
                 value = filterValue[filterValue.type as "text"].content || "";
             }
@@ -629,7 +629,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     }
                 } else if (["text", "block", "url", "phone", "email", "relation"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
                     const content = filterValue[filterValue.type as "text"].content ||
-                        filterValue.relation?.contents[0] || "";
+                        filterValue.relation?.blockIDs[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterText = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {

@@ -285,7 +285,7 @@ export const showPopover = async (app: App, showRef = false) => {
         ids = [getIdFromSYProtocol(popoverTargetElement.textContent.trim())];
     } else if (popoverTargetElement.dataset.popoverUrl) {
         // 镜像数据库
-        const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {id: popoverTargetElement.dataset.avId});
+        const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {avID: popoverTargetElement.dataset.avId});
         ids = postResponse.data;
     } else {
         // pdf

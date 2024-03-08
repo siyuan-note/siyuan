@@ -627,7 +627,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterText = ` ≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "phone", "email", "relation"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
+                } else if (["text", "block", "url", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
                     const content = filterValue[filterValue.type as "text"].content ||
                         filterValue.relation?.blockIDs[0] || "";
                     if (["=", "Contains"].includes(filter.operator)) {
@@ -640,6 +640,12 @@ export const getFiltersHTML = (data: IAVTable) => {
                         filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
                     } else if ("Ends with" === filter.operator) {
                         filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                    } else if ([">", "<"].includes(filter.operator)) {
+                        filterText = ` ${filter.operator} ${content}`;
+                    } else if (">=" === filter.operator) {
+                        filterText = ` ≥ ${content}`;
+                    } else if ("<=" === filter.operator) {
+                        filterText = ` ≤ ${content}`;
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">

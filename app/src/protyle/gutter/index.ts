@@ -714,7 +714,14 @@ export class Gutter {
             }
         }
         if (!protyle.disabled) {
-            AIActions(selectsElement, protyle);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconSparkles",
+                label: window.siyuan.languages.ai,
+                accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
+                click() {
+                    AIActions(selectsElement, protyle);
+                }
+            }).element);
         }
         const copyMenu: IMenu[] = [{
             label: window.siyuan.languages.copy,
@@ -1175,7 +1182,14 @@ export class Gutter {
             }).element);
         }
         if (!protyle.disabled && !nodeElement.classList.contains("hr")) {
-            AIActions([nodeElement], protyle);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconSparkles",
+                label: window.siyuan.languages.ai,
+                accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
+                click() {
+                    AIActions([nodeElement], protyle);
+                }
+            }).element);
         }
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
             label: window.siyuan.languages.copy,

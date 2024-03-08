@@ -734,7 +734,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			}
 
 			if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
-				// 填充属性视图名称
+				// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 				avNames := bytes.Buffer{}
 				avIDs := strings.Split(avs, ",")
 				for _, avID := range avIDs {
@@ -746,11 +746,15 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 					if "" == avName {
 						avName = "Untitled"
 					}
-					avNames.WriteString(avName)
-					avNames.WriteString(",")
+
+					tpl := `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
+					tpl = strings.ReplaceAll(tpl, "${avID}", avID)
+					tpl = strings.ReplaceAll(tpl, "${avName}", avName)
+					avNames.WriteString(tpl)
+					avNames.WriteString("&nbsp;")
 				}
 				if 0 < avNames.Len() {
-					avNames.Truncate(avNames.Len() - 1)
+					avNames.Truncate(avNames.Len() - 6)
 					n.SetIALAttr("av-names", avNames.String())
 				}
 			}

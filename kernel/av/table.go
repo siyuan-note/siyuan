@@ -435,7 +435,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
 				_, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterTime(value.Date.Content, true, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
+				return filterTime(value.Date.Content, value.Date.IsNotEmpty, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Date {
 					return true
@@ -704,17 +704,17 @@ func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherVa
 	valueTime := time.UnixMilli(valueMills)
 	switch operator {
 	case FilterOperatorIsEqual:
-		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd)
 	case FilterOperatorIsNotEqual:
-		return !((valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)))
+		return valueTime.Before(otherValueStart) || valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreater:
-		return valueTime.After(otherValueEnd)
+		return valueTime.After(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsGreaterOrEqual:
 		return valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)
 	case FilterOperatorIsLess:
 		return valueTime.Before(otherValueStart)
 	case FilterOperatorIsLessOrEqual:
-		return valueTime.Before(otherValueStart) || valueTime.Equal(otherValueStart)
+		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
 		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2))
 	case FilterOperatorIsEmpty:

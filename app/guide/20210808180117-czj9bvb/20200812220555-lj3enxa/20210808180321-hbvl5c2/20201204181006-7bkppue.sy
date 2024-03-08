@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20230820185615"
+		"updated": "20240308162603"
 	},
 	"Children": [
 		{
@@ -128,7 +128,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091309-mvyh081",
-				"updated": "20230820185615"
+				"updated": "20240308161634"
 			},
 			"Children": [
 				{
@@ -152,7 +152,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.siyuan-note.club/zh-Hans/reference/template/sprig/",
+					"TextMarkTextContent": "中文版"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
 				}
 			]
 		},
@@ -226,7 +236,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20220605170311"
+				"updated": "20240308162603"
 			},
 			"Children": [
 				{
@@ -249,13 +259,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "title"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该变量用于插入当前文档名。比如模板内容为 "
+									"Data": "​：该变量用于插入当前文档名。比如模板内容为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -264,7 +278,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，则调用后会以一级标题语法插入到当前文档内容中"
+									"Data": "​，则调用后会以一级标题语法插入到当前文档内容中"
 								}
 							]
 						}
@@ -290,13 +304,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "id"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该变量用于插入当前文档 ID"
+									"Data": "​：该变量用于插入当前文档 ID"
 								}
 							]
 						}
@@ -322,13 +340,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "name"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该变量用于插入当前文档命名"
+									"Data": "​：该变量用于插入当前文档命名"
 								}
 							]
 						}
@@ -355,13 +377,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "alias"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该变量用于插入当前文档别名"
+									"Data": "​：该变量用于插入当前文档别名"
 								}
 							]
 						}
@@ -387,18 +413,34 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "queryBlocks"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该函数用于查询数据库，返回值为 blocks 列表，参数为 SQL 语句："
+									"Data": "​：该函数用于查询"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值为 blocks 列表，参数为 SQL 语句："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -424,18 +466,34 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "querySpans"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该函数用于查询数据库，返回值为 spans 列表，参数为 SQL 语句："
+									"Data": "​：该函数用于查询"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值为 spans 列表，参数为 SQL 语句："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -462,13 +520,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "parseTime"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该函数用于将时间格式的字符串解析为 "
+									"Data": "​：该函数用于将时间格式的字符串解析为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -477,7 +539,323 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 类型，以便使用更多格式化方法渲染该时间"
+									"Data": "​ 类型，以便使用更多格式化方法渲染该时间"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308161717-xkgiour",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308161717-xkgiour"
+					},
+					"Children": [
+						{
+							"ID": "20240308161717-ja8a2qw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308161717-ja8a2qw",
+								"updated": "20240308162050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回周几 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162051-g575lg1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162051-g575lg1"
+					},
+					"Children": [
+						{
+							"ID": "20240308162051-qdxgndg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162051-qdxgndg",
+								"updated": "20240308162108"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回周几 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=日, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162109-paei265",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162109-paei265"
+					},
+					"Children": [
+						{
+							"ID": "20240308162109-6s8psxm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162109-6s8psxm",
+								"updated": "20240308162125"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回周几 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=天, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162139-yt96e2z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162139-yt96e2z"
+					},
+					"Children": [
+						{
+							"ID": "20240308162139-x4evb04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162139-x4evb04",
+								"updated": "20240308162153"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回第几周"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162209-vls60yh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162209-vls60yh"
+					},
+					"Children": [
+						{
+							"ID": "20240308162209-hheoq88",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162209-hheoq88",
+								"updated": "20240308162504"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指数计算，返回整数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162455-c15kzsv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162455-c15kzsv"
+					},
+					"Children": [
+						{
+							"ID": "20240308162455-eqm57bk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162455-eqm57bk",
+								"updated": "20240308162515"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指数计算，返回浮点数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162518-1ouvecu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162518-1ouvecu"
+					},
+					"Children": [
+						{
+							"ID": "20240308162518-c71ndzq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162518-c71ndzq",
+								"updated": "20240308162549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：对数计算，返回整数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162549-jyktdek",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162549-jyktdek",
+						"updated": "20240308162603"
+					},
+					"Children": [
+						{
+							"ID": "20240308162549-2z3s09v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162549-2z3s09v",
+								"updated": "20240308162603"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：对数计算，返回浮点数"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20230820185644"
+		"updated": "20240308162730"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20211213121210"
+				"updated": "20240308162730"
 			},
 			"Children": [
 				{
@@ -237,13 +237,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "title"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Use this variable to insert the current document name. For example, if the template content is "
+									"Data": "​: Use this variable to insert the current document name. For example, if the template content is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -252,7 +256,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", it will be inserted into the current document content with the first-level heading syntax after invoking"
+									"Data": "​, it will be inserted into the current document content with the first-level heading syntax after invoking"
 								}
 							]
 						}
@@ -278,13 +282,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "id"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：Use this variable to insert the current document id"
+									"Data": "​：Use this variable to insert the current document id"
 								}
 							]
 						}
@@ -310,13 +318,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "name"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Use this variable to insert the current document name"
+									"Data": "​: Use this variable to insert the current document name"
 								}
 							]
 						}
@@ -342,13 +354,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "alias"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：Use this variable to insert the current document alias"
+									"Data": "​：Use this variable to insert the current document alias"
 								}
 							]
 						}
@@ -374,18 +390,50 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "queryBlocks"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": This function is used to query the database, and the return value is a list of blocks,  and the parameter is a SQL statement: "
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and the return value is "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " list of blocks,  and the parameter is "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " SQL statement: "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -411,18 +459,50 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "querySpans"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": This function is used to query the database, and the return value is a list of spans,  and the parameter is a SQL statement: "
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and the return value is "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " list of spans,  and the parameter is "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " SQL statement: "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -449,13 +529,33 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "parseTime"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": This function is used to parse a string in time format into a "
+									"Data": "​: This function is used to parse "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " string in time format into "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -464,7 +564,330 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " type so that more formatting methods can be used to render the time"
+									"Data": "​ type so that more formatting methods can be used to render the time"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-h7vi1dh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-h7vi1dh",
+						"updated": "20240308162632"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-en6g3fm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-en6g3fm",
+								"updated": "20240308162632"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the day of the week "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-s5ipztw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-s5ipztw",
+						"updated": "20240308162652"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-r20wx9o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-r20wx9o",
+								"updated": "20240308162652"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the day of the week "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=日, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-9e9ytoj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-9e9ytoj",
+						"updated": "20240308162700"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-dhivcod",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-dhivcod",
+								"updated": "20240308162700"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the day of the week "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=天, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-3ec0qtk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-3ec0qtk",
+						"updated": "20240308162632"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-akk8sxn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-akk8sxn",
+								"updated": "20240308162632"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the week"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-essiuhv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-essiuhv",
+						"updated": "20240308162717"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-usz39m7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-usz39m7",
+								"updated": "20240308162717"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Exponential calculation, return an integer"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-iekhm3w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-iekhm3w",
+						"updated": "20240308162721"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-rxfovte",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-rxfovte",
+								"updated": "20240308162721"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Exponential calculation, return a floating point number"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-v8vhchs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-v8vhchs",
+						"updated": "20240308162730"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-2lzssxv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-2lzssxv",
+								"updated": "20240308162730"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Logarithmic calculation, returns an integer"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162632-4wa3g3n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162632-4wa3g3n",
+						"updated": "20240308162724"
+					},
+					"Children": [
+						{
+							"ID": "20240308162632-27ni8cf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162632-27ni8cf",
+								"updated": "20240308162724"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Logarithmic calculation, return a floating point number"
 								}
 							]
 						}

@@ -114,9 +114,11 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "relation":
             value?.relation?.contents?.forEach((item) => {
-                const rollupText = genAVRollupHTML(item);
-                if (rollupText) {
-                    html += rollupText + ",&nbsp;";
+                if (item) {
+                    const rollupText = genAVRollupHTML(item);
+                    if (rollupText) {
+                        html += rollupText + ",&nbsp;";
+                    }
                 }
             });
             if (html && html.endsWith(",&nbsp;")) {

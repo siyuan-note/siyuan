@@ -1681,14 +1681,82 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	return
 }
 
+const attrAvNameTpl = `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
+
 func setAttributeViewName(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.ID)
+	avID := operation.ID
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
+
+	nodes := getAttrViewBoundNodes(attrView)
+	for _, node := range nodes {
+		oldAttrs := parse.IAL2Map(node.KramdownIAL)
+		nodeAvIDsVal := oldAttrs[av.NodeAttrNameAvs]
+		if "" == nodeAvIDsVal {
+			continue
+		}
+
+		avNames := bytes.Buffer{}
+		nodeAvIDs := strings.Split(nodeAvIDsVal, ",")
+		for _, nodeAvID := range nodeAvIDs {
+			var nodeAvName string
+			var getErr error
+			if nodeAvID == avID {
+				nodeAvName = attrView.Name
+			} else {
+				nodeAvName, getErr = av.GetAttributeViewName(nodeAvID)
+				if nil != getErr {
+					continue
+				}
+			}
+			if "" == nodeAvName {
+				nodeAvName = "Untitled"
+			}
+
+			tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", nodeAvID)
+			tpl = strings.ReplaceAll(tpl, "${avName}", nodeAvName)
+			avNames.WriteString(tpl)
+			avNames.WriteString("&nbsp;")
+		}
+		if 0 < avNames.Len() {
+			avNames.Truncate(avNames.Len() - 6)
+			node.SetIALAttr("av-names", avNames.String())
+			pushBroadcastAttrTransactions(oldAttrs, node)
+		}
+	}
+	return
+}
+
+func getAttrViewBoundNodes(attrView *av.AttributeView) (ret []*ast.Node) {
+	blockKeyValues := attrView.GetBlockKeyValues()
+	treeMap := map[string]*parse.Tree{}
+	for _, blockKeyValue := range blockKeyValues.Values {
+		if blockKeyValue.IsDetached {
+			continue
+		}
+
+		var tree *parse.Tree
+		tree = treeMap[blockKeyValue.BlockID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(blockKeyValue.BlockID)
+		}
+		if nil == tree {
+			continue
+		}
+		treeMap[blockKeyValue.BlockID] = tree
+
+		node := treenode.GetNodeInTree(tree, blockKeyValue.BlockID)
+		if nil == node {
+			continue
+		}
+
+		ret = append(ret, node)
+	}
 	return
 }
 

@@ -747,8 +747,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 						avName = "Untitled"
 					}
 
-					tpl := `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
-					tpl = strings.ReplaceAll(tpl, "${avID}", avID)
+					tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", avID)
 					tpl = strings.ReplaceAll(tpl, "${avName}", avName)
 					avNames.WriteString(tpl)
 					avNames.WriteString("&nbsp;")

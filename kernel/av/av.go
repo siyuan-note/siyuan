@@ -29,6 +29,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -209,6 +210,26 @@ func NewAttributeView(id string) (ret *AttributeView) {
 		ViewID:    view.ID,
 		Views:     []*View{view},
 	}
+	return
+}
+
+func GetAttributeViewName(avID string) (ret string, err error) {
+	avJSONPath := GetAttributeViewDataPath(avID)
+	if !filelock.IsExist(avJSONPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(avJSONPath)
+	if nil != err {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	val := jsoniter.Get(data, "name")
+	if nil == val || val.ValueType() == jsoniter.InvalidValue {
+		return
+	}
+	ret = val.ToString()
 	return
 }
 

@@ -414,6 +414,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewPrimaryKeyValues", model.CheckAuth, model.CheckReadonly, getAttributeViewPrimaryKeyValues)
 	ginServer.Handle("POST", "/api/av/setDatabaseBlockView", model.CheckAuth, model.CheckReadonly, setDatabaseBlockView)
 	ginServer.Handle("POST", "/api/av/searchTableView", model.CheckAuth, model.CheckReadonly, searchTableView)
+	ginServer.Handle("POST", "/api/av/getMirrorDatabaseBlocks", model.CheckAuth, model.CheckReadonly, getMirrorDatabaseBlocks)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, chatGPTWithAction)

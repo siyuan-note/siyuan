@@ -77,12 +77,8 @@ const (
 
 func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Value) {
 	if nil != filter.Value {
-		if filter.Value.IsGenerated() {
-			// 自动生成类型的过滤条件不设置默认值
-			return nil
-		}
-		if KeyTypeRelation == filter.Value.Type {
-			// 关联类型的过滤条件不设置默认值 https://ld246.com/article/1709608533749
+		if KeyTypeRelation == filter.Value.Type || KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
+			// 所有生成的数据都不设置默认值
 			return nil
 		}
 	}

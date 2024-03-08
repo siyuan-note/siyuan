@@ -193,8 +193,7 @@ func (value *Value) IsEdited() bool {
 		return true
 	}
 
-	if value.IsGenerated() {
-		// 所有生成的数据都认为是编辑过的
+	if KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type {
 		return true
 	}
 
@@ -206,7 +205,7 @@ func (value *Value) IsEdited() bool {
 }
 
 func (value *Value) IsGenerated() bool {
-	return KeyTypeTemplate == value.Type || KeyTypeRollup == value.Type || KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type
+	return KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type
 }
 
 func (value *Value) IsEmpty() bool {

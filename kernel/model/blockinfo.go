@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -42,6 +43,12 @@ type BlockInfo struct {
 	RefIDs       []string          `json:"refIDs"`
 	IAL          map[string]string `json:"ial"`
 	Icon         string            `json:"icon"`
+	AttrViews    []*AttrView       `json:"attrViews"`
+}
+
+type AttrView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func GetDocInfo(blockID string) (ret *BlockInfo) {
@@ -81,8 +88,25 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 			}
 		}
 	}
+
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
-	ret.RefCount = len(ret.RefIDs)
+	ret.RefCount = len(ret.RefIDs) // 填充块引计数
+
+	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+	avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
+	for _, avID := range avIDs {
+		avName, getErr := av.GetAttributeViewName(avID)
+		if nil != getErr {
+			continue
+		}
+
+		if "" == avName {
+			avName = "Untitled"
+		}
+
+		attrView := &AttrView{ID: avID, Name: avName}
+		ret.AttrViews = append(ret.AttrViews, attrView)
+	}
 
 	var subFileCount int
 	boxLocalPath := filepath.Join(util.DataDir, tree.Box)

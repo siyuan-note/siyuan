@@ -485,7 +485,13 @@ func renderAttributeView(c *gin.Context) {
 		pageSize = int(pageSizeArg.(float64))
 	}
 
-	view, attrView, err := model.RenderAttributeView(id, viewID, page, pageSize)
+	query := ""
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	view, attrView, err := model.RenderAttributeView(id, viewID, query, page, pageSize)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

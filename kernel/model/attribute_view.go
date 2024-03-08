@@ -596,7 +596,7 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 	return
 }
 
-func RenderAttributeView(avID, viewID string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -614,6 +614,31 @@ func RenderAttributeView(avID, viewID string, page, pageSize int) (viewable av.V
 	}
 
 	viewable, err = renderAttributeView(attrView, viewID, page, pageSize)
+
+	query = strings.TrimSpace(query)
+	if "" != query {
+		keywords := strings.Split(query, " ")
+		var rows []*av.TableRow
+		switch viewable.GetType() {
+		case av.LayoutTypeTable:
+			table := viewable.(*av.Table)
+			for _, row := range table.Rows {
+				hit := false
+				for _, cell := range row.Cells {
+					for _, keyword := range keywords {
+						if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
+							hit = true
+							break
+						}
+					}
+				}
+				if hit {
+					rows = append(rows, row)
+				}
+			}
+			table.Rows = rows
+		}
+	}
 	return
 }
 

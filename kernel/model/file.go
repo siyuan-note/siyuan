@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -40,6 +41,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -728,6 +730,32 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				if (0 != mode && id != n.ID) || isDoc {
 					unlinks = append(unlinks, n)
 					return ast.WalkContinue
+				}
+			}
+
+			if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
+				// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+				avNames := bytes.Buffer{}
+				avIDs := strings.Split(avs, ",")
+				for _, avID := range avIDs {
+					avName, getErr := av.GetAttributeViewName(avID)
+					if nil != getErr {
+						continue
+					}
+
+					if "" == avName {
+						avName = "Untitled"
+					}
+
+					tpl := `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
+					tpl = strings.ReplaceAll(tpl, "${avID}", avID)
+					tpl = strings.ReplaceAll(tpl, "${avName}", avName)
+					avNames.WriteString(tpl)
+					avNames.WriteString("&nbsp;")
+				}
+				if 0 < avNames.Len() {
+					avNames.Truncate(avNames.Len() - 6)
+					n.SetIALAttr("av-names", avNames.String())
 				}
 			}
 

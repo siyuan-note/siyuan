@@ -1696,38 +1696,41 @@ func setAttributeViewName(operation *Operation) (err error) {
 	nodes := getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
-		nodeAvIDsVal := oldAttrs[av.NodeAttrNameAvs]
-		if "" == nodeAvIDsVal {
+		avNames := getNodeIALAvNames(node)
+		if "" == avNames {
 			continue
 		}
+		node.SetIALAttr("av-names", avNames)
+		pushBroadcastAttrTransactions(oldAttrs, node)
+	}
+	return
+}
 
-		avNames := bytes.Buffer{}
-		nodeAvIDs := strings.Split(nodeAvIDsVal, ",")
-		for _, nodeAvID := range nodeAvIDs {
-			var nodeAvName string
-			var getErr error
-			if nodeAvID == avID {
-				nodeAvName = attrView.Name
-			} else {
-				nodeAvName, getErr = av.GetAttributeViewName(nodeAvID)
-				if nil != getErr {
-					continue
-				}
-			}
-			if "" == nodeAvName {
-				nodeAvName = "Untitled"
-			}
+func getNodeIALAvNames(node *ast.Node) (ret string) {
+	avIDs := parse.IAL2Map(node.KramdownIAL)[av.NodeAttrNameAvs]
+	if "" == avIDs {
+		return
+	}
 
-			tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", nodeAvID)
-			tpl = strings.ReplaceAll(tpl, "${avName}", nodeAvName)
-			avNames.WriteString(tpl)
-			avNames.WriteString("&nbsp;")
+	avNames := bytes.Buffer{}
+	nodeAvIDs := strings.Split(avIDs, ",")
+	for _, nodeAvID := range nodeAvIDs {
+		nodeAvName, getErr := av.GetAttributeViewName(nodeAvID)
+		if nil != getErr {
+			continue
 		}
-		if 0 < avNames.Len() {
-			avNames.Truncate(avNames.Len() - 6)
-			node.SetIALAttr("av-names", avNames.String())
-			pushBroadcastAttrTransactions(oldAttrs, node)
+		if "" == nodeAvName {
+			nodeAvName = "Untitled"
 		}
+
+		tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", nodeAvID)
+		tpl = strings.ReplaceAll(tpl, "${avName}", nodeAvName)
+		avNames.WriteString(tpl)
+		avNames.WriteString("&nbsp;")
+	}
+	if 0 < avNames.Len() {
+		avNames.Truncate(avNames.Len() - 6)
+		ret = avNames.String()
 	}
 	return
 }
@@ -2051,6 +2054,11 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 			avIDs = append(avIDs, avID)
 			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+		}
+
+		avNames := getNodeIALAvNames(node)
+		if "" != avNames {
+			attrs["av-names"] = avNames
 		}
 
 		if nil != tx {

@@ -493,14 +493,17 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 aliasHTML = `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
             } else if (key === "memo") {
                 memoHTML = `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
-            } else if (key === "custom-avs") {
-                avHTML = '<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg></div>';
+            } else if (key === "custom-avs" && data.new["av-names"]) {
+                avHTML = `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${data.new["av-names"]}</div>`;
             }
         });
         let nodeAttrHTML = bookmarkHTML + nameHTML + aliasHTML + memoHTML + avHTML;
         if (protyle.block.rootID === operation.id) {
             // 文档
             if (protyle.title) {
+                if (data.new["custom-avs"] && !data.new["av-names"]) {
+                    nodeAttrHTML += protyle.title.element.querySelector(".protyle-attr--av")?.outerHTML || "";
+                }
                 const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
                 if (refElement) {
                     nodeAttrHTML += refElement.outerHTML;
@@ -566,6 +569,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     }, 450);
                 }
             });
+            if (data.new["custom-avs"] && !data.new["av-names"]) {
+                nodeAttrHTML += item.lastElementChild.querySelector(".protyle-attr--av")?.outerHTML || "";
+            }
             const refElement = item.lastElementChild.querySelector(".protyle-attr--refcount");
             if (refElement) {
                 nodeAttrHTML += refElement.outerHTML;

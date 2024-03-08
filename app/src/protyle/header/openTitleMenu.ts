@@ -63,6 +63,10 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                             srcIDs: sourceIds,
                             isDetached: false,
                             blockID: listItemElement.dataset.nodeId
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.nodeId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,

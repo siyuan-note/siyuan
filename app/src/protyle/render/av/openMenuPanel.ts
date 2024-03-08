@@ -30,6 +30,7 @@ import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updat
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
+import * as dayjs from "dayjs";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1008,6 +1009,7 @@ export const openMenuPanel = (options: {
                     const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
                     const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
                     duplicateCol({
+                        blockElement: options.blockElement,
                         protyle: options.protyle,
                         type: colData.type,
                         avID,
@@ -1029,10 +1031,15 @@ export const openMenuPanel = (options: {
                             return true;
                         }
                     });
+                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                     transaction(options.protyle, [{
                         action: "removeAttrViewCol",
                         id: colId,
                         avID,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockID,
+                        data: newUpdated,
                     }], [{
                         action: "addAttrViewCol",
                         name: colData.name,
@@ -1040,8 +1047,13 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         id: colId,
                         previousID
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockID,
+                        data: options.blockElement.getAttribute("updated")
                     }]);
                     removeAttrViewColAnimation(options.blockElement, colId);
+                    options.blockElement.setAttribute("updated", newUpdated);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

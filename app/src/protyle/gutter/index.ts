@@ -225,6 +225,7 @@ export class Gutter {
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
+                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
@@ -232,12 +233,21 @@ export class Gutter {
                         srcIDs,
                         isDetached: true,
                         blockID: id,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id,
+                        data: newUpdated,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs,
                         avID,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id,
+                        data: blockElement.getAttribute("updated")
                     }]);
                     insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    blockElement.setAttribute("updated", newUpdated);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
@@ -812,6 +822,10 @@ export class Gutter {
                         srcIDs: sourceIds,
                         isDetached: false,
                         blockID: listItemElement.dataset.blockId
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: listItemElement.dataset.blockId,
+                        data: dayjs().format("YYYYMMDDHHmmss"),
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: sourceIds,
@@ -1269,6 +1283,10 @@ export class Gutter {
                             srcIDs: sourceIds,
                             isDetached: false,
                             blockID: listItemElement.dataset.blockId
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.blockId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,

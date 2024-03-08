@@ -5,6 +5,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell, renderCellAttr} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
+import * as dayjs from "dayjs";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -319,14 +320,25 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
             blockID: blockElement.dataset.nodeId
         });
     });
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    undoOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated")
+    });
     transaction(protyle, [{
         action: "removeAttrViewBlock",
         srcIDs: blockIds,
         avID,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
     }], undoOperations);
     rowElements.forEach(item => {
         item.remove();
     });
     stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
     updateHeader(blockElement.querySelector(".av__row"));
+    blockElement.setAttribute("updated", newUpdated);
 };

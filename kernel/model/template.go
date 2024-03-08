@@ -20,14 +20,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/araddon/dateparse"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -412,14 +410,5 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		}
 		retSpans = sql.SelectSpansRawStmt(stmt, 512)
 		return
-	}
-	(*templateFuncMap)["parseTime"] = func(dateStr string) time.Time {
-		now := time.Now()
-		retTime, err := dateparse.ParseIn(dateStr, now.Location())
-		if nil != err {
-			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
-			return now
-		}
-		return retTime
 	}
 }

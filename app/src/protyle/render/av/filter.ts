@@ -560,7 +560,7 @@ export const getFiltersHTML = (data: IAVTable) => {
         data.columns.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
                 let filterText = "";
-                const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
+                const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents?.length > 0 ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
                 if (filter.operator === "Is empty") {
                     filterText = ": " + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {

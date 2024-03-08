@@ -572,7 +572,7 @@
 .protyle .protyle-wysiwyg {
   .li[data-subtype="o"] > .protyle-action,
   .li[data-subtype="u"] > .protyle-action,
-  &[contenteditable="true"] .li[data-subtype="t"] > .protyle-action {
+  &[data-readonly="true"] .li[data-subtype="t"] > .protyle-action {
     cursor: pointer;
 
     &:hover {
@@ -586,7 +586,7 @@
 }
 
 // 导出 html 不需要编辑样式
-.protyle-wysiwyg[contenteditable="true"] {
+.protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
   span[data-type~="tag"],
   span[data-type~="block-ref"],
@@ -632,7 +632,7 @@
 }
 
 .protyle-wysiwyg:not([contenteditable]),
-.protyle-wysiwyg[contenteditable="false"] {
+.protyle-wysiwyg[data-readonly="true"] {
   .img:hover .protyle-icons {
     display: none;
   }

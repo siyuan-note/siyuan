@@ -304,6 +304,8 @@ export const disabledProtyle = (protyle: IProtyle) => {
     });
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
+    // 用于区分移动端样式
+    protyle.wysiwyg.element.setAttribute("data-readonly", "true");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
         item.setAttribute("contenteditable", "false");
     });
@@ -345,6 +347,8 @@ export const enableProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
         protyle.wysiwyg.element.style.userSelect = "";
     }
+    // 用于区分移动端样式
+    protyle.wysiwyg.element.setAttribute("data-readonly", "false");
     if (protyle.title) {
         const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
         titleElement.setAttribute("contenteditable", "true");

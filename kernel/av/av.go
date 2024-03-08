@@ -233,8 +233,51 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	ret = &AttributeView{}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
-			// v3.0.3 兼容之前旧版本，通过正则将 "relation":{"contents":[".*"],"blockIDs": 替换为 "relation":{"contents":null,"blockIDs":
-			data = regexp.MustCompile(`"relation":{"contents":\[".*"\],"blockIDs":`).ReplaceAll(data, []byte(`"relation":{"contents":null,"blockIDs":`))
+			mapAv := map[string]interface{}{}
+			if err = gulu.JSON.UnmarshalJSON(data, &mapAv); nil != err {
+				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+				return
+			}
+
+			// v3.0.3 兼容之前旧版本，将 relation.contents[""] 转换为 null
+			keyValues := mapAv["keyValues"]
+			keyValuesMap := keyValues.([]interface{})
+			for _, kv := range keyValuesMap {
+				kvMap := kv.(map[string]interface{})
+				if values := kvMap["values"]; nil != values {
+					valuesMap := values.([]interface{})
+					for _, v := range valuesMap {
+						if vMap := v.(map[string]interface{}); nil != vMap["relation"] {
+							vMap["relation"].(map[string]interface{})["contents"] = nil
+						}
+					}
+				}
+			}
+
+			views := mapAv["views"]
+			viewsMap := views.([]interface{})
+			for _, view := range viewsMap {
+				if table := view.(map[string]interface{})["table"]; nil != table {
+					tableMap := table.(map[string]interface{})
+					if filters := tableMap["filters"]; nil != filters {
+						filtersMap := filters.([]interface{})
+						for _, f := range filtersMap {
+							if fMap := f.(map[string]interface{}); nil != fMap["value"] {
+								if valueMap := fMap["value"].(map[string]interface{}); nil != valueMap["relation"] {
+									valueMap["relation"].(map[string]interface{})["contents"] = nil
+								}
+							}
+						}
+					}
+				}
+			}
+
+			data, err = gulu.JSON.MarshalJSON(mapAv)
+			if nil != err {
+				logging.LogErrorf("marshal attribute view [%s] failed: %s", avID, err)
+				return
+			}
+
 			if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
 				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 				return

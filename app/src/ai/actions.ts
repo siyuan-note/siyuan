@@ -270,6 +270,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 while (target && !target.isSameNode(element)) {
                     if (target.classList.contains("b3-list-item__action")) {
                         editDialog(target.previousElementSibling.textContent, target.parentElement.getAttribute("aria-label"));
+                        menu.close();
                         event.stopPropagation();
                         event.preventDefault();
                         break;
@@ -281,17 +282,20 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                                 fillContent(protyle, response.data, elements);
                             });
                         }
+                        menu.close();
                         event.stopPropagation();
                         event.preventDefault();
                         break;
                     }
                     target = target.parentElement;
                 }
-                menu.close();
             });
         }
     });
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+    /// #if MOBILE
+    menu.fullscreen();
+    /// #else
     const rect = elements[elements.length - 1].getBoundingClientRect();
     menu.open({
         x: rect.left,
@@ -299,4 +303,5 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         h: rect.height,
     });
     menu.element.querySelector("input").focus();
+    /// #endif
 };

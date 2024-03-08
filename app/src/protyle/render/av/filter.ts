@@ -106,6 +106,8 @@ export const setFilter = async (options: {
                         hasEndDate: newFilter.operator === "Is between",
                         isNotTime: true,
                     });
+                    newFilter.relativeDate = null;
+                    newFilter.relativeDate2 = null;
                 }
             } else {
                 newValue = genCellValue(filterValue.type, textElements[0].value);

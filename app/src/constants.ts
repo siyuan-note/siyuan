@@ -360,6 +360,7 @@ export abstract class Constants {
                 refPopover: {default: "", custom: ""},
                 copyText: {default: "", custom: ""},
                 exitFocus: {default: "", custom: ""},
+                ai: {default: "", custom: ""},
                 switchReadonly: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
@@ -395,7 +396,7 @@ export abstract class Constants {
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
                 jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
-                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"}
             },
             insert: {
                 appearance: {default: "⌥⌘X", custom: "⌥⌘X"},

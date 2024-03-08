@@ -283,6 +283,10 @@ export const showPopover = async (app: App, showRef = false) => {
     } else if (popoverTargetElement.dataset.type === "url") {
         // 在 database 的 url 列中以思源协议开头的链接
         ids = [getIdFromSYProtocol(popoverTargetElement.textContent.trim())];
+    } else if (popoverTargetElement.dataset.popoverUrl) {
+        // 镜像数据库
+        const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {id: popoverTargetElement.dataset.avId});
+        ids = postResponse.data;
     } else {
         // pdf
         let targetId;

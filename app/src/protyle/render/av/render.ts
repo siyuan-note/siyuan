@@ -204,7 +204,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            ${response.data.isMirror ? ` <span class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
+            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
         <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " av__title--hide" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>

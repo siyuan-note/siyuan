@@ -52,6 +52,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
+                accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {

@@ -75,6 +75,8 @@ import {searchKeydown} from "./searchKeydown";
 import {openNewWindow} from "../../window/openNewWindow";
 import {historyKeydown} from "../../history/keydown";
 import {zoomOut} from "../../menus/protyle";
+import {openSearchAV} from "../../protyle/render/av/relation";
+import * as dayjs from "dayjs";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -301,6 +303,64 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 }
             }
             quickMakeCard(protyle, selectElement);
+        }
+        event.preventDefault();
+        return true;
+    }
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.addToDatabase.custom, event)) {
+        if (protyle.title?.editElement.contains(range.startContainer)) {
+            openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
+                const sourceIds: string[] = [protyle.block.rootID];
+                const avID = listItemElement.dataset.avId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    srcIDs: sourceIds,
+                    isDetached: false,
+                    blockID: listItemElement.dataset.nodeId
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.nodeId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: sourceIds,
+                    avID,
+                }]);
+            });
+        } else {
+            const selectElement: Element[] = [];
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                selectElement.push(item);
+            });
+            if (selectElement.length === 0) {
+                const nodeElement = hasClosestBlock(range.startContainer);
+                if (nodeElement) {
+                    selectElement.push(nodeElement);
+                }
+            }
+            openSearchAV("", selectElement[0] as HTMLElement, (listItemElement) => {
+                const sourceIds: string[] = [];
+                selectElement.forEach(item => {
+                    sourceIds.push(item.getAttribute("data-node-id"));
+                });
+                const avID = listItemElement.dataset.avId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    srcIDs: sourceIds,
+                    isDetached: false,
+                    blockID: listItemElement.dataset.blockId
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: sourceIds,
+                    avID,
+                }]);
+            });
         }
         event.preventDefault();
         return true;

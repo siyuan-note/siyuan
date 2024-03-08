@@ -808,6 +808,7 @@ export class Gutter {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.addToDatabase,
+            accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
                 openSearchAV("", selectsElement[0] as HTMLElement, (listItemElement) => {
@@ -1272,6 +1273,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
+                accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {

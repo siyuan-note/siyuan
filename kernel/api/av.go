@@ -26,6 +26,19 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getMirrorDatabaseBlocks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	ret.Data = av.GetMirrorBlockIDs(avID)
+}
+
 func searchTableView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

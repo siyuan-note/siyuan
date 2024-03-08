@@ -1695,23 +1695,18 @@ func setAttributeViewName(operation *Operation) (err error) {
 
 	nodes := getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
+		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
-		avNames := getNodeIALAvNames(node)
-		if "" == avNames {
-			continue
-		}
 		node.SetIALAttr("av-names", avNames)
 		pushBroadcastAttrTransactions(oldAttrs, node)
 	}
 	return
 }
 
-func getNodeIALAvNames(node *ast.Node) (ret string) {
-	avIDs := parse.IAL2Map(node.KramdownIAL)[av.NodeAttrNameAvs]
+func getAvNames(avIDs string) (ret string) {
 	if "" == avIDs {
 		return
 	}
-
 	avNames := bytes.Buffer{}
 	nodeAvIDs := strings.Split(avIDs, ",")
 	for _, nodeAvID := range nodeAvIDs {
@@ -2056,7 +2051,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 		}
 
-		avNames := getNodeIALAvNames(node)
+		avNames := getAvNames(attrs[av.NodeAttrNameAvs])
 		if "" != avNames {
 			attrs["av-names"] = avNames
 		}

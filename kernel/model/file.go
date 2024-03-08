@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -735,26 +734,9 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 			if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
 				// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
-				avNames := bytes.Buffer{}
-				avIDs := strings.Split(avs, ",")
-				for _, avID := range avIDs {
-					avName, getErr := av.GetAttributeViewName(avID)
-					if nil != getErr {
-						continue
-					}
-
-					if "" == avName {
-						avName = "Untitled"
-					}
-
-					tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", avID)
-					tpl = strings.ReplaceAll(tpl, "${avName}", avName)
-					avNames.WriteString(tpl)
-					avNames.WriteString("&nbsp;")
-				}
-				if 0 < avNames.Len() {
-					avNames.Truncate(avNames.Len() - 6)
-					n.SetIALAttr("av-names", avNames.String())
+				avNames := getAvNames(n.IALAttr(av.NodeAttrNameAvs))
+				if "" != avNames {
+					n.SetIALAttr("av-names", avNames)
 				}
 			}
 

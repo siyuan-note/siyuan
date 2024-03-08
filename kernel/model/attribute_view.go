@@ -1432,9 +1432,35 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
 	}
 
+	trees, nodes := getMirrorBlocksNodes(avID)
+	for _, node := range nodes {
+		attrs := parse.IAL2Map(node.KramdownIAL)
+		blockViewID := attrs[av.NodeAttrView]
+		if blockViewID == viewID {
+			attrs[av.NodeAttrView] = attrView.ViewID
+			oldAttrs, e := setNodeAttrs0(node, attrs)
+			if nil != e {
+				logging.LogErrorf("set node attrs failed: %s", e)
+				continue
+			}
+
+			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+			pushBroadcastAttrTransactions(oldAttrs, node)
+		}
+	}
+
+	for _, tree := range trees {
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
+	}
+	return
+}
+
+func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) {
 	mirrorBlocks := av.GetMirrorBlockIDs(avID)
 	mirrorBlockTree := map[string]*parse.Tree{}
-	trees := map[string]*parse.Tree{}
+	treeMap := map[string]*parse.Tree{}
 	for _, mirrorBlock := range mirrorBlocks {
 		bt := treenode.GetBlockTree(mirrorBlock)
 		if nil == bt {
@@ -1449,12 +1475,11 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 				logging.LogErrorf("load tree by block ID [%s] failed", mirrorBlock)
 				continue
 			}
-			trees[tree.ID] = tree
+			treeMap[tree.ID] = tree
 			mirrorBlockTree[mirrorBlock] = tree
 		}
 	}
 
-	var nodes []*ast.Node
 	for _, mirrorBlock := range mirrorBlocks {
 		tree := mirrorBlockTree[mirrorBlock]
 		node := treenode.GetNodeInTree(tree, mirrorBlock)
@@ -1462,27 +1487,11 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlock)
 			continue
 		}
-
-		attrs := parse.IAL2Map(node.KramdownIAL)
-		blockViewID := attrs[av.NodeAttrView]
-		if blockViewID == viewID {
-			attrs[av.NodeAttrView] = attrView.ViewID
-			oldAttrs, e := setNodeAttrs0(node, attrs)
-			if nil != e {
-				logging.LogErrorf("set node attrs failed: %s", e)
-				continue
-			}
-
-			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-			pushBroadcastAttrTransactions(oldAttrs, node)
-			nodes = append(nodes, node)
-		}
+		nodes = append(nodes, node)
 	}
 
-	for _, tree := range trees {
-		if err = indexWriteJSONQueue(tree); nil != err {
-			return
-		}
+	for _, tree := range treeMap {
+		trees = append(trees, tree)
 	}
 	return
 }

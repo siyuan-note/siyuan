@@ -81,7 +81,7 @@ const editDialog = (customName: string, customMemo: string) => {
         dialog.destroy();
     });
     nameElement.focus();
-}
+};
 
 const customDialog = (protyle: IProtyle, ids: string[], elements: Element[]) => {
     const dialog = new Dialog({
@@ -134,7 +134,7 @@ const customDialog = (protyle: IProtyle, ids: string[], elements: Element[]) => 
         dialog.destroy();
     });
     nameElement.focus();
-}
+};
 
 const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
     element.querySelectorAll(".b3-list-item").forEach(item => {
@@ -143,17 +143,17 @@ const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
         } else {
             item.classList.add("fn__none");
         }
-    })
-    element.querySelectorAll('.b3-menu__separator').forEach(item => {
+    });
+    element.querySelectorAll(".b3-menu__separator").forEach(item => {
         if (inputElement.value) {
             item.classList.add("fn__none");
         } else {
             item.classList.remove("fn__none");
         }
-    })
+    });
     element.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
     element.querySelector(".b3-list-item:not(.fn__none)").classList.add("b3-list-item--focus");
-}
+};
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
@@ -164,7 +164,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     const menu = new Menu("ai", () => {
         focusByRange(protyle.toolbar.range);
     });
-    let customHTML = ""
+    let customHTML = "";
     window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }) => {
         customHTML += `<div data-action="${item.memo || item.name}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
@@ -258,7 +258,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             });
             inputElement.addEventListener("compositionend", () => {
                 filterAI(element, inputElement);
-            })
+            });
             inputElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;

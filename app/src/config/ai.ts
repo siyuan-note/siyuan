@@ -160,12 +160,12 @@ export const ai = {
 </div>`;
     },
     bindEvent: () => {
-        const togglePassword = ai.element.querySelector('.b3-form__icona-icon[data-action="togglePassword"]')
+        const togglePassword = ai.element.querySelector('.b3-form__icona-icon[data-action="togglePassword"]');
         togglePassword.addEventListener("click", () => {
             const isEye = togglePassword.firstElementChild.getAttribute("xlink:href") === "#iconEye";
             togglePassword.firstElementChild.setAttribute("xlink:href", isEye ? "#iconEyeoff" : "#iconEye");
             togglePassword.previousElementSibling.setAttribute("type", isEye ? "text" : "password");
-        })
+        });
         ai.element.querySelectorAll("input, select").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setAI", {

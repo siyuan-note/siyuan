@@ -1412,7 +1412,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length === 0) {
                 selectsElement = [nodeElement];
             }
-            AIActions(selectsElement, protyle)
+            AIActions(selectsElement, protyle);
             return;
         }
 

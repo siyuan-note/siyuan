@@ -79,10 +79,10 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     if (!hasFilter) {
                         data.filters.find(filterItem => {
                             if (filterItem.value.type === item.type && item.id === filterItem.column) {
-                                hasFilter = true
-                                return true
+                                hasFilter = true;
+                                return true;
                             }
-                        })
+                        });
                     }
                     if (!item.hidden) {
                         if (item.pin) {

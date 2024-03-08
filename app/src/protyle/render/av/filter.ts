@@ -140,9 +140,9 @@ export const setFilter = async (options: {
                     contents: [newValue],
                 },
                 type: "rollup"
-            }
+            };
         } else {
-            newFilter.value = newValue
+            newFilter.value = newValue;
         }
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
@@ -225,7 +225,7 @@ export const setFilter = async (options: {
                         type: filterValue.type
                     };
                 } else {
-                    filterValue = item.value.rollup.contents[0]
+                    filterValue = item.value.rollup.contents[0];
                 }
                 return true;
             }

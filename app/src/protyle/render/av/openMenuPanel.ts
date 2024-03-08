@@ -366,10 +366,10 @@ export const openMenuPanel = (options: {
                 }
                 targetElement.classList.remove("dragover__bottom", "dragover__top");
                 const blockIDs: string[] = [];
-                const contents: IAVCellValue[] = []
+                const contents: IAVCellValue[] = [];
                 targetElement.parentElement.querySelectorAll(".fn__grab").forEach(item => {
-                    const dateElement = item.nextElementSibling as HTMLElement
-                    blockIDs.push(dateElement.dataset.id)
+                    const dateElement = item.nextElementSibling as HTMLElement;
+                    blockIDs.push(dateElement.dataset.id);
                     contents.push({
                         isDetached: !dateElement.style.color,
                         type: "block",
@@ -377,8 +377,8 @@ export const openMenuPanel = (options: {
                             content: dateElement.textContent,
                             id: dateElement.dataset.id
                         }
-                    })
-                })
+                    });
+                });
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
                     blockIDs,
                     contents,

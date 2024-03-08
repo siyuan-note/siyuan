@@ -26,6 +26,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
+            const alignSelf = e.style.alignSelf;
             if (e.firstElementChild.innerHTML === "") {
                 e.style.alignSelf = "";
                 let html = "";
@@ -239,7 +240,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 if (left) {
                     e.querySelector(".av__scroll").scrollLeft = left;
                 }
-
+                if (alignSelf) {
+                    e.style.alignSelf = alignSelf;
+                }
                 const editRect = protyle.contentElement.getBoundingClientRect();
                 if (headerTransform) {
                     (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;

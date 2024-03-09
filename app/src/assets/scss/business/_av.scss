@@ -47,6 +47,14 @@
   &__views {
     align-items: center;
     box-shadow: 0px -1px inset var(--b3-theme-background-light);
+
+    &--show .block__icon {
+      opacity: 1;
+    }
+
+    .b3-text-field {
+      transition: var(--b3-width-transition);
+    }
   }
 
   &__title {

@@ -85,7 +85,7 @@ export const getContentByInlineHTML = (range: Range, cb: (content: string) => vo
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
-        if (event.target.localName === "protyle-html") {
+        if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;
         }

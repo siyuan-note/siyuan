@@ -9,6 +9,7 @@ import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
+import {addClearButton} from "../../../util/addClearButton";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -62,7 +63,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
-                viewID: newViewID
+                viewID: newViewID,
+                query: (e.querySelector('.b3-text-field[data-type="av-search"]') as HTMLInputElement)?.value || ""
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {
@@ -197,6 +199,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
+            <span data-type="av-search-icon" class="block__icon">
+                <svg><use xlink:href="#iconSearch"></use></svg>
+            </span>
+            <div style="position: relative">
+                <input style="width:0;padding-left: 0;padding-right: 0;" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
+            </div>
+            <div class="fn__space"></div>
             <span data-type="av-more" class="block__icon">
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
@@ -280,6 +289,56 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 if (cb) {
                     cb();
                 }
+                const viewsElement = e.querySelector(".av__views") as HTMLElement;
+                const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+                searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (searchInputElement.value) {
+                        viewsElement.classList.add("av__views--show");
+                    } else {
+                        viewsElement.classList.remove("av__views--show");
+                    }
+                });
+                searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (event.key === "Enter") {
+                        e.removeAttribute("data-render");
+                        avRender(e, protyle)
+                        event.preventDefault();
+                    }
+                });
+                searchInputElement.addEventListener("compositionend", (event: KeyboardEvent) => {
+                    if (event.key === "Enter") {
+                        // todo
+                        event.preventDefault();
+                    }
+                });
+                searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (!searchInputElement.value) {
+                        viewsElement.classList.remove("av__views--show");
+                        searchInputElement.style.width = "0";
+                        searchInputElement.style.paddingLeft = "0";
+                        searchInputElement.style.paddingRight = "0";
+                    }
+                });
+                addClearButton({
+                    inputElement: searchInputElement,
+                    right: 0,
+                    height: searchInputElement.clientHeight,
+                    clearCB() {
+                        viewsElement.classList.remove("av__views--show");
+                        searchInputElement.style.width = "0";
+                        searchInputElement.style.paddingLeft = "0";
+                        searchInputElement.style.paddingRight = "0";
+                    }
+                });
             });
         });
     }

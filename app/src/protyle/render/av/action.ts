@@ -115,6 +115,15 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-search-icon") {
+            const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
+            searchElement.style.width = "128px";
+            searchElement.style.paddingLeft = "";
+            searchElement.style.paddingRight = "";
+            searchElement.focus();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-filter") {
             openMenuPanel({protyle, blockElement, type: "filters"});
             event.preventDefault();

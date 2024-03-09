@@ -39,46 +39,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SearchTableView(avID, viewID, query string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
-		attrView = av.NewAttributeView(avID)
-		if err = av.SaveAttributeView(attrView); nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-			return
-		}
-	}
-
-	attrView, err = av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	keywords := strings.Split(query, " ")
-	viewable, err = renderAttributeView(attrView, viewID, 1, -1)
-	var rows []*av.TableRow
-	switch viewable.GetType() {
-	case av.LayoutTypeTable:
-		table := viewable.(*av.Table)
-		for _, row := range table.Rows {
-			hit := false
-			for _, cell := range row.Cells {
-				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
-						hit = true
-						break
-					}
-				}
-			}
-			if hit {
-				rows = append(rows, row)
-			}
-		}
-		table.Rows = rows
-	}
-	return
-}
-
 func SetDatabaseBlockView(blockID, viewID string) (err error) {
 	node, tree, err := getNodeByBlockID(nil, blockID)
 	if nil != err {
@@ -653,6 +613,9 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 				}
 			}
 			table.Rows = rows
+			if 1 > len(table.Rows) {
+				table.Rows = []*av.TableRow{}
+			}
 		}
 	}
 	return
@@ -1138,18 +1101,18 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 获取闪卡信息
 	flashcards := map[string]*Flashcard{}
-	deck := Decks[builtinDeckID]
-	if nil != deck {
-		var blockIDs []string
-		for _, row := range ret.Rows {
-			blockIDs = append(blockIDs, row.ID)
-		}
-		cards := deck.GetCardsByBlockIDs(blockIDs)
-		now := time.Now()
-		for _, card := range cards {
-			flashcards[card.BlockID()] = newFlashcard(card, builtinDeckID, now)
-		}
-	}
+	//deck := Decks[builtinDeckID]
+	//if nil != deck {
+	//	var blockIDs []string
+	//	for _, row := range ret.Rows {
+	//		blockIDs = append(blockIDs, row.ID)
+	//	}
+	//	cards := deck.GetCardsByBlockIDs(blockIDs)
+	//	now := time.Now()
+	//	for _, card := range cards {
+	//		flashcards[card.BlockID()] = newFlashcard(card, builtinDeckID, now)
+	//	}
+	//}
 
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {

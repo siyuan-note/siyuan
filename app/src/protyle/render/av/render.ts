@@ -58,13 +58,16 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
                 e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
             }
+            let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+            const isSearching = searchInputElement && document.activeElement.isSameNode(searchInputElement);
+            const query = searchInputElement?.value || "";
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
                 viewID: newViewID,
-                query: (e.querySelector('.b3-text-field[data-type="av-search"]') as HTMLInputElement)?.value || ""
+                query
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {
@@ -175,7 +178,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
 
                 e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
-        <div class="fn__flex av__views">
+        <div class="fn__flex av__views${isSearching ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -203,7 +206,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </span>
             <div style="position: relative">
-                <input style="width:0;padding-left: 0;padding-right: 0;" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
+                <input style="${isSearching ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" class="block__icon">
@@ -271,7 +274,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel")) {
+                    } else if (!document.querySelector(".av__panel") && !isSearching) {
                         focusBlock(e);
                     }
                 }
@@ -280,7 +283,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     const range = getSelection().getRangeAt(0);
                     if (!hasClosestByClassName(range.startContainer, "av__title")) {
                         const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && e.isSameNode(blockElement)) {
+                        if (blockElement && e.isSameNode(blockElement) && !isSearching) {
                             focusBlock(e);
                         }
                     }
@@ -290,7 +293,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     cb();
                 }
                 const viewsElement = e.querySelector(".av__views") as HTMLElement;
-                const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+                searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+                searchInputElement.value = query;
+                if (isSearching) {
+                    searchInputElement.focus();
+                }
                 searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
                     if (event.isComposing) {
                         return;

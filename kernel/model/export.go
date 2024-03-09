@@ -79,7 +79,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		name = "Untitled"
 	}
 
-	table, err := renderAttributeViewTable(attrView, view)
+	table, err := renderAttributeViewTable(attrView, view, "")
 	if nil != err {
 		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
 		return
@@ -2255,7 +2255,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		table, err := renderAttributeViewTable(attrView, view)
+		table, err := renderAttributeViewTable(attrView, view, "")
 		if nil != err {
 			logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
 			return ast.WalkContinue

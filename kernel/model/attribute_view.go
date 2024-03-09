@@ -653,6 +653,9 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 				}
 			}
 			table.Rows = rows
+			if 1 > len(table.Rows) {
+				table.Rows = []*av.TableRow{}
+			}
 		}
 	}
 	return

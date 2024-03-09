@@ -39,46 +39,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SearchTableView(avID, viewID, query string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
-		attrView = av.NewAttributeView(avID)
-		if err = av.SaveAttributeView(attrView); nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-			return
-		}
-	}
-
-	attrView, err = av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	keywords := strings.Split(query, " ")
-	viewable, err = renderAttributeView(attrView, viewID, 1, -1)
-	var rows []*av.TableRow
-	switch viewable.GetType() {
-	case av.LayoutTypeTable:
-		table := viewable.(*av.Table)
-		for _, row := range table.Rows {
-			hit := false
-			for _, cell := range row.Cells {
-				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
-						hit = true
-						break
-					}
-				}
-			}
-			if hit {
-				rows = append(rows, row)
-			}
-		}
-		table.Rows = rows
-	}
-	return
-}
-
 func SetDatabaseBlockView(blockID, viewID string) (err error) {
 	node, tree, err := getNodeByBlockID(nil, blockID)
 	if nil != err {

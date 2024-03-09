@@ -1138,18 +1138,18 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 获取闪卡信息
 	flashcards := map[string]*Flashcard{}
-	deck := Decks[builtinDeckID]
-	if nil != deck {
-		var blockIDs []string
-		for _, row := range ret.Rows {
-			blockIDs = append(blockIDs, row.ID)
-		}
-		cards := deck.GetCardsByBlockIDs(blockIDs)
-		now := time.Now()
-		for _, card := range cards {
-			flashcards[card.BlockID()] = newFlashcard(card, builtinDeckID, now)
-		}
-	}
+	//deck := Decks[builtinDeckID]
+	//if nil != deck {
+	//	var blockIDs []string
+	//	for _, row := range ret.Rows {
+	//		blockIDs = append(blockIDs, row.ID)
+	//	}
+	//	cards := deck.GetCardsByBlockIDs(blockIDs)
+	//	now := time.Now()
+	//	for _, card := range cards {
+	//		flashcards[card.BlockID()] = newFlashcard(card, builtinDeckID, now)
+	//	}
+	//}
 
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {

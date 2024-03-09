@@ -433,7 +433,22 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				}
 			}
 		}
+
 		// 再处理模板列
+		// 获取闪卡信息
+		// TODO 目前看来使用场景不多，暂时不实现了 https://github.com/siyuan-note/siyuan/issues/10502#issuecomment-1986703280
+		var flashcard *Flashcard
+		//deck := Decks[builtinDeckID]
+		//if nil != deck {
+		//	blockIDs := []string{blockID}
+		//	cards := deck.GetCardsByBlockIDs(blockIDs)
+		//	now := time.Now()
+		//	if 0 < len(cards) {
+		//		flashcard = newFlashcard(cards[0], builtinDeckID, now)
+		//	}
+		//}
+
+		// 渲染模板
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
@@ -441,9 +456,10 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					ial := map[string]string{}
 					block := getRowBlockValue(keyValues)
 					if nil != block && !block.IsDetached {
-						ial = GetBlockAttrsWithoutWaitWriting(blockID)
+						ial = GetBlockAttrsWithoutWaitWriting(block.ID)
 					}
-					kv.Values[0].Template.Content = renderTemplateCol(ial, kv.Key.Template, keyValues)
+
+					kv.Values[0].Template.Content = renderTemplateCol(ial, flashcard, keyValues, kv.Key.Template)
 				}
 			}
 		}
@@ -798,7 +814,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 	return
 }
 
-func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av.KeyValues) string {
+func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []*av.KeyValues, tplContent string) string {
 	if "" == ial["id"] {
 		block := getRowBlockValue(rowValues)
 		if nil != block && nil != block.Block {
@@ -847,6 +863,11 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 			dataModel["updated"] = time.Now()
 		}
 	}
+
+	if nil != flashcard {
+		dataModel["flashcard"] = flashcard
+	}
+
 	for _, rowValue := range rowValues {
 		if 0 < len(rowValue.Values) {
 			v := rowValue.Values[0]
@@ -859,6 +880,7 @@ func renderTemplateCol(ial map[string]string, tplContent string, rowValues []*av
 			}
 		}
 	}
+
 	if err := tpl.Execute(buf, dataModel); nil != err {
 		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
 	}
@@ -1113,6 +1135,22 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 	// 最后单独渲染模板列，这样模板列就可以使用汇总、关联、创建时间和更新时间列的值了
 	// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
+
+	// 获取闪卡信息
+	flashcards := map[string]*Flashcard{}
+	deck := Decks[builtinDeckID]
+	if nil != deck {
+		var blockIDs []string
+		for _, row := range ret.Rows {
+			blockIDs = append(blockIDs, row.ID)
+		}
+		cards := deck.GetCardsByBlockIDs(blockIDs)
+		now := time.Now()
+		for _, card := range cards {
+			flashcards[card.BlockID()] = newFlashcard(card, builtinDeckID, now)
+		}
+	}
+
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
@@ -1123,7 +1161,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				if nil != block && !block.IsDetached {
 					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
-				content := renderTemplateCol(ial, cell.Value.Template.Content, keyValues)
+				content := renderTemplateCol(ial, flashcards[row.ID], keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content
 			}
 		}

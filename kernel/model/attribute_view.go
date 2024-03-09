@@ -525,7 +525,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", 1, -1)
 	return
 }
 
@@ -568,7 +568,7 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", 1, -1)
 	return
 }
 
@@ -589,39 +589,11 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, viewID, page, pageSize)
-
-	query = strings.TrimSpace(query)
-	if "" != query {
-		keywords := strings.Split(query, " ")
-		var rows []*av.TableRow
-		switch viewable.GetType() {
-		case av.LayoutTypeTable:
-			table := viewable.(*av.Table)
-			for _, row := range table.Rows {
-				hit := false
-				for _, cell := range row.Cells {
-					for _, keyword := range keywords {
-						if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
-							hit = true
-							break
-						}
-					}
-				}
-				if hit {
-					rows = append(rows, row)
-				}
-			}
-			table.Rows = rows
-			if 1 > len(table.Rows) {
-				table.Rows = []*av.TableRow{}
-			}
-		}
-	}
+	viewable, err = renderAttributeView(attrView, viewID, query, page, pageSize)
 	return
 }
 
-func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSize int) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -747,7 +719,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID string, page, pageSi
 		}
 		view.Table.Sorts = tmpSorts
 
-		viewable, err = renderAttributeViewTable(attrView, view)
+		viewable, err = renderAttributeViewTable(attrView, view, query)
 	}
 
 	viewable.FilterRows(attrView)
@@ -850,7 +822,7 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 	return buf.String()
 }
 
-func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
+func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table, err error) {
 	ret = &av.Table{
 		ID:               view.ID,
 		Icon:             view.Icon,
@@ -1127,6 +1099,31 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				content := renderTemplateCol(ial, flashcards[row.ID], keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content
 			}
+		}
+	}
+
+	// 根据搜索条件过滤
+	query = strings.TrimSpace(query)
+	if "" != query {
+		keywords := strings.Split(query, " ")
+		var hitRows []*av.TableRow
+		for _, row := range ret.Rows {
+			hit := false
+			for _, cell := range row.Cells {
+				for _, keyword := range keywords {
+					if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
+						hit = true
+						break
+					}
+				}
+			}
+			if hit {
+				hitRows = append(hitRows, row)
+			}
+		}
+		ret.Rows = hitRows
+		if 1 > len(ret.Rows) {
+			ret.Rows = []*av.TableRow{}
 		}
 	}
 
@@ -2011,7 +2008,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 	if nil != view && 0 < len(view.Table.Filters) {
-		viewable, _ := renderAttributeViewTable(attrView, view)
+		viewable, _ := renderAttributeViewTable(attrView, view, "")
 		viewable.FilterRows(attrView)
 		viewable.SortRows()
 

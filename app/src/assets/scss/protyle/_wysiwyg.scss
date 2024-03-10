@@ -637,4 +637,27 @@
   .img:hover .protyle-icons {
     display: none;
   }
+
+  .av {
+    .b3-chip[data-type="block-more"],
+    .av__row--util,
+    .av__row--header > .block__icons,
+    .av__views .fn__space,
+    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__widthdrag {
+      display: none;
+    }
+
+    .av__row--footer {
+      border-top-color: transparent;
+    }
+
+    .av__row > div:nth-last-child(-n + 2) {
+      border-right-color: transparent;
+    }
+
+    .av__row--footer:hover .av__calc:not(.av__calc--ashow) {
+      opacity: 0;
+    }
+  }
 }

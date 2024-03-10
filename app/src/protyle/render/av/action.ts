@@ -49,6 +49,19 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const searchIconElement = hasClosestByAttribute(event.target, "data-type", "av-search-icon");
+    if (searchIconElement) {
+        const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
+        searchElement.style.width = "128px";
+        searchElement.style.paddingLeft = "";
+        searchElement.style.paddingRight = "";
+        searchElement.focus();
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+
     if (protyle.disabled) {
         return false;
     }
@@ -112,15 +125,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-sort") {
             openMenuPanel({protyle, blockElement, type: "sorts"});
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        } else if (type === "av-search-icon") {
-            const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
-            searchElement.style.width = "128px";
-            searchElement.style.paddingLeft = "";
-            searchElement.style.paddingRight = "";
-            searchElement.focus();
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -2202,11 +2202,12 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 		avIDs = existAvIDs
 
 		if 0 == len(avIDs) {
-			delete(attrs, av.NodeAttrNameAvs)
-			node.RemoveIALAttr(av.NodeAttrNameAvs)
+			attrs[av.NodeAttrNameAvs] = ""
 		} else {
 			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 			node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
+			avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
+			attrs["av-names"] = avNames
 		}
 	}
 

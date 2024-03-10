@@ -119,7 +119,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.MAsset {
-			ret = append(ret, v.Content)
+			ret = append(ret, v.Name+" "+v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:

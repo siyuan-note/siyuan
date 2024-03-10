@@ -307,22 +307,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     } else {
                         viewsElement.classList.remove("av__views--show");
                     }
+                    updateSearch(e, protyle)
                 });
-                searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                    if (event.isComposing) {
-                        return;
-                    }
-                    if (event.key === "Enter") {
-                        e.removeAttribute("data-render");
-                        avRender(e, protyle)
-                        event.preventDefault();
-                    }
-                });
-                searchInputElement.addEventListener("compositionend", (event: KeyboardEvent) => {
-                    if (event.key === "Enter") {
-                        // todo
-                        event.preventDefault();
-                    }
+                searchInputElement.addEventListener("compositionend", () => {
+                    updateSearch(e, protyle)
                 });
                 searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
                     if (event.isComposing) {
@@ -350,6 +338,16 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
         });
     }
 };
+
+let searchTimeout: number
+
+const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
+    clearTimeout(searchTimeout)
+    searchTimeout = window.setTimeout(() => {
+        e.removeAttribute("data-render");
+        avRender(e, protyle)
+    }, Constants.TIMEOUT_INPUT);
+}
 
 const refreshTimeouts: {
     [key: string]: number;

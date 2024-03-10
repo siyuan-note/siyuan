@@ -266,7 +266,7 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 	count := 0
 	for _, sb := range sqlBlocks {
 		if nil == trees[sb.RootID] {
-			tree, _ := loadTreeByBlockID(sb.RootID)
+			tree, _ := LoadTreeByBlockID(sb.RootID)
 			if nil == tree {
 				continue
 			}
@@ -324,7 +324,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockID(ref.DefBlockRootID)
+				tree, _ = LoadTreeByBlockID(ref.DefBlockRootID)
 			}
 			if nil == tree {
 				continue
@@ -360,7 +360,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 	for _, b := range ret {
 		tree := cachedTrees[b.RootID]
 		if nil == tree {
-			tree, _ = loadTreeByBlockID(b.RootID)
+			tree, _ = LoadTreeByBlockID(b.RootID)
 		}
 		if nil == tree {
 			continue
@@ -373,7 +373,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := cachedTrees[b.RootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockID(b.RootID)
+				tree, _ = LoadTreeByBlockID(b.RootID)
 				cachedTrees[b.RootID] = tree
 			}
 			if nil != tree {
@@ -466,7 +466,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			continue
 		}
 
-		tree, _ = loadTreeByBlockID(id)
+		tree, _ = LoadTreeByBlockID(id)
 		if nil == tree {
 			continue
 		}
@@ -820,7 +820,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 			if _, ok := rootMap[b.RootID]; !ok {
 				rootMap[b.RootID] = true
 				rootIDs = append(rootIDs, b.RootID)
-				tree, _ := loadTreeByBlockID(b.RootID)
+				tree, _ := LoadTreeByBlockID(b.RootID)
 				if nil == tree {
 					continue
 				}

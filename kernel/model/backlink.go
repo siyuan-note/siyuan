@@ -52,7 +52,7 @@ func refreshRefsByDefID(defID string) {
 		}
 
 		var loadErr error
-		tree, loadErr = loadTreeByBlockID(ref.RootID)
+		tree, loadErr = LoadTreeByBlockID(ref.RootID)
 		if nil != loadErr {
 			logging.LogErrorf("refresh tree refs failed: %s", loadErr)
 			continue
@@ -100,7 +100,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 		refTree := treeCache[mention.RootID]
 		if nil == refTree {
 			var loadErr error
-			refTree, loadErr = loadTreeByBlockID(mention.ID)
+			refTree, loadErr = LoadTreeByBlockID(mention.ID)
 			if nil != loadErr {
 				logging.LogWarnf("load ref tree [%s] failed: %s", mention.ID, loadErr)
 				continue
@@ -133,7 +133,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, _, _ := buildLinkRefs(rootID, refs, keyword)
-	refTree, err := loadTreeByBlockID(refTreeID)
+	refTree, err := LoadTreeByBlockID(refTreeID)
 	if nil != err {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
 		return

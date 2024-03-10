@@ -117,7 +117,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath string, err error) {
-	srcTree, _ := loadTreeByBlockID(srcID)
+	srcTree, _ := LoadTreeByBlockID(srcID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return
@@ -135,7 +135,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		}
 	}
 
-	targetTree, _ := loadTreeByBlockID(targetID)
+	targetTree, _ := LoadTreeByBlockID(targetID)
 	if nil == targetTree {
 		err = ErrBlockNotFound
 		return
@@ -264,7 +264,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 }
 
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, newTargetPath string, err error) {
-	srcTree, _ := loadTreeByBlockID(srcHeadingID)
+	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return

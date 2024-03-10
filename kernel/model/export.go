@@ -191,7 +191,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 }
 
 func Export2Liandi(id string) (err error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
@@ -293,7 +293,7 @@ func Export2Liandi(id string) (err error) {
 
 	if !foundArticle {
 		articleId = result.Data.(string)
-		tree, _ = loadTreeByBlockID(id) // 这里必须重新加载，因为前面导出时已经修改了树结构
+		tree, _ = LoadTreeByBlockID(id) // 这里必须重新加载，因为前面导出时已经修改了树结构
 		tree.Root.SetIALAttr(liandiArticleIdAttrName, articleId)
 		if err = writeJSONQueue(tree); nil != err {
 			return
@@ -518,7 +518,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 }
 
 func Preview(id string) (retStdHTML string, retOutline []*Path) {
-	tree, _ := loadTreeByBlockID(id)
+	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
@@ -931,7 +931,7 @@ func processIFrame(tree *parse.Tree) {
 }
 
 func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
-	tree, _ := loadTreeByBlockID(id)
+	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
@@ -1319,7 +1319,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 }
 
 func ExportStdMarkdown(id string) string {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return ""
@@ -1490,7 +1490,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 
 		id := docIAL["id"]
-		tree, err := loadTreeByBlockID(id)
+		tree, err := LoadTreeByBlockID(id)
 		if nil != err {
 			continue
 		}
@@ -1783,7 +1783,7 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 }
 
 func exportMarkdownContent(id string, exportRefMode int, defBlockIDs []string) (hPath, exportedMd string) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
@@ -2071,7 +2071,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 		// 处理引用节点
 
 		defID, linkText := getExportBlockRefLinkText(n, blockRefTextLeft, blockRefTextRight)
-		defTree, _ := loadTreeByBlockID(defID)
+		defTree, _ := LoadTreeByBlockID(defID)
 		if nil == defTree {
 			return ast.WalkContinue
 		}
@@ -2337,7 +2337,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
 	var rendered []string
 	for _, foot := range *refFootnotes {
-		t, err := loadTreeByBlockID(foot.defID)
+		t, err := LoadTreeByBlockID(foot.defID)
 		if nil != err {
 			continue
 		}
@@ -2464,7 +2464,7 @@ func collectFootnotesDefs(id string, refFootnotes *[]*refAsFootnotes, treeCache 
 	t := (*treeCache)[b.RootID]
 	if nil == t {
 		var err error
-		if t, err = loadTreeByBlockID(b.ID); nil != err {
+		if t, err = LoadTreeByBlockID(b.ID); nil != err {
 			return
 		}
 		(*treeCache)[t.ID] = t
@@ -2550,7 +2550,7 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 			if nil == defBlock {
 				return ast.WalkSkipChildren
 			}
-			defTree, err := loadTreeByBlockID(defBlock.RootID)
+			defTree, err := LoadTreeByBlockID(defBlock.RootID)
 			if nil != err {
 				return ast.WalkSkipChildren
 			}
@@ -2642,7 +2642,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 				continue
 			}
 			id := docIAL["id"]
-			tree, err := loadTreeByBlockID(id)
+			tree, err := LoadTreeByBlockID(id)
 			if nil != err {
 				continue
 			}

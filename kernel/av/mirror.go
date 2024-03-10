@@ -13,37 +13,12 @@ import (
 )
 
 var (
-	attributeViewBlocksLock = sync.Mutex{}
+	AttributeViewBlocksLock = sync.Mutex{}
 )
 
-func GetMirrorBlockIDs(avID string) []string {
-	attributeViewBlocksLock.Lock()
-	defer attributeViewBlocksLock.Unlock()
-
-	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !filelock.IsExist(blocks) {
-		return nil
-	}
-
-	data, err := filelock.ReadFile(blocks)
-	if nil != err {
-		logging.LogErrorf("read attribute view blocks failed: %s", err)
-		return nil
-	}
-
-	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
-		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
-		return nil
-	}
-
-	blockIDs := avBlocks[avID]
-	return blockIDs
-}
-
 func IsMirror(avID string) bool {
-	attributeViewBlocksLock.Lock()
-	defer attributeViewBlocksLock.Unlock()
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
 
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
 	if !filelock.IsExist(blocks) {
@@ -67,8 +42,8 @@ func IsMirror(avID string) bool {
 }
 
 func RemoveBlockRel(avID, blockID string) {
-	attributeViewBlocksLock.Lock()
-	defer attributeViewBlocksLock.Unlock()
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
 
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
 	if !filelock.IsExist(blocks) {
@@ -112,8 +87,8 @@ func RemoveBlockRel(avID, blockID string) {
 }
 
 func UpsertBlockRel(avID, blockID string) {
-	attributeViewBlocksLock.Lock()
-	defer attributeViewBlocksLock.Unlock()
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
 
 	avBlocks := map[string][]string{}
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")

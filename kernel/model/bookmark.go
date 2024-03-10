@@ -45,7 +45,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := loadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
 			util.PushClearProgress()
 			return e
@@ -103,7 +103,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := loadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -173,7 +173,7 @@ func BuildBookmark() (ret *Bookmarks) {
 			block.Content = block.Name
 		} else {
 			// Improve bookmark panel rendering https://github.com/siyuan-note/siyuan/issues/9361
-			tree, err := loadTreeByBlockID(block.ID)
+			tree, err := LoadTreeByBlockID(block.ID)
 			if nil != err {
 				logging.LogErrorf("parse block [%s] failed: %s", block.ID, err)
 			} else {

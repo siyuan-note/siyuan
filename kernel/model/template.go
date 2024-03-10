@@ -188,7 +188,7 @@ func RenderTemplate(p, id string, preview bool) (string, error) {
 }
 
 func renderTemplate(p, id string, preview bool) (string, error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return "", err
 	}

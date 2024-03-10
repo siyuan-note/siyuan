@@ -1376,7 +1376,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		refTree, ok := updatedTrees[refTreeID]
 		if !ok {
 			var err error
-			refTree, err = loadTreeByBlockID(refTreeID)
+			refTree, err = LoadTreeByBlockID(refTreeID)
 			if nil != err {
 				continue
 			}

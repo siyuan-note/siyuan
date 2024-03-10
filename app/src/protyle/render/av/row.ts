@@ -89,9 +89,13 @@ const setPage = (blockElement: Element) => {
  * @param blockElement
  * @param srcIDs
  * @param previousId
- * @param avId 还用于判断是否是插入的 block
+ * @param avId 存在为新增否则为拖拽插入
  */
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
+    if ((blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
+        showMessage(window.siyuan.languages.insertRowTip);
+        return
+    }
     let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     // 有排序需要加入最后一行
     if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {

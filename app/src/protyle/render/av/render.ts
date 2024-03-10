@@ -178,7 +178,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
 
                 e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
-        <div class="fn__flex av__views${isSearching ? " av__views--show" : ""}">
+        <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -206,7 +206,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </span>
             <div style="position: relative">
-                <input style="${isSearching ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
+                <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" class="block__icon">
@@ -332,6 +332,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                         searchInputElement.style.width = "0";
                         searchInputElement.style.paddingLeft = "0";
                         searchInputElement.style.paddingRight = "0";
+                        focusBlock(e);
+                        updateSearch(e, protyle);
                     }
                 });
             });

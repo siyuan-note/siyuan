@@ -82,7 +82,8 @@ func (value *Value) String() string {
 		if nil == value.Date {
 			return ""
 		}
-		return value.Date.FormattedContent
+		formatted := NewFormattedValueDate(value.Date.Content, value.Date.Content2, DateFormatNone, value.Date.IsNotTime, value.Date.HasEndDate)
+		return formatted.FormattedContent
 	case KeyTypeSelect:
 		if 1 > len(value.MSelect) {
 			return ""
@@ -118,7 +119,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.MAsset {
-			ret = append(ret, v.Content)
+			ret = append(ret, v.Name+" "+v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:

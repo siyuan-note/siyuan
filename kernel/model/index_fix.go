@@ -40,8 +40,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// FixIndexJob 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
-func FixIndexJob() {
+// CheckIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016 https://github.com/siyuan-note/siyuan/issues/10563
+func CheckIndex() {
 	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
 	sql.WaitForWritingDatabase()
 

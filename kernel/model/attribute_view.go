@@ -2012,9 +2012,20 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		viewable.FilterRows(attrView)
 		viewable.SortRows()
 
-		var lastRow *av.TableRow
+		var nearRow *av.TableRow
 		if 0 < len(viewable.Rows) {
-			lastRow = viewable.Rows[len(viewable.Rows)-1]
+			if "" != previousBlockID {
+				for _, row := range viewable.Rows {
+					if row.ID == previousBlockID {
+						nearRow = row
+						break
+					}
+				}
+			} else {
+				if 0 < len(viewable.Rows) {
+					nearRow = viewable.Rows[0]
+				}
+			}
 		}
 
 		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
@@ -2041,8 +2052,8 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 				for _, keyValues := range attrView.KeyValues {
 					if keyValues.Key.ID == filter.Column {
 						var defaultVal *av.Value
-						if nil != lastRow {
-							defaultVal = lastRow.GetValue(filter.Column)
+						if nil != nearRow {
+							defaultVal = nearRow.GetValue(filter.Column)
 						}
 
 						newValue := filter.GetAffectValue(keyValues.Key, defaultVal)

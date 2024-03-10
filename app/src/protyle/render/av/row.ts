@@ -94,7 +94,7 @@ const setPage = (blockElement: Element) => {
 export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
     if ((blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
         showMessage(window.siyuan.languages.insertRowTip);
-        return
+        return;
     }
     let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     // 有排序需要加入最后一行

@@ -307,10 +307,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     } else {
                         viewsElement.classList.remove("av__views--show");
                     }
-                    updateSearch(e, protyle)
+                    updateSearch(e, protyle);
                 });
                 searchInputElement.addEventListener("compositionend", () => {
-                    updateSearch(e, protyle)
+                    updateSearch(e, protyle);
                 });
                 searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
                     if (event.isComposing) {
@@ -341,15 +341,15 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
     }
 };
 
-let searchTimeout: number
+let searchTimeout: number;
 
 const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
-    clearTimeout(searchTimeout)
+    clearTimeout(searchTimeout);
     searchTimeout = window.setTimeout(() => {
         e.removeAttribute("data-render");
-        avRender(e, protyle)
+        avRender(e, protyle);
     }, Constants.TIMEOUT_INPUT);
-}
+};
 
 const refreshTimeouts: {
     [key: string]: number;

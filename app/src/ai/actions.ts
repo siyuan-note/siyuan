@@ -233,7 +233,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             element.setAttribute("style", "height: 100%;padding: 0 16px;");
             element.querySelectorAll(".b3-menu__separator").forEach(item => {
                 item.remove();
-            })
+            });
             /// #endif
             const listElement = element.querySelector(".b3-list");
             const inputElement = element.querySelector("input");

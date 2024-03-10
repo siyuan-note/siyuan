@@ -397,7 +397,7 @@
   }
 
   &[disabled] {
-    opacity: 0.38;
+    opacity: .38;
     cursor: not-allowed;
   }
 }
@@ -421,11 +421,11 @@
 }
 
 #pageWidthOption {
-  border-bottom: 1px rgba(255, 255, 255, 0.5) solid;
+  border-bottom: 1px rgba(255, 255, 255, .5) solid;
 }
 
 .bookmark[href="#"] {
-  opacity: 0.5;
+  opacity: .5;
   pointer-events: none;
 }
 
@@ -479,8 +479,8 @@
 
 .thumbnailImage {
   border: 1px solid rgba(0, 0, 0, 0);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
-  opacity: 0.8;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
+  opacity: .8;
   z-index: 99;
   background-color: rgba(255, 255, 255, 1);
   background-clip: content-box;
@@ -495,14 +495,14 @@
 
 a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
 .thumbnail:hover > .thumbnailSelectionRing > .thumbnailImage {
-  opacity: 0.9;
+  opacity: .9;
 }
 
 a:focus > .thumbnail > .thumbnailSelectionRing,
 .thumbnail:hover > .thumbnailSelectionRing {
   background-color: var(--b3-list-hover);
   background-clip: padding-box;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, .9);
 }
 
 .thumbnail.selected > .thumbnailSelectionRing > .thumbnailImage {
@@ -632,8 +632,8 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   border-radius: var(--b3-border-radius-b);
   width: 520px;
   position: absolute;
-  inset-inline-start: 0px;
-  inset-inline-end: 0px;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   height: fit-content;
   margin: auto;
   display: none;
@@ -641,8 +641,8 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 
   &--open {
     position: fixed;
-    inset-block-start: 0px;
-    inset-block-end: 0px;
+    inset-block-start: 0;
+    inset-block-end: 0;
     max-width: calc((100% - 6px) - 2em);
     max-height: calc((100% - 6px) - 2em);
     user-select: text;
@@ -824,9 +824,9 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 }
 
 #viewer.textLayer-visible .textLayer span {
-  background-color: rgba(255, 255, 0, 0.1);
+  background-color: rgba(255, 255, 0, .1);
   color: rgba(0, 0, 0, 1);
-  border: solid 1px rgba(255, 0, 0, 0.5);
+  border: solid 1px rgba(255, 0, 0, .5);
   box-sizing: border-box;
 }
 
@@ -836,7 +836,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 }
 
 #viewer.textLayer-shadow .textLayer span {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, .6);
   color: rgba(0, 0, 0, 1);
 }
 

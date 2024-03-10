@@ -44,7 +44,7 @@
     max-width: 88vw;
     transform: scale(.8);
     opacity: 0;
-    transition: opacity 75ms linear, transform 150ms 0ms cubic-bezier(0, 0, 0.2, 1);
+    transition: opacity 75ms linear, transform 150ms 0ms cubic-bezier(0, 0, .2, 1);
     border: 1px solid var(--b3-theme-surface-lighter);
   }
 

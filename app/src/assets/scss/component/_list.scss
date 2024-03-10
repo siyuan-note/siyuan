@@ -30,7 +30,7 @@
     .b3-list__panel:before {
       content: "";
       height: 100%;
-      top: 0px;
+      top: 0;
       position: absolute;
       border-left: 1px solid var(--b3-theme-background-light);
       left: -21px;
@@ -173,7 +173,7 @@
       flex-shrink: 0;
       height: 10px;
       width: 10px;
-      transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);
+      transition: transform .15s cubic-bezier(0, 0, .2, 1), opacity 1s cubic-bezier(0, 0, .2, 1);
 
       &--open {
         transform: rotate(90deg);
@@ -205,7 +205,7 @@
     }
 
     &__meta {
-      font-size: 0.75rem;
+      font-size: .75rem;
       margin-left: 8px;
       flex-shrink: 0;
       color: var(--b3-theme-on-surface);

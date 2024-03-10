@@ -17,12 +17,13 @@
     position: relative;
 
     &[custom-riff-decks] {
-      box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+      box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
     }
 
     [spellcheck] {
       word-break: break-word;
-      white-space: pre-wrap;
+      // https://github.com/siyuan-note/siyuan/issues/10483
+      white-space: break-spaces;
 
       &:focus {
         outline: none;
@@ -54,11 +55,11 @@
 
       .dragover {
         &__top:not(.av__row) {
-          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0px 1px 0 var(--b3-theme-primary-lighter) !important;
+          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
         }
 
         &__bottom:not(.av__row) {
-          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0px -1px 0 var(--b3-theme-primary-lighter) !important;
+          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0 -1px 0 var(--b3-theme-primary-lighter) !important;
         }
       }
     }
@@ -70,7 +71,7 @@
       &:before {
         content: "";
         position: absolute;
-        border-left: 0.5px solid var(--b3-theme-background-light);
+        border-left: .5px solid var(--b3-theme-background-light);
         left: 17px;
       }
 
@@ -289,7 +290,7 @@
         position: sticky;
         top: -1px;
         z-index: 2;
-        box-shadow: 0px -1px 0px var(--b3-theme-on-surface-light) inset;
+        box-shadow: 0 -1px 0 var(--b3-theme-on-surface-light) inset;
       }
     }
 
@@ -304,7 +305,7 @@
       }
 
       &--select {
-        filter: brightness(0.68);
+        filter: brightness(.68);
       }
 
       &--drag > span:after {
@@ -460,11 +461,11 @@
 
   .dragover {
     &__top:not(.av__row) {
-      box-shadow: 0 -4px 0 0px var(--b3-theme-primary-lighter) !important;
+      box-shadow: 0 -4px 0 0 var(--b3-theme-primary-lighter) !important;
     }
 
     &__bottom:not(.av__row) {
-      box-shadow: 0 4px 0 0px var(--b3-theme-primary-lighter) !important
+      box-shadow: 0 4px 0 0 var(--b3-theme-primary-lighter) !important
     }
   }
 
@@ -478,7 +479,7 @@
   }
 
   &--animate {
-    animation: scale 0.3s ease-in-out;
+    animation: scale .3s ease-in-out;
   }
 
   div[data-type="NodeMathBlock"] {
@@ -507,7 +508,7 @@
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include text-clamp(1);
-    opacity: 0.38;
+    opacity: .38;
     font-size: 16px;
     height: 26px;
     line-height: 26px;
@@ -616,7 +617,7 @@
 
       &:empty::after {
         content: "language";
-        opacity: 0.68;
+        opacity: .68;
       }
     }
   }

@@ -21,7 +21,7 @@
     box-shadow: inset 0 0 2.5px 2.5px var(--b3-scroll-color);
 
     &:hover {
-      border-width: 0.5px;
+      border-width: .5px;
     }
   }
 
@@ -42,7 +42,7 @@
     height: 100vh;
     padding: 0;
     border-radius: 0;
-    transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
+    transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
     display: flex;
     flex-direction: column;
 
@@ -175,7 +175,7 @@
       cursor: not-allowed;
 
       & > *:not(.b3-menu__submenu) {
-        opacity: 0.38;
+        opacity: .38;
       }
     }
 
@@ -307,7 +307,7 @@
   }
 
   &__accelerator {
-    font-size: 0.75rem;
+    font-size: .75rem;
     margin-left: 16px;
     color: var(--b3-theme-on-surface);
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
@@ -339,7 +339,7 @@
 
   &__item {
     font-size: 24px;
-    line-height: 0.9em; // windows 需要这样设置
+    line-height: .9em; // windows 需要这样设置
     font-family: var(--b3-font-family-emoji);
     text-align: center;
     height: 28px;

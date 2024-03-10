@@ -2,7 +2,7 @@
   &__layout {
     display: flex;
     flex: 1;
-    min-height: 0.1px;
+    min-height: .1px;
     flex-direction: column;
 
     &:not(.search__layout--row) .search__list {
@@ -25,7 +25,7 @@
         height: auto;
 
         &:after {
-          width: 0.5px;
+          width: .5px;
           height: 100%;
         }
       }
@@ -113,7 +113,7 @@
       transition: var(--b3-transition);
       top: 0;
       width: 100%;
-      height: 0.5px;
+      height: .5px;
     }
 
     &:hover:after {

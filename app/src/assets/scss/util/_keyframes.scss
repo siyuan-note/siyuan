@@ -10,10 +10,10 @@
 
 @keyframes addCard {
   0% {
-    box-shadow: 100vw 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 100vw 0px 0 -1px var(--b3-protyle-inline-mark-background) inset;
   }
   100% {
-    box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
   }
 }
 
@@ -32,7 +32,7 @@
 @keyframes zoomIn {
   0% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(.8);
   }
 
   to {

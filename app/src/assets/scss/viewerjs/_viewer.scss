@@ -81,7 +81,7 @@
   }
 
   &-navbar {
-    background-color: rgba(0, 0, 0, 0.48);
+    background-color: rgba(0, 0, 0, .48);
     overflow: hidden;
   }
 
@@ -101,12 +101,12 @@
       line-height: 0;
       opacity: .48;
       overflow: hidden;
-      transition: opacity 0.15s;
+      transition: opacity .15s;
       width: 30px;
 
       &:focus,
       &:hover {
-        opacity: 0.78;
+        opacity: .78;
       }
 
       &:focus {
@@ -171,7 +171,7 @@
         float: left;
         height: 24px;
         overflow: hidden;
-        transition: background-color 0.15s;
+        transition: background-color .15s;
         width: 24px;
 
         &:focus,
@@ -252,7 +252,7 @@
   }
 
   &-button {
-    background-color: rgba(0, 0, 0, 0.48);
+    background-color: rgba(0, 0, 0, .48);
     border-radius: 50%;
     cursor: pointer;
     height: 80px;
@@ -260,7 +260,7 @@
     position: absolute;
     right: -40px;
     top: -40px;
-    transition: background-color 0.15s;
+    transition: background-color .15s;
     width: 80px;
     -webkit-app-region: no-drag;
 
@@ -298,7 +298,7 @@
   }
 
   &-backdrop {
-    background-color: rgba(0, 0, 0, 0.24);
+    background-color: rgba(0, 0, 0, .24);
   }
 
   &-invisible {
@@ -319,7 +319,7 @@
   }
 
   &-transition {
-    transition: all 0.3s;
+    transition: all .3s;
   }
 
   @keyframes viewer-spinner {
@@ -335,8 +335,8 @@
   &-loading {
     &::after {
       animation: viewer-spinner 1s linear infinite;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-left-color: rgba(255, 255, 255, 0.5);
+      border: 4px solid rgba(255, 255, 255, .1);
+      border-left-color: rgba(255, 255, 255, .5);
       border-radius: 50%;
       content: '';
       display: inline-block;

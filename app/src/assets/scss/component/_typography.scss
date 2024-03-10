@@ -52,11 +52,11 @@
   }
 
   span[data-type~="sup"] {
-    top: -0.5em;
+    top: -.5em;
   }
 
   span[data-type~="sub"] {
-    bottom: -0.25em;
+    bottom: -.25em;
   }
 
   em,
@@ -127,7 +127,7 @@
   .bq {
     padding: 4px;
     color: var(--b3-theme-on-surface);
-    border-left: 0.25em solid var(--b3-theme-surface-lighter);
+    border-left: .25em solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-list-hover);
     margin: 4px 0;
   }
@@ -156,13 +156,13 @@
 
   .h1,
   h1 {
-    padding: 0.3em 4px;
+    padding: .3em 4px;
     font-size: 1.75em;
   }
 
   .h2,
   h2 {
-    padding: 0.3em 4px;
+    padding: .3em 4px;
     font-size: 1.55em;
   }
 

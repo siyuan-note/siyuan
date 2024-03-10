@@ -1720,7 +1720,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
-		node.SetIALAttr("av-names", avNames)
+		node.SetIALAttr(av.NodeAttrViewNames, avNames)
 		pushBroadcastAttrTransactions(oldAttrs, node)
 	}
 	return
@@ -2087,7 +2087,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 
 		avNames := getAvNames(attrs[av.NodeAttrNameAvs])
 		if "" != avNames {
-			attrs["av-names"] = avNames
+			attrs[av.NodeAttrViewNames] = avNames
 		}
 
 		if nil != tx {
@@ -2202,11 +2202,12 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 		avIDs = existAvIDs
 
 		if 0 == len(avIDs) {
-			delete(attrs, av.NodeAttrNameAvs)
-			node.RemoveIALAttr(av.NodeAttrNameAvs)
+			attrs[av.NodeAttrNameAvs] = ""
 		} else {
 			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 			node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
+			avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
+			attrs[av.NodeAttrViewNames] = avNames
 		}
 	}
 

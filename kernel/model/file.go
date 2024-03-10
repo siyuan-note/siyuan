@@ -736,7 +736,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 				avNames := getAvNames(n.IALAttr(av.NodeAttrNameAvs))
 				if "" != avNames {
-					n.SetIALAttr("av-names", avNames)
+					n.SetIALAttr(av.NodeAttrViewNames, avNames)
 				}
 			}
 

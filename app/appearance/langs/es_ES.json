@@ -968,7 +968,7 @@
   "fileTree18": "Permite la creación de subdocumentos de más de 7 niveles",
   "fileTree19": "Algunos sistemas operativos tienen limitaciones técnicas que pueden impedir la copia manual de los datos del espacio de trabajo después de crear subdocumentos de más de 7 niveles",
   "fileTree20": "Guardar con una sola línea",
-  "fileTree21": "Después de habilitarlo, se usará un formato JSON de una sola línea al guardar archivos .sy, lo que puede reducir el tamaño del archivo en aproximadamente un 30 % y mejorar la eficiencia de lectura y escritura en un 50 %",
+  "fileTree21": "Después de habilitarlo, se utilizará el formato JSON de una sola línea al guardar documentos .sy y archivos .json de bases de datos, lo que puede reducir el tamaño del archivo en aproximadamente un 30 % y mejorar la eficiencia de lectura y escritura en un 50 %.",
   "export11": "Método de manejo de contenido del bloque de referencia de contenido al exportar",
   "export12": "Método de manejo de contenido del bloque de incrustación de contenido al exportar",
   "export13": "Símbolo de envoltura de texto ancla",

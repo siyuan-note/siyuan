@@ -111,6 +111,7 @@ export const openMenuPanel = (options: {
     <div class="b3-menu">${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
+        let closeCB: () => void;
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
         if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
@@ -118,7 +119,7 @@ export const openMenuPanel = (options: {
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
             } else if (options.type === "date") {
-                bindDateEvent({
+                closeCB = bindDateEvent({
                     protyle: options.protyle,
                     data,
                     menuElement,
@@ -465,6 +466,7 @@ export const openMenuPanel = (options: {
                         // 过滤面板先关闭过滤条件
                         window.siyuan.menus.menu.remove();
                     } else {
+                        closeCB?.();
                         avPanelElement.remove();
                         focusBlock(options.blockElement);
                     }

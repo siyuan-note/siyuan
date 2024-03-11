@@ -53,9 +53,18 @@ export const switchTabByIndex = (index: number) => {
         } else if (index === -2) {
             // 上一个
             indexElement = activeDockIcoElement.previousElementSibling;
+            if (!indexElement) {
+                indexElement = activeDockIcoElement.parentElement.lastElementChild;
+                if (indexElement.classList.contains("dock__item--pin")) {
+                    indexElement = indexElement.previousElementSibling;
+                }
+            }
         } else if (index === -3) {
             // 下一个
             indexElement = activeDockIcoElement.nextElementSibling;
+            if (!indexElement || indexElement.classList.contains("dock__item--pin")) {
+                indexElement = activeDockIcoElement.parentElement.firstElementChild;
+            }
         }
         const type = indexElement?.getAttribute("data-type");
         if (type) {
@@ -72,9 +81,15 @@ export const switchTabByIndex = (index: number) => {
         } else if (index === -2) {
             // 上一个
             indexElement = tab.headElement.previousElementSibling;
+            if (!indexElement) {
+                indexElement = tab.headElement.parentElement.lastElementChild;
+            }
         } else if (index === -3) {
             // 下一个
             indexElement = tab.headElement.nextElementSibling;
+            if (!indexElement) {
+                indexElement = tab.headElement.parentElement.firstElementChild;
+            }
         }
         if (indexElement) {
             tab.parent.switchTab(indexElement as HTMLElement, true);

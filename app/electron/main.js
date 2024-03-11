@@ -1221,9 +1221,13 @@ app.on("activate", () => {
     }
 });
 
-// 在编辑器内打开链接的处理，比如 iframe 上的打开链接。
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     contents.setWindowOpenHandler((details) => {
+        // https://github.com/siyuan-note/siyuan/issues/10567
+        if (details.url.startsWith("file:///") && details.disposition === "foreground-tab") {
+            return;
+        }
+        // 在编辑器内打开链接的处理，比如 iframe 上的打开链接。
         shell.openExternal(details.url);
         return {action: "deny"};
     });

@@ -54,7 +54,7 @@ type AttrView struct {
 func GetDocInfo(blockID string) (ret *BlockInfo) {
 	WaitForWritingFiles()
 
-	tree, err := loadTreeByBlockID(blockID)
+	tree, err := LoadTreeByBlockID(blockID)
 	if nil != err {
 		logging.LogErrorf("load tree by root id [%s] failed: %s", blockID, err)
 		return
@@ -129,7 +129,7 @@ func GetBlockRefText(id string) string {
 		return ErrBlockNotFound.Error()
 	}
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return ErrTreeNotFound.Error()
 	}
@@ -243,7 +243,7 @@ func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string)
 }
 
 func GetBlockIndex(id string) (ret int) {
-	tree, _ := loadTreeByBlockID(id)
+	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
@@ -284,7 +284,7 @@ type BlockPath struct {
 
 func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
 	ret = []*BlockPath{}
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil == tree {
 		err = nil
 		return

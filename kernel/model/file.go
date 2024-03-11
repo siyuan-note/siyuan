@@ -491,7 +491,7 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 func StatTree(id string) (ret *util.BlockStatResult) {
 	WaitForWritingFiles()
 
-	tree, _ := loadTreeByBlockID(id)
+	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
@@ -515,7 +515,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		if ErrBlockNotFound == err {
 			if 0 == mode {
@@ -1075,7 +1075,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		existed = true
 		p = existRoot.Path
 
-		tree, loadErr := loadTreeByBlockID(existRoot.RootID)
+		tree, loadErr := LoadTreeByBlockID(existRoot.RootID)
 		if nil != loadErr {
 			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
 			return
@@ -1110,7 +1110,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 	if "" != dom {
 		var tree *parse.Tree
-		tree, err = loadTreeByBlockID(id)
+		tree, err = LoadTreeByBlockID(id)
 		if nil == err {
 			tree.Root.FirstChild.Unlink()
 
@@ -1133,7 +1133,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	WaitForWritingFiles()
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		logging.LogErrorf("load tree by block id [%s] failed: %v", id, err)
 		return
@@ -1184,7 +1184,7 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 }
 
 func GetHPathByID(id string) (hPath string, err error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}
@@ -1193,7 +1193,7 @@ func GetHPathByID(id string) (hPath string, err error) {
 }
 
 func GetFullHPathByID(id string) (hPath string, err error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}
@@ -1585,7 +1585,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	folder := path.Dir(p)
 	if "/" != folder {
 		parentID := path.Base(folder)
-		parentTree, loadErr := loadTreeByBlockID(parentID)
+		parentTree, loadErr := LoadTreeByBlockID(parentID)
 		if nil != loadErr {
 			logging.LogErrorf("get parent tree [%s] failed", parentID)
 			err = ErrBlockNotFound

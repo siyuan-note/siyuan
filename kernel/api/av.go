@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -36,7 +37,7 @@ func getMirrorDatabaseBlocks(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	ret.Data = av.GetMirrorBlockIDs(avID)
+	ret.Data = treenode.GetMirrorAttrViewBlockIDs(avID)
 }
 
 func setDatabaseBlockView(c *gin.Context) {

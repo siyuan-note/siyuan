@@ -253,7 +253,7 @@ func IndexRefs() {
 		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
-			defTree, loadErr := LoadTreeByID(defBlockID)
+			defTree, loadErr := LoadTreeByBlockID(defBlockID)
 			if nil != loadErr {
 				continue
 			}

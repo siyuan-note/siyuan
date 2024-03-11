@@ -52,7 +52,7 @@ import (
 )
 
 func DocImageAssets(rootID string) (ret []string, err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -75,7 +75,7 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 }
 
 func NetImg2LocalAssets(rootID, originalURL string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -227,7 +227,7 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 }
 
 func NetAssets2LocalAssets(rootID string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -515,7 +515,7 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 		return
 	}
 
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -1071,7 +1071,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 		for _, sqlBlock := range sqlBlocks {
-			subtree, _ := loadTreeByBlockID(sqlBlock.ID)
+			subtree, _ := LoadTreeByBlockID(sqlBlock.ID)
 			if nil == subtree {
 				continue
 			}

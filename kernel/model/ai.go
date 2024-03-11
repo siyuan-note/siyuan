@@ -132,7 +132,7 @@ func getBlocksContent(ids []string) string {
 
 		var tree *parse.Tree
 		if tree = trees[bt.RootID]; nil == tree {
-			tree, _ = loadTreeByBlockID(bt.RootID)
+			tree, _ = LoadTreeByBlockID(bt.RootID)
 			if nil == tree {
 				continue
 			}

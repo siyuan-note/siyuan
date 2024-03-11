@@ -31,7 +31,7 @@ func Outline(rootID string) (ret []*Path, err error) {
 	WaitForWritingFiles()
 
 	ret = []*Path{}
-	tree, _ := loadTreeByBlockID(rootID)
+	tree, _ := LoadTreeByBlockID(rootID)
 	if nil == tree {
 		return
 	}

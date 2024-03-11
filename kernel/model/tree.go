@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"io/fs"
 	"path"
 	"path/filepath"
@@ -30,7 +31,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -150,11 +150,7 @@ var (
 	ErrIndexing      = errors.New("indexing")
 )
 
-func LoadTreeByID(id string) (ret *parse.Tree, err error) {
-	return loadTreeByBlockID(id)
-}
-
-func loadTreeByBlockID(id string) (ret *parse.Tree, err error) {
+func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	if "" == id {
 		return nil, ErrTreeNotFound
 	}

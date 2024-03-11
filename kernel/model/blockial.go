@@ -53,7 +53,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	}
 
 	attrs := GetBlockAttrs(id) // 获取属性是会等待树写入
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}
@@ -110,7 +110,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		}
 
 		if nil == trees[bt.RootID] {
-			tree, e := loadTreeByBlockID(id)
+			tree, e := LoadTreeByBlockID(id)
 			if nil != e {
 				return e
 			}
@@ -160,7 +160,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	WaitForWritingFiles()
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return err
 	}
@@ -248,7 +248,7 @@ func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
 }
 
 func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return err
 	}
@@ -296,7 +296,7 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 
 	WaitForWritingFiles()
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}
@@ -321,7 +321,7 @@ func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
 		return
 	}
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}

@@ -71,18 +71,21 @@ func LoginAuth(c *gin.Context) {
 		if nil == captchaArg {
 			ret.Code = 1
 			ret.Msg = Conf.Language(21)
+			logging.LogWarnf("invalid captcha")
 			return
 		}
 		inputCaptcha = captchaArg.(string)
 		if "" == inputCaptcha {
 			ret.Code = 1
 			ret.Msg = Conf.Language(21)
+			logging.LogWarnf("invalid captcha")
 			return
 		}
 
 		if strings.ToLower(workspaceSession.Captcha) != strings.ToLower(inputCaptcha) {
 			ret.Code = 1
 			ret.Msg = Conf.Language(22)
+			logging.LogWarnf("invalid captcha")
 			return
 		}
 	}
@@ -91,6 +94,7 @@ func LoginAuth(c *gin.Context) {
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
+		logging.LogWarnf("invalid auth code")
 
 		util.WrongAuthCount++
 		workspaceSession.Captcha = gulu.Rand.String(7)
@@ -109,6 +113,7 @@ func LoginAuth(c *gin.Context) {
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
 	workspaceSession.Captcha = gulu.Rand.String(7)
+	logging.LogInfof("auth success")
 	if err := session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)

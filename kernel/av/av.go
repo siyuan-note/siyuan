@@ -468,7 +468,12 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	data, err := gulu.JSON.MarshalJSON(av)
+	var data []byte
+	if util.UseSingleLineSave {
+		data, err = gulu.JSON.MarshalJSON(av)
+	} else {
+		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
+	}
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return

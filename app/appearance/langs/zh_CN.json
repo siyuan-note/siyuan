@@ -1,5 +1,5 @@
 {
-  "insertRowTip": "新增行已被过滤，可取消过滤进行查看",
+  "insertRowTip": "新增行已被过滤，可取消过滤/搜索/排序进行查看",
   "insertRowTip2": "新增行不参与排序",
   "insertPhoto": "拍照并插入",
   "relativeToToday": "相对于今天",

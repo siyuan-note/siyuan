@@ -26,7 +26,7 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     }
     const isNotTime = !cellValue || cellValue?.value?.date?.isNotTime;
     let value = "";
-    const currentDate = new Date().getTime()
+    const currentDate = new Date().getTime();
     if (cellValue?.value?.date?.isNotEmpty) {
         value = dayjs(cellValue.value.date.content).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     } else {
@@ -79,8 +79,8 @@ export const bindDateEvent = (options: {
     inputElements[2].addEventListener("change", () => {
         if (inputElements[2].checked) {
             if (!inputElements[1].dataset.value) {
-                const currentDate = new Date().getTime()
-                inputElements[1].dataset.value = dayjs(currentDate).format("YYYY-MM-DD HH:mm")
+                const currentDate = new Date().getTime();
+                inputElements[1].dataset.value = dayjs(currentDate).format("YYYY-MM-DD HH:mm");
                 inputElements[1].value = dayjs(currentDate).format(inputElements[3].checked ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD");
             }
             inputElements[1].classList.remove("fn__none");
@@ -114,5 +114,5 @@ export const bindDateEvent = (options: {
             hasEndDate: inputElements[2].checked,
             isNotTime: !inputElements[3].checked,
         }, options.cellElements);
-    }
+    };
 };

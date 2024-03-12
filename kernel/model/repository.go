@@ -1163,7 +1163,6 @@ func bootSyncRepo() (err error) {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
-		logging.LogErrorf("data repo is corrupted: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		Conf.Sync.Stat = msg
 		Conf.Save()
@@ -1518,12 +1517,10 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
-	if errors.Is(err, dejavu.ErrNotFoundObject) {
-		logging.LogErrorf("data repo is corrupted: %s", err)
-		return
-	}
-
 	if nil != err {
+		if errors.Is(err, dejavu.ErrNotFoundObject) {
+			err = dejavu.ErrRepoFatal
+		}
 		msg := fmt.Sprintf(Conf.Language(140), formatRepoErrorMsg(err))
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 12000)

@@ -197,8 +197,6 @@ github.com/huandu/xstrings v1.4.0/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
-github.com/imroc/req/v3 v3.43.0 h1:TZDLMcuXEUFOvoyjKI2vMeimhq/OWnxvRJDPfEVCEhk=
-github.com/imroc/req/v3 v3.43.0/go.mod h1:SQIz5iYop16MJxbo8ib+4LnostGCok8NQf8ToyQc2xA=
 github.com/imroc/req/v3 v3.43.1 h1:tsWAhvxik4egtHAvMlxcjaWJtHlJL8EpBqJMOm5rmyQ=
 github.com/imroc/req/v3 v3.43.1/go.mod h1:SQIz5iYop16MJxbo8ib+4LnostGCok8NQf8ToyQc2xA=
 github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0/go.mod h1:CVKlgaMiht+LXvHG173ujK6JUhZXKb2u/BQtjPDIvyk=
@@ -353,16 +351,14 @@ github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFR
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20240218075321-a488f36181cc h1:8Xtg9wp+wvt1Pv/VaaqLkvizT1myUG5yUzoeX/tkMyc=
-github.com/siyuan-note/dejavu v0.0.0-20240218075321-a488f36181cc/go.mod h1:uh+lahK4RdQGlS7AsZ1mAHp6lWI9GR+aNboq4cdaBQU=
+github.com/siyuan-note/dejavu v0.0.0-20240312083319-7cf60efe5c66 h1:9r9Op9nZBHi5IfRQxLoxKOEwajrMVRJCHWQXgt8jsbY=
+github.com/siyuan-note/dejavu v0.0.0-20240312083319-7cf60efe5c66/go.mod h1:lMrCZfigfQNC89yr1UF/PYbFenBQLzSWiWV1TcqUkVY=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4 h1:kJaw5L/evyW6LcB9IQT8PR4ppx8JVqOFP9Ix3rfwSrc=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4/go.mod h1:UYcCCY+0wh+GmUoDOaO63j1sV5lgy7laLAk1XhEiUis=
 github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255 h1:WTAUBlU2v7ISet9ankbjqZrRKo6MLGK1LBmDyNlehPY=
 github.com/siyuan-note/eventbus v0.0.0-20240124091459-8e1b37a55255/go.mod h1:1/nGgthl89FPA7GzAcEWKl6zRRnfgyTjzLZj9bW7kuw=
 github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772 h1:ceX49LJmN8FMwWpkCkZIV9dHG4Ya2ZMrhu9T6VyDiKs=
 github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772/go.mod h1:CYJQjSyKYLhEJJC+5I+R4uNcpyW0X2CaUYwMVbkelDk=
-github.com/siyuan-note/httpclient v0.0.0-20240306121400-b3af777a1f1b h1:t8xkj25nNOQXsS6grX2kpFcNeOydjrT250ahdzWosos=
-github.com/siyuan-note/httpclient v0.0.0-20240306121400-b3af777a1f1b/go.mod h1:mgg/IhCzGQ5h2k6QTTn0kFSR7cCMN/Xb313eTpAedic=
 github.com/siyuan-note/httpclient v0.0.0-20240312073515-af29be1cfb4e h1:2DeWT+8qGw2mqF03Z7R9gwPJ7WTUqDrQSv5Yo/NxxYA=
 github.com/siyuan-note/httpclient v0.0.0-20240312073515-af29be1cfb4e/go.mod h1:v/O6xcc3HomxJR1dLwENGan9RB08WqSPv4kxyzaTSUI=
 github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0 h1:+XjUr9UMXsczdO2bGA72p/k9wa2ShPb8ybi7CDBJ7HQ=

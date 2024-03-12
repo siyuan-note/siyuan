@@ -132,7 +132,9 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
-				linkText.Tokens = []byte(name)
+				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
+					linkText.Tokens = []byte(name)
+				}
 				name = "net-img-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
@@ -209,7 +211,9 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				name = strings.TrimSuffix(name, ext)
 				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
-				linkText.Tokens = []byte(name)
+				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
+					linkText.Tokens = []byte(name)
+				}
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); nil != err {

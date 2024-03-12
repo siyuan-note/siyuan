@@ -1153,6 +1153,13 @@ func bootSyncRepo() (err error) {
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		BootSyncSucc = 1
 		isBootSyncing.Store(false)
 		return
 	}

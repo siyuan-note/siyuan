@@ -856,6 +856,7 @@ export const turnsIntoTransaction = (options: {
     type: TTurnInto,
     level?: number,
     isContinue?: boolean,
+    range?: Range
 }) => {
     let selectsElement: Element[] = options.selectsElement;
     let range: Range;
@@ -977,8 +978,8 @@ export const turnsIntoTransaction = (options: {
     highlightRender(options.protyle.wysiwyg.element);
     avRender(options.protyle.wysiwyg.element, options.protyle);
     blockRender(options.protyle, options.protyle.wysiwyg.element);
-    if (range) {
-        focusByWbr(options.protyle.wysiwyg.element, range);
+    if (range || options.range) {
+        focusByWbr(options.protyle.wysiwyg.element, range || options.range);
     } else {
         focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${selectsElement[0].getAttribute("data-node-id")}"]`));
     }

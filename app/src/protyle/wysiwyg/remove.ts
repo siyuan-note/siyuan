@@ -351,14 +351,6 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         }
         return;
     }
-    if (blockElement.getAttribute("data-type") === "NodeHeading") {
-        turnsIntoTransaction({
-            protyle: protyle,
-            selectsElement: [blockElement],
-            type: "Blocks2Ps",
-        });
-        return;
-    }
     if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
         range.insertNode(document.createElement("wbr"));
         const blockParentElement = blockElement.parentElement;
@@ -404,7 +396,15 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
-
+    if (blockElement.getAttribute("data-type") === "NodeHeading") {
+        turnsIntoTransaction({
+            protyle: protyle,
+            selectsElement: [blockElement],
+            type: "Blocks2Ps",
+            range: moveToPrevious(blockElement, range, type === "Delete")
+        });
+        return;
+    }
     if (blockElement.previousElementSibling && blockElement.previousElementSibling.classList.contains("protyle-breadcrumb__bar")) {
         return;
     }
@@ -558,14 +558,14 @@ export const moveToPrevious = (blockElement: Element, range: Range, isDelete: bo
         if (previousBlockElement) {
             const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement));
             if (previousEditElement) {
-                setLastNodeRange(previousEditElement, range, false);
+                return setLastNodeRange(previousEditElement, range, false);
             }
         }
     }
 };
 
 // https://github.com/siyuan-note/siyuan/issues/10393
-export const removeImage = (imgSelectElement: Element, nodeElement:HTMLElement, range:Range, protyle:IProtyle) => {
+export const removeImage = (imgSelectElement: Element, nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
     const oldHTML = nodeElement.outerHTML;
     const imgPreviousSibling = hasPreviousSibling(imgSelectElement);
     if (imgPreviousSibling && imgPreviousSibling.textContent.endsWith(Constants.ZWSP)) {

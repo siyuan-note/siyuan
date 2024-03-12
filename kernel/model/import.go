@@ -951,7 +951,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) 
 	if nil != alt {
 		name = alt.TokensStr() + ext
 	}
-	name = util.FilterFileName(name)
+	name = util.FilterUploadFileName(name)
 	name = util.AssetName(name)
 
 	tmp := filepath.Join(base64TmpDir, name)

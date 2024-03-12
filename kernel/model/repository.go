@@ -1019,6 +1019,13 @@ func syncRepoDownload() (err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo download failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 
@@ -1083,6 +1090,13 @@ func syncRepoUpload() (err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo upload failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 
@@ -1263,6 +1277,18 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		if 1 > autoSyncErrCount || byHand {
+			util.PushErrMsg(msg, 0)
+		}
+		if exit {
+			ExitSyncSucc = 1
+		}
 		return
 	}
 
@@ -1525,12 +1551,6 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
 	if nil != err {
-		if errors.Is(err, dejavu.ErrNotFoundObject) {
-			err = dejavu.ErrRepoFatal
-		}
-		msg := fmt.Sprintf(Conf.Language(140), formatRepoErrorMsg(err))
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 12000)
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}

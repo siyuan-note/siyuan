@@ -240,7 +240,7 @@ export class WYSIWYG {
         this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }
@@ -1255,7 +1255,7 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 return;
             }
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }
@@ -1714,7 +1714,7 @@ export class WYSIWYG {
             }
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }

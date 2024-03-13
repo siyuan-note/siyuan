@@ -728,7 +728,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             selectAll(protyle, nodeElement, range);
         }
     }).element);
-    if (nodeElement.classList.contains("table")) {
+    if (nodeElement.classList.contains("table") && !protyle.disabled) {
         const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
         if (cellElement) {
             window.siyuan.menus.menu.append(new MenuItem({

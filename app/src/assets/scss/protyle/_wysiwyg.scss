@@ -573,7 +573,7 @@
 .protyle .protyle-wysiwyg {
   .li[data-subtype="o"] > .protyle-action,
   .li[data-subtype="u"] > .protyle-action,
-  &[data-readonly="true"] .li[data-subtype="t"] > .protyle-action {
+  &[data-readonly="false"] .li[data-subtype="t"] > .protyle-action {
     cursor: pointer;
 
     &:hover {

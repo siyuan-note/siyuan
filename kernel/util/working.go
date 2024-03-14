@@ -243,7 +243,6 @@ func initWorkspaceDir(workspaceArg string) {
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
 		if 0 < len(workspacePaths) {
-			// 取最后一个（也就是最近打开的）工作空间
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 		} else {
 			WorkspaceDir = defaultWorkspaceDir

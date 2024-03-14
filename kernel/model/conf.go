@@ -587,6 +587,18 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	clearWorkspaceTemp()
 	clearCorruptedNotebooks()
 	clearPortJSON()
+
+	// 将当前工作空间放到工作空间列表的最后一个
+	// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
+	workspacePaths, err := util.ReadWorkspacePaths()
+	if nil != err {
+		logging.LogErrorf("read workspace paths failed: %s", err)
+	} else {
+		workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
+		workspacePaths = append(workspacePaths, util.WorkspaceDir)
+		util.WriteWorkspacePaths(workspacePaths)
+	}
+
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)

@@ -1475,8 +1475,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 
 		util.WaitForUILoaded()
-		util.BroadcastByType("main", "syncMergeResult", 0, "",
-			map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+
+		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
+			util.BroadcastByType("main", "syncMergeResult", 0, "",
+				map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+		}
 
 		time.Sleep(2 * time.Second)
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))

@@ -122,8 +122,12 @@ func addAttributeViewValues(c *gin.Context) {
 		previousID = arg["previousID"].(string)
 	}
 	isDetached := arg["isDetached"].(bool)
+	ignoreFillFilter := true
+	if nil != arg["ignoreFillFilter"] {
+		ignoreFillFilter = arg["ignoreFillFilter"].(bool)
+	}
 
-	err := model.AddAttributeViewBlock(nil, srcIDs, avID, blockID, previousID, isDetached)
+	err := model.AddAttributeViewBlock(nil, srcIDs, avID, blockID, previousID, isDetached, ignoreFillFilter)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

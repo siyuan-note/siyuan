@@ -447,7 +447,9 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
-    insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="/widgets/${value}" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
+    // src 地址以 / 结尾
+    // Use the path ending with `/` when loading the widget https://github.com/siyuan-note/siyuan/issues/10520
+    insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="/widgets/${value}/" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
     hideElements(["util"], protyle);
 };
 

@@ -1376,15 +1376,14 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view := attrView.GetView(operation.ID)
 	if nil == view {
 		logging.LogErrorf("get view failed: %s", operation.BlockID)
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	viewID := view.ID
-	previewViewID := operation.PreviousID
-
-	if viewID == previewViewID {
+	previousViewID := operation.PreviousID
+	if viewID == previousViewID {
 		return
 	}
 
@@ -1402,7 +1401,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 
 	attrView.Views = append(attrView.Views[:index], attrView.Views[index+1:]...)
 	for i, v := range attrView.Views {
-		if v.ID == previewViewID {
+		if v.ID == previousViewID {
 			previousIndex = i + 1
 			break
 		}
@@ -1926,14 +1925,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached)
+	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached, operation.IgnoreFillFilterVal)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, previousBlockID string, isDetached bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, previousBlockID string, isDetached, ignoreFillFilter bool) (err error) {
 	for _, id := range srcIDs {
 		var tree *parse.Tree
 		if !isDetached {
@@ -1949,14 +1948,14 @@ func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, prev
 			}
 		}
 
-		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, id, isDetached, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, id, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string, isDetached, ignoreFillFilter bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBlockID)
@@ -2007,7 +2006,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
-	if nil != view && 0 < len(view.Table.Filters) {
+	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
 		viewable, _ := renderAttributeViewTable(attrView, view, "")
 		viewable.FilterRows(attrView)
 		viewable.SortRows()

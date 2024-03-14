@@ -509,7 +509,7 @@ type Flashcard struct {
 	Lapses     int                    `json:"lapses"`
 	Reps       int                    `json:"reps"`
 	State      riff.State             `json:"state"`
-	LastReview time.Time              `json:"lastReview"`
+	LastReview int64                  `json:"lastReview"`
 	NextDues   map[riff.Rating]string `json:"nextDues"`
 }
 
@@ -526,7 +526,7 @@ func newFlashcard(card riff.Card, deckID string, now time.Time) *Flashcard {
 		Lapses:     card.GetLapses(),
 		Reps:       card.GetReps(),
 		State:      card.GetState(),
-		LastReview: card.GetLastReview(),
+		LastReview: card.GetLastReview().UnixMilli(),
 		NextDues:   nextDues,
 	}
 }

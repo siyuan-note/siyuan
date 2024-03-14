@@ -61,6 +61,19 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const viewItemElement = hasClosestByClassName(event.target, "item");
+    if (viewItemElement && viewItemElement.parentElement.classList.contains("layout-tab-bar")) {
+        if (viewItemElement.classList.contains("item--focus")) {
+            openViewMenu({protyle, blockElement, element: viewItemElement});
+        } else {
+            blockElement.removeAttribute("data-render");
+            avRender(blockElement, protyle, undefined, viewItemElement.dataset.id);
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
 
     if (protyle.disabled) {
         return false;
@@ -264,16 +277,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("av__calc")) {
             openCalcMenu(protyle, target);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
-            if (target.classList.contains("item--focus")) {
-                openViewMenu({protyle, blockElement, element: target});
-            } else {
-                blockElement.removeAttribute("data-render");
-                avRender(blockElement, protyle, undefined, target.dataset.id);
-            }
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -19,13 +19,32 @@ import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {focusByRange} from "../protyle/util/selection";
 import {updateCardHV} from "./util";
+import {showMessage} from "../dialog/message";
+import {Menu} from "../plugin/Menu";
+import {transaction} from "../protyle/wysiwyg/transaction";
 
-const genCardCount = (unreviewedNewCardCount: number, unreviewedOldCardCount: number, index = 1) => {
-    return `<span class="ft__error">${index}</span>
-<span class="fn__space"></span>/<span class="fn__space"></span>
-<span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${unreviewedNewCardCount}</span>
+const genCardCount = (cardsData: ICardData, allIndex = 0) => {
+    let newIndex = 0;
+    let oldIndex = 0;
+    cardsData.cards.forEach((item, index) => {
+        if (index > allIndex) {
+            return
+        }
+        if (item.state === 0) {
+            newIndex++;
+        } else {
+            oldIndex++;
+        }
+    })
+    return `<span class="ariaLabel" aria-label="${window.siyuan.languages.flashcardNewCard}">
+    <span class="ft__error">${newIndex}</span> /
+    <span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${cardsData.unreviewedNewCardCount}</span>
+</span>
 <span class="fn__space"></span>+<span class="fn__space"></span>
-<span class="ariaLabel ft__success" aria-label="${window.siyuan.languages.flashcardReviewCard}">${unreviewedOldCardCount}</span>`;
+<span class="ariaLabel" aria-label="${window.siyuan.languages.flashcardReviewCard}">
+    <span class="ft__error">${oldIndex}</span> /
+    <span class="ft__success">${cardsData.unreviewedOldCardCount}</span>
+</span>`;
 };
 
 export const genCardHTML = (options: {
@@ -39,7 +58,7 @@ export const genCardHTML = (options: {
     iconsHTML = `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
-    <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+    <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
@@ -49,7 +68,7 @@ export const genCardHTML = (options: {
             <svg class="block__logoicon"><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
         </div>`}
         <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
-        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount)}</span></div>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData)}</span></div>
         <div class="fn__space"></div>
         <button data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -57,6 +76,10 @@ export const genCardHTML = (options: {
         <div class="fn__space"></div>
         <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
             <svg><use xlink:href="#iconFullscreen"></use></svg>
+        </div>
+        <div class="fn__space"></div>
+        <div data-type="more" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.more}">
+            <svg><use xlink:href="#iconMore"></use></svg>
         </div>
         <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
         <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openInNewTab}">
@@ -175,14 +198,14 @@ export const bindCardEvent = async (options: {
         });
     }
     options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
-    const countElement = options.element.querySelector('[data-type="count"]');
-    countElement.firstElementChild.innerHTML = (index + 1).toString();
+    genCardCount(options.cardsData, index);
     const actionElements = options.element.querySelectorAll(".card__action");
     if (options.index === 0) {
         actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
     } else {
         actionElements[0].firstElementChild.removeAttribute("disabled");
     }
+    const countElement = options.element.querySelector('[data-type="count"]');
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
@@ -555,7 +578,7 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.innerHTML = genCardCount(options.cardsData.unreviewedNewCardCount, options.cardsData.unreviewedOldCardCount, options.index + 1);
+    options.countElement.innerHTML = genCardCount(options.cardsData, options.index);
     options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");

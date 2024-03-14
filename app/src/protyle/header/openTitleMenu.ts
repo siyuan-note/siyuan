@@ -61,6 +61,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
+                            ignoreFillFilter: true,
                             srcIDs: sourceIds,
                             isDetached: false,
                             blockID: listItemElement.dataset.nodeId

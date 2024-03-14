@@ -315,6 +315,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",
                     avID,
+                    ignoreFillFilter: true,
                     srcIDs: sourceIds,
                     isDetached: false,
                     blockID: listItemElement.dataset.nodeId
@@ -348,6 +349,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",
                     avID,
+                    ignoreFillFilter: true,
                     srcIDs: sourceIds,
                     isDetached: false,
                     blockID: listItemElement.dataset.blockId

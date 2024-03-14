@@ -821,6 +821,7 @@ export class Gutter {
                         action: "insertAttrViewBlock",
                         avID,
                         srcIDs: sourceIds,
+                        ignoreFillFilter: true,
                         isDetached: false,
                         blockID: listItemElement.dataset.blockId
                     }, {
@@ -1283,6 +1284,7 @@ export class Gutter {
                             action: "insertAttrViewBlock",
                             avID,
                             srcIDs: sourceIds,
+                            ignoreFillFilter: true,
                             isDetached: false,
                             blockID: listItemElement.dataset.blockId
                         }, {

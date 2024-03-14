@@ -148,7 +148,12 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				return ast.WalkSkipChildren
 			}
 
-			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) {
+			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
+				if bytes.HasPrefix(dest, []byte("//")) {
+					// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
+					dest = append([]byte("https:"), dest...)
+				}
+
 				u := string(dest)
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
@@ -320,7 +325,12 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 			return ast.WalkContinue
 		}
 
-		if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) {
+		if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
+			if bytes.HasPrefix(dest, []byte("//")) {
+				// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
+				dest = append([]byte("https:"), dest...)
+			}
+
 			u := string(dest)
 			if strings.Contains(u, "qpic.cn") {
 				// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052

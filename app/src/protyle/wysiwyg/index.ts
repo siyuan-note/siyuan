@@ -2077,7 +2077,7 @@ export class WYSIWYG {
                 return;
             }
 
-            if (aElement && !event.altKey) {
+            if (aElement) {
                 event.stopPropagation();
                 event.preventDefault();
                 let linkAddress = Lute.UnEscapeHTMLStr(aLink);
@@ -2090,31 +2090,28 @@ export class WYSIWYG {
                         (!linkPathname.endsWith(".pdf") ||
                             (linkPathname.endsWith(".pdf") && !linkAddress.startsWith("file://")))
                     ) {
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else if (event.shiftKey) {
-                            openBy(linkAddress, "app");
-                        } else {
+                        if (event.altKey) {
+                            openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
+                        } else if (!ctrlIsPressed && !event.shiftKey) {
                             openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
                         }
                     } else {
-                        /// #if !BROWSER
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else {
-                            openBy(linkAddress, "app");
-                        }
-                        /// #else
                         openByMobile(linkAddress);
-                        /// #endif
                     }
-                } else if (linkAddress) {
                     /// #if !BROWSER
+                    if (ctrlIsPressed) {
+                        openBy(linkAddress, "folder");
+                    } else if (event.shiftKey) {
+                        openBy(linkAddress, "app");
+                    }
+                    /// #endif
+                } else if (linkAddress) {
                     if (0 > linkAddress.indexOf(":")) {
                         // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
                         // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
                         linkAddress = `https://${linkAddress}`;
                     }
+                    /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
                         showMessage(e);
                     });

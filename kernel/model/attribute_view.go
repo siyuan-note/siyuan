@@ -1925,14 +1925,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached)
+	err := AddAttributeViewBlock(tx, operation.SrcIDs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached, operation.IgnoreFillFilterVal)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, previousBlockID string, isDetached bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, previousBlockID string, isDetached, ignoreFillFilter bool) (err error) {
 	for _, id := range srcIDs {
 		var tree *parse.Tree
 		if !isDetached {
@@ -1948,14 +1948,14 @@ func AddAttributeViewBlock(tx *Transaction, srcIDs []string, avID, blockID, prev
 			}
 		}
 
-		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, id, isDetached, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, id, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string, isDetached, ignoreFillFilter bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBlockID)
@@ -2006,7 +2006,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
-	if nil != view && 0 < len(view.Table.Filters) {
+	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
 		viewable, _ := renderAttributeViewTable(attrView, view, "")
 		viewable.FilterRows(attrView)
 		viewable.SortRows()

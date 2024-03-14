@@ -265,6 +265,57 @@ export const bindCardEvent = async (options: {
                 event.preventDefault();
                 return;
             }
+            const moreElement = hasClosestByAttribute(target, "data-type", "more");
+            if (moreElement) {
+                event.stopPropagation();
+                event.preventDefault();
+                if (filterElement.getAttribute("data-cardtype") === "all") {
+                    showMessage(window.siyuan.languages.noSupportTip);
+                    return;
+                }
+                const menu = new Menu();
+                menu.addItem({
+                    icon: "iconClock",
+                    label: window.siyuan.languages.updatedTime,
+                    click() {
+
+                    }
+                })
+                menu.addItem({
+                    icon: "iconRefresh",
+                    label: window.siyuan.languages.reset,
+                    click() {
+
+                    }
+                })
+                menu.addItem({
+                    icon: "iconTrashcan",
+                    label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
+                    click() {
+                        actionElements[0].classList.add("fn__none");
+                        actionElements[1].classList.remove("fn__none");
+                        if (options.cardsData.cards[index].state === 0) {
+                            options.cardsData.unreviewedNewCardCount--;
+                        } else  {
+                            options.cardsData.unreviewedOldCardCount--;
+                        }
+                        options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                        transaction(undefined, [{
+                            action: "removeFlashcards",
+                            deckID: Constants.QUICK_DECK_ID,
+                            blockIDs: [options.cardsData.cards[index].blockID]
+                        }]);
+                        options.cardsData.cards.splice(index, 1);
+                        index--;
+                    }
+                })
+                const rect = target.getBoundingClientRect();
+                menu.open({
+                    x: rect.left,
+                    y: rect.bottom
+                });
+                return;
+            }
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {

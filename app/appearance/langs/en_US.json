@@ -1,4 +1,5 @@
 {
+  "noSupportTip": "This function does not support the use of card packages",
   "insertRowTip": "The newly added rows have been filtered and can be viewed by canceling filtering/searching/sorting",
   "insertRowTip2": "New rows do not participate in sorting",
   "insertPhoto": "Take a photo and insert it",

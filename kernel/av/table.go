@@ -208,6 +208,7 @@ func (table *Table) SortRows() {
 	})
 
 	sort.Slice(editedRows, func(i, j int) bool {
+		sorted := true
 		for _, colIndexSort := range colIndexSorts {
 			val1 := editedRows[i].Cells[colIndexSort.Index].Value
 			if nil == val1 {
@@ -221,13 +222,27 @@ func (table *Table) SortRows() {
 
 			result := val1.Compare(val2)
 			if 0 == result {
+				sorted = false
 				continue
 			}
+			sorted = true
 
 			if colIndexSort.Order == SortOrderAsc {
 				return 0 > result
 			}
 			return 0 < result
+		}
+
+		if !sorted {
+			key1 := editedRows[i].GetBlockValue()
+			if nil == key1 {
+				return false
+			}
+			key2 := editedRows[j].GetBlockValue()
+			if nil == key2 {
+				return false
+			}
+			return key1.CreatedAt < key2.CreatedAt
 		}
 		return false
 	})

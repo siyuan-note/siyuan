@@ -1,4 +1,7 @@
 {
+  "forgetCount": "Oublier de compter",
+  "lastReviewTime": "Heure de la dernière révision",
+  "cardStatus": "Statut de la carte",
   "noSupportTip": "Cette fonction ne prend pas en charge l'utilisation de packages de cartes",
   "insertRowTip": "Les lignes nouvellement ajoutées ont été filtrées et peuvent être visualisées en annulant le filtrage/recherche/tri",
   "insertRowTip2": "Les nouvelles lignes ne participent pas au tri",

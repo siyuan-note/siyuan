@@ -13,6 +13,7 @@ import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
 /// #endif
+import * as dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
 import {resize} from "../protyle/util/resize";
@@ -237,6 +238,7 @@ export const bindCardEvent = async (options: {
     options.element.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
+        const currentCard = options.cardsData.cards[index]
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
                 type = "1";
@@ -294,20 +296,45 @@ export const bindCardEvent = async (options: {
                     click() {
                         actionElements[0].classList.add("fn__none");
                         actionElements[1].classList.remove("fn__none");
-                        if (options.cardsData.cards[index].state === 0) {
+                        if (currentCard.state === 0) {
                             options.cardsData.unreviewedNewCardCount--;
-                        } else  {
+                        } else {
                             options.cardsData.unreviewedOldCardCount--;
                         }
                         options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
                         transaction(undefined, [{
                             action: "removeFlashcards",
                             deckID: Constants.QUICK_DECK_ID,
-                            blockIDs: [options.cardsData.cards[index].blockID]
+                            blockIDs: [currentCard.blockID]
                         }]);
                         options.cardsData.cards.splice(index, 1);
                         index--;
                     }
+                })
+                menu.addSeparator()
+                menu.addItem({
+                    iconHTML: "",
+                    type: "readonly",
+                    label: `<div class="fn__flex">
+    <div class="fn__flex-1">${window.siyuan.languages.forgetCount}</div>
+    <div class="fn__space"></div>
+    <div>${currentCard.lapses}</div>
+</div>
+<div class="fn__flex${currentCard.lastReview > 0 ? "" : " fn__none"}">
+    <div class="fn__flex-1">${window.siyuan.languages.lastReviewTime}</div>
+    <div class="fn__space"></div>
+    <div>${dayjs(currentCard.lastReview).format("YYYY-MM-DD")}</div>
+</div>
+<div class="fn__flex">
+    <div class="fn__flex-1">${window.siyuan.languages.revisionCount}</div>
+    <div class="fn__space"></div>
+    <div>${currentCard.reps}</div>
+</div>
+<div class="fn__flex">
+    <div class="fn__flex-1">${window.siyuan.languages.cardStatus}</div>
+    <div class="fn__space"></div>
+    <div class="${window.siyuan.languages.cardStatus === 0 ? "ft__primary" : "ft__success"}">${window.siyuan.languages.cardStatus === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
+</div>`,
                 })
                 const rect = target.getBoundingClientRect();
                 menu.open({
@@ -426,7 +453,7 @@ export const bindCardEvent = async (options: {
                 type = buttonElement.getAttribute("data-type");
             }
         }
-        if (!type || !options.cardsData.cards[index]) {
+        if (!type || !currentCard) {
             return;
         }
         event.preventDefault();
@@ -439,10 +466,10 @@ export const bindCardEvent = async (options: {
                 editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
                 actionElements[0].classList.add("fn__none");
                 actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                    element.previousElementSibling.textContent = options.cardsData.cards[index].nextDues[btnIndex];
+                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex];
                 });
                 actionElements[1].classList.remove("fn__none");
-                emitEvent(options.app, options.cardsData.cards[index], type);
+                emitEvent(options.app, currentCard, type);
                 return;
             }
         } else if (type === "-2") {    // 上一步
@@ -464,8 +491,8 @@ export const bindCardEvent = async (options: {
         }
         if (["1", "2", "3", "4", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
-                deckID: options.cardsData.cards[index].deckID,
-                cardID: options.cardsData.cards[index].cardID,
+                deckID: currentCard.deckID,
+                cardID: currentCard.cardID,
                 rating: parseInt(type),
                 reviewedCards: options.cardsData.cards
             }, () => {

@@ -218,7 +218,10 @@ interface ICard {
     cardID: string
     blockID: string
     nextDues: IObject
-    state: number   // 0：新卡
+    lapses: number  // 遗忘次数
+    lastReview: number  // 最后复习时间
+    reps: number  // 复习次数
+    state: number   // 卡片状态 0：新卡
 }
 
 interface ICardData {

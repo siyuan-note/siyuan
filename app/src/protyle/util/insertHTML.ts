@@ -7,12 +7,7 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
-import {
-    genCellValue,
-    genCellValueByElement,
-    getTypeByCellElement,
-    updateCellsValue
-} from "../render/av/cell";
+import {genCellValue, genCellValueByElement, getTypeByCellElement, updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {objEquals} from "../../util/functions";
 
@@ -213,10 +208,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
     }
     const tempElement = document.createElement("template");
-    // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
-    tempElement.innerHTML = tableInlineHTML // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
-        || protyle.lute.SpinBlockDOM(html) ||
+
+    let innerHTML = tableInlineHTML || // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
+        protyle.lute.SpinBlockDOM(html) || // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
         html;   // 空格会被 Spin 不再，需要使用原文
+    // 粘贴纯文本时会进行内部转义，这里需要进行反转义 https://github.com/siyuan-note/siyuan/issues/10620
+    innerHTML = innerHTML.replace(/;;;lt;;;/g, "&lt;").replace(/;;;gt;;;/g, "&gt;");
+    tempElement.innerHTML = innerHTML;
+
     const editableElement = getContenteditableElement(blockElement);
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {

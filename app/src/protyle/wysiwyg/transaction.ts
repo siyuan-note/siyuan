@@ -565,7 +565,13 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 if (key === Constants.CUSTOM_RIFF_DECKS && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     item.style.animation = "addCard 450ms linear";
                     setTimeout(() => {
-                        item.style.animation = "";
+                        if (item.parentElement) {
+                            item.style.animation = "";
+                        } else {
+                            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((realItem: HTMLElement) => {
+                                realItem.style.animation = "";
+                            })
+                        }
                     }, 450);
                 }
             });

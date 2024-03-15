@@ -470,7 +470,7 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		indexWriteJSONQueue(tree)
 	} else {
 		treenode.IndexBlockTree(tree)
-		sql.IndexTreeQueue(tree.Box, tree.Path)
+		sql.IndexTreeQueue(tree)
 	}
 
 	if 0 == i%64 {

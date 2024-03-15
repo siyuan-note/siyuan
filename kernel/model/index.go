@@ -170,7 +170,7 @@ func index(boxID string) {
 
 		cache.PutDocIAL(file.path, docIAL)
 		treenode.IndexBlockTree(tree)
-		sql.IndexTreeQueue(box.ID, file.path)
+		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		if 1 < i && 0 == i%64 {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))

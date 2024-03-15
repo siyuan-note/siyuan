@@ -307,7 +307,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 			util.PushStatusBar(msg)
 
 			treenode.RemoveBlockTreesByRootID(block.RootID)
-			sql.RemoveTreeQueue(block.BoxID, block.RootID)
+			sql.RemoveTreeQueue(block.RootID)
 		}
 	}
 

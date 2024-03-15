@@ -33,7 +33,6 @@ import (
 	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -401,12 +400,7 @@ func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	return err
 }
 
-func indexTree(tx *sql.Tx, box, p string, context map[string]interface{}) (err error) {
-	tree, err := filesys.LoadTree(box, p, luteEngine)
-	if nil != err {
-		return
-	}
-
+func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	refs, fileAnnotationRefs := refsFromTree(tree)
 	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)

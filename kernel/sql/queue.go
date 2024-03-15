@@ -40,10 +40,10 @@ var (
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
 	action                        string      // upsert/delete/delete_id/rename/rename_sub_tree/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content/delete_assets
-	indexPath                     string      // index
+	indexTree                     *parse.Tree // index
 	upsertTree                    *parse.Tree // upsert/insert_refs/update_refs/delete_refs
 	removeTreeBox, removeTreePath string      // delete
-	removeTreeIDBox, removeTreeID string      // delete_id
+	removeTreeID                  string      // delete_id
 	removeTreeIDs                 []string    // delete_ids
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename/rename_sub_tree
@@ -164,7 +164,7 @@ func FlushQueue() {
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
 	switch op.action {
 	case "index":
-		err = indexTree(tx, op.box, op.indexPath, context)
+		err = indexTree(tx, op.indexTree, context)
 	case "upsert":
 		err = upsertTree(tx, op.upsertTree, context)
 	case "delete":
@@ -315,13 +315,13 @@ func DeleteBoxQueue(boxID string) {
 	operationQueue = append(operationQueue, newOp)
 }
 
-func IndexTreeQueue(box, p string) {
+func IndexTreeQueue(tree *parse.Tree) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{indexPath: p, box: box, inQueueTime: time.Now(), action: "index"}
+	newOp := &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
 	for i, op := range operationQueue {
-		if "index" == op.action && op.indexPath == p && op.box == box { // 相同树则覆盖
+		if "index" == op.action && op.indexTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}
@@ -379,13 +379,13 @@ func RenameSubTreeQueue(tree *parse.Tree) {
 	operationQueue = append(operationQueue, newOp)
 }
 
-func RemoveTreeQueue(box, rootID string) {
+func RemoveTreeQueue(rootID string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{removeTreeIDBox: box, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
+	newOp := &dbQueueOperation{removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
 	for i, op := range operationQueue {
-		if "delete_id" == op.action && op.removeTreeIDBox == box && op.removeTreeID == rootID {
+		if "delete_id" == op.action && op.removeTreeID == rootID {
 			operationQueue[i] = newOp
 			return
 		}

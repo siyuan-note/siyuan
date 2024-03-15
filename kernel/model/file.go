@@ -1257,8 +1257,12 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 		}
 	}
 
-	// A progress layer appears when moving more than 16 documents at once https://github.com/siyuan-note/siyuan/issues/9356
-	needShowProgress := 16 < len(fromPaths)
+	// A progress layer appears when moving more than 64 documents at once https://github.com/siyuan-note/siyuan/issues/9356
+	subDocsCount := 0
+	for fromPath, fromBox := range pathsBoxes {
+		subDocsCount += countSubDocs(fromBox.ID, fromPath)
+	}
+	needShowProgress := 64 < subDocsCount
 	if needShowProgress {
 		defer util.PushClearProgress()
 	}
@@ -1279,6 +1283,23 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 	}
 	cache.ClearDocsIAL()
 	IncSync()
+	return
+}
+
+func countSubDocs(box, p string) (ret int) {
+	p = strings.TrimSuffix(p, ".sy")
+	_ = filepath.Walk(filepath.Join(util.DataDir, box, p), func(path string, info os.FileInfo, err error) error {
+		if nil != err {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(path, ".sy") {
+			ret++
+		}
+		return nil
+	})
 	return
 }
 

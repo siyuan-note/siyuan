@@ -44,19 +44,11 @@ func (value *Value) Compare(other *Value) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
-			ret := strings.Compare(value.Block.Content, other.Block.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.Block.Content, other.Block.Content)
 		}
 	case KeyTypeText:
 		if nil != value.Text && nil != other.Text {
-			ret := strings.Compare(value.Text.Content, other.Text.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.Text.Content, other.Text.Content)
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other.Number {
@@ -67,16 +59,16 @@ func (value *Value) Compare(other *Value) int {
 
 				if value.Number.Content > other.Number.Content {
 					return 1
-				} else if value.Number.Content < other.Number.Content {
-					return -1
-				} else {
-					return int(value.CreatedAt - other.CreatedAt)
 				}
+				if value.Number.Content < other.Number.Content {
+					return -1
+				}
+				return 0
 			} else {
 				if other.Number.IsNotEmpty {
 					return -1
 				}
-				return int(value.CreatedAt - other.CreatedAt)
+				return 0
 			}
 		}
 	case KeyTypeDate:
@@ -87,37 +79,37 @@ func (value *Value) Compare(other *Value) int {
 				}
 				if value.Date.Content > other.Date.Content {
 					return 1
-				} else if value.Date.Content < other.Date.Content {
-					return -1
-				} else {
-					return int(value.CreatedAt - other.CreatedAt)
 				}
+				if value.Date.Content < other.Date.Content {
+					return -1
+				}
+				return 0
 			} else {
 				if other.Date.IsNotEmpty {
 					return -1
 				}
-				return int(value.CreatedAt - other.CreatedAt)
+				return 0
 			}
 		}
 	case KeyTypeCreated:
 		if nil != value.Created && nil != other.Created {
 			if value.Created.Content > other.Created.Content {
 				return 1
-			} else if value.Created.Content < other.Created.Content {
-				return -1
-			} else {
-				return int(value.CreatedAt - other.CreatedAt)
 			}
+			if value.Created.Content < other.Created.Content {
+				return -1
+			}
+			return 0
 		}
 	case KeyTypeUpdated:
 		if nil != value.Updated && nil != other.Updated {
 			if value.Updated.Content > other.Updated.Content {
 				return 1
-			} else if value.Updated.Content < other.Updated.Content {
-				return -1
-			} else {
-				return int(value.CreatedAt - other.CreatedAt)
 			}
+			if value.Updated.Content < other.Updated.Content {
+				return -1
+			}
+			return 0
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect && nil != other.MSelect {
@@ -129,35 +121,19 @@ func (value *Value) Compare(other *Value) int {
 			for _, v := range other.MSelect {
 				v2 += v.Content
 			}
-			ret := strings.Compare(v1, v2)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(v1, v2)
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {
-			ret := strings.Compare(value.URL.Content, other.URL.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.URL.Content, other.URL.Content)
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other.Email {
-			ret := strings.Compare(value.Email.Content, other.Email.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.Email.Content, other.Email.Content)
 		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other.Phone {
-			ret := strings.Compare(value.Phone.Content, other.Phone.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.Phone.Content, other.Phone.Content)
 		}
 	case KeyTypeMAsset:
 		if nil != value.MAsset && nil != other.MAsset {
@@ -169,11 +145,7 @@ func (value *Value) Compare(other *Value) int {
 			for _, v := range other.MAsset {
 				v2 += v.Content
 			}
-			ret := strings.Compare(v1, v2)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(v1, v2)
 		}
 	case KeyTypeTemplate:
 		if nil != value.Template && nil != other.Template {
@@ -188,13 +160,9 @@ func (value *Value) Compare(other *Value) int {
 				if v1 < v2 {
 					return -1
 				}
-				return int(value.CreatedAt - other.CreatedAt)
+				return 0
 			}
-			ret := strings.Compare(value.Template.Content, other.Template.Content)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(value.Template.Content, other.Template.Content)
 		}
 	case KeyTypeCheckbox:
 		if nil != value.Checkbox && nil != other.Checkbox {
@@ -204,7 +172,7 @@ func (value *Value) Compare(other *Value) int {
 			if !value.Checkbox.Checked && other.Checkbox.Checked {
 				return -1
 			}
-			return int(value.CreatedAt - other.CreatedAt)
+			return 0
 		}
 	case KeyTypeRelation:
 		if nil != value.Relation && nil != other.Relation {
@@ -231,13 +199,9 @@ func (value *Value) Compare(other *Value) int {
 				if v1 < v2 {
 					return -1
 				}
-				return int(value.CreatedAt - other.CreatedAt)
+				return 0
 			}
-			ret := strings.Compare(vContent, oContent)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(vContent, oContent)
 		}
 	case KeyTypeRollup:
 		if nil != value.Rollup && nil != other.Rollup {
@@ -263,14 +227,10 @@ func (value *Value) Compare(other *Value) int {
 				if v1 < v2 {
 					return -1
 				}
-				return int(value.CreatedAt - other.CreatedAt)
+				return 0
 			}
-			ret := strings.Compare(vContent, oContent)
-			if 0 == ret {
-				ret = int(value.CreatedAt - other.CreatedAt)
-			}
-			return ret
+			return strings.Compare(vContent, oContent)
 		}
 	}
-	return int(value.CreatedAt - other.CreatedAt)
+	return 0
 }

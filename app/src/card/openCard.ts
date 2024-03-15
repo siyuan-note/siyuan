@@ -29,14 +29,14 @@ const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let oldIndex = 0;
     cardsData.cards.forEach((item, index) => {
         if (index > allIndex) {
-            return
+            return;
         }
         if (item.state === 0) {
             newIndex++;
         } else {
             oldIndex++;
         }
-    })
+    });
     return `<span class="ariaLabel" aria-label="${window.siyuan.languages.flashcardNewCard}">
     <span class="ft__error">${newIndex}</span> /
     <span class="ariaLabel ft__primary" aria-label="${window.siyuan.languages.flashcardNewCard}">${cardsData.unreviewedNewCardCount}</span>
@@ -238,7 +238,7 @@ export const bindCardEvent = async (options: {
     options.element.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
-        const currentCard = options.cardsData.cards[index]
+        const currentCard = options.cardsData.cards[index];
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
                 type = "1";
@@ -282,14 +282,14 @@ export const bindCardEvent = async (options: {
                     click() {
 
                     }
-                })
+                });
                 menu.addItem({
                     icon: "iconRefresh",
                     label: window.siyuan.languages.reset,
                     click() {
 
                     }
-                })
+                });
                 menu.addItem({
                     icon: "iconTrashcan",
                     label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
@@ -310,8 +310,8 @@ export const bindCardEvent = async (options: {
                         options.cardsData.cards.splice(index, 1);
                         index--;
                     }
-                })
-                menu.addSeparator()
+                });
+                menu.addSeparator();
                 menu.addItem({
                     iconHTML: "",
                     type: "readonly",
@@ -335,7 +335,7 @@ export const bindCardEvent = async (options: {
     <div class="fn__space"></div>
     <div class="${window.siyuan.languages.cardStatus === 0 ? "ft__primary" : "ft__success"}">${window.siyuan.languages.cardStatus === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
 </div>`,
-                })
+                });
                 const rect = target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,

@@ -393,7 +393,9 @@ func moveTree(tree *parse.Tree) {
 		tree.Root.RemoveIALAttr("custom-hidden")
 		filesys.WriteTree(tree)
 	}
-	sql.UpsertTreeQueue(tree)
+
+	sql.RemoveTreeQueue(tree.ID)
+	sql.IndexTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)
 	box.renameSubTrees(tree)

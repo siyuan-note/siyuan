@@ -27,6 +27,7 @@ import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
+import * as dayjs from "dayjs";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -847,11 +848,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             avID,
                             previousID,
                             id: gutterTypes[2],
+                            blockID: blockElement.dataset.nodeId,
                         }], [{
                             action: "sortAttrViewCol",
                             avID,
                             previousID: oldPreviousID,
                             id: gutterTypes[2],
+                            blockID: blockElement.dataset.nodeId,
                         }]);
                     }
                 } else if (targetElement.classList.contains("av__row")) {
@@ -876,27 +879,40 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     avID,
                                     previousID,
                                     id: item,
+                                    blockID: blockElement.dataset.nodeId,
                                 });
                                 undoOperations.push({
                                     action: "sortAttrViewRow",
                                     avID,
                                     previousID: undoPreviousId,
                                     id: item,
+                                    blockID: blockElement.dataset.nodeId,
                                 });
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
+                            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcIDs: sourceIds,
                                 isDetached: false,
+                                blockID: blockElement.dataset.nodeId
+                            }, {
+                                action: "doUpdateUpdated",
+                                id: blockElement.dataset.nodeId,
+                                data: newUpdated,
                             }], [{
                                 action: "removeAttrViewBlock",
                                 srcIDs: sourceIds,
                                 avID,
+                            }, {
+                                action: "doUpdateUpdated",
+                                id: blockElement.dataset.nodeId,
+                                data: blockElement.getAttribute("updated")
                             }]);
+                            blockElement.setAttribute("updated", newUpdated);
                             insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
                         }
                     }
@@ -946,18 +962,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                     }
                     const avID = blockElement.getAttribute("data-av-id");
+                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
                         previousID,
                         srcIDs: ids,
                         isDetached: false,
+                        blockID: blockElement.dataset.nodeId,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockElement.dataset.nodeId,
+                        data: newUpdated,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: ids,
                         avID,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockElement.dataset.nodeId,
+                        data: blockElement.getAttribute("updated")
                     }]);
                     insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                    blockElement.setAttribute("updated", newUpdated);
                 }
             } else {
                 for (let i = 0; i < ids.length; i++) {

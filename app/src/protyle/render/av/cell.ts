@@ -69,9 +69,22 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
         };
     } else if (colType === "relation") {
+        const blockIDs: string[] = [];
+        const contents: IAVCellValue[] = [];
+        Array.from(cellElement.querySelectorAll("span")).forEach((item: HTMLElement) => {
+            blockIDs.push(item.dataset.id);
+            contents.push({
+                isDetached: !item.classList.contains("av__celltext--ref"),
+                block: {
+                    content: item.textContent,
+                    id: item.dataset.id,
+                },
+                type: "block"
+            });
+        });
         cellValue.relation = {
-            blockIDs: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.getAttribute("data-id")),
-            contents: Array.from(cellElement.querySelectorAll("span")).map((item: HTMLElement) => item.textContent),
+            blockIDs,
+            contents
         };
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = [];
@@ -145,7 +158,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
-                relation: {blockIDs: [], contents: [value]}
+                relation: {blockIDs: [value], contents: []}
             };
         }
     } else if (typeof value === "undefined" || !value) {
@@ -192,6 +205,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 relation: {blockIDs: [], contents: []}
+            };
+        } else if (colType === "rollup") {
+            cellValue = {
+                type: colType,
+                rollup: {contents: []}
             };
         }
     }
@@ -335,7 +353,10 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         inputElement.select();
         inputElement.focus();
         if (type === "template") {
-            fetchPost("/api/av/renderAttributeView", {id: blockElement.dataset.avId}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {
+                id: blockElement.dataset.avId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+            }, (response) => {
                 response.data.view.columns.find((item: IAVColumn) => {
                     if (item.id === cellElements[0].dataset.colId) {
                         inputElement.value = item.template;
@@ -408,7 +429,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (type === "template") {
         const colId = cellElements[0].getAttribute("data-col-id");
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-        if (textElement.value !== textElement.dataset.template) {
+        if (textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
             transaction(protyle, [{
                 action: "updateAttrViewColTemplate",
                 id: colId,
@@ -422,13 +443,15 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
                 data: textElement.dataset.template,
                 type: "template",
             }]);
+            blockElement.setAttribute("data-loading", "true");
         }
     } else {
         updateCellsValue(protyle, blockElement, type === "checkbox" ? {
             checked: cellElements[0].querySelector("use").getAttribute("xlink:href") === "#iconUncheck"
         } : (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value, cellElements);
     }
-    if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
+    if (cellElements[0] // 兼容新增行后台隐藏
+        && !hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
     }
     //  单元格编辑中 ctrl+p 光标定位
@@ -469,6 +492,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
         if (!nodeElement.contains(item)) {
             item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+        }
+        if (!item) {
+            // 兼容新增行后台隐藏
+            return;
         }
         const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template", "rollup"].includes(type)) {
@@ -581,7 +608,7 @@ export const renderCell = (cellValue: IAVCellValue) => {
 <span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || "Untitled"}</span>
-<span class="b3-chip b3-chip--info b3-chip--small popover__block" data-id="${cellValue.block.id}" data-type="block-more">${window.siyuan.languages.update}</span>`;
+<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
@@ -627,9 +654,14 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text = text.substring(0, text.length - 2);
         }
     } else if (cellValue.type === "relation") {
-        cellValue?.relation?.contents?.forEach((item, index) => {
-            text += `<span class="av__celltext--ref" style="margin-right: 8px" data-id="${cellValue?.relation?.blockIDs[index]}">${item || "Untitled"}</span>`;
+        cellValue?.relation?.contents?.forEach((item) => {
+            if (item && item.block) {
+                text += renderRollup(item) + ", ";
+            }
         });
+        if (text && text.endsWith(", ")) {
+            text = text.substring(0, text.length - 2);
+        }
     }
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
         cellValue && cellValue[cellValue.type as "url"].content) {
@@ -653,7 +685,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block?.content || ""}</span>`;
+            text = `<span class="av__celltext" data-id="${cellValue.block?.id}">${cellValue.block?.content || "Untitled"}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || "Untitled"}</span>`;
         }

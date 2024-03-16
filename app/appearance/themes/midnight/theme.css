@@ -1,12 +1,12 @@
 :root {
     /* 主色 */
     --b3-theme-primary: #3573f0;
-    --b3-theme-primary-light: rgba(53, 115, 240, 0.72);
-    --b3-theme-primary-lighter: rgba(53, 115, 240, 0.48);
-    --b3-theme-primary-lightest: rgba(53, 115, 240, 0.24);
+    --b3-theme-primary-light: rgba(53, 115, 240, .72);
+    --b3-theme-primary-lighter: rgba(53, 115, 240, .48);
+    --b3-theme-primary-lightest: rgba(53, 115, 240, .24);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #1e1e1e;
-    --b3-theme-background-light: rgba(255, 255, 255, 0.075);
+    --b3-theme-background-light: rgba(255, 255, 255, .075);
     --b3-theme-surface: #262626;
     --b3-theme-surface-light: rgba(41, 42, 45, .86);
     --b3-theme-surface-lighter: rgba(230, 230, 230, .06);
@@ -64,7 +64,7 @@
     --b3-empty-color: var(--b3-theme-on-surface);
 
     /* 遮罩 */
-    --b3-mask-background: rgba(10, 10, 10, 0.4);
+    --b3-mask-background: rgba(10, 10, 10, .4);
 
     /* 卡片背景 */
     --b3-card-error-color: rgb(243, 153, 147);
@@ -113,9 +113,9 @@
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
 
     /* 阴影 */
-    --b3-point-shadow: inset 0 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.09), 0 3px 6px rgba(0, 0, 0, .04), 0 0 0 0 transparent;
+    --b3-point-shadow: inset 0 .5px .5px .5px rgba(255, 255, 255, .09), 0 3px 6px rgba(0, 0, 0, .04), 0 0 0 0 transparent;
     --b3-dialog-shadow: 0 8px 24px #010409;
-    --b3-button-shadow: 0px 5px 5px -3px rgb(0 0 0 / 0.2), 0px 8px 10px 1px rgb(0 0 0 / 0.14), 0px 3px 14px 2px rgb(0 0 0 / 0.12);
+    --b3-button-shadow: 0 5px 5px -3px rgb(0 0 0 / .2), 0 8px 10px 1px rgb(0 0 0 / .14), 0 3px 14px 2px rgb(0 0 0 / .12);
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;

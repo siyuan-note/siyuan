@@ -12,7 +12,7 @@ export class Dialog {
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
-    public editor: Protyle;
+    public editors: { [key: string]: Protyle };
     public data: any;
 
     constructor(options: {
@@ -99,6 +99,8 @@ export class Dialog {
                 return true;
             }
         });
+        // https://github.com/siyuan-note/siyuan/issues/10475
+        document.getElementById("drag")?.classList.remove("fn__hidden");
     }
 
     public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void, bindEnter = true) {

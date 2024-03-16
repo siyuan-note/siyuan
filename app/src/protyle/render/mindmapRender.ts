@@ -27,12 +27,13 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 });
             }
         }
+        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         mindmapElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                e.insertAdjacentHTML("afterbegin", genIconHTML());
+                e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {

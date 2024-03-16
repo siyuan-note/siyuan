@@ -301,6 +301,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
     const assetsElement = document.querySelector("#searchAssetsPanel");
+    const unRefElement = document.querySelector("#searchUnRefPanel");
     const searchListElement = element.querySelector("#searchList") as HTMLElement;
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     element.addEventListener("click", (event: MouseEvent) => {
@@ -510,6 +511,32 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "refreshUnRef") {
+                getUnRefListMobile(unRefElement);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "unRefPrevious") {
+                if (!target.getAttribute("disabled")) {
+                    let currentPage = parseInt(unRefElement.querySelector("#searchUnRefResult").lastElementChild.textContent);
+                    if (currentPage > 1) {
+                        currentPage--;
+                        getUnRefListMobile(unRefElement, currentPage);
+                    }
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "unRefNext") {
+                const unRefRageElement = unRefElement.querySelector("#searchUnRefResult").lastElementChild;
+                let currentPage = parseInt(unRefRageElement.textContent);
+                if (currentPage < parseInt(unRefRageElement.textContent.split("/")[1])) {
+                    currentPage++;
+                    getUnRefListMobile(unRefElement, currentPage);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "queryAsset") {
                 assetMethodMenu(target, () => {
                     assetInputEvent(assetsElement, localSearch);
@@ -538,6 +565,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "goSearch") {
                 assetsElement.classList.add("fn__none");
+                unRefElement.classList.add("fn__none");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -682,6 +710,22 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
             <span class="fn__flex-1"></span>
          </div>
     </div>
+     <div class="fn__none fn__flex-column" style="position: fixed;top: 0;width: 100%;background: var(--b3-theme-surface);height: 100%;" id="searchUnRefPanel">
+        <div class="toolbar">
+            <span class="fn__space"></span>
+            <span id="searchUnRefResult" class="fn__flex-1 fn__flex"></span>
+            <span class="fn__space"></span>
+            <svg data-type="unRefPrevious" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
+            <svg data-type="unRefNext" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
+        </div>
+        <div id="searchUnRefList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
+        <div class="toolbar">
+            <span class="fn__flex-1"></span>
+            <svg data-type="refreshUnRef" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
+            <svg data-type="goSearch" class="toolbar__icon"><use xlink:href="#iconBack"></use></svg>
+            <span class="fn__flex-1"></span>
+         </div>
+    </div>
      <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
@@ -723,5 +767,54 @@ const goAsset = () => {
         clearCB() {
             assetInputEvent(assetsElement, localSearch);
         }
+    });
+};
+
+export const goUnRef = () => {
+    window.siyuan.menus.menu.remove();
+    const unRefElement = document.querySelector("#searchUnRefPanel");
+    unRefElement.classList.remove("fn__none");
+    const listElement = unRefElement.querySelector("#searchUnRefList");
+    if (listElement.innerHTML) {
+        return;
+    }
+    getUnRefListMobile(unRefElement);
+};
+
+const getUnRefListMobile = (element: Element, page = 1) => {
+    const previousElement = element.querySelector('[data-type="unRefPrevious"]');
+    if (page > 1) {
+        previousElement.removeAttribute("disabled");
+    } else {
+        previousElement.setAttribute("disabled", "disabled");
+    }
+    fetchPost("/api/search/listInvalidBlockRefs", {
+        page,
+    }, (response) => {
+        element.parentElement.querySelector(".fn__loading--top").classList.add("fn__none");
+        const nextElement = element.querySelector('[data-type="unRefNext"]');
+        if (page < response.data.pageCount) {
+            nextElement.removeAttribute("disabled");
+        } else {
+            nextElement.setAttribute("disabled", "disabled");
+        }
+        let resultHTML = "";
+        response.data.blocks.forEach((item: IBlock, index: number) => {
+            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
+<div class="b3-list-item__first">
+    <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
+    ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
+    <span class="b3-list-item__text">${item.content}</span>
+</div>
+<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+</div>`;
+        });
+        element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>
+<span class="fn__flex-1"></span>
+<span class="fn__flex-center">${page}/${response.data.pageCount || 1}</span>`;
+        element.querySelector("#searchUnRefList").innerHTML = resultHTML || `<div class="search__empty">
+    ${window.siyuan.languages.emptyContent}
+</div>`;
     });
 };

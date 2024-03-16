@@ -12,6 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
+import {isInAndroid} from "../../protyle/util/compatibility";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -194,6 +195,16 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
     protyle.hint.lastIndex = -1;
+    let pluginHTML = "";
+    protyle.app.plugins.forEach((plugin) => {
+        plugin.protyleSlash.forEach(slash => {
+            pluginHTML += getSlashItem(`plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
+                "", slash.html, "true");
+        });
+    });
+    if (pluginHTML) {
+        pluginHTML = `<div class="keyboard__slash-title"></div><div class="keyboard__slash-block">${pluginHTML}</div>`;
+    }
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
@@ -205,6 +216,16 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", "AI Chat")}
     ${getSlashItem('<div data-type="NodeAttributeView" data-av-type="table"></div>', "iconDatabase", window.siyuan.languages.database, "true")}
     ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newSubDoc)}
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
+    ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
+    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
+    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
+    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
+    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
+    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
@@ -226,29 +247,6 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
-    ${getSlashItem("a", "iconLink", window.siyuan.languages.link)}
-    ${getSlashItem("strong", "iconBold", window.siyuan.languages.bold, "true")}
-    ${getSlashItem("em", "iconItalic", window.siyuan.languages.italic, "true")}
-    ${getSlashItem("u", "iconUnderline", window.siyuan.languages.underline, "true")}
-    ${getSlashItem("s", "iconStrike", window.siyuan.languages.strike, "true")}
-    ${getSlashItem("mark", "iconMark", window.siyuan.languages.mark, "true")}
-    ${getSlashItem("sup", "iconSup", window.siyuan.languages.sup, "true")}
-    ${getSlashItem("sub", "iconSub", window.siyuan.languages.sub, "true")}
-    ${getSlashItem("tag", "iconTags", window.siyuan.languages.tag, "true")}
-    ${getSlashItem("code", "iconInlineCode", window.siyuan.languages["inline-code"], "true")}
-    ${getSlashItem("inline-math", "iconMath", window.siyuan.languages["inline-math"])}
-</div>
-<div class="keyboard__slash-title"></div>
-<div class="keyboard__slash-block">
-    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
-    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
-    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
-    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
-    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
-</div>
-<div class="keyboard__slash-title"></div>
-<div class="keyboard__slash-block">
     ${getSlashItem("```abc\n```", "", window.siyuan.languages.staff, "true")}
     ${getSlashItem("```echarts\n```", "", window.siyuan.languages.chart, "true")}
     ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
@@ -264,7 +262,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);`, '<div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.warningStyle, "true")}
     ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);`, '<div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.errorStyle, "true")}
     ${getSlashItem(`style${Constants.ZWSP}`, '<div class="keyboard__slash-icon">A</div>', window.siyuan.languages.clearFontStyle, "true")}
-</div>`;
+</div>${pluginHTML}`;
     protyle.hint.bindUploadEvent(protyle, utilElement);
 };
 

@@ -3,7 +3,7 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByMatchTag,
-    hasClosestByTag
+    hasClosestByTag, hasTopClosestByClassName
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
@@ -225,18 +225,29 @@ export class Gutter {
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
+                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
                         previousID,
                         srcIDs,
                         isDetached: true,
+                        blockID: id,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id,
+                        data: newUpdated,
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs,
                         avID,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id,
+                        data: blockElement.getAttribute("updated")
                     }]);
                     insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    blockElement.setAttribute("updated", newUpdated);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
@@ -312,7 +323,8 @@ export class Gutter {
                     window.siyuan.menus.menu.fullscreen();
                 } else {
                     window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
-                    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+                    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+                    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                     focusByRange(protyle.toolbar.range);
                 }
             }
@@ -343,7 +355,8 @@ export class Gutter {
                 } else if (buttonElement.dataset.type !== "NodeAttributeViewRow") {
                     this.renderMenu(protyle, buttonElement);
                     window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
-                    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+                    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+                    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                 }
             }
             event.preventDefault();
@@ -711,7 +724,14 @@ export class Gutter {
             }
         }
         if (!protyle.disabled) {
-            AIActions(selectsElement, protyle);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconSparkles",
+                label: window.siyuan.languages.ai,
+                accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
+                click() {
+                    AIActions(selectsElement, protyle);
+                }
+            }).element);
         }
         const copyMenu: IMenu[] = [{
             label: window.siyuan.languages.copy,
@@ -769,7 +789,7 @@ export class Gutter {
                     });
                     writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "remove");
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                     document.execCommand("cut");
@@ -788,9 +808,10 @@ export class Gutter {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.addToDatabase,
+            accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                openSearchAV("", this.element, (listItemElement) => {
+                openSearchAV("", selectsElement[0] as HTMLElement, (listItemElement) => {
                     const sourceIds: string[] = [];
                     selectsElement.forEach(item => {
                         sourceIds.push(item.getAttribute("data-node-id"));
@@ -800,7 +821,13 @@ export class Gutter {
                         action: "insertAttrViewBlock",
                         avID,
                         srcIDs: sourceIds,
+                        ignoreFillFilter: true,
                         isDetached: false,
+                        blockID: listItemElement.dataset.blockId
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: listItemElement.dataset.blockId,
+                        data: dayjs().format("YYYYMMDDHHmmss"),
                     }], [{
                         action: "removeAttrViewBlock",
                         srcIDs: sourceIds,
@@ -815,7 +842,7 @@ export class Gutter {
             accelerator: "⌫",
             click: () => {
                 protyle.breadcrumb?.hide();
-                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
             }
         }).element);
 
@@ -1171,7 +1198,14 @@ export class Gutter {
             }).element);
         }
         if (!protyle.disabled && !nodeElement.classList.contains("hr")) {
-            AIActions([nodeElement], protyle);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconSparkles",
+                label: window.siyuan.languages.ai,
+                accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
+                click() {
+                    AIActions([nodeElement], protyle);
+                }
+            }).element);
         }
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
             label: window.siyuan.languages.copy,
@@ -1220,7 +1254,7 @@ export class Gutter {
                 click: () => {
                     if (isNotEditBlock(nodeElement)) {
                         writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
-                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "remove");
                         protyle.breadcrumb?.hide();
                     } else {
                         focusByRange(getEditorRange(nodeElement));
@@ -1240,16 +1274,23 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
+                accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
-                    openSearchAV("", this.element, (listItemElement) => {
-                        const sourceIds: string[] = [nodeElement.getAttribute("data-node-id")];
+                    openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {
+                        const sourceIds: string[] = [id];
                         const avID = listItemElement.dataset.avId;
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
                             srcIDs: sourceIds,
+                            ignoreFillFilter: true,
                             isDetached: false,
+                            blockID: listItemElement.dataset.blockId
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.blockId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,
@@ -1264,7 +1305,7 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "Backspace");
                 }
             }).element);
         }
@@ -1406,7 +1447,8 @@ export class Gutter {
                 label: window.siyuan.languages.export + " CSV",
                 click() {
                     fetchPost("/api/export/exportAttributeView", {
-                        id: nodeElement.getAttribute("data-av-id")
+                        id: nodeElement.getAttribute("data-av-id"),
+                        blockID: id,
                     }, response => {
                         openByMobile(response.data.zip);
                     });
@@ -1703,7 +1745,7 @@ export class Gutter {
                     label: window.siyuan.languages.addToDeck,
                     icon: "iconRiffCard",
                     click() {
-                        makeCard(protyle.app, [nodeElement.getAttribute("data-node-id")]);
+                        makeCard(protyle.app, [id]);
                     }
                 }).element);
             }

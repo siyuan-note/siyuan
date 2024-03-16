@@ -221,7 +221,6 @@ func syncData(exit, byHand bool) {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
 		}
 	}
-
 	return
 }
 
@@ -308,7 +307,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 			util.PushStatusBar(msg)
 
 			treenode.RemoveBlockTreesByRootID(block.RootID)
-			sql.RemoveTreeQueue(block.BoxID, block.RootID)
+			sql.RemoveTreeQueue(block.RootID)
 		}
 	}
 

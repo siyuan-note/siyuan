@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -32,6 +34,107 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func listDocTree(c *gin.Context) {
+	// Add kernel API `/api/filetree/listDocTree` https://github.com/siyuan-note/siyuan/issues/10482
+
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	p := arg["path"].(string)
+	var doctree []*DocFile
+	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
+	dir, err := os.ReadDir(root)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ids := map[string]bool{}
+	for _, entry := range dir {
+		if entry.IsDir() {
+			if strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
+
+			if !ast.IsNodeIDPattern(entry.Name()) {
+				continue
+			}
+
+			parent := &DocFile{ID: entry.Name()}
+			ids[parent.ID] = true
+			doctree = append(doctree, parent)
+
+			subPath := filepath.Join(root, entry.Name())
+			if err = walkDocTree(subPath, parent, &ids); nil != err {
+				ret.Code = -1
+				ret.Msg = err.Error()
+				return
+			}
+		} else {
+			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
+			if !ids[doc.ID] {
+				doctree = append(doctree, doc)
+			}
+			ids[doc.ID] = true
+		}
+	}
+
+	ret.Data = map[string]interface{}{
+		"tree": doctree,
+	}
+}
+
+type DocFile struct {
+	ID       string     `json:"id"`
+	Children []*DocFile `json:"children,omitempty"`
+}
+
+func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
+	dir, err := os.ReadDir(p)
+	if nil != err {
+		return
+	}
+
+	for _, entry := range dir {
+		if entry.IsDir() {
+			if strings.HasPrefix(entry.Name(), ".") {
+				continue
+			}
+
+			if !ast.IsNodeIDPattern(entry.Name()) {
+				continue
+			}
+
+			parent := &DocFile{ID: entry.Name()}
+			(*ids)[parent.ID] = true
+			docFile.Children = append(docFile.Children, parent)
+
+			subPath := filepath.Join(p, entry.Name())
+			if err = walkDocTree(subPath, parent, ids); nil != err {
+				return
+			}
+		} else {
+			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
+			if !(*ids)[doc.ID] {
+				docFile.Children = append(docFile.Children, doc)
+			}
+			(*ids)[doc.ID] = true
+		}
+	}
+	return
+}
 
 func upsertIndexes(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -415,7 +518,7 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	tree, err := model.LoadTreeByID(id)
+	tree, err := model.LoadTreeByBlockID(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

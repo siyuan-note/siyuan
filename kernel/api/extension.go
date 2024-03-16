@@ -121,7 +121,7 @@ func extensionCopy(c *gin.Context) {
 		uploaded[oName] = "assets/" + fName
 	}
 
-	luteEngine := lute.New()
+	luteEngine := util.NewStdLute()
 	md := luteEngine.HTML2Md(dom)
 	md = strings.TrimSpace(md)
 

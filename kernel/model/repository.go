@@ -1019,17 +1019,18 @@ func syncRepoDownload() (err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo download failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatal) {
-		// 重置仓库并再次尝试同步
-		if _, resetErr := resetRepository(repo); nil == resetErr {
-			mergeResult, trafficStat, err = repo.SyncDownload(syncContext)
-		}
-	}
 	elapsed := time.Since(start)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
@@ -1089,17 +1090,18 @@ func syncRepoUpload() (err error) {
 	_, _, err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo upload failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	trafficStat, err := repo.SyncUpload(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatal) {
-		// 重置仓库并再次尝试同步
-		if _, resetErr := resetRepository(repo); nil == resetErr {
-			trafficStat, err = repo.SyncUpload(syncContext)
-		}
-	}
 	elapsed := time.Since(start)
 	if nil != err {
 		planSyncAfter(fixSyncInterval)
@@ -1165,6 +1167,13 @@ func bootSyncRepo() (err error) {
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		BootSyncSucc = 1
 		isBootSyncing.Store(false)
 		return
 	}
@@ -1172,10 +1181,17 @@ func bootSyncRepo() (err error) {
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatal) {
-		// 重置仓库并再次尝试同步
-		if _, resetErr := resetRepository(repo); nil == resetErr {
-			fetchedFiles, err = repo.GetSyncCloudFiles(syncContext)
-		}
+		autoSyncErrCount++
+		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		BootSyncSucc = 1
+		isBootSyncing.Store(false)
+		return
 	}
 
 	syncingFiles = sync.Map{}
@@ -1261,17 +1277,23 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	if nil != err {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
+		Conf.Sync.Stat = msg
+		Conf.Save()
+		util.PushStatusBar(msg)
+		if 1 > autoSyncErrCount || byHand {
+			util.PushErrMsg(msg, 0)
+		}
+		if exit {
+			ExitSyncSucc = 1
+		}
 		return
 	}
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatal) {
-		// 重置仓库并再次尝试同步
-		if _, resetErr := resetRepository(repo); nil == resetErr {
-			mergeResult, trafficStat, err = repo.Sync(syncContext)
-		}
-	}
 	elapsed := time.Since(start)
 	if nil != err {
 		autoSyncErrCount++
@@ -1453,8 +1475,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 
 		util.WaitForUILoaded()
-		util.BroadcastByType("main", "syncMergeResult", 0, "",
-			map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+
+		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
+			util.BroadcastByType("main", "syncMergeResult", 0, "",
+				map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+		}
 
 		time.Sleep(2 * time.Second)
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
@@ -1528,19 +1553,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
-	if errors.Is(err, dejavu.ErrNotFoundObject) {
-		var resetErr error
-		afterIndex, resetErr = resetRepository(repo)
-		if nil != resetErr {
-			return
-		}
-		err = nil
-	}
-
 	if nil != err {
-		msg := fmt.Sprintf(Conf.Language(140), formatRepoErrorMsg(err))
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 12000)
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}
@@ -1576,25 +1589,6 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 			}()
 		}
 	}
-	return
-}
-
-func resetRepository(repo *dejavu.Repo) (index *entity.Index, err error) {
-	logging.LogWarnf("data repo is corrupted, try to reset it")
-	err = os.RemoveAll(filepath.Join(repo.Path))
-	if nil != err {
-		logging.LogErrorf("remove data repo failed: %s", err)
-		return
-	}
-	index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
-		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
-	})
-	logging.LogWarnf("data repo has been reset")
-
-	go func() {
-		time.Sleep(5 * time.Second)
-		util.PushMsg(Conf.Language(105), 5000)
-	}()
 	return
 }
 

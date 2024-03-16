@@ -859,12 +859,16 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
+        const parentWnd = getWindowByContentId(event.sender.id);
+        // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
+        const width = parentWnd.getBounds().width * 0.8;
+        const height = parentWnd.getBounds().height * 0.8;
         const printWin = new BrowserWindow({
-            parent: getWindowByContentId(event.sender.id),
-            modal: true,
+            parent: parentWnd,
+            modal: false,
             show: true,
-            width: Math.floor(screen.getPrimaryDisplay().size.width * 0.8),
-            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
+            width: width,
+            height: height,
             resizable: false,
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
@@ -1217,9 +1221,13 @@ app.on("activate", () => {
     }
 });
 
-// 在编辑器内打开链接的处理，比如 iframe 上的打开链接。
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     contents.setWindowOpenHandler((details) => {
+        // https://github.com/siyuan-note/siyuan/issues/10567
+        if (details.url.startsWith("file:///") && details.disposition === "foreground-tab") {
+            return;
+        }
+        // 在编辑器内打开链接的处理，比如 iframe 上的打开链接。
         shell.openExternal(details.url);
         return {action: "deny"};
     });

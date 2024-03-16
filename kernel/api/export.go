@@ -43,7 +43,8 @@ func exportAttributeView(c *gin.Context) {
 	}
 
 	avID := arg["id"].(string)
-	zipPath, err := model.ExportAv2CSV(avID)
+	blockID := arg["blockID"].(string)
+	zipPath, err := model.ExportAv2CSV(avID, blockID)
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()

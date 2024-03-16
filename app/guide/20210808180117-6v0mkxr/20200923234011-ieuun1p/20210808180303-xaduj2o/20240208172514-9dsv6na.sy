@@ -628,59 +628,6 @@
 			},
 			"AttributeViewID": "20240208173528-oq4elsj",
 			"AttributeViewType": "table"
-		},
-		{
-			"ID": "20240208173718-rd3m292",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240208173718-rd3m292",
-				"updated": "20240208173725"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Limitations:"
-				}
-			]
-		},
-		{
-			"ID": "20240208173718-nfm0bmg",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20240208173718-nfm0bmg",
-				"updated": "20240208173738"
-			},
-			"Children": [
-				{
-					"ID": "20240208173718-02mf086",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240208173718-02mf086",
-						"updated": "20240208173738"
-					},
-					"Children": [
-						{
-							"ID": "20240208173718-glmn4sj",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240208173718-glmn4sj",
-								"updated": "20240208173738"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Templates do not support access to rollups and other templates"
-								}
-							]
-						}
-					]
-				}
-			]
 		}
 	]
 }

@@ -2,7 +2,7 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasClosestByMatchTag
+    hasClosestByMatchTag, hasTopClosestByClassName
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
@@ -294,7 +294,8 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     anchorElement.select();
     window.siyuan.menus.menu.removeCB = () => {
         if (nodeElement.outerHTML !== oldHTML) {
@@ -601,7 +602,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         window.siyuan.menus.menu.element.querySelector("input").select();
         window.siyuan.menus.menu.removeCB = () => {
@@ -726,7 +728,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             selectAll(protyle, nodeElement, range);
         }
     }).element);
-    if (nodeElement.classList.contains("table")) {
+    if (nodeElement.classList.contains("table") && !protyle.disabled) {
         const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
         if (cellElement) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -1080,7 +1082,8 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }
 
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
         textElements[0].focus();
@@ -1275,7 +1278,8 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         inputElements[1].select();
     } else {
@@ -1415,7 +1419,8 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         y: rect.top + 26,
         h: 26
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", hasClosestByClassName(protyle.element, "block__edit") ? "popover" : "app");
+    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 
@@ -1461,11 +1466,15 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                         page: "1",
                         high_quality: "1",
                         as_wide: "1",
-                        allowfullscreen: "true"
+                        allowfullscreen: "true",
+                        autoplay: "0"
                     };
                     // `//player.bilibili.com/player.html?aid=895154192&bvid=BV1NP4y1M72N&cid=562898119&page=1`
                     // `https://www.bilibili.com/video/BV1ys411472E?t=3.4&p=4`
                     new URL(value.startsWith("http") ? value : "https:" + value).search.split("&").forEach((item, index) => {
+                        if (!item) {
+                            return;
+                        }
                         if (index === 0) {
                             item = item.substr(1);
                         }

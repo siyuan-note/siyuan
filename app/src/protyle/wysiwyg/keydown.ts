@@ -14,7 +14,7 @@ import {
     hasClosestByMatchTag,
     hasTopClosestByAttribute
 } from "../util/hasClosest";
-import {removeBlock} from "./remove";
+import {removeBlock, removeImage} from "./remove";
 import {
     getContenteditableElement,
     getFirstBlock,
@@ -67,6 +67,7 @@ import {getSavePath, newFileBySelect} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {AIActions} from "../../ai/actions";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -84,7 +85,7 @@ export const getContentByInlineHTML = (range: Range, cb: (content: string) => vo
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
-        if (event.target.localName === "protyle-html") {
+        if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;
         }
@@ -726,7 +727,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
-                removeBlock(protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -766,11 +767,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (imgSelectElement) {
                 imgSelectElement.classList.remove("img--select");
                 if (nodeElement.contains(imgSelectElement)) {
-                    imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
-                    const oldHTML = nodeElement.outerHTML;
-                    imgSelectElement.remove();
-                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                    focusByWbr(nodeElement, range);
+                    removeImage(imgSelectElement, nodeElement, range, protyle);
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -779,7 +776,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const editElement = getContenteditableElement(nodeElement);
                 if (!editElement) {
                     nodeElement.classList.add("protyle-wysiwyg--select");
-                    removeBlock(protyle, nodeElement, range);
+                    removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -794,7 +791,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextRange) {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement) {
-                                    removeBlock(protyle, nextBlockElement, nextRange, true);
+                                    removeBlock(protyle, nextBlockElement, nextRange, "Delete");
                                 }
                             }
                             event.stopPropagation();
@@ -812,7 +809,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         range.startOffset === 0 ||
                         (currentNode && currentNode.nodeType === 3 && !hasPreviousSibling(currentNode) && currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
-                        removeBlock(protyle, nodeElement, range);
+                        removeBlock(protyle, nodeElement, range, "Backspace");
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -821,18 +818,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         nodeElement.getAttribute("data-type") === "NodeTable" &&
                         (range.startContainer as HTMLElement).children[range.startOffset - 1]?.tagName === "TABLE") {
                         nodeElement.classList.add("protyle-wysiwyg--select");
-                        removeBlock(protyle, nodeElement, range);
+                        removeBlock(protyle, nodeElement, range, "Backspace");
                         event.stopPropagation();
                         event.preventDefault();
                         return;
                     }
                     // 图片后为 br，在 br 后删除 https://github.com/siyuan-note/siyuan/issues/4963
                     if (currentNode && currentNode.nodeType !== 3 && currentNode.classList.contains("img")) {
-                        range.insertNode(document.createElement("wbr"));
-                        const oldHTML = nodeElement.outerHTML;
-                        currentNode.remove();
-                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                        focusByWbr(nodeElement, range);
+                        removeImage(currentNode, nodeElement, range, protyle);
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -856,7 +849,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     if (position.start === 1 && !inlineElement && editElement.textContent.startsWith(Constants.ZWSP)) {
                         setFirstNodeRange(editElement, range);
-                        removeBlock(protyle, nodeElement, range);
+                        removeBlock(protyle, nodeElement, range, "Backspace");
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -1409,6 +1402,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectsElement = [nodeElement];
             }
             duplicateBlock(selectsElement, protyle);
+            return;
+        }
+
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.ai.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectsElement.length === 0) {
+                selectsElement = [nodeElement];
+            }
+            AIActions(selectsElement, protyle);
             return;
         }
 

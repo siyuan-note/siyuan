@@ -341,6 +341,7 @@ export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTML
             fetchPost("/api/av/renderAttributeView", {
                 id: avID,
                 pageSize: parseInt(blockElement.getAttribute("data-page-size")) || undefined,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
             }, (response) => {
                 updateAssetCell({
                     protyle,

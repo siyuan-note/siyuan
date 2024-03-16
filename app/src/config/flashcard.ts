@@ -42,7 +42,19 @@ export const flashcard = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="deck" type="checkbox"${window.siyuan.config.flashcard.deck ? " checked" : ""}/>
-</label>`;
+</label>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.reviewMode}
+        <div class="b3-label__text">${window.siyuan.languages.reviewModeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select class="b3-select fn__flex-center fn__size200" id="reviewMode">
+      <option value="0" ${window.siyuan.config.flashcard.reviewMode === 0 ? "selected" : ""}>${window.siyuan.languages.reviewMode0}</option>
+      <option value="1" ${window.siyuan.config.flashcard.reviewMode === 1 ? "selected" : ""}>${window.siyuan.languages.reviewMode1}</option>
+      <option value="2" ${window.siyuan.config.flashcard.reviewMode === 2 ? "selected" : ""}>${window.siyuan.languages.reviewMode2}</option>
+    </select>    
+</div>`;
         /// #if MOBILE
         responsiveHTML = `${responsiveHTML}<div class="b3-label">
     ${window.siyuan.languages.flashcardNewCardLimit}
@@ -119,9 +131,10 @@ export const flashcard = {
         return responsiveHTML;
     },
     bindEvent: () => {
-        flashcard.element.querySelectorAll("input").forEach((item) => {
+        flashcard.element.querySelectorAll("input, select.b3-select").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setFlashcard", {
+                    reviewMode: parseInt((flashcard.element.querySelector("#reviewMode") as HTMLSelectElement).value),
                     newCardLimit: parseInt((flashcard.element.querySelector("#newCardLimit") as HTMLInputElement).value),
                     reviewCardLimit: parseInt((flashcard.element.querySelector("#reviewCardLimit") as HTMLInputElement).value),
                     mark: (flashcard.element.querySelector("#mark") as HTMLInputElement).checked,

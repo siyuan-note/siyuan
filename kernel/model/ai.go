@@ -92,7 +92,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 	if cloud {
 		gpt = &CloudGPT{}
 	} else {
-		gpt = &OpenAIGPT{c: util.NewOpenAIClient(Conf.AI.OpenAI.APIKey, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APIUserAgent)}
+		gpt = &OpenAIGPT{c: util.NewOpenAIClient(Conf.AI.OpenAI.APIKey, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APIUserAgent, Conf.AI.OpenAI.APIVersion, Conf.AI.OpenAI.APIProvider)}
 	}
 
 	buf := &bytes.Buffer{}
@@ -132,7 +132,7 @@ func getBlocksContent(ids []string) string {
 
 		var tree *parse.Tree
 		if tree = trees[bt.RootID]; nil == tree {
-			tree, _ = loadTreeByBlockID(bt.RootID)
+			tree, _ = LoadTreeByBlockID(bt.RootID)
 			if nil == tree {
 				continue
 			}

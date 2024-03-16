@@ -30,7 +30,7 @@ import (
 )
 
 func AutoSpace(rootID string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}

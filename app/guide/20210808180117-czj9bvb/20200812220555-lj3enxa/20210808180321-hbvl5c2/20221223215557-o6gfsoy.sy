@@ -6,7 +6,7 @@
 		"icon": "1f4f8",
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20240128112938"
+		"updated": "20240224103816"
 	},
 	"Children": [
 		{
@@ -535,7 +535,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240128110950-exhbssa",
-				"updated": "20240128111232"
+				"updated": "20240224103816"
 			},
 			"Children": [
 				{
@@ -572,7 +572,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "复习卡上限"
+					"TextMarkTextContent": "旧卡上限"
 				},
 				{
 					"Type": "NodeText",

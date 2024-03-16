@@ -17,12 +17,13 @@
     position: relative;
 
     &[custom-riff-decks] {
-      box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+      box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
     }
 
     [spellcheck] {
       word-break: break-word;
-      white-space: pre-wrap;
+      // https://github.com/siyuan-note/siyuan/issues/10483
+      white-space: break-spaces;
 
       &:focus {
         outline: none;
@@ -54,11 +55,11 @@
 
       .dragover {
         &__top:not(.av__row) {
-          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0px 1px 0 var(--b3-theme-primary-lighter) !important;
+          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
         }
 
         &__bottom:not(.av__row) {
-          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0px -1px 0 var(--b3-theme-primary-lighter) !important;
+          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0 -1px 0 var(--b3-theme-primary-lighter) !important;
         }
       }
     }
@@ -70,7 +71,7 @@
       &:before {
         content: "";
         position: absolute;
-        border-left: 0.5px solid var(--b3-theme-background-light);
+        border-left: .5px solid var(--b3-theme-background-light);
         left: 17px;
       }
 
@@ -243,6 +244,10 @@
     &.render-node {
       min-height: 32px;
 
+      &:hover > .protyle-icons {
+        opacity: .86;
+      }
+
       &[data-type="NodeBlockQueryEmbed"] {
         background-color: var(--b3-theme-surface);
         border-left: 1px dashed var(--b3-theme-surface-lighter);
@@ -285,7 +290,7 @@
         position: sticky;
         top: -1px;
         z-index: 2;
-        box-shadow: 0px -1px 0px var(--b3-theme-on-surface-light) inset;
+        box-shadow: 0 -1px 0 var(--b3-theme-on-surface-light) inset;
       }
     }
 
@@ -300,7 +305,7 @@
       }
 
       &--select {
-        filter: brightness(0.68);
+        filter: brightness(.68);
       }
 
       &--drag > span:after {
@@ -456,11 +461,11 @@
 
   .dragover {
     &__top:not(.av__row) {
-      box-shadow: 0 -4px 0 0px var(--b3-theme-primary-lighter) !important;
+      box-shadow: 0 -4px 0 0 var(--b3-theme-primary-lighter) !important;
     }
 
     &__bottom:not(.av__row) {
-      box-shadow: 0 4px 0 0px var(--b3-theme-primary-lighter) !important
+      box-shadow: 0 4px 0 0 var(--b3-theme-primary-lighter) !important
     }
   }
 
@@ -474,7 +479,7 @@
   }
 
   &--animate {
-    animation: scale 0.3s ease-in-out;
+    animation: scale .3s ease-in-out;
   }
 
   div[data-type="NodeMathBlock"] {
@@ -503,7 +508,7 @@
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include text-clamp(1);
-    opacity: 0.38;
+    opacity: .38;
     font-size: 16px;
     height: 26px;
     line-height: 26px;
@@ -552,6 +557,7 @@
 
       .protyle-action__language {
         opacity: .86;
+        user-select: none;
       }
 
       .protyle-action__copy,
@@ -567,7 +573,7 @@
 .protyle .protyle-wysiwyg {
   .li[data-subtype="o"] > .protyle-action,
   .li[data-subtype="u"] > .protyle-action,
-  &[contenteditable="true"] .li[data-subtype="t"] > .protyle-action {
+  &[data-readonly="false"] .li[data-subtype="t"] > .protyle-action {
     cursor: pointer;
 
     &:hover {
@@ -581,7 +587,7 @@
 }
 
 // 导出 html 不需要编辑样式
-.protyle-wysiwyg[contenteditable="true"] {
+.protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
   span[data-type~="tag"],
   span[data-type~="block-ref"],
@@ -611,19 +617,47 @@
 
       &:empty::after {
         content: "language";
-        opacity: 0.68;
+        opacity: .68;
       }
     }
   }
 
-  .img:hover .protyle-icons,
-  .render-node:hover > .protyle-icons,
-  .protyle-icons--show {
+  .img:hover .protyle-icons {
     opacity: .86;
   }
 
   .render-node .img:hover .protyle-icons,
   .render-node .render-node:hover > .protyle-icons {
-    opacity: 0;
+    display: none;
+  }
+}
+
+.protyle-wysiwyg:not([contenteditable]),
+.protyle-wysiwyg[data-readonly="true"] {
+  .img:hover .protyle-icons {
+    display: none;
+  }
+
+  .av {
+    .b3-chip[data-type="block-more"],
+    .av__row--util,
+    .av__row--header > .block__icons,
+    .av__views .fn__space,
+    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__widthdrag {
+      display: none;
+    }
+
+    .av__row--footer {
+      border-top-color: transparent;
+    }
+
+    .av__row > div:nth-last-child(-n + 2) {
+      border-right-color: transparent;
+    }
+
+    .av__row--footer:hover .av__calc:not(.av__calc--ashow) {
+      opacity: 0;
+    }
   }
 }

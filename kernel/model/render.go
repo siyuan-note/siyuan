@@ -188,7 +188,7 @@ func renderBlockMarkdownR0(id string, rendered *[]string) (ret []*ast.Node) {
 
 	var err error
 	var t *parse.Tree
-	if t, err = loadTreeByBlockID(b.ID); nil != err {
+	if t, err = LoadTreeByBlockID(b.ID); nil != err {
 		return
 	}
 	node := treenode.GetNodeInTree(t, b.ID)

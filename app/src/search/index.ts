@@ -8,7 +8,7 @@ import {App} from "../index";
 export class Search extends Model {
     public element: HTMLElement;
     public config: ISearchOption;
-    public edit: Protyle;
+    public editors: { edit: Protyle, unRefEdit: Protyle };
 
     constructor(options: { tab: Tab, config: ISearchOption, app: App }) {
         super({
@@ -20,7 +20,7 @@ export class Search extends Model {
         }
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
-        this.edit = genSearch(options.app, this.config, this.element);
+        this.editors = genSearch(options.app, this.config, this.element);
         this.element.addEventListener("click", () => {
             setPanelFocus(this.element.parentElement.parentElement);
         });

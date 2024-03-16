@@ -7,8 +7,9 @@ import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
-import {openMenuPanel} from "./openMenuPanel";
 import {renderAVAttribute} from "./blockAttr";
+import {showMessage} from "../../../dialog/message";
+import {addClearButton} from "../../../util/addClearButton";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -26,6 +27,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
+            const alignSelf = e.style.alignSelf;
             if (e.firstElementChild.innerHTML === "") {
                 e.style.alignSelf = "";
                 let html = "";
@@ -50,18 +52,22 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             }
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
-            let newViewID = "";
+            let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
             if (typeof viewID === "string") {
                 newViewID = viewID;
-            } else if (typeof viewID === "undefined") {
-                newViewID = e.querySelector(".av__header .item--focus")?.getAttribute("data-id");
+                fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
+                e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
             }
+            let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+            const isSearching = searchInputElement && document.activeElement.isSameNode(searchInputElement);
+            const query = searchInputElement?.value || "";
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
-                viewID: newViewID
+                viewID: newViewID,
+                query
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {
@@ -74,7 +80,16 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 let pinMaxIndex = -1;
                 let indexWidth = 0;
                 const eWidth = e.clientWidth;
+                let hasFilter = false;
                 data.columns.forEach((item, index) => {
+                    if (!hasFilter) {
+                        data.filters.find(filterItem => {
+                            if (filterItem.value.type === item.type && item.id === filterItem.column) {
+                                hasFilter = true;
+                                return true;
+                            }
+                        });
+                    }
                     if (!item.hidden) {
                         if (item.pin) {
                             pinIndex = index;
@@ -150,15 +165,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     tableHTML += "<div></div></div>";
                 });
                 let tabHTML = "";
+                let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
                     tabHTML += `<div data-id="${item.id}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
     <span class="item__text">${item.name}</span>
 </div>`;
+                    if (item.id === response.data.viewID) {
+                        viewData = item;
+                    }
                 });
+
                 e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
     <div class="av__header">
-        <div class="fn__flex av__views">
+        <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -170,15 +190,24 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
             <div class="fn__space"></div>
             <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
+                <span class="fn__space"></span>
+                <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${data.filters.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-filter" class="block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-sort" class="block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
+            <div class="fn__space"></div>
+            <span data-type="av-search-icon" class="block__icon">
+                <svg><use xlink:href="#iconSearch"></use></svg>
+            </span>
+            <div style="position: relative">
+                <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
+            </div>
             <div class="fn__space"></div>
             <span data-type="av-more" class="block__icon">
                 <svg><use xlink:href="#iconMore"></use></svg>
@@ -188,10 +217,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            ${response.data.isMirror ? ` <span class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
+            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
-        <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
+        <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " av__title--hide" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
@@ -223,7 +252,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 if (left) {
                     e.querySelector(".av__scroll").scrollLeft = left;
                 }
-
+                if (alignSelf) {
+                    e.style.alignSelf = alignSelf;
+                }
                 const editRect = protyle.contentElement.getBoundingClientRect();
                 if (headerTransform) {
                     (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
@@ -243,7 +274,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel")) {
+                    } else if (!document.querySelector(".av__panel") && !isSearching) {
                         focusBlock(e);
                     }
                 }
@@ -252,7 +283,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                     const range = getSelection().getRangeAt(0);
                     if (!hasClosestByClassName(range.startContainer, "av__title")) {
                         const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && e.isSameNode(blockElement)) {
+                        if (blockElement && e.isSameNode(blockElement) && !isSearching) {
                             focusBlock(e);
                         }
                     }
@@ -261,9 +292,63 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                 if (cb) {
                     cb();
                 }
+                const viewsElement = e.querySelector(".av__views") as HTMLElement;
+                searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+                searchInputElement.value = query;
+                if (isSearching) {
+                    searchInputElement.focus();
+                }
+                searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (searchInputElement.value) {
+                        viewsElement.classList.add("av__views--show");
+                    } else {
+                        viewsElement.classList.remove("av__views--show");
+                    }
+                    updateSearch(e, protyle);
+                });
+                searchInputElement.addEventListener("compositionend", () => {
+                    updateSearch(e, protyle);
+                });
+                searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (!searchInputElement.value) {
+                        viewsElement.classList.remove("av__views--show");
+                        searchInputElement.style.width = "0";
+                        searchInputElement.style.paddingLeft = "0";
+                        searchInputElement.style.paddingRight = "0";
+                    }
+                });
+                addClearButton({
+                    inputElement: searchInputElement,
+                    right: 0,
+                    height: searchInputElement.clientHeight,
+                    clearCB() {
+                        viewsElement.classList.remove("av__views--show");
+                        searchInputElement.style.width = "0";
+                        searchInputElement.style.paddingLeft = "0";
+                        searchInputElement.style.paddingRight = "0";
+                        focusBlock(e);
+                        updateSearch(e, protyle);
+                    }
+                });
             });
         });
     }
+};
+
+let searchTimeout: number;
+
+const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = window.setTimeout(() => {
+        e.removeAttribute("data-render");
+        avRender(e, protyle);
+    }, Constants.TIMEOUT_INPUT);
 };
 
 const refreshTimeouts: {
@@ -296,29 +381,21 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         } else {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
-                const isPulse = item.querySelector(".av__pulse");
+                const updateRow = item.querySelector('.av__row[data-need-update="true"]');
                 avRender(item, protyle, () => {
-                    if (operation.action === "addAttrViewCol" && isPulse) {
-                        openMenuPanel({protyle, blockElement: item, type: "edit", colId: operation.id});
-                    }
-
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
                     if (attrElement) {
                         // 更新属性面板
-                        renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle, (newElment) => {
-                            if (operation.action === "addAttrViewCol") {
-                                openMenuPanel({
-                                    protyle,
-                                    blockElement: newElment.querySelector(`div[data-av-id="${operation.avID}"]`),
-                                    type: "edit",
-                                    colId: operation.id
-                                });
-                            }
-                        });
+                        renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
+                    } else {
+                        if (operation.action === "insertAttrViewBlock" && updateRow && !item.querySelector(`.av__row[data-id="${updateRow.getAttribute("data-id")}"]`)) {
+                            showMessage(window.siyuan.languages.insertRowTip);
+                            document.querySelector(".av__mask")?.remove();
+                        }
                     }
-                }, ["addAttrViewView", "duplicateAttrViewView"].includes(operation.action) ? operation.id :
-                    (operation.action === "removeAttrViewView" ? null : undefined));
+                    item.removeAttribute("data-loading");
+                });
             });
         }
-    }, ["insertAttrViewBlock", "addAttrViewCol"].includes(operation.action) ? 2 : 100);
+    }, ["insertAttrViewBlock"].includes(operation.action) ? 2 : 100);
 };

@@ -38,7 +38,10 @@ export const ai = {
 <div class="b3-label">
     ${window.siyuan.languages.apiKey}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
+    <div class="b3-form__icona fn__block">
+        <input id="apiKey" type="password" class="b3-text-field b3-form__icona-input" value="${window.siyuan.config.ai.openAI.apiKey}">
+        <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
+    </div>
     <div class="b3-label__text">${window.siyuan.languages.apiKeyTip}</div>
 </div>
 <div class="b3-label">
@@ -52,6 +55,12 @@ export const ai = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
     <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.apiVersion}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="apiVersion" value="${window.siyuan.config.ai.openAI.apiVersion}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiVersionTip}</div>
 </div>
 <div class="b3-label">
     User-Agent
@@ -100,7 +109,10 @@ export const ai = {
         ${window.siyuan.languages.apiKey}
         <div class="b3-label__text">${window.siyuan.languages.apiKeyTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
+        <div class="b3-form__icona fn__block">
+            <input id="apiKey" type="password" class="b3-text-field b3-form__icona-input" value="${window.siyuan.config.ai.openAI.apiKey}">
+            <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
+        </div>
     </div>
 </div>
 <div class="fn__flex b3-label">
@@ -117,6 +129,14 @@ export const ai = {
         <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
         <span class="fn__hr"></span>
         <input class="b3-text-field fn__block" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__block">
+        ${window.siyuan.languages.apiVersion}
+        <div class="b3-label__text">${window.siyuan.languages.apiVersionTip}</div>
+        <span class="fn__hr"></span>
+        <input class="b3-text-field fn__block" id="apiVersion" value="${window.siyuan.config.ai.openAI.apiVersion}"/>
     </div>
 </div>
 <div class="fn__flex b3-label">
@@ -140,17 +160,25 @@ export const ai = {
 </div>`;
     },
     bindEvent: () => {
-        ai.element.querySelectorAll("input,select").forEach((item) => {
+        const togglePassword = ai.element.querySelector('.b3-form__icona-icon[data-action="togglePassword"]');
+        togglePassword.addEventListener("click", () => {
+            const isEye = togglePassword.firstElementChild.getAttribute("xlink:href") === "#iconEye";
+            togglePassword.firstElementChild.setAttribute("xlink:href", isEye ? "#iconEyeoff" : "#iconEye");
+            togglePassword.previousElementSibling.setAttribute("type", isEye ? "text" : "password");
+        });
+        ai.element.querySelectorAll("input, select").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setAI", {
                     openAI: {
                         apiUserAgent: (ai.element.querySelector("#apiUserAgent") as HTMLInputElement).value,
                         apiBaseURL: (ai.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
+                        apiVersion: (ai.element.querySelector("#apiVersion") as HTMLInputElement).value,
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
                         apiModel: (ai.element.querySelector("#apiModel") as HTMLSelectElement).value,
                         apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
                         apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
                         apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
+                        apiProvider: (ai.element.querySelector("#apiProvider") as HTMLSelectElement).value,
                     }
                 }, response => {
                     window.siyuan.config.ai = response.data;

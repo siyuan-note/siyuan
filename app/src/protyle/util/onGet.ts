@@ -296,8 +296,16 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll(".protyle-icons--show").forEach(item => {
         item.classList.remove("protyle-icons--show");
     });
+    protyle.wysiwyg.element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
+        item.classList.add("fn__none");
+        if (item.classList.contains("protyle-icon--first")) {
+            item.nextElementSibling?.classList.add("protyle-icon--first");
+        }
+    });
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
+    // 用于区分移动端样式
+    protyle.wysiwyg.element.setAttribute("data-readonly", "true");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
         item.setAttribute("contenteditable", "false");
     });
@@ -339,6 +347,8 @@ export const enableProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
         protyle.wysiwyg.element.style.userSelect = "";
     }
+    // 用于区分移动端样式
+    protyle.wysiwyg.element.setAttribute("data-readonly", "false");
     if (protyle.title) {
         const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
         titleElement.setAttribute("contenteditable", "true");
@@ -347,6 +357,13 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (protyle.background) {
         protyle.background.element.classList.add("protyle-background--enable");
     }
+
+    protyle.wysiwyg.element.querySelectorAll(".render-node .protyle-action__edit").forEach(item => {
+        item.classList.remove("fn__none");
+        if (item.classList.contains("protyle-icon--first")) {
+            item.nextElementSibling?.classList.remove("protyle-icon--first");
+        }
+    });
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
             item.setAttribute("contenteditable", "true");

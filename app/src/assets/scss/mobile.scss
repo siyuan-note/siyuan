@@ -45,7 +45,6 @@
   }
 
   .b3-list-item {
-
     font-size: 16px;
     line-height: 40px;
 
@@ -63,7 +62,7 @@
     }
 
     &__toggle {
-      height: 24px;
+      height: 32px;
       padding: 4px;
     }
 
@@ -126,7 +125,7 @@
     border-radius: var(--b3-border-radius);
 
     &[disabled] {
-      opacity: 0.38;
+      opacity: .38;
     }
 
     &--active,
@@ -168,7 +167,7 @@
   width: 100vw;
   z-index: 7;
   transform: translateX(-100vw);
-  transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
+  transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
   &--all {
     transform: translateY(-200vh);
@@ -229,7 +228,7 @@
       background-position: 50%;
       background-size: cover;
       border-radius: 90px;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, .8);
       box-shadow: var(--b3-point-shadow);
       border: 1px solid var(--b3-theme-surface-lighter);
     }
@@ -315,7 +314,7 @@
     }
 
     &[disabled] {
-      opacity: 0.38;
+      opacity: .38;
     }
 
     &.protyle-toolbar__item--current svg {
@@ -364,6 +363,8 @@
       box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface);
       border: 0;
       color: var(--b3-theme-on-background);
+      min-height: 50px;
+      text-align: left;
     }
 
     &-icon {
@@ -377,7 +378,6 @@
     }
 
     &-text {
-      line-height: 48px;
       margin-left: 6px;
     }
   }

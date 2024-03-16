@@ -16,6 +16,14 @@
 
 package av
 
+import (
+	"bytes"
+	"strconv"
+	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
 type Sortable interface {
 	SortRows()
 }
@@ -31,3 +39,198 @@ const (
 	SortOrderAsc  SortOrder = "ASC"
 	SortOrderDesc SortOrder = "DESC"
 )
+
+func (value *Value) Compare(other *Value) int {
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil != value.Block && nil != other.Block {
+			return strings.Compare(value.Block.Content, other.Block.Content)
+		}
+	case KeyTypeText:
+		if nil != value.Text && nil != other.Text {
+			return strings.Compare(value.Text.Content, other.Text.Content)
+		}
+	case KeyTypeNumber:
+		if nil != value.Number && nil != other.Number {
+			if value.Number.IsNotEmpty {
+				if !other.Number.IsNotEmpty {
+					return 1
+				}
+
+				if value.Number.Content > other.Number.Content {
+					return 1
+				}
+				if value.Number.Content < other.Number.Content {
+					return -1
+				}
+				return 0
+			} else {
+				if other.Number.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+		}
+	case KeyTypeDate:
+		if nil != value.Date && nil != other.Date {
+			if value.Date.IsNotEmpty {
+				if !other.Date.IsNotEmpty {
+					return 1
+				}
+				if value.Date.Content > other.Date.Content {
+					return 1
+				}
+				if value.Date.Content < other.Date.Content {
+					return -1
+				}
+				return 0
+			} else {
+				if other.Date.IsNotEmpty {
+					return -1
+				}
+				return 0
+			}
+		}
+	case KeyTypeCreated:
+		if nil != value.Created && nil != other.Created {
+			if value.Created.Content > other.Created.Content {
+				return 1
+			}
+			if value.Created.Content < other.Created.Content {
+				return -1
+			}
+			return 0
+		}
+	case KeyTypeUpdated:
+		if nil != value.Updated && nil != other.Updated {
+			if value.Updated.Content > other.Updated.Content {
+				return 1
+			}
+			if value.Updated.Content < other.Updated.Content {
+				return -1
+			}
+			return 0
+		}
+	case KeyTypeSelect, KeyTypeMSelect:
+		if nil != value.MSelect && nil != other.MSelect {
+			var v1 string
+			for _, v := range value.MSelect {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MSelect {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeURL:
+		if nil != value.URL && nil != other.URL {
+			return strings.Compare(value.URL.Content, other.URL.Content)
+		}
+	case KeyTypeEmail:
+		if nil != value.Email && nil != other.Email {
+			return strings.Compare(value.Email.Content, other.Email.Content)
+		}
+	case KeyTypePhone:
+		if nil != value.Phone && nil != other.Phone {
+			return strings.Compare(value.Phone.Content, other.Phone.Content)
+		}
+	case KeyTypeMAsset:
+		if nil != value.MAsset && nil != other.MAsset {
+			var v1 string
+			for _, v := range value.MAsset {
+				v1 += v.Content
+			}
+			var v2 string
+			for _, v := range other.MAsset {
+				v2 += v.Content
+			}
+			return strings.Compare(v1, v2)
+		}
+	case KeyTypeTemplate:
+		if nil != value.Template && nil != other.Template {
+			vContent := strings.TrimSpace(value.Template.Content)
+			oContent := strings.TrimSpace(other.Template.Content)
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
+				if v1 > v2 {
+					return 1
+				}
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
+			return strings.Compare(value.Template.Content, other.Template.Content)
+		}
+	case KeyTypeCheckbox:
+		if nil != value.Checkbox && nil != other.Checkbox {
+			if value.Checkbox.Checked && !other.Checkbox.Checked {
+				return 1
+			}
+			if !value.Checkbox.Checked && other.Checkbox.Checked {
+				return -1
+			}
+			return 0
+		}
+	case KeyTypeRelation:
+		if nil != value.Relation && nil != other.Relation {
+			vContentBuf := bytes.Buffer{}
+			for _, c := range value.Relation.Contents {
+				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteByte(' ')
+			}
+			vContent := strings.TrimSpace(vContentBuf.String())
+			oContentBuf := bytes.Buffer{}
+			for _, c := range other.Relation.Contents {
+				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteByte(' ')
+			}
+			oContent := strings.TrimSpace(oContentBuf.String())
+
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
+				if v1 > v2 {
+					return 1
+				}
+
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
+			return strings.Compare(vContent, oContent)
+		}
+	case KeyTypeRollup:
+		if nil != value.Rollup && nil != other.Rollup {
+			vContentBuf := bytes.Buffer{}
+			for _, c := range value.Rollup.Contents {
+				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteByte(' ')
+			}
+			vContent := strings.TrimSpace(vContentBuf.String())
+			oContentBuf := bytes.Buffer{}
+			for _, c := range other.Rollup.Contents {
+				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteByte(' ')
+			}
+			oContent := strings.TrimSpace(oContentBuf.String())
+
+			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
+				v1, _ := strconv.ParseFloat(vContent, 64)
+				v2, _ := strconv.ParseFloat(oContent, 64)
+				if v1 > v2 {
+					return 1
+				}
+				if v1 < v2 {
+					return -1
+				}
+				return 0
+			}
+			return strings.Compare(vContent, oContent)
+		}
+	}
+	return 0
+}

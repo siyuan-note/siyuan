@@ -10,7 +10,8 @@ export const addSort = (options: {
     menuElement: HTMLElement,
     tabRect: DOMRect,
     avId: string,
-    protyle: IProtyle
+    protyle: IProtyle,
+    blockID: string,
 }) => {
     const menu = new Menu("av-add-sort");
     options.data.view.columns.forEach((column) => {
@@ -34,14 +35,16 @@ export const addSort = (options: {
                     transaction(options.protyle, [{
                         action: "setAttrViewSorts",
                         avID: options.data.id,
-                        data: options.data.view.sorts
+                        data: options.data.view.sorts,
+                        blockID: options.blockID,
                     }], [{
                         action: "setAttrViewSorts",
                         avID: options.data.id,
-                        data: oldSorts
+                        data: oldSorts,
+                        blockID: options.blockID,
                     }]);
                     options.menuElement.innerHTML = getSortsHTML(options.data.view.columns, options.data.view.sorts);
-                    bindSortsEvent(options.protyle, options.menuElement, options.data);
+                    bindSortsEvent(options.protyle, options.menuElement, options.data, options.blockID);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                 }
             });
@@ -54,7 +57,7 @@ export const addSort = (options: {
     });
 };
 
-export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
+export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV, blockID: string) => {
     menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
             const colId = item.parentElement.getAttribute("data-id");
@@ -73,11 +76,13 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
             transaction(protyle, [{
                 action: "setAttrViewSorts",
                 avID: data.id,
-                data: data.view.sorts
+                data: data.view.sorts,
+                blockID
             }], [{
                 action: "setAttrViewSorts",
                 avID: data.id,
-                data: oldSort
+                data: oldSort,
+                blockID
             }]);
         });
     });

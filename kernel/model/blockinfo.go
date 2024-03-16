@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -42,12 +43,18 @@ type BlockInfo struct {
 	RefIDs       []string          `json:"refIDs"`
 	IAL          map[string]string `json:"ial"`
 	Icon         string            `json:"icon"`
+	AttrViews    []*AttrView       `json:"attrViews"`
+}
+
+type AttrView struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func GetDocInfo(blockID string) (ret *BlockInfo) {
 	WaitForWritingFiles()
 
-	tree, err := loadTreeByBlockID(blockID)
+	tree, err := LoadTreeByBlockID(blockID)
 	if nil != err {
 		logging.LogErrorf("load tree by root id [%s] failed: %s", blockID, err)
 		return
@@ -81,8 +88,25 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 			}
 		}
 	}
+
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
-	ret.RefCount = len(ret.RefIDs)
+	ret.RefCount = len(ret.RefIDs) // 填充块引计数
+
+	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+	avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
+	for _, avID := range avIDs {
+		avName, getErr := av.GetAttributeViewName(avID)
+		if nil != getErr {
+			continue
+		}
+
+		if "" == avName {
+			avName = "Untitled"
+		}
+
+		attrView := &AttrView{ID: avID, Name: avName}
+		ret.AttrViews = append(ret.AttrViews, attrView)
+	}
 
 	var subFileCount int
 	boxLocalPath := filepath.Join(util.DataDir, tree.Box)
@@ -105,7 +129,7 @@ func GetBlockRefText(id string) string {
 		return ErrBlockNotFound.Error()
 	}
 
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return ErrTreeNotFound.Error()
 	}
@@ -219,7 +243,7 @@ func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string)
 }
 
 func GetBlockIndex(id string) (ret int) {
-	tree, _ := loadTreeByBlockID(id)
+	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
@@ -250,6 +274,39 @@ func GetBlockIndex(id string) (ret int) {
 	return
 }
 
+func GetBlocksIndexes(ids []string) (ret map[string]int) {
+	ret = map[string]int{}
+	if 1 > len(ids) {
+		return
+	}
+
+	tree, _ := LoadTreeByBlockID(ids[0])
+	if nil == tree {
+		return
+	}
+
+	idx := 0
+	nodesIndexes := map[string]int{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if !n.IsChildBlockOf(tree.Root, 1) {
+			return ast.WalkContinue
+		}
+
+		nodesIndexes[n.ID] = idx
+		idx++
+		return ast.WalkContinue
+	})
+
+	for _, id := range ids {
+		ret[id] = nodesIndexes[id]
+	}
+	return
+}
+
 type BlockPath struct {
 	ID       string       `json:"id"`
 	Name     string       `json:"name"`
@@ -260,7 +317,7 @@ type BlockPath struct {
 
 func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
 	ret = []*BlockPath{}
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil == tree {
 		err = nil
 		return

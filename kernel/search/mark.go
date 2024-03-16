@@ -118,7 +118,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	}
 
 	// 搜索结果预览包含转义符问题 Search results preview contains escape character issue https://github.com/siyuan-note/siyuan/issues/9790
-	ret = strings.ReplaceAll(ret, "\\<span", "\\\\<span ")
+	ret = strings.ReplaceAll(ret, "\\<span", "\\\\<span")
 	return
 }
 

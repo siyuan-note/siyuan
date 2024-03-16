@@ -37,6 +37,9 @@ type Value struct {
 	Type       KeyType `json:"type,omitempty"`
 	IsDetached bool    `json:"isDetached,omitempty"`
 
+	CreatedAt int64 `json:"createdAt,omitempty"`
+	UpdatedAt int64 `json:"updatedAt,omitempty"`
+
 	Block    *ValueBlock    `json:"block,omitempty"`
 	Text     *ValueText     `json:"text,omitempty"`
 	Number   *ValueNumber   `json:"number,omitempty"`
@@ -55,6 +58,10 @@ type Value struct {
 }
 
 func (value *Value) String() string {
+	if nil == value {
+		return ""
+	}
+
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil == value.Block {
@@ -75,7 +82,8 @@ func (value *Value) String() string {
 		if nil == value.Date {
 			return ""
 		}
-		return value.Date.FormattedContent
+		formatted := NewFormattedValueDate(value.Date.Content, value.Date.Content2, DateFormatNone, value.Date.IsNotTime, value.Date.HasEndDate)
+		return formatted.FormattedContent
 	case KeyTypeSelect:
 		if 1 > len(value.MSelect) {
 			return ""
@@ -111,7 +119,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.MAsset {
-			ret = append(ret, v.Content)
+			ret = append(ret, v.Name+" "+v.Content)
 		}
 		return strings.Join(ret, " ")
 	case KeyTypeTemplate:
@@ -138,23 +146,23 @@ func (value *Value) String() string {
 		}
 		return ""
 	case KeyTypeRelation:
-		if 1 > len(value.Relation.Contents) {
+		if nil == value.Relation || 1 > len(value.Relation.Contents) {
 			return ""
 		}
 		var ret []string
 		for _, v := range value.Relation.Contents {
-			ret = append(ret, v)
+			ret = append(ret, v.String())
 		}
-		return strings.Join(ret, " ")
+		return strings.TrimSpace(strings.Join(ret, ", "))
 	case KeyTypeRollup:
-		if nil == value.Rollup || nil == value.Rollup.Contents {
+		if nil == value.Rollup || 1 > len(value.Rollup.Contents) {
 			return ""
 		}
 		var ret []string
 		for _, v := range value.Rollup.Contents {
 			ret = append(ret, v.String())
 		}
-		return strings.Join(ret, " ")
+		return strings.TrimSpace(strings.Join(ret, ", "))
 	default:
 		return ""
 	}
@@ -176,6 +184,176 @@ func (value *Value) Clone() (ret *Value) {
 	err = gulu.JSON.UnmarshalJSON(data, &ret)
 	if nil != err {
 		return
+	}
+	return
+}
+
+func (value *Value) IsEdited() bool {
+	if 1709740800000 > value.CreatedAt {
+		// 说明是旧数据，认为都是编辑过的
+		return true
+	}
+
+	if KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type {
+		return true
+	}
+
+	if value.IsEmpty() {
+		// 空数据认为是未编辑过的
+		return false
+	}
+	return value.CreatedAt != value.UpdatedAt
+}
+
+func (value *Value) IsGenerated() bool {
+	return KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type
+}
+
+func (value *Value) IsEmpty() bool {
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil == value.Block {
+			return true
+		}
+		return "" == value.Block.Content
+	case KeyTypeText:
+		if nil == value.Text {
+			return true
+		}
+		return "" == value.Text.Content
+	case KeyTypeNumber:
+		if nil == value.Number {
+			return true
+		}
+		return !value.Number.IsNotEmpty
+	case KeyTypeDate:
+		if nil == value.Date {
+			return true
+		}
+		return !value.Date.IsNotEmpty
+	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return true
+		}
+		return "" == value.MSelect[0].Content
+	case KeyTypeMSelect:
+		return 1 > len(value.MSelect)
+	case KeyTypeURL:
+		if nil == value.URL {
+			return true
+		}
+		return "" == value.URL.Content
+	case KeyTypeEmail:
+		if nil == value.Email {
+			return true
+		}
+		return "" == value.Email.Content
+	case KeyTypePhone:
+		if nil == value.Phone {
+			return true
+		}
+		return "" == value.Phone.Content
+	case KeyTypeMAsset:
+		return 1 > len(value.MAsset)
+	case KeyTypeTemplate:
+		if nil == value.Template {
+			return true
+		}
+		return "" == value.Template.Content
+	case KeyTypeCreated:
+		if nil == value.Created {
+			return true
+		}
+		return !value.Created.IsNotEmpty
+	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return true
+		}
+		return !value.Updated.IsNotEmpty
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return true
+		}
+		return !value.Checkbox.Checked
+	case KeyTypeRelation:
+		return 1 > len(value.Relation.Contents)
+	case KeyTypeRollup:
+		return 1 > len(value.Rollup.Contents)
+	}
+	return false
+}
+
+func (value *Value) SetValByType(typ KeyType, val interface{}) {
+	switch typ {
+	case KeyTypeBlock:
+		value.Block = val.(*ValueBlock)
+	case KeyTypeText:
+		value.Text = val.(*ValueText)
+	case KeyTypeNumber:
+		value.Number = val.(*ValueNumber)
+	case KeyTypeDate:
+		value.Date = val.(*ValueDate)
+	case KeyTypeSelect:
+		value.MSelect = val.([]*ValueSelect)
+	case KeyTypeMSelect:
+		value.MSelect = val.([]*ValueSelect)
+	case KeyTypeURL:
+		value.URL = val.(*ValueURL)
+	case KeyTypeEmail:
+		value.Email = val.(*ValueEmail)
+	case KeyTypePhone:
+		value.Phone = val.(*ValuePhone)
+	case KeyTypeMAsset:
+		value.MAsset = val.([]*ValueAsset)
+	case KeyTypeTemplate:
+		value.Template = val.(*ValueTemplate)
+	case KeyTypeCreated:
+		value.Created = val.(*ValueCreated)
+	case KeyTypeUpdated:
+		value.Updated = val.(*ValueUpdated)
+	case KeyTypeCheckbox:
+		value.Checkbox = val.(*ValueCheckbox)
+	case KeyTypeRelation:
+		value.Relation = val.(*ValueRelation)
+	case KeyTypeRollup:
+		value.Rollup = val.(*ValueRollup)
+	}
+}
+
+func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	switch typ {
+	case KeyTypeBlock:
+		return value.Block
+	case KeyTypeText:
+		return value.Text
+	case KeyTypeNumber:
+		return value.Number
+	case KeyTypeDate:
+		return value.Date
+	case KeyTypeSelect:
+		return value.MSelect
+	case KeyTypeMSelect:
+		return value.MSelect
+	case KeyTypeURL:
+		return value.URL
+	case KeyTypeEmail:
+		return value.Email
+	case KeyTypePhone:
+		return value.Phone
+	case KeyTypeMAsset:
+		return value.MAsset
+	case KeyTypeTemplate:
+		return value.Template
+	case KeyTypeCreated:
+		return value.Created
+	case KeyTypeUpdated:
+		return value.Updated
+	case KeyTypeCheckbox:
+		return value.Checkbox
+	case KeyTypeRelation:
+		return value.Relation
+	case KeyTypeRollup:
+		return value.Rollup
 	}
 	return
 }
@@ -301,7 +479,7 @@ const (
 	DateFormatDuration DateFormat = "duration"
 )
 
-func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime bool) (ret *ValueDate) {
+func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime, hasEndDate bool) (ret *ValueDate) {
 	var formatted string
 	contentTime := time.UnixMilli(content)
 	if 0 == content || contentTime.IsZero() {
@@ -321,7 +499,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 		formatted = contentTime.Format("2006-01-02 15:04")
 	}
 
-	if 0 < content2 {
+	if hasEndDate {
 		var formattedContent2 string
 		content2Time := time.UnixMilli(content2)
 		if isNotTime {
@@ -343,7 +521,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 	ret = &ValueDate{
 		Content:          content,
 		Content2:         content2,
-		HasEndDate:       false,
+		HasEndDate:       hasEndDate,
 		IsNotTime:        true,
 		FormattedContent: formatted,
 	}
@@ -474,8 +652,8 @@ type ValueCheckbox struct {
 }
 
 type ValueRelation struct {
-	Contents []string `json:"contents"`
 	BlockIDs []string `json:"blockIDs"`
+	Contents []*Value `json:"contents"`
 }
 
 type ValueRollup struct {

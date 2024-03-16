@@ -1,9 +1,9 @@
 :root {
     /* 主色 */
     --b3-theme-primary: #3575f0;
-    --b3-theme-primary-light: rgba(53, 117, 240, 0.54);
-    --b3-theme-primary-lighter: rgba(53, 117, 240, 0.38);
-    --b3-theme-primary-lightest: rgba(53, 117, 240, 0.12);
+    --b3-theme-primary-light: rgba(53, 117, 240, .54);
+    --b3-theme-primary-lighter: rgba(53, 117, 240, .38);
+    --b3-theme-primary-lightest: rgba(53, 117, 240, .12);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #fff;
     --b3-theme-background-light: #dfe0e1;
@@ -113,9 +113,9 @@
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
 
     /* 阴影 */
-    --b3-point-shadow: 0 0 1px 0px rgba(0, 0, 0, 0.1), 0 0 2px 0px rgba(0, 0, 0, 0.2);
-    --b3-dialog-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    --b3-button-shadow: 0px 5px 5px -3px rgb(0 0 0 / 0.2), 0px 8px 10px 1px rgb(0 0 0 / 0.14), 0px 3px 14px 2px rgb(0 0 0 / 0.12);
+    --b3-point-shadow: 0 0 1px 0 rgba(0, 0, 0, .1), 0 0 2px 0 rgba(0, 0, 0, .2);
+    --b3-dialog-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+    --b3-button-shadow: 0 5px 5px -3px rgb(0 0 0 / .2), 0 8px 10px 1px rgb(0 0 0 / .14), 0 3px 14px 2px rgb(0 0 0 / .12);
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;

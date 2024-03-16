@@ -1,6 +1,6 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
-import {hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 
 declare const flowchart: {
@@ -36,12 +36,13 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
 };
 
 const initFlowchart = (flowchartElements: Element[]) => {
+    const wysiswgElement = hasClosestByClassName(flowchartElements[0], "protyle-wysiwyg", true);
     flowchartElements.forEach((item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
-            item.insertAdjacentHTML("afterbegin", genIconHTML());
+            item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
         const renderElement = item.firstElementChild.nextElementSibling;
         renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false"></div>`;

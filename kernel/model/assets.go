@@ -52,7 +52,7 @@ import (
 )
 
 func DocImageAssets(rootID string) (ret []string, err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -75,7 +75,7 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 }
 
 func NetImg2LocalAssets(rootID, originalURL string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -103,6 +103,14 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 		}
 		if ast.NodeImage == n.Type {
 			linkDest := n.ChildByType(ast.NodeLinkDest)
+			linkText := n.ChildByType(ast.NodeLinkText)
+			if nil == linkText {
+				linkText = &ast.Node{Type: ast.NodeLinkText, Tokens: []byte("image")}
+				if openBracket := n.ChildByType(ast.NodeOpenBracket); nil != openBracket {
+					openBracket.InsertAfter(linkText)
+				}
+			}
+
 			dest := linkDest.Tokens
 			if util.IsAssetLinkDest(dest) {
 				return ast.WalkSkipChildren
@@ -122,8 +130,11 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				}
 
 				name := filepath.Base(u)
-				name = util.FilterFileName(name)
+				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
+				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
+					linkText.Tokens = []byte(name)
+				}
 				name = "net-img-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
@@ -137,7 +148,12 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				return ast.WalkSkipChildren
 			}
 
-			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) {
+			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
+				if bytes.HasPrefix(dest, []byte("//")) {
+					// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
+					dest = append([]byte("https:"), dest...)
+				}
+
 				u := string(dest)
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
@@ -198,8 +214,11 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 					}
 				}
 				name = strings.TrimSuffix(name, ext)
-				name = util.FilterFileName(name)
+				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
+				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
+					linkText.Tokens = []byte(name)
+				}
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); nil != err {
@@ -227,7 +246,7 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 }
 
 func NetAssets2LocalAssets(rootID string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -285,7 +304,7 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 			}
 
 			name := filepath.Base(u)
-			name = util.FilterFileName(name)
+			name = util.FilterUploadFileName(name)
 			name = util.TruncateLenFileName(name)
 			name = "network-asset-" + name
 			name = util.AssetName(name)
@@ -306,7 +325,12 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 			return ast.WalkContinue
 		}
 
-		if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) {
+		if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
+			if bytes.HasPrefix(dest, []byte("//")) {
+				// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
+				dest = append([]byte("https:"), dest...)
+			}
+
 			u := string(dest)
 			if strings.Contains(u, "qpic.cn") {
 				// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
@@ -375,7 +399,7 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 				}
 			}
 			name = strings.TrimSuffix(name, ext)
-			name = util.FilterFileName(name)
+			name = util.FilterUploadFileName(name)
 			name = util.TruncateLenFileName(name)
 			name = "network-asset-" + name + "-" + ast.NewNodeID() + ext
 			writePath := filepath.Join(assetsDirPath, name)
@@ -515,7 +539,7 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 		return
 	}
 
-	tree, err := loadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
@@ -1071,7 +1095,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 		for _, sqlBlock := range sqlBlocks {
-			subtree, _ := loadTreeByBlockID(sqlBlock.ID)
+			subtree, _ := LoadTreeByBlockID(sqlBlock.ID)
 			if nil == subtree {
 				continue
 			}
@@ -1104,21 +1128,21 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !isRelativePath(n.Tokens) {
+			if !treenode.IsRelativePath(n.Tokens) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
+			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
 				return ast.WalkContinue
 			}
 
@@ -1136,24 +1160,14 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if "" == dataAssets || !isRelativePath([]byte(dataAssets)) {
+				if "" == dataAssets || !treenode.IsRelativePath([]byte(dataAssets)) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				if index := bytes.Index(n.Tokens, []byte("src=\"")); 0 < index {
-					src := n.Tokens[index+len("src=\""):]
-					if index = bytes.Index(src, []byte("\"")); 0 < index {
-						src = src[:bytes.Index(src, []byte("\""))]
-						if !isRelativePath(src) {
-							return ast.WalkContinue
-						}
-
-						dest := strings.TrimSpace(string(src))
-						ret = append(ret, dest)
-					} else {
-						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", node.Box+node.Path)
-					}
+				dest := treenode.GetNodeSrcTokens(n)
+				if "" != dest {
+					ret = append(ret, dest)
 				}
 			}
 		}
@@ -1167,16 +1181,6 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		}
 	}
 	return
-}
-
-func isRelativePath(dest []byte) bool {
-	if 1 > len(dest) {
-		return false
-	}
-	if '/' == dest[0] {
-		return false
-	}
-	return !bytes.Contains(dest, []byte(":"))
 }
 
 // allAssetAbsPaths 返回 asset 相对路径（assets/xxx）到绝对路径（F:\SiYuan\data\assets\xxx）的映射。

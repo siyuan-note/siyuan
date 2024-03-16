@@ -291,7 +291,7 @@ html {
       & > div {
         background-color: var(--b3-theme-primary-light);
         height: 4px;
-        background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+        background-image: linear-gradient(-45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
         animation: stripMove 450ms linear infinite;
         background-size: 50px 50px;
       }

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
-		"updated": "20230820185634"
+		"updated": "20220605170337"
 	},
 	"Children": [
 		{
@@ -231,13 +231,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "title"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該變量用於插入當前文檔名。比如範本內容為 "
+									"Data": "​：該變量用於插入當前文檔名。比如範本內容為 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -246,7 +250,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，則調用後會以一級標題語法插入到當前文檔內容中"
+									"Data": "​，則調用後會以一級標題語法插入到當前文檔內容中"
 								}
 							]
 						}
@@ -271,13 +275,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "id"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該變量用於插入當前文檔 ID"
+									"Data": "​：該變量用於插入當前文檔 ID"
 								}
 							]
 						}
@@ -302,13 +310,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "name"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該變量用於插入當前文檔命名"
+									"Data": "​：該變量用於插入當前文檔命名"
 								}
 							]
 						}
@@ -335,13 +347,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "alias"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該變量用於插入當前文檔別名"
+									"Data": "​：該變量用於插入當前文檔別名"
 								}
 							]
 						}
@@ -368,18 +384,34 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "queryBlocks"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該函數用於查詢資料庫，返回值為 blocks 列表，參數為 SQL 語句："
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 blocks 列表，參數為 SQL 語句："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -406,18 +438,34 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "querySpans"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該函數用於查詢資料庫，返回值為 spans 列表，參數為 SQL 語句："
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 spans 列表，參數為 SQL 語句："
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
+									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -442,13 +490,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "parseTime"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該函數用於將時間格式的字符串解析為 "
+									"Data": "​：該函數用於將時間格式的字符串解析為 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -457,7 +509,330 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 類型，以便使用更多格式化方法渲染該時間"
+									"Data": "​ 類型，以便使用更多格式化方法渲染該時間"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-8almw0o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-8almw0o",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-l18r65o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-l18r65o",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-2qy7ko8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-2qy7ko8",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-6u90ynh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-6u90ynh",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=日, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-a8vapod",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-a8vapod",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-a18gx3m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-a18gx3m",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=天, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-qs51tmz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-qs51tmz",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-tde2ifs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-tde2ifs",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回第幾週"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-zazpf8n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-zazpf8n",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-zp3uf3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-zp3uf3c",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指數計算，傳回整數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-623n608",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-623n608",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-y7455e1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-y7455e1",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指數計算，傳回浮點數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-bilwjys",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-bilwjys",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-m1h6rni",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-m1h6rni",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：對數計算，傳回整數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-m9aebtw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-m9aebtw",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-ly9t8ym",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-ly9t8ym",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：對數計算，傳回浮點數"
 								}
 							]
 						}

@@ -52,6 +52,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
+                accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
@@ -60,8 +61,14 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
+                            ignoreFillFilter: true,
                             srcIDs: sourceIds,
                             isDetached: false,
+                            blockID: listItemElement.dataset.nodeId
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: listItemElement.dataset.nodeId,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,

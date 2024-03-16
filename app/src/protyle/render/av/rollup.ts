@@ -4,7 +4,6 @@ import {upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {genIconHTML} from "../util";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {showMessage} from "../../../dialog/message";
@@ -72,7 +71,6 @@ const genSearchList = (element: Element, keyword: string, avId: string, isRelati
         response.data.keys.forEach((item: IAVColumn, index: number) => {
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-col-id="${item.id}" ${isRelation ? `data-target-av-id="${item.relation.avID}"` : `data-col-type="${item.type}"`}>
         ${item.icon ? unicode2Emoji(item.icon, "b3-list-item__graphic", true) : `<svg class="b3-list-item__graphic"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-        ${genIconHTML()}
         <span class="b3-list-item__text">${escapeHtml(item.name || window.siyuan.languages.title)}</span>
 </div>`;
         });
@@ -95,7 +93,7 @@ export const goSearchRollupCol = (options: {
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column" style = "min-width: 260px;max-width:420px;max-height: 50vh">
+        label: `<div class="fn__flex-column b3-menu__filter">
     <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
@@ -175,7 +173,7 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
 </button>`;
 };
 
-export const bindRollupEvent = (options: {
+export const bindRollupData = (options: {
     protyle: IProtyle,
     data: IAV,
     menuElement: HTMLElement
@@ -202,7 +200,9 @@ export const bindRollupEvent = (options: {
                         goSearchRollupTargetElement.querySelector(".b3-menu__accelerator").textContent = item.key.name;
                         const goSearchRollupCalcElement = options.menuElement.querySelector('[data-type="goSearchRollupCalc"]') as HTMLElement;
                         goSearchRollupCalcElement.dataset.colType = item.key.type;
-                        goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
+                        if (oldValue.calc) {
+                            goSearchRollupCalcElement.dataset.calc = oldValue.calc.operator;
+                        }
                         return true;
                     }
                 });

@@ -166,6 +166,11 @@ export const getLocalStorage = (cb: () => void) => {
             sort: 0,
             k: "",
         };
+        defaultStorage[Constants.LOCAL_SEARCHUNREF] = {
+            col: "",
+            row: "",
+            layout: 0,
+        };
         Constants.SIYUAN_ASSETS_SEARCH.forEach(type => {
             defaultStorage[Constants.LOCAL_SEARCHASSET].types[type] = true;
         });
@@ -250,7 +255,8 @@ export const getLocalStorage = (cb: () => void) => {
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
-            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD, Constants.LOCAL_DIALOGPOSITION,
+            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
+            Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {

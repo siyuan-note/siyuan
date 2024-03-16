@@ -20,14 +20,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/araddon/dateparse"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -190,7 +188,7 @@ func RenderTemplate(p, id string, preview bool) (string, error) {
 }
 
 func renderTemplate(p, id string, preview bool) (string, error) {
-	tree, err := loadTreeByBlockID(id)
+	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return "", err
 	}
@@ -299,13 +297,14 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 					}
 				} else {
 					// 预览时使用简单表格渲染
-					view, getErr := attrView.GetCurrentView()
+					viewID := n.IALAttr(av.NodeAttrView)
+					view, getErr := attrView.GetCurrentView(viewID)
 					if nil != getErr {
 						logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
 						return ast.WalkContinue
 					}
 
-					table, renderErr := renderAttributeViewTable(attrView, view)
+					table, renderErr := renderAttributeViewTable(attrView, view, "")
 					if nil != renderErr {
 						logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
 						return ast.WalkContinue
@@ -411,14 +410,5 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		}
 		retSpans = sql.SelectSpansRawStmt(stmt, 512)
 		return
-	}
-	(*templateFuncMap)["parseTime"] = func(dateStr string) time.Time {
-		now := time.Now()
-		retTime, err := dateparse.ParseIn(dateStr, now.Location())
-		if nil != err {
-			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
-			return now
-		}
-		return retTime
 	}
 }

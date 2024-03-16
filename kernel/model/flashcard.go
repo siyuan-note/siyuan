@@ -38,6 +38,80 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetFlashcardsByBlockIDs(blockIDs []string) (ret []*Block) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	waitForSyncingStorages()
+
+	ret = []*Block{}
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	cards := deck.GetCardsByBlockIDs(blockIDs)
+	blocks, _, _ := getCardsBlocks(cards, 1, math.MaxInt)
+
+	for _, blockID := range blockIDs {
+		found := false
+		for _, block := range blocks {
+			if blockID == block.ID {
+				found = true
+				ret = append(ret, block)
+				break
+			}
+		}
+		if !found {
+			ret = append(ret, &Block{
+				ID:      blockID,
+				Content: Conf.Language(180),
+			})
+		}
+	}
+	return
+}
+
+type SetFlashcardDueTime struct {
+	ID  string `json:"id"`  // 卡片 ID
+	Due string `json:"due"` // 下次复习时间，格式为 YYYYMMDDHHmmss
+}
+
+func SetFlashcardsDueTime(cardDues []*SetFlashcardDueTime) (err error) {
+	// Add internal kernel API `/api/riff/batchSetRiffCardsDueTime` https://github.com/siyuan-note/siyuan/issues/10423
+
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	waitForSyncingStorages()
+
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	for _, cardDue := range cardDues {
+		card := deck.GetCard(cardDue.ID)
+		if nil == card {
+			continue
+		}
+
+		due, parseErr := time.Parse("20060102150405", cardDue.Due)
+		if nil != parseErr {
+			logging.LogErrorf("parse due time [%s] failed: %s", cardDue.Due, err)
+			err = parseErr
+			return
+		}
+
+		card.SetDue(due)
+	}
+
+	if err = deck.Save(); nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", builtinDeckID, err)
+	}
+	return
+}
+
 func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	// Support resetting the learning progress of flashcards https://github.com/siyuan-note/siyuan/issues/9564
 
@@ -69,7 +143,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 	switch typ {
 	case "notebook":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetNotebookFlashcards(id, i)
+			pagedBlocks, _, _ := GetNotebookFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -80,7 +154,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 		}
 	case "tree":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetTreeFlashcards(id, i)
+			pagedBlocks, _, _ := GetTreeFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -91,7 +165,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) {
 		}
 	case "deck":
 		for i := 1; ; i++ {
-			pagedBlocks, _, _ := GetDeckFlashcards(id, i)
+			pagedBlocks, _, _ := GetDeckFlashcards(id, i, 20)
 			if 1 > len(pagedBlocks) {
 				break
 			}
@@ -192,7 +266,7 @@ var (
 	deckLock = sync.Mutex{}
 )
 
-func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, pageCount int) {
+func GetNotebookFlashcards(boxID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
@@ -236,14 +310,14 @@ func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, page
 	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
 	cards := deck.GetCardsByBlockIDs(allBlockIDs)
 
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
-func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
+func GetTreeFlashcards(rootID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	cards := getTreeSubTreeFlashcards(rootID)
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
@@ -285,7 +359,7 @@ func getTreeFlashcards(rootID string) (ret []riff.Card) {
 	return
 }
 
-func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
+func GetDeckFlashcards(deckID string, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	var cards []riff.Card
 	if "" == deckID {
@@ -303,11 +377,11 @@ func GetDeckFlashcards(deckID string, page int) (blocks []*Block, total, pageCou
 		cards = append(cards, deck.GetCardsByBlockIDs(blockIDs)...)
 	}
 
-	blocks, total, pageCount = getCardsBlocks(cards, page)
+	blocks, total, pageCount = getCardsBlocks(cards, page, pageSize)
 	return
 }
 
-func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
+func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, total, pageCount int) {
 	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
 	sort.Slice(cards, func(i, j int) bool {
 		due1 := cards[i].(*riff.FSRSCard).C.Due
@@ -315,7 +389,6 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 		return due1.Before(due2)
 	})
 
-	const pageSize = 20
 	total = len(cards)
 	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
 	start := (page - 1) * pageSize
@@ -430,25 +503,31 @@ func SkipReviewFlashcard(deckID, cardID string) (err error) {
 }
 
 type Flashcard struct {
-	DeckID   string                 `json:"deckID"`
-	CardID   string                 `json:"cardID"`
-	BlockID  string                 `json:"blockID"`
-	State    riff.State             `json:"state"`
-	NextDues map[riff.Rating]string `json:"nextDues"`
+	DeckID     string                 `json:"deckID"`
+	CardID     string                 `json:"cardID"`
+	BlockID    string                 `json:"blockID"`
+	Lapses     int                    `json:"lapses"`
+	Reps       int                    `json:"reps"`
+	State      riff.State             `json:"state"`
+	LastReview int64                  `json:"lastReview"`
+	NextDues   map[riff.Rating]string `json:"nextDues"`
 }
 
-func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashcard {
+func newFlashcard(card riff.Card, deckID string, now time.Time) *Flashcard {
 	nextDues := map[riff.Rating]string{}
 	for rating, due := range card.NextDues() {
 		nextDues[rating] = strings.TrimSpace(util.HumanizeDiffTime(due, now, Conf.Lang))
 	}
 
 	return &Flashcard{
-		DeckID:   deckID,
-		CardID:   card.ID(),
-		BlockID:  blockID,
-		State:    card.GetState(),
-		NextDues: nextDues,
+		DeckID:     deckID,
+		CardID:     card.ID(),
+		BlockID:    card.BlockID(),
+		Lapses:     card.GetLapses(),
+		Reps:       card.GetReps(),
+		State:      card.GetState(),
+		LastReview: card.GetLastReview().UnixMilli(),
+		NextDues:   nextDues,
 	}
 }
 
@@ -490,10 +569,10 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
-		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
+		ret = append(ret, newFlashcard(card, builtinDeckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -535,10 +614,10 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 		}
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
-		ret = append(ret, newFlashcard(card, card.BlockID(), builtinDeckID, now))
+		ret = append(ret, newFlashcard(card, builtinDeckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -606,10 +685,10 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
-		ret = append(ret, newFlashcard(card, card.BlockID(), deckID, now))
+		ret = append(ret, newFlashcard(card, deckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -623,12 +702,12 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int) {
 	now := time.Now()
 	for _, deck := range Decks {
-		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 		unreviewedCount += unreviewedCnt
 		unreviewedNewCardCount += unreviewedNewCardCnt
 		unreviewedOldCardCount += unreviewedOldCardCnt
 		for _, card := range cards {
-			ret = append(ret, newFlashcard(card, card.BlockID(), deck.ID, now))
+			ret = append(ret, newFlashcard(card, deck.ID, now))
 		}
 	}
 	if 1 > len(ret) {
@@ -988,8 +1067,10 @@ func getDeckIDs() (deckIDs []string) {
 	return
 }
 
-func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCountInRound, unreviewedOldCardCountInRound int) {
+func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCardLimit, reviewCardLimit, reviewMode int) (ret []riff.Card, unreviewedCount, unreviewedNewCardCountInRound, unreviewedOldCardCountInRound int) {
 	ret = []riff.Card{}
+	var retNew, retOld []riff.Card
+
 	dues := deck.Dues()
 
 	var tmp []riff.Card
@@ -1060,15 +1141,28 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			}
 
 			newCount++
+			retNew = append(retNew, c)
 		} else {
 			if reviewCount >= reviewCardLimit {
 				continue
 			}
 
 			reviewCount++
+			retOld = append(retOld, c)
 		}
 
 		ret = append(ret, c)
+	}
+
+	switch reviewMode {
+	case 1: // 优先复习新卡
+		ret = nil
+		ret = append(ret, retNew...)
+		ret = append(ret, retOld...)
+	case 2: // 优先复习旧卡
+		ret = nil
+		ret = append(ret, retOld...)
+		ret = append(ret, retNew...)
 	}
 	return
 }

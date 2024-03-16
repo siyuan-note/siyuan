@@ -15,7 +15,7 @@ import {Dialog} from "../../dialog";
 import {Constants} from "../../constants";
 import {assetMenu} from "../../menus/protyle";
 import {previewImage} from "../preview/image";
-import {MenuItem} from "../../menus/Menu";
+import {Menu} from "../../plugin/Menu";
 
 const bgs = [
     "background:radial-gradient(black 3px, transparent 4px),radial-gradient(black 3px, transparent 4px),linear-gradient(#fff 4px, transparent 0),linear-gradient(45deg, transparent 74px, transparent 75px, #a4a4a4 75px, #a4a4a4 76px, transparent 77px, transparent 109px),linear-gradient(-45deg, transparent 75px, transparent 76px, #a4a4a4 76px, #a4a4a4 77px, transparent 78px, transparent 109px),#fff;background-size: 109px 109px, 109px 109px,100% 6px, 109px 109px, 109px 109px;background-position: 54px 55px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;",
@@ -476,77 +476,82 @@ export class Background {
     }
 
     private openTag(protyle: IProtyle) {
-        fetchPost("/api/search/searchTag", {
-            k: "",
-        }, (response) => {
-            let html = "";
-            response.data.tags.forEach((item: string, index: number) => {
-                html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
-            });
-            window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.append(new MenuItem({
-                iconHTML: "",
-                type: "readonly",
-                label: `<div class="fn__flex-column" style="max-height: calc(80vh - 8px)">
-    <input style="margin: 4px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}">
-    <div class="b3-menu__separator"></div>
-    <div class="b3-list fn__flex-1 b3-list--background">${html}</div>
+        window.siyuan.menus.menu.remove();
+        const menu = new Menu();
+        menu.addItem({
+            iconHTML: "",
+            type: "empty",
+            label: `<div class="fn__flex-column b3-menu__filter">
+    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
+    <div class="fn__hr"></div>
+    <div class="b3-list fn__flex-1 b3-list--background">
+        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+    </div>
 </div>`,
-                bind: (element) => {
-                    const inputElement = element.querySelector("input");
-                    const listElement = element.querySelector(".b3-list--background");
-                    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                        event.stopPropagation();
-                        if (event.isComposing) {
-                            return;
-                        }
-                        upDownHint(listElement, event);
-                        if (event.key === "Enter") {
-                            const currentElement = listElement.querySelector(".b3-list-item--focus");
-                            if (currentElement) {
-                                this.addTags(currentElement.textContent, protyle);
-                            } else {
-                                this.addTags(inputElement.value, protyle);
-                            }
-                            window.siyuan.menus.menu.remove();
-                        } else if (event.key === "Escape") {
-                            window.siyuan.menus.menu.remove();
-                        }
+            bind: (element) => {
+                const listElement = element.querySelector(".b3-list--background");
+                fetchPost("/api/search/searchTag", {
+                    k: "",
+                }, (response) => {
+                    let html = "";
+                    response.data.tags.forEach((item: string, index: number) => {
+                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
                     });
-                    inputElement.addEventListener("input", (event) => {
-                        event.stopPropagation();
-                        fetchPost("/api/search/searchTag", {
-                            k: inputElement.value,
-                        }, (response) => {
-                            let searchHTML = "";
-                            let hasKey = false;
-                            response.data.tags.forEach((item: string) => {
-                                searchHTML += `<div class="b3-list-item b3-list-item--narrow">${item}</div>`;
-                                if (item === `<mark>${response.data.k}</mark>`) {
-                                    hasKey = true;
-                                }
-                            });
-                            if (!hasKey && response.data.k) {
-                                searchHTML = `<div class="b3-list-item b3-list-item--narrow"><mark>${response.data.k}</mark></div>` + searchHTML;
+                    listElement.innerHTML = html;
+                });
+                const inputElement = element.querySelector("input");
+                inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    event.stopPropagation();
+                    if (event.isComposing) {
+                        return;
+                    }
+                    upDownHint(listElement, event);
+                    if (event.key === "Enter") {
+                        const currentElement = listElement.querySelector(".b3-list-item--focus");
+                        if (currentElement) {
+                            this.addTags(currentElement.textContent, protyle);
+                        } else {
+                            this.addTags(inputElement.value, protyle);
+                        }
+                        window.siyuan.menus.menu.remove();
+                    } else if (event.key === "Escape") {
+                        window.siyuan.menus.menu.remove();
+                    }
+                });
+                inputElement.addEventListener("input", (event) => {
+                    event.stopPropagation();
+                    fetchPost("/api/search/searchTag", {
+                        k: inputElement.value,
+                    }, (response) => {
+                        let searchHTML = "";
+                        let hasKey = false;
+                        response.data.tags.forEach((item: string) => {
+                            searchHTML += `<div class="b3-list-item b3-list-item--narrow">${item}</div>`;
+                            if (item === `<mark>${response.data.k}</mark>`) {
+                                hasKey = true;
                             }
-                            listElement.innerHTML = searchHTML;
-                            listElement.firstElementChild.classList.add("b3-list-item--focus");
                         });
-                    });
-                    listElement.addEventListener("click", (event) => {
-                        const target = event.target as HTMLElement;
-                        const listItemElement = hasClosestByClassName(target, "b3-list-item");
-                        if (!listItemElement) {
-                            return;
+                        if (!hasKey && response.data.k) {
+                            searchHTML = `<div class="b3-list-item b3-list-item--narrow"><mark>${response.data.k}</mark></div>` + searchHTML;
                         }
-                        this.addTags(listItemElement.textContent, protyle);
+                        listElement.innerHTML = searchHTML;
+                        listElement.firstElementChild.classList.add("b3-list-item--focus");
                     });
-                }
-            }).element);
-            const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
-            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
-            window.siyuan.menus.menu.element.querySelector("input").focus();
+                });
+                listElement.addEventListener("click", (event) => {
+                    const target = event.target as HTMLElement;
+                    const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                    if (!listItemElement) {
+                        return;
+                    }
+                    this.addTags(listItemElement.textContent, protyle);
+                });
+            }
         });
+        menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+        const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.top + rect.height});
+        menu.element.querySelector("input").focus();
     }
 
     private getTags(removeTag?: string) {

@@ -17,7 +17,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
@@ -34,7 +34,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     }
     if (!hasMatch && key) {
         const colorIndex = (options?.length || 0) % 13 + 1;
-        html = `<button data-type="addColOptionOrCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-name="${key}" data-color="${colorIndex}">
+        html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
     <span class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">
@@ -43,6 +43,12 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
 </div>
 <span class="b3-menu__accelerator">Enter</span>
 </button>${html}`;
+    } else {
+        if (key) {
+            html = html.replace(`class="b3-menu__item" data-name="${key}"` , `class="b3-menu__item b3-menu__item--current" data-name="${key}"`);
+        } else {
+            html = html.replace('class="b3-menu__item"' , 'class="b3-menu__item b3-menu__item--current"');
+        }
     }
     return html;
 };

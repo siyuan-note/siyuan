@@ -75,8 +75,13 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	return
 }
 
-func NewOpenAIClient(apiKey, apiProxy, apiBaseURL, apiUserAgent string) *openai.Client {
+func NewOpenAIClient(apiKey, apiProxy, apiBaseURL, apiUserAgent, apiVersion, apiProvider string) *openai.Client {
 	config := openai.DefaultConfig(apiKey)
+	if "Azure" == apiProvider {
+		config = openai.DefaultAzureConfig(apiKey, apiBaseURL)
+		config.APIVersion = apiVersion
+	}
+
 	transport := &http.Transport{}
 	if "" != apiProxy {
 		proxyUrl, err := url.Parse(apiProxy)

@@ -628,59 +628,6 @@
 			},
 			"AttributeViewID": "20240208172113-d44j7tk",
 			"AttributeViewType": "table"
-		},
-		{
-			"ID": "20240208172311-cq451l0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240208172311-cq451l0",
-				"updated": "20240208172311"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "限制："
-				}
-			]
-		},
-		{
-			"ID": "20240208172311-6owi2nq",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20240208172311-6owi2nq",
-				"updated": "20240208172311"
-			},
-			"Children": [
-				{
-					"ID": "20240208172311-qogv4xs",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240208172311-qogv4xs",
-						"updated": "20240208172311"
-					},
-					"Children": [
-						{
-							"ID": "20240208172311-hwflpdm",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240208172311-hwflpdm",
-								"updated": "20240208172311"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "範本不支援存取匯總和其他範本屬性"
-								}
-							]
-						}
-					]
-				}
-			]
 		}
 	]
 }

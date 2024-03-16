@@ -20,6 +20,7 @@ import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
 import {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
+import {openAssetNewWindow} from "../window/openNewWindow";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -679,12 +680,20 @@ export const exportMd = (id: string) => {
 
 export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerator: boolean) => {
     const submenu = [];
+    /// #if MOBILE
+    submenu.push({
+        label: window.siyuan.languages.useBrowserView,
+        accelerator: showAccelerator ? "Click" : "",
+        click: () => {
+            openByMobile(src);
+        }
+    });
+    /// #else
     if (isLocalPath(src)) {
         if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
             (!src.endsWith(".pdf") ||
                 (src.endsWith(".pdf") && !src.startsWith("file://")))
         ) {
-            /// #if !MOBILE
             submenu.push({
                 icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
@@ -693,26 +702,31 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
             });
-            /// #endif
+            submenu.push({
+                label: window.siyuan.languages.openBy,
+                icon: "iconOpen",
+                accelerator: showAccelerator ? "⌥Click" : "",
+                click() {
+                    openAsset(app, src.trim(), parseInt(getSearch("page", src)));
+                }
+            });
             /// #if !BROWSER
             submenu.push({
-                label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? "⇧Click" : "",
+                label: window.siyuan.languages.openByNewWindow,
+                icon: "iconOpenWindow",
                 click() {
-                    openBy(src, "app");
+                    openAssetNewWindow(src.trim());
                 }
             });
             /// #endif
         } else {
-            /// #if !BROWSER
             submenu.push({
-                label: window.siyuan.languages.useDefault,
+                label: window.siyuan.languages.useBrowserView,
                 accelerator: showAccelerator ? "Click" : "",
-                click() {
-                    openBy(src, "app");
+                click: () => {
+                    openByMobile(src);
                 }
             });
-            /// #endif
         }
         /// #if !BROWSER
         submenu.push({
@@ -723,8 +737,20 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 openBy(src, "folder");
             }
         });
+        submenu.push({
+            label: window.siyuan.languages.useDefault,
+            accelerator: showAccelerator ? "⇧Click" : "",
+            click() {
+                openBy(src, "app");
+            }
+        });
         /// #endif
-    } else {
+    } else if (src) {
+        if (0 > src.indexOf(":")) {
+            // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
+            // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
+            src = `https://${src}`;
+        }
         /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.useDefault,
@@ -735,16 +761,16 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 });
             }
         });
+        /// #else
+        submenu.push({
+            label: window.siyuan.languages.useBrowserView,
+            accelerator: showAccelerator ? "Click" : "",
+            click: () => {
+                openByMobile(src);
+            }
+        });
         /// #endif
     }
-    /// #if BROWSER
-    submenu.push({
-        label: window.siyuan.languages.useBrowserView,
-        accelerator: showAccelerator ? "Click" : "",
-        click: () => {
-            openByMobile(src);
-        }
-    });
     /// #endif
     if (onlyMenu) {
         return submenu;

@@ -239,15 +239,15 @@
 
   &--transition {
     .protyle-wysiwyg {
-      transition: padding .3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
+      transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
 
     .protyle-title {
-      transition: margin .3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
+      transition: margin .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
 
     .protyle-background__iconw {
-      transition: left .3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
+      transition: left .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
   }
 }
@@ -348,7 +348,7 @@
   }
 
   &[custom-riff-decks] {
-    box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
   }
 
   &__icon {

@@ -207,7 +207,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 		}
 		for _, c := range root.Children {
 			if "NodeListItem" == c.Type {
-				tree, _ := loadTreeByBlockID(c.RootID)
+				tree, _ := LoadTreeByBlockID(c.RootID)
 				li := treenode.GetNodeInTree(tree, c.ID)
 				if nil == li || nil == li.FirstChild {
 					// 反链面板拖拽到文档以后可能会出现这种情况 https://github.com/siyuan-note/siyuan/issues/5363
@@ -309,7 +309,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 					treeNode.Children = append(treeNode.Children, subRoot)
 				}
 			} else if "NodeHeading" == c.Type {
-				tree, _ := loadTreeByBlockID(c.RootID)
+				tree, _ := LoadTreeByBlockID(c.RootID)
 				h := treenode.GetNodeInTree(tree, c.ID)
 				if nil == h {
 					continue

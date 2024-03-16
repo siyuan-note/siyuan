@@ -294,7 +294,14 @@ export class Title {
             nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
         }
         if (response.data.ial["custom-avs"]) {
-            nodeAttrHTML += '<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg></div>';
+            let avTitle = "";
+            response.data.attrViews.forEach((item: { id: string, name: string }) => {
+                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${item.name}</span>&nbsp;`;
+            });
+            if (avTitle) {
+                avTitle = avTitle.substring(0, avTitle.length - 6);
+            }
+            nodeAttrHTML += `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${avTitle}</div>`;
         }
         this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
         if (response.data.refCount !== 0) {

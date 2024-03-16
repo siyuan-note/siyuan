@@ -9,6 +9,10 @@
   align-items: center;
   line-height: 16px;
 
+  &--av span:hover {
+    color: var(--b3-protyle-inline-blockref-color);
+  }
+
   & > div.protyle-attr--bookmark {
     flex: 1;
   }
@@ -37,7 +41,7 @@
 
   &--refcount {
     right: -16px;
-    top: 12px;  // https://github.com/siyuan-note/siyuan/issues/8784
+    top: 12px; // https://github.com/siyuan-note/siyuan/issues/8784
     position: absolute;
     line-height: 16px;
     padding: 0 4px;

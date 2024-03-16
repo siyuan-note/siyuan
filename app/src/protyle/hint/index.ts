@@ -210,9 +210,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     }
 
     public bindUploadEvent(protyle: IProtyle, element: HTMLElement) {
-        const uploadElement = element.querySelector('input[type="file"]');
-        if (uploadElement) {
-            uploadElement.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+        element.querySelectorAll('input[type="file"]').forEach(item => {
+            item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {
                     return;
                 }
@@ -224,7 +223,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 uploadFiles(protyle, event.target.files, event.target);
                 hideElements(["hint", "toolbar"], protyle);
             });
-        }
+        });
     }
 
     private getHTMLByData(data: IHintData[]) {
@@ -784,7 +783,9 @@ ${genHintItemHTML(item)}
                 } else if (value === "---") {
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {
-                    avRender(nodeElement, protyle);
+                    avRender(nodeElement, protyle, () => {
+                        focusBlock(nodeElement);
+                    });
                 } else {
                     focusByWbr(nodeElement, range);
                 }

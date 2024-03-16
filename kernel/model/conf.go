@@ -587,6 +587,18 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	clearWorkspaceTemp()
 	clearCorruptedNotebooks()
 	clearPortJSON()
+
+	// 将当前工作空间放到工作空间列表的最后一个
+	// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
+	workspacePaths, err := util.ReadWorkspacePaths()
+	if nil != err {
+		logging.LogErrorf("read workspace paths failed: %s", err)
+	} else {
+		workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
+		workspacePaths = append(workspacePaths, util.WorkspaceDir)
+		util.WriteWorkspacePaths(workspacePaths)
+	}
+
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)
@@ -1007,11 +1019,20 @@ func closeUserGuide() {
 		}
 
 		msgId := util.PushMsg(Conf.language(233), 30000)
+		evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
+		evt.Data = map[string]interface{}{
+			"box": boxID,
+		}
+		util.PushEvent(evt)
+
 		unindex(boxID)
+
 		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
 			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
 		}
+
 		sql.WaitForWritingDatabase()
+
 		util.PushClearMsg(msgId)
 		logging.LogInfof("closed user guide box [%s]", boxID)
 	}

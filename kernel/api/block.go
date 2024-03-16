@@ -62,6 +62,11 @@ func transferBlockRef(c *gin.Context) {
 		return
 	}
 
+	reloadUI := true
+	if nil != arg["reloadUI"] {
+		reloadUI = arg["reloadUI"].(bool)
+	}
+
 	var refIDs []string
 	if nil != arg["refIDs"] {
 		for _, refID := range arg["refIDs"].([]interface{}) {
@@ -75,6 +80,10 @@ func transferBlockRef(c *gin.Context) {
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
+	}
+
+	if reloadUI {
+		util.ReloadUI()
 	}
 }
 
@@ -427,6 +436,24 @@ func getBlockIndex(c *gin.Context) {
 	ret.Data = index
 }
 
+func getBlocksIndexes(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	index := model.GetBlocksIndexes(ids)
+	ret.Data = index
+}
+
 func getBlockInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -438,7 +465,7 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 
-	tree, err := model.LoadTreeByID(id)
+	tree, err := model.LoadTreeByBlockID(id)
 	if errors.Is(err, model.ErrIndexing) {
 		ret.Code = 3
 		ret.Msg = model.Conf.Language(56)

@@ -46,9 +46,9 @@
 
     &-1 {
       flex: 1;
-      min-width: 0.1px;
+      min-width: .1px;
       overflow: auto;
-      min-height: 0.1px;
+      min-height: .1px;
     }
 
     &-column {
@@ -129,7 +129,7 @@
   }
 
   &__code {
-    padding: 0.2em 0.4em;
+    padding: .2em .4em;
     margin: 0;
     font-size: 85%;
     border-radius: var(--b3-border-radius);

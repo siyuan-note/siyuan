@@ -240,7 +240,7 @@ export class WYSIWYG {
         this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }
@@ -412,6 +412,7 @@ export class WYSIWYG {
                     return;
                 }
                 const avId = nodeElement.getAttribute("data-av-id");
+                const blockID = nodeElement.dataset.nodeId;
                 const dragElement = target.parentElement;
                 const oldWidth = dragElement.clientWidth;
                 const dragColId = dragElement.getAttribute("data-col-id");
@@ -439,12 +440,14 @@ export class WYSIWYG {
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
-                        data: newWidth
+                        data: newWidth,
+                        blockID
                     }], [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
-                        data: oldWidth + "px"
+                        data: oldWidth + "px",
+                        blockID
                     }]);
                 };
                 this.preventClick = true;
@@ -874,7 +877,11 @@ export class WYSIWYG {
                 let firstBlockElement = hasClosestBlock(firstElement);
                 if (moveEvent.clientY > y) {
                     if (!startFirstElement) {
-                        startFirstElement = firstElement;
+                        // 向上选择导致滚动条滚动到顶部再向下选择至 > y 时，firstBlockElement 为 undefined https://ld246.com/article/1705233964097
+                        if (!firstBlockElement) {
+                            firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+                        }
+                        startFirstElement = firstBlockElement;
                     }
                 } else if (!firstBlockElement &&
                     // https://github.com/siyuan-note/siyuan/issues/7580
@@ -1248,7 +1255,7 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 return;
             }
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }
@@ -1295,7 +1302,7 @@ export class WYSIWYG {
                     }
                 }
                 const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
-                removeBlock(protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range, "remove");
                 if (nextElement) {
                     // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                     focusBlock(nextElement);
@@ -1707,7 +1714,7 @@ export class WYSIWYG {
             }
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
-            if (event.target.tagName === "PROTYLE-HTML") {
+            if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
                 event.stopPropagation();
                 return;
             }
@@ -2029,6 +2036,26 @@ export class WYSIWYG {
                 /// #endif
                 return;
             }
+            /// #if MOBILE
+            // https://github.com/siyuan-note/siyuan/issues/10513
+            const virtualRefElement = hasClosestByAttribute(event.target, "data-type", "virtual-block-ref");
+            if (virtualRefElement) {
+                const blockElement = hasClosestBlock(virtualRefElement);
+                if (blockElement) {
+                    fetchPost("/api/block/getBlockDefIDsByRefText", {
+                        anchor: virtualRefElement.textContent,
+                        excludeIDs: [blockElement.getAttribute("data-node-id")]
+                    }, (response) => {
+                        checkFold(response.data[0], (zoomIn) => {
+                            openMobileFileById(protyle.app, response.data[0], zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                            activeBlur();
+                            hideKeyboardToolbar();
+                        });
+                    });
+                }
+                return;
+            }
+            /// #endif
 
             const fileElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref");
             if (fileElement && range.toString() === "") {
@@ -2050,7 +2077,7 @@ export class WYSIWYG {
                 return;
             }
 
-            if (aElement && !event.altKey) {
+            if (aElement) {
                 event.stopPropagation();
                 event.preventDefault();
                 let linkAddress = Lute.UnEscapeHTMLStr(aLink);
@@ -2063,31 +2090,28 @@ export class WYSIWYG {
                         (!linkPathname.endsWith(".pdf") ||
                             (linkPathname.endsWith(".pdf") && !linkAddress.startsWith("file://")))
                     ) {
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else if (event.shiftKey) {
-                            openBy(linkAddress, "app");
-                        } else {
+                        if (event.altKey) {
+                            openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
+                        } else if (!ctrlIsPressed && !event.shiftKey) {
                             openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
                         }
                     } else {
-                        /// #if !BROWSER
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else {
-                            openBy(linkAddress, "app");
-                        }
-                        /// #else
                         openByMobile(linkAddress);
-                        /// #endif
                     }
-                } else if (linkAddress) {
                     /// #if !BROWSER
+                    if (ctrlIsPressed) {
+                        openBy(linkAddress, "folder");
+                    } else if (event.shiftKey) {
+                        openBy(linkAddress, "app");
+                    }
+                    /// #endif
+                } else if (linkAddress) {
                     if (0 > linkAddress.indexOf(":")) {
                         // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
                         // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
                         linkAddress = `https://${linkAddress}`;
                     }
+                    /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
                         showMessage(e);
                     });
@@ -2289,7 +2313,7 @@ export class WYSIWYG {
                                 actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                                 updateTransaction(protyle, actionId, actionElement.parentElement.outerHTML, html);
                             }
-                        } else {
+                        } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {
                             if (protyle.block.showAll && protyle.block.id === actionId) {
                                 enterBack(protyle, actionId);
                             } else {

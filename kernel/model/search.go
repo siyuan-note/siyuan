@@ -50,6 +50,145 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+	refBlockMap := map[string][]string{}
+	blockMap := map[string]bool{}
+	var invalidBlockIDs []string
+	notebooks, err := ListNotebooks()
+	if nil != err {
+		return
+	}
+	luteEngine := util.NewLute()
+	for _, notebook := range notebooks {
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		for _, paths := range pages {
+			var trees []*parse.Tree
+			for _, localPath := range paths {
+				tree, loadTreeErr := loadTree(localPath, luteEngine)
+				if nil != loadTreeErr {
+					continue
+				}
+				trees = append(trees, tree)
+			}
+			for _, tree := range trees {
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if entering {
+						if n.IsBlock() {
+							blockMap[n.ID] = true
+							return ast.WalkContinue
+						}
+
+						if ast.NodeTextMark == n.Type {
+							if n.IsTextMarkType("a") {
+								if strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/") {
+									defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+									if strings.Contains(defID, "?") {
+										defID = strings.Split(defID, "?")[0]
+									}
+									refID := treenode.ParentBlock(n).ID
+									if defIDs := refBlockMap[refID]; 1 > len(defIDs) {
+										refBlockMap[refID] = []string{defID}
+									} else {
+										refBlockMap[refID] = append(defIDs, defID)
+									}
+								}
+							} else if n.IsTextMarkType("block-ref") {
+								defID := n.TextMarkBlockRefID
+								refID := treenode.ParentBlock(n).ID
+								if defIDs := refBlockMap[refID]; 1 > len(defIDs) {
+									refBlockMap[refID] = []string{defID}
+								} else {
+									refBlockMap[refID] = append(defIDs, defID)
+								}
+							}
+						}
+					}
+					return ast.WalkContinue
+				})
+			}
+		}
+	}
+
+	invalidDefIDs := map[string]bool{}
+	for _, refDefIDs := range refBlockMap {
+		for _, defID := range refDefIDs {
+			invalidDefIDs[defID] = true
+		}
+	}
+
+	var toRemoves []string
+	for defID, _ := range invalidDefIDs {
+		if _, ok := blockMap[defID]; ok {
+			toRemoves = append(toRemoves, defID)
+		}
+	}
+	for _, toRemove := range toRemoves {
+		delete(invalidDefIDs, toRemove)
+	}
+
+	toRemoves = nil
+	for refID, defIDs := range refBlockMap {
+		var tmp []string
+		for _, defID := range defIDs {
+			if _, ok := invalidDefIDs[defID]; !ok {
+				tmp = append(tmp, defID)
+			}
+		}
+
+		for _, toRemove := range tmp {
+			defIDs = gulu.Str.RemoveElem(defIDs, toRemove)
+		}
+
+		if 1 > len(defIDs) {
+			toRemoves = append(toRemoves, refID)
+		}
+	}
+	for _, toRemove := range toRemoves {
+		delete(refBlockMap, toRemove)
+	}
+
+	for refID, _ := range refBlockMap {
+		invalidBlockIDs = append(invalidBlockIDs, refID)
+	}
+	invalidBlockIDs = gulu.Str.RemoveDuplicatedElem(invalidBlockIDs)
+
+	sort.Strings(invalidBlockIDs)
+	allInvalidBlockIDs := invalidBlockIDs
+
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if end > len(invalidBlockIDs) {
+		end = len(invalidBlockIDs)
+	}
+	invalidBlockIDs = invalidBlockIDs[start:end]
+
+	sqlBlocks := sql.GetBlocks(invalidBlockIDs)
+	var tmp []*sql.Block
+	for _, sqlBlock := range sqlBlocks {
+		if nil != sqlBlock {
+			tmp = append(tmp, sqlBlock)
+		}
+	}
+	sqlBlocks = tmp
+
+	ret = fromSQLBlocks(&sqlBlocks, "", 36)
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
+	matchedBlockCount = len(allInvalidBlockIDs)
+	rootCount := map[string]bool{}
+	for _, id := range allInvalidBlockIDs {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			continue
+		}
+		rootCount[bt.RootID] = true
+	}
+	matchedRootCount = len(rootCount)
+	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	return
+}
+
 type EmbedBlock struct {
 	Block      *Block       `json:"block"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
@@ -127,7 +266,7 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 	count := 0
 	for _, sb := range sqlBlocks {
 		if nil == trees[sb.RootID] {
-			tree, _ := loadTreeByBlockID(sb.RootID)
+			tree, _ := LoadTreeByBlockID(sb.RootID)
 			if nil == tree {
 				continue
 			}
@@ -185,7 +324,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockID(ref.DefBlockRootID)
+				tree, _ = LoadTreeByBlockID(ref.DefBlockRootID)
 			}
 			if nil == tree {
 				continue
@@ -221,7 +360,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 	for _, b := range ret {
 		tree := cachedTrees[b.RootID]
 		if nil == tree {
-			tree, _ = loadTreeByBlockID(b.RootID)
+			tree, _ = LoadTreeByBlockID(b.RootID)
 		}
 		if nil == tree {
 			continue
@@ -234,7 +373,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := cachedTrees[b.RootID]
 			if nil == tree {
-				tree, _ = loadTreeByBlockID(b.RootID)
+				tree, _ = LoadTreeByBlockID(b.RootID)
 				cachedTrees[b.RootID] = tree
 			}
 			if nil != tree {
@@ -327,7 +466,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			continue
 		}
 
-		tree, _ = loadTreeByBlockID(id)
+		tree, _ = LoadTreeByBlockID(id)
 		if nil == tree {
 			continue
 		}
@@ -681,7 +820,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 			if _, ok := rootMap[b.RootID]; !ok {
 				rootMap[b.RootID] = true
 				rootIDs = append(rootIDs, b.RootID)
-				tree, _ := loadTreeByBlockID(b.RootID)
+				tree, _ := LoadTreeByBlockID(b.RootID)
 				if nil == tree {
 					continue
 				}

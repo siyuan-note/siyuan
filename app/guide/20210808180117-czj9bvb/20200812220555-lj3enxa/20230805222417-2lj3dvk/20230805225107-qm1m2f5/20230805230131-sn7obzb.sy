@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805230131-sn7obzb",
 		"title": "对接第三方云端存储",
-		"updated": "20231217111041"
+		"updated": "20240301090951"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805230746-4q9cmrb",
-				"updated": "20230805230746"
+				"updated": "20240301090951"
 			},
 			"Children": [
 				{
@@ -121,7 +121,7 @@
 					},
 					"Properties": {
 						"id": "20230805230746-zb33erf",
-						"updated": "20230805230746"
+						"updated": "20240301090951"
 					},
 					"Children": [
 						{
@@ -129,7 +129,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230805230746-i9fzmzi",
-								"updated": "20230805230746"
+								"updated": "20240301090951"
 							},
 							"Children": [
 								{
@@ -141,6 +141,20 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://infini-cloud.net/",
 									"TextMarkTextContent": "InfiniCLOUD"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（不支持坚果云 WebDAV，因为其"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
+									"TextMarkTextContent": "接口存在限制"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "）"
 								}
 							]
 						}

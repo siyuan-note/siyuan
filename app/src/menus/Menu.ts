@@ -349,7 +349,10 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
             } else {
                 currentElement.dispatchEvent(new CustomEvent(getEventName()));
             }
-            window.siyuan.menus.menu.remove();
+            if (window.siyuan.menus.menu.element.contains(currentElement)) {
+                // 块标上 AI 会使用新的 menu，不能移除
+                window.siyuan.menus.menu.remove();
+            }
         }
         return true;
     }

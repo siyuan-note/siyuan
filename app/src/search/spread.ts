@@ -88,13 +88,16 @@ export const openSearch = async (options: {
             if (range && !options) {
                 focusByRange(range);
             }
-            if (edit) {
-                edit.destroy();
-            }
+            dialog.editors.edit.destroy();
+            dialog.editors.unRefEdit.destroy();
         },
         resizeCallback(type: string) {
-            if (type !== "d" && type !== "t" && edit) {
-                edit.resize();
+            if (type !== "d" && type !== "t") {
+                if (dialog.element.querySelector("#searchUnRefPanel").classList.contains("fn__none")) {
+                    dialog.editors.edit.resize();
+                } else {
+                    dialog.editors.unRefEdit.resize();
+                }
             }
         }
     });
@@ -113,9 +116,8 @@ export const openSearch = async (options: {
         replaceTypes: Object.assign({}, localData.replaceTypes),
         page: options.key ? 1 : localData.page
     };
-    const edit = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {
+    dialog.editors = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {
         dialog.destroy({focus: "false"});
     });
-    dialog.editor = edit;
     dialog.data = config;
 };

@@ -1,6 +1,7 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
+import {hasClosestByClassName} from "../util/hasClosest";
 
 export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let plantumlElements: Element[] = [];
@@ -14,12 +15,13 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
         return;
     }
     addScript(`${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`, "protylePlantumlScript").then(() => {
+        const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         plantumlElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                e.insertAdjacentHTML("afterbegin", genIconHTML());
+                e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {

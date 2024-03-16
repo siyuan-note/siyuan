@@ -57,6 +57,11 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                         window.siyuan.mobile.popEditor = null;
                     }
                 }
+            },
+            resizeCallback(type: string) {
+                if (type !== "d" && type !== "t" && edit) {
+                    edit.resize();
+                }
             }
         });
         if (response.data.blocks.length > 0) {
@@ -70,7 +75,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
             }
-            dialog.editor = edit;
+            dialog.editors = {
+                card: edit
+            };
+            edit.resize();
             getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         }
         const previousElement = dialog.element.querySelector('[data-type="previous"]');

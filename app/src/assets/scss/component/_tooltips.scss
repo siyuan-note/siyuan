@@ -51,7 +51,7 @@
     background-color: var(--b3-tooltips-background);
     border-radius: var(--b3-border-radius);
     line-height: 17px;
-    transform: scale(0.8);
+    transform: scale(.8);
     max-width: 60vw;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -74,7 +74,7 @@
     pointer-events: none;
     position: absolute;
     opacity: 0;
-    transition: opacity 150ms 0ms cubic-bezier(0, 0, 0.2, 1), transform 150ms 0ms cubic-bezier(0, 0, 0.2, 1);
+    transition: opacity 150ms 0ms cubic-bezier(0, 0, .2, 1), transform 150ms 0ms cubic-bezier(0, 0, .2, 1);
   }
 
   &:hover,

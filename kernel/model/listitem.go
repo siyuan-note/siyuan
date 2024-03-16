@@ -27,7 +27,7 @@ import (
 )
 
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID, newTargetPath string, err error) {
-	srcTree, _ := loadTreeByBlockID(srcListItemID)
+	srcTree, _ := LoadTreeByBlockID(srcListItemID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
 		return

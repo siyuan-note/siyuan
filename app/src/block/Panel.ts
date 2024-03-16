@@ -211,11 +211,13 @@ export class BlockPanel {
             });
             this.editors = [];
         }
+        const level = parseInt(this.element.dataset.level);
         this.element.remove();
         this.element = undefined;
         this.targetElement = undefined;
         // 移除弹出上使用右键菜单
-        if (window.siyuan.menus.menu.element.dataset.from !== "app") {
+        const menuLevel = parseInt(window.siyuan.menus.menu.element.dataset.from);
+        if (window.siyuan.menus.menu.element.dataset.from !== "app" && menuLevel && menuLevel >= level) {
             // https://github.com/siyuan-note/siyuan/issues/9854 右键菜单不是从浮窗中弹出的则不进行移除
             window.siyuan.menus.menu.remove();
         }

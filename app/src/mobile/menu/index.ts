@@ -84,6 +84,7 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
         <svg class="b3-menu__icon"><use xlink:href="#iconHistory"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dataHistory}</span>
     </div>
+    <div class="b3-menu__separator${(isInAndroid() || isInIOS()) ? "" : " fn__none"}"></div>
     <div class="b3-menu__item${(isInAndroid() || isInIOS()) ? "" : " fn__none"}" id="menuSafeQuit">
         <svg class="b3-menu__icon"><use xlink:href="#iconQuit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.safeQuit}</span>
     </div>

@@ -8,6 +8,14 @@ const _NODE_ENV = NODE_ENV;
 
 const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
 
+const getFunctionKey = () => {
+    const fData: { [key: number]: string } = {};
+    for (let i = 1; i <= 32; i++) {
+        fData[i + 111] = "F" + i;
+    }
+    return fData;
+};
+
 export abstract class Constants {
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
@@ -50,6 +58,7 @@ export abstract class Constants {
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
+    public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
 
@@ -88,6 +97,7 @@ export abstract class Constants {
     public static readonly LOCAL_SEARCHDATA = "local-searchdata";
     public static readonly LOCAL_SEARCHKEYS = "local-searchkeys";
     public static readonly LOCAL_SEARCHASSET = "local-searchasset";
+    public static readonly LOCAL_SEARCHUNREF = "local-searchunref";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORYNOTEID = "local-historynoteid"; // string
@@ -180,7 +190,7 @@ export abstract class Constants {
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
-    public static readonly KEYCODELIST: { [key: number]: string } = {
+    public static KEYCODELIST: { [key: number]: string } = Object.assign(getFunctionKey(), {
         8: "⌫",
         9: "⇥",
         13: "↩",
@@ -256,18 +266,6 @@ export abstract class Constants {
         109: "-",
         110: ".",
         111: "/",
-        112: "F1",
-        113: "F2",
-        114: "F3",
-        115: "F4",
-        116: "F5",
-        117: "F6",
-        118: "F7",
-        119: "F8",
-        120: "F9",
-        121: "F10",
-        122: "F11",
-        123: "F12",
         144: "NumLock",
         145: "ScrollLock",
         182: "MyComputer",
@@ -283,7 +281,7 @@ export abstract class Constants {
         220: "\\",
         221: "]",
         222: "'",
-    };
+    });
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
     // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
@@ -345,6 +343,7 @@ export abstract class Constants {
             closeLeft: {default: "", custom: ""},
             closeRight: {default: "", custom: ""},
             tabToWindow: {default: "", custom: ""},
+            addToDatabase: {default: "", custom: ""},
         },
         editor: {
             general: {
@@ -362,6 +361,7 @@ export abstract class Constants {
                 refPopover: {default: "", custom: ""},
                 copyText: {default: "", custom: ""},
                 exitFocus: {default: "", custom: ""},
+                ai: {default: "", custom: ""},
                 switchReadonly: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
@@ -397,7 +397,7 @@ export abstract class Constants {
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
                 jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
-                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"}
             },
             insert: {
                 appearance: {default: "⌥⌘X", custom: "⌥⌘X"},

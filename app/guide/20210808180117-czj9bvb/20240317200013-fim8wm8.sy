@@ -1,0 +1,524 @@
+{
+	"ID": "20240317200013-fim8wm8",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f9d1-200d-1f4bb",
+		"id": "20240317200013-fim8wm8",
+		"title": "扩展开发",
+		"type": "doc",
+		"updated": "20240317202200"
+	},
+	"Children": [
+		{
+			"ID": "20240317200016-xvywk4p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317200016-xvywk4p",
+				"updated": "20240317200558"
+			},
+			"Children": [
+				{
+					"ID": "20240317200558-4v1hex5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317200558-4v1hex5",
+						"updated": "20240317200558"
+					},
+					"Children": [
+						{
+							"ID": "20240317200558-gwf2uwd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317200558-gwf2uwd",
+								"updated": "20240317201234"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200922102318-oz84yu3",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "主题"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 样例项目 github repo: siyuan-note/theme-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317200705-tk4ayhp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317200705-tk4ayhp"
+					},
+					"Children": [
+						{
+							"ID": "20240317200705-q5dnsn1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317200705-q5dnsn1",
+								"updated": "20240317201252"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200922101913-d5yitmq",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "图标"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 样例项目 github repo: siyuan-note/icon-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317200724-tsalfh6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317200724-tsalfh6"
+					},
+					"Children": [
+						{
+							"ID": "20240317200724-b2jtxr5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317200724-b2jtxr5",
+								"updated": "20240317201310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210824201257-cy7icrc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "挂件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 样例项目 github repo: siyuan-note/widget-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317200744-xhlofif",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317200744-xhlofif"
+					},
+					"Children": [
+						{
+							"ID": "20240317200744-9x0xxvl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317200744-9x0xxvl",
+								"updated": "20240317201325"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506210010-houyyvy",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "插件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 样例项目 github repo: siyuan-note/plugin-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317200746-2zoowq8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317200746-2zoowq8"
+					},
+					"Children": [
+						{
+							"ID": "20240317200746-v3zvzqi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317200746-v3zvzqi",
+								"updated": "20240317201342"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20201204181006-7bkppue",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "模板"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 样例项目 github repo: siyuan-note/template-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317201413-gnqg9wp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317201413-gnqg9wp"
+					},
+					"Children": [
+						{
+							"ID": "20240317201413-0l5jsoe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317201413-0l5jsoe",
+								"updated": "20240317201433"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "集市仓库 github repo: siyuan-note/bazaar"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317201527-h016be8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317201527-h016be8"
+					},
+					"Children": [
+						{
+							"ID": "20240317201527-191zcb8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317201527-191zcb8",
+								"updated": "20240317201608"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://docs.siyuan-note.club/",
+									"TextMarkTextContent": "社区开发者资源"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240317201610-467kw9x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240317201610-467kw9x",
+				"updated": "20240317201707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240317201708-e6uwpl2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317201708-e6uwpl2",
+				"updated": "20240317202200"
+			},
+			"Children": [
+				{
+					"ID": "20240317201708-mfe7y9d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317201708-mfe7y9d",
+						"updated": "20240317201708"
+					},
+					"Children": [
+						{
+							"ID": "20240317201810-kb9f6qe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317201810-kb9f6qe",
+								"updated": "20240317201841"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "插件或者外部扩展如果有直接读取或者写入 data 下文件的需求，请通过调用内核 API 来实现，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "不要自行调用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong code",
+									"TextMarkTextContent": "fs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "或者其他 electron、nodejs API"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，否则可能会导致数据同步时分块丢失，造成云端数据损坏。相关 API 见 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/getFile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 等）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317201924-6yrpv38",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317201924-6yrpv38",
+						"updated": "20240317202200"
+					},
+					"Children": [
+						{
+							"ID": "20240317201924-j85082w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317201924-j85082w",
+								"updated": "20240317202207"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源在创建日记的时候会自动为文档添加 custom-dailynote-yyyymmdd 属性，以方便将日记文档同普通文档区分。"
+								}
+							]
+						},
+						{
+							"ID": "20240317201924-ljq7w3h",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"id": "20240317201924-ljq7w3h",
+								"updated": "20240317201924"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": "\u003e"
+								},
+								{
+									"ID": "20240317201924-fr7chfe",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20240317201924-fr7chfe",
+										"updated": "20240317201924"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "详情请见 "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "a",
+											"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/9807",
+											"TextMarkTextContent": "Github Issue #9807"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "。"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20240317201924-9m1bcso",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317201924-9m1bcso",
+								"updated": "20240317201924"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "开发者在开发手动创建 Daily Note 的功能时请注意："
+								}
+							]
+						},
+						{
+							"ID": "20240317201924-cl20fvv",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240317201924-cl20fvv",
+								"updated": "20240317202200"
+							},
+							"Children": [
+								{
+									"ID": "20240317201924-bxsu2r5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317201924-bxsu2r5",
+										"updated": "20240317202201"
+									},
+									"Children": [
+										{
+											"ID": "20240317201924-f0mjd17",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317201924-f0mjd17",
+												"updated": "20240317202201"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果调用了 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/api/filetree/createDailyNote"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 创建日记，那么文档会自动添加这个属性，无需开发者特别处理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240317201924-0gnnmqf",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317201924-0gnnmqf",
+										"updated": "20240317202200"
+									},
+									"Children": [
+										{
+											"ID": "20240317201924-qul097o",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317201924-qul097o",
+												"updated": "20240317202200"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果是开发者代码手动创建文档（例如使用 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "createDocWithMd"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ API 创建日记），请手动为文档添加该属性"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

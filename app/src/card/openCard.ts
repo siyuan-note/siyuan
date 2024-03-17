@@ -210,11 +210,12 @@ export const bindCardEvent = async (options: {
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
+        const docId =  filterElement.getAttribute("data-id");
         fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
             (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-            rootID: filterElement.getAttribute("data-id"),
-            deckID: filterElement.getAttribute("data-id"),
-            notebook: filterElement.getAttribute("data-id"),
+            rootID: docId,
+            deckID: docId,
+            notebook: docId,
         }, async (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
@@ -239,6 +240,7 @@ export const bindCardEvent = async (options: {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];
+        const docId =  filterElement.getAttribute("data-id");
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
                 type = "1";
@@ -287,7 +289,15 @@ export const bindCardEvent = async (options: {
                     icon: "iconRefresh",
                     label: window.siyuan.languages.reset,
                     click() {
-
+                        fetchPost("/api/riff/resetRiffCards", {
+                            type: filterElement.getAttribute("data-cardtype"),
+                            id: docId,
+                            deckID: Constants.QUICK_DECK_ID,
+                            blockIDs: [currentCard.blockID],
+                        }, () => {
+                            // currentCard.
+                            // genCardCount(options.cardsData, index);
+                        });
                     }
                 });
                 menu.addItem({
@@ -356,7 +366,7 @@ export const bindCardEvent = async (options: {
                             cardsData: options.cardsData,
                             index,
                             cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                            id: filterElement.getAttribute("data-id"),
+                            id: docId,
                             title: options.title
                         },
                         id: "siyuan-card"
@@ -509,9 +519,9 @@ export const bindCardEvent = async (options: {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
                     fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
                         (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                        rootID: filterElement.getAttribute("data-id"),
-                        deckID: filterElement.getAttribute("data-id"),
-                        notebook: filterElement.getAttribute("data-id"),
+                        rootID: docId,
+                        deckID: docId,
+                        notebook: docId,
                         reviewedCards: options.cardsData.cards
                     }, async (result) => {
                         emitEvent(options.app, options.cardsData.cards[index - 1], type);

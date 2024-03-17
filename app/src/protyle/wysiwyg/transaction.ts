@@ -570,7 +570,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                         } else {
                             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((realItem: HTMLElement) => {
                                 realItem.style.animation = "";
-                            })
+                            });
                         }
                     }, 450);
                 }

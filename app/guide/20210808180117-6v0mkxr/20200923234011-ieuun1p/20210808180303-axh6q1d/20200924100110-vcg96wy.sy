@@ -1026,8 +1026,7 @@
 													]
 												},
 												{
-													"Type": "NodeText",
-													"Data": "\n"
+													"Type": "NodeText"
 												}
 											]
 										}
@@ -1086,8 +1085,7 @@
 													]
 												},
 												{
-													"Type": "NodeText",
-													"Data": "\n"
+													"Type": "NodeText"
 												}
 											]
 										}

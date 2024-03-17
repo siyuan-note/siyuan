@@ -1,0 +1,530 @@
+{
+	"ID": "20240317202230-l8duv3r",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f9d1-200d-1f4bb",
+		"id": "20240317202230-l8duv3r",
+		"title": "擴充開發",
+		"type": "doc",
+		"updated": "20240317202429"
+	},
+	"Children": [
+		{
+			"ID": "20240317202310-5hm9jav",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317202310-5hm9jav",
+				"updated": "20240317202429"
+			},
+			"Children": [
+				{
+					"ID": "20240317202310-coy1p2h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-coy1p2h",
+						"updated": "20240317202351"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-x9edmfs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-x9edmfs",
+								"updated": "20240317202351"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121326-v5kpxfp",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 範例專案 github repo: siyuan-note/theme-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-6u8bpzw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-6u8bpzw",
+						"updated": "20240317202343"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-n17h6f6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-n17h6f6",
+								"updated": "20240317202343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121633-qa2fjpl",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "圖示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 範例專案 github repo: siyuan-note/icon-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-0nar36g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-0nar36g",
+						"updated": "20240317202411"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-k0gjr97",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-k0gjr97",
+								"updated": "20240317202411"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226123101-qjw03ab",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "掛件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 範例專案 github repo: siyuan-note/widget-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-vzab5p6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-vzab5p6",
+						"updated": "20240317202417"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-641jn1t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-641jn1t",
+								"updated": "20240317202417"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506211210-1roopyo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "插件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 範例專案 github repo: siyuan-note/plugin-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-ucco616",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-ucco616",
+						"updated": "20240317202429"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-7vgo9bs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-7vgo9bs",
+								"updated": "20240317202429"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226123004-dplpw0o",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "模板"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 範例專案 github repo: siyuan-note/template-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-3gr3zpr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-3gr3zpr",
+						"updated": "20240317202310"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-1j0gqwj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-1j0gqwj",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "市集倉庫 github repo: siyuan-note/bazaar"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-ed4q32m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-ed4q32m",
+						"updated": "20240317202310"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-gxcut0e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-gxcut0e",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://docs.siyuan-note.club/",
+									"TextMarkTextContent": "社區開發者資源"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240317202310-219htvn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240317202310-219htvn",
+				"updated": "20240317202310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240317202310-3n68u3l",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317202310-3n68u3l",
+				"updated": "20240317202310"
+			},
+			"Children": [
+				{
+					"ID": "20240317202310-qr9ah0g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-qr9ah0g",
+						"updated": "20240317202310"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-8deqwkz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-8deqwkz",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "外掛程式或外部擴充如果有直接讀取或寫入data 下檔案的需求，請透過呼叫核心API 來實現，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "不要自行呼叫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong code",
+									"TextMarkTextContent": "fs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ *"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "或其他electron、nodejs API"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " *，否則可能會導致資料同步時分塊遺失，造成雲端資料損壞。 相關 API 請參閱 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/getFile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 等）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202310-poaxn3m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202310-poaxn3m",
+						"updated": "20240317202310"
+					},
+					"Children": [
+						{
+							"ID": "20240317202310-e5wron5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-e5wron5",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源在建立日記的時候會自動為文件新增 custom-dailynote-yyyymmdd 屬性，以方便將日記文件同普通文件區分。"
+								}
+							]
+						},
+						{
+							"ID": "20240317202310-ozkltzq",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"id": "20240317202310-ozkltzq",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": "\u003e"
+								},
+								{
+									"ID": "20240317202310-tfo5fiq",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20240317202310-tfo5fiq",
+										"updated": "20240317202310"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "詳情請見 "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "a",
+											"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/9807",
+											"TextMarkTextContent": "Github Issue #9807"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "。"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20240317202310-q23q89l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202310-q23q89l",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開發者在開發手動建立 Daily Note 的功能時請注意："
+								}
+							]
+						},
+						{
+							"ID": "20240317202310-wlez4b5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240317202310-wlez4b5",
+								"updated": "20240317202310"
+							},
+							"Children": [
+								{
+									"ID": "20240317202310-kl0aozp",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317202310-kl0aozp",
+										"updated": "20240317202310"
+									},
+									"Children": [
+										{
+											"ID": "20240317202310-rltqwa6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317202310-rltqwa6",
+												"updated": "20240317202310"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果呼叫了 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/api/filetree/createDailyNote"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 建立日記，那麼文件會自動新增這個屬性，無需開發者特別處理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240317202310-2zcvsjh",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317202310-2zcvsjh",
+										"updated": "20240317202310"
+									},
+									"Children": [
+										{
+											"ID": "20240317202310-s8kk0s5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317202310-s8kk0s5",
+												"updated": "20240317202310"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果是開發者程式碼手動建立文件（例如使用 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "createDocWithMd"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ API 建立日記），請手動為文件新增該屬性"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

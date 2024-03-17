@@ -274,7 +274,7 @@ export const bindCardEvent = async (options: {
             if (moreElement) {
                 event.stopPropagation();
                 event.preventDefault();
-                if (filterElement.getAttribute("data-cardtype") === "all") {
+                if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
                     showMessage(window.siyuan.languages.noSupportTip);
                     return;
                 }

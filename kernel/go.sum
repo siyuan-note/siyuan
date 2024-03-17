@@ -10,10 +10,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950 h1:Pa5hMiBceT
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c h1:Fas3hxqP33xA9KKDV50jUmppiiOukk5bdV00Hk5VSSk=
 github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
-github.com/88250/lute v1.7.7-0.20240314121716-744ca7756fe3 h1:qhyZg222TTfg1fbguxk3Nq21S1bcj+usXdJuxA0uBhk=
-github.com/88250/lute v1.7.7-0.20240314121716-744ca7756fe3/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
-github.com/88250/lute v1.7.7-0.20240316041855-e459dd2855d6 h1:tYUMTPtZoqfX87KdKztrGKjA7UTdoEf3MS1dtj3g0vo=
-github.com/88250/lute v1.7.7-0.20240316041855-e459dd2855d6/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
+github.com/88250/lute v1.7.7-0.20240317033923-b5d564e25df7 h1:egkoxNZeGBDcUCd4kUHgeYIZZ7uNHTK+TT+K2yZTHm0=
+github.com/88250/lute v1.7.7-0.20240317033923-b5d564e25df7/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -365,8 +363,6 @@ github.com/siyuan-note/httpclient v0.0.0-20240312073515-af29be1cfb4e h1:2DeWT+8q
 github.com/siyuan-note/httpclient v0.0.0-20240312073515-af29be1cfb4e/go.mod h1:v/O6xcc3HomxJR1dLwENGan9RB08WqSPv4kxyzaTSUI=
 github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0 h1:+XjUr9UMXsczdO2bGA72p/k9wa2ShPb8ybi7CDBJ7HQ=
 github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
-github.com/siyuan-note/riff v0.0.0-20240315093840-462c11a1810a h1:eTFvL5JrHZfOtWRfhR8YMI5VfxgA/yyn/TEDXcAHd/E=
-github.com/siyuan-note/riff v0.0.0-20240315093840-462c11a1810a/go.mod h1:QGtzYegDWStrf0lAamdAX0DEO503xAZMU7XyJ3ftfmI=
 github.com/siyuan-note/riff v0.0.0-20240315100323-cc554b704bcc h1:/xkXmPKwQZRnpJYW2WBv0VAGQeRaGN72KUqAZiar60Q=
 github.com/siyuan-note/riff v0.0.0-20240315100323-cc554b704bcc/go.mod h1:QGtzYegDWStrf0lAamdAX0DEO503xAZMU7XyJ3ftfmI=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=

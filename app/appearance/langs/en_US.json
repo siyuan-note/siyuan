@@ -4,7 +4,7 @@
   "forgetCount": "Forget to count",
   "lastReviewTime": "Last review time",
   "cardStatus": "Card status",
-  "noSupportTip": "This function does not support the use of card packages",
+  "noSupportTip": "This function does not support the use of card decks",
   "insertRowTip": "The newly added rows have been filtered and can be viewed by canceling filtering/searching/sorting",
   "insertRowTip2": "New rows do not participate in sorting",
   "insertPhoto": "Take a photo and insert it",

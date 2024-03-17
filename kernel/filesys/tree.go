@@ -146,6 +146,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		tree.Root.Spec = "1"
 		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
 	}
+	tree.Root.SetIALAttr("type", "doc")
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 	data = renderer.Render()
 

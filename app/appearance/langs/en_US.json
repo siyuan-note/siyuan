@@ -1,4 +1,6 @@
 {
+  "setDueTime": "Set expiration time",
+  "showCardDay": "After how many days do you want to show the card?",
   "forgetCount": "Forget to count",
   "lastReviewTime": "Last review time",
   "cardStatus": "Card status",

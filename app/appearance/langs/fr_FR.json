@@ -1,4 +1,6 @@
 {
+  "setDueTime": "Définir le délai d'expiration",
+  "showCardDay": "Après combien de jours souhaitez-vous montrer la carte ?",
   "forgetCount": "Oublier de compter",
   "lastReviewTime": "Heure de la dernière révision",
   "cardStatus": "Statut de la carte",

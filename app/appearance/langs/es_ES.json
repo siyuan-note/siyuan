@@ -1,4 +1,6 @@
 {
+  "setDueTime": "Establecer tiempo de vencimiento",
+  "showCardDay": "¿Después de cuántos días deseas mostrar la tarjeta?",
   "forgetCount": "Olvídate de contar",
   "lastReviewTime": "Última hora de revisión",
   "cardStatus": "Estado de la tarjeta",

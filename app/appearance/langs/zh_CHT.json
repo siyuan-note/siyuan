@@ -1,4 +1,6 @@
 {
+  "setDueTime": "設定到期時間",
+  "showCardDay": "要在幾天後顯示卡片？",
   "forgetCount": "遺忘次數",
   "lastReviewTime": "最後複習時間",
   "cardStatus": "卡片狀態",

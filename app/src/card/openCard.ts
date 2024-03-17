@@ -283,7 +283,7 @@ export const bindCardEvent = async (options: {
                     icon: "iconClock",
                     label: window.siyuan.languages.setDueTime,
                     click() {
-                        const dialog = new Dialog({
+                        const timedialog = new Dialog({
                             title: window.siyuan.languages.setDueTime,
                             content: `<div class="b3-dialog__content">
     <div class="b3-label__text">${window.siyuan.languages.showCardDay}</div>
@@ -296,20 +296,20 @@ export const bindCardEvent = async (options: {
 </div>`,
                             width: isMobile() ? "92vw" : "520px",
                         });
-                        const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                        dialog.bindInput(inputElement, () => {
+                        const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
+                        const btnsElement = timedialog.element.querySelectorAll(".b3-button");
+                        timedialog.bindInput(inputElement, () => {
                             (btnsElement[1] as HTMLButtonElement).click();
                         });
                         inputElement.focus();
                         inputElement.select();
                         btnsElement[0].addEventListener("click", () => {
-                            dialog.destroy();
+                            timedialog.destroy();
                         });
                         btnsElement[1].addEventListener("click", () => {
                             fetchPost("/api/riff/batchSetRiffCardsDueTime", {
                                 cardDues: [{
-                                    id: currentCard.blockID,
+                                    id: currentCard.cardID,
                                     due: dayjs().day(parseInt(inputElement.value)).format("YYYYMMDDHHmmss")
                                 }]
                             }, () => {
@@ -323,7 +323,7 @@ export const bindCardEvent = async (options: {
                                 options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
                                 options.cardsData.cards.splice(index, 1);
                                 index--;
-                                dialog.destroy();
+                                timedialog.destroy();
                             });
                         });
                     }

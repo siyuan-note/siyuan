@@ -1228,7 +1228,7 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string, context map[st
 	}
 	ClearCache()
 	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(rootID)))[:7]
-	eventbus.Publish(eventbus.EvtSQLInsertBlocksFTS, context, 1, evtHash)
+	eventbus.Publish(eventbus.EvtSQLUpdateBlocksHPaths, context, 1, evtHash)
 	return
 }
 

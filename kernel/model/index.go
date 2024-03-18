@@ -351,13 +351,23 @@ func subscribeSQLEvents() {
 	})
 	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
-			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
 			return
 		}
 
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]interface{}, blockCount int, hash string) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			return
+		}
+
+		current := context["current"].(int)
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(234), current, total, blockCount, hash)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})

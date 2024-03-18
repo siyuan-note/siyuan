@@ -1441,6 +1441,7 @@
     "230": "Deleting cloud storage unreferenced check indexes...",
     "231": "Deleting unreferenced data objects in cloud storage...",
     "232": "The cloud data storage has been purged. [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released",
-    "233": "Closing user guide..."
+    "233": "Closing user guide...",
+    "234": "[%d/%d] Updated [%d] of readable paths of block-level elements [%s]"
   }
 }

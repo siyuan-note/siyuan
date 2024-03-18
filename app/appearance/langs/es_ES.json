@@ -1441,6 +1441,7 @@
     "230": "Eliminando índices de verificación sin referencia del almacenamiento en la nube...",
     "231": "Eliminar objetos de datos no referenciados en el almacenamiento en la nube...",
     "232": "Se ha eliminado el almacenamiento de datos en la nube. Se han eliminado [%d] instantáneas y [%d] objetos de datos, y se ha liberado un total de [%s] espacio en disco",
-    "233": "Cerrando la guía del usuario..."
+    "233": "Cerrando la guía del usuario...",
+    "234": "[%d/%d] Actualizado [%d] de rutas legibles de elementos a nivel de bloque [%s]"
   }
 }

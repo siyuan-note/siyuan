@@ -1442,6 +1442,6 @@
     "231": "Suppression des objets de données non référencés dans le stockage cloud...",
     "232": "Le stockage de données cloud a été purgé. [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré",
     "233": "Fermeture du guide de l'utilisateur...",
-    "234": "[%d/%d] Mise à jour [%d] des chemins lisibles des éléments de niveau bloc [%s]"
+    "234": "[%d/%d] Mise à jour de [%d] des chemins lisibles du document [%s]"
   }
 }

@@ -45,7 +45,7 @@ export const processPasteCode = (html: string, text: string) => {
 
 export const processRender = (previewPanel: Element) => {
     const language = previewPanel.getAttribute("data-subtype");
-    if (!["abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"].includes(language) || previewPanel.getAttribute("data-type") !== "NodeHTMLBlock") {
+    if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(language) || previewPanel.getAttribute("data-type") !== "NodeHTMLBlock") {
         abcRender(previewPanel);
         htmlRender(previewPanel);
         plantumlRender(previewPanel);

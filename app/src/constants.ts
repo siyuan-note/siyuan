@@ -670,6 +670,9 @@ export abstract class Constants {
     public static readonly ALIAS_CODE_LANGUAGES: string[] = [
         "js", "ts", "html", "toml", "c#", "bat",
     ];
+    public static readonly SIYUAN_RENDER_CODE_LANGUAGES: string[] = [
+        "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"
+    ];
 
     // Google Analytics 事件
     public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";

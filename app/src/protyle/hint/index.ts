@@ -680,7 +680,7 @@ ${genHintItemHTML(item)}
                 }
                 let textContent = value;
                 if (value === "```") {
-                    textContent = value + window.siyuan.storage[Constants.LOCAL_CODELANG] + Lute.Caret + "\n```";
+                    textContent = value + (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(window.siyuan.storage[Constants.LOCAL_CODELANG]) ? "" : window.siyuan.storage[Constants.LOCAL_CODELANG]) + Lute.Caret + "\n```";
                 }
                 const editableElement = getContenteditableElement(nodeElement);
                 if (value === "![]()") { // https://github.com/siyuan-note/siyuan/issues/4586 1
@@ -763,7 +763,7 @@ ${genHintItemHTML(item)}
                         action: "update"
                     }]);
                 }
-                if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && value.length > 3)) {
+                if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {
                     protyle.toolbar.showRender(protyle, nodeElement);
                     processRender(nodeElement);
                 } else if (value.startsWith("```")) {

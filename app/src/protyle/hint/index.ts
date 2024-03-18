@@ -970,7 +970,10 @@ ${genHintItemHTML(item)}
         }
         const lineArray = currentLineValue.split(this.splitChar);
         const lastItem = lineArray[lineArray.length - 1];
-        if (lineArray.length > 1 && lastItem.trim() === lastItem && lastItem.length < Constants.SIZE_TITLE) {
+        if (lineArray.length > 1 &&
+            // https://github.com/siyuan-note/siyuan/issues/10637
+            lastItem.trimStart() === lastItem &&
+            lastItem.length < Constants.SIZE_TITLE) {
             // 输入法自动补全 https://github.com/siyuan-note/insider/issues/100
             if (this.splitChar === "【【" && currentLineValue.endsWith("【【】")) {
                 return "";

@@ -202,6 +202,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, model.CheckReadonly, putFile)
 	ginServer.Handle("POST", "/api/file/copyFile", model.CheckAuth, model.CheckReadonly, copyFile)
+	ginServer.Handle("POST", "/api/file/globalCopyFiles", model.CheckAuth, model.CheckReadonly, globalCopyFiles)
 	ginServer.Handle("POST", "/api/file/removeFile", model.CheckAuth, model.CheckReadonly, removeFile)
 	ginServer.Handle("POST", "/api/file/renameFile", model.CheckAuth, model.CheckReadonly, renameFile)
 	ginServer.Handle("POST", "/api/file/readDir", model.CheckAuth, readDir)

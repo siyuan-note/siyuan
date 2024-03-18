@@ -95,6 +95,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 }
             } else {
                 protyle.toolbar.showRender(protyle, blockElement);
+                processRender(blockElement);
             }
             updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
             return true;

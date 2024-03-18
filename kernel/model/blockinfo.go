@@ -293,11 +293,14 @@ func GetBlocksIndexes(ids []string) (ret map[string]int) {
 		}
 
 		if !n.IsChildBlockOf(tree.Root, 1) {
+			if n.IsBlock() {
+				nodesIndexes[n.ID] = idx
+			}
 			return ast.WalkContinue
 		}
 
-		nodesIndexes[n.ID] = idx
 		idx++
+		nodesIndexes[n.ID] = idx
 		return ast.WalkContinue
 	})
 

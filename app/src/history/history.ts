@@ -537,7 +537,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         const opElement = firstPanelElement.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
                         const typeElement = firstPanelElement.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
                         const notebookElement = firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
-                       const created = target.getAttribute("data-created");
+                        const created = target.getAttribute("data-created");
                         fetchPost("/api/history/getHistoryItems", {
                             notebook: notebookElement.value,
                             query: inputElement.value,
@@ -547,11 +547,26 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }, (response) => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
-                            response.data.items.forEach((docItem: { title: string, path: string }) => {
-                                html += `<li title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 40px">
+                            response.data.items.forEach((docItem: { title: string, path: string, op: string }) => {
+                                let chipClass = " b3-chip b3-chip--list "
+                                if (docItem.op === "clean") {
+                                    chipClass += "b3-chip--primary ";
+                                } else if (docItem.op === "update") {
+                                    chipClass += "b3-chip--info ";
+                                } else if (docItem.op === "delete") {
+                                    chipClass += "b3-chip--error ";
+                                } else if (docItem.op === "format") {
+                                    chipClass += "b3-chip--pink ";
+                                } else if (docItem.op === "sync") {
+                                    chipClass += "b3-chip--success ";
+                                } else if (docItem.op === "replace") {
+                                    chipClass += "b3-chip--secondary ";
+                                }
+                                html += `<li title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}b3-tooltips b3-tooltips__n" aria-label="${docItem.op}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__n" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
 </li>`;

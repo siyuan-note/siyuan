@@ -464,6 +464,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 			Items: []*HistoryItem{{
 				Title: c.Name,
 				Path:  filepath.Dir(filepath.Dir(historyNotebookConf)),
+				Op:    HistoryOpDelete,
 			}},
 		})
 	}

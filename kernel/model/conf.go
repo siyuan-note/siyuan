@@ -527,6 +527,8 @@ var exitLock = sync.Mutex{}
 //
 // force：是否不执行同步过程而直接退出
 //
+// setCurrentWorkspace：是否将当前工作空间放到工作空间列表的最后一个
+//
 // execInstallPkg：是否执行新版本安装包
 //
 //	0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
@@ -540,7 +542,7 @@ var exitLock = sync.Mutex{}
 //	2：提示新安装包
 //
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且同步失败并且新版本安装版已经准备就绪时，执行新版本安装 https://github.com/siyuan-note/siyuan/issues/10288
-func Close(force bool, execInstallPkg int) (exitCode int) {
+func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
@@ -588,15 +590,17 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	clearCorruptedNotebooks()
 	clearPortJSON()
 
-	// 将当前工作空间放到工作空间列表的最后一个
-	// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
-	workspacePaths, err := util.ReadWorkspacePaths()
-	if nil != err {
-		logging.LogErrorf("read workspace paths failed: %s", err)
-	} else {
-		workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
-		workspacePaths = append(workspacePaths, util.WorkspaceDir)
-		util.WriteWorkspacePaths(workspacePaths)
+	if setCurrentWorkspace {
+		// 将当前工作空间放到工作空间列表的最后一个
+		// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
+		workspacePaths, err := util.ReadWorkspacePaths()
+		if nil != err {
+			logging.LogErrorf("read workspace paths failed: %s", err)
+		} else {
+			workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
+			workspacePaths = append(workspacePaths, util.WorkspaceDir)
+			util.WriteWorkspacePaths(workspacePaths)
+		}
 	}
 
 	util.UnlockWorkspace()

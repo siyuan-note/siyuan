@@ -130,6 +130,11 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks] failed: %s", err)
 	}
 
+	_, err = db.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_root_id] failed: %s", err)
+	}
+
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts] failed: %s", err)

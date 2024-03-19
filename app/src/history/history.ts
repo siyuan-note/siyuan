@@ -548,7 +548,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
                             response.data.items.forEach((docItem: { title: string, path: string, op: string }) => {
-                                let chipClass = " b3-chip b3-chip--list "
+                                let chipClass = " b3-chip b3-chip--list ";
                                 if (docItem.op === "clean") {
                                     chipClass += "b3-chip--primary ";
                                 } else if (docItem.op === "update") {

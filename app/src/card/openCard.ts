@@ -339,7 +339,7 @@ export const bindCardEvent = async (options: {
                                 deckID: Constants.QUICK_DECK_ID,
                                 blockIDs: [currentCard.blockID],
                             }, () => {
-                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "")
+                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
                                 currentCard.lapses = 0;
                                 currentCard.lastReview = -62135596800000;
                                 currentCard.reps = 0;

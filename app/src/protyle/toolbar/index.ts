@@ -2,11 +2,13 @@ import {Divider} from "./Divider";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {ToolbarItem} from "./ToolbarItem";
 import {
-    fixTableRange, focusBlock,
+    fixTableRange,
+    focusBlock,
     focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionPosition, selectAll,
+    getSelectionPosition,
+    selectAll,
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
@@ -1141,8 +1143,8 @@ export class Toolbar {
         const editElement = getContenteditableElement(nodeElement);
         if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
             nodeElement.dataset.content = editElement.textContent.trim();
-            nodeElement.dataset.subtype = languageElement.textContent
-            nodeElement.className = "render-node"
+            nodeElement.dataset.subtype = languageElement.textContent;
+            nodeElement.className = "render-node";
             nodeElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
             processRender(nodeElement);
         } else {

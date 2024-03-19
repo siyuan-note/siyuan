@@ -1,5 +1,5 @@
 import {genEmptyElement, insertEmptyBlock} from "../../block/util";
-import {getSelectionOffset, focusByWbr, setLastNodeRange, focusBlock, focusByRange} from "../util/selection";
+import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
     getTopEmptyElement,
@@ -84,9 +84,9 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                     setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
                 }
                 if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
-                    blockElement.dataset.content = ""
-                    blockElement.dataset.subtype = languageElement.textContent
-                    blockElement.className = "render-node"
+                    blockElement.dataset.content = "";
+                    blockElement.dataset.subtype = languageElement.textContent;
+                    blockElement.className = "render-node";
                     blockElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
                     protyle.toolbar.showRender(protyle, blockElement);
                     processRender(blockElement);

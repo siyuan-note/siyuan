@@ -885,8 +885,8 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 		oldRoot := ret.Root
 		ret = parse.Parse("", []byte(""), luteEngine.ParseOptions)
 		first := ret.Root.FirstChild
-		for _, node := range nodes {
-			first.InsertBefore(node)
+		for _, n := range nodes {
+			first.InsertBefore(n)
 		}
 		ret.Root.KramdownIAL = oldRoot.KramdownIAL
 	}
@@ -2107,7 +2107,27 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 	}
 
 	if 4 == blockRefMode { // 块引转脚注
+		unlinks = nil
 		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret.Root.ID, blockRefTextLeft, blockRefTextRight); nil != footnotesDefBlock {
+			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
+			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
+			footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
+			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
+				exist := false
+				for _, ref := range footnotesRefs {
+					if ref.FootnotesRefId == footnotesDef.FootnotesRefId {
+						exist = true
+						break
+					}
+				}
+				if !exist {
+					unlinks = append(unlinks, footnotesDef)
+				}
+			}
+			for _, n := range unlinks {
+				n.Unlink()
+			}
+
 			ret.Root.AppendChild(footnotesDefBlock)
 		}
 	}

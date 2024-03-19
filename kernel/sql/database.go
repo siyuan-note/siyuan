@@ -130,6 +130,11 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks] failed: %s", err)
 	}
 
+	_, err = db.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_root_id] failed: %s", err)
+	}
+
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts] failed: %s", err)
@@ -1211,18 +1216,18 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	return
 }
 
-func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string, context map[string]interface{}) (err error) {
-	stmt := "UPDATE blocks SET hpath = ? WHERE box = ? AND root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+func batchUpdateHPath(tx *sql.Tx, rootID, newHPath string, context map[string]interface{}) (err error) {
+	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE box = ? AND root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ?"
-		if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 			return
 		}
 	}

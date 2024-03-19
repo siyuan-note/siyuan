@@ -1211,18 +1211,18 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	return
 }
 
-func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string, context map[string]interface{}) (err error) {
-	stmt := "UPDATE blocks SET hpath = ? WHERE box = ? AND root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+func batchUpdateHPath(tx *sql.Tx, rootID, newHPath string, context map[string]interface{}) (err error) {
+	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE box = ? AND root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ?"
-		if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, newHPath, rootID); nil != err {
 			return
 		}
 	}

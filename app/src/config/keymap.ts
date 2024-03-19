@@ -50,6 +50,22 @@ export const keymap = {
     <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${command.langKey}" data-value="${command.customHotkey}" data-default="${command.hotkey}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
 </label>`;
             });
+            Object.keys(item.docks).forEach(key => {
+                const dockConfig = item.docks[key].config;
+                const dockKeymap =  window.siyuan.config.keymap.plugin[item.name][key];
+                const keyValue = updateHotkeyTip(dockKeymap.custom);
+                commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+    <span class="b3-list-item__text">${dockConfig.title}</span>
+    <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+    <span data-type="clear" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    </span>
+    <span data-type="update" class="config-keymap__key">${keyValue}</span>
+    <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${key}" data-value="${dockKeymap.custom}" data-default="${dockKeymap.default}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
+</label>`;
+            });
             if (commandHTML) {
                 pluginHtml += `<div class="b3-list-item b3-list-item--narrow toggle">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">

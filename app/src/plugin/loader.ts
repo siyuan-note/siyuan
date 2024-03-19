@@ -138,6 +138,27 @@ const mergePluginHotkey = (plugin: Plugin) => {
             i--;
         }
     }
+    Object.keys(plugin.docks).forEach(dockKey => {
+        const dock = plugin.docks[dockKey];
+        if (!window.siyuan.config.keymap.plugin[plugin.name]) {
+            window.siyuan.config.keymap.plugin[plugin.name] = {
+                [dockKey]: {
+                    default: dock.config.hotkey,
+                    custom: dock.config.hotkey,
+                }
+            };
+        } else if (!window.siyuan.config.keymap.plugin[plugin.name][dockKey]) {
+            window.siyuan.config.keymap.plugin[plugin.name][dockKey] = {
+                default: dock.config.hotkey,
+                custom: dock.config.hotkey,
+            };
+        } else if (window.siyuan.config.keymap.plugin[plugin.name][dockKey]) {
+            if (typeof window.siyuan.config.keymap.plugin[plugin.name][dockKey].custom !== "string") {
+                window.siyuan.config.keymap.plugin[plugin.name][dockKey].custom = dock.config.hotkey;
+            }
+            window.siyuan.config.keymap.plugin[plugin.name][dockKey]["default"] = dock.config.hotkey;
+        }
+    })
 };
 
 export const afterLoadPlugin = (plugin: Plugin) => {
@@ -201,6 +222,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     });
     Object.keys(plugin.docks).forEach(key => {
         const dock = plugin.docks[key];
+        const hotkey = window.siyuan.config.keymap.plugin[plugin.name][key].custom
         if (dock.config.position.startsWith("Left")) {
             window.siyuan.layout.leftDock.genButton([{
                 type: key,
@@ -208,7 +230,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
-                hotkey: dock.config.hotkey
+                hotkey
             }], dock.config.position === "LeftBottom" ? 1 : 0, dock.config.index);
         } else if (dock.config.position.startsWith("Bottom")) {
             window.siyuan.layout.bottomDock.genButton([{
@@ -217,7 +239,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
-                hotkey: dock.config.hotkey
+                hotkey
             }], dock.config.position === "BottomRight" ? 1 : 0, dock.config.index);
         } else if (dock.config.position.startsWith("Right")) {
             window.siyuan.layout.rightDock.genButton([{
@@ -226,7 +248,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
-                hotkey: dock.config.hotkey
+                hotkey
             }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
         }
     });

@@ -2095,7 +2095,7 @@ export class WYSIWYG {
                         } else if (!ctrlIsPressed && !event.shiftKey) {
                             openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
                         }
-                    } else {
+                    } else if (!ctrlIsPressed && !event.shiftKey && !event.altKey) {
                         openByMobile(linkAddress);
                     }
                     /// #if !BROWSER

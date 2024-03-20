@@ -295,6 +295,8 @@
   "apiModelTip": "El parámetro <code class='fn__code'>model</code> pasado al solicitar la API se usa para controlar el estilo del texto generado (el ID de implementación debe completarse cuando se usa el servicio Azure OpenAI)",
   "apiMaxTokens": "Número máximo de tokens",
   "apiMaxTokensTip": "El parámetro <code class='fn__code'>max_tokens</code> que se pasa al solicitar la API se usa para controlar la longitud del texto generado",
+  "apiTemperature": "Temperatura",
+  "apiTemperatureTip": "El parámetro <code class='fn__code'>temperature</code> pasado al solicitar la API se utiliza para controlar la aleatoriedad del texto generado",
   "apiBaseURL": "URL base de la API",
   "apiBaseURLTip": "La dirección base de la solicitud, como <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "El agente de usuario que inició la solicitud, es decir, el encabezado HTTP <code class='fn__code'>User-Agent</code>",

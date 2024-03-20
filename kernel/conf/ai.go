@@ -29,15 +29,16 @@ type AI struct {
 }
 
 type OpenAI struct {
-	APIKey       string `json:"apiKey"`
-	APITimeout   int    `json:"apiTimeout"`
-	APIProxy     string `json:"apiProxy"`
-	APIModel     string `json:"apiModel"`
-	APIMaxTokens int    `json:"apiMaxTokens"`
-	APIBaseURL   string `json:"apiBaseURL"`
-	APIUserAgent string `json:"apiUserAgent"`
-	APIProvider  string `json:"apiProvider"` // OpenAI, Azure
-	APIVersion   string `json:"apiVersion"`  // Azure API version
+	APIKey         string  `json:"apiKey"`
+	APITimeout     int     `json:"apiTimeout"`
+	APIProxy       string  `json:"apiProxy"`
+	APIModel       string  `json:"apiModel"`
+	APIMaxTokens   int     `json:"apiMaxTokens"`
+	APITemperature float64 `json:"apiTemperature"`
+	APIBaseURL     string  `json:"apiBaseURL"`
+	APIUserAgent   string  `json:"apiUserAgent"`
+	APIProvider    string  `json:"apiProvider"` // OpenAI, Azure
+	APIVersion     string  `json:"apiVersion"`  // Azure API version
 }
 
 func NewAI() *AI {
@@ -66,6 +67,13 @@ func NewAI() *AI {
 		maxTokensInt, err := strconv.Atoi(maxTokens)
 		if nil == err {
 			openAI.APIMaxTokens = maxTokensInt
+		}
+	}
+
+	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+		temperatureFloat, err := strconv.ParseFloat(temperature, 64)
+		if nil == err {
+			openAI.APITemperature = temperatureFloat
 		}
 	}
 

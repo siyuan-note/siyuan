@@ -408,8 +408,17 @@ func InitConf() {
 	if "" == Conf.AI.OpenAI.APIUserAgent {
 		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
 	}
+	if strings.HasPrefix(Conf.AI.OpenAI.APIUserAgent, "SiYuan/") {
+		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
+	}
 	if "" == Conf.AI.OpenAI.APIProvider {
 		Conf.AI.OpenAI.APIProvider = "OpenAI"
+	}
+	if 0 > Conf.AI.OpenAI.APIMaxTokens {
+		Conf.AI.OpenAI.APIMaxTokens = 0
+	}
+	if 0 >= Conf.AI.OpenAI.APITemperature || 2 < Conf.AI.OpenAI.APITemperature {
+		Conf.AI.OpenAI.APITemperature = 1.0
 	}
 
 	if "" != Conf.AI.OpenAI.APIKey {
@@ -419,13 +428,15 @@ func InitConf() {
 			"    timeout=%ds\n"+
 			"    proxy=%s\n"+
 			"    model=%s\n"+
-			"    maxTokens=%d",
+			"    maxTokens=%d\n"+
+			"    temperature=%.1f",
 			Conf.AI.OpenAI.APIUserAgent,
 			Conf.AI.OpenAI.APIBaseURL,
 			Conf.AI.OpenAI.APITimeout,
 			Conf.AI.OpenAI.APIProxy,
 			Conf.AI.OpenAI.APIModel,
-			Conf.AI.OpenAI.APIMaxTokens)
+			Conf.AI.OpenAI.APIMaxTokens,
+			Conf.AI.OpenAI.APITemperature)
 	}
 
 	Conf.ReadOnly = util.ReadOnly

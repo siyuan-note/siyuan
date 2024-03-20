@@ -194,6 +194,10 @@ func setAI(c *gin.Context) {
 		ai.OpenAI.APIMaxTokens = 0
 	}
 
+	if 0 >= ai.OpenAI.APITemperature || 2 < ai.OpenAI.APITemperature {
+		ai.OpenAI.APITemperature = 1.0
+	}
+
 	model.Conf.AI = ai
 	model.Conf.Save()
 

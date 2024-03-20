@@ -295,6 +295,8 @@
   "apiModelTip": "請求 API 時傳入的 <code class='fn__code'>model</code> 參數，用於控制產生的文字風格（使用 Azure OpenAI 服務時需填入 Deployment ID）",
   "apiMaxTokens": "最大 Token 數",
   "apiMaxTokensTip": "請求 API 時傳入的 <code class='fn__code'>max_tokens</code> 參數，用於控制生成的文字長度",
+  "apiTemperature": "溫度",
+  "apiTemperatureTip": "請求 API 時傳入的 <code class='fn__code'>temperature</code> 參數，用來控制產生的文字隨機性",
   "apiBaseURL": "API 基礎地址",
   "apiBaseURLTip": "發起請求的基礎地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "發起請求的使用者代理，即 HTTP 標頭 <code class='fn__code'>User-Agent</code>",

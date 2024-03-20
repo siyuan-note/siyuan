@@ -420,6 +420,9 @@ func InitConf() {
 	if 0 >= Conf.AI.OpenAI.APITemperature || 2 < Conf.AI.OpenAI.APITemperature {
 		Conf.AI.OpenAI.APITemperature = 1.0
 	}
+	if 1 > Conf.AI.OpenAI.APIMaxContexts || 64 < Conf.AI.OpenAI.APIMaxContexts {
+		Conf.AI.OpenAI.APIMaxContexts = 7
+	}
 
 	if "" != Conf.AI.OpenAI.APIKey {
 		logging.LogInfof("OpenAI API enabled\n"+
@@ -429,14 +432,16 @@ func InitConf() {
 			"    proxy=%s\n"+
 			"    model=%s\n"+
 			"    maxTokens=%d\n"+
-			"    temperature=%.1f",
+			"    temperature=%.1f\n"+
+			"    maxContexts=%d",
 			Conf.AI.OpenAI.APIUserAgent,
 			Conf.AI.OpenAI.APIBaseURL,
 			Conf.AI.OpenAI.APITimeout,
 			Conf.AI.OpenAI.APIProxy,
 			Conf.AI.OpenAI.APIModel,
 			Conf.AI.OpenAI.APIMaxTokens,
-			Conf.AI.OpenAI.APITemperature)
+			Conf.AI.OpenAI.APITemperature,
+			Conf.AI.OpenAI.APIMaxContexts)
 	}
 
 	Conf.ReadOnly = util.ReadOnly

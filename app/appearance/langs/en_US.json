@@ -297,6 +297,8 @@
   "apiMaxTokensTip": "The <code class='fn__code'>max_tokens</code> parameter passed in when requesting the API is used to control the length of the generated text",
   "apiTemperature": "Temperature",
   "apiTemperatureTip": "The <code class='fn__code'>temperature</code> parameter passed in when requesting the API is used to control the randomness of the generated text",
+  "apiMaxContexts": "Maximum number of contexts",
+  "apiMaxContextsTip": "The maximum number of contexts passed in when requesting the API",
   "apiBaseURL": "API Base URL",
   "apiBaseURLTip": "The base address of the request, such as <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "The user agent that initiated the request, that is, the HTTP header <code class='fn__code'>User-Agent</code>",

@@ -297,6 +297,8 @@
   "apiMaxTokensTip": "請求 API 時傳入的 <code class='fn__code'>max_tokens</code> 參數，用於控制生成的文字長度",
   "apiTemperature": "溫度",
   "apiTemperatureTip": "請求 API 時傳入的 <code class='fn__code'>temperature</code> 參數，用來控制產生的文字隨機性",
+  "apiMaxContexts": "最大上下文數",
+  "apiMaxContextsTip": "請求 API 時傳入的最大上下文數",
   "apiBaseURL": "API 基礎地址",
   "apiBaseURLTip": "發起請求的基礎地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiUserAgentTip": "發起請求的使用者代理，即 HTTP 標頭 <code class='fn__code'>User-Agent</code>",

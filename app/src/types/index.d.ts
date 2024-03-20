@@ -739,6 +739,7 @@ interface IConfig {
             apiModel: string
             apiMaxTokens: number
             apiTemperature: number
+            apiMaxContexts: number
             apiProxy: string
             apiTimeout: number
         },

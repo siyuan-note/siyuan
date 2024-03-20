@@ -297,6 +297,8 @@
   "apiMaxTokensTip": "请求 API 时传入的 <code class='fn__code'>max_tokens</code> 参数，用于控制生成的文本长度",
   "apiTemperature": "温度",
   "apiTemperatureTip": "请求 API 时传入的 <code class='fn__code'>temperature</code> 参数，用于控制生成的文本随机性",
+  "apiMaxContexts": "最大上下文数",
+  "apiMaxContextsTip": "请求 API 时传入的最大上下文数",
   "apiBaseURL": "API 基础地址",
   "apiBaseURLTip": "发起请求的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "apiVersion": "API 版本",

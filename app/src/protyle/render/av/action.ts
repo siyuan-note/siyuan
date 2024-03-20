@@ -66,19 +66,32 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
             if (event.altKey) {
                 openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)));
-            } else if (!ctrlIsPressed && !event.shiftKey) {
+            } else if (ctrlIsPressed) {
+                /// #if !BROWSER
+                openBy(linkAddress, "folder");
+                /// #else
+                openByMobile(linkAddress);
+                /// #endif
+            } else if (event.shiftKey) {
+                /// #if !BROWSER
+                openBy(linkAddress, "app");
+                /// #else
+                openByMobile(linkAddress);
+                /// #endif
+            } else {
                 openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
             }
-        } else if (!ctrlIsPressed && !event.shiftKey && !event.altKey) {
+        } else {
+            /// #if !BROWSER
+            if (ctrlIsPressed) {
+                openBy(linkAddress, "folder");
+            } else {
+                openBy(linkAddress, "app");
+            }
+            /// #else
             openByMobile(linkAddress);
+            /// #endif
         }
-        /// #if !BROWSER
-        if (ctrlIsPressed) {
-            openBy(linkAddress, "folder");
-        } else if (event.shiftKey) {
-            openBy(linkAddress, "app");
-        }
-        /// #endif
         /// #else
         openByMobile(linkAddress);
         /// #endif

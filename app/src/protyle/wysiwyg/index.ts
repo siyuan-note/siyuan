@@ -2092,19 +2092,32 @@ export class WYSIWYG {
                     ) {
                         if (event.altKey) {
                             openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
-                        } else if (!ctrlIsPressed && !event.shiftKey) {
+                        } else if (ctrlIsPressed) {
+                            /// #if !BROWSER
+                            openBy(linkAddress, "folder");
+                            /// #else
+                            openByMobile(linkAddress);
+                            /// #endif
+                        } else if (event.shiftKey) {
+                            /// #if !BROWSER
+                            openBy(linkAddress, "app");
+                            /// #else
+                            openByMobile(linkAddress);
+                            /// #endif
+                        } else {
                             openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
                         }
-                    } else if (!ctrlIsPressed && !event.shiftKey && !event.altKey) {
+                    } else {
+                        /// #if !BROWSER
+                        if (ctrlIsPressed) {
+                            openBy(linkAddress, "folder");
+                        } else {
+                            openBy(linkAddress, "app");
+                        }
+                        /// #else
                         openByMobile(linkAddress);
+                        /// #endif
                     }
-                    /// #if !BROWSER
-                    if (ctrlIsPressed) {
-                        openBy(linkAddress, "folder");
-                    } else if (event.shiftKey) {
-                        openBy(linkAddress, "app");
-                    }
-                    /// #endif
                 } else if (linkAddress) {
                     if (0 > linkAddress.indexOf(":")) {
                         // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075

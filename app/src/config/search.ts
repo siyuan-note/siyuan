@@ -41,7 +41,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // AI
         ["AI"].concat(getLang(["ai", "apiTimeout", "apiTimeoutTip", "apiMaxTokens", "apiMaxTokensTip", "apiKey",
             "apiKeyTip", "apiProxy", "apiProxyTip", "apiBaseURL", "apiBaseURLTip", "apiUserAgentTip", "apiVersion", "apiVersionTip",
-            "apiProvider", "apiProviderTip"])),
+            "apiProvider", "apiProviderTip", "apiTemperature", "apiTemperatureTip", "apiMaxContexts", "apiMaxContextsTip"])),
 
         // 图片
         getLang(["assets", "unreferencedAssets", "missingAssets"]),

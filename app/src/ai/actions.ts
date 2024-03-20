@@ -185,31 +185,6 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             ${window.siyuan.languages.aiContinueWrite}
         </div>
         <div class="b3-menu__separator"></div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [zh-Hans]">
-            ${window.siyuan.languages.aiTranslate_zh_Hans}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [zh-Hant]">
-            ${window.siyuan.languages.aiTranslate_zh_Hant}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [ja-JP]">
-            ${window.siyuan.languages.aiTranslate_ja_JP}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [ko-KR]">
-            ${window.siyuan.languages.aiTranslate_ko_KR}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [en-US]">
-            ${window.siyuan.languages.aiTranslate_en_US}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [es-ES]">
-            ${window.siyuan.languages.aiTranslate_es_ES}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [fr-FR]">
-            ${window.siyuan.languages.aiTranslate_fr_FR}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [de-DE]">
-            ${window.siyuan.languages.aiTranslate_de_DE}
-        </div>
-        <div class="b3-menu__separator"></div>
         <div class="b3-list-item b3-list-item--narrow" data-action="${window.siyuan.languages.aiExtractSummary}">
             ${window.siyuan.languages.aiExtractSummary}
         </div>
@@ -222,6 +197,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         <div class="b3-list-item b3-list-item--narrow" data-action="Clear context">
             ${window.siyuan.languages.clearContext}
         </div>
+        <div class="b3-menu__separator"></div>
         <div class="b3-list-item b3-list-item--narrow" data-type="custom">
             ${window.siyuan.languages.aiCustomAction}
         </div>

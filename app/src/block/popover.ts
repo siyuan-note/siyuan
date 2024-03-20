@@ -17,7 +17,7 @@ export const initBlockPopover = (app: App) => {
     let timeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
-        if (!window.siyuan.config) {
+        if (!window.siyuan.config || !window.siyuan.menus) {
             return;
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||

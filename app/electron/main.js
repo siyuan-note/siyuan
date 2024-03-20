@@ -861,14 +861,12 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
         const parentWnd = getWindowByContentId(event.sender.id);
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
-        const width = parentWnd.getBounds().width * 0.8;
-        const height = parentWnd.getBounds().height * 0.8;
         const printWin = new BrowserWindow({
             parent: parentWnd,
             modal: false,
             show: true,
-            width: width,
-            height: height,
+            width: Math.floor(parentWnd.getBounds().width * 0.8),
+            height: Math.floor(parentWnd.getBounds().height * 0.8),
             resizable: false,
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),

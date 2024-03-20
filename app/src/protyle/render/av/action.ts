@@ -13,10 +13,10 @@ import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
-import {isLocalPath, pathPosix} from "../../../util/pathName";
+import {pathPosix} from "../../../util/pathName";
 import {Constants} from "../../../constants";
 /// #if !MOBILE
-import {openAsset} from "../../../editor/util";
+import {openAsset, openBy} from "../../../editor/util";
 /// #endif
 import {getSearch} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
@@ -25,21 +25,83 @@ import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
-import {writeText} from "../../util/compatibility";
+import {isOnlyMeta, openByMobile, writeText} from "../../util/compatibility";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
         return false;
     }
+    const loadMoreElement = hasClosestByAttribute(event.target, "data-type", "av-load-more");
+    if (loadMoreElement) {
+        (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
+        blockElement.removeAttribute("data-render");
+        blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+        avRender(blockElement, protyle);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    const firstColElement = hasClosestByClassName(event.target, "av__firstcol");
+    if (firstColElement) {
+        window.siyuan.menus.menu.remove();
+        selectRow(firstColElement, "toggle");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    const urlElement = hasClosestByClassName(event.target, "av__celltext--url");
+    if (urlElement) {
+        let linkAddress = urlElement.textContent.trim();
+        if (urlElement.dataset.type === "phone") {
+            linkAddress = "tel:" + linkAddress;
+        } else if (urlElement.dataset.type === "email") {
+            linkAddress = "mailto:" + linkAddress;
+        } else if (urlElement.classList.contains("b3-chip")) {
+            linkAddress = urlElement.dataset.url;
+        }
+        /// #if !MOBILE
+        const suffix = pathPosix().extname(linkAddress);
+        const ctrlIsPressed = isOnlyMeta(event);
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
+            if (event.altKey) {
+                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)));
+            } else if (!ctrlIsPressed && !event.shiftKey) {
+                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
+            }
+        } else if (!ctrlIsPressed && !event.shiftKey && !event.altKey) {
+            openByMobile(linkAddress);
+        }
+        /// #if !BROWSER
+        if (ctrlIsPressed) {
+            openBy(linkAddress, "folder");
+        } else if (event.shiftKey) {
+            openBy(linkAddress, "app");
+        }
+        /// #endif
+        /// #else
+        openByMobile(linkAddress);
+        /// #endif
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
+    if (imgElement) {
+        previewImage((imgElement as HTMLImageElement).src);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
     if (event.shiftKey) {
         const rowElement = hasClosestByClassName(event.target, "av__row");
         if (rowElement && !rowElement.classList.contains("av__row--header")) {
             selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+            event.preventDefault();
+            event.stopPropagation();
             return true;
         }
     }
-
     const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
     if (copyElement) {
         writeText(getCellText(hasClosestByClassName(copyElement, "av__cell")));
@@ -159,14 +221,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-load-more") {
-            (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
-            blockElement.removeAttribute("data-render");
-            blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
-            avRender(blockElement, protyle);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
         } else if (type === "set-page-size") {
             setPageSize({
                 target,
@@ -204,44 +258,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             }]);
             insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
             blockElement.setAttribute("updated", newUpdated);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        } else if (target.classList.contains("av__firstcol")) {
-            window.siyuan.menus.menu.remove();
-            selectRow(target, "toggle");
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        } else if (target.classList.contains("av__celltext--url")) {
-            let linkAddress = target.textContent.trim();
-            if (target.dataset.type === "phone") {
-                linkAddress = "tel:" + linkAddress;
-            } else if (target.dataset.type === "email") {
-                linkAddress = "mailto:" + linkAddress;
-            } else if (target.classList.contains("b3-chip")) {
-                linkAddress = target.dataset.url;
-            }
-            /// #if !MOBILE
-            const suffix = pathPosix().extname(linkAddress);
-            if (isLocalPath(linkAddress) && (
-                [".pdf"].concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix) && (
-                    suffix !== ".pdf" || (suffix === ".pdf" && !linkAddress.startsWith("file://"))
-                )
-            )) {
-                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
-            } else {
-                window.open(linkAddress);
-            }
-            /// #else
-            window.open(linkAddress);
-            /// #endif
-
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        } else if (target.classList.contains("av__cellassetimg")) {
-            previewImage((target as HTMLImageElement).src);
             event.preventDefault();
             event.stopPropagation();
             return true;

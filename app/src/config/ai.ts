@@ -190,7 +190,7 @@ export const ai = {
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
                         apiModel: (ai.element.querySelector("#apiModel") as HTMLSelectElement).value,
                         apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
-                        apiTemperature: parseInt((ai.element.querySelector("#apiTemperature") as HTMLInputElement).value),
+                        apiTemperature: parseFloat((ai.element.querySelector("#apiTemperature") as HTMLInputElement).value),
                         apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
                         apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
                         apiProvider: (ai.element.querySelector("#apiProvider") as HTMLSelectElement).value,

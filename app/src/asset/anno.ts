@@ -719,6 +719,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                     const formData = new FormData();
                     const imageName = content + ".png";
                     formData.append("file[]", blob, imageName);
+                    formData.append("skipIfDuplicated", "true");
                     fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
                         writeText(`<<${idPath} "${content}">>
 ![](${response.data.succMap[imageName]})`);

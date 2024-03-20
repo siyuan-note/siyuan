@@ -205,10 +205,6 @@ func (value *Value) IsEdited() bool {
 	return value.CreatedAt != value.UpdatedAt
 }
 
-func (value *Value) IsGenerated() bool {
-	return KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type
-}
-
 func (value *Value) IsEmpty() bool {
 	switch value.Type {
 	case KeyTypeBlock:

@@ -875,11 +875,17 @@ export class WYSIWYG {
                     return;
                 }
                 let firstBlockElement = hasClosestBlock(firstElement);
+                if (!firstBlockElement && firstElement.classList.contains("protyle-breadcrumb__bar")) {
+                    firstBlockElement = firstElement.nextElementSibling as HTMLElement;
+                }
                 if (moveEvent.clientY > y) {
                     if (!startFirstElement) {
                         // 向上选择导致滚动条滚动到顶部再向下选择至 > y 时，firstBlockElement 为 undefined https://ld246.com/article/1705233964097
                         if (!firstBlockElement) {
                             firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+                            if (firstBlockElement.classList.contains("protyle-breadcrumb__bar")) {
+                                firstBlockElement = firstBlockElement.nextElementSibling as HTMLElement;
+                            }
                         }
                         startFirstElement = firstBlockElement;
                     }
@@ -887,6 +893,9 @@ export class WYSIWYG {
                     // https://github.com/siyuan-note/siyuan/issues/7580
                     moveEvent.clientY < protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+                    if (firstBlockElement.classList.contains("protyle-breadcrumb__bar")) {
+                        firstBlockElement = firstBlockElement.nextElementSibling as HTMLElement;
+                    }
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
@@ -915,7 +924,9 @@ export class WYSIWYG {
                                     hasJump = true;
                                 }
                             } else {
-                                selectElements.push(currentElement);
+                                if (!currentElement.classList.contains("protyle-breadcrumb__bar")) {
+                                    selectElements.push(currentElement);
+                                }
                                 currentElement = currentElement.nextElementSibling;
                             }
                         } else if (currentElement.parentElement.classList.contains("sb")) {

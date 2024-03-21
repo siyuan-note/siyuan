@@ -1,4 +1,7 @@
 {
+  "updateAll": "全部更新",
+  "confirmUpdateAll": "确定全部更新吗？",
+  "confirmUpdate": "确定更新吗？",
   "insertRowBefore": "在上方插入${x}行",
   "insertRowAfter": "在下方插入${x}行",
   "setDueTime": "设置到期时间",

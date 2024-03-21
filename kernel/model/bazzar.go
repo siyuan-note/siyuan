@@ -30,7 +30,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
 
-func BazaarPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*bazaar.Widget, icons []*bazaar.Icon, themes []*bazaar.Theme, templates []*bazaar.Template) {
+func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*bazaar.Widget, icons []*bazaar.Icon, themes []*bazaar.Theme, templates []*bazaar.Template) {
 	wg := &sync.WaitGroup{}
 	wg.Add(5)
 	go func() {

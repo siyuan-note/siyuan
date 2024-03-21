@@ -84,6 +84,26 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 	}()
 
 	wg.Wait()
+
+	if 1 > len(plugins) {
+		plugins = []*bazaar.Plugin{}
+	}
+
+	if 1 > len(widgets) {
+		widgets = []*bazaar.Widget{}
+	}
+
+	if 1 > len(icons) {
+		icons = []*bazaar.Icon{}
+	}
+
+	if 1 > len(themes) {
+		themes = []*bazaar.Theme{}
+	}
+
+	if 1 > len(templates) {
+		templates = []*bazaar.Template{}
+	}
 	return
 }
 

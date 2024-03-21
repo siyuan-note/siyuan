@@ -25,6 +25,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getBazaarPackages(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	frontend := arg["frontend"].(string)
+	plugins, widgets, icons, themes, templates := model.BazaarPackages(frontend)
+	ret.Data = map[string]interface{}{
+		"plugins":   plugins,
+		"widgets":   widgets,
+		"icons":     icons,
+		"themes":    themes,
+		"templates": templates,
+	}
+}
+
 func getBazaarPackageREAME(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

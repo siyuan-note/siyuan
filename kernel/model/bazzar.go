@@ -29,6 +29,15 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
 
+func BazaarPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*bazaar.Widget, icons []*bazaar.Icon, themes []*bazaar.Theme, templates []*bazaar.Template) {
+	plugins = BazaarPlugins(frontend, "")
+	widgets = BazaarWidgets("")
+	icons = BazaarIcons("")
+	themes = BazaarThemes("")
+	templates = BazaarTemplates("")
+	return
+}
+
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)
 	return

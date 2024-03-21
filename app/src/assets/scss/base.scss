@@ -371,6 +371,10 @@ html {
     width: 32px;
     text-align: right;
   }
+
+  &--bg {
+    background-color: var(--b3-theme-surface);
+  }
 }
 
 .reveal {

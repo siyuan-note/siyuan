@@ -707,7 +707,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "install-all") {
-                    confirmDialog(window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
+                    confirmDialog('⬆️ ' + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
                         fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
                     });
                     event.preventDefault();
@@ -715,7 +715,7 @@ export const bazaar = {
                     break;
                 } else if (type === "install-t") {
                     if (!target.classList.contains("b3-button--progress")) {
-                        confirmDialog(window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
+                        confirmDialog('⬆️ ' + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
                             const bazaarType = dataObj.bazaarType as TBazaarType;
                             let url = "/api/bazaar/installBazaarTemplate";
                             if (bazaarType === "themes") {

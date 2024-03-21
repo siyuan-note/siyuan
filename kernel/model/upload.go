@@ -188,6 +188,7 @@ func Upload(c *gin.Context) {
 			succMap[baseName] = existAsset.Path
 		} else {
 			if skipIfDuplicated {
+				// https://github.com/siyuan-note/siyuan/issues/10666
 				matches, globErr := filepath.Glob(assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext) + "*")
 				if nil != globErr {
 					logging.LogErrorf("glob failed: %s", globErr)

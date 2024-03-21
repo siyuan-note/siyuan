@@ -724,7 +724,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 
 	viewable.FilterRows(attrView)
-	viewable.SortRows()
+	viewable.SortRows(attrView)
 	viewable.CalcCols()
 
 	// 分页
@@ -2010,7 +2010,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
 		viewable, _ := renderAttributeViewTable(attrView, view, "")
 		viewable.FilterRows(attrView)
-		viewable.SortRows()
+		viewable.SortRows(attrView)
 
 		var nearRow *av.TableRow
 		if 0 < len(viewable.Rows) {

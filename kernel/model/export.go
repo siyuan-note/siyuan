@@ -87,7 +87,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 
 	// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 	table.FilterRows(attrView)
-	table.SortRows()
+	table.SortRows(attrView)
 
 	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
 	if err = os.MkdirAll(exportFolder, 0755); nil != err {
@@ -2284,7 +2284,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 		table.FilterRows(attrView)
-		table.SortRows()
+		table.SortRows(attrView)
 
 		var aligns []int
 		for range table.Columns {

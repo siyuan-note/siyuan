@@ -153,7 +153,7 @@ func (table *Table) GetID() string {
 	return table.ID
 }
 
-func (table *Table) SortRows() {
+func (table *Table) SortRows(attrView *AttributeView) {
 	if 1 > len(table.Sorts) {
 		return
 	}
@@ -220,7 +220,7 @@ func (table *Table) SortRows() {
 				return colIndexSort.Order != SortOrderAsc
 			}
 
-			result := val1.Compare(val2)
+			result := val1.Compare(val2, attrView)
 			if 0 == result {
 				sorted = false
 				continue

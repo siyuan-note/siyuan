@@ -25,7 +25,7 @@ import (
 )
 
 type Sortable interface {
-	SortRows()
+	SortRows(attrView *AttributeView)
 }
 
 type ViewSort struct {
@@ -40,7 +40,7 @@ const (
 	SortOrderDesc SortOrder = "DESC"
 )
 
-func (value *Value) Compare(other *Value) int {
+func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
@@ -112,14 +112,29 @@ func (value *Value) Compare(other *Value) int {
 			return 0
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
-		if nil != value.MSelect && nil != other.MSelect {
-			var v1 string
-			for _, v := range value.MSelect {
-				v1 += v.Content
+		if 0 < len(value.MSelect) && 0 < len(other.MSelect) {
+			v1 := value.MSelect[0].Content
+			v2 := other.MSelect[0].Content
+			if v1 == v2 {
+				return 0
 			}
-			var v2 string
-			for _, v := range other.MSelect {
-				v2 += v.Content
+
+			key, _ := attrView.GetKey(value.KeyID)
+			if nil != key {
+				optionSort := map[string]int{}
+				for i, op := range key.Options {
+					optionSort[op.Name] = i
+				}
+
+				v1Sort := optionSort[v1]
+				v2Sort := optionSort[v2]
+				if v1Sort > v2Sort {
+					return 1
+				}
+				if v1Sort < v2Sort {
+					return -1
+				}
+				return 0
 			}
 			return strings.Compare(v1, v2)
 		}

@@ -1,4 +1,7 @@
 {
+  "updateAll": "Actualizar todo",
+  "confirmUpdateAll": "¿Estás seguro de que deseas actualizar todo?",
+  "confirmUpdate": "¿Estás seguro de que deseas actualizar?",
   "insertRowBefore": "Insertar filas ${x} arriba",
   "insertRowAfter": "Insertar filas ${x} debajo",
   "setDueTime": "Establecer tiempo de vencimiento",

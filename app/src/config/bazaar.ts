@@ -341,11 +341,16 @@ export const bazaar = {
             response.data.widgets.forEach((item: IBazaarItem) => {
                 html += this._genUpdateItemHTML(item, "widgets");
             });
+
+            const allCount = response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length
+            if (allCount === 0) {
+                return;
+            }
             this.element.querySelector('[data-type="downloaded-update"]').innerHTML = `<div class="fn__flex config-bazaar__title">
     <div class="fn__flex-1"></div>
-    <button class="b3-button" data-type="install-all">${window.siyuan.languages.update}</button>
+    <button class="b3-button" data-type="install-all">${window.siyuan.languages.updateAll}</button>
     <span class="fn__space"></span>
-    <div class="counter counter--bg fn__flex-center">${response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length}</div>
+    <div class="counter counter--bg fn__flex-center">${allCount}</div>
 </div>
 <div class="config-bazaar__content">${html}</div>`;
         })
@@ -702,13 +707,15 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "install-all") {
-                    fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
+                    confirmDialog(window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
+                        fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "install-t") {
                     if (!target.classList.contains("b3-button--progress")) {
-                        confirmDialog(window.siyuan.languages.update, window.siyuan.languages.exportTplTip, () => {
+                        confirmDialog(window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
                             const bazaarType = dataObj.bazaarType as TBazaarType;
                             let url = "/api/bazaar/installBazaarTemplate";
                             if (bazaarType === "themes") {

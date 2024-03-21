@@ -83,6 +83,7 @@ export const bazaar = {
 </div>
 <div class="fn__flex-1">
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
+        <div data-type="downloaded-update"></div>
         <div class="fn__flex config-bazaar__title">
             <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
             <div class="fn__space"></div>
@@ -291,6 +292,11 @@ export const bazaar = {
         </div>
     </div>
 </div>`;
+    },
+    _getUpdate() {
+        fetchPost("/api/bazaar/getUpdatedPackage", {frontend: getFrontend()}, (response) => {
+            this.element.querySelector('[data-type="downloaded-update"]').innerHTML = `<div class="fn__flex"></div>`
+        })
     },
     _genMyHTML(bazaarType: TBazaarType, app: App) {
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
@@ -535,6 +541,7 @@ export const bazaar = {
             return;
         }
         this._genMyHTML("plugins", app);
+        this._getUpdate();
         bazaar.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             const dataElement = hasClosestByAttribute(target, "data-obj", null);

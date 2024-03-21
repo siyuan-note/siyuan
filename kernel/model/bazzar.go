@@ -22,6 +22,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -30,11 +31,34 @@ import (
 )
 
 func BazaarPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*bazaar.Widget, icons []*bazaar.Icon, themes []*bazaar.Theme, templates []*bazaar.Template) {
-	plugins = BazaarPlugins(frontend, "")
-	widgets = BazaarWidgets("")
-	icons = BazaarIcons("")
-	themes = BazaarThemes("")
-	templates = BazaarTemplates("")
+	wg := &sync.WaitGroup{}
+	wg.Add(5)
+	go func() {
+		defer wg.Done()
+		plugins = InstalledPlugins(frontend, "")
+	}()
+
+	go func() {
+		defer wg.Done()
+		widgets = InstalledWidgets("")
+	}()
+
+	go func() {
+		defer wg.Done()
+		icons = InstalledIcons("")
+	}()
+
+	go func() {
+		defer wg.Done()
+		themes = InstalledThemes("")
+	}()
+
+	go func() {
+		defer wg.Done()
+		templates = InstalledTemplates("")
+	}()
+
+	wg.Wait()
 	return
 }
 

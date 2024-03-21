@@ -35,27 +35,52 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 	wg.Add(5)
 	go func() {
 		defer wg.Done()
-		plugins = InstalledPlugins(frontend, "")
+		tmp := InstalledPlugins(frontend, "")
+		for _, plugin := range tmp {
+			if plugin.Outdated {
+				plugins = append(plugins, plugin)
+			}
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		widgets = InstalledWidgets("")
+		tmp := InstalledWidgets("")
+		for _, widget := range tmp {
+			if widget.Outdated {
+				widgets = append(widgets, widget)
+			}
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		icons = InstalledIcons("")
+		tmp := InstalledIcons("")
+		for _, icon := range tmp {
+			if icon.Outdated {
+				icons = append(icons, icon)
+			}
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		themes = InstalledThemes("")
+		tmp := InstalledThemes("")
+		for _, theme := range tmp {
+			if theme.Outdated {
+				themes = append(themes, theme)
+			}
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		templates = InstalledTemplates("")
+		tmp := InstalledTemplates("")
+		for _, template := range tmp {
+			if template.Outdated {
+				templates = append(templates, template)
+			}
+		}
 	}()
 
 	wg.Wait()

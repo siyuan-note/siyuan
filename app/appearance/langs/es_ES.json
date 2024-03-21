@@ -1440,6 +1440,10 @@
     "231": "Eliminar objetos de datos no referenciados en el almacenamiento en la nube...",
     "232": "Se ha eliminado el almacenamiento de datos en la nube. Se han eliminado [%d] instantáneas y [%d] objetos de datos, y se ha liberado un total de [%s] espacio en disco",
     "233": "Cerrando la guía del usuario...",
-    "234": "[%d/%d] Actualizado [%d] de rutas legibles del documento [%s]"
+    "234": "[%d/%d] Actualizado [%d] de rutas legibles del documento [%s]",
+    "235": "[%d/%d] está actualizando el paquete del mercado...",
+    "236": "[%d/%d] está actualizando el paquete del mercado [%s]...",
+    "237": "[%d] todos los paquetes del mercado se han actualizado correctamente",
+    "238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde"
   }
 }

@@ -330,7 +330,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/graph/getGraph", model.CheckAuth, getGraph)
 	ginServer.Handle("POST", "/api/graph/getLocalGraph", model.CheckAuth, getLocalGraph)
 
-	ginServer.Handle("POST", "/api/bazaar/getUpdatedPackage", model.CheckAuth, getUpdatedPackage)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarPlugin", model.CheckAuth, getBazaarPlugin)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledPlugin", model.CheckAuth, getInstalledPlugin)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarPlugin", model.CheckAuth, model.CheckReadonly, installBazaarPlugin)
@@ -352,6 +351,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTheme", model.CheckAuth, model.CheckReadonly, installBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTheme", model.CheckAuth, model.CheckReadonly, uninstallBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
+	ginServer.Handle("POST", "/api/bazaar/getUpdatedPackage", model.CheckAuth, getUpdatedPackage)
+	ginServer.Handle("POST", "/api/bazaar/batchUpdatePackage", model.CheckAuth, batchUpdatePackage)
 
 	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, model.CheckReadonly, initRepoKey)
 	ginServer.Handle("POST", "/api/repo/initRepoKeyFromPassphrase", model.CheckAuth, model.CheckReadonly, initRepoKeyFromPassphrase)

@@ -1440,6 +1440,10 @@
     "231": "Suppression des objets de données non référencés dans le stockage cloud...",
     "232": "Le stockage de données cloud a été purgé. [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré",
     "233": "Fermeture du guide de l'utilisateur...",
-    "234": "[%d/%d] Mise à jour de [%d] des chemins lisibles du document [%s]"
+    "234": "[%d/%d] Mise à jour de [%d] des chemins lisibles du document [%s]",
+    "235": "[%d/%d] met à jour le package Marketplace...",
+    "236": "[%d/%d] met à jour le package Marketplace [%s]...",
+    "237": "[%d] packages Marketplace ont tous été mis à jour avec succès",
+    "238": "La mise à jour du package Marketplace [%s] a échoué, veuillez réessayer plus tard"
   }
 }

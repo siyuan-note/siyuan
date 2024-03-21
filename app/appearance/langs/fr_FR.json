@@ -1,4 +1,6 @@
 {
+  "insertRowBefore": "Insérer les lignes ${x} ci-dessus",
+  "insertRowAfter": "Insérer les lignes ${x} ci-dessous",
   "setDueTime": "Définir le délai d'expiration",
   "showCardDay": "Après combien de jours souhaitez-vous montrer la carte ?",
   "forgetCount": "Oublier de compter",

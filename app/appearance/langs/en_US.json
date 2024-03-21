@@ -1,4 +1,6 @@
 {
+  "insertRowBefore": "Insert rows ${x} above",
+  "insertRowAfter": "Insert rows ${x} below",
   "setDueTime": "Set expiration time",
   "showCardDay": "After how many days do you want to show the card?",
   "forgetCount": "Forget to count",

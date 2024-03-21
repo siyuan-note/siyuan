@@ -171,7 +171,7 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             if (hideTextCell) {
                 currentRow.remove();
                 showMessage(window.siyuan.languages.insertRowTip);
-            } else {
+            } else if (srcIDs.length === 1) {
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             }
             setPage(blockElement);
@@ -350,3 +350,34 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     updateHeader(blockElement.querySelector(".av__row"));
     blockElement.setAttribute("updated", newUpdated);
 };
+
+export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: number, previousID: string) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const srcIDs: string[] = [];
+    new Array(count).fill(0).forEach(() => {
+        srcIDs.push(Lute.NewNodeID());
+    });
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    transaction(protyle, [{
+        action: "insertAttrViewBlock",
+        avID,
+        previousID,
+        srcIDs,
+        isDetached: true,
+        blockID: blockElement.dataset.nodeId,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
+    }], [{
+        action: "removeAttrViewBlock",
+        srcIDs,
+        avID,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated")
+    }]);
+    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+    blockElement.setAttribute("updated", newUpdated);
+}

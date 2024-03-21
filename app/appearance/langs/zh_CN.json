@@ -1,4 +1,6 @@
 {
+  "insertRowBefore": "在上方插入${x}行",
+  "insertRowAfter": "在下方插入${x}行",
   "setDueTime": "设置到期时间",
   "showCardDay": "要在多少天后显示卡片？",
   "forgetCount": "遗忘次数",

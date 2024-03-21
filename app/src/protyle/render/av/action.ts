@@ -5,7 +5,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {getCellText, getTypeByCellElement, popTextCell, renderCell, renderCellAttr, updateHeaderCell} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
-import {deleteRow, insertAttrViewBlockAnimation, setPageSize, updateHeader} from "./row";
+import {deleteRow, insertRows, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
@@ -174,30 +174,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-more") {
-            const avID = blockElement.getAttribute("data-av-id");
-            const srcIDs = [Lute.NewNodeID()];
-            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-            transaction(protyle, [{
-                action: "insertAttrViewBlock",
-                avID,
-                srcIDs,
-                isDetached: true,
-                blockID: blockElement.dataset.nodeId,
-            }, {
-                action: "doUpdateUpdated",
-                id: blockElement.dataset.nodeId,
-                data: newUpdated,
-            }], [{
-                action: "removeAttrViewBlock",
-                srcIDs,
-                avID,
-            }, {
-                action: "doUpdateUpdated",
-                id: blockElement.dataset.nodeId,
-                data: blockElement.getAttribute("updated")
-            }]);
-            insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, undefined, avID);
-            blockElement.setAttribute("updated", newUpdated);
+            insertRows(blockElement, protyle, 1, undefined);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -245,32 +222,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-bottom") {
-            const avID = blockElement.getAttribute("data-av-id");
-            const srcIDs = [Lute.NewNodeID()];
-            const previousID = blockElement.querySelector(".av__row--util").previousElementSibling.getAttribute("data-id") || "";
-            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-            transaction(protyle, [{
-                action: "insertAttrViewBlock",
-                avID,
-                previousID,
-                srcIDs,
-                isDetached: true,
-                blockID: blockElement.dataset.nodeId,
-            }, {
-                action: "doUpdateUpdated",
-                id: blockElement.dataset.nodeId,
-                data: newUpdated,
-            }], [{
-                action: "removeAttrViewBlock",
-                srcIDs,
-                avID,
-            }, {
-                action: "doUpdateUpdated",
-                id: blockElement.dataset.nodeId,
-                data: blockElement.getAttribute("updated")
-            }]);
-            insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
-            blockElement.setAttribute("updated", newUpdated);
+            insertRows(blockElement, protyle, 1, blockElement.querySelector(".av__row--util").previousElementSibling.getAttribute("data-id") || "");
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -344,19 +296,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     updateHeader(rowElement);
-    if (!protyle.disabled) {
-        menu.addItem({
-            icon: "iconTrashcan",
-            label: window.siyuan.languages.delete,
-            click() {
-                deleteRow(blockElement, protyle);
-            }
-        });
-    }
     if (rowElements.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
-        if (!protyle.disabled) {
-            menu.addSeparator();
-        }
         openEditorTab(protyle.app, rowElements[0].getAttribute("data-id"));
         menu.addItem({
             label: window.siyuan.languages.copy,
@@ -366,7 +306,51 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         });
     }
     if (!protyle.disabled) {
-        menu.addSeparator();
+        if (rowElements.length === 1) {
+            if (!rowElements[0].querySelector('[data-detached="true"]')) {
+                menu.addSeparator();
+            }
+            menu.addItem({
+                icon: "iconBefore",
+                type: "readonly",
+                label: `<div class="fn__flex" style="align-items: center;">
+${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
+</div>`,
+                bind(element) {
+                    const inputElement = element.querySelector("input")
+                    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                        if (!event.isComposing && event.key === "Enter") {
+                            insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
+                            menu.close();
+                        }
+                    })
+                }
+            });
+            menu.addItem({
+                icon: "iconAfter",
+                type: "readonly",
+                label: `<div class="fn__flex" style="align-items: center;">
+${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
+</div>`,
+                bind(element) {
+                    const inputElement = element.querySelector("input")
+                    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                        if (!event.isComposing && event.key === "Enter") {
+                            insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
+                            menu.close();
+                        }
+                    })
+                }
+            });
+            menu.addSeparator();
+        }
+        menu.addItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            click() {
+                deleteRow(blockElement, protyle);
+            }
+        });
         const editAttrSubmenu: IMenu[] = [];
         rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
             let hideBlock = false;

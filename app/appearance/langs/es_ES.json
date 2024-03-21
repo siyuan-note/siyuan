@@ -1,4 +1,6 @@
 {
+  "insertRowBefore": "Insertar filas ${x} arriba",
+  "insertRowAfter": "Insertar filas ${x} debajo",
   "setDueTime": "Establecer tiempo de vencimiento",
   "showCardDay": "¿Después de cuántos días deseas mostrar la tarjeta?",
   "forgetCount": "Olvídate de contar",

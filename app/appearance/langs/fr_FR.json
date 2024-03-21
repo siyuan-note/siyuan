@@ -1,4 +1,7 @@
 {
+  "updateAll": "Tout mettre à jour",
+  "confirmUpdateAll": "Etes-vous sûr de vouloir tout mettre à jour ?",
+  "confirmUpdate": "Êtes-vous sûr de vouloir mettre à jour ?",
   "insertRowBefore": "Insérer les lignes ${x} ci-dessus",
   "insertRowAfter": "Insérer les lignes ${x} ci-dessous",
   "setDueTime": "Définir le délai d'expiration",

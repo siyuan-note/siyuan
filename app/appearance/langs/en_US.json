@@ -1,4 +1,7 @@
 {
+  "updateAll": "Update all",
+  "confirmUpdateAll": "Are you sure you want to update all?",
+  "confirmUpdate": "Are you sure you want to update?",
   "insertRowBefore": "Insert rows ${x} above",
   "insertRowAfter": "Insert rows ${x} below",
   "setDueTime": "Set expiration time",

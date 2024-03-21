@@ -25,7 +25,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getBazaarPackages(c *gin.Context) {
+func getUpdatedPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -35,7 +35,7 @@ func getBazaarPackages(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
-	plugins, widgets, icons, themes, templates := model.BazaarPackages(frontend)
+	plugins, widgets, icons, themes, templates := model.UpdatedPackages(frontend)
 	ret.Data = map[string]interface{}{
 		"plugins":   plugins,
 		"widgets":   widgets,

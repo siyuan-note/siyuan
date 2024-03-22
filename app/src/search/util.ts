@@ -51,6 +51,27 @@ import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 
+export const getDefaultType = () => {
+    return {
+        audioBlock: window.siyuan.config.search.audioBlock,
+        videoBlock: window.siyuan.config.search.videoBlock,
+        iFrameBlock: window.siyuan.config.search.iFrameBlock,
+        widgetBlock: window.siyuan.config.search.widgetBlock,
+        document: window.siyuan.config.search.document,
+        heading: window.siyuan.config.search.heading,
+        list: window.siyuan.config.search.list,
+        listItem: window.siyuan.config.search.listItem,
+        codeBlock: window.siyuan.config.search.codeBlock,
+        htmlBlock: window.siyuan.config.search.htmlBlock,
+        mathBlock: window.siyuan.config.search.mathBlock,
+        table: window.siyuan.config.search.table,
+        blockquote: window.siyuan.config.search.blockquote,
+        superBlock: window.siyuan.config.search.superBlock,
+        paragraph: window.siyuan.config.search.paragraph,
+        embedBlock: window.siyuan.config.search.embedBlock,
+        databaseBlock: window.siyuan.config.search.databaseBlock,
+    };
+};
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     if (!list.replaceKeys || list.replaceKeys.length === 0) {
@@ -506,25 +527,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     k: "",
                     r: "",
                     page: 1,
-                    types: {
-                        audioBlock: window.siyuan.config.search.audioBlock,
-                        videoBlock: window.siyuan.config.search.videoBlock,
-                        iFrameBlock: window.siyuan.config.search.iFrameBlock,
-                        widgetBlock: window.siyuan.config.search.widgetBlock,
-                        document: window.siyuan.config.search.document,
-                        heading: window.siyuan.config.search.heading,
-                        list: window.siyuan.config.search.list,
-                        listItem: window.siyuan.config.search.listItem,
-                        codeBlock: window.siyuan.config.search.codeBlock,
-                        htmlBlock: window.siyuan.config.search.htmlBlock,
-                        mathBlock: window.siyuan.config.search.mathBlock,
-                        table: window.siyuan.config.search.table,
-                        blockquote: window.siyuan.config.search.blockquote,
-                        superBlock: window.siyuan.config.search.superBlock,
-                        paragraph: window.siyuan.config.search.paragraph,
-                        embedBlock: window.siyuan.config.search.embedBlock,
-                        databaseBlock: window.siyuan.config.search.databaseBlock,
-                    },
+                    types: getDefaultType(),
                     replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                 }, config, edit);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
@@ -766,25 +769,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         k: "",
                         r: "",
                         page: 1,
-                        types: {
-                            audioBlock: window.siyuan.config.search.audioBlock,
-                            videoBlock: window.siyuan.config.search.videoBlock,
-                            iFrameBlock: window.siyuan.config.search.iFrameBlock,
-                            widgetBlock: window.siyuan.config.search.widgetBlock,
-                            document: window.siyuan.config.search.document,
-                            heading: window.siyuan.config.search.heading,
-                            list: window.siyuan.config.search.list,
-                            listItem: window.siyuan.config.search.listItem,
-                            codeBlock: window.siyuan.config.search.codeBlock,
-                            htmlBlock: window.siyuan.config.search.htmlBlock,
-                            mathBlock: window.siyuan.config.search.mathBlock,
-                            table: window.siyuan.config.search.table,
-                            blockquote: window.siyuan.config.search.blockquote,
-                            superBlock: window.siyuan.config.search.superBlock,
-                            paragraph: window.siyuan.config.search.paragraph,
-                            embedBlock: window.siyuan.config.search.embedBlock,
-                            databaseBlock: window.siyuan.config.search.databaseBlock,
-                        },
+                        types: getDefaultType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");

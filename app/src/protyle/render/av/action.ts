@@ -317,13 +317,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
 ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
-                    const inputElement = element.querySelector("input")
+                    const inputElement = element.querySelector("input");
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
                             menu.close();
                         }
-                    })
+                    });
                 }
             });
             menu.addItem({
@@ -333,13 +333,13 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__spac
 ${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
-                    const inputElement = element.querySelector("input")
+                    const inputElement = element.querySelector("input");
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
                             menu.close();
                         }
-                    })
+                    });
                 }
             });
             menu.addSeparator();

@@ -12,7 +12,7 @@ import {input} from "../wysiwyg/input";
 import {objEquals} from "../../util/functions";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
-    const tempElement = document.createElement("template")
+    const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     let values: IAVCellValue[] = [];
     if (html.endsWith("]") && html.startsWith("[")) {
@@ -27,9 +27,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 values.push({
                     text: {content: cell.textContent},
                     type: "text"
-                })
-            })
-        })
+                });
+            });
+        });
     }
     if (values && Array.isArray(values) && values.length > 0) {
         const cellElements: Element[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];

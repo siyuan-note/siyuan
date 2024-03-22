@@ -1,4 +1,6 @@
 {
+  "video": "Video",
+  "audio": "Audio",
   "updateAll": "Update all",
   "confirmUpdateAll": "Are you sure you want to update all?",
   "confirmUpdate": "Are you sure you want to update?",

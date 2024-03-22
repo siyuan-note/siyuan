@@ -507,6 +507,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     r: "",
                     page: 1,
                     types: {
+                        audioBlock: window.siyuan.config.search.audioBlock,
+                        videoBlock: window.siyuan.config.search.videoBlock,
+                        iFrameBlock: window.siyuan.config.search.iFrameBlock,
+                        widgetBlock: window.siyuan.config.search.widgetBlock,
                         document: window.siyuan.config.search.document,
                         heading: window.siyuan.config.search.heading,
                         list: window.siyuan.config.search.list,
@@ -763,6 +767,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         r: "",
                         page: 1,
                         types: {
+                            audioBlock: window.siyuan.config.search.audioBlock,
+                            videoBlock: window.siyuan.config.search.videoBlock,
+                            iFrameBlock: window.siyuan.config.search.iFrameBlock,
+                            widgetBlock: window.siyuan.config.search.widgetBlock,
                             document: window.siyuan.config.search.document,
                             heading: window.siyuan.config.search.heading,
                             list: window.siyuan.config.search.list,

@@ -1,4 +1,6 @@
 {
+  "video": "视频",
+  "audio": "音频",
   "updateAll": "全部更新",
   "confirmUpdateAll": "确定全部更新吗？",
   "confirmUpdate": "确定更新吗？",

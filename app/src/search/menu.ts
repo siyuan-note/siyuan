@@ -130,6 +130,42 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="databaseBlock" type="checkbox"${config.types.databaseBlock ? " checked" : ""}>
     </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconVideo"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.video}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="videoBlock" type="checkbox"${config.types.videoBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconRecord"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.audio}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="audioBlock" type="checkbox"${config.types.audioBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconLanguage"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            IFrame
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="iFrameBlock" type="checkbox"${config.types.iFrameBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconBoth"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.widget}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="widgetBlock" type="checkbox"${config.types.widgetBlock ? " checked" : ""}>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

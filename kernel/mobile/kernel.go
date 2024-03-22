@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -87,6 +88,15 @@ func SetHttpServerPort(port int) {
 
 func GetCurrentWorkspacePath() string {
 	return util.WorkspaceDir
+}
+
+func GetAssetAbsPath(asset string) (ret string) {
+	ret, err := model.GetAssetAbsPath(asset)
+	if nil != err {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", asset, err)
+		ret = asset
+	}
+	return
 }
 
 func SetTimezone(container, appDir, timezoneID string) {

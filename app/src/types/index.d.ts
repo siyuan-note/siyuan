@@ -421,7 +421,7 @@ interface ISiyuan {
         rightDock?: import("../layout/dock").Dock,
         bottomDock?: import("../layout/dock").Dock,
     }
-    config?: IConfig;
+    config?: Config.IConf;
     ws: import("../layout/Model").Model,
     ctrlIsPressed?: boolean,
     altIsPressed?: boolean,

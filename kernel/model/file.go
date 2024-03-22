@@ -1096,26 +1096,28 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	var dom string
+	var templateTree *parse.Tree
+	var templateDom string
 	if "" != boxConf.DailyNoteTemplatePath {
 		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
 		if !filelock.IsExist(tplPath) {
 			logging.LogWarnf("not found daily note template [%s]", tplPath)
 		} else {
-			dom, err = renderTemplate(tplPath, id, false)
-			if nil != err {
+			var renderErr error
+			templateTree, templateDom, renderErr = RenderTemplate(tplPath, id, false)
+			if nil != renderErr {
 				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
 			}
 		}
 	}
-	if "" != dom {
+	if "" != templateDom {
 		var tree *parse.Tree
 		tree, err = LoadTreeByBlockID(id)
 		if nil == err {
 			tree.Root.FirstChild.Unlink()
 
 			luteEngine := util.NewLute()
-			newTree := luteEngine.BlockDOM2Tree(dom)
+			newTree := luteEngine.BlockDOM2Tree(templateDom)
 			var children []*ast.Node
 			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
 				children = append(children, c)
@@ -1123,6 +1125,15 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 			for _, c := range children {
 				tree.Root.AppendChild(c)
 			}
+
+			// Creating a dailynote template supports doc attributes https://github.com/siyuan-note/siyuan/issues/10698
+			templateIALs := parse.IAL2Map(templateTree.Root.KramdownIAL)
+			for k, v := range templateIALs {
+				if "name" == k || "alias" == k || "bookmark" == k || "memo" == k || "title" == k || strings.HasPrefix(k, "custom-") {
+					tree.Root.SetIALAttr(k, v)
+				}
+			}
+
 			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 			if err = indexWriteJSONQueue(tree); nil != err {
 				return

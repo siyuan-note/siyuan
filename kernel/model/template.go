@@ -183,24 +183,21 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return
 }
 
-func RenderTemplate(p, id string, preview bool) (string, error) {
-	return renderTemplate(p, id, preview)
-}
-
-func renderTemplate(p, id string, preview bool) (string, error) {
-	tree, err := LoadTreeByBlockID(id)
+func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {
+	tree, err = LoadTreeByBlockID(id)
 	if nil != err {
-		return "", err
+		return
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return "", ErrBlockNotFound
+		err = ErrBlockNotFound
+		return
 	}
 	block := sql.BuildBlockFromNode(node, tree)
 	md, err := os.ReadFile(p)
 	if nil != err {
-		return "", err
+		return
 	}
 
 	dataModel := map[string]string{}
@@ -222,20 +219,23 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if nil != err {
-		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
+		err = errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
+		return
 	}
 
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
 	if err = tpl.Execute(buf, dataModel); nil != err {
-		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
+		err = errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
+		return
 	}
 	md = buf.Bytes()
 	tree = parseKTree(md)
 	if nil == tree {
 		msg := fmt.Sprintf("parse tree [%s] failed", p)
 		logging.LogErrorf(msg)
-		return "", errors.New(msg)
+		err = errors.New(msg)
+		return
 	}
 
 	var nodesNeedAppendChild, unlinks []*ast.Node
@@ -357,8 +357,8 @@ func renderTemplate(p, id string, preview bool) (string, error) {
 	})
 
 	luteEngine := NewLute()
-	dom := luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
-	return dom, nil
+	dom = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+	return
 }
 
 func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {

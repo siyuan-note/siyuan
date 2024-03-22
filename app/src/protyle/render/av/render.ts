@@ -397,6 +397,13 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
                 const updateRow = item.querySelector('.av__row[data-need-update="true"]');
+                if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
+                    item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                        item.classList.remove("av__cell--active");
+                        item.querySelector(".av__drag-fill")?.remove();
+                    });
+                    addDragFill(item.querySelector(".av__cell--select"));
+                }
                 avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
                     if (attrElement) {

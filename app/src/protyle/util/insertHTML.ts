@@ -12,101 +12,115 @@ import {input} from "../wysiwyg/input";
 import {objEquals} from "../../util/functions";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
+    const tempElement = document.createElement("template")
+    tempElement.innerHTML = html;
+    let values: IAVCellValue[] = [];
     if (html.endsWith("]") && html.startsWith("[")) {
         try {
-            const values = JSON.parse(html);
-            const cellElements: Element[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
-            if (cellElements.length === 0) {
-                blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
-                    rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
-                        cellElements.push(cellElement);
-                    });
-                });
-            }
-            const doOperations: IOperation[] = [];
-            const undoOperations: IOperation[] = [];
-
-            const avID = blockElement.dataset.avId;
-            const id = blockElement.dataset.nodeId;
-            cellElements.forEach((item: HTMLElement, elementIndex) => {
-                let cellValue: IAVCellValue = values[elementIndex];
-                if (!cellValue) {
-                    return;
-                }
-                const rowElement = hasClosestByClassName(item, "av__row");
-                if (!rowElement) {
-                    return;
-                }
-                if (!blockElement.contains(item)) {
-                    item = cellElements[elementIndex] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
-                }
-                const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
-                if (["created", "updated", "template", "rollup"].includes(type)) {
-                    return;
-                }
-
-                const rowID = rowElement.getAttribute("data-id");
-                const cellId = item.getAttribute("data-id");
-                const colId = item.getAttribute("data-col-id");
-
-                const oldValue = genCellValueByElement(type, item);
-                if (cellValue.type !== type) {
-                    if (type === "date") {
-                        // 类型不能转换时就不进行替换
-                        return;
-                    }
-                    const content = cellValue[cellValue.type as "text"].content;
-                    if (!content) {
-                        return;
-                    }
-                    cellValue = genCellValue(type, cellValue[cellValue.type as "text"].content.toString());
-                } else if (cellValue.type === "block") {
-                    cellValue.isDetached = true;
-                    delete cellValue.block.id;
-                }
-                cellValue.id = cellId;
-                if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
-                    (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
-                    return;
-                }
-                if (objEquals(cellValue, oldValue)) {
-                    return;
-                }
-                doOperations.push({
-                    action: "updateAttrViewCell",
-                    id: cellId,
-                    avID,
-                    keyID: colId,
-                    rowID,
-                    data: cellValue
-                });
-                undoOperations.push({
-                    action: "updateAttrViewCell",
-                    id: cellId,
-                    avID,
-                    keyID: colId,
-                    rowID,
-                    data: oldValue
-                });
-                updateAttrViewCellAnimation(item, cellValue);
-            });
-            if (doOperations.length > 0) {
-                doOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: dayjs().format("YYYYMMDDHHmmss"),
-                });
-                undoOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: blockElement.getAttribute("updated"),
-                });
-                transaction(protyle, doOperations, undoOperations);
-            }
-            return;
+            values = JSON.parse(html);
         } catch (e) {
             console.warn("insert cell: JSON.parse error");
         }
+    } else if (tempElement.content.querySelector("table")) {
+        tempElement.content.querySelectorAll("tr").forEach(item => {
+            Array.from(item.children).forEach(cell => {
+                values.push({
+                    text: {content: cell.textContent},
+                    type: "text"
+                })
+            })
+        })
+    }
+    if (values && Array.isArray(values) && values.length > 0) {
+        const cellElements: Element[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
+        if (cellElements.length === 0) {
+            blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(rowElement => {
+                rowElement.querySelectorAll(".av__cell").forEach(cellElement => {
+                    cellElements.push(cellElement);
+                });
+            });
+        }
+        const doOperations: IOperation[] = [];
+        const undoOperations: IOperation[] = [];
+
+        const avID = blockElement.dataset.avId;
+        const id = blockElement.dataset.nodeId;
+        cellElements.forEach((item: HTMLElement, elementIndex) => {
+            let cellValue: IAVCellValue = values[elementIndex];
+            if (!cellValue) {
+                return;
+            }
+            const rowElement = hasClosestByClassName(item, "av__row");
+            if (!rowElement) {
+                return;
+            }
+            if (!blockElement.contains(item)) {
+                item = cellElements[elementIndex] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            }
+            const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
+            if (["created", "updated", "template", "rollup"].includes(type)) {
+                return;
+            }
+
+            const rowID = rowElement.getAttribute("data-id");
+            const cellId = item.getAttribute("data-id");
+            const colId = item.getAttribute("data-col-id");
+
+            const oldValue = genCellValueByElement(type, item);
+            if (cellValue.type !== type) {
+                if (type === "date") {
+                    // 类型不能转换时就不进行替换
+                    return;
+                }
+                const content = cellValue[cellValue.type as "text"].content;
+                if (!content) {
+                    return;
+                }
+                cellValue = genCellValue(type, cellValue[cellValue.type as "text"].content.toString());
+            } else if (cellValue.type === "block") {
+                cellValue.isDetached = true;
+                delete cellValue.block.id;
+            }
+            cellValue.id = cellId;
+            if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
+                (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
+                return;
+            }
+            if (objEquals(cellValue, oldValue)) {
+                return;
+            }
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: cellValue
+            });
+            undoOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: oldValue
+            });
+            updateAttrViewCellAnimation(item, cellValue);
+        });
+        if (doOperations.length > 0) {
+            doOperations.push({
+                action: "doUpdateUpdated",
+                id,
+                data: dayjs().format("YYYYMMDDHHmmss"),
+            });
+            undoOperations.push({
+                action: "doUpdateUpdated",
+                id,
+                data: blockElement.getAttribute("updated"),
+            });
+            transaction(protyle, doOperations, undoOperations);
+        }
+        return;
     }
     const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);
     const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));

@@ -187,6 +187,10 @@ type CriterionTypes struct {
 	HtmlBlock     bool `json:"htmlBlock"`
 	EmbedBlock    bool `json:"embedBlock"`
 	DatabaseBlock bool `json:"databaseBlock"`
+	AudioBlock    bool `json:"audioBlock"`
+	VideoBlock    bool `json:"videoBlock"`
+	IFrameBlock   bool `json:"iframeBlock"`
+	WidgetBlock   bool `json:"widgetBlock"`
 }
 
 type CriterionReplaceTypes struct {

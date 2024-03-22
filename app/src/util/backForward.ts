@@ -163,7 +163,6 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 onGet({
                     data: getResponse,
                     protyle: stack.protyle,
-                    action: [Constants.CB_GET_FOCUS],
                     afterCB() {
                         Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
                             if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
@@ -180,6 +179,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                             }
                         });
                         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                        scrollCenter(stack.protyle, blockElement, true);
                     }
                 });
             });

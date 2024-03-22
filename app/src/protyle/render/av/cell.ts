@@ -340,6 +340,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
+            addDragFill(cellElements[0]);
         }
         return;
     }
@@ -379,6 +380,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
                     focusByRange(protyle.toolbar.range);
                     cellElements[0].classList.add("av__cell--select");
+                    addDragFill(cellElements[0]);
                     hintRef(inputElement.value.substring(2), protyle, "av");
                     avMaskElement?.remove();
                     event.preventDefault();
@@ -453,6 +455,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (cellElements[0] // 兼容新增行后台隐藏
         && !hasClosestByClassName(cellElements[0], "custom-attr")) {
         cellElements[0].classList.add("av__cell--select");
+        addDragFill(cellElements[0]);
     }
     //  单元格编辑中 ctrl+p 光标定位
     if (!document.querySelector(".b3-dialog")) {
@@ -819,3 +822,11 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         transaction(protyle, doOperations, undoOperations);
     }
 };
+
+export const addDragFill = (cellElement: Element) => {
+    if (!cellElement) {
+        return;
+    }
+    cellElement.classList.add("av__cell--active");
+    cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+}

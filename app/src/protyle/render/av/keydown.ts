@@ -1,6 +1,6 @@
 import {matchHotKey} from "../../util/hotKey";
 import {deleteRow, selectRow} from "./row";
-import {cellScrollIntoView, popTextCell, updateCellsValue} from "./cell";
+import {addDragFill, cellScrollIntoView, popTextCell, updateCellsValue} from "./cell";
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
@@ -62,6 +62,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
                 newCellElement.classList.add("av__cell--select");
+                addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
             }
             event.preventDefault();
@@ -79,6 +80,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
                 newCellElement.classList.add("av__cell--select");
+                addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
             }
             event.preventDefault();
@@ -92,6 +94,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
                 newCellElement.classList.add("av__cell--select");
+                addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
             }
             event.preventDefault();
@@ -105,6 +108,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (newCellElement) {
                 selectCellElement.classList.remove("av__cell--select");
                 newCellElement.classList.add("av__cell--select");
+                addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
             }
             event.preventDefault();

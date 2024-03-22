@@ -82,6 +82,7 @@ import {openViewMenu} from "../render/av/view";
 import {avRender} from "../render/av/render";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {
+    addDragFill,
     dragFillCellsValue,
     genCellValueByElement,
     getCellText,
@@ -517,7 +518,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
-                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+                        addDragFill(lastCellElement);
                     }
                     return false;
                 };
@@ -589,7 +590,7 @@ export class WYSIWYG {
                     if (lastCellElement) {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
-                        lastCellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+                        addDragFill(lastCellElement);
                         this.preventClick = true;
                     }
                     return false;

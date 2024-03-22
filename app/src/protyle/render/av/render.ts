@@ -1,7 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {renderCell} from "./cell";
+import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
@@ -50,6 +50,15 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             if (selectCellElement) {
                 selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
             }
+            let dragFillId = ""
+            const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
+            if (dragFillElement) {
+                dragFillId = (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + dragFillElement.parentElement.getAttribute("data-col-id");
+            }
+            const activeIds: string[] = [];
+            e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                activeIds.push((hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + item.getAttribute("data-col-id"));
+            })
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
             let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
@@ -278,6 +287,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
                         focusBlock(e);
                     }
                 }
+                if (dragFillId) {
+                    addDragFill(e.querySelector(`.av__row[data-id="${dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${dragFillId.split(Constants.ZWSP)[1]}"]`))
+                }
+                activeIds.forEach(activeId => {
+                    e.querySelector(`.av__row[data-id="${activeId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${activeId.split(Constants.ZWSP)[1]}"]`)?.classList.add("av__cell--active")
+                })
                 if (getSelection().rangeCount > 0) {
                     // 修改表头后光标重新定位
                     const range = getSelection().getRangeAt(0);

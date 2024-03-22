@@ -99,6 +99,10 @@ func GetAssetAbsPath(asset string) (ret string) {
 	return
 }
 
+func GetMimeTypeByExt(ext string) string {
+	return util.GetMimeTypeByExt(ext)
+}
+
 func SetTimezone(container, appDir, timezoneID string) {
 	if "ios" == container {
 		os.Setenv("ZONEINFO", filepath.Join(appDir, "app", "zoneinfo.zip"))

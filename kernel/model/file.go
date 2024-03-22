@@ -1125,12 +1125,15 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 			for _, c := range children {
 				tree.Root.AppendChild(c)
 			}
+
+			// Creating a dailynote template supports doc attributes https://github.com/siyuan-note/siyuan/issues/10698
 			templateIALs := parse.IAL2Map(templateTree.Root.KramdownIAL)
 			for k, v := range templateIALs {
 				if "name" == k || "alias" == k || "bookmark" == k || "memo" == k || "title" == k || strings.HasPrefix(k, "custom-") {
 					tree.Root.SetIALAttr(k, v)
 				}
 			}
+
 			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 			if err = indexWriteJSONQueue(tree); nil != err {
 				return

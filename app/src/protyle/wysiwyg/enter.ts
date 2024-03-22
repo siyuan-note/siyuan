@@ -219,9 +219,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     // 回车之前的块为 1\n\n2 时会产生多个块
     Array.from(enterElement.children).forEach((item: HTMLElement) => {
         if (item.dataset.nodeId === id) {
-            const previousElement = blockElement.previousElementSibling;
+            const blockPreviousElement = blockElement.previousElementSibling;
+            const blockParentElement = blockElement.parentElement;
             blockElement.outerHTML = item.outerHTML;
-            blockElement = (previousElement?.nextElementSibling || protyle.wysiwyg.element.firstElementChild) as HTMLElement;
+            blockElement = (blockPreviousElement ? blockPreviousElement.nextElementSibling : blockParentElement.firstElementChild) as HTMLElement;
             doOperation.push({
                 action: "update",
                 data: blockElement.outerHTML,

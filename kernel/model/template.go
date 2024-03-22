@@ -169,6 +169,16 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	luteEngine := NewLute()
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
+
+	// 单独渲染根节点的 IAL
+	if 0 < len(tree.Root.KramdownIAL) {
+		// 把 docIAL 中的 id 调整到第一个
+		tree.Root.RemoveIALAttr("id")
+		tree.Root.KramdownIAL = append([][]string{{"id", tree.Root.ID}}, tree.Root.KramdownIAL...)
+		md = append(md, []byte("\n")...)
+		md = append(md, parse.IAL2Tokens(tree.Root.KramdownIAL)...)
+	}
+
 	name = util.FilterFileName(name) + ".md"
 	name = util.TruncateLenFileName(name)
 	savePath := filepath.Join(util.DataDir, "templates", name)

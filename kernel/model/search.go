@@ -592,7 +592,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
 							if 0 == method {
-								if bytes.Contains(n.Tokens, []byte(keyword)) {
+								if strings.Contains(n.TextMarkTextContent, keyword) {
 									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 								}
 							} else if 3 == method {

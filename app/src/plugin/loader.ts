@@ -140,6 +140,9 @@ const mergePluginHotkey = (plugin: Plugin) => {
     }
     Object.keys(plugin.docks).forEach(dockKey => {
         const dock = plugin.docks[dockKey];
+        if (!dock.config.hotkey) {
+            return;
+        }
         if (!window.siyuan.config.keymap.plugin[plugin.name]) {
             window.siyuan.config.keymap.plugin[plugin.name] = {
                 [dockKey]: {

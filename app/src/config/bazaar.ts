@@ -344,6 +344,7 @@ export const bazaar = {
 
             const allCount = response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length
             if (allCount === 0) {
+                this.element.querySelector('[data-type="downloaded-update"]').innerHTML = "";
                 return;
             }
             this.element.querySelector('[data-type="downloaded-update"]').innerHTML = `<div class="fn__flex config-bazaar__title">

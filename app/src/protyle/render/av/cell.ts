@@ -473,7 +473,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
     let text = "";
-    const json: IAVCellValue[] = [];
+    const json: IAVCellValue[][] = [];
     let cellElements: Element[];
     if (cElements?.length > 0) {
         cellElements = cElements;
@@ -511,7 +511,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
 
         text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
-        json.push(oldValue);
+        if (elementIndex === 0 || !cellElements[elementIndex - 1].isSameNode(item.previousElementSibling)) {
+           json.push([]);
+        }
+        json[json.length - 1].push(oldValue);
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {

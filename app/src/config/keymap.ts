@@ -185,7 +185,7 @@ export const keymap = {
 </div>`;
     },
     _setkeymap(app: App) {
-        const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+        const data: Config.IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             const newHotkey = item.getAttribute("data-value");

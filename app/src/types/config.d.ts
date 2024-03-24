@@ -1,16 +1,16 @@
 /**
  * Copyright (C) 2023 SiYuan Community
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -65,6 +65,7 @@ declare namespace Config {
         openHelp: boolean;
         /**
          * Whether it is running in read-only mode
+         * 全局只读
          */
         readonly: boolean;
         repo: IRepo;
@@ -133,6 +134,7 @@ declare namespace Config {
         apiModel: TOpenAIModel;
         /**
          * API Provider
+         * OpenAI, Azure
          */
         apiProvider: APIProvider;
         /**
@@ -1191,8 +1193,8 @@ declare namespace Config {
         /**
          * Cloud storage service provider
          * - `0`: SiYuan official cloud storage service
-         * - `1`: Object storage service compatible with S3 protocol
-         * - `2`: Network storage service using WebDAV protocol
+         * - `2`: Object storage service compatible with S3 protocol
+         * - `3`: Network storage service using WebDAV protocol
          */
         provider: number;
         s3: ISyncS3;

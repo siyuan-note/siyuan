@@ -86,9 +86,9 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
 };
 
 
-const updateDock = (dockItem: IDockTab[], index: number, plugin: Plugin, type: string) => {
+const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: Plugin, type: string) => {
     const dockKeys = Object.keys(plugin.docks);
-    dockItem.forEach((tabItem: IDockTab, tabIndex: number) => {
+    dockItem.forEach((tabItem: Config.IUILayoutDockTab, tabIndex: number) => {
         if (dockKeys.includes(tabItem.type)) {
             if (type === "Left") {
                 plugin.docks[tabItem.type].config.position = index === 0 ? "LeftTop" : "LeftBottom";
@@ -214,13 +214,13 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     }
 
     /// #if !MOBILE
-    window.siyuan.config.uiLayout.left.data.forEach((dockItem: IDockTab[], index: number) => {
+    window.siyuan.config.uiLayout.left.data.forEach((dockItem: Config.IUILayoutDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Left");
     });
-    window.siyuan.config.uiLayout.right.data.forEach((dockItem: IDockTab[], index: number) => {
+    window.siyuan.config.uiLayout.right.data.forEach((dockItem: Config.IUILayoutDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Right");
     });
-    window.siyuan.config.uiLayout.bottom.data.forEach((dockItem: IDockTab[], index: number) => {
+    window.siyuan.config.uiLayout.bottom.data.forEach((dockItem: Config.IUILayoutDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Bottom");
     });
     Object.keys(plugin.docks).forEach(key => {

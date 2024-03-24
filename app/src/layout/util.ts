@@ -136,7 +136,7 @@ export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {
 const dockToJSON = (dock: Dock) => {
     const json = [];
     const subDockToJSON = (index: number) => {
-        const data: IDockTab[] = [];
+        const data: Config.IUILayoutDockTab[] = [];
         dock.element.querySelectorAll(`span[data-index="${index}"]`).forEach(item => {
             data.push({
                 type: item.getAttribute("data-type"),
@@ -270,7 +270,7 @@ export const getAllLayout = () => {
     return layoutJSON;
 };
 
-const initInternalDock = (dockItem: IDockTab[]) => {
+const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem) => {
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
@@ -280,13 +280,13 @@ const initInternalDock = (dockItem: IDockTab[]) => {
 };
 
 const JSONToDock = (json: any, app: App) => {
-    json.left.data.forEach((existItem: IDockTab[]) => {
+    json.left.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
-    json.right.data.forEach((existItem: IDockTab[]) => {
+    json.right.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
-    json.bottom.data.forEach((existItem: IDockTab[]) => {
+    json.bottom.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;

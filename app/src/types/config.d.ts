@@ -1019,6 +1019,10 @@ declare namespace Config {
          */
         alias: boolean;
         /**
+         * Whether to search in audio blocks
+         */
+        audioBlock: boolean;
+        /**
          * Extract backlink mention keywords from block aliases
          */
         backlinkMentionAlias: boolean;
@@ -1075,6 +1079,10 @@ declare namespace Config {
          */
         ial: boolean;
         /**
+         * Whether to search in iframe blocks
+         */
+        iFrameBlock: boolean;
+        /**
          * Whether to search resource file paths
          */
         indexAssetPath: boolean;
@@ -1115,6 +1123,10 @@ declare namespace Config {
          */
         table: boolean;
         /**
+         * Whether to search in video blocks
+         */
+        videoBlock: boolean;
+        /**
          * Whether to get virtual reference keywords from block aliases
          */
         virtualRefAlias: boolean;
@@ -1130,6 +1142,10 @@ declare namespace Config {
          * Whether to get virtual reference keywords from block names
          */
         virtualRefName: boolean;
+        /**
+         * Whether to search in widget blocks
+         */
+        widgetBlock: boolean;
     }
 
     /**
@@ -1478,7 +1494,7 @@ declare namespace Config {
         /**
          * Dock area list
          */
-        data: Array<IUILayoutDockPanel[]>;
+        data: Array<IUILayoutDockTab[]>;
         /**
          * Whether to pin the dock
          */
@@ -1486,48 +1502,46 @@ declare namespace Config {
     }
 
     /**
-     * Dock panel list
-     *
-     * SiYuan dock panel data
+     * SiYuan dock tab data
      */
-    export interface IUILayoutDockPanel {
+    export interface IUILayoutDockTab {
         /**
-         * Panel hotkey
+         * Dock tab hotkey
          */
-        hotkey?: string;
+        hotkey: string;
         /**
          * Hotkey description ID
          */
-        hotkeyLangId: string;
+        hotkeyLangId?: string;
         /**
-         * Panel icon ID
+         * Tab icon ID
          */
         icon: string;
         /**
-         * Whether to display the panel
+         * Whether to display the tab
          */
         show: boolean;
         size: IUILayoutDockPanelSize;
         /**
-         * Panel title
+         * Tab title
          */
-        title?: string;
+        title: string;
         /**
-         * Panel type
+         * Tab type
          */
         type: string;
     }
 
     /**
-     * SiYuan dock panel size
+     * SiYuan dock tab size
      */
     export interface IUILayoutDockPanelSize {
         /**
-         * Panel height (unit: px)
+         * Tab height (unit: px)
          */
         height: number | null;
         /**
-         * Panel width (unit: px)
+         * Tab width (unit: px)
          */
         width: number | null;
     }

@@ -1208,7 +1208,8 @@
   },
   "_attrView": {
     "table": "Table",
-    "key": "Primary Key"
+    "key": "Primary Key",
+    "select": "Select"
   },
   "_kernel": {
     "0": "Query notebook failed",

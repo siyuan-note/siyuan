@@ -596,7 +596,7 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 
 func renderAttributeView(attrView *av.AttributeView, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
-		view, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
+		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
 		attrView.ViewID = view.ID
 		if err = av.SaveAttributeView(attrView); nil != err {

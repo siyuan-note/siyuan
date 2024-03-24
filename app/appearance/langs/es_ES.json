@@ -1208,7 +1208,8 @@
   },
   "_attrView": {
     "tabla": "Tabla",
-    "clave": "Clave principal"
+    "key": "Clave principal",
+    "select": "Selección"
   },
   "_kernel": {
     "0": "Consulta al cuaderno de notas fallido",

@@ -1299,7 +1299,20 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	}
 
 	id := sqlBlock.ID
-	content := util.EscapeHTML(sqlBlock.Content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
+	content := sqlBlock.Content
+	if 1 < strings.Count(content, search.SearchMarkRight) && strings.HasSuffix(content, search.SearchMarkRight+"...") {
+		// 返回多个关键字命中时需要检查最后一个关键字是否被截断
+		firstKeyword := gulu.Str.SubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		lastKeyword := gulu.Str.LastSubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		if firstKeyword != lastKeyword {
+			// 如果第一个关键字和最后一个关键字不相同，说明最后一个关键字被截断了
+			// 此时需要将 content 中的最后一个关键字替换为完整的关键字
+			content = strings.TrimSuffix(content, search.SearchMarkLeft+lastKeyword+search.SearchMarkRight+"...")
+			content += search.SearchMarkLeft + firstKeyword + search.SearchMarkRight + "..."
+		}
+	}
+
+	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
 	markdown := maxContent(sqlBlock.Markdown, 5120)

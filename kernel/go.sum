@@ -8,8 +8,8 @@ github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48 h1:qiE88Pw/9GG8hvMfpfB4
 github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48/go.mod h1:UgVSq5iO9pOvqs3hIGNVk6WXDiAB0v3Dlg4nssQJ7W4=
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950 h1:Pa5hMiBceTVVqrYaDlLio2QSKbXMUmAZPbzCwT5eNCw=
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
-github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c h1:Fas3hxqP33xA9KKDV50jUmppiiOukk5bdV00Hk5VSSk=
-github.com/88250/gulu v1.2.3-0.20231209020950-b7b6994e395c/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
+github.com/88250/gulu v1.2.3-0.20240324024901-3c1bb82cba30 h1:IeE4DVRWnVpcbMj7gGZoSMiBWs3h/ihiyOmualS1Mas=
+github.com/88250/gulu v1.2.3-0.20240324024901-3c1bb82cba30/go.mod h1:MUfzyfmbPrRDZLqxc7aPrVYveatTHRfoUa5TynPS0i8=
 github.com/88250/lute v1.7.7-0.20240317033923-b5d564e25df7 h1:egkoxNZeGBDcUCd4kUHgeYIZZ7uNHTK+TT+K2yZTHm0=
 github.com/88250/lute v1.7.7-0.20240317033923-b5d564e25df7/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=

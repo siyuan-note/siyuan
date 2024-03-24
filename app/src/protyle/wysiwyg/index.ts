@@ -1454,6 +1454,11 @@ export class WYSIWYG {
                 }
                 this.emojiToMd(tempElement);
                 html = tempElement.innerHTML;
+                // https://github.com/siyuan-note/siyuan/issues/10722
+                if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
+                    hasClosestByMatchTag(range.startContainer, "CODE")) {
+                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                }
                 // https://github.com/siyuan-note/siyuan/issues/4321
                 if (!nodeElement.classList.contains("table")) {
                     const editableElement = getContenteditableElement(nodeElement);
@@ -1474,7 +1479,7 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             if (!selectAVElement) {
-                textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);

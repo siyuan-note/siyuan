@@ -1870,9 +1870,8 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return -1;
     }
-    // 0 正常；1 折叠
-    let fold = "0";
-    if (nodeElement.getAttribute("fold") === "1") {
+    let hasFold = nodeElement.getAttribute("fold") === "1";
+    if (hasFold) {
         if (typeof isOpen === "boolean" && !isOpen) {
             return -1;
         }
@@ -1885,7 +1884,6 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         if (typeof isOpen === "boolean" && isOpen) {
             return -1;
         }
-        fold = "1";
         nodeElement.setAttribute("fold", "1");
         // 光标在子列表中，再次 focus 段尾的时候不会变 https://ld246.com/article/1647099132461
         if (getSelection().rangeCount > 0) {
@@ -1909,7 +1907,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     }
     const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {
-        if (fold === "0") {
+        if (hasFold) {
             nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" src="/stage/loading-pure.svg"></div>');
             transaction(protyle, [{
                 action: "unfoldHeading",
@@ -1933,14 +1931,14 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         transaction(protyle, [{
             action: "setAttrs",
             id,
-            data: JSON.stringify({fold})
+            data: JSON.stringify({fold: hasFold ? "" : "1"})
         }], [{
             action: "setAttrs",
             id,
-            data: JSON.stringify({fold: fold === "0" ? "1" : "0"})
+            data: JSON.stringify({fold: hasFold ? "1" : ""})
         }]);
     }
     // 折叠后，防止滚动条滚动后调用 get 请求 https://github.com/siyuan-note/siyuan/issues/2248
     preventScroll(protyle);
-    return fold;
+    return !hasFold ? 1 : 0;
 };

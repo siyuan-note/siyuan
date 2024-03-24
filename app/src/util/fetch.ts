@@ -85,7 +85,11 @@ export const fetchSyncPost = async (url: string, data?: any) => {
         method: "POST",
     };
     if (data) {
-        init.body = JSON.stringify(data);
+        if (data instanceof FormData) {
+            init.body = data;
+        } else {
+            init.body = JSON.stringify(data);
+        }
     }
     const res = await fetch(url, init);
     const res2 = await res.json() as IWebSocketData;

@@ -1,16 +1,16 @@
 /**
  * Copyright (C) 2023 SiYuan Community
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -46,7 +46,7 @@ declare namespace Config {
          * User interface language
          * Same as {@link IAppearance.lang}
          */
-        lang: Lang;
+        lang: TLang;
         /**
          * List of supported languages
          */
@@ -65,6 +65,7 @@ declare namespace Config {
         openHelp: boolean;
         /**
          * Whether it is running in read-only mode
+         * 全局只读
          */
         readonly: boolean;
         repo: IRepo;
@@ -137,6 +138,7 @@ declare namespace Config {
         apiModel: TOpenAIAPIModel;
         /**
          * API Provider
+         * OpenAI, Azure
          */
         apiProvider: TOpenAAPIProvider;
         /**
@@ -222,7 +224,7 @@ declare namespace Config {
         /**
          * The language used by the current user
          */
-        lang: Lang;
+        lang: TLang;
         /**
          * List of installed light themes
          */
@@ -261,7 +263,7 @@ declare namespace Config {
      * User interface language
      * Same as {@link IAppearance.lang}
      */
-    export type Lang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN";
+    export type TLang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN";
 
     /**
      * SiYuan bazaar related configuration
@@ -1213,8 +1215,8 @@ declare namespace Config {
         /**
          * Cloud storage service provider
          * - `0`: SiYuan official cloud storage service
-         * - `1`: Object storage service compatible with S3 protocol
-         * - `2`: Network storage service using WebDAV protocol
+         * - `2`: Object storage service compatible with S3 protocol
+         * - `3`: Network storage service using WebDAV protocol
          */
         provider: number;
         s3: ISyncS3;
@@ -1693,7 +1695,7 @@ declare namespace Config {
          * - `pin`: Pinned panel
          * - `local`: The panel of the current document
          */
-        type: IUILayoutTabBacklinkType;
+        type: TUILayoutTabBacklinkType;
     }
 
     /**
@@ -1701,7 +1703,7 @@ declare namespace Config {
      * - `pin`: Pinned panel
      * - `local`: The panel of the current document
      */
-    export type IUILayoutTabBacklinkType = "pin" | "local";
+    export type TUILayoutTabBacklinkType = "pin" | "local";
 
     /**
      * SiYuan bookmark tab
@@ -1796,7 +1798,7 @@ declare namespace Config {
          * - `local`: Graph of the current editor
          * - `global`: Global graph
          */
-        type: IUILayoutTabGraphType;
+        type: TUILayoutTabGraphType;
     }
 
 
@@ -1806,7 +1808,7 @@ declare namespace Config {
      * - `local`: Graph of the current editor
      * - `global`: Global graph
      */
-    export type IUILayoutTabGraphType = "pin" | "local" | "global";
+    export type TUILayoutTabGraphType = "pin" | "local" | "global";
 
     /**
      * SiYuan outline tab
@@ -1829,7 +1831,7 @@ declare namespace Config {
          * - `pin`: Pinned outline panel
          * - `local`: The outline panel of the current editor
          */
-        type: IUILayoutTabOutlineType;
+        type: TUILayoutTabOutlineType;
     }
 
 
@@ -1838,7 +1840,7 @@ declare namespace Config {
      * - `pin`: Pinned outline panel
      * - `local`: The outline panel of the current editor
      */
-    export type IUILayoutTabOutlineType = "pin" | "local";
+    export type TUILayoutTabOutlineType = "pin" | "local";
 
     /**
      * SiYuan tag tab

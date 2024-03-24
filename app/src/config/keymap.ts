@@ -12,7 +12,7 @@ import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
 
 export const keymap = {
     element: undefined as Element,
-    _genItem(keymap: Record<string, IKeymapItem>, keys: string) {
+    _genItem(keymap: Record<string, Config.IKey>, keys: string) {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
@@ -185,7 +185,7 @@ export const keymap = {
 </div>`;
     },
     _setkeymap(app: App) {
-        const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+        const data: Config.IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             const newHotkey = item.getAttribute("data-value");

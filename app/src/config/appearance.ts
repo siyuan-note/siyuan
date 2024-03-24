@@ -244,7 +244,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: IAppearance) {
+    onSetappearance(data: Config.IAppearance) {
         if (data.lang !== window.siyuan.config.appearance.lang) {
             exportLayout({
                 cb() {

@@ -30,7 +30,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     let dialog: Dialog;
     let edit;
     let unRefEdit;
-    let config: ISearchOption;
+    let config: Config.IUILayoutTabSearchConfig;
     window.siyuan.dialogs.find((item) => {
         if (item.element.contains(range.startContainer) && item.element.querySelector("#searchList")) {
             element = item.element.querySelector(".b3-dialog__body");

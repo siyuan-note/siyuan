@@ -47,9 +47,9 @@ export class Wnd {
     public element: HTMLElement;
     public headersElement: HTMLElement;
     public children: Tab[] = [];
-    public resize?: TDirection;
+    public resize?: Config.TUILayoutDirection;
 
-    constructor(app: App, resize?: TDirection, parentType?: TLayout) {
+    constructor(app: App, resize?: Config.TUILayoutDirection, parentType?: Config.TUILayoutType) {
         this.id = genUUID();
         this.app = app;
         this.resize = resize;
@@ -896,7 +896,7 @@ export class Wnd {
         /// #endif
     }
 
-    public split(direction: TDirection) {
+    public split(direction: Config.TUILayoutDirection) {
         if (this.children.length === 1 && !this.children[0].headElement) {
             // 场景：没有打开的文档，点击标签面板打开
             return this;

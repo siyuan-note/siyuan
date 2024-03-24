@@ -71,7 +71,7 @@ func RenameBox(boxID, name string) (err error) {
 	}
 
 	if 512 < utf8.RuneCountInString(name) {
-		// 限制笔记本名和文档名最大长度为 `512`
+		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
 	}

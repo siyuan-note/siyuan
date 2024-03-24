@@ -101,7 +101,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 
 		if "" == avName {
-			avName = "Untitled"
+			avName = Conf.language(105)
 		}
 
 		attrView := &AttrView{ID: avID, Name: avName}

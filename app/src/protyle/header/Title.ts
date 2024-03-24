@@ -1,14 +1,15 @@
 import {
-    focusBlock, focusByOffset,
-    focusByRange, focusByWbr,
-    getEditorRange, getSelectionOffset,
+    focusBlock,
+    focusByOffset,
+    focusByRange,
+    focusByWbr,
+    getEditorRange,
+    getSelectionOffset,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
-import {
-    openFileAttr,
-} from "../../menus/commonMenuItem";
+import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
 import {isMac, readText, writeText} from "../util/compatibility";
@@ -264,7 +265,7 @@ export class Title {
 
     public setTitle(title: string) {
         if (code160to32(title) !== code160to32(this.editElement.textContent)) {
-            this.editElement.textContent = title === "Untitled" ? "" : title;
+            this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
         }
     }
 

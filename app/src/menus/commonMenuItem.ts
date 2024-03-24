@@ -476,7 +476,7 @@ export const exportMd = (id: string) => {
                 });
                 btnsElement[1].addEventListener("click", () => {
                     if (inputElement.value.trim() === "") {
-                        inputElement.value = "Untitled";
+                        inputElement.value = window.siyuan.languages.untitled;
                     } else {
                         inputElement.value = replaceFileName(inputElement.value);
                     }

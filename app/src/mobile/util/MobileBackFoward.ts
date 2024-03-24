@@ -44,7 +44,7 @@ const focusStack = (backStack: IBackStack) => {
             id: backStack.id,
         }, (response) => {
             setTitle(response.data.name);
-            (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
+            (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === window.siyuan.languages.untitled ? "" : response.data.name;
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
         });

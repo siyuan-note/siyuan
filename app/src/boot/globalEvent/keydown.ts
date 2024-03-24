@@ -18,8 +18,7 @@ import {newFile} from "../../util/newFile";
 import {Constants} from "../../constants";
 import {openSetting} from "../../config";
 import {getInstanceById} from "../../layout/util";
-import {closeTabByType, copyTab, getDockByType, resizeTabs, switchTabByIndex} from "../../layout/tabUtil";
-import {getActiveTab} from "../../layout/tabUtil";
+import {closeTabByType, copyTab, getActiveTab, getDockByType, resizeTabs, switchTabByIndex} from "../../layout/tabUtil";
 import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {setEditMode} from "../../protyle/util/setEditMode";
@@ -369,7 +368,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent || "Untitled");
+            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent || window.siyuan.languages.untitled);
         });
         event.preventDefault();
         return true;
@@ -428,7 +427,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             blockId: protyle.block.id,
             rootId: protyle.block.rootID,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+            title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
         });
         return true;
     }
@@ -449,7 +448,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             blockId: protyle.block.id,
             rootId: protyle.block.rootID,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.editElement.textContent || "Untitled") : null,
+            title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null,
         });
         return true;
     }

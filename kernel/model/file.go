@@ -1568,7 +1568,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 	if "" == title {
-		title = "Untitled"
+		title = Conf.language(105)
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
@@ -1604,6 +1604,10 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		return
 	}
 	title = strings.ReplaceAll(title, "/", "")
+	title = strings.TrimSpace(title)
+	if "" == title {
+		title = Conf.Language(105)
+	}
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == strings.TrimSuffix(baseName, ".sy") {

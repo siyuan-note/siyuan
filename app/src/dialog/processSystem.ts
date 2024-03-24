@@ -54,7 +54,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
                 setTitle(response.data.name);
-                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
+                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === window.siyuan.languages.untitled ? "" : response.data.name;
             });
         }
     }
@@ -389,7 +389,7 @@ export const setTitle = (title: string) => {
             dragElement.setAttribute("title", versionTitle);
         }
     } else {
-        title = title || "Untitled";
+        title = title || window.siyuan.languages.untitled;
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         if (!dragElement) {
             return;

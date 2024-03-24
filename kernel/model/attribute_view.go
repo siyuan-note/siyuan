@@ -1738,7 +1738,7 @@ func getAvNames(avIDs string) (ret string) {
 			continue
 		}
 		if "" == nodeAvName {
-			nodeAvName = "Untitled"
+			nodeAvName = Conf.language(105)
 		}
 
 		tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", nodeAvID)

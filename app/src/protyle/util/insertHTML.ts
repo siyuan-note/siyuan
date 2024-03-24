@@ -23,7 +23,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
     } else if (tempElement.content.querySelector("table")) {
         tempElement.content.querySelectorAll("tr").forEach(item => {
-            values.push([])
+            values.push([]);
             Array.from(item.children).forEach(cell => {
                 values[values.length - 1].push({
                     text: {content: cell.textContent},
@@ -50,7 +50,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         const avID = blockElement.dataset.avId;
         const id = blockElement.dataset.nodeId;
         let currentRowElement: Element;
-        const firstColIndex = cellElements[0].getAttribute("data-col-id")
+        const firstColIndex = cellElements[0].getAttribute("data-col-id");
         values.find(rowItem => {
             if (!currentRowElement) {
                 currentRowElement = cellElements[0].parentElement;
@@ -63,9 +63,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             let cellElement: HTMLElement;
             rowItem.find(cellValue => {
                 if (!cellElement) {
-                    cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement
+                    cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                 } else {
-                    cellElement = cellElement.nextElementSibling as HTMLElement
+                    cellElement = cellElement.nextElementSibling as HTMLElement;
                 }
                 if (!cellElement.classList.contains("av__cell")) {
                     return true;

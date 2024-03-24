@@ -254,7 +254,7 @@ export const exportConfig = {
         });
         /// #endif
     },
-    onSetexport: (data: IExport) => {
+    onSetexport: (data: Config.IExport) => {
         window.siyuan.config.export = data;
     }
 };

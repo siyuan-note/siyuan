@@ -349,7 +349,7 @@ export const editor = {
             });
         });
     },
-    _onSetEditor: (editorData: IEditor) => {
+    _onSetEditor: (editorData: Config.IEditor) => {
         const changeReadonly = editorData.readOnly !== window.siyuan.config.editor.readOnly;
         if (changeReadonly) {
             editor.setReadonly(editorData.readOnly);

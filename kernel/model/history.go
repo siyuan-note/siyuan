@@ -687,7 +687,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 
 		title := tree.Root.IALAttr("title")
 		if "" == title {
-			title = "Untitled"
+			title = Conf.language(105)
 		}
 		content := tree.Root.Content()
 		p := strings.TrimPrefix(doc, util.HistoryDir)

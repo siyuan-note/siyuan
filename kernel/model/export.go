@@ -76,7 +76,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 
 	name := util.FilterFileName(attrView.Name)
 	if "" == name {
-		name = "Untitled"
+		name = Conf.language(105)
 	}
 
 	table, err := renderAttributeViewTable(attrView, view, "")
@@ -1375,7 +1375,7 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 		baseFolderName = path.Base(block.HPath)
 	}
 	if "" == baseFolderName {
-		baseFolderName = "Untitled"
+		baseFolderName = Conf.language(105)
 	}
 
 	docFiles := box.ListFiles(folderPath)

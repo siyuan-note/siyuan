@@ -1,4 +1,6 @@
 {
+  "video": "Video",
+  "audio": "Audio",
   "updateAll": "Update all",
   "confirmUpdateAll": "Are you sure you want to update all?",
   "confirmUpdate": "Are you sure you want to update?",
@@ -1206,7 +1208,8 @@
   },
   "_attrView": {
     "table": "Table",
-    "key": "Primary Key"
+    "key": "Primary Key",
+    "select": "Select"
   },
   "_kernel": {
     "0": "Query notebook failed",
@@ -1314,7 +1317,7 @@
     "102": "Processing completed",
     "103": "The update installation package has been automatically downloaded in the background. When exiting, you will be asked whether to install the new version",
     "104": "The update installation package failed to download, please check the network connection",
-    "105": "TODO",
+    "105": "Untitled",
     "106": "Maximum length is limited to 512 characters",
     "107": "Moved document [%s]",
     "108": "Data sync found conflicts, you can view the generated conflict content in [Data History]",

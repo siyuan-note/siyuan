@@ -125,7 +125,7 @@ func unfoldBlock(c *gin.Context) {
 			},
 		}
 	} else {
-		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"unfold": "1"})
+		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"fold": ""})
 		transactions = []*model.Transaction{
 			{
 				DoOperations: []*model.Operation{

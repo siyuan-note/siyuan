@@ -3,7 +3,15 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {getCellText, getTypeByCellElement, popTextCell, renderCell, renderCellAttr, updateHeaderCell} from "./cell";
+import {
+    addDragFill,
+    getCellText,
+    getTypeByCellElement,
+    popTextCell,
+    renderCell,
+    renderCellAttr,
+    updateHeaderCell
+} from "./cell";
 import {getColIconByType, showColMenu} from "./col";
 import {deleteRow, insertRows, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
@@ -317,13 +325,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
 ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
-                    const inputElement = element.querySelector("input")
+                    const inputElement = element.querySelector("input");
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
                             menu.close();
                         }
-                    })
+                    });
                 }
             });
             menu.addItem({
@@ -333,13 +341,13 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__spac
 ${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
-                    const inputElement = element.querySelector("input")
+                    const inputElement = element.querySelector("input");
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
                             menu.close();
                         }
-                    })
+                    });
                 }
             });
             menu.addSeparator();
@@ -450,7 +458,11 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     if (headerValue) {
         updateHeaderCell(cellElement, headerValue);
     } else {
+        const hasDragFill = cellElement.querySelector(".av__drag-fill");
         cellElement.innerHTML = renderCell(value);
+        if (hasDragFill) {
+            addDragFill(cellElement);
+        }
         renderCellAttr(cellElement, value);
     }
 };

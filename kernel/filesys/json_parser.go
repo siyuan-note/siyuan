@@ -233,11 +233,6 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 			node.Tokens = []byte("Untitled")
 			*needFix = true
 		}
-		if 1 == len(node.Tokens) && bytes.Equal(node.Tokens, []byte("\n")) {
-			// https://ld246.com/article/1710381064911
-			node.Tokens = []byte("")
-			*needFix = true
-		}
 	case ast.NodeTagCloseMarker:
 		if nil != tip.LastChild {
 			if ast.NodeTagOpenMarker == tip.LastChild.Type {

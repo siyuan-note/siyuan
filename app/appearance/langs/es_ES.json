@@ -1,4 +1,6 @@
 {
+  "vídeo": "Vídeo",
+  "audio": "Audio",
   "updateAll": "Actualizar todo",
   "confirmUpdateAll": "¿Estás seguro de que deseas actualizar todo?",
   "confirmUpdate": "¿Estás seguro de que deseas actualizar?",
@@ -313,7 +315,7 @@
   "apiProviderTip": "Utilice el proveedor de API seleccionado para implementar funciones relacionadas con la IA",
   "skip": "barco",
   "nextRound": "Siguiente ronda",
-  "save": "Ahorrar",
+  "save": "Guardar",
   "ai": "Inteligencia Artificial",
   "aiContinueWrite": "Continuar escribiendo",
   "aiTranslate": "Traducir",
@@ -326,12 +328,12 @@
   "spaceRepetition": "Repetición Espaciada",
   "space": "Espacio",
   "pdfIsLoading": "El PDF se está cargando, inténtalo de nuevo más tarde",
-  "cardShowAnswer": "Afficher la réponse",
+  "cardShowAnswer": "Mostrar la respuesta",
   "cardRatingAgain": "Otra vez",
   "cardRatingHard": "Difícil",
   "cardRatingGood": "Bueno",
   "cardRatingEasy": "Fácil",
-  "addToDeck": "Agregar a la plataforma...",
+  "addToDeck": "Agregar al mazo...",
   "quickMakeCard": "Tarjeta de creación rápida",
   "allAttrs": "Todos los nombres de atributos y valores de atributos",
   "chooseSyncDirection": "Elegir dirección de sincronización",
@@ -1206,7 +1208,8 @@
   },
   "_attrView": {
     "tabla": "Tabla",
-    "clave": "Clave principal"
+    "key": "Clave principal",
+    "select": "Selección"
   },
   "_kernel": {
     "0": "Consulta al cuaderno de notas fallido",
@@ -1314,7 +1317,7 @@
     "102": "Procesamiento completado",
     "103": "El paquete de instalación de la actualización se ha descargado automáticamente en segundo plano. Al salir, se le preguntará si desea instalar la nueva versión",
     "104": "El paquete de instalación de la actualización no se pudo descargar, verifique la conexión de red",
-    "105": "TODO",
+    "105": "Sin título",
     "106": "La longitud máxima está limitada a 512 caracteres",
     "107": "Documento movido [%s]",
     "108": "La sincronizaci\u00f3n de datos encontr\u00f3 en conflictos, puede ver el contenido del conflicto generado en [Historial de datos]",

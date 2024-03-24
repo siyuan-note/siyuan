@@ -40,6 +40,9 @@ func CreateBox(name string) (id string, err error) {
 		err = errors.New(Conf.Language(106))
 		return
 	}
+	if "" == name {
+		name = Conf.language(105)
+	}
 
 	WaitForWritingFiles()
 
@@ -65,6 +68,16 @@ func RenameBox(boxID, name string) (err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return errors.New(Conf.Language(0))
+	}
+
+	if 512 < utf8.RuneCountInString(name) {
+		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		err = errors.New(Conf.Language(106))
+		return
+	}
+
+	if "" == name {
+		name = Conf.language(105)
 	}
 
 	boxConf := box.GetConf()

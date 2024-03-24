@@ -82,7 +82,7 @@ export const rename = (options: {
             return false;
         }
         if (inputElement.value.trim() === "") {
-            inputElement.value = "Untitled";
+            inputElement.value = window.siyuan.languages.untitled;
         } else {
             inputElement.value = replaceFileName(inputElement.value);
         }

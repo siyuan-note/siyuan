@@ -122,7 +122,43 @@ export const query = {
             </div>
             <span class="fn__space"></span>
             <input class="b3-switch" id="databaseBlock" type="checkbox"${window.siyuan.config.search.databaseBlock ? " checked" : ""}/>
-        </label>        
+        </label>
+        <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconVideo"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.video}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="videoBlock" type="checkbox"${window.siyuan.config.search.videoBlock ? " checked" : ""}/>
+        </label>
+        <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconRecord"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.audio}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="audioBlock" type="checkbox"${window.siyuan.config.search.audioBlock ? " checked" : ""}/>
+        </label>
+        <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconLanguage"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                IFrame
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="iFrameBlock" type="checkbox"${window.siyuan.config.search.iFrameBlock ? " checked" : ""}/>
+        </label>
+        <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconBoth"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.widget}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="widgetBlock" type="checkbox"${window.siyuan.config.search.widgetBlock ? " checked" : ""}/>
+        </label>
     </div>
 </div>
 <div class="b3-label">
@@ -279,6 +315,10 @@ export const query = {
                     htmlBlock: (query.element.querySelector("#htmlBlock") as HTMLInputElement).checked,
                     embedBlock: (query.element.querySelector("#embedBlock") as HTMLInputElement).checked,
                     databaseBlock: (query.element.querySelector("#databaseBlock") as HTMLInputElement).checked,
+                    audioBlock: (query.element.querySelector("#audioBlock") as HTMLInputElement).checked,
+                    videoBlock: (query.element.querySelector("#videoBlock") as HTMLInputElement).checked,
+                    iFrameBlock: (query.element.querySelector("#iFrameBlock") as HTMLInputElement).checked,
+                    widgetBlock: (query.element.querySelector("#widgetBlock") as HTMLInputElement).checked,
                     mathBlock: (query.element.querySelector("#mathBlock") as HTMLInputElement).checked,
                     table: (query.element.querySelector("#table") as HTMLInputElement).checked,
                     blockquote: (query.element.querySelector("#blockquote") as HTMLInputElement).checked,

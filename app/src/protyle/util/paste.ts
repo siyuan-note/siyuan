@@ -19,7 +19,7 @@ import {cellScrollIntoView} from "../render/av/cell";
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
-        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
+        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
         // https://github.com/siyuan-note/siyuan/issues/5446
         // A\B\C\D\
@@ -47,7 +47,8 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
             .replace(/#/g, "\\#")
             .replace(/\$/g, "\\$")
             .replace(/\^/g, "\\^")
-            .replace(/\|/g, "\\|");
+            .replace(/\|/g, "\\|")
+            .replace(/\./g, "\\.");
         pasteText(protyle, clipText, nodeElement);
     } catch (e) {
         console.log(e);

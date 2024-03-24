@@ -592,7 +592,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
 							if 0 == method {
-								if bytes.Contains(n.Tokens, []byte(keyword)) {
+								if strings.Contains(n.TextMarkTextContent, keyword) {
 									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 								}
 							} else if 3 == method {
@@ -1161,13 +1161,13 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		table = "blocks_fts_case_insensitive"
 	}
 	projections := "id, parent_id, root_id, hash, box, path, " +
-		// Improve the highlight snippet when search result content is too long https://github.com/siyuan-note/siyuan/issues/9215
-		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS hpath, " +
-		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS name, " +
-		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS alias, " +
-		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS memo, " +
+		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
+		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
+		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
+		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
+		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
 		"tag, " +
-		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS content, " +
+		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
@@ -1299,7 +1299,20 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	}
 
 	id := sqlBlock.ID
-	content := util.EscapeHTML(sqlBlock.Content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
+	content := sqlBlock.Content
+	if 1 < strings.Count(content, search.SearchMarkRight) && strings.HasSuffix(content, search.SearchMarkRight+"...") {
+		// 返回多个关键字命中时需要检查最后一个关键字是否被截断
+		firstKeyword := gulu.Str.SubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		lastKeyword := gulu.Str.LastSubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		if firstKeyword != lastKeyword {
+			// 如果第一个关键字和最后一个关键字不相同，说明最后一个关键字被截断了
+			// 此时需要将 content 中的最后一个关键字替换为完整的关键字
+			content = strings.TrimSuffix(content, search.SearchMarkLeft+lastKeyword+search.SearchMarkRight+"...")
+			content += search.SearchMarkLeft + firstKeyword + search.SearchMarkRight + "..."
+		}
+	}
+
+	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
 	markdown := maxContent(sqlBlock.Markdown, 5120)

@@ -308,7 +308,13 @@ export class WYSIWYG {
                     html = "[";
                     cellElements.forEach((item: HTMLElement, index) => {
                         const cellText = getCellText(item);
+                        if (index === 0 || !cellElements[index - 1].isSameNode(item.previousElementSibling)) {
+                            html += "[";
+                        }
                         html += JSON.stringify(genCellValueByElement(getTypeByCellElement(item), item)) + ",";
+                        if (index === cellElements.length - 1 || !cellElements[index + 1].isSameNode(item.nextElementSibling)) {
+                            html = html.substring(0, html.length - 1) + "],";
+                        }
                         textPlain += cellText + ((cellElements[index + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[index + 1])) ? "\t" : "\n\n");
                     });
                     textPlain = textPlain.substring(0, textPlain.length - 2);
@@ -1448,6 +1454,11 @@ export class WYSIWYG {
                 }
                 this.emojiToMd(tempElement);
                 html = tempElement.innerHTML;
+                // https://github.com/siyuan-note/siyuan/issues/10722
+                if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
+                    hasClosestByMatchTag(range.startContainer, "CODE")) {
+                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                }
                 // https://github.com/siyuan-note/siyuan/issues/4321
                 if (!nodeElement.classList.contains("table")) {
                     const editableElement = getContenteditableElement(nodeElement);
@@ -1468,7 +1479,7 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             if (!selectAVElement) {
-                textPlain = protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);

@@ -335,6 +335,16 @@
       border-bottom: .5px solid var(--b3-border-color);
     }
 
+    &--url.b3-chip {
+      max-width: 120px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: top;
+      height: 20px;
+    }
+
     & > .av__cellicon {
       margin: 0 5px;
       height: 10px;

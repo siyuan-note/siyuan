@@ -121,7 +121,7 @@ export const fileTree = {
             });
         });
     },
-    onSetfiletree: (fileTree: IFileTree) => {
+    onSetfiletree: (fileTree: Config.IFileTree) => {
         window.siyuan.config.fileTree = fileTree;
     }
 };

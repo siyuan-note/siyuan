@@ -342,7 +342,7 @@ export const bazaar = {
                 html += this._genUpdateItemHTML(item, "widgets");
             });
 
-            const allCount = response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length
+            const allCount = response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length;
             if (allCount === 0) {
                 this.element.querySelector('[data-type="downloaded-update"]').innerHTML = "";
                 return;
@@ -354,7 +354,7 @@ export const bazaar = {
     <div class="counter counter--bg fn__flex-center">${allCount}</div>
 </div>
 <div class="config-bazaar__content">${html}</div>`;
-        })
+        });
     },
     _genMyHTML(bazaarType: TBazaarType, app: App, updateUpdate = true) {
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
@@ -708,7 +708,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "install-all") {
-                    confirmDialog('⬆️ ' + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
+                    confirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
                         fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
                     });
                     event.preventDefault();
@@ -716,7 +716,7 @@ export const bazaar = {
                     break;
                 } else if (type === "install-t") {
                     if (!target.classList.contains("b3-button--progress")) {
-                        confirmDialog('⬆️ ' + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
+                        confirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
                             const bazaarType = dataObj.bazaarType as TBazaarType;
                             let url = "/api/bazaar/installBazaarTemplate";
                             if (bazaarType === "themes") {

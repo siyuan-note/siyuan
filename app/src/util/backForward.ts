@@ -2,7 +2,7 @@ import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
 import {hideElements} from "../protyle/ui/hideElements";
-import {fetchSyncPost} from "./fetch";
+import {fetchPost, fetchSyncPost} from "./fetch";
 import {Constants} from "../constants";
 import {Wnd} from "../layout/Wnd";
 import {getInstanceById, getWndByLayout} from "../layout/util";
@@ -14,6 +14,7 @@ import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {getAllModels} from "../layout/getAll";
 import {App} from "../index";
+import {onGet} from "../protyle/util/onGet";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
@@ -143,7 +144,6 @@ const focusStack = async (app: App, stack: IBackStack) => {
         });
         return true;
     }
-    // 缩放
     if (stack.protyle.element.parentElement) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.id});
         if (!response.data) {
@@ -153,6 +153,40 @@ const focusStack = async (app: App, stack: IBackStack) => {
             }
             return false;
         }
+        // 动态加载导致内容移除 https://github.com/siyuan-note/siyuan/issues/10692
+        if (!blockElement && !stack.zoomId && !stack.protyle.scroll.element.classList.contains("fn__none")) {
+            fetchPost("/api/filetree/getDoc", {
+                id: stack.id,
+                mode: 3,
+                size: window.siyuan.config.editor.dynamicLoadBlocks,
+            }, getResponse => {
+                onGet({
+                    data: getResponse,
+                    protyle: stack.protyle,
+                    afterCB() {
+                        Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
+                            if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                                blockElement = item;
+                                return true;
+                            }
+                        });
+                        if (!blockElement) {
+                            return;
+                        }
+                        getAllModels().outline.forEach(item => {
+                            if (item.blockId === stack.protyle.block.rootID) {
+                                item.setCurrent(blockElement);
+                            }
+                        });
+                        focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                        scrollCenter(stack.protyle, blockElement, true);
+                    }
+                });
+            });
+            return true;
+        }
+
+        // 缩放
         zoomOut({
             protyle: stack.protyle,
             id: stack.zoomId || stack.protyle.block.rootID,

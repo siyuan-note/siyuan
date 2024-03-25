@@ -1059,7 +1059,7 @@ export const openMenuPanel = (options: {
                         removeAttrViewColAnimation(options.blockElement, colId);
                         options.blockElement.setAttribute("updated", newUpdated);
                         avPanelElement.remove();
-                    })
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

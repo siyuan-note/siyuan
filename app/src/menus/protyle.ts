@@ -1870,7 +1870,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return -1;
     }
-    let hasFold = nodeElement.getAttribute("fold") === "1";
+    const hasFold = nodeElement.getAttribute("fold") === "1";
     if (hasFold) {
         if (typeof isOpen === "boolean" && !isOpen) {
             return -1;

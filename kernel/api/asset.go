@@ -19,15 +19,66 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/djherbis/times"
+	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func statAsset(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	var p string
+	if strings.HasPrefix(path, "assets/") {
+		var err error
+		p, err = model.GetAssetAbsPath(path)
+		if nil != err {
+			ret.Code = 1
+			return
+		}
+
+	} else if strings.HasPrefix(path, "file://") {
+		p = strings.TrimPrefix(path, "file://")
+	} else {
+		ret.Code = 1
+		return
+	}
+
+	info, err := os.Stat(p)
+	if nil != err {
+		ret.Code = 1
+		return
+	}
+
+	t, err := times.Stat(p)
+	if nil != err {
+		ret.Code = 1
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"size":     info.Size(),
+		"hSize":    humanize.Bytes(uint64(info.Size())),
+		"created":  t.BirthTime().UnixMilli(),
+		"hCreated": t.BirthTime().Format("2006-01-02 15:04:05"),
+		"updated":  t.ModTime().UnixMilli(),
+		"hUpdated": t.ModTime().Format("2006-01-02 15:04:05"),
+	}
+}
 
 func fullReindexAssetContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

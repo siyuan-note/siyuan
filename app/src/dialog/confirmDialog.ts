@@ -1,7 +1,11 @@
 import {isMobile} from "../util/functions";
 import {Dialog} from "./index";
 
-export const confirmDialog = (title: string, text: string, confirm?: (dialog:Dialog) => void, cancel?: (dialog:Dialog) => void) => {
+export const confirmDialog = (title: string, text: string, confirm?: (dialog?: Dialog) => void, cancel?: (dialog: Dialog) => void) => {
+    if (!text && !title) {
+        confirm();
+        return;
+    }
     const dialog = new Dialog({
         title,
         content: `<div class="b3-dialog__content">

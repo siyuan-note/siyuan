@@ -907,13 +907,11 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
-        const parentWndBounds = getWindowByContentId(event.sender.id).getBounds();
-        const parentWndScreen = screen.getDisplayNearestPoint({x: parentWndBounds.x, y: parentWndBounds.y});
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
         const printWin = new BrowserWindow({
             show: true,
-            width: parentWndScreen.size.width * 0.9,
-            height: parentWndScreen.size.height * 0.9,
+            width: Math.floor(screen.getPrimaryDisplay().size.width * 0.8),
+            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
             resizable: true,
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),

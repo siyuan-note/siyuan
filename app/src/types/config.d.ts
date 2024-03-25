@@ -1508,7 +1508,7 @@ declare namespace Config {
         /**
          * Dock tab hotkey
          */
-        hotkey: string;
+        hotkey?: string;
         /**
          * Hotkey description ID
          */
@@ -1525,7 +1525,7 @@ declare namespace Config {
         /**
          * Tab title
          */
-        title: string;
+        title?: string;
         /**
          * Tab type
          */
@@ -1636,7 +1636,7 @@ declare namespace Config {
         /**
          * Whether the tab is active
          */
-        active: boolean;
+        active?: boolean;
         /**
          * Tab content
          */
@@ -1660,11 +1660,11 @@ declare namespace Config {
         /**
          * Whether the tab is pinned
          */
-        pin: boolean;
+        pin?: boolean;
         /**
          * Tab title
          */
-        title: string;
+        title?: string;
     }
 
     /**

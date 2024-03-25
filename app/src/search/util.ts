@@ -120,7 +120,7 @@ export const toggleReplaceHistory = (searchElement: Element) => {
     });
 };
 
-export const toggleSearchHistory = (searchElement: Element, config: ISearchOption, edit: Protyle) => {
+export const toggleSearchHistory = (searchElement: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     if (!list.keys || list.keys.length === 0) {
         return;
@@ -234,7 +234,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
 };
 
 // closeCB 不存在为页签搜索
-export const genSearch = (app: App, config: ISearchOption, element: Element, closeCB?: () => void) => {
+export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: Element, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
         methodText = window.siyuan.languages.querySyntax;
@@ -395,7 +395,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
-    const criteriaData: ISearchOption[] = [];
+    const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
@@ -1072,7 +1072,7 @@ export const getQueryTip = (method: number) => {
     return methodTip;
 };
 
-const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
+const updateConfig = (element: Element, item: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
     if (dialogElement && dialogElement.getAttribute("data-key") === Constants.DIALOG_SEARCH) {
         // https://github.com/siyuan-note/siyuan/issues/6828
@@ -1159,7 +1159,7 @@ const renderNextSearchMark = (options: {
 
 export const getArticle = (options: {
     id: string,
-    config?: ISearchOption,
+    config?: Config.IUILayoutTabSearchConfig,
     edit: Protyle
     value?: string,
 }) => {
@@ -1196,7 +1196,7 @@ export const getArticle = (options: {
     });
 };
 
-export const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: boolean) => {
+export const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
@@ -1282,7 +1282,7 @@ export const replace = (element: Element, config: ISearchOption, edit: Protyle, 
     });
 };
 
-export const inputEvent = (element: Element, config: ISearchOption, edit: Protyle, rmCurrentCriteria = false) => {
+export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, rmCurrentCriteria = false) => {
     let inputTimeout = parseInt(element.getAttribute("data-timeout") || "0");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
@@ -1360,7 +1360,7 @@ export const getAttr = (block: IBlock) => {
     return attrHTML;
 };
 
-const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: ISearchOption) => {
+const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Config.IUILayoutTabSearchConfig) => {
     let resultHTML = "";
     data.forEach((item, index) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);

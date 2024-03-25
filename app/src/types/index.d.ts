@@ -1,7 +1,3 @@
-type TLayout = "normal" | "bottom" | "left" | "right" | "center"
-type TSearchFilter = "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading"
-    | "list" | "listItem" | "codeBlock" | "htmlBlock"
-type TDirection = "lr" | "tb"
 type TPluginDockPosition = "LeftTop" | "LeftBottom" | "RightTop" | "RightBottom" | "BottomLeft" | "BottomRight"
 type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
@@ -507,21 +503,8 @@ interface ILayoutJSON extends ILayoutOptions {
     isPreview?: boolean
     customModelData?: any
     customModelType?: string
-    config?: ISearchOption
+    config?: Config.IUILayoutTabSearchConfig
     children?: ILayoutJSON[] | ILayoutJSON
-}
-
-interface IDockTab {
-    type: string;
-    size: {
-        width: number,
-        height: number
-    }
-    show: boolean
-    icon: string
-    title: string
-    hotkey?: string
-    hotkeyLangId?: string   // 常量中无法存变量
 }
 
 interface ICommand {
@@ -564,7 +547,7 @@ interface IExportOptions {
 
 interface IOpenFileOptions {
     app: import("../index").App,
-    searchData?: ISearchOption, // 搜索必填
+    searchData?: Config.IUILayoutTabSearchConfig, // 搜索必填
     // card 和自定义页签 必填
     custom?: {
         title: string,
@@ -592,10 +575,10 @@ interface IOpenFileOptions {
 }
 
 interface ILayoutOptions {
-    direction?: TDirection;
+    direction?: Config.TUILayoutDirection
     size?: string
-    resize?: TDirection
-    type?: TLayout
+    resize?: Config.TUILayoutDirection
+    type?: Config.TUILayoutType
     element?: HTMLElement
 }
 

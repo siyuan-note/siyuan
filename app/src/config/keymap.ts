@@ -12,7 +12,7 @@ import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
 
 export const keymap = {
     element: undefined as Element,
-    _genItem(keymap: Record<string, IKeymapItem>, keys: string) {
+    _genItem(keymap: Record<string, Config.IKey>, keys: string) {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {

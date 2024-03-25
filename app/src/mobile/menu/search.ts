@@ -27,7 +27,7 @@ import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {getDefaultType} from "../../search/getDefault";
 
-const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
+const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
@@ -106,7 +106,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     });
 };
 
-const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearchOption) => {
+const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig) => {
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -162,7 +162,7 @@ const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearc
     window.siyuan.menus.menu.remove();
 };
 
-const onRecentBlocks = (data: IBlock[], config: ISearchOption, response?: IWebSocketData) => {
+const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig, response?: IWebSocketData) => {
     const listElement = document.querySelector("#searchList");
     let resultHTML = "";
     data.forEach((item: IBlock, index: number) => {
@@ -212,7 +212,7 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 };
 
 let toolbarSearchTimeout = 0;
-export const updateSearchResult = (config: ISearchOption, element: Element, rmCurrentCriteria = false) => {
+export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, element: Element, rmCurrentCriteria = false) => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
         if (rmCurrentCriteria) {
@@ -260,7 +260,7 @@ export const updateSearchResult = (config: ISearchOption, element: Element, rmCu
     }, Constants.TIMEOUT_INPUT);
 };
 
-const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
+const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTabSearchConfig) => {
     const searchInputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     searchInputElement.value = config.k || "";
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
@@ -298,7 +298,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
         inputElement: replaceInputElement,
         className: "toolbar__icon",
     });
-    const criteriaData: ISearchOption[] = [];
+    const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
     const assetsElement = document.querySelector("#searchAssetsPanel");
@@ -616,7 +616,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     }, false);
 };
 
-export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOCAL_SEARCHDATA] as ISearchOption) => {
+export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOCAL_SEARCHDATA] as Config.IUILayoutTabSearchConfig) => {
     activeBlur();
     hideKeyboardToolbar();
     let includeChild = true;

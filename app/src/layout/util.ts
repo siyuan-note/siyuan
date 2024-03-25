@@ -1,39 +1,39 @@
-import {Layout} from "./index";
-import {Wnd} from "./Wnd";
-import {Tab} from "./Tab";
-import {Model} from "./Model";
-import {Graph} from "./dock/Graph";
-import {Editor} from "../editor";
-import {Files} from "./dock/Files";
-import {Outline} from "./dock/Outline";
-import {Bookmark} from "./dock/Bookmark";
-import {Tag} from "./dock/Tag";
-import {getAllModels, getAllTabs} from "./getAll";
-import {Asset} from "../asset";
-import {Search} from "../search";
-import {Dock} from "./dock";
-import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
-import {hideElements} from "../protyle/ui/hideElements";
-import {fetchPost} from "../util/fetch";
-import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {Constants} from "../constants";
-import {saveScroll} from "../protyle/scroll/saveScroll";
-import {Backlink} from "./dock/Backlink";
-import {openFileById} from "../editor/util";
-import {isWindow} from "../util/functions";
+import { Layout } from "./index";
+import { Wnd } from "./Wnd";
+import { Tab } from "./Tab";
+import { Model } from "./Model";
+import { Graph } from "./dock/Graph";
+import { Editor } from "../editor";
+import { Files } from "./dock/Files";
+import { Outline } from "./dock/Outline";
+import { Bookmark } from "./dock/Bookmark";
+import { Tag } from "./dock/Tag";
+import { getAllModels, getAllTabs } from "./getAll";
+import { Asset } from "../asset";
+import { Search } from "../search";
+import { Dock } from "./dock";
+import { focusByOffset, focusByRange, getSelectionOffset } from "../protyle/util/selection";
+import { hideElements } from "../protyle/ui/hideElements";
+import { fetchPost } from "../util/fetch";
+import { hasClosestBlock, hasClosestByClassName } from "../protyle/util/hasClosest";
+import { getContenteditableElement } from "../protyle/wysiwyg/getBlock";
+import { Constants } from "../constants";
+import { saveScroll } from "../protyle/scroll/saveScroll";
+import { Backlink } from "./dock/Backlink";
+import { openFileById } from "../editor/util";
+import { isWindow } from "../util/functions";
 /// #if !BROWSER
-import {setTabPosition} from "../window/setHeader";
+import { setTabPosition } from "../window/setHeader";
 /// #endif
-import {showMessage} from "../dialog/message";
-import {getIdZoomInByPath} from "../util/pathName";
-import {Custom} from "./dock/Custom";
-import {newCardModel} from "../card/newCardTab";
-import {App} from "../index";
-import {afterLoadPlugin} from "../plugin/loader";
-import {setTitle} from "../dialog/processSystem";
-import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
-import {setStorageVal} from "../protyle/util/compatibility";
+import { showMessage } from "../dialog/message";
+import { getIdZoomInByPath } from "../util/pathName";
+import { Custom } from "./dock/Custom";
+import { newCardModel } from "../card/newCardTab";
+import { App } from "../index";
+import { afterLoadPlugin } from "../plugin/loader";
+import { setTitle } from "../dialog/processSystem";
+import { newCenterEmptyTab, resizeTabs } from "./tabUtil";
+import { setStorageVal } from "../protyle/util/compatibility";
 
 export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -136,7 +136,7 @@ export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {
 const dockToJSON = (dock: Dock) => {
     const json = [];
     const subDockToJSON = (index: number) => {
-        const data: IDockTab[] = [];
+        const data: Config.IUILayoutDockTab[] = [];
         dock.element.querySelectorAll(`span[data-index="${index}"]`).forEach(item => {
             data.push({
                 type: item.getAttribute("data-type"),
@@ -169,7 +169,7 @@ const dockToJSON = (dock: Dock) => {
 };
 
 export const resetLayout = () => {
-    fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+    fetchPost("/api/system/setUILayout", { layout: {} }, () => {
         window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
         setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
         window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
@@ -270,7 +270,7 @@ export const getAllLayout = () => {
     return layoutJSON;
 };
 
-const initInternalDock = (dockItem: IDockTab[]) => {
+const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem) => {
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
@@ -280,22 +280,26 @@ const initInternalDock = (dockItem: IDockTab[]) => {
 };
 
 const JSONToDock = (json: any, app: App) => {
-    json.left.data.forEach((existItem: IDockTab[]) => {
+    json.left.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
-    json.right.data.forEach((existItem: IDockTab[]) => {
+    json.right.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
-    json.bottom.data.forEach((existItem: IDockTab[]) => {
+    json.bottom.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;
-    window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left, app});
-    window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right, app});
-    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
+    window.siyuan.layout.leftDock = new Dock({ position: "Left", data: json.left, app });
+    window.siyuan.layout.rightDock = new Dock({ position: "Right", data: json.right, app });
+    window.siyuan.layout.bottomDock = new Dock({ position: "Bottom", data: json.bottom, app });
 };
 
-export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model) => {
+export const JSONToCenter = (
+    app: App,
+    json: Config.TUILayoutItem,
+    layout?: Layout | Wnd | Tab | Model,
+) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
@@ -408,7 +412,7 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
         }
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     }
-    if (json.children) {
+    if ("children" in json) {
         if (Array.isArray(json.children)) {
             json.children.forEach((item: any) => {
                 JSONToCenter(app, item, layout ? child : window.siyuan.layout.layout);

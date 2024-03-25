@@ -451,7 +451,7 @@ export abstract class Constants {
         plugin: {},
     };
 
-    public static readonly SIYUAN_EMPTY_LAYOUT: Record<string, unknown> = {
+    public static readonly SIYUAN_EMPTY_LAYOUT: Config.IUiLayout = {
         hideDock: false,
         layout: {
             "direction": "tb",
@@ -482,7 +482,14 @@ export abstract class Constants {
                     "size": "auto",
                     "type": "center",
                     "instance": "Layout",
-                    "children": [{"instance": "Wnd", "children": [{"instance": "Tab", "children": []}]}]
+                    "children": [{
+                        "instance": "Wnd",
+                        "children": [],
+                        // "children": [{
+                        //     "instance": "Tab",
+                        //     "children": []
+                        // }]
+                    }]
                 }, {
                     "direction": "tb",
                     "size": "0px",
@@ -580,9 +587,7 @@ export abstract class Constants {
         }
     };
 
-    public static readonly SIYUAN_DEFAULT_REPLACETYPES: {
-        [key: string]: boolean;
-    } = {
+    public static readonly SIYUAN_DEFAULT_REPLACETYPES: Required<Config.IUILayoutTabSearchConfigReplaceTypes> = {
         "text": true,
         "imgText": true,
         "imgTitle": true,

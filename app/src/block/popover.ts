@@ -48,7 +48,13 @@ export const initBlockPopover = (app: App) => {
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
                     let assetTip = tip;
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
-                        assetTip += ` ${response.data.hSize}${title ? "<br>" + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hCreated}<br>${window.siyuan.languages.createdAt} ${response.data.hUpdated}`;
+                        if (response.code === 1) {
+                            if (title) {
+                                assetTip += "<br>" + title;
+                            }
+                        } else {
+                            assetTip += ` ${response.data.hSize}${title ? "<br>" + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hCreated}<br>${window.siyuan.languages.createdAt} ${response.data.hUpdated}`;
+                        }
                         showTooltip(assetTip, aElement);
                     });
                     tip = "";

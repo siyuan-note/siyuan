@@ -94,7 +94,7 @@ func LoginAuth(c *gin.Context) {
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
-		logging.LogWarnf("invalid auth code")
+		logging.LogWarnf("invalid auth code [ip=%s]", util.GetRemoteAddr(c.Request))
 
 		util.WrongAuthCount++
 		workspaceSession.Captcha = gulu.Rand.String(7)
@@ -113,7 +113,7 @@ func LoginAuth(c *gin.Context) {
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
 	workspaceSession.Captcha = gulu.Rand.String(7)
-	logging.LogInfof("auth success")
+	logging.LogInfof("auth success [ip=%s]", util.GetRemoteAddr(c.Request))
 	if err := session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)

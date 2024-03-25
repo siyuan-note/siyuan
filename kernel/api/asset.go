@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/djherbis/times"
+	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -66,9 +67,12 @@ func statAsset(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"size":    info.Size(),
-		"created": t.BirthTime().UnixMilli(),
-		"updated": t.ModTime().UnixMilli(),
+		"size":     info.Size(),
+		"hSize":    humanize.Bytes(uint64(info.Size())),
+		"created":  t.BirthTime().UnixMilli(),
+		"hCreated": t.BirthTime().Format("2006-01-02 15:04:05"),
+		"updated":  t.ModTime().UnixMilli(),
+		"hUpdated": t.ModTime().Format("2006-01-02 15:04:05"),
 	}
 }
 

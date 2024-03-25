@@ -137,6 +137,7 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	if util.IsChinaCloud() {
 		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
 		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
+		downloadPkgURLs = append(downloadPkgURLs, githubURL)
 	} else {
 		downloadPkgURLs = append(downloadPkgURLs, githubURL)
 		downloadPkgURLs = append(downloadPkgURLs, b3logURL)

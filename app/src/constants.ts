@@ -482,14 +482,7 @@ export abstract class Constants {
                     "size": "auto",
                     "type": "center",
                     "instance": "Layout",
-                    "children": [{
-                        "instance": "Wnd",
-                        "children": [],
-                        // "children": [{
-                        //     "instance": "Tab",
-                        //     "children": []
-                        // }]
-                    }]
+                    "children": [{"instance": "Wnd", "children": [{"instance": "Tab", "children": []}]}]
                 }, {
                     "direction": "tb",
                     "size": "0px",

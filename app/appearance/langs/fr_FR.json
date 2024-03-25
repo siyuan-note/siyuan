@@ -1,4 +1,5 @@
 {
+  "removeCol": "Êtes-vous sûr de vouloir supprimer la colonne ${x} de la base de données ?",
   "video": "Vidéo",
   "audio": "Audio",
   "updateAll": "Tout mettre à jour",

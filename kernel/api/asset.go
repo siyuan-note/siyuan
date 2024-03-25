@@ -19,15 +19,58 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/djherbis/times"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func statAsset(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	p, err := model.GetAssetAbsPath(path)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		return
+	}
+
+	info, err := os.Stat(p)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		return
+	}
+
+	t, err := times.Stat(p)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"size":    info.Size(),
+		"created": t.BirthTime().UnixMilli(),
+		"updated": t.ModTime().UnixMilli(),
+	}
+}
 
 func fullReindexAssetContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

@@ -700,6 +700,9 @@ app.whenReady().then(() => {
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }
+        if (data.cmd === "getCurrentWindowId") {
+            return event.sender.id;
+        }
         if (data.cmd === "setProxy") {
             return setProxy(data.proxyURL, event.sender);
         }
@@ -904,26 +907,12 @@ app.whenReady().then(() => {
             }
             data.filePaths = result.filePaths;
             data.webContentsId = event.sender.id;
-            const wnd = getWindowByContentId(event.sender.id);
-            if (!wnd) {
-                // 文档已经被删除的情况下关闭窗口，下同
-                event.sender.destroy();
-                return;
-            }
-            const parentWnd = wnd.getParentWindow();
-            if (!parentWnd) {
-                event.sender.destroy();
-                return;
-            }
-            parentWnd.send("siyuan-export-pdf", data);
+            getWindowByContentId(data.parentWindowId).send("siyuan-export-pdf", data);
         });
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
-        const parentWnd = getWindowByContentId(event.sender.id);
-        const parentWndBounds = parentWnd.getBounds();
+        const parentWndBounds = getWindowByContentId(event.sender.id).getBounds();
         const parentWndScreen = screen.getDisplayNearestPoint({x: parentWndBounds.x, y: parentWndBounds.y});
-        parentWndScreen.size.width;
-
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
         const printWin = new BrowserWindow({
             show: true,

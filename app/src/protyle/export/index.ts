@@ -81,7 +81,7 @@ const getSnippetCSS = () => {
 };
 
 /// #if !BROWSER
-const renderPDF = (id: string) => {
+const renderPDF = async (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
@@ -89,6 +89,9 @@ const renderPDF = (id: string) => {
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
+    const currentWindowId = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "getCurrentWindowId",
+    })
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
@@ -542,6 +545,7 @@ const renderPDF = (id: string) => {
               removeAssets: actionElement.querySelector("#removeAssets").checked,
               rootId: "${id}",
               rootTitle: response.data.name,
+              parentWindowId: ${currentWindowId},
             })
             previewElement.classList.add("exporting");
             previewElement.style.zoom = "";

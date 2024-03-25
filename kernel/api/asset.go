@@ -42,27 +42,31 @@ func statAsset(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	p, err := model.GetAssetAbsPath(path)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+	var p string
+	if strings.HasPrefix(path, "assets/") {
+		var err error
+		p, err = model.GetAssetAbsPath(path)
+		if nil != err {
+			ret.Code = 1
+			return
+		}
+
+	} else if strings.HasPrefix(path, "file://") {
+		p = strings.TrimPrefix(path, "file://")
+	} else {
+		ret.Code = 1
 		return
 	}
 
 	info, err := os.Stat(p)
 	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		ret.Code = 1
 		return
 	}
 
 	t, err := times.Stat(p)
 	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		ret.Code = 1
 		return
 	}
 

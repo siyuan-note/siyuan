@@ -4,9 +4,9 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
 } from "../protyle/util/hasClosest";
-import {fetchSyncPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
-import {getIdFromSYProtocol} from "../util/pathName";
+import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
@@ -42,9 +42,17 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             if (!tip) {
-                tip = aElement.getAttribute("data-href")?.substring(0, Constants.SIZE_TITLE) || "";
+                const href = aElement.getAttribute("data-href") || "";
+                tip = href.substring(0, Constants.SIZE_TITLE) || "";
                 const title = aElement.getAttribute("data-title");
-                if (title) {
+                if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
+                    let assetTip = tip;
+                    fetchPost("/api/asset/statAsset", {path: href}, (response) => {
+                        assetTip += ` ${response.data.hSize}${title ? "<br>" + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hCreated}<br>${window.siyuan.languages.createdAt} ${response.data.hUpdated}`;
+                        showTooltip(assetTip, aElement);
+                    });
+                    tip = "";
+                } else if (title) {
                     tip += "<br>" + title;
                 }
             }

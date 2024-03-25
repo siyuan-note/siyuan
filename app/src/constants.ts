@@ -482,7 +482,13 @@ export abstract class Constants {
                     "size": "auto",
                     "type": "center",
                     "instance": "Layout",
-                    "children": [{"instance": "Wnd", "children": [{"instance": "Tab", "children": []}]}]
+                    "children": [{
+                        "instance": "Wnd",
+                        "children": [{
+                            "instance": "Tab",
+                            "children": []
+                        } as Config.IUILayoutTab]
+                    }]
                 }, {
                     "direction": "tb",
                     "size": "0px",
@@ -527,30 +533,40 @@ export abstract class Constants {
                     show: true,
                     icon: "iconFiles",
                     hotkeyLangId: "fileTree",
+                    hotkey: "",
+                    title: "",
                 }, {
                     type: "outline",
                     size: {width: 227, height: 0},
                     show: false,
                     icon: "iconAlignCenter",
                     hotkeyLangId: "outline",
+                    hotkey: "",
+                    title: "",
                 }, {
                     type: "inbox",
                     size: {width: 320, height: 0},
                     show: false,
                     icon: "iconInbox",
                     hotkeyLangId: "inbox",
+                    hotkey: "",
+                    title: "",
                 }], [{
                     type: "bookmark",
                     size: {width: 227, height: 0},
                     show: false,
                     icon: "iconBookmark",
                     hotkeyLangId: "bookmark",
+                    hotkey: "",
+                    title: "",
                 }, {
                     type: "tag",
                     size: {width: 227, height: 0},
                     show: false,
                     icon: "iconTags",
                     hotkeyLangId: "tag",
+                    hotkey: "",
+                    title: "",
                 }]
             ]
         },
@@ -563,18 +579,24 @@ export abstract class Constants {
                     show: false,
                     icon: "iconGraph",
                     hotkeyLangId: "graphView",
+                    hotkey: "",
+                    title: "",
                 }, {
                     type: "globalGraph",
                     size: {width: 320, height: 0},
                     show: false,
                     icon: "iconGlobalGraph",
                     hotkeyLangId: "globalGraph",
+                    hotkey: "",
+                    title: "",
                 }], [{
                     type: "backlink",
                     size: {width: 320, height: 0},
                     show: false,
                     icon: "iconLink",
                     hotkeyLangId: "backlinks",
+                    hotkey: "",
+                    title: "",
                 }]
             ]
         }

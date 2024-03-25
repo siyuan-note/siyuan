@@ -2068,6 +2068,11 @@ declare namespace Config {
      */
     export interface IUILayoutTabSearchConfigTypes {
         /**
+         * Search results contain audio blocks
+         * @default false
+         */
+        audioBlock: boolean;
+        /**
          * Search results contain blockquote blocks
          * @default false
          */
@@ -2103,6 +2108,11 @@ declare namespace Config {
          */
         htmlBlock: boolean;
         /**
+         * Search results contain iframe blocks
+         * @default false
+         */
+        iFrameBlock: boolean;
+        /**
          * Search results contain list blocks
          * @default false
          */
@@ -2132,6 +2142,16 @@ declare namespace Config {
          * @default false
          */
         table: boolean;
+        /**
+         * Search results contain video blocks
+         * @default false
+         */
+        videoBlock: boolean;
+        /**
+         * Search results contain widget blocks
+         * @default false
+         */
+        widgetBlock: boolean;
     }
 
 

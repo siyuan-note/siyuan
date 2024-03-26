@@ -6,7 +6,8 @@
 		"icon": "1f4f8",
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20240224103816"
+		"type": "doc",
+		"updated": "20240326165457"
 	},
 	"Children": [
 		{
@@ -88,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219085658-xnrf7rf",
-				"updated": "20231013103850"
+				"updated": "20240326165457"
 			},
 			"Children": [
 				{
@@ -193,7 +194,7 @@
 					},
 					"Properties": {
 						"id": "20231013103816-b0k440b",
-						"updated": "20231013103850"
+						"updated": "20240326165457"
 					},
 					"Children": [
 						{
@@ -201,12 +202,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231013103816-sx34w1r",
-								"updated": "20231013103850"
+								"updated": "20240326165457"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果将标题块设置为上卡，则该标题块会被视作问题，其下方块会被视作答案"
+									"Data": "如果将标题块设置为闪卡，则该标题块会被视作问题，其下方块会被视作答案"
 								}
 							]
 						}

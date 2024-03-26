@@ -433,7 +433,6 @@ const initKernel = (workspace, port, lang) => {
             backgroundColor: "#1e1e1e",
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
-
         let bootIndex = path.join(appDir, "app", "electron", "boot.html");
         if (isDevEnv) {
             bootIndex = path.join(appDir, "electron", "boot.html");
@@ -682,12 +681,9 @@ app.whenReady().then(() => {
 
         resetTrayMenu(tray, lang, mainWindow);
     };
+
     const getWindowByContentId = (id) => {
-        const wnd = BrowserWindow.getAllWindows().find((win) => win.webContents.id === id);
-        if (!wnd) {
-            return null;
-        }
-        return BrowserWindow.fromId(wnd.id);
+        return BrowserWindow.getAllWindows().find((win) => win.webContents.id === id);
     };
 
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
@@ -700,7 +696,7 @@ app.whenReady().then(() => {
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }
-        if (data.cmd === "getCurrentWindowId") {
+        if (data.cmd === "getContentsId") {
             return event.sender.id;
         }
         if (data.cmd === "setProxy") {
@@ -796,8 +792,8 @@ app.whenReady().then(() => {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;
-            case "unregisterAll":
-                globalShortcut.unregisterAll();
+            case "unregisterGlobalShortcut":
+                globalShortcut.unregister(hotKey2Electron(data.accelerator));
                 break;
             case "show":
                 if (!currentWindow) {
@@ -1036,7 +1032,6 @@ app.whenReady().then(() => {
         await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
-        globalShortcut.unregisterAll();
         if (!data.hotkeys || data.hotkeys.length === 0) {
             return;
         }
@@ -1045,31 +1040,32 @@ app.whenReady().then(() => {
             if (!shortcut) {
                 return;
             }
+            if (globalShortcut.isRegistered(shortcut)) {
+                globalShortcut.unregister(shortcut)
+            }
             if (index === 0) {
                 globalShortcut.register(shortcut, () => {
-                    workspaces.forEach(workspaceItem => {
+                    workspaces.find(workspaceItem => {
                         const mainWindow = workspaceItem.browserWindow;
-                        if (mainWindow.isMinimized()) {
-                            mainWindow.restore();
-                            mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
-                        } else {
-                            if (mainWindow.isVisible()) {
-                                if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258
+                        if (event.sender.id === mainWindow.webContents.id) {
+                            if (mainWindow.isMinimized()) {
+                                mainWindow.restore();
+                                mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
+                            } else {
+                                if (mainWindow.isVisible()) {
                                     if (!mainWindow.isFocused()) {
                                         mainWindow.show();
                                     } else {
                                         hideWindow(mainWindow);
                                     }
                                 } else {
-                                    hideWindow(mainWindow);
+                                    mainWindow.show();
                                 }
-                            } else {
-                                mainWindow.show();
                             }
-                        }
-
-                        if ("win32" === process.platform || "linux" === process.platform) {
-                            resetTrayMenu(workspaceItem.tray, data.languages, mainWindow);
+                            if ("win32" === process.platform || "linux" === process.platform) {
+                                resetTrayMenu(workspaceItem.tray, data.languages, mainWindow);
+                            }
+                            return true;
                         }
                     });
                 });

@@ -90,7 +90,7 @@ const renderPDF = async (id: string) => {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     const currentWindowId = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-        cmd: "getCurrentWindowId",
+        cmd: "getContentsId",
     });
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>

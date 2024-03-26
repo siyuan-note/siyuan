@@ -233,7 +233,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 data: html,
                 id,
             });
-            mathRender(editableElement);
+            mathRender(blockElement);
         } else {
             doOperation.push({
                 action: "insert",

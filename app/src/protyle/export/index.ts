@@ -383,7 +383,7 @@ const renderPDF = async (id: string) => {
         })
     }
     const renderPreview = (data) => {
-        previewElement.innerHTML = '<div style="padding:0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
+        previewElement.innerHTML = '<div style="padding:6px 0 0 0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
         const wysElement = previewElement.querySelector(".protyle-wysiwyg");
         wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
         if (data.attrs.memo) {

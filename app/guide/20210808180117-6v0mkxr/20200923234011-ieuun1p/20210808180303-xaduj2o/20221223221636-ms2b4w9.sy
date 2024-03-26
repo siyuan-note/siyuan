@@ -6,7 +6,8 @@
 		"icon": "1f4f8",
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20240224103857"
+		"type": "doc",
+		"updated": "20240326165536"
 	},
 	"Children": [
 		{
@@ -88,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092249-yzjjb1o",
-				"updated": "20231013104018"
+				"updated": "20240326165536"
 			},
 			"Children": [
 				{
@@ -189,7 +190,7 @@
 					},
 					"Properties": {
 						"id": "20231013103926-u4hxd38",
-						"updated": "20231013104018"
+						"updated": "20240326165536"
 					},
 					"Children": [
 						{
@@ -197,12 +198,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231013103926-o3y1n5a",
-								"updated": "20231013104018"
+								"updated": "20240326165536"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If a heading block is set as an flashcard, the heading block will be treated as a question and the blocks below it will be treated answers"
+									"Data": "If a heading block is set as a flashcard, the heading block will be treated as a question and the blocks below it will be treated answers"
 								}
 							]
 						}

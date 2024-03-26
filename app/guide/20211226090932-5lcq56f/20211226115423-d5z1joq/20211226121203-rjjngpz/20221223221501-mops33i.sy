@@ -6,7 +6,8 @@
 		"icon": "1f4f8",
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20240224103933"
+		"type": "doc",
+		"updated": "20240326165451"
 	},
 	"Children": [
 		{
@@ -88,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092911-8074ovh",
-				"updated": "20231013104052"
+				"updated": "20240326165451"
 			},
 			"Children": [
 				{
@@ -193,7 +194,7 @@
 					},
 					"Properties": {
 						"id": "20231013104042-7impulf",
-						"updated": "20231013104052"
+						"updated": "20240326165451"
 					},
 					"Children": [
 						{
@@ -201,12 +202,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231013104042-wzwhxmr",
-								"updated": "20231013104052"
+								"updated": "20240326165451"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將標題塊設為上卡，則該標題塊會被視為問題，其下方塊會被視為答案"
+									"Data": "如果將標題塊設為閃卡，則該標題塊會被視為問題，其下方塊會被視為答案"
 								}
 							]
 						}

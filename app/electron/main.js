@@ -947,8 +947,8 @@ app.whenReady().then(() => {
         const win = new BrowserWindow({
             show: true,
             trafficLightPosition: {x: 8, y: 13},
-            width: data.width || mainScreen.size.width * 0.7,
-            height: data.height || mainScreen.size.height * 0.9,
+            width: Math.floor(data.width || mainScreen.size.width * 0.7),
+            height: Math.floor(data.height || mainScreen.size.height * 0.9),
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,

@@ -204,7 +204,22 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     const id = blockElement.getAttribute("data-node-id");
     const newElement = document.createElement("div");
     newElement.appendChild(genEmptyElement(false, false));
-    newElement.querySelector('[contenteditable="true"]').appendChild(range.extractContents());
+    const newEditableElement = newElement.querySelector('[contenteditable="true"]');
+    newEditableElement.appendChild(range.extractContents());
+    const newHTML = newEditableElement.innerHTML.trimStart();
+    // https://github.com/siyuan-note/siyuan/issues/10759
+    if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
+        newHTML.indexOf("\n```") > -1 || newHTML.indexOf("\n~~~") > -1 || newHTML.indexOf("\n···") > -1) {
+        if (newHTML.indexOf("\n") === -1 && newHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+            // ```test` 不处理，正常渲染为段落块
+        } else {
+            let replaceNewHTML = newEditableElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+            if (!replaceNewHTML.endsWith("\n```")) {
+                replaceNewHTML += "\n```";
+            }
+            newEditableElement.innerHTML = replaceNewHTML;
+        }
+    }
     // https://github.com/siyuan-note/insider/issues/480
     newElement.innerHTML = protyle.lute.SpinBlockDOM(newElement.innerHTML);
 
@@ -264,7 +279,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             id: newId,
         });
         previousElement.insertAdjacentElement("afterend", item);
-        mathRender(previousElement.nextElementSibling);
+        if (item.classList.contains("code-block")) {
+            highlightRender(item);
+        } else {
+            mathRender(previousElement.nextElementSibling);
+        }
         previousElement = item;
     });
     transaction(protyle, doOperation, undoOperation);

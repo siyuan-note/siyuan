@@ -273,7 +273,7 @@ interface ISearchOption {
 interface ISearchType {
     audioBlock: boolean
     videoBlock: boolean
-    iFrameBlock: boolean
+    iframeBlock: boolean
     widgetBlock: boolean
     mathBlock: boolean
     table: boolean

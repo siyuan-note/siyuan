@@ -148,7 +148,7 @@ export const query = {
                 IFrame
             </div>
             <span class="fn__space"></span>
-            <input class="b3-switch" id="iFrameBlock" type="checkbox"${window.siyuan.config.search.iFrameBlock ? " checked" : ""}/>
+            <input class="b3-switch" id="iframeBlock" type="checkbox"${window.siyuan.config.search.iframeBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
             <svg class="svg"><use xlink:href="#iconBoth"></use></svg>
@@ -317,7 +317,7 @@ export const query = {
                     databaseBlock: (query.element.querySelector("#databaseBlock") as HTMLInputElement).checked,
                     audioBlock: (query.element.querySelector("#audioBlock") as HTMLInputElement).checked,
                     videoBlock: (query.element.querySelector("#videoBlock") as HTMLInputElement).checked,
-                    iFrameBlock: (query.element.querySelector("#iFrameBlock") as HTMLInputElement).checked,
+                    iframeBlock: (query.element.querySelector("#iframeBlock") as HTMLInputElement).checked,
                     widgetBlock: (query.element.querySelector("#widgetBlock") as HTMLInputElement).checked,
                     mathBlock: (query.element.querySelector("#mathBlock") as HTMLInputElement).checked,
                     table: (query.element.querySelector("#table") as HTMLInputElement).checked,

@@ -3,7 +3,7 @@ export const getDefaultType = () => {
     return {
         audioBlock: window.siyuan.config.search.audioBlock,
         videoBlock: window.siyuan.config.search.videoBlock,
-        iFrameBlock: window.siyuan.config.search.iFrameBlock,
+        iframeBlock: window.siyuan.config.search.iframeBlock,
         widgetBlock: window.siyuan.config.search.widgetBlock,
         document: window.siyuan.config.search.document,
         heading: window.siyuan.config.search.heading,

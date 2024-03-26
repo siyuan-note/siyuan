@@ -973,7 +973,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.DatabaseBlock = types["databaseBlock"]
 		s.AudioBlock = types["audioBlock"]
 		s.VideoBlock = types["videoBlock"]
-		s.IFrameBlock = types["iFrameBlock"]
+		s.IFrameBlock = types["iframeBlock"]
 		s.WidgetBlock = types["widgetBlock"]
 	} else {
 		s.Document = Conf.Search.Document

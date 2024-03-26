@@ -155,7 +155,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             IFrame
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type="iFrameBlock" type="checkbox"${config.types.iFrameBlock ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="iframeBlock" type="checkbox"${config.types.iframeBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconBoth"></use></svg>

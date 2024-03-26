@@ -91,7 +91,7 @@ const renderPDF = async (id: string) => {
     }
     const currentWindowId = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
         cmd: "getCurrentWindowId",
-    })
+    });
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">

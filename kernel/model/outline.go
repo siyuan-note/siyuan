@@ -26,6 +26,103 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
+	headingID := operation.ID
+	previousID := operation.PreviousID
+	parentID := operation.ParentID
+
+	if headingID == parentID || headingID == previousID {
+		return
+	}
+
+	tree, err := tx.loadTree(headingID)
+	if nil != err {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
+	}
+
+	heading := treenode.GetNodeInTree(tree, headingID)
+	if nil == heading {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
+	}
+
+	headings := []*ast.Node{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			headings = append(headings, n)
+		}
+		return ast.WalkContinue
+	})
+
+	headingChildren := treenode.HeadingChildren(heading)
+	if "" != previousID {
+		previousHeading := treenode.GetNodeInTree(tree, previousID)
+		if nil == previousHeading {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
+		}
+
+		targetNode := previousHeading
+		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
+		if 0 < len(previousHeadingChildren) {
+			for _, child := range previousHeadingChildren {
+				targetNode = child
+				if child.ID == headingID {
+					break
+				}
+			}
+		}
+
+		diffLevel := heading.HeadingLevel - previousHeading.HeadingLevel
+		heading.HeadingLevel = previousHeading.HeadingLevel
+
+		for i := len(headingChildren) - 1; i >= 0; i-- {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+			}
+			targetNode.InsertAfter(child)
+		}
+		targetNode.InsertAfter(heading)
+	} else if "" != parentID {
+		parentHeading := treenode.GetNodeInTree(tree, parentID)
+		if nil == parentHeading {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: parentID}
+		}
+
+		targetNode := parentHeading
+		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
+		if 0 < len(parentHeadingChildren) {
+			for _, child := range parentHeadingChildren {
+				targetNode = child
+				if child.ID == headingID {
+					break
+				}
+			}
+		}
+
+		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel
+		heading.HeadingLevel = parentHeading.HeadingLevel + 1
+		if 6 < heading.HeadingLevel {
+			heading.HeadingLevel = 6
+		}
+
+		for i := len(headingChildren) - 1; i >= 0; i-- {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+			}
+			targetNode.InsertAfter(child)
+		}
+		targetNode.InsertAfter(heading)
+	} else {
+		return
+	}
+
+	if err = tx.writeTree(tree); nil != err {
+		return
+	}
+	return
+}
+
 func Outline(rootID string) (ret []*Path, err error) {
 	time.Sleep(util.FrontendQueueInterval)
 	WaitForWritingFiles()

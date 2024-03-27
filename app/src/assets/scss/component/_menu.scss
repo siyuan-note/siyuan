@@ -120,6 +120,8 @@
         white-space: break-spaces;
         line-height: 26px;
         margin: 8px 0;
+        // 移动端面包屑过长
+        word-wrap: break-word;
       }
 
       &__icon {

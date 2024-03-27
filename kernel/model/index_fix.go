@@ -24,6 +24,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -40,8 +41,18 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// CheckIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016 https://github.com/siyuan-note/siyuan/issues/10563
-func CheckIndex() {
+var (
+	checkIndexPerformed = atomic.Bool{}
+)
+
+// checkIndex 自动校验数据库索引，仅在数据同步执行完成后执行一次。
+func checkIndex() {
+	if checkIndexPerformed.Load() {
+		return
+	}
+
+	logging.LogInfof("start checking index...")
+
 	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
 	sql.WaitForWritingDatabase()
 
@@ -61,6 +72,9 @@ func CheckIndex() {
 		util.PushStatusBar(Conf.Language(185))
 	})
 	debug.FreeOSMemory()
+	logging.LogInfof("finish checking index")
+
+	checkIndexPerformed.Store(true)
 }
 
 var autoFixLock = sync.Mutex{}

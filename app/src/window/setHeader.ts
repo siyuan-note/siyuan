@@ -30,10 +30,11 @@ export const setTabPosition = () => {
                 cmd: "isFullScreen",
             });
             if (rect.top <= 0 && rect.left <= 0 && !isFullScreen) {
-                item.headersElement.style.marginLeft = "var(--b3-toolbar-left-mac)";
+                // 用 marginLeft 左侧底部无线条
+                item.headersElement.style.paddingLeft = "var(--b3-toolbar-left-mac)";
                 headersLastElement.style.paddingRight = "42px";
             } else {
-                item.headersElement.style.marginLeft = "";
+                item.headersElement.style.paddingLeft = "";
                 headersLastElement.style.paddingRight = "";
             }
         }

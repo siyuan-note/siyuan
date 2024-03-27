@@ -368,7 +368,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent || window.siyuan.languages.untitled);
+            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         });
         event.preventDefault();
         return true;

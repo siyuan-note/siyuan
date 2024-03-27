@@ -13,6 +13,9 @@ import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
 /// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import * as dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
@@ -84,8 +87,8 @@ export const genCardHTML = (options: {
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
         <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
-        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openInNewTab}">
-            <svg><use xlink:href="#iconLayoutRight"></use></svg>
+        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
+            <svg><use xlink:href="#iconOpen"></use></svg>
         </div>
     </div>`;
     /// #endif
@@ -406,7 +409,7 @@ export const bindCardEvent = async (options: {
                 /// #if MOBILE
                 menu.fullscreen();
                 /// #else
-                const rect = target.getBoundingClientRect();
+                const rect = moreElement.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
                     y: rect.bottom
@@ -417,25 +420,62 @@ export const bindCardEvent = async (options: {
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
-                openFile({
-                    app: options.app,
-                    position: "right",
-                    custom: {
-                        icon: "iconRiffCard",
-                        title: window.siyuan.languages.spaceRepetition,
-                        data: {
-                            cardsData: options.cardsData,
-                            index,
-                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                            id: docId,
-                            title: options.title
-                        },
-                        id: "siyuan-card"
-                    },
+                const stickMenu = new Menu();
+                stickMenu.addItem({
+                    icon: "iconLayoutRight",
+                    label: window.siyuan.languages.insertRight,
+                    click() {
+                        openFile({
+                            app: options.app,
+                            position: "right",
+                            custom: {
+                                icon: "iconRiffCard",
+                                title: window.siyuan.languages.spaceRepetition,
+                                data: {
+                                    cardsData: options.cardsData,
+                                    index,
+                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                    id: docId,
+                                    title: options.title
+                                },
+                                id: "siyuan-card"
+                            },
+                        });
+                        options.dialog.destroy();
+                    }
                 });
-                if (options.dialog) {
-                    options.dialog.destroy();
-                }
+                /// #if !BROWSER
+                stickMenu.addItem({
+                    icon: "iconOpenWindow",
+                    label: window.siyuan.languages.openByNewWindow,
+                    click() {
+                        const json = {
+                            "title": window.siyuan.languages.spaceRepetition,
+                            "icon": "iconRiffCard",
+                            "instance": "Tab",
+                            "children": {
+                                "instance": "Custom",
+                                "customModelType": "siyuan-card",
+                                "customModelData": {
+                                    "cardType": filterElement.getAttribute("data-cardtype"),
+                                    "id": docId,
+                                    "title": options.title
+                                }
+                            }
+                        };
+                        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+                            // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
+                            url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+                        });
+                        options.dialog.destroy();
+                    }
+                });
+                /// #endif
+                const rect = sticktabElement.getBoundingClientRect();
+                stickMenu.open({
+                    x: rect.left,
+                    y: rect.bottom
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 return;

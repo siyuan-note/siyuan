@@ -320,12 +320,18 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             }
             menu.addItem({
                 icon: "iconBefore",
-                type: "readonly",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
+${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
+                    element.addEventListener("click", () => {
+                        if (document.activeElement.isSameNode(inputElement)) {
+                            return;
+                        }
+                        insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
+                        menu.close();
+                    })
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
@@ -336,12 +342,18 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__spac
             });
             menu.addItem({
                 icon: "iconAfter",
-                type: "readonly",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field"><span class="fn__space"></span>')}
+${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="Enter" class="b3-text-field" value="1"><span class="fn__space"></span>')}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
+                    element.addEventListener("click", () => {
+                        if (document.activeElement.isSameNode(inputElement)) {
+                            return;
+                        }
+                        insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
+                        menu.close();
+                    });
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));

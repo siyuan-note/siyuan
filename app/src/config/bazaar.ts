@@ -503,9 +503,13 @@ export const bazaar = {
     </div>
     <div class="fn__flex-1"></div>
     <img class="item__img" src="${data.iconURL}" onerror="this.src='/stage/images/icon.png'">
-    <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.preferredName}</a>
+    <div class="item__title">
+        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.preferredName}</a>
+    </div>
     <br>
-    <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${data.name}</a>
+    <div class="item__repo">
+        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${data.name}</a>
+    </div>
     <div class="block__icons">
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?

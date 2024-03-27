@@ -64,11 +64,15 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
 		if 0 < len(previousHeadingChildren) {
 			for _, child := range previousHeadingChildren {
-				targetNode = child
 				if child.ID == headingID {
 					break
 				}
+				targetNode = child
 			}
+		}
+
+		if targetNode == heading.Previous {
+			return
 		}
 
 		diffLevel := heading.HeadingLevel - previousHeading.HeadingLevel
@@ -92,10 +96,16 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
 		if 0 < len(parentHeadingChildren) {
 			for _, child := range parentHeadingChildren {
-				targetNode = child
 				if child.ID == headingID {
 					break
 				}
+				targetNode = child
+			}
+		}
+
+		if targetNode == heading.Previous {
+			if parentHeading.HeadingLevel < heading.HeadingLevel {
+				return
 			}
 		}
 

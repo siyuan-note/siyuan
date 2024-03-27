@@ -254,11 +254,14 @@ const setHTML = (options: {
     }
     if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") && !protyle.element.classList.contains("fn__none")) {
         // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
-        protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
-        // https://github.com/siyuan-note/siyuan/issues/8224
-        if (protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
-            showMessage(window.siyuan.languages.scrollGetMore);
-        }
+        protyle.scroll.updateIndex(protyle, options.scrollAttr.startId, (index) => {
+            // https://github.com/siyuan-note/siyuan/issues/8224
+            // https://github.com/siyuan-note/siyuan/issues/10716
+            if (index > 1 && protyle.block.blockCount > 1 && protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
+                showMessage(window.siyuan.languages.scrollGetMore);
+            }
+        });
+
     }
     protyle.app.plugins.forEach(item => {
         item.eventBus.emit("loaded-protyle", protyle);  // 准备废弃

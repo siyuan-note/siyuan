@@ -78,7 +78,7 @@ export class Scroll {
         });
     }
 
-    public updateIndex(protyle: IProtyle, id: string) {
+    public updateIndex(protyle: IProtyle, id: string, cb?:(index: number) => void) {
         fetchPost("/api/block/getBlockIndex", {id}, (response) => {
             if (!response.data) {
                 return;
@@ -86,6 +86,9 @@ export class Scroll {
             const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
             inputElement.value = response.data;
             protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+            if (cb) {
+                cb(response.data);
+            }
         });
     }
 

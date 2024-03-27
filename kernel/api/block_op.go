@@ -222,13 +222,13 @@ func moveBlock(c *gin.Context) {
 	var parentID, previousID string
 	if nil != arg["parentID"] {
 		parentID = arg["parentID"].(string)
-		if util.InvalidIDPattern(parentID, ret) {
+		if "" != parentID && util.InvalidIDPattern(parentID, ret) {
 			return
 		}
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
-		if util.InvalidIDPattern(previousID, ret) {
+		if "" != previousID && util.InvalidIDPattern(previousID, ret) {
 			return
 		}
 
@@ -364,26 +364,20 @@ func insertBlock(c *gin.Context) {
 	var parentID, previousID, nextID string
 	if nil != arg["parentID"] {
 		parentID = arg["parentID"].(string)
-		if "" != parentID {
-			if util.InvalidIDPattern(parentID, ret) {
-				return
-			}
+		if "" != parentID && util.InvalidIDPattern(parentID, ret) {
+			return
 		}
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
-		if "" != previousID {
-			if util.InvalidIDPattern(previousID, ret) {
-				return
-			}
+		if "" != previousID && util.InvalidIDPattern(parentID, ret) {
+			return
 		}
 	}
 	if nil != arg["nextID"] {
 		nextID = arg["nextID"].(string)
-		if "" != nextID {
-			if util.InvalidIDPattern(nextID, ret) {
-				return
-			}
+		if "" != nextID && util.InvalidIDPattern(parentID, ret) {
+			return
 		}
 	}
 

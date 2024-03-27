@@ -173,25 +173,25 @@ func (table *Table) SortRows(attrView *AttributeView) {
 		}
 	}
 
-	includeUneditedRows := map[string]bool{}
+	editedValRows := map[string]bool{}
 	for i, row := range table.Rows {
 		for _, colIndexSort := range colIndexSorts {
 			val := table.Rows[i].Cells[colIndexSort.Index].Value
-			if !val.IsEdited() {
-				// 如果该行的某个列的值是未编辑的，则该行不参与排序
-				includeUneditedRows[row.ID] = true
+			if val.IsEdited() {
+				// 如果该行某列的值已经编辑过，则该行可参与排序
+				editedValRows[row.ID] = true
 				break
 			}
 		}
 	}
 
-	// 将包含未编辑的行和全部已编辑的行分开排序
+	// 将未编辑的行和已编辑的行分开排序
 	var uneditedRows, editedRows []*TableRow
 	for _, row := range table.Rows {
-		if _, ok := includeUneditedRows[row.ID]; ok {
-			uneditedRows = append(uneditedRows, row)
-		} else {
+		if _, ok := editedValRows[row.ID]; ok {
 			editedRows = append(editedRows, row)
+		} else {
+			uneditedRows = append(uneditedRows, row)
 		}
 	}
 

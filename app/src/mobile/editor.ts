@@ -94,5 +94,8 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === window.siyuan.languages.untitled ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
+        app.plugins.forEach(item => {
+            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+        });
     });
 };

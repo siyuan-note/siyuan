@@ -366,6 +366,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 			name = util.EscapeHTML(box.Name) + util.EscapeHTML(hPath)
 		} else if ast.NodeAttributeView == parent.Type {
 			name = treenode.GetAttributeViewName(parent.AttributeViewID)
+			name = util.EscapeHTML(name)
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {
@@ -373,6 +374,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes), maxNameLen)
 				}
+				name = util.EscapeHTML(name)
 			}
 			if ast.NodeHeading == parent.Type {
 				headingLevel = parent.HeadingLevel
@@ -389,6 +391,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 		if ast.NodeListItem == parent.Type {
 			if "" == name {
 				name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
+				name = util.EscapeHTML(name)
 			}
 		}
 

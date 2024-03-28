@@ -901,7 +901,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			continue
 		}
 
-		if treenode.GetBlockTree(blockID) == nil {
+		if nil == treenode.GetBlockTree(blockID) {
 			notFound = append(notFound, blockID)
 		}
 	}
@@ -1985,6 +1985,10 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	blockValues := attrView.GetBlockKeyValues()
 	for _, blockValue := range blockValues.Values {
 		if blockValue.Block.ID == addingBlockID {
+			if !isDetached {
+				// 重复绑定一下，比如剪切数据库块的场景需要
+				bindBlockAv0(tx, avID, blockID, node, tree)
+			}
 			return
 		}
 	}
@@ -2074,31 +2078,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	}
 
 	if !isDetached {
-		attrs := parse.IAL2Map(node.KramdownIAL)
-
-		if "" == attrs[av.NodeAttrNameAvs] {
-			attrs[av.NodeAttrNameAvs] = avID
-		} else {
-			avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
-			avIDs = append(avIDs, avID)
-			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-		}
-
-		avNames := getAvNames(attrs[av.NodeAttrNameAvs])
-		if "" != avNames {
-			attrs[av.NodeAttrViewNames] = avNames
-		}
-
-		if nil != tx {
-			if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-				return
-			}
-		} else {
-			if err = setNodeAttrs(node, tree, attrs); nil != err {
-				return
-			}
-		}
+		bindBlockAv0(tx, avID, blockID, node, tree)
 	}
 
 	for _, view := range attrView.Views {
@@ -3036,6 +3016,11 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 		return
 	}
 
+	bindBlockAv0(tx, avID, blockID, node, tree)
+	return
+}
+
+func bindBlockAv0(tx *Transaction, avID, blockID string, node *ast.Node, tree *parse.Tree) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	if "" == attrs[av.NodeAttrNameAvs] {
 		attrs[av.NodeAttrNameAvs] = avID
@@ -3046,6 +3031,12 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 	}
 
+	avNames := getAvNames(attrs[av.NodeAttrNameAvs])
+	if "" != avNames {
+		attrs[av.NodeAttrViewNames] = avNames
+	}
+
+	var err error
 	if nil != tx {
 		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {

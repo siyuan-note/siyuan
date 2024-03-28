@@ -242,7 +242,7 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
 			c.Abort()
 			return
 		}
@@ -255,7 +255,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
 		c.Abort()
 		return
 	}
@@ -285,7 +285,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [session]"})
 		c.Abort()
 		return
 	}

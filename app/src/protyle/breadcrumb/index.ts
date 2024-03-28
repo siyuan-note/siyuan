@@ -31,7 +31,6 @@ import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
 import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
-import {escapeAttr, escapeHtml} from "../../util/escape";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -244,7 +243,7 @@ ${padHTML}
                 menu.addItem({
                     current: isCurrent,
                     icon: getIconByType(item.type, item.subType),
-                    label: escapeHtml(item.name),
+                    label: item.name,
                     click() {
                         zoomOut({protyle, id: item.id, focusId: id});
                     }
@@ -619,7 +618,7 @@ ${padHTML}
                 } else {
                     html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}"${(response.data.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
-    <span class="protyle-breadcrumb__text" title="${escapeAttr(item.name)}">${escapeHtml(item.name)}</span>
+    <span class="protyle-breadcrumb__text" title="${item.name}">${item.name}</span>
 </span>`;
                 }
                 if (index !== response.data.length - 1) {

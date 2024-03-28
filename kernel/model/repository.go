@@ -1331,8 +1331,10 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
 
-	// 首次数据同步执行完成后再执行索引订正 Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
-	checkIndex()
+	if !exit {
+		// 首次数据同步执行完成后再执行索引订正 Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
+		checkIndex()
+	}
 	return
 }
 

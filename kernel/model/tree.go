@@ -225,6 +225,5 @@ func searchTreeInFilesystem(rootID string) {
 
 	treenode.IndexBlockTree(tree)
 	sql.IndexTreeQueue(tree)
-	sql.WaitForWritingDatabase()
 	logging.LogInfof("reindexed tree by filesystem [rootID=%s]", rootID)
 }

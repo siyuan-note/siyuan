@@ -13,6 +13,23 @@ import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 
+const renderCellURL = (urlContent: string) => {
+    let host = urlContent;
+    let suffix = ""
+    try {
+        const urlObj = new URL(urlContent);
+        host = urlObj.host;
+        suffix = urlObj.href.replace(urlObj.origin, "")
+        if (suffix.length > 12) {
+            suffix = suffix.substring(0, 4) + "..." + suffix.substring(suffix.length - 6);
+        }
+    } catch (e) {
+        // 不是 url 地址
+    }
+    // https://github.com/siyuan-note/siyuan/issues/9291
+    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${urlContent}"><span>${host}</span><span class="ft__on-surface">${suffix}</span></span>`;
+};
+
 export const getCellText = (cellElement: HTMLElement | false) => {
     if (!cellElement) {
         return "";
@@ -48,7 +65,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
         const textElement = cellElement.querySelector(".av__celltext") as HTMLElement;
         cellValue[colType as "text"] = {
-            content: textElement.textContent
+            content: colType === "url" ? textElement.dataset.href : textElement.textContent
         };
         if (colType === "block" && textElement.dataset.id) {
             cellValue.block.id = textElement.dataset.id;
@@ -319,8 +336,10 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
     }
     const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
-    if (["text", "url", "email", "phone", "block", "template"].includes(type)) {
+    if (["text", "email", "phone", "block", "template"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
+    } else if (type === "url") {
+        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else {
@@ -512,7 +531,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
         if (elementIndex === 0 || !cellElements[elementIndex - 1].isSameNode(item.previousElementSibling)) {
-           json.push([]);
+            json.push([]);
         }
         json[json.length - 1].push(oldValue);
         // relation 为全部更新，以下类型为添加
@@ -600,14 +619,10 @@ export const renderCell = (cellValue: IAVCellValue) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
         text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
-    } else if (["url", "email", "phone"].includes(cellValue.type)) {
-        const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
-        // https://github.com/siyuan-note/siyuan/issues/9291
-        let urlAttr = "";
-        if (cellValue.type === "url") {
-            urlAttr = ` data-href="${urlContent}"`;
-        }
-        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
+    } else if (["email", "phone"].includes(cellValue.type)) {
+        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? cellValue[cellValue.type as "email"].content : ""}</span>`;
+    } else if ("url" === cellValue.type) {
+        text = renderCellURL(cellValue?.url?.content || "")
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
             text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
@@ -680,14 +695,15 @@ const renderRollup = (cellValue: IAVCellValue) => {
     let text = "";
     if (["text"].includes(cellValue.type)) {
         text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
-    } else if (["url", "email", "phone"].includes(cellValue.type)) {
-        const urlContent = cellValue ? cellValue[cellValue.type as "url"].content : "";
+    } else if (["email", "phone"].includes(cellValue.type)) {
+        const emailContent = cellValue ? cellValue[cellValue.type as "email"].content : "";
+        if (emailContent) {
+            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${emailContent}</span>`;
+        }
+    } else if ("url" === cellValue.type) {
+        const urlContent = cellValue?.url?.content || ""
         if (urlContent) {
-            let urlAttr = "";
-            if (cellValue.type === "url") {
-                urlAttr = ` data-href="${urlContent}"`;
-            }
-            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}"${urlAttr}>${urlContent}</span>`;
+            text = renderCellURL(urlContent);
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {

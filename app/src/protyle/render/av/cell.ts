@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
-import {objEquals} from "../../../util/functions";
+import {isDynamicRef, objEquals} from "../../../util/functions";
 import {fetchPost} from "../../../util/fetch";
 import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
@@ -402,7 +402,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     focusByRange(protyle.toolbar.range);
                     cellElements[0].classList.add("av__cell--select");
                     addDragFill(cellElements[0]);
-                    hintRef(inputElement.value.substring(2), protyle, "av");
+                    let textPlain = inputElement.value;
+                    if (isDynamicRef(textPlain)) {
+                        textPlain = textPlain.substring(2, 22 + 2)
+                    } else {
+                        textPlain = textPlain.substring(2)
+                    }
+                    hintRef(textPlain, protyle, "av");
                     avMaskElement?.remove();
                     event.preventDefault();
                     event.stopPropagation();

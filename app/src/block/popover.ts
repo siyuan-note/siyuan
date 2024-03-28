@@ -34,7 +34,7 @@ export const initBlockPopover = (app: App) => {
                         tip = getCellText(aElement);
                     }
                 } else {
-                    if (aElement.firstElementChild.getAttribute("data-type") === "url") {
+                    if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
                             tip = aElement.firstElementChild.getAttribute("data-href");
                         }

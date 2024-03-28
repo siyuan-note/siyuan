@@ -135,6 +135,30 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
         return;
     }
+    const contenteditableElement = getContenteditableElement(tempElement.content.firstElementChild);
+    if (contenteditableElement && contenteditableElement.childNodes.length === 1 && contenteditableElement.firstElementChild?.getAttribute("data-type") === "block-ref") {
+        const selectCellElement = blockElement.querySelector(".av__cell--select") as HTMLElement
+        if (selectCellElement) {
+            const avID = blockElement.dataset.avId;
+            const sourceId = contenteditableElement.firstElementChild.getAttribute("data-id");
+            const previousID = selectCellElement.dataset.blockId;
+            transaction(protyle, [{
+                action: "replaceAttrViewBlock",
+                avID,
+                previousID,
+                nextID: sourceId,
+                isDetached: false,
+            }], [{
+                action: "replaceAttrViewBlock",
+                avID,
+                previousID: sourceId,
+                nextID: previousID,
+                isDetached: selectCellElement.dataset.detached === "true",
+            }]);
+            return;
+        }
+    }
+
     const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);
     const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));
     const rowsElement = blockElement.querySelector(".av__row--select");

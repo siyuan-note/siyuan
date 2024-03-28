@@ -48,13 +48,21 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeText:
 		if nil != value.Text && nil != other.Text {
+			if "" == value.Text.Content {
+				if "" == other.Text.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Text.Content {
+				return -1
+			}
 			return strings.Compare(value.Text.Content, other.Text.Content)
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other.Number {
 			if value.Number.IsNotEmpty {
 				if !other.Number.IsNotEmpty {
-					return 1
+					return -1
 				}
 
 				if value.Number.Content > other.Number.Content {
@@ -65,17 +73,17 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				}
 				return 0
 			} else {
-				if other.Number.IsNotEmpty {
-					return -1
+				if !other.Number.IsNotEmpty {
+					return 0
 				}
-				return 0
+				return 1
 			}
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
 			if value.Date.IsNotEmpty {
 				if !other.Date.IsNotEmpty {
-					return 1
+					return -1
 				}
 				if value.Date.Content > other.Date.Content {
 					return 1
@@ -85,10 +93,10 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				}
 				return 0
 			} else {
-				if other.Date.IsNotEmpty {
-					return -1
+				if !other.Date.IsNotEmpty {
+					return 0
 				}
-				return 0
+				return 1
 			}
 		}
 	case KeyTypeCreated:
@@ -140,14 +148,38 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {
+			if "" == value.URL.Content {
+				if "" == other.URL.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.URL.Content {
+				return -1
+			}
 			return strings.Compare(value.URL.Content, other.URL.Content)
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other.Email {
+			if "" == value.Email.Content {
+				if "" == other.Email.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Email.Content {
+				return -1
+			}
 			return strings.Compare(value.Email.Content, other.Email.Content)
 		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other.Phone {
+			if "" == value.Phone.Content {
+				if "" == other.Phone.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Phone.Content {
+				return -1
+			}
 			return strings.Compare(value.Phone.Content, other.Phone.Content)
 		}
 	case KeyTypeMAsset:

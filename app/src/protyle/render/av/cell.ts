@@ -40,6 +40,8 @@ export const getCellText = (cellElement: HTMLElement | false) => {
         textElements.forEach(item => {
             if (item.querySelector(".av__cellicon")) {
                 cellText += `${item.firstChild.textContent} → ${item.lastChild.textContent}, `;
+            } else if (item.getAttribute("data-type") === "url") {
+                cellText = item.getAttribute("data-href") + ", ";
             } else if (item.getAttribute("data-type") !== "block-more") {
                 cellText += item.textContent + ", ";
             }

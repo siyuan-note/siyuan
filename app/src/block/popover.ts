@@ -33,12 +33,19 @@ export const initBlockPopover = (app: App) => {
                     if (textElement.scrollWidth > textElement.clientWidth + 2) {
                         tip = getCellText(aElement);
                     }
-                } else if (aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
-                    aElement.style.overflow = "auto";
-                    if (aElement.scrollWidth > aElement.clientWidth + 2) {
-                        tip = getCellText(aElement);
+                } else {
+                    if (aElement.firstElementChild.getAttribute("data-type") === "url") {
+                        if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
+                            tip = aElement.firstElementChild.getAttribute("data-href");
+                        }
                     }
-                    aElement.style.overflow = "";
+                    if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
+                        aElement.style.overflow = "auto";
+                        if (aElement.scrollWidth > aElement.clientWidth + 2) {
+                            tip = getCellText(aElement);
+                        }
+                        aElement.style.overflow = "";
+                    }
                 }
             }
             if (!tip) {

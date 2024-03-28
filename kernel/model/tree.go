@@ -181,6 +181,7 @@ func searchTreeInFilesystem(rootID string) {
 	msdID := util.PushMsg(Conf.language(45), 7000)
 	defer util.PushClearMsg(msdID)
 
+	logging.LogWarnf("searching tree on filesystem [rootID=%s]", rootID)
 	var treePath string
 	filepath.Walk(util.DataDir, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
@@ -204,6 +205,7 @@ func searchTreeInFilesystem(rootID string) {
 	})
 
 	if "" == treePath {
+		logging.LogErrorf("tree not found on filesystem [rootID=%s]", rootID)
 		return
 	}
 
@@ -224,4 +226,5 @@ func searchTreeInFilesystem(rootID string) {
 	treenode.IndexBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	sql.WaitForWritingDatabase()
+	logging.LogInfof("reindexed tree by filesystem [rootID=%s]", rootID)
 }

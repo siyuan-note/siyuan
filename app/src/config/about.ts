@@ -155,7 +155,7 @@ export const about = {
 <div class="fn__flex config__item  b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}
-         <div class="b3-label__text">${window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token)}</div>
+         <div class="b3-label__text" id="tokenTip">${window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token)}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="token" value="${window.siyuan.config.api.token}">
@@ -204,6 +204,7 @@ export const about = {
         tokenElement.addEventListener("change", () => {
             fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
                 window.siyuan.config.api.token = tokenElement.value;
+                about.element.querySelector("#tokenTip").innerHTML = window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token)
             });
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {

@@ -54,8 +54,9 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	})
 
 	headingChildren := treenode.HeadingChildren(heading)
-	var tmp []*ast.Node
+
 	// 过滤掉超级块结束节点
+	var tmp []*ast.Node
 	for _, child := range headingChildren {
 		if ast.NodeSuperBlockCloseMarker == child.Type {
 			continue
@@ -103,6 +104,17 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 		targetNode := parentHeading
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
+
+		// 找到下方第一个非标题节点
+		tmp = nil
+		for _, child := range parentHeadingChildren {
+			if ast.NodeHeading == child.Type {
+				break
+			}
+			tmp = append(tmp, child)
+		}
+		parentHeadingChildren = tmp
+
 		if 0 < len(parentHeadingChildren) {
 			for _, child := range parentHeadingChildren {
 				if child.ID == headingID {

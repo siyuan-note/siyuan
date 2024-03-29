@@ -338,7 +338,7 @@ export const openHistory = (app: App) => {
                         <option value="2">${window.siyuan.languages.assets}</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="opselect" class="b3-select${isMobile() ? "fn__size96" : "fn__size200"}">
+                    <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : " fn__size200"}">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
                         <option value="clean">${window.siyuan.languages.historyClean}</option>
                         <option value="update">${window.siyuan.languages.historyUpdate}</option>

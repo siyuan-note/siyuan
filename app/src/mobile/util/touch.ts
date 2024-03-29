@@ -44,6 +44,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "commonMenu")
     ) {
+        closePanel();
         return;
     }
     if (window.siyuan.mobile.editor) {
@@ -180,6 +181,11 @@ export const handleTouchMove = (event: TouchEvent) => {
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
+    if (Math.abs(xDiff) < Math.abs(yDiff)) {
+        clientX = null;
+        clientY = null;
+        return;
+    }
     if (!firstDirection) {
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
     }

@@ -67,12 +67,12 @@ export const openDocHistory = (options: {
             <div class="fn__flex-1"></div>
             <select data-type="opselect" class="b3-select">
                 <option value="all" selected>${window.siyuan.languages.allOp}</option>
-                <option value="clean">clean</option>
-                <option value="update">update</option>
-                <option value="delete">delete</option>
-                <option value="format">format</option>
-                <option value="sync">sync</option>
-                <option value="replace">replace</option>
+                <option value="clean">${window.siyuan.languages.historyClean}</option>
+                <option value="update">${window.siyuan.languages.historyUpdate}</option>
+                <option value="delete">${window.siyuan.languages.historyDelete}</option>
+                <option value="format">${window.siyuan.languages.historyFormat}</option>
+                <option value="sync">${window.siyuan.languages.historySync}</option>
+                <option value="replace">${window.siyuan.languages.historyReplace}</option>
             </select>
             <span class="fn__space"></span>
             <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__s" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>

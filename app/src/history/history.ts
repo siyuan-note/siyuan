@@ -340,12 +340,12 @@ export const openHistory = (app: App) => {
                     <span class="fn__space"></span>
                     <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
-                        <option value="clean">clean</option>
-                        <option value="update">update</option>
-                        <option value="delete">delete</option>
-                        <option value="format">format</option>
-                        <option value="sync">sync</option>
-                        <option value="replace">replace</option>
+                        <option value="clean">${window.siyuan.languages.historyClean}</option>
+                        <option value="update">${window.siyuan.languages.historyUpdate}</option>
+                        <option value="delete">${window.siyuan.languages.historyDelete}</option>
+                        <option value="format">${window.siyuan.languages.historyFormat}</option>
+                        <option value="sync">${window.siyuan.languages.historySync}</option>
+                        <option value="replace">${window.siyuan.languages.historyReplace}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="notebookselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">

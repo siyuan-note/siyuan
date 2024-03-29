@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -88,13 +89,23 @@ func RenameBox(boxID, name string) (err error) {
 	return
 }
 
+var boxLock = sync.Map{}
+
 func RemoveBox(boxID string) (err error) {
+	if _, ok := boxLock.Load(boxID); ok {
+		err = fmt.Errorf(Conf.language(239))
+		return
+	}
+
+	boxLock.Store(boxID, true)
+	defer boxLock.Delete(boxID)
+
 	if util.IsReservedFilename(boxID) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is a reserved file", boxID))
 	}
 
 	WaitForWritingFiles()
-
+	isUserGuide := IsUserGuide(boxID)
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -106,7 +117,7 @@ func RemoveBox(boxID string) (err error) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is not a dir", boxID))
 	}
 
-	if !IsUserGuide(boxID) {
+	if !isUserGuide {
 		var historyDir string
 		historyDir, err = GetHistoryDir(HistoryOpDelete)
 		if nil != err {
@@ -155,11 +166,20 @@ func unmount0(boxID string) {
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {
+	if _, ok := boxLock.Load(boxID); ok {
+		err = fmt.Errorf(Conf.language(239))
+		return
+	}
+
+	boxLock.Store(boxID, true)
+	defer boxLock.Delete(boxID)
+
 	WaitForWritingFiles()
+	isUserGuide := IsUserGuide(boxID)
 
 	localPath := filepath.Join(util.DataDir, boxID)
 	var reMountGuide bool
-	if IsUserGuide(boxID) {
+	if isUserGuide {
 		// 重新挂载帮助文档
 
 		guideBox := Conf.Box(boxID)
@@ -226,7 +246,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	treenode.SaveBlockTree(false)
 	util.ClearPushProgress(100)
 
-	if IsUserGuide(boxID) {
+	if isUserGuide {
 		go func() {
 			var startID string
 			i := 0

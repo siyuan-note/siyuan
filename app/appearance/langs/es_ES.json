@@ -1457,6 +1457,7 @@
     "235": "[%d/%d] está actualizando el paquete del mercado...",
     "236": "[%d/%d] está actualizando el paquete del mercado [%s]...",
     "237": "[%d] todos los paquetes del mercado se han actualizado correctamente",
-    "238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde"
+    "238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde",
+    "239": "Las operaciones relacionadas se están procesando, inténtalo de nuevo más tarde"
   }
 }

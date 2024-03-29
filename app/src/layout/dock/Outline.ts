@@ -273,6 +273,9 @@ export class Outline extends Model {
                 ghostElement.remove();
                 item.style.opacity = "";
 
+                if (!selectItem) {
+                    selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
+                }
                 if (selectItem) {
                     getAllModels().editor.find(editItem => {
                         if (editItem.editor.protyle.block.rootID === this.blockId) {

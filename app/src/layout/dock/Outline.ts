@@ -99,7 +99,7 @@ export class Outline extends Model {
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="b3-list-item fn__none"></div>
-<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
+<div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.tree = new Tree({
@@ -233,18 +233,35 @@ export class Outline extends Model {
                 return;
             }
             const documentSelf = document;
+            item.style.opacity = "0.38";
             const ghostElement = item.cloneNode(true) as HTMLElement;
             document.body.append(ghostElement);
             ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
-            ghostElement.setAttribute("style", `opacity:.38;position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+            ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
 
             documentSelf.ondragstart = () => false;
 
+            let selectItem: HTMLElement;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
                 ghostElement.style.top = moveEvent.clientY + "px";
                 ghostElement.style.left = moveEvent.clientX + "px";
+                selectItem = hasClosestByClassName(moveEvent.target as HTMLElement, "b3-list-item") as HTMLElement;
+                if (!selectItem || selectItem.tagName !== "LI" || selectItem.isSameNode(item) || selectItem.style.position === "fixed" || !this.element.contains(selectItem)) {
+                    return;
+                }
+                this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                });
+                const selectRect = selectItem.getBoundingClientRect();
+                if (moveEvent.clientY > selectRect.bottom - 10) {
+                    selectItem.classList.add("dragover__bottom");
+                } else if (moveEvent.clientY < selectRect.top + 10) {
+                    selectItem.classList.add("dragover__top");
+                } else {
+                    selectItem.classList.add("dragover");
+                }
             };
 
             documentSelf.onmouseup = () => {
@@ -254,26 +271,29 @@ export class Outline extends Model {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 ghostElement.remove();
-                const selectItem = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-                if (!selectItem || selectItem.tagName !== "LI") {
+                item.style.opacity = "";
+                this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                });
+                if (!selectItem) {
                     return;
                 }
                 getAllModels().editor.find(editItem => {
                     if (editItem.editor.protyle.block.rootID === this.blockId) {
                         transaction(editItem.editor.protyle, [{
                             action: "moveOutlineHeading",
-                            id: item.dataset.blockId,
+                            id: item.dataset.nodeId,
                             previousID: selectItem.previousElementSibling?.getAttribute("data-node-id"),
                             parentID: selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id"),
                         }], [{
                             action: "moveOutlineHeading",
-                            id: item.dataset.blockId,
+                            id: item.dataset.nodeId,
                             previousID: item.previousElementSibling?.getAttribute("data-node-id"),
                             parentID: item.parentElement.previousElementSibling?.getAttribute("data-node-id"),
                         }]);
                         return true;
                     }
-                })
+                });
             };
         });
     }

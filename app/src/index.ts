@@ -65,6 +65,9 @@ export class App {
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
                                 break;
+                            case "reloaddoc":
+                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []});
+                                break;
                             case "readonly":
                                 window.siyuan.config.editor.readOnly = data.data;
                                 hideAllElements(["util"]);

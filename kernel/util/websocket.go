@@ -216,6 +216,10 @@ func PushClearProgress() {
 	BroadcastByType("main", "cprogress", 0, "", nil)
 }
 
+func PushReloadDoc(rootID string) {
+	BroadcastByType("main", "reloaddoc", 0, "", rootID)
+}
+
 func PushProtyleReload(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }

@@ -139,7 +139,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	util.PushProtyleReload(tree.Root.ID)
+	util.PushReloadDoc(tree.Root.ID)
 	return
 }
 

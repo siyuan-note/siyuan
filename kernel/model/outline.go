@@ -54,6 +54,16 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	})
 
 	headingChildren := treenode.HeadingChildren(heading)
+	var tmp []*ast.Node
+	// 过滤掉超级块结束节点
+	for _, child := range headingChildren {
+		if ast.NodeSuperBlockCloseMarker == child.Type {
+			continue
+		}
+		tmp = append(tmp, child)
+	}
+	headingChildren = tmp
+
 	if "" != previousID {
 		previousHeading := treenode.GetNodeInTree(tree, previousID)
 		if nil == previousHeading {

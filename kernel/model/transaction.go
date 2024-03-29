@@ -66,6 +66,17 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
+func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
+	for _, tx := range *transactions {
+		for _, op := range tx.DoOperations {
+			if "moveOutlineHeading" == op.Action {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func WaitForWritingFiles() {
 	var printLog bool
 	var lastPrintLog bool

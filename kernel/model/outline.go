@@ -138,6 +138,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return
 	}
+
+	util.PushProtyleReload(tree.Root.ID)
 	return
 }
 

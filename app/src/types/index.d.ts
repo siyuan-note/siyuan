@@ -46,6 +46,7 @@ type TOperation =
     | "sortAttrViewView"
     | "setAttrViewPageSize"
     | "updateAttrViewColRelation"
+    | "moveOutlineHeading"
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"

@@ -15,6 +15,7 @@ import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {transaction} from "../../protyle/wysiwyg/transaction";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -206,7 +207,7 @@ export class Outline extends Model {
                 target = target.parentElement;
             }
         });
-
+        this.bindSort();
         if (this.isPreview) {
             if (this.blockId) {
                 fetchPost("/api/export/preview", {
@@ -223,6 +224,58 @@ export class Outline extends Model {
                 this.update(response);
             });
         }
+    }
+
+    private bindSort() {
+        this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            const item = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+            if (!item || item.tagName !== "LI") {
+                return;
+            }
+            const documentSelf = document;
+            const ghostElement = item.cloneNode(true) as HTMLElement;
+            document.body.append(ghostElement);
+            ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
+            ghostElement.setAttribute("style", `opacity:.38;position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+
+            documentSelf.ondragstart = () => false;
+
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                ghostElement.style.top = moveEvent.clientY + "px";
+                ghostElement.style.left = moveEvent.clientX + "px";
+            };
+
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                ghostElement.remove();
+                const selectItem = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+                if (!selectItem || selectItem.tagName !== "LI") {
+                    return;
+                }
+                getAllModels().editor.find(editItem => {
+                    if (editItem.editor.protyle.block.rootID === this.blockId) {
+                        transaction(editItem.editor.protyle, [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.blockId,
+                            previousID: selectItem.previousElementSibling?.getAttribute("data-node-id"),
+                            parentID: selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id"),
+                        }], [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.blockId,
+                            previousID: item.previousElementSibling?.getAttribute("data-node-id"),
+                            parentID: item.parentElement.previousElementSibling?.getAttribute("data-node-id"),
+                        }]);
+                        return true;
+                    }
+                })
+            };
+        });
     }
 
     public updateDocTitle(ial?: IObject) {

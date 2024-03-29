@@ -1079,7 +1079,7 @@
   "about11": "Red de servicio",
   "about12": "Después de habilitarlo, se permitirá el acceso a otros dispositivos de la misma LAN. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "about13": "Token API",
-  "about14": "El token debe ser autentificado al llamar a la API",
+  "about14": "El token debe ser autentificado al llamar a la API<br>Encabezado de solicitud HTTP <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "No habilite el proxy cuando esté configurado como <code class='fn__code'>Conexión directa</code>",
   "about18": "Cuando se utiliza una dirección sin bucle invertido (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code> ) Primero configure el Código de autorización de acceso",
   "checkUpdate": "Comprobar actualización",

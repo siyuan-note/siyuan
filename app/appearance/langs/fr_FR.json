@@ -1079,7 +1079,7 @@
   "about11": "Service de réseau",
   "about12": "Après l'activation, les autres appareils du même réseau local seront autorisés à accéder. L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about13": "API token",
-  "about14": "Le token doit être authentifié lors de l'appel de l'API.",
+  "about14": "Le token doit être authentifié lors de l'appel de l'API<br>En-tête de requête HTTP <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "N'activez pas le proxy lorsqu'il est défini sur <code class='fn__code'>Connexion directe</code>.",
   "about18": "Lors de l'utilisation d'une adresse sans bouclage (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code> ) Veuillez d'abord définir le Accès code d'autorisation",
   "checkUpdate": "Vérifier la mise à jour",

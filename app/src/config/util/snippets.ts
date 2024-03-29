@@ -171,7 +171,7 @@ export const openSnippets = () => {
                     }, (searchResponse) => {
                         dialog.element.querySelectorAll(`.fn__flex-1 > div > [data-type="${inputItem.dataset.type}"]`).forEach((snipeetPanel: Element) => {
                             snipeetPanel.classList.add("fn__none");
-                        })
+                        });
                         searchResponse.data.snippets.forEach((snippetItem: ISnippet) => {
                             if (snippetItem.type === inputItem.dataset.type) {
                                 dialog.element.querySelector(`[data-id="${snippetItem.id}"]`).classList.remove("fn__none");
@@ -180,7 +180,7 @@ export const openSnippets = () => {
                     });
                 }
             });
-        })
+        });
     });
 };
 

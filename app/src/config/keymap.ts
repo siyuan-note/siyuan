@@ -186,7 +186,7 @@ export const keymap = {
     },
     _setkeymap(app: App) {
         const data: Config.IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
-        const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom
+        const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom;
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             const newHotkey = item.getAttribute("data-value");

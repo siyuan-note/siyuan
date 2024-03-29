@@ -15,11 +15,11 @@ import {hintRef} from "../../hint/extend";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
-    let suffix = ""
+    let suffix = "";
     try {
         const urlObj = new URL(urlContent);
         host = urlObj.host;
-        suffix = urlObj.href.replace(urlObj.origin, "")
+        suffix = urlObj.href.replace(urlObj.origin, "");
         if (suffix.length > 12) {
             suffix = suffix.substring(0, 4) + "..." + suffix.substring(suffix.length - 6);
         }
@@ -404,9 +404,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     addDragFill(cellElements[0]);
                     let textPlain = inputElement.value;
                     if (isDynamicRef(textPlain)) {
-                        textPlain = textPlain.substring(2, 22 + 2)
+                        textPlain = textPlain.substring(2, 22 + 2);
                     } else {
-                        textPlain = textPlain.substring(2)
+                        textPlain = textPlain.substring(2);
                     }
                     hintRef(textPlain, protyle, "av");
                     avMaskElement?.remove();
@@ -630,7 +630,7 @@ export const renderCell = (cellValue: IAVCellValue) => {
     } else if (["email", "phone"].includes(cellValue.type)) {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? cellValue[cellValue.type as "email"].content : ""}</span>`;
     } else if ("url" === cellValue.type) {
-        text = renderCellURL(cellValue?.url?.content || "")
+        text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
             text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
@@ -709,7 +709,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
             text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${emailContent}</span>`;
         }
     } else if ("url" === cellValue.type) {
-        const urlContent = cellValue?.url?.content || ""
+        const urlContent = cellValue?.url?.content || "";
         if (urlContent) {
             text = renderCellURL(urlContent);
         }

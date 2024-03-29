@@ -331,7 +331,7 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", '<span class="fn__spac
                         }
                         insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
                         menu.close();
-                    })
+                    });
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
                             insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));

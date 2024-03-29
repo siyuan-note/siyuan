@@ -1041,7 +1041,7 @@ app.whenReady().then(() => {
                 return;
             }
             if (globalShortcut.isRegistered(shortcut)) {
-                globalShortcut.unregister(shortcut)
+                globalShortcut.unregister(shortcut);
             }
             if (index === 0) {
                 globalShortcut.register(shortcut, () => {

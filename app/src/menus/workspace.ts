@@ -98,7 +98,7 @@ const editLayout = (layoutName?: string) => {
         });
         dialog.destroy();
     });
-}
+};
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {

@@ -137,7 +137,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     }
     const contenteditableElement = getContenteditableElement(tempElement.content.firstElementChild);
     if (contenteditableElement && contenteditableElement.childNodes.length === 1 && contenteditableElement.firstElementChild?.getAttribute("data-type") === "block-ref") {
-        const selectCellElement = blockElement.querySelector(".av__cell--select") as HTMLElement
+        const selectCellElement = blockElement.querySelector(".av__cell--select") as HTMLElement;
         if (selectCellElement) {
             const avID = blockElement.dataset.avId;
             const sourceId = contenteditableElement.firstElementChild.getAttribute("data-id");

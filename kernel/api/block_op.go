@@ -418,13 +418,13 @@ func insertBlock(c *gin.Context) {
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
-		if "" != previousID && util.InvalidIDPattern(parentID, ret) {
+		if "" != previousID && util.InvalidIDPattern(previousID, ret) {
 			return
 		}
 	}
 	if nil != arg["nextID"] {
 		nextID = arg["nextID"].(string)
-		if "" != nextID && util.InvalidIDPattern(parentID, ret) {
+		if "" != nextID && util.InvalidIDPattern(nextID, ret) {
 			return
 		}
 	}

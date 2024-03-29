@@ -154,7 +154,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	util.PushReloadDoc(tree.Root.ID)
+	operation.RetData = tree.Root.ID
 	return
 }
 

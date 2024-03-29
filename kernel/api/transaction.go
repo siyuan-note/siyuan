@@ -70,10 +70,15 @@ func performTransactions(c *gin.Context) {
 
 	app := arg["app"].(string)
 	session := arg["session"].(string)
-	if model.IsFoldHeading(&transactions) || model.IsUnfoldHeading(&transactions) {
-		model.WaitForWritingFiles()
-	}
 	pushTransactions(app, session, transactions)
+
+	if model.IsFoldHeading(&transactions) || model.IsUnfoldHeading(&transactions) || model.IsMoveOutlineHeading(&transactions) {
+		if model.IsMoveOutlineHeading(&transactions) {
+			if retData := transactions[0].DoOperations[0].RetData; nil != retData {
+				util.PushReloadDoc(retData.(string))
+			}
+		}
+	}
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	c.Header("Server-Timing", fmt.Sprintf("total;dur=%d", elapsed))

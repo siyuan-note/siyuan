@@ -65,7 +65,7 @@ export const openDocHistory = (options: {
             ${isMobile() ? "" : options.pathString}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
-            <select data-type="opselect" class="b3-select fn__size200">
+            <select data-type="opselect" class="b3-select">
                 <option value="all" selected>${window.siyuan.languages.allOp}</option>
                 <option value="clean">${window.siyuan.languages.historyClean}</option>
                 <option value="update">${window.siyuan.languages.historyUpdate}</option>

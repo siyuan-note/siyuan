@@ -112,12 +112,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			}
 		}
 
-		if targetNode == heading.Previous {
-			if parentHeading.HeadingLevel < heading.HeadingLevel {
-				return
-			}
-		}
-
 		diffLevel := 1
 		heading.HeadingLevel = parentHeading.HeadingLevel + 1
 		if 6 < heading.HeadingLevel {

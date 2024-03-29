@@ -132,7 +132,12 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 		targetNode.InsertAfter(heading)
 	} else {
-		return
+		// 移到最前
+		for i := len(headingChildren) - 1; i >= 0; i-- {
+			child := headingChildren[i]
+			tree.Root.PrependChild(child)
+		}
+		tree.Root.PrependChild(heading)
 	}
 
 	if err = tx.writeTree(tree); nil != err {

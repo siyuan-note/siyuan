@@ -272,27 +272,47 @@ export class Outline extends Model {
                 documentSelf.onselect = null;
                 ghostElement.remove();
                 item.style.opacity = "";
+
+                if (selectItem) {
+                    getAllModels().editor.find(editItem => {
+                        if (editItem.editor.protyle.block.rootID === this.blockId) {
+                            let previousID
+                            let parentID
+                            const undoPreviousID = item.previousElementSibling?.getAttribute("data-node-id")
+                            const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id")
+                            if (selectItem.classList.contains("dragover")) {
+                                parentID = selectItem.getAttribute("data-node-id");
+                                if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
+                                    selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
+                                } else {
+                                    selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
+                                    item.remove();
+                                }
+                            } else if (selectItem.classList.contains("dragover__top")) {
+                                parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                                previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                                selectItem.before(item);
+                            } else if (selectItem.classList.contains("dragover__bottom")) {
+                                previousID = selectItem.getAttribute("data-node-id");
+                                selectItem.after(item);
+                            }
+                            transaction(editItem.editor.protyle, [{
+                                action: "moveOutlineHeading",
+                                id: item.dataset.nodeId,
+                                previousID,
+                                parentID,
+                            }], [{
+                                action: "moveOutlineHeading",
+                                id: item.dataset.nodeId,
+                                previousID: undoPreviousID,
+                                parentID: undoParentID,
+                            }]);
+                            return true;
+                        }
+                    });
+                }
                 this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover");
-                });
-                if (!selectItem) {
-                    return;
-                }
-                getAllModels().editor.find(editItem => {
-                    if (editItem.editor.protyle.block.rootID === this.blockId) {
-                        transaction(editItem.editor.protyle, [{
-                            action: "moveOutlineHeading",
-                            id: item.dataset.nodeId,
-                            previousID: selectItem.previousElementSibling?.getAttribute("data-node-id"),
-                            parentID: selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id"),
-                        }], [{
-                            action: "moveOutlineHeading",
-                            id: item.dataset.nodeId,
-                            previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                            parentID: item.parentElement.previousElementSibling?.getAttribute("data-node-id"),
-                        }]);
-                        return true;
-                    }
                 });
             };
         });

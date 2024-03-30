@@ -55,6 +55,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";
 import {Menu} from "../plugin/Menu";
+import {getFirstBlock} from "../protyle/wysiwyg/getBlock";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -834,8 +835,14 @@ export const zoomOut = (options: {
         if (options.focusId) {
             const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
             if (focusElement) {
-                focusBlock(focusElement);
-                focusElement.scrollIntoView();
+                // 退出聚焦后块在折叠中 https://github.com/siyuan-note/siyuan/issues/10746
+                let showElement = focusElement
+                while (showElement.getBoundingClientRect().height === 0) {
+                    showElement = showElement.parentElement;
+                }
+                showElement = getFirstBlock(showElement);
+                focusBlock(showElement);
+                showElement.scrollIntoView();
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
                 fetchPost("/api/filetree/getDoc", {
                     id: options.focusId,

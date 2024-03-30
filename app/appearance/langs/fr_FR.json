@@ -1,4 +1,5 @@
 {
+  "dndFolderTip": "Veuillez noter que l'insertion d'un dossier insère uniquement le lien hypertexte file:// et ne copie pas les fichiers qu'il contient",
   "removeCol": "Êtes-vous sûr de vouloir supprimer la colonne ${x} de la base de données ?",
   "video": "Vidéo",
   "audio": "Audio",

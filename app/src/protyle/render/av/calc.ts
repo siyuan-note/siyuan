@@ -251,11 +251,11 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             target: calcElement
         });
     }
-    let rollupIsNumber = false
+    let rollupIsNumber = false;
     if (type === "rollup") {
-        let relationKeyID: string
-        let keyID: string
-        let avData = panelData?.data
+        let relationKeyID: string;
+        let keyID: string;
+        let avData = panelData?.data;
         if (!avData) {
             const avResponse = await fetchSyncPost("api/av/renderAttributeView", {id: avId});
             avData = avResponse.data;
@@ -264,25 +264,25 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             if (item.id === colId) {
                 relationKeyID = item.rollup?.relationKeyID;
                 keyID = item.rollup?.keyID;
-                return true
+                return true;
             }
-        })
+        });
         if (relationKeyID && keyID) {
-            let relationAvId: string
+            let relationAvId: string;
             avData.view.columns.find((item) => {
                 if (item.id === relationKeyID) {
                     relationAvId = item.relation?.avID;
-                    return true
+                    return true;
                 }
-            })
+            });
             if (relationAvId) {
-                const colResponse = await fetchSyncPost("api/av/getAttributeView", {id: relationAvId})
+                const colResponse = await fetchSyncPost("api/av/getAttributeView", {id: relationAvId});
                 colResponse.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
                     if (item.key.id === keyID) {
-                        rollupIsNumber = item.key.type === "number"
-                        return true
+                        rollupIsNumber = item.key.type === "number";
+                        return true;
                     }
-                })
+                });
             }
         }
     }

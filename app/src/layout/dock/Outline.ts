@@ -279,10 +279,10 @@ export class Outline extends Model {
                 if (selectItem) {
                     getAllModels().editor.find(editItem => {
                         if (editItem.editor.protyle.block.rootID === this.blockId) {
-                            let previousID
-                            let parentID
-                            const undoPreviousID = item.previousElementSibling?.getAttribute("data-node-id")
-                            const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id")
+                            let previousID;
+                            let parentID;
+                            const undoPreviousID = item.previousElementSibling?.getAttribute("data-node-id");
+                            const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
                             if (selectItem.classList.contains("dragover")) {
                                 parentID = selectItem.getAttribute("data-node-id");
                                 if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {

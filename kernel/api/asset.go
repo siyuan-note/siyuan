@@ -70,13 +70,23 @@ func statAsset(c *gin.Context) {
 		return
 	}
 
+	updated := t.ModTime().UnixMilli()
+	hUpdated := t.ModTime().Format("2006-01-02 15:04:05")
+	created := updated
+	hCreated := hUpdated
+	// Check birthtime before use
+	if t.HasBirthTime() {
+		created = t.BirthTime().UnixMilli()
+		hCreated = t.BirthTime().Format("2006-01-02 15:04:05")
+	}
+
 	ret.Data = map[string]interface{}{
 		"size":     info.Size(),
 		"hSize":    humanize.Bytes(uint64(info.Size())),
-		"created":  t.BirthTime().UnixMilli(),
-		"hCreated": t.BirthTime().Format("2006-01-02 15:04:05"),
-		"updated":  t.ModTime().UnixMilli(),
-		"hUpdated": t.ModTime().Format("2006-01-02 15:04:05"),
+		"created":  created,
+		"hCreated": hCreated,
+		"updated":  updated,
+		"hUpdated": hUpdated,
 	}
 }
 

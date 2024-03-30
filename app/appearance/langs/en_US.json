@@ -1,5 +1,5 @@
 {
-  "dndFolderTip": "Please note that inserting a folder only inserts the file:// hyperlink and does not copy the files in it",
+  "dndFolderTip": "Please note that ${x} only inserts the file:// hyperlink and does not copy the file",
   "removeCol": "Are you sure you want to delete the ${x} column in the database?",
   "video": "Video",
   "audio": "Audio",

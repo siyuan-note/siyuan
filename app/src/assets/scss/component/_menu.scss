@@ -284,6 +284,18 @@
     }
   }
 
+  &__checked {
+    width: 22px;
+    height: 22px;
+    align-self: center;
+    margin-left: 8px;
+    color: var(--b3-theme-on-surface-light);
+    border-radius: var(--b3-border-radius);
+    padding: 4px;
+    box-sizing: border-box;
+    translate: var(--b3-transition);
+  }
+
   &__separator {
     background-color: var(--b3-theme-surface-lighter);
     height: 1px;

@@ -500,22 +500,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
-        // ctrl+home 光标移动到顶
-        if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "Home") {
-            goHome(protyle);
-            hideElements(["select"], protyle);
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
-        // ctrl+end 光标移动到尾
-        if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "End") {
-            goEnd(protyle);
-            hideElements(["select"], protyle);
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
         // 向上/下滚动一屏
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
             if (event.key === "PageUp") {

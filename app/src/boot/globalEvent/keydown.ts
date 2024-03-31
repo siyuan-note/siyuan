@@ -42,7 +42,7 @@ import {deleteFiles} from "../../editor/deleteFile";
 import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
 import {showPopover} from "../../block/popover";
-import {getStartEndElement} from "../../protyle/wysiwyg/commonHotkey";
+import {getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {editor} from "../../config/editor";
 import {hintMoveBlock} from "../../protyle/hint/extend";
@@ -399,6 +399,22 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     if (target.tagName !== "TABLE" && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
+    }
+    // ctrl+home 光标移动到顶
+    if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "Home") {
+        goHome(protyle);
+        hideElements(["select"], protyle);
+        event.stopPropagation();
+        event.preventDefault();
+        return;
+    }
+    // ctrl+end 光标移动到尾
+    if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "End") {
+        goEnd(protyle);
+        hideElements(["select"], protyle);
+        event.stopPropagation();
+        event.preventDefault();
+        return;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.exitFocus.custom, event)) {
         event.preventDefault();

@@ -17,8 +17,12 @@ import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
+import {hasClosestByClassName} from "../util/hasClosest";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
+    if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
+        return;
+    }
     const disableElement = isNotEditBlock(blockElement);
     if (!disableElement && blockElement.classList.contains("protyle-wysiwyg--select")) {
         setLastNodeRange(getContenteditableElement(blockElement), range, false);

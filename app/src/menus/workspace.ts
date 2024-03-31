@@ -46,12 +46,12 @@ const editLayout = (layoutName?: string) => {
     inputElement.select();
     inputElement.focus();
     dialog.bindInput(inputElement, () => {
-        btnsElement[1].dispatchEvent(new CustomEvent("click"));
-    });
-    btnsElement[0].addEventListener("click", () => {
-        dialog.destroy();
+        btnsElement[2].dispatchEvent(new CustomEvent("click"));
     });
     btnsElement[1].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[2].addEventListener("click", () => {
         const value = inputElement.value;
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);
@@ -88,7 +88,7 @@ const editLayout = (layoutName?: string) => {
         });
         setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
     });
-    btnsElement[2].addEventListener("click", () => {
+    btnsElement[0].addEventListener("click", () => {
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
             if (layoutItem.name === layoutName) {
                 window.siyuan.storage[Constants.LOCAL_LAYOUTS].splice(index, 1);

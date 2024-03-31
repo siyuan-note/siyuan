@@ -47,13 +47,13 @@ const editDialog = (customName: string, customMemo: string) => {
     const customElement = dialog.element.querySelector("textarea");
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(customElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
+        (btnsElement[2] as HTMLButtonElement).click();
     });
     customElement.value = customMemo;
-    btnsElement[0].addEventListener("click", () => {
+    btnsElement[1].addEventListener("click", () => {
         dialog.destroy();
     });
-    btnsElement[1].addEventListener("click", () => {
+    btnsElement[2].addEventListener("click", () => {
         window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
             name: string,
             memo: string
@@ -67,7 +67,7 @@ const editDialog = (customName: string, customMemo: string) => {
         });
         dialog.destroy();
     });
-    btnsElement[2].addEventListener("click", () => {
+    btnsElement[0].addEventListener("click", () => {
         window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
             name: string,
             memo: string

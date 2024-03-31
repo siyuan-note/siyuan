@@ -2095,7 +2095,7 @@ export class WYSIWYG {
                 return;
             }
 
-            if (aElement) {
+            if (aElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
                 let linkAddress = Lute.UnEscapeHTMLStr(aLink);

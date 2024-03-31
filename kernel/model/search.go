@@ -424,6 +424,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 0 != groupBy {
 		// 按文档分组后不支持替换 Need to be reminded that replacement operations are not supported after grouping by doc https://github.com/siyuan-note/siyuan/issues/10161
+		// 因为分组条件传入以后搜索只能命中文档块，会导致 全部替换 失效
 		err = errors.New(Conf.Language(221))
 		return
 	}

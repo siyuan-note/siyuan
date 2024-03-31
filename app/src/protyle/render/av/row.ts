@@ -250,7 +250,7 @@ export const setPageSize = (options: {
     menu.addItem({
         iconHTML: "",
         label: "10",
-        accelerator: currentPageSize === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "10",
         click() {
             updatePageSize({
                 currentPageSize,
@@ -263,7 +263,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "25",
         label: "25",
         click() {
             updatePageSize({
@@ -277,7 +277,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "50",
         label: "50",
         click() {
             updatePageSize({
@@ -291,7 +291,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "100",
         label: "100",
         click() {
             updatePageSize({

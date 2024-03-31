@@ -18,10 +18,12 @@ const renderCellURL = (urlContent: string) => {
     let suffix = "";
     try {
         const urlObj = new URL(urlContent);
-        host = urlObj.host;
-        suffix = urlObj.href.replace(urlObj.origin, "");
-        if (suffix.length > 12) {
-            suffix = suffix.substring(0, 4) + "..." + suffix.substring(suffix.length - 6);
+        if (urlObj.protocol.startsWith("http")) {
+            host = urlObj.host;
+            suffix = urlObj.href.replace(urlObj.origin, "");
+            if (suffix.length > 12) {
+                suffix = suffix.substring(0, 4) + "..." + suffix.substring(suffix.length - 6);
+            }
         }
     } catch (e) {
         // 不是 url 地址

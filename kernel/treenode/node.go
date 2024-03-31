@@ -1081,6 +1081,11 @@ func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 				dataModel[rowValue.Key.Name] = v.Number.Content
 			} else if av.KeyTypeDate == v.Type {
 				dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+			} else if av.KeyTypeRollup == v.Type {
+				if 0 < len(v.Rollup.Contents) && av.KeyTypeNumber == v.Rollup.Contents[0].Type {
+					// 汇总数字时仅取第一个数字填充模板
+					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
+				}
 			} else {
 				dataModel[rowValue.Key.Name] = v.String()
 			}

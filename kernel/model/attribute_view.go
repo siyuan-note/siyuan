@@ -417,7 +417,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					ial := map[string]string{}
 					block := getRowBlockValue(keyValues)
 					if nil != block && !block.IsDetached {
-						ial = GetBlockAttrsWithoutWaitWriting(block.ID)
+						ial = GetBlockAttrsWithoutWaitWriting(block.BlockID)
 					}
 
 					kv.Values[0].Template.Content = renderTemplateCol(ial, flashcard, keyValues, kv.Key.Template)

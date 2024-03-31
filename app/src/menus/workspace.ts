@@ -34,9 +34,10 @@ const editLayout = (layoutName?: string) => {
         <input class="b3-text-field fn__block" value="${layoutName || ""}" placeholder="${window.siyuan.languages.memo}">
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--error${layoutName ? "" : " fn__none"}">${window.siyuan.languages.delete}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--error${layoutName ? "" : " fn__none"}">${window.siyuan.languages.delete}</button><div class="fn__space"></div>   
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text${layoutName ? "" : " fn__none"}">${window.siyuan.languages.rename}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages[layoutName ? "update" : "confirm"]}</button>
 </div>`,
         width: "520px",
     });
@@ -46,12 +47,37 @@ const editLayout = (layoutName?: string) => {
     inputElement.select();
     inputElement.focus();
     dialog.bindInput(inputElement, () => {
-        btnsElement[2].dispatchEvent(new CustomEvent("click"));
+        btnsElement[3].dispatchEvent(new CustomEvent("click"));
+    });
+    btnsElement[0].addEventListener("click", () => {
+        window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
+            if (layoutItem.name === layoutName) {
+                window.siyuan.storage[Constants.LOCAL_LAYOUTS].splice(index, 1);
+                setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                return true;
+            }
+        });
+        dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
         dialog.destroy();
     });
     btnsElement[2].addEventListener("click", () => {
+        const value = inputElement.value;
+        if (!value) {
+            showMessage(window.siyuan.languages["_kernel"]["142"]);
+            return;
+        }
+        dialog.destroy();
+        window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout) => {
+            if (layoutItem.name === layoutName) {
+                layoutItem.name = value;
+                setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                return true;
+            }
+        });
+    });
+    btnsElement[3].addEventListener("click", () => {
         const value = inputElement.value;
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);
@@ -87,16 +113,6 @@ const editLayout = (layoutName?: string) => {
             layout: getAllLayout()
         });
         setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-    });
-    btnsElement[0].addEventListener("click", () => {
-        window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
-            if (layoutItem.name === layoutName) {
-                window.siyuan.storage[Constants.LOCAL_LAYOUTS].splice(index, 1);
-                setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
-                return true;
-            }
-        });
-        dialog.destroy();
     });
 };
 

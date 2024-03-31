@@ -708,6 +708,7 @@ interface IModels {
 }
 
 interface IMenu {
+    checked?: boolean,
     iconClass?: string,
     label?: string,
     click?: (element: HTMLElement, event: MouseEvent) => boolean | void | Promise<boolean | void>

@@ -301,15 +301,15 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     menu.addSeparator();
     Array.from(Array(13).keys()).forEach(index => {
         menu.addItem({
-            accelerator: parseInt(color) === index + 1 ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+            checked: parseInt(color) === index + 1,
             iconHTML: "",
             label: `<span class="color__square"  style="padding: 5px;margin: 2px;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
             click(element) {
-                if (element.lastElementChild.classList.contains("b3-menu__accelerator")) {
+                if (element.lastElementChild.classList.contains("b3-menu__checked")) {
                     return;
                 }
-                element.parentElement.querySelector(".b3-menu__accelerator")?.remove();
-                element.insertAdjacentHTML("beforeend", '<span class="b3-menu__accelerator"><svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg></span>');
+                element.parentElement.querySelector(".b3-menu__checked")?.remove();
+                element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>');
                 transaction(protyle, [{
                     action: "updateAttrViewColOption",
                     id: colId,

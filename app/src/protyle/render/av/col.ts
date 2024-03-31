@@ -854,7 +854,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol, name: string) => {
     return `<button class="b3-menu__item" data-type="updateColType"  data-name="${name}" data-old-type="${oldType}" data-new-type="${type}">
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>
     <span class="b3-menu__label">${getColNameByType(type)}</span>
-    ${type === oldType ? '<span class="b3-menu__accelerator"><svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg></span>' : ""}
+    ${type === oldType ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>' : ""}
 </button>`;
 };
 

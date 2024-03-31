@@ -47,8 +47,6 @@ import {
     downSelect,
     duplicateBlock,
     getStartEndElement,
-    goEnd,
-    goHome,
     upSelect
 } from "./commonHotkey";
 import {enterBack, fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";

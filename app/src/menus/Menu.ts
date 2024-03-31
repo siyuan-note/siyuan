@@ -225,7 +225,7 @@ export class MenuItem {
                 html += `<svg class="b3-menu__action${options.action === "iconCloseRound" ? " b3-menu__action--close" : ""}"><use xlink:href="#${options.action}"></use></svg>`;
             }
             if (options.checked) {
-                html += '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>'
+                html += '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>';
             }
             this.element.innerHTML = html;
         }

@@ -97,7 +97,6 @@ const editLayout = (layoutName?: string) => {
         }
         const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
             if (item.name === value) {
-
                 confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
                     item.layout = getAllLayout();
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);

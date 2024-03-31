@@ -17,7 +17,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             selected.push(item.dataset.content);
         });
     }
-    const checkedName = document.querySelector('.av__panel .b3-menu__item--current[data-type="addColOptionOrCell"]')?.getAttribute("data-name") || ""
+    const checkedName = document.querySelector('.av__panel .b3-menu__item--current[data-type="addColOptionOrCell"]')?.getAttribute("data-name") || "";
     if (options) {
         options.forEach(item => {
             if (!key ||
@@ -126,7 +126,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
             item.querySelector(".b3-menu__checked")?.remove();
             return true;
         }
-    })
+    });
     target.remove();
 };
 
@@ -580,9 +580,9 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     });
 
     let selectedHTML = "";
-    const selected: string[] = []
+    const selected: string[] = [];
     genCellValueByElement(colData.type, cellElements[0]).mSelect?.forEach((item) => {
-        selected.push(item.content)
+        selected.push(item.content);
         selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 

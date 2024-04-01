@@ -104,66 +104,6 @@ const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: 
     });
 };
 
-const mergePluginHotkey = (plugin: Plugin) => {
-    if (!window.siyuan.config.keymap.plugin) {
-        window.siyuan.config.keymap.plugin = {};
-    }
-    for (let i = 0; i < plugin.commands.length; i++) {
-        const command = plugin.commands[i];
-        if (!window.siyuan.config.keymap.plugin[plugin.name]) {
-            command.customHotkey = command.hotkey;
-            window.siyuan.config.keymap.plugin[plugin.name] = {
-                [command.langKey]: {
-                    default: command.hotkey,
-                    custom: command.hotkey,
-                }
-            };
-        } else if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
-            command.customHotkey = command.hotkey;
-            window.siyuan.config.keymap.plugin[plugin.name][command.langKey] = {
-                default: command.hotkey,
-                custom: command.hotkey,
-            };
-        } else if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
-            if (typeof window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom === "string") {
-                command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom;
-            } else {
-                command.customHotkey = command.hotkey;
-            }
-            window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey;
-        }
-        if (typeof command.customHotkey !== "string") {
-            console.error(`${plugin.name} - commands data is error and has been removed.`);
-            plugin.commands.splice(i, 1);
-            i--;
-        }
-    }
-    Object.keys(plugin.docks).forEach(dockKey => {
-        const dock = plugin.docks[dockKey];
-        if (!dock.config.hotkey) {
-            return;
-        }
-        if (!window.siyuan.config.keymap.plugin[plugin.name]) {
-            window.siyuan.config.keymap.plugin[plugin.name] = {
-                [dockKey]: {
-                    default: dock.config.hotkey,
-                    custom: dock.config.hotkey,
-                }
-            };
-        } else if (!window.siyuan.config.keymap.plugin[plugin.name][dockKey]) {
-            window.siyuan.config.keymap.plugin[plugin.name][dockKey] = {
-                default: dock.config.hotkey,
-                custom: dock.config.hotkey,
-            };
-        } else if (window.siyuan.config.keymap.plugin[plugin.name][dockKey]) {
-            if (typeof window.siyuan.config.keymap.plugin[plugin.name][dockKey].custom !== "string") {
-                window.siyuan.config.keymap.plugin[plugin.name][dockKey].custom = dock.config.hotkey;
-            }
-            window.siyuan.config.keymap.plugin[plugin.name][dockKey]["default"] = dock.config.hotkey;
-        }
-    });
-};
-
 export const afterLoadPlugin = (plugin: Plugin) => {
     try {
         plugin.onLayoutReady();
@@ -199,7 +139,6 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     }
     /// #if !MOBILE
     resizeTopBar();
-    mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status");
         if (element.getAttribute("data-position") === "right") {

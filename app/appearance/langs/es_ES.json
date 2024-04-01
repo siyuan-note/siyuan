@@ -1,4 +1,5 @@
 {
+  "updateLayout": "Actualizar diseño",
   "dndFolderTip": "Tenga en cuenta que ${x} solo inserta el hipervínculo file:// y no copia el archivo",
   "removeCol": "¿Está seguro de que desea eliminar la columna ${x} en la base de datos?",
   "vídeo": "Vídeo",

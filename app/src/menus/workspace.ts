@@ -37,7 +37,7 @@ const editLayout = (layoutName?: string) => {
     <button class="b3-button b3-button--error${layoutName ? "" : " fn__none"}">${window.siyuan.languages.delete}</button><div class="fn__space"></div>   
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text${layoutName ? "" : " fn__none"}">${window.siyuan.languages.rename}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages[layoutName ? "update" : "confirm"]}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages[layoutName ? "updateLayout" : "confirm"]}</button>
 </div>`,
         width: "520px",
     });

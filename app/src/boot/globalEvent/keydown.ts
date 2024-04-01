@@ -76,6 +76,7 @@ import {historyKeydown} from "../../history/keydown";
 import {zoomOut} from "../../menus/protyle";
 import {openSearchAV} from "../../protyle/render/av/relation";
 import * as dayjs from "dayjs";
+import {getPlainText} from "../../protyle/util/paste";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -488,10 +489,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 selectsElement.push(nodeElement);
             }
             selectsElement.forEach(item => {
-                // 不能使用 [contenteditable="true"], 否则嵌入块无法复制
-                item.querySelectorAll("[spellcheck]").forEach(editItem => {
-                    html += editItem.textContent + "\n";
-                });
+                html += getPlainText(item) + "\n";
             });
             copyPlainText(html.trimEnd());
         } else {

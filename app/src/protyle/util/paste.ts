@@ -15,7 +15,42 @@ import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
-import {cellScrollIntoView} from "../render/av/cell";
+import {cellScrollIntoView, getCellText} from "../render/av/cell";
+
+export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
+    let text = ""
+    const dataType = blockElement.dataset.type
+    if ("NodeHTMLBlock" === dataType) {
+        text += Lute.UnEscapeHTMLStr(blockElement.querySelector("protyle-html").getAttribute("data-content"))
+    } else if ("NodeAttributeView" === dataType) {
+        blockElement.querySelectorAll(".av__row").forEach(rowElement => {
+            rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
+                text += getCellText(cellElement) + " ";
+            })
+            text += "\n";
+        })
+        text = text.trimEnd()
+    } else if ("NodeThematicBreak" === dataType) {
+        text += "---";
+    } else if ("NodeIFrame" === dataType || "NodeWidget" === dataType) {
+        text += blockElement.querySelector("iframe").getAttribute("src")
+    } else if ("NodeVideo" === dataType) {
+        text += blockElement.querySelector("video").getAttribute("src")
+    } else if ("NodeAudio" === dataType) {
+        text += blockElement.querySelector("audio").getAttribute("src")
+    } else if (blockElement.classList.contains("render-node")) {
+        // 需在嵌入块后，代码块前
+        text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"))
+    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock", "NodeTable"].includes(dataType)) {
+        text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+        blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
+            const nestedText = getPlainText(item, true);
+            text += nestedText ? nestedText + "\n" : "";
+        })
+    }
+    return text;
+}
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {

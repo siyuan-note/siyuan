@@ -840,7 +840,12 @@ export const zoomOut = (options: {
                 while (showElement.getBoundingClientRect().height === 0) {
                     showElement = showElement.parentElement;
                 }
-                showElement = getFirstBlock(showElement);
+                if (showElement.classList.contains("protyle-wysiwyg")) {
+                    // 闪卡退出聚焦元素被隐藏 https://github.com/siyuan-note/siyuan/issues/10058#issuecomment-2029524211
+                    showElement = focusElement.previousElementSibling || focusElement.nextElementSibling;
+                } else {
+                    showElement = getFirstBlock(showElement);
+                }
                 focusBlock(showElement);
                 showElement.scrollIntoView();
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来

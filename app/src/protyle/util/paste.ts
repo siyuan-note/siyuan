@@ -16,6 +16,47 @@ import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
+
+export const getTextStar = (blockElement: HTMLElement) => {
+    const dataType = blockElement.dataset.type
+    let refText = ""
+    if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
+        refText = getContenteditableElement(blockElement).innerHTML;
+    } else {
+        if ("NodeHTMLBlock" === dataType) {
+            refText = "HTML"
+        } else if ("NodeAttributeView" === dataType) {
+            refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database
+        } else if ("NodeThematicBreak" === dataType) {
+            refText = window.siyuan.languages.line
+        } else if ("NodeIFrame" === dataType) {
+            refText = "IFrame"
+        } else if ("NodeWidget" === dataType) {
+            refText = window.siyuan.languages.widget
+        } else if ("NodeVideo" === dataType) {
+            refText = window.siyuan.languages.video
+        } else if ("NodeAudio" === dataType) {
+            refText = window.siyuan.languages.audio
+        } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
+            refText = getPlainText(blockElement);
+        } else if (blockElement.classList.contains("render-node")) {
+            // 需在嵌入块后，代码块前
+            refText += blockElement.dataset.subtype || Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
+        }  else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+            Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
+                if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
+                    refText = getTextStar(blockElement.querySelector("[data-node-id]"));
+                    return true;
+                }
+            })
+            if (refText) {
+                return refText
+            }
+        }
+    }
+    return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
+}
 
 export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     let text = ""

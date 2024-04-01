@@ -1,4 +1,4 @@
-import {paste} from "../util/paste";
+import {getTextStar, paste} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -269,31 +269,22 @@ export class WYSIWYG {
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
                     selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     if (isRefText) {
-                        const cloneElement = selectElements[0].parentElement.cloneNode(true) as HTMLElement;
-                        const cloneEditElement = getContenteditableElement(cloneElement);
-                        if (cloneEditElement) {
-                            cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${cloneElement.getAttribute("data-node-id")}">*</span>`);
-                        }
-                        html = cloneElement.outerHTML;
-                        selectElements[0].removeAttribute("data-reftext");
+                        html = getTextStar(selectElements[0].parentElement)
                     } else {
                         html = selectElements[0].parentElement.outerHTML;
                     }
                 } else {
-                    selectElements.forEach((item, index) => {
+                    selectElements.forEach((item: HTMLElement, index) => {
                         // 复制列表项中的块会变为复制列表项，因此不能使用 getTopAloneElement https://github.com/siyuan-note/siyuan/issues/8925
                         if (isRefText && index === 0) {
-                            const cloneElement = item.cloneNode(true) as HTMLElement;
-                            const cloneEditElement = getContenteditableElement(cloneElement);
-                            if (cloneEditElement) {
-                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${item.getAttribute("data-node-id")}">*</span>`);
-                            }
-                            html += removeEmbed(cloneElement);
-                            selectElements[0].removeAttribute("data-reftext");
+                            html += getTextStar(item) + "\n\n";
                         } else {
                             html += removeEmbed(item);
                         }
                     });
+                }
+                if (isRefText) {
+                    selectElements[0].removeAttribute("data-reftext");
                 }
             } else if (selectAVElement) {
                 const cellElements: Element[] = Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];

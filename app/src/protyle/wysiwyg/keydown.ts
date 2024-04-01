@@ -919,7 +919,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     writeText(`${content.trim()} ((${nodeElement.getAttribute("data-node-id")} "*"))`);
                 });
             } else {
-                nodeElement.setAttribute("data-reftext", "true");
+                const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+                if (selectElements.length > 0) {
+                    selectElements[0].setAttribute("data-reftext", "true");
+                } else {
+                    nodeElement.setAttribute("data-reftext", "true");
+                }
                 focusByRange(getEditorRange(nodeElement));
                 document.execCommand("copy");
             }

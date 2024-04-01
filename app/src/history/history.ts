@@ -303,7 +303,16 @@ export const openHistory = (app: App) => {
         return;
     }
 
-    let notebookSelectHTML = "";
+    let existLocalHistoryNoteID = false;
+    window.siyuan.notebooks.forEach((item) => {
+        if (!item.closed) {
+            if (item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID]) {
+                existLocalHistoryNoteID = true;
+            }
+        }
+    });
+
+    let notebookSelectHTML = `<option value='%' ${!existLocalHistoryNoteID? "selected" : ""}>${window.siyuan.languages.allNotebooks}</option>`;
     window.siyuan.notebooks.forEach((item) => {
         if (!item.closed) {
             notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${escapeHtml(item.name)}</option>`;

@@ -105,6 +105,7 @@ const renderPDF = async (id: string) => {
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
+    <script src="${servePath}/stage/protyle/js/protyle-html.js?v=3.0.5" async="" id="protyleWcHtmlScript"></script>
     ${themeStyle}
     <title>${window.siyuan.languages.export} PDF</title>
     <style>

@@ -88,6 +88,11 @@ func LoadPetals(frontend string) (ret []*Petal) {
 
 	petals := getPetals()
 	for _, petal := range petals {
+		installPath := filepath.Join(util.DataDir, "plugins", petal.Name)
+		if !filelock.IsExist(installPath) {
+			continue
+		}
+
 		_, petal.DisplayName, petal.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled || petal.Incompatible {
 			continue

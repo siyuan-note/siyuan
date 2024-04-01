@@ -436,6 +436,7 @@
   "autoDownloadUpdatePkgTip": "启用后会每隔两小时自动检查版本更新，如果有更新版本则自动下载安装包并提示安装",
   "downloaded": "已下载",
   "allOp": "所有操作",
+  "allNotebooks": "所有笔记本",
   "historyClean": "清理　 (clean)",
   "historyUpdate": "更新　 (update)",
   "historyDelete": "删除　 (delete)",

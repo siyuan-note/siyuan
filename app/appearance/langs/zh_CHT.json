@@ -443,6 +443,7 @@
   "historyFormat": "格式化 (format)",
   "historySync": "同步　 (sync)",
   "historyReplace": "替換　 (replace)",
+  "historyOutline": "大綱　 (outline)",
   "htmlBlockError": "以下 script 執行會影響界面顯示，已經停止運行該腳本",
   "fileHistory": "文件歷史",
   "htmlBlockTip": "形成了多個 HTML 塊，為防止資料丟失請使用 <code class='fn__code'>&lt;div&gt;</code> 標籤包裹並去掉空行",

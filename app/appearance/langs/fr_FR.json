@@ -443,6 +443,7 @@
   "historyFormat": "formater (format)",
   "historySync": "synchroniser (sync)",
   "historyReplace": "remplacer (replace)",
+  "historyOutline": "contour (outline)",
   "htmlBlockError": "L'exécution du script suivant affectera l'affichage de l'interface et le script a cessé de s'exécuter",
   "fileHistory": "Historique des fichiers",
   "htmlBlockTip": "Plusieurs blocs HTML sont formés. Pour éviter la perte de données, veuillez utiliser les balises <code class='fn__code'>&lt;div&gt;</code> pour envelopper et supprimer les lignes vides",

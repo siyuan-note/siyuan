@@ -443,6 +443,7 @@
   "historyFormat": "format",
   "historySync": "sync",
   "historyReplace": "replace",
+  "historyOutline": "outline",
   "htmlBlockError": "The execution of the following script will affect the interface display, and the script has stopped running",
   "fileHistory": "File history",
   "htmlBlockTip": "Multiple HTML blocks are formed. To prevent data loss, please use <code class='fn__code'>&lt;div&gt;</code> tags to wrap and remove blank lines",

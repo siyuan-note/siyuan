@@ -355,6 +355,7 @@ export const openHistory = (app: App) => {
                         <option value="format">${window.siyuan.languages.historyFormat}</option>
                         <option value="sync">${window.siyuan.languages.historySync}</option>
                         <option value="replace">${window.siyuan.languages.historyReplace}</option>
+                        <option value="outline">${window.siyuan.languages.historyOutline}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="notebookselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">

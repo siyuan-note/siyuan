@@ -269,7 +269,7 @@ export class WYSIWYG {
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
                     selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     if (isRefText) {
-                        html = getTextStar(selectElements[0].parentElement)
+                        html = getTextStar(selectElements[0].parentElement);
                     } else {
                         html = selectElements[0].parentElement.outerHTML;
                     }

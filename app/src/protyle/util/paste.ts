@@ -19,25 +19,25 @@ import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 
 export const getTextStar = (blockElement: HTMLElement) => {
-    const dataType = blockElement.dataset.type
-    let refText = ""
+    const dataType = blockElement.dataset.type;
+    let refText = "";
     if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
         refText = getContenteditableElement(blockElement).innerHTML;
     } else {
         if ("NodeHTMLBlock" === dataType) {
-            refText = "HTML"
+            refText = "HTML";
         } else if ("NodeAttributeView" === dataType) {
-            refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database
+            refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database;
         } else if ("NodeThematicBreak" === dataType) {
-            refText = window.siyuan.languages.line
+            refText = window.siyuan.languages.line;
         } else if ("NodeIFrame" === dataType) {
-            refText = "IFrame"
+            refText = "IFrame";
         } else if ("NodeWidget" === dataType) {
-            refText = window.siyuan.languages.widget
+            refText = window.siyuan.languages.widget;
         } else if ("NodeVideo" === dataType) {
-            refText = window.siyuan.languages.video
+            refText = window.siyuan.languages.video;
         } else if ("NodeAudio" === dataType) {
-            refText = window.siyuan.languages.audio
+            refText = window.siyuan.languages.audio;
         } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
             refText = getPlainText(blockElement);
         } else if (blockElement.classList.contains("render-node")) {
@@ -49,49 +49,49 @@ export const getTextStar = (blockElement: HTMLElement) => {
                     refText = getTextStar(blockElement.querySelector("[data-node-id]"));
                     return true;
                 }
-            })
+            });
             if (refText) {
-                return refText
+                return refText;
             }
         }
     }
     return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
-}
+};
 
 export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
-    let text = ""
-    const dataType = blockElement.dataset.type
+    let text = "";
+    const dataType = blockElement.dataset.type;
     if ("NodeHTMLBlock" === dataType) {
-        text += Lute.UnEscapeHTMLStr(blockElement.querySelector("protyle-html").getAttribute("data-content"))
+        text += Lute.UnEscapeHTMLStr(blockElement.querySelector("protyle-html").getAttribute("data-content"));
     } else if ("NodeAttributeView" === dataType) {
         blockElement.querySelectorAll(".av__row").forEach(rowElement => {
             rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
                 text += getCellText(cellElement) + " ";
-            })
+            });
             text += "\n";
-        })
-        text = text.trimEnd()
+        });
+        text = text.trimEnd();
     } else if ("NodeThematicBreak" === dataType) {
         text += "---";
     } else if ("NodeIFrame" === dataType || "NodeWidget" === dataType) {
-        text += blockElement.querySelector("iframe").getAttribute("src")
+        text += blockElement.querySelector("iframe").getAttribute("src");
     } else if ("NodeVideo" === dataType) {
-        text += blockElement.querySelector("video").getAttribute("src")
+        text += blockElement.querySelector("video").getAttribute("src");
     } else if ("NodeAudio" === dataType) {
-        text += blockElement.querySelector("audio").getAttribute("src")
+        text += blockElement.querySelector("audio").getAttribute("src");
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
-        text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"))
+        text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
     } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock", "NodeTable"].includes(dataType)) {
         text += blockElement.querySelector("[spellcheck]").textContent;
     } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);
             text += nestedText ? nestedText + "\n" : "";
-        })
+        });
     }
     return text;
-}
+};
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {

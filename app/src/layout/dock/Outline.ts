@@ -280,7 +280,7 @@ export class Outline extends Model {
                         if (editItem.editor.protyle.block.rootID === this.blockId) {
                             let previousID;
                             let parentID;
-                            const undoPreviousID = item.previousElementSibling?.getAttribute("data-node-id");
+                            const undoPreviousID = (item.previousElementSibling && item.previousElementSibling.tagName === "UL") ? item.previousElementSibling.previousElementSibling.getAttribute("data-node-id") : item.previousElementSibling?.getAttribute("data-node-id");
                             const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
                             if (selectItem.classList.contains("dragover")) {
                                 parentID = selectItem.getAttribute("data-node-id");
@@ -292,7 +292,11 @@ export class Outline extends Model {
                                 }
                             } else if (selectItem.classList.contains("dragover__top")) {
                                 parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
-                                previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                                if (selectItem.previousElementSibling && selectItem.previousElementSibling.tagName === "UL") {
+                                    previousID = selectItem.previousElementSibling.previousElementSibling.getAttribute("data-node-id");
+                                } else {
+                                    previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                                }
                                 selectItem.before(item);
                             } else if (selectItem.classList.contains("dragover__bottom")) {
                                 previousID = selectItem.getAttribute("data-node-id");

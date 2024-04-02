@@ -35,9 +35,11 @@ const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     });
 };
 
-export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
-    hideMessage();
-    /// #if MOBILE
+export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRootIDs: string[] }, hideMsg = true) => {
+   if (hideMsg) {
+       hideMessage();
+   }
+   /// #if MOBILE
     if (window.siyuan.mobile.popEditor) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);

@@ -83,6 +83,14 @@ export class Title {
             if (commonHotkey(protyle, event)) {
                 return true;
             }
+            if (matchHotKey("⇧⌘V", event)) {
+                navigator.clipboard.readText().then(textPlain => {
+                    textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                    const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                    document.execCommand("insertText", false, replaceFileName(content));
+                    this.rename(protyle);
+                });
+            }
             if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
@@ -211,6 +219,7 @@ export class Title {
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.paste,
+                icon: "iconPaste",
                 accelerator: "⌘V",
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
@@ -218,6 +227,18 @@ export class Title {
                     const text = await readText();
                     document.execCommand("insertText", false, replaceFileName(text));
                     this.rename(protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.pasteAsPlainText,
+                accelerator: "⇧⌘V",
+                click: async () => {
+                    navigator.clipboard.readText().then(textPlain => {
+                        textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        document.execCommand("insertText", false, replaceFileName(content));
+                        this.rename(protyle);
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

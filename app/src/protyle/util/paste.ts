@@ -169,7 +169,6 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
             // 对 HTML 标签进行内部转移，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
-            // 在
             textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
             insertHTML(content, protyle);

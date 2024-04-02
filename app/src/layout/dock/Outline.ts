@@ -272,11 +272,10 @@ export class Outline extends Model {
                 documentSelf.onselect = null;
                 ghostElement.remove();
                 item.style.opacity = "";
-
                 if (!selectItem) {
                     selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
                 }
-                if (selectItem) {
+                if (selectItem && selectItem.className.indexOf("dragover") > -1) {
                     getAllModels().editor.find(editItem => {
                         if (editItem.editor.protyle.block.rootID === this.blockId) {
                             let previousID;

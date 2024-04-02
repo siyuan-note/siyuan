@@ -268,6 +268,8 @@ func IndexRefs() {
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", size, time.Now().Sub(start).Milliseconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
+
+	ResetVirtualBlockRefCache()
 }
 
 // IndexEmbedBlockJob 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112

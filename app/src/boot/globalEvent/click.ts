@@ -6,6 +6,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
+    document.getElementById("dragGhost")?.remove();
     if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
         if (getSelection().rangeCount > 0 && window.siyuan.menus.menu.element.contains(getSelection().getRangeAt(0).startContainer) &&
             window.siyuan.menus.menu.element.contains(document.activeElement)) {

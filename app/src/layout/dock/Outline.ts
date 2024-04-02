@@ -236,6 +236,7 @@ export class Outline extends Model {
             item.style.opacity = "0.38";
             const ghostElement = item.cloneNode(true) as HTMLElement;
             document.body.append(ghostElement);
+            ghostElement.dataset.id = "dragGhost"
             ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
             ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
 

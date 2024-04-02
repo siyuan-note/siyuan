@@ -189,7 +189,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		heading.HeadingLevel = firstHeading.HeadingLevel
 
 		firstHeading.InsertBefore(heading)
-		for i := 0; i < len(headingChildren)-1; i++ {
+		for i := 0; i < len(headingChildren); i++ {
 			child := headingChildren[i]
 			if ast.NodeHeading == child.Type {
 				child.HeadingLevel -= diffLevel

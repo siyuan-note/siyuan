@@ -1461,6 +1461,7 @@
     "236": "[%d/%d] met à jour le package Marketplace [%s]...",
     "237": "[%d] packages Marketplace ont tous été mis à jour avec succès",
     "238": "La mise à jour du package Marketplace [%s] a échoué, veuillez réessayer plus tard",
-    "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard"
+    "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
+    "240": "Le titre sous le bloc conteneur dans la doc ne prend pas en charge le glisser"
   }
 }

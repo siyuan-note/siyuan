@@ -1461,6 +1461,7 @@
     "236": "[%d/%d] is updating the marketplace package [%s]...",
     "237": "[%d] marketplace packages have all been updated successfully",
     "238": "Marketplace package [%s] update failed, please try again later",
-    "239": "Related operations are being processed, please try again later"
+    "239": "Related operations are being processed, please try again later",
+    "240": "The heading under the container block in the doc does not support dragging"
   }
 }

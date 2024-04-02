@@ -40,9 +40,17 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
+	operation.RetData = tree.Root.ID
+
 	heading := treenode.GetNodeInTree(tree, headingID)
 	if nil == heading {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
+	}
+
+	if ast.NodeDocument != heading.Parent.Type {
+		// 仅支持文档根节点下第一层标题，不支持容器块内标题
+		util.PushMsg(Conf.language(240), 5000)
+		return
 	}
 
 	headings := []*ast.Node{}
@@ -69,6 +77,12 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		previousHeading := treenode.GetNodeInTree(tree, previousID)
 		if nil == previousHeading {
 			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
+		}
+
+		if ast.NodeDocument != previousHeading.Parent.Type {
+			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
+			return
 		}
 
 		targetNode := previousHeading
@@ -100,6 +114,12 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		parentHeading := treenode.GetNodeInTree(tree, parentID)
 		if nil == parentHeading {
 			return &TxErr{code: TxErrCodeBlockNotFound, id: parentID}
+		}
+
+		if ast.NodeDocument != parentHeading.Parent.Type {
+			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
+			return
 		}
 
 		targetNode := parentHeading
@@ -153,8 +173,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return
 	}
-
-	operation.RetData = tree.Root.ID
 	return
 }
 

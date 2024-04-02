@@ -153,7 +153,9 @@ var (
 	ErrIndexing      = errors.New("indexing")
 )
 
-func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
+func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
+	// 仅提供给 getBlockInfo 接口使用
+
 	if "" == id {
 		return nil, ErrTreeNotFound
 	}
@@ -171,6 +173,25 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 		if nil == bt {
 			return nil, ErrTreeNotFound
 		}
+	}
+
+	luteEngine := util.NewLute()
+	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	return
+}
+
+func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
+	if "" == id {
+		return nil, ErrTreeNotFound
+	}
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		if task.Contain(task.DatabaseIndex, task.DatabaseIndexFull) {
+			err = ErrIndexing
+			return
+		}
+		return nil, ErrTreeNotFound
 	}
 
 	luteEngine := util.NewLute()

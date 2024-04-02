@@ -36,11 +36,6 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
         return;
     }
     const target = event.target as HTMLElement;
-    if (!clientX) {
-        // 上下滚动时防止左右滚动会将 clientX 清空
-        closePanel();
-        return;
-    }
     if (!clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog", true) ||
@@ -163,6 +158,7 @@ export const handleTouchStart = (event: TouchEvent) => {
 };
 
 let previousClientX: number;
+const sideMaskElement = document.querySelector(".side-mask") as HTMLElement
 export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
@@ -186,7 +182,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
     // 上下滚动防止左右滑动
-    if (Math.abs(xDiff) < Math.abs(yDiff)) {
+    if (Math.abs(xDiff) < Math.abs(yDiff) && sideMaskElement.classList.contains("fn__none")) {
         clientX = null;
         return;
     }
@@ -270,11 +266,12 @@ export const handleTouchMove = (event: TouchEvent) => {
             }
             return;
         }
+
         if (firstDirection === "toRight") {
-            document.getElementById("sidebar").style.transform = `translateX(${-xDiff - windowWidth}px)`;
+            document.getElementById("sidebar").style.transform = `translateX(${Math.min(-xDiff - windowWidth, 0)}px)`;
             transformMask((windowWidth + xDiff) / windowWidth);
         } else {
-            document.getElementById("menu").style.transform = `translateX(${windowWidth - xDiff}px)`;
+            document.getElementById("menu").style.transform = `translateX(${Math.max(windowWidth - xDiff, 0)}px)`;
             transformMask((windowWidth - xDiff) / windowWidth);
         }
         activeBlur();
@@ -286,7 +283,6 @@ export const handleTouchMove = (event: TouchEvent) => {
 };
 
 const transformMask = (opacity: number) => {
-    const maskElement = document.querySelector(".side-mask") as HTMLElement;
-    maskElement.classList.remove("fn__none");
-    maskElement.style.opacity = Math.min((1 - opacity), 0.68).toString();
+    sideMaskElement.classList.remove("fn__none");
+    sideMaskElement.style.opacity = Math.min((1 - opacity), 0.68).toString();
 };

@@ -83,6 +83,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			}
 		}
 
+		generateFormatHistory(tree)
+
 		targetNode := previousHeading
 		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
 		if 0 < len(previousHeadingChildren) {
@@ -128,6 +130,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			}
 		}
 
+		generateFormatHistory(tree)
+
 		targetNode := parentHeading
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
 
@@ -168,6 +172,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 		targetNode.InsertAfter(heading)
 	} else {
+		generateFormatHistory(tree)
+
 		// 移到最前
 		for i := len(headingChildren) - 1; i >= 0; i-- {
 			child := headingChildren[i]

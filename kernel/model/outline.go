@@ -63,16 +63,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 	headingChildren := treenode.HeadingChildren(heading)
 
-	// 过滤掉超级块结束节点
-	var tmp []*ast.Node
-	for _, child := range headingChildren {
-		if ast.NodeSuperBlockCloseMarker == child.Type {
-			continue
-		}
-		tmp = append(tmp, child)
-	}
-	headingChildren = tmp
-
 	if "" != previousID {
 		previousHeading := treenode.GetNodeInTree(tree, previousID)
 		if nil == previousHeading {
@@ -83,6 +73,14 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			// 仅支持文档根节点下第一层标题，不支持容器块内标题
 			util.PushMsg(Conf.language(240), 5000)
 			return
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == previousID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
 		}
 
 		targetNode := previousHeading
@@ -122,11 +120,19 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			return
 		}
 
+		for _, h := range headingChildren {
+			if h.ID == parentID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
+		}
+
 		targetNode := parentHeading
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
 
 		// 找到下方第一个非标题节点
-		tmp = nil
+		var tmp []*ast.Node
 		for _, child := range parentHeadingChildren {
 			if ast.NodeHeading == child.Type {
 				break
@@ -144,7 +150,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			}
 		}
 
-		diffLevel := 1
+		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
 		heading.HeadingLevel = parentHeading.HeadingLevel + 1
 		if 6 < heading.HeadingLevel {
 			heading.HeadingLevel = 6
@@ -153,7 +159,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		for i := len(headingChildren) - 1; i >= 0; i-- {
 			child := headingChildren[i]
 			if ast.NodeHeading == child.Type {
-				child.HeadingLevel += diffLevel
+				child.HeadingLevel -= diffLevel
 				if 6 < child.HeadingLevel {
 					child.HeadingLevel = 6
 				}

@@ -298,6 +298,9 @@ export class Outline extends Model {
                                 } else {
                                     previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
                                 }
+                                if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
+                                    return true;
+                                }
                                 selectItem.before(item);
                             } else if (selectItem.classList.contains("dragover__bottom")) {
                                 previousID = selectItem.getAttribute("data-node-id");

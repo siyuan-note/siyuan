@@ -16,6 +16,7 @@ let xDiff: number;
 let yDiff: number;
 let time: number;
 let firstDirection: "toLeft" | "toRight";
+let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 let scrollBlock: boolean;
 
@@ -143,6 +144,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     xDiff = undefined;
     yDiff = undefined;
     lastClientX = undefined;
+    firstXY = undefined;
     if (isIPhone() ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
@@ -167,7 +169,7 @@ export const handleTouchMove = (event: TouchEvent) => {
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByClassName(target, "viewer-container") ||
-        hasClosestByAttribute(target, "id", "commonMenu")
+        hasClosestByAttribute(target, "id", "commonMenu") || firstXY === "y"
     ) {
         return;
     }
@@ -181,13 +183,23 @@ export const handleTouchMove = (event: TouchEvent) => {
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
-    // 上下滚动防止左右滑动
-    if (Math.abs(xDiff) < Math.abs(yDiff) && sideMaskElement.classList.contains("fn__none")) {
-        clientX = null;
-        return;
-    }
     if (!firstDirection) {
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
+    }
+    // 上下滚动防止左右滑动
+    if (!firstXY) {
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            firstXY = "x"
+        } else {
+            firstXY = "y"
+        }
+        if (firstXY === "x") {
+            if ((hasClosestByAttribute(target, "id", "menu") && firstDirection === "toLeft") ||
+                (hasClosestByAttribute(target, "id", "sidebar") && firstDirection === "toRight")) {
+                firstXY = "y"
+                yDiff = undefined
+            }
+        }
     }
     if (previousClientX) {
         if (firstDirection === "toRight") {

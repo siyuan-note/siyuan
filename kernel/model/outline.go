@@ -63,16 +63,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 	headingChildren := treenode.HeadingChildren(heading)
 
-	// 过滤掉超级块结束节点
-	var tmp []*ast.Node
-	for _, child := range headingChildren {
-		if ast.NodeSuperBlockCloseMarker == child.Type {
-			continue
-		}
-		tmp = append(tmp, child)
-	}
-	headingChildren = tmp
-
 	if "" != previousID {
 		previousHeading := treenode.GetNodeInTree(tree, previousID)
 		if nil == previousHeading {
@@ -142,7 +132,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
 
 		// 找到下方第一个非标题节点
-		tmp = nil
+		var tmp []*ast.Node
 		for _, child := range parentHeadingChildren {
 			if ast.NodeHeading == child.Type {
 				break
@@ -160,7 +150,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			}
 		}
 
-		diffLevel := 1
+		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
 		heading.HeadingLevel = parentHeading.HeadingLevel + 1
 		if 6 < heading.HeadingLevel {
 			heading.HeadingLevel = 6
@@ -169,7 +159,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		for i := len(headingChildren) - 1; i >= 0; i-- {
 			child := headingChildren[i]
 			if ast.NodeHeading == child.Type {
-				child.HeadingLevel += diffLevel
+				child.HeadingLevel -= diffLevel
 				if 6 < child.HeadingLevel {
 					child.HeadingLevel = 6
 				}

@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/time/rate"
 )
 
 func resetTree(tree *parse.Tree, titleSuffix string) {
@@ -177,7 +178,13 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	return
 }
 
+var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)
+
 func searchTreeInFilesystem(rootID string) {
+	if !searchTreeLimiter.Allow() {
+		return
+	}
+
 	msdID := util.PushMsg(Conf.language(45), 7000)
 	defer util.PushClearMsg(msdID)
 

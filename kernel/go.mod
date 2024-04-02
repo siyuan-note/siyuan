@@ -55,10 +55,10 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20240328150019-caf931b7a455
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240318125243-801c98e8f025
-	github.com/siyuan-note/filelock v0.0.0-20240128091141-94d7bb3e0772
+	github.com/siyuan-note/filelock v0.0.0-20240402150846-49b758760509
 	github.com/siyuan-note/httpclient v0.0.0-20240328145713-1035acaa5f8a
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
-	github.com/siyuan-note/riff v0.0.0-20240315100323-cc554b704bcc
+	github.com/siyuan-note/riff v0.0.0-20240402142626-801021d65752
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0

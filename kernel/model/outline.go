@@ -31,16 +31,15 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	previousID := operation.PreviousID
 	parentID := operation.ParentID
 
-	if headingID == parentID || headingID == previousID {
-		return
-	}
-
 	tree, err := tx.loadTree(headingID)
 	if nil != err {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
-
 	operation.RetData = tree.Root.ID
+
+	if headingID == parentID || headingID == previousID {
+		return
+	}
 
 	heading := treenode.GetNodeInTree(tree, headingID)
 	if nil == heading {

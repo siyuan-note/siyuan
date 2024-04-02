@@ -173,12 +173,32 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	} else {
 		generateOpTypeHistory(tree, HistoryOpOutline)
 
-		// 移到最前
-		for i := len(headingChildren) - 1; i >= 0; i-- {
-			child := headingChildren[i]
-			tree.Root.PrependChild(child)
+		// 移到第一个标题前
+		var firstHeading *ast.Node
+		for n := tree.Root.FirstChild; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type {
+				firstHeading = n
+				break
+			}
 		}
-		tree.Root.PrependChild(heading)
+		if nil == firstHeading || firstHeading.ID == heading.ID {
+			return
+		}
+
+		diffLevel := heading.HeadingLevel - firstHeading.HeadingLevel
+		heading.HeadingLevel = firstHeading.HeadingLevel
+
+		firstHeading.InsertBefore(heading)
+		for i := 0; i < len(headingChildren)-1; i++ {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+				if 6 < child.HeadingLevel {
+					child.HeadingLevel = 6
+				}
+			}
+			firstHeading.InsertBefore(child)
+		}
 	}
 
 	if err = tx.writeTree(tree); nil != err {

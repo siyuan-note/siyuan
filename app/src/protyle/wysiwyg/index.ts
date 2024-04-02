@@ -414,13 +414,18 @@ export class WYSIWYG {
                 const dragElement = target.parentElement;
                 const oldWidth = dragElement.clientWidth;
                 const dragColId = dragElement.getAttribute("data-col-id");
-                let newWidth: string;
+                let newWidth: number;
                 const scrollElement = nodeElement.querySelector(".av__scroll");
                 const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25) + "px";
+                    newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25);
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
+                        const cellElement = item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement
+                        if (cellElement.previousElementSibling) {
+                            cellElement.style.width = newWidth + "px";
+                        } else {
+                            cellElement.style.width = newWidth + 24 + "px";
+                        }
                     });
                     stickyRow(nodeElement, contentRect, "bottom");
                 };
@@ -431,7 +436,7 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (!newWidth || newWidth === oldWidth + "px") {
+                    if (!newWidth || newWidth === oldWidth) {
                         return;
                     }
                     transaction(protyle, [{

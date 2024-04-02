@@ -87,11 +87,13 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		targetNode := previousHeading
 		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
 		if 0 < len(previousHeadingChildren) {
-			for _, child := range previousHeadingChildren {
-				if child.ID == headingID {
-					break
-				}
-				targetNode = child
+			targetNode = previousHeadingChildren[len(previousHeadingChildren)-1]
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == targetNode.ID {
+				// 目标节点是当前标题的子节点，不需要移动
+				return
 			}
 		}
 
@@ -133,7 +135,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 		targetNode := parentHeading
 		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
-
 		// 找到下方第一个非标题节点
 		var tmp []*ast.Node
 		for _, child := range parentHeadingChildren {
@@ -143,7 +144,6 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			tmp = append(tmp, child)
 		}
 		parentHeadingChildren = tmp
-
 		if 0 < len(parentHeadingChildren) {
 			for _, child := range parentHeadingChildren {
 				if child.ID == headingID {

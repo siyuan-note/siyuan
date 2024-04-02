@@ -244,6 +244,9 @@ export class Outline extends Model {
 
             let selectItem: HTMLElement;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX) {
+                    return;
+                }
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
                 ghostElement.style.top = moveEvent.clientY + "px";

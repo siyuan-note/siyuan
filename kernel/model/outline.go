@@ -49,6 +49,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 	if ast.NodeDocument != heading.Parent.Type {
 		// 仅支持文档根节点下第一层标题，不支持容器块内标题
+		util.PushMsg(Conf.language(240), 5000)
 		return
 	}
 
@@ -80,6 +81,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 		if ast.NodeDocument != previousHeading.Parent.Type {
 			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
 			return
 		}
 
@@ -116,6 +118,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 		if ast.NodeDocument != parentHeading.Parent.Type {
 			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
 			return
 		}
 

@@ -1462,6 +1462,7 @@
     "237": "[%d] todos los paquetes del mercado se han actualizado correctamente",
     "238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde",
     "239": "Las operaciones relacionadas se están procesando, inténtalo de nuevo más tarde",
-    "240": "El encabezado debajo del bloque contenedor en el documento no admite el arrastre"
+    "240": "No se admite arrastrar encabezado debajo de los bloques contenedores en el documento",
+    "241": "No se admite arrastrar a su subtítulo"
   }
 }

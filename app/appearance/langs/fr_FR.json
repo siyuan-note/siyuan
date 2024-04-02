@@ -1462,6 +1462,7 @@
     "237": "[%d] packages Marketplace ont tous été mis à jour avec succès",
     "238": "La mise à jour du package Marketplace [%s] a échoué, veuillez réessayer plus tard",
     "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
-    "240": "Le titre sous le bloc conteneur dans la doc ne prend pas en charge le glisser"
+    "240": "Le déplacement du titre sous les blocs conteneurs dans la doc n'est pas pris en charge",
+    "241": "Le glisser vers son sous-titre n'est pas pris en charge"
   }
 }

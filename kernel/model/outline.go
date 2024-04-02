@@ -85,6 +85,14 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			return
 		}
 
+		for _, h := range headingChildren {
+			if h.ID == previousID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
+		}
+
 		targetNode := previousHeading
 		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
 		if 0 < len(previousHeadingChildren) {
@@ -120,6 +128,14 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 			// 仅支持文档根节点下第一层标题，不支持容器块内标题
 			util.PushMsg(Conf.language(240), 5000)
 			return
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == parentID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
 		}
 
 		targetNode := parentHeading

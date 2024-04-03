@@ -1209,8 +1209,6 @@
 * `/api/export/exportResources`
 * 参数
 
-  请求参数中的`"path"`和`"paths"`是同义的。
-
   ```json
   {
     "path": [

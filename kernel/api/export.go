@@ -283,16 +283,18 @@ func exportResources(c *gin.Context) {
 		name = time.Now().Format("export-2006-01-02_15-04-05") // 生成的 *.zip 文件主文件名
 	}
 
-	var resourcePaths []string // 文件/文件夹在工作空间中的路径
-	if nil != arg["paths"] {
-		for _, resourcePath := range arg["paths"].([]interface{}) {
-			resourcePaths = append(resourcePaths, resourcePath.(string))
-		}
-	} else if nil != arg["path"] {
-		for _, resourcePath := range arg["path"].([]interface{}) {
-			resourcePaths = append(resourcePaths, resourcePath.(string))
-		}
+	if arg["paths"] == nil {
+		ret.Code = http.StatusBadRequest
+		ret.Data = ""
+		ret.Msg = "paths is required"
+		return
 	}
+
+	var resourcePaths []string // 文件/文件夹在工作空间中的路径
+	for _, resourcePath := range arg["paths"].([]interface{}) {
+		resourcePaths = append(resourcePaths, resourcePath.(string))
+	}
+
 	zipFilePath, err := model.ExportResources(resourcePaths, name)
 	if nil != err {
 		ret.Code = 1

@@ -1045,8 +1045,8 @@ func removeLimitClause(stmt string) string {
 func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
 	keyword = filterQueryInvisibleChars(keyword)
 
-	if ast.IsNodeIDPattern(keyword) {
-		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36, 1, 32)
+	if id := extractID(keyword); "" != id {
+		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+id+"'", 36, 1, 32)
 		return
 	}
 
@@ -1102,6 +1102,21 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
+	}
+	return
+}
+
+func extractID(content string) (ret string) {
+	if 22 > len(content) {
+		return
+	}
+
+	// 从第一个字符开始循环，直到找到一个合法的 ID 为止
+	for i := 0; i < len(content)-21; i++ {
+		if ast.IsNodeIDPattern(content[i : i+22]) {
+			ret = content[i : i+22]
+			return
+		}
 	}
 	return
 }

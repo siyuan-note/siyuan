@@ -284,7 +284,7 @@ func exportResources(c *gin.Context) {
 	}
 
 	if arg["paths"] == nil {
-		ret.Code = http.StatusBadRequest
+		ret.Code = 1
 		ret.Data = ""
 		ret.Msg = "paths is required"
 		return

@@ -604,6 +604,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         h: 26
     });
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.data = element;
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         window.siyuan.menus.menu.element.querySelector("input").select();

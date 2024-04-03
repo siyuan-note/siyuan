@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 
 export class Menu {
     public element: HTMLElement;
+    public data: any;   // 用于记录当前菜单的数据
     public removeCB: () => void;
     private wheelEvent: string;
 
@@ -111,6 +112,7 @@ export class Menu {
         this.element.removeAttribute("style");  // zIndex
         window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
         window.siyuan.menus.menu.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
+        window.siyuan.menus.menu.data = undefined;    // 移除数据
     }
 
     public append(element?: HTMLElement, index?: number) {

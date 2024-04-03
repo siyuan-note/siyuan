@@ -333,9 +333,10 @@ type History struct {
 }
 
 type HistoryItem struct {
-	Title string `json:"title"`
-	Path  string `json:"path"`
-	Op    string `json:"op"`
+	Title    string `json:"title"`
+	Path     string `json:"path"`
+	Op       string `json:"op"`
+	Notebook string `json:"notebook"` // 仅用于文档历史
 }
 
 const fileHistoryPageSize = 32
@@ -766,6 +767,13 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*HistoryItem) {
 		}
 		if HistoryTypeAsset == sqlHistory.Type {
 			item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
+		} else {
+			parts := strings.Split(sqlHistory.Path, "/")
+			if 2 <= len(parts) {
+				item.Notebook = parts[1]
+			} else {
+				logging.LogWarnf("invalid doc history path [%s]", item.Path)
+			}
 		}
 		ret = append(ret, item)
 	}

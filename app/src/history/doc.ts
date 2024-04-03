@@ -181,7 +181,6 @@ export const openDocHistory = (options: {
     });
 };
 
-
 const getHistoryPath = (target: Element, op: string, id: string, cb: (path: string) => void) => {
     isLoading = true;
     const path = target.getAttribute("data-path");

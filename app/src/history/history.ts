@@ -312,7 +312,7 @@ export const openHistory = (app: App) => {
         }
     });
 
-    let notebookSelectHTML = `<option value='%' ${!existLocalHistoryNoteID? "selected" : ""}>${window.siyuan.languages.allNotebooks}</option>`;
+    let notebookSelectHTML = `<option value='%' ${!existLocalHistoryNoteID ? "selected" : ""}>${window.siyuan.languages.allNotebooks}</option>`;
     window.siyuan.notebooks.forEach((item) => {
         if (!item.closed) {
             notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${escapeHtml(item.name)}</option>`;
@@ -510,7 +510,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         });
                     } else if (dataType === "doc") {
                         fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: (firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement).value,
+                            notebook: target.parentElement.getAttribute("data-notebook-id"),
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
                     } else if (dataType === "notebook") {
@@ -557,7 +557,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }, (response) => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
-                            response.data.items.forEach((docItem: { title: string, path: string, op: string }) => {
+                            response.data.items.forEach((docItem: {
+                                title: string,
+                                path: string,
+                                op: string,
+                                notebook: string
+                            }) => {
                                 let chipClass = " b3-chip b3-chip--list ";
                                 if (docItem.op === "clean") {
                                     chipClass += "b3-chip--primary ";
@@ -572,7 +577,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 } else if (docItem.op === "replace") {
                                     chipClass += "b3-chip--secondary ";
                                 }
-                                html += `<li title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                html += `<li data-notebook-id="${docItem.notebook}" title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}b3-tooltips b3-tooltips__n" aria-label="${docItem.op}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>

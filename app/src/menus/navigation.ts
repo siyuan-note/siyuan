@@ -79,7 +79,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }
     }, {
         iconHTML: "",
-        label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
+        label: window.siyuan.languages.removeCard,
         click: () => {
             transaction(undefined, [{
                 action: "removeFlashcards",
@@ -509,7 +509,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }
         }, {
             iconHTML: "",
-            label: `${window.siyuan.languages.cancel} <b>${window.siyuan.languages.quickMakeCard}</b>`,
+            label: window.siyuan.languages.removeCard,
             click: () => {
                 transaction(undefined, [{
                     action: "removeFlashcards",

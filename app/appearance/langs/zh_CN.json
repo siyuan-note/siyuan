@@ -1,4 +1,5 @@
 {
+  "removeCard": "移除闪卡",
   "updateLayout": "更新布局",
   "dndFolderTip": "请注意 ${x} 仅插入 file:// 超链接，不复制文件",
   "removeCol": "确定删除数据库中的 ${x} 列？",

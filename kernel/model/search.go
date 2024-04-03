@@ -1107,6 +1107,8 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 }
 
 func extractID(content string) (ret string) {
+	// Improve block ref search ID extraction https://github.com/siyuan-note/siyuan/issues/10848
+
 	if 22 > len(content) {
 		return
 	}

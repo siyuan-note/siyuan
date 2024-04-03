@@ -6,7 +6,7 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset, getSelectionPosition,
-    selectAll, setFirstNodeRange,
+    selectAll, setFirstNodeRange, setLastNodeRange,
 } from "../util/selection";
 import {
     hasClosestBlock,
@@ -687,6 +687,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                         focusBlock(nextElement);
                         scrollCenter(protyle, nextElement);
+                    } else {
+                        setLastNodeRange(nodeEditableElement, range, false);
+                        range.collapse(false)
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -696,9 +699,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
                         focusBlock(nextFoldElement);
                         scrollCenter(protyle, nextFoldElement);
-                        event.stopPropagation();
-                        event.preventDefault();
+                    } else {
+                        setLastNodeRange(nodeEditableElement, range, false);
+                        range.collapse(false)
                     }
+                    event.stopPropagation();
+                    event.preventDefault();
                 }
             }
             return;

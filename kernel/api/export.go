@@ -288,8 +288,11 @@ func exportResources(c *gin.Context) {
 		for _, resourcePath := range arg["paths"].([]interface{}) {
 			resourcePaths = append(resourcePaths, resourcePath.(string))
 		}
+	} else if nil != arg["path"] {
+		for _, resourcePath := range arg["path"].([]interface{}) {
+			resourcePaths = append(resourcePaths, resourcePath.(string))
+		}
 	}
-
 	zipFilePath, err := model.ExportResources(resourcePaths, name)
 	if nil != err {
 		ret.Code = 1

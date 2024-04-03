@@ -6,13 +6,13 @@ import {writeText} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
-    const ghostElement = document.getElementById("dragGhost")
+    const ghostElement = document.getElementById("dragGhost");
     if (ghostElement) {
-        const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement
-        startElement ? startElement.style.opacity = "" : ""
+        const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
+        startElement ? startElement.style.opacity = "" : "";
         ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
             item.classList.remove("dragover__top", "dragover__bottom", "dragover");
-            item.style.opacity = ""
+            item.style.opacity = "";
         });
         ghostElement.remove();
     }

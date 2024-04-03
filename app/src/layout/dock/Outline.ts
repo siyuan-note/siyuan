@@ -234,7 +234,7 @@ export class Outline extends Model {
             }
             const documentSelf = document;
             documentSelf.ondragstart = () => false;
-            let ghostElement: HTMLElement
+            let ghostElement: HTMLElement;
             let selectItem: HTMLElement;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX) {

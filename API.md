@@ -1216,6 +1216,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 * `/api/export/exportResources`
 * Parameters
 
+  `"path"` and `"paths"` in request parameters are synonymous.
+  
   ```json
   {
     "paths": [

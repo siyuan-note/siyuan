@@ -1209,9 +1209,11 @@
 * `/api/export/exportResources`
 * 参数
 
+  请求参数中的`"path"`和`"paths"`是同义的。
+
   ```json
   {
-    "paths": [
+    "path": [
       "/conf/appearance/boot",
       "/conf/appearance/langs",
       "/conf/appearance/emojis/conf.json",
@@ -1223,6 +1225,7 @@
 
     * `paths`：要导出的文件或文件夹路径列表，相同名称的文件/文件夹会被覆盖
     * `name`：（可选）导出的文件名，未设置时默认为 `export-YYYY-MM-DD_hh-mm-ss.zip`
+
 * 返回值
 
   ```json

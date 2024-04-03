@@ -986,6 +986,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.DataDir, ".siyuan", "history"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "backup"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "sync"))
+	os.RemoveAll(filepath.Join(util.DataDir, "%")) // v3.0.6 生成的错误历史文件夹
 
 	logging.LogInfof("cleared workspace temp")
 }

@@ -289,6 +289,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			return
 		}
 
+		if !attrView.ExistBlock(blockID) {
+			// 比如剪切后粘贴，块 ID 会变，但是属性还在块上，这里做一次数据订正
+			// Auto verify the database name when clicking the block superscript icon https://github.com/siyuan-note/siyuan/issues/10861
+			unbindBlockAv(nil, avID, blockID)
+			return
+		}
+
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
 			kValues := &av.KeyValues{Key: kv.Key}
@@ -2177,6 +2184,11 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		for _, blockID := range srcIDs {
 			view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
 		}
+	}
+
+	relatedAvIDs := av.GetSrcAvIDs(avID)
+	for _, relatedAvID := range relatedAvIDs {
+		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": relatedAvID})
 	}
 
 	err = av.SaveAttributeView(attrView)

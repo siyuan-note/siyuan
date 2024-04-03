@@ -420,7 +420,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 
 			if 0 == v.UpdatedAt {
-				v.UpdatedAt = v.CreatedAt
+				v.UpdatedAt = v.CreatedAt + 1000
 			}
 		}
 	}

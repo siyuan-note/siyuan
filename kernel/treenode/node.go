@@ -995,7 +995,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ av.KeyType
 		ret.CreatedAt = time.Now().UnixMilli()
 	}
 	if 0 == ret.UpdatedAt {
-		ret.UpdatedAt = ret.CreatedAt
+		ret.UpdatedAt = ret.CreatedAt + 1000
 	}
 
 	switch typ {

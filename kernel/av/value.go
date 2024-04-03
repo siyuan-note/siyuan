@@ -57,6 +57,13 @@ type Value struct {
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
 }
 
+func (value *Value) SetUpdatedAt(mills int64) {
+	value.UpdatedAt = mills
+	if value.CreatedAt == value.UpdatedAt {
+		value.UpdatedAt += 1000 // 防止更新时间和创建时间一样
+	}
+}
+
 func (value *Value) String() string {
 	if nil == value {
 		return ""
@@ -198,9 +205,8 @@ func (value *Value) IsEdited() bool {
 		return true
 	}
 
-	if value.IsEmpty() {
-		// 空数据认为是未编辑过的
-		return false
+	if !value.IsEmpty() {
+		return true
 	}
 	return value.CreatedAt != value.UpdatedAt
 }

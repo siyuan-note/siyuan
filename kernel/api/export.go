@@ -283,7 +283,7 @@ func exportResources(c *gin.Context) {
 		name = time.Now().Format("export-2006-01-02_15-04-05") // 生成的 *.zip 文件主文件名
 	}
 
-	if arg["paths"] == nil {
+	if nil == arg["paths"] {
 		ret.Code = 1
 		ret.Data = ""
 		ret.Msg = "paths is required"

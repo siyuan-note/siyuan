@@ -94,7 +94,10 @@ export const exportConfig = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="imageWatermarkStr">
     <div class="fn__hr"></div>
-    <div class="b3-label__text">${window.siyuan.languages.export29}</div>
+    <div class="b3-label__text">    
+        ${window.siyuan.languages.export29}<br>
+        ${window.siyuan.languages.export10}
+    </div>
     <div class="fn__hr"></div>
     <textarea class="b3-text-field fn__block" id="imageWatermarkDesc"></textarea>
 </div>

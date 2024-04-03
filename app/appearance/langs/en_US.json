@@ -989,6 +989,7 @@
   "fileTree19": "Some operating systems have technical limitations that may prevent manual copying of workspace data after creating sub-documents greater than 7 levels",
   "fileTree20": "Save with a single line",
   "fileTree21": "After enabling, the single-line JSON format will be used when saving .sy docs and database .json files, which can reduce the file size by about 30% and improve read and write efficiency by 50%",
+  "export10": "For example <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, if empty, use watermark text or watermark file path.",
   "export11": "Content handling method of content ref block when exporting",
   "export12": "Content handling method of content embed block when exporting",
   "export13": "Anchor text wrapping symbol",

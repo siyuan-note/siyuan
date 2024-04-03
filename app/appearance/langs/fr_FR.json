@@ -989,6 +989,7 @@
   "fileTree19": "Certains systèmes d'exploitation ont des limitations techniques qui peuvent empêcher la copie manuelle des données de l'espace de travail après la création de sous-documents supérieurs à 7 niveaux",
   "fileTree20": "Enregistrer avec une seule ligne",
   "fileTree21": "Après activation, le format JSON sur une seule ligne sera utilisé lors de l'enregistrement des documents .sy et des fichiers .json de base de données, ce qui peut réduire la taille du fichier d'environ 30 % et améliorer l'efficacité de lecture et d'écriture de 50 %",
+  "export10": "Par exemple <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, s'il est vide, utilisez le texte du filigrane ou le chemin du fichier du filigrane.",
   "export11": "Traitement du contenu des blocs de référence lors de l'exportation",
   "export12": "Gestion du contenu des blocs intégrés lors de l'exportation",
   "export13": "Symbole d'enveloppement du texte d'ancrage",

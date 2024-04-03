@@ -989,6 +989,7 @@
   "fileTree19": "一些操作系統存在技術限制導致建立大於 7 層的子文檔後可能無法正常手動複製工作空間資料",
   "fileTree20": "使用單行保存",
   "fileTree21": "啟用後儲存 .sy 文件和資料庫 .json 時將使用單行 JSON 格式，大約能減少 30% 檔案大小並提升 50% 讀寫效率",
+  "export10": "例如 <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code> ，為空時使用水印文字或浮水印檔案路徑。",
   "export11": "匯出時關於引用塊內容的處理方式",
   "export12": "匯出時關於嵌入塊內容的處理方式",
   "export13": "錨文字包裹符號",

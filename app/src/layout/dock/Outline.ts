@@ -237,7 +237,7 @@ export class Outline extends Model {
             let ghostElement: HTMLElement;
             let selectItem: HTMLElement;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX) {
+                if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX || this.element.getAttribute("data-loading") === "true") {
                     return;
                 }
                 moveEvent.preventDefault();
@@ -310,6 +310,7 @@ export class Outline extends Model {
                                 previousID = selectItem.getAttribute("data-node-id");
                                 selectItem.after(item);
                             }
+                            this.element.setAttribute("data-loading", "true");
                             transaction(editItem.editor.protyle, [{
                                 action: "moveOutlineHeading",
                                 id: item.dataset.nodeId,
@@ -469,5 +470,6 @@ export class Outline extends Model {
                 currentElement.classList.add("b3-list-item--focus");
             }
         }
+        this.element.removeAttribute("data-loading")
     }
 }

@@ -1211,7 +1211,7 @@
 
   ```json
   {
-    "path": [
+    "paths": [
       "/conf/appearance/boot",
       "/conf/appearance/langs",
       "/conf/appearance/emojis/conf.json",

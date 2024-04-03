@@ -523,6 +523,22 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	return
 }
 
+func (av *AttributeView) ExistBlock(blockID string) bool {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock != kv.Key.Type {
+			continue
+		}
+
+		for _, v := range kv.Values {
+			if v.BlockID == blockID {
+				return true
+			}
+		}
+		return false
+	}
+	return false
+}
+
 func (av *AttributeView) GetValue(keyID, blockID string) (ret *Value) {
 	for _, kv := range av.KeyValues {
 		if kv.Key.ID == keyID {

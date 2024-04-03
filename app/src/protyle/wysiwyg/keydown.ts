@@ -5,8 +5,11 @@ import {
     focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset, getSelectionPosition,
-    selectAll, setFirstNodeRange, setLastNodeRange,
+    getSelectionOffset,
+    getSelectionPosition,
+    selectAll,
+    setFirstNodeRange,
+    setLastNodeRange,
 } from "../util/selection";
 import {
     hasClosestBlock,
@@ -28,11 +31,7 @@ import {
 import {matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
 import {fixTable} from "../util/table";
-import {
-    turnsIntoOneTransaction, turnsIntoTransaction,
-    updateBatchTransaction,
-    updateTransaction
-} from "./transaction";
+import {turnsIntoOneTransaction, turnsIntoTransaction, updateBatchTransaction, updateTransaction} from "./transaction";
 import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
@@ -42,7 +41,8 @@ import {isLocalPath} from "../../util/pathName";
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {
-    alignImgCenter, alignImgLeft,
+    alignImgCenter,
+    alignImgLeft,
     commonHotkey,
     downSelect,
     duplicateBlock,
@@ -674,6 +674,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (event.key === "ArrowDown") {
+                if (nodeElement.isSameNode(protyle.wysiwyg.element.lastElementChild)) {
+                    setLastNodeRange(getContenteditableElement(nodeEditableElement), range, false);
+                    range.collapse(false)
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 const foldElement = hasClosestByAttribute(range.startContainer, "fold", "1");
                 if (foldElement) {
                     // 本身为折叠块
@@ -687,9 +694,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                         focusBlock(nextElement);
                         scrollCenter(protyle, nextElement);
-                    } else {
-                        setLastNodeRange(nodeEditableElement, range, false);
-                        range.collapse(false)
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -699,12 +703,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
                         focusBlock(nextFoldElement);
                         scrollCenter(protyle, nextFoldElement);
-                    } else {
-                        setLastNodeRange(nodeEditableElement, range, false);
-                        range.collapse(false)
+                        event.stopPropagation();
+                        event.preventDefault();
                     }
-                    event.stopPropagation();
-                    event.preventDefault();
                 }
             }
             return;

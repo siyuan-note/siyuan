@@ -863,7 +863,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "updateColType") {
                     if (target.dataset.newType !== target.dataset.oldType) {
-                        const name = target.dataset.name;
+                        const name = (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).value;
                         transaction(options.protyle, [{
                             action: "updateAttrViewCol",
                             id: options.colId,
@@ -1076,7 +1076,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addColOptionOrCell") {
                     if (target.querySelector(".b3-menu__checked")) {
-                        removeCellOption(options.protyle, data, options.cellElements,  menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
+                        removeCellOption(options.protyle, data, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
                     } else {
                         addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     }

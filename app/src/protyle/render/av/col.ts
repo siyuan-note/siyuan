@@ -216,21 +216,21 @@ export const getEditHTML = (options: {
         <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
     </button>
     <button class="b3-menu__separator"></button>
-    ${genUpdateColItem("text", colData.type, colData.name)}
-    ${genUpdateColItem("number", colData.type, colData.name)}
-    ${genUpdateColItem("select", colData.type, colData.name)}
-    ${genUpdateColItem("mSelect", colData.type, colData.name)}
-    ${genUpdateColItem("date", colData.type, colData.name)}
-    ${genUpdateColItem("mAsset", colData.type, colData.name)}
-    ${genUpdateColItem("checkbox", colData.type, colData.name)}
-    ${genUpdateColItem("url", colData.type, colData.name)}
-    ${genUpdateColItem("email", colData.type, colData.name)}
-    ${genUpdateColItem("phone", colData.type, colData.name)}
-    ${genUpdateColItem("template", colData.type, colData.name)}
-    ${genUpdateColItem("relation", colData.type, colData.name)}
-    ${genUpdateColItem("rollup", colData.type, colData.name)}
-    ${genUpdateColItem("created", colData.type, colData.name)}
-    ${genUpdateColItem("updated", colData.type, colData.name)}
+    ${genUpdateColItem("text", colData.type)}
+    ${genUpdateColItem("number", colData.type)}
+    ${genUpdateColItem("select", colData.type)}
+    ${genUpdateColItem("mSelect", colData.type)}
+    ${genUpdateColItem("date", colData.type)}
+    ${genUpdateColItem("mAsset", colData.type)}
+    ${genUpdateColItem("checkbox", colData.type)}
+    ${genUpdateColItem("url", colData.type)}
+    ${genUpdateColItem("email", colData.type)}
+    ${genUpdateColItem("phone", colData.type)}
+    ${genUpdateColItem("template", colData.type)}
+    ${genUpdateColItem("relation", colData.type)}
+    ${genUpdateColItem("rollup", colData.type)}
+    ${genUpdateColItem("created", colData.type)}
+    ${genUpdateColItem("updated", colData.type)}
 </div>`;
 };
 
@@ -850,8 +850,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     }
 };
 
-const genUpdateColItem = (type: TAVCol, oldType: TAVCol, name: string) => {
-    return `<button class="b3-menu__item" data-type="updateColType"  data-name="${name}" data-old-type="${oldType}" data-new-type="${type}">
+const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
+    return `<button class="b3-menu__item" data-type="updateColType" data-old-type="${oldType}" data-new-type="${type}">
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>
     <span class="b3-menu__label">${getColNameByType(type)}</span>
     ${type === oldType ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>' : ""}

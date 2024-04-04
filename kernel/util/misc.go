@@ -18,12 +18,30 @@ package util
 
 import (
 	"bytes"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/88250/lute/html"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+var (
+	letter = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+)
+
+func RandString(length int) string {
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = letter[rand.Intn(len(letter))]
+	}
+	return string(b)
+}
 
 // InsertElem inserts value at index into a.
 // 0 <= index <= len(s)

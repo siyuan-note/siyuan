@@ -1184,6 +1184,36 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColDate(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColDate(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColDate(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	keyID := operation.ID
+	key, _ := attrView.GetKey(keyID)
+	if nil == key || av.KeyTypeDate != key.Type {
+		return
+	}
+
+	if nil == key.Date {
+		key.Date = &av.Date{}
+	}
+
+	key.Date.AutoFillNow = operation.Data.(bool)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doHideAttrViewName(operation *Operation) (ret *TxErr) {
 	err := hideAttrViewName(operation)
 	if nil != err {
@@ -2104,27 +2134,39 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		}
 	}
 
+	// 处理日期字段默认填充当前创建时间
+	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
+			dateVal := &av.Value{
+				ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingBlockID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
+				Date: &av.ValueDate{Content: now, IsNotEmpty: true},
+			}
+			keyValues.Values = append(keyValues.Values, dateVal)
+		}
+	}
+
 	if !isDetached {
 		bindBlockAv0(tx, avID, blockID, node, tree)
 	}
 
-	for _, view := range attrView.Views {
-		switch view.LayoutType {
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
 		case av.LayoutTypeTable:
 			if "" != previousBlockID {
 				changed := false
-				for i, id := range view.Table.RowIDs {
+				for i, id := range v.Table.RowIDs {
 					if id == previousBlockID {
-						view.Table.RowIDs = append(view.Table.RowIDs[:i+1], append([]string{addingBlockID}, view.Table.RowIDs[i+1:]...)...)
+						v.Table.RowIDs = append(v.Table.RowIDs[:i+1], append([]string{addingBlockID}, v.Table.RowIDs[i+1:]...)...)
 						changed = true
 						break
 					}
 				}
 				if !changed {
-					view.Table.RowIDs = append(view.Table.RowIDs, addingBlockID)
+					v.Table.RowIDs = append(v.Table.RowIDs, addingBlockID)
 				}
 			} else {
-				view.Table.RowIDs = append([]string{addingBlockID}, view.Table.RowIDs...)
+				v.Table.RowIDs = append([]string{addingBlockID}, v.Table.RowIDs...)
 			}
 		}
 	}

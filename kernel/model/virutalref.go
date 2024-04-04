@@ -275,7 +275,7 @@ func prepareMarkKeywords(keywords []string) (ret []string) {
 	ret = gulu.Str.RemoveDuplicatedElem(keywords)
 	var tmp []string
 	for _, k := range ret {
-		if "" != k {
+		if "" != k && "*" != k { // 提及和虚引排除 * Ignore `*` back mentions and virtual references https://github.com/siyuan-note/siyuan/issues/10873
 			tmp = append(tmp, k)
 		}
 	}

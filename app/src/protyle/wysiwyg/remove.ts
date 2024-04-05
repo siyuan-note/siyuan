@@ -141,7 +141,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 }
                 // https://github.com/siyuan-note/siyuan/issues/5485
                 // https://github.com/siyuan-note/siyuan/issues/10389
-                if (type === "remove" && sideIsNext) {
+                // https://github.com/siyuan-note/siyuan/issues/10899
+                if (type !== "Backspace" && sideIsNext) {
                     focusBlock(sideElement);
                 } else {
                     focusBlock(sideElement, undefined, false);

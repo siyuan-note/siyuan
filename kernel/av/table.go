@@ -106,10 +106,11 @@ type TableColumn struct {
 	// 以下是某些列类型的特有属性
 
 	Options      []*SelectOption `json:"options,omitempty"`  // 选项列表
-	NumberFormat NumberFormat    `json:"numberFormat"`       // 列数字格式化
-	Template     string          `json:"template"`           // 模板内容
+	NumberFormat NumberFormat    `json:"numberFormat"`       // 数字列格式化
+	Template     string          `json:"template"`           // 模板列内容
 	Relation     *Relation       `json:"relation,omitempty"` // 关联列
 	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总列
+	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
 type TableCell struct {

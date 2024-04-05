@@ -875,6 +875,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			Template:     key.Template,
 			Relation:     key.Relation,
 			Rollup:       key.Rollup,
+			Date:         key.Date,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,

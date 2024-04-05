@@ -565,11 +565,13 @@ ${padHTML}
         });
     }
 
-    public render(protyle: IProtyle, update = false) {
+    public render(protyle: IProtyle, update = false, nodeElement?: Element | false) {
         /// #if !MOBILE
         let range: Range;
         let blockElement: Element;
-        if (getSelection().rangeCount > 0) {
+        if (nodeElement) {
+            blockElement = nodeElement
+        } else if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
                 if (protyle.element.id === "searchPreview") {

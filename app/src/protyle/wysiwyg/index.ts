@@ -1980,7 +1980,7 @@ export class WYSIWYG {
             });
             // 面包屑定位，需至于前，否则 return 的元素就无法进行面包屑定位
             if (protyle.options.render.breadcrumb) {
-                protyle.breadcrumb.render(protyle);
+                protyle.breadcrumb.render(protyle, false, hasClosestBlock(event.target));
             }
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513

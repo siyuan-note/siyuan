@@ -136,9 +136,9 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
                     }
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">
-    <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
+    <div class="block__icon block__icon--show" data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
     <div class="fn__space"></div>
-    <div class="block__icon block__icon--show"  data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
+    <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
 </div>
 </div>`;
                 // body

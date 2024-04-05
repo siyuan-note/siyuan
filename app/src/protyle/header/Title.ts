@@ -93,6 +93,8 @@ export class Title {
                     document.execCommand("insertText", false, replaceFileName(content));
                     this.rename(protyle);
                 });
+                event.preventDefault();
+                event.stopPropagation();
             }
             if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
                 const ids = protyle.path.split("/");

@@ -167,12 +167,13 @@ export const getEditHTML = (options: {
 </button>`;
     } else if (colData.type === "template") {
         html += `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="nobg">
     <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
-        html += `<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -190,7 +191,14 @@ export const getEditHTML = (options: {
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
 </div>`;
     } else if (colData.type === "rollup") {
-        html += getRollupHTML({colData});
+        html += '<button class="b3-menu__separator"></button>' + getRollupHTML({colData});
+    } else if (colData.type === "date") {
+        html += `<button class="b3-menu__separator"></button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+</label>`;
     }
     return `<div class="b3-menu__items">
     ${html}

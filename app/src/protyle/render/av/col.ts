@@ -195,9 +195,9 @@ export const getEditHTML = (options: {
     } else if (colData.type === "date") {
         html += `<button class="b3-menu__separator"></button>
 <label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
+    <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+    <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
 </label>`;
     }
     return `<div class="b3-menu__items">
@@ -369,6 +369,22 @@ export const bindEditEvent = (options: {
                 });
                 (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
             }
+        });
+    }
+    const fillCreatedElement = options.menuElement.querySelector('[data-type="fillCreated"]') as HTMLInputElement;
+    if (fillCreatedElement) {
+        fillCreatedElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                avID,
+                action: "setAttrViewColDate",
+                id: colId,
+                data: fillCreatedElement.checked
+            }], [{
+                avID,
+                action: "setAttrViewColDate",
+                id: colId,
+                data: !fillCreatedElement.checked
+            }]);
         });
     }
 

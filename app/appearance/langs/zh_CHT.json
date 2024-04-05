@@ -1,4 +1,5 @@
 {
+  "fillCreated": "Default fill creation time",
   "removeCard": "移除閃卡",
   "updateLayout": "更新版面配置",
   "dndFolderTip": "請注意 ${x} 僅插入 file:// 超鏈接，不複製檔案",

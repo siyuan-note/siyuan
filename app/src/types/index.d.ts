@@ -49,6 +49,7 @@ type TOperation =
     | "moveOutlineHeading"
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
+    | "setAttrViewColDate"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -813,6 +814,9 @@ interface IAVColumn {
     numberFormat: string,
     template: string,
     calc: IAVCalc,
+    date?: {
+        autoFillNow: boolean,
+    }
     // 选项列表
     options?: {
         name: string,

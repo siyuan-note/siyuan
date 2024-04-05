@@ -1,4 +1,5 @@
 {
+  "fillCreated": "Heure de création de remplissage par défaut",
   "removeCard": "Supprimer la flashcard",
   "updateLayout": "Mettre à jour la mise en page",
   "dndFolderTip": "Veuillez noter que ${x} insère uniquement le lien hypertexte file:// et ne copie pas le fichier",

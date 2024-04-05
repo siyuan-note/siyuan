@@ -739,6 +739,10 @@ export class WYSIWYG {
             let endLastElement: Element;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
+                if (moveTarget.tagName === "IFRAME") {
+                    moveTarget.style.pointerEvents = "none";
+                    return;
+                }
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) && !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if ((moveTarget.tagName === "TH" || moveTarget.tagName === "TD") && !moveTarget.isSameNode(target) && (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {
@@ -1194,6 +1198,9 @@ export class WYSIWYG {
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
+                    if (item.classList.contains("iframe")) {
+                        item.querySelector("iframe").style.pointerEvents = "";
+                    }
                 });
                 countBlockWord(ids);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473

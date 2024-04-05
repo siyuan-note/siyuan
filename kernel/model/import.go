@@ -149,16 +149,18 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 			// 新 ID 保留时间部分，仅修改随机值，避免时间变化导致更新时间早于创建时间
 			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
-			newNodeID := util.TimeFromID(n.ID) + "-" + gulu.Rand.String(7)
+			newNodeID := util.TimeFromID(n.ID) + "-" + util.RandString(7)
 			blockIDs[n.ID] = newNodeID
 			oldNodeID := n.ID
 			n.ID = newNodeID
 			n.SetIALAttr("id", newNodeID)
 
 			// 重新指向数据库属性值
-			ial := parse.IAL2Map(n.KramdownIAL)
-			for k, _ := range ial {
-				if strings.HasPrefix(k, av.NodeAttrNameAvs) {
+			for _, kv := range n.KramdownIAL {
+				if 2 > len(kv) {
+					continue
+				}
+				if strings.HasPrefix(kv[0], av.NodeAttrNameAvs) {
 					avBlockIDs[oldNodeID] = newNodeID
 				}
 			}

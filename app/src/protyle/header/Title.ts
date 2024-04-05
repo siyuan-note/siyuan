@@ -85,8 +85,11 @@ export class Title {
             }
             if (matchHotKey("⇧⌘V", event)) {
                 navigator.clipboard.readText().then(textPlain => {
+                    // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
                     textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
-                    const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                    let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                    // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
+                    content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
                     document.execCommand("insertText", false, replaceFileName(content));
                     this.rename(protyle);
                 });
@@ -235,7 +238,9 @@ export class Title {
                 click: async () => {
                     navigator.clipboard.readText().then(textPlain => {
                         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
-                        const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
+                        content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
                         document.execCommand("insertText", false, replaceFileName(content));
                         this.rename(protyle);
                     });

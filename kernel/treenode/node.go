@@ -182,7 +182,8 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			return getAttributeViewContent(node.AttributeViewID)
 		}
 
-		return getAttributeViewName(node.AttributeViewID)
+		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
+		return ret
 	}
 
 	buf := bytes.Buffer{}
@@ -562,28 +563,6 @@ func GetAttributeViewName(avID string) (name string) {
 		buf.WriteByte(' ')
 	}
 
-	name = strings.TrimSpace(buf.String())
-	return
-}
-
-func getAttributeViewName(avID string) (name string) {
-	if "" == avID {
-		return
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	buf.WriteString(attrView.Name)
-	buf.WriteByte(' ')
-	for _, v := range attrView.Views {
-		buf.WriteString(v.Name)
-		buf.WriteByte(' ')
-	}
 	name = strings.TrimSpace(buf.String())
 	return
 }

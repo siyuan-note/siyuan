@@ -1,4 +1,5 @@
 {
+  "showTitle": "显示数据库标题",
   "fillCreated": "默认填充创建时间",
   "removeCard": "移除闪卡",
   "updateLayout": "更新布局",

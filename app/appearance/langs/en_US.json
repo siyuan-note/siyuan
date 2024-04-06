@@ -1,4 +1,5 @@
 {
+  "showTitle": "Show database title",
   "fillCreated": "Default fill created time",
   "removeCard": "Remove flashcard",
   "updateLayout": "Update layout",

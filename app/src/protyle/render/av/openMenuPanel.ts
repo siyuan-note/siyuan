@@ -164,7 +164,7 @@ export const openMenuPanel = (options: {
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
             } else if (options.type === "config") {
-                bindViewEvent({protyle: options.protyle, data, menuElement});
+                bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
             }
         }
         if (options.cb) {
@@ -479,7 +479,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-config") {
                     menuElement.innerHTML = getViewHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    bindViewEvent({protyle: options.protyle, data, menuElement});
+                    bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -687,39 +687,6 @@ export const openMenuPanel = (options: {
                         avID,
                         nodeElement: options.blockElement
                     });
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "toggle-view-title") {
-                    if (target.firstElementChild.getAttribute("xlink:href") === "#iconEyeoff") {
-                        // hide
-                        transaction(options.protyle, [{
-                            action: "hideAttrViewName",
-                            avID,
-                            blockID,
-                            data: true
-                        }], [{
-                            action: "hideAttrViewName",
-                            avID,
-                            blockID,
-                            data: false
-                        }]);
-                        options.blockElement.querySelector(".av__title").classList.add("av__title--hide");
-                    } else {
-                        transaction(options.protyle, [{
-                            action: "hideAttrViewName",
-                            avID,
-                            blockID,
-                            data: false
-                        }], [{
-                            action: "hideAttrViewName",
-                            avID,
-                            blockID,
-                            data: true
-                        }]);
-                        options.blockElement.querySelector(".av__title").classList.remove("av__title--hide");
-                    }
-                    avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

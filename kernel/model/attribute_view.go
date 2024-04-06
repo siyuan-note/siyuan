@@ -3251,6 +3251,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 	}
 
+	// 如果存在选项对应的值，需要更新值中的选项
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID != operation.ID {
 			continue
@@ -3270,6 +3271,30 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 			}
 		}
 		break
+	}
+
+	// 如果存在选项对应的过滤器，需要更新过滤器中设置的选项值
+	// Database select field filters follow option editing changes https://github.com/siyuan-note/siyuan/issues/10881
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			table := view.Table
+			for _, filter := range table.Filters {
+				if filter.Column != key.ID {
+					continue
+				}
+
+				if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+					for i, opt := range filter.Value.MSelect {
+						if oldName == opt.Content {
+							filter.Value.MSelect[i].Content = newName
+							filter.Value.MSelect[i].Color = newColor
+							break
+						}
+					}
+				}
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

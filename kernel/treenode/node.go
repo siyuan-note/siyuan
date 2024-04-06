@@ -342,7 +342,7 @@ func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {
 
 func CountBlockNodes(node *ast.Node) (ret int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
+		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeListItem == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
 			return ast.WalkContinue
 		}
 

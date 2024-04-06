@@ -50,6 +50,11 @@ type Editor struct {
 	BackmentionExpandCount          int      `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 }
 
+const (
+	MinDynamicLoadBlocks = 48
+	MaxDynamicLoadBlocks = 1024
+)
+
 func NewEditor() *Editor {
 	return &Editor{
 		FontSize:                        16,

@@ -101,10 +101,12 @@ export class Gutter {
             const ghostElement = document.createElement("div");
             ghostElement.className = protyle.wysiwyg.element.className;
             selectElements.forEach(item => {
-                if (item.getAttribute("data-type") === "NodeIFrame") {
+                const type = item.getAttribute("data-type");
+                if (["NodeIFrame", "NodeWidget"].includes(type)) {
                     const embedElement = genEmptyElement();
                     embedElement.classList.add("protyle-wysiwyg--select");
-                    getContenteditableElement(embedElement).innerHTML = "<svg class=\"svg\"><use xlink:href=\"#iconLanguage\"></use></svg> IFrame";
+                    const isIFrame = type === "NodeIFrame";
+                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="#icon${isIFrame ? "Language" : "Both"}"></use></svg> ${isIFrame ? "IFrame" : window.siyuan.languages.widget}`;
                     ghostElement.append(embedElement);
                 } else {
                     ghostElement.append(item.cloneNode(true));

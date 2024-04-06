@@ -342,7 +342,7 @@ func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {
 
 func CountBlockNodes(node *ast.Node) (ret int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
+		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeListItem == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
 			return ast.WalkContinue
 		}
 
@@ -544,27 +544,6 @@ func IsChartCodeBlockCode(code *ast.Node) bool {
 	language := gulu.Str.FromBytes(code.Previous.CodeBlockInfo)
 	language = strings.ReplaceAll(language, editor.Caret, "")
 	return render.NoHighlight(language)
-}
-
-func GetAttributeViewName(avID string) (name string) {
-	if "" == avID {
-		return
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	for _, v := range attrView.Views {
-		buf.WriteString(v.Name)
-		buf.WriteByte(' ')
-	}
-
-	name = strings.TrimSpace(buf.String())
-	return
 }
 
 func getAttributeViewContent(avID string) (content string) {

@@ -235,16 +235,15 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     enterElement.innerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
     const doOperation: IOperation[] = [];
     const undoOperation: IOperation[] = [];
+    let currentElement = blockElement;
     // 回车之前的块为 1\n\n2 时会产生多个块
     Array.from(enterElement.children).forEach((item: HTMLElement) => {
         if (item.dataset.nodeId === id) {
-            const blockPreviousElement = blockElement.previousElementSibling;
-            const blockParentElement = blockElement.parentElement;
-            blockElement.outerHTML = item.outerHTML;
-            blockElement = (blockPreviousElement ? blockPreviousElement.nextElementSibling : blockParentElement.firstElementChild) as HTMLElement;
+            blockElement.before(item);
+            blockElement.remove();
             doOperation.push({
                 action: "update",
-                data: blockElement.outerHTML,
+                data: item.outerHTML,
                 id,
             });
             undoOperation.push({
@@ -252,7 +251,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 data: html,
                 id,
             });
-            mathRender(blockElement);
         } else {
             doOperation.push({
                 action: "insert",
@@ -260,38 +258,38 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 id: item.dataset.nodeId,
                 nextID: id,
             });
-            blockElement.insertAdjacentElement("beforebegin", item);
+            currentElement.insertAdjacentElement("afterend", item);
             undoOperation.push({
                 action: "delete",
                 id: item.dataset.nodeId,
             });
-            mathRender(item);
         }
+        mathRender(item);
+        currentElement = item;
     });
 
-    let previousElement = blockElement;
     Array.from(newElement.children).forEach((item: HTMLElement) => {
         const newId = item.getAttribute("data-node-id");
         doOperation.push({
             action: "insert",
             data: item.outerHTML,
             id: newId,
-            previousID: previousElement.getAttribute("data-node-id"),
+            previousID: currentElement.getAttribute("data-node-id"),
         });
         undoOperation.push({
             action: "delete",
             id: newId,
         });
-        previousElement.insertAdjacentElement("afterend", item);
+        currentElement.insertAdjacentElement("afterend", item);
         if (item.classList.contains("code-block")) {
             highlightRender(item);
         } else {
-            mathRender(previousElement.nextElementSibling);
+            mathRender(currentElement.nextElementSibling);
         }
-        previousElement = item;
+        currentElement = item;
     });
     transaction(protyle, doOperation, undoOperation);
-    focusBlock(blockElement.nextElementSibling);
+    focusBlock(currentElement);
     scrollCenter(protyle);
     return true;
 };

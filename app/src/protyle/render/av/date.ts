@@ -70,6 +70,24 @@ export const bindDateEvent = (options: {
     cellElements: HTMLElement[]
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
+    inputElements.forEach(item => {
+        item.addEventListener("keydown", (event) => {
+            if (event.isComposing) {
+                return
+            }
+            if (event.key === "Enter") {
+                updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
+                    content: new Date(inputElements[0].dataset.value).getTime(),
+                    isNotEmpty: inputElements[0].value !== "",
+                    content2: new Date(inputElements[1].dataset.value).getTime(),
+                    isNotEmpty2: inputElements[1].value !== "",
+                    hasEndDate: inputElements[2].checked,
+                    isNotTime: !inputElements[3].checked,
+                }, options.cellElements);
+                document.querySelector(".av__panel")?.remove();
+            }
+        });
+    })
     inputElements[0].addEventListener("change", () => {
         inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
     });

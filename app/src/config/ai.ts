@@ -30,6 +30,18 @@ export const ai = {
     <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
 </div>
 <div class="b3-label">
+    ${window.siyuan.languages.apiTemperature}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__flex-center fn__block" type="number" step="0.1" min="0" max="2" id="apiTemperature" value="${window.siyuan.config.ai.openAI.apiTemperature}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiTemperatureTip}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.apiMaxContexts}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="1" max="64" id="apiMaxContexts" value="${window.siyuan.config.ai.openAI.apiMaxContexts}"/>
+    <div class="b3-label__text">${window.siyuan.languages.apiMaxContextsTip}</div>
+</div>
+<div class="b3-label">
     ${window.siyuan.languages.apiModel}
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="apiModel" value="${window.siyuan.config.ai.openAI.apiModel}"/>
@@ -95,6 +107,22 @@ export const ai = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.apiTemperature}
+        <div class="b3-label__text">${window.siyuan.languages.apiTemperatureTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="0.1" min="0" max="2" id="apiTemperature" value="${window.siyuan.config.ai.openAI.apiTemperature}"/>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.apiMaxContexts}
+        <div class="b3-label__text">${window.siyuan.languages.apiMaxContextsTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="1" max="64" id="apiMaxContexts" value="${window.siyuan.config.ai.openAI.apiMaxContexts}"/>
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__block">
@@ -176,6 +204,8 @@ export const ai = {
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
                         apiModel: (ai.element.querySelector("#apiModel") as HTMLSelectElement).value,
                         apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
+                        apiTemperature: parseFloat((ai.element.querySelector("#apiTemperature") as HTMLInputElement).value),
+                        apiMaxContexts: parseInt((ai.element.querySelector("#apiMaxContexts") as HTMLInputElement).value),
                         apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
                         apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
                         apiProvider: (ai.element.querySelector("#apiProvider") as HTMLSelectElement).value,

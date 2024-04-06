@@ -15,11 +15,87 @@ import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
-import {cellScrollIntoView} from "../render/av/cell";
+import {cellScrollIntoView, getCellText} from "../render/av/cell";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
+
+export const getTextStar = (blockElement: HTMLElement) => {
+    const dataType = blockElement.dataset.type;
+    let refText = "";
+    if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
+        refText = getContenteditableElement(blockElement).innerHTML;
+    } else {
+        if ("NodeHTMLBlock" === dataType) {
+            refText = "HTML";
+        } else if ("NodeAttributeView" === dataType) {
+            refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database;
+        } else if ("NodeThematicBreak" === dataType) {
+            refText = window.siyuan.languages.line;
+        } else if ("NodeIFrame" === dataType) {
+            refText = "IFrame";
+        } else if ("NodeWidget" === dataType) {
+            refText = window.siyuan.languages.widget;
+        } else if ("NodeVideo" === dataType) {
+            refText = window.siyuan.languages.video;
+        } else if ("NodeAudio" === dataType) {
+            refText = window.siyuan.languages.audio;
+        } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
+            refText = getPlainText(blockElement);
+        } else if (blockElement.classList.contains("render-node")) {
+            // 需在嵌入块后，代码块前
+            refText += blockElement.dataset.subtype || Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
+        }  else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+            Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
+                if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
+                    refText = getTextStar(blockElement.querySelector("[data-node-id]"));
+                    return true;
+                }
+            });
+            if (refText) {
+                return refText;
+            }
+        }
+    }
+    return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
+};
+
+export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
+    let text = "";
+    const dataType = blockElement.dataset.type;
+    if ("NodeHTMLBlock" === dataType) {
+        text += Lute.UnEscapeHTMLStr(blockElement.querySelector("protyle-html").getAttribute("data-content"));
+    } else if ("NodeAttributeView" === dataType) {
+        blockElement.querySelectorAll(".av__row").forEach(rowElement => {
+            rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
+                text += getCellText(cellElement) + " ";
+            });
+            text += "\n";
+        });
+        text = text.trimEnd();
+    } else if ("NodeThematicBreak" === dataType) {
+        text += "---";
+    } else if ("NodeIFrame" === dataType || "NodeWidget" === dataType) {
+        text += blockElement.querySelector("iframe").getAttribute("src");
+    } else if ("NodeVideo" === dataType) {
+        text += blockElement.querySelector("video").getAttribute("src");
+    } else if ("NodeAudio" === dataType) {
+        text += blockElement.querySelector("audio").getAttribute("src");
+    } else if (blockElement.classList.contains("render-node")) {
+        // 需在嵌入块后，代码块前
+        text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
+    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock", "NodeTable"].includes(dataType)) {
+        text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+        blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
+            const nestedText = getPlainText(item, true);
+            text += nestedText ? nestedText + "\n" : "";
+        });
+    }
+    return text;
+};
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
-        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
+        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
         // https://github.com/siyuan-note/siyuan/issues/5446
         // A\B\C\D\
@@ -47,7 +123,8 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
             .replace(/#/g, "\\#")
             .replace(/\$/g, "\\$")
             .replace(/\^/g, "\\^")
-            .replace(/\|/g, "\\|");
+            .replace(/\|/g, "\\|")
+            .replace(/\./g, "\\.");
         pasteText(protyle, clipText, nodeElement);
     } catch (e) {
         console.log(e);
@@ -92,7 +169,6 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
             // 对 HTML 标签进行内部转移，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
-            // 在
             textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
             insertHTML(content, protyle);

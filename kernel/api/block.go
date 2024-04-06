@@ -465,7 +465,8 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 
-	tree, err := model.LoadTreeByBlockID(id)
+	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
+	tree, err := model.LoadTreeByBlockIDWithReindex(id)
 	if errors.Is(err, model.ErrIndexing) {
 		ret.Code = 3
 		ret.Msg = model.Conf.Language(56)

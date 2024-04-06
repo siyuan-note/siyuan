@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20240119210241"
+		"type": "doc",
+		"updated": "20240402173808"
 	},
 	"Children": [
 		{
@@ -183,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210403160319-ufy7jta",
-				"updated": "20230403114310"
+				"updated": "20240402173808"
 			},
 			"Children": [
 				{
@@ -208,7 +209,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "每隔 10 分钟会对这 10 分钟内更新过的文档生成历史（间隔时间可通过 "
+									"Data": "每隔 10 分钟会对这 10 分钟内更新过的文档生成历史（间隔"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时间"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "可通过 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -309,7 +318,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "手动删除笔记本、文档和资源文件时会生成历史，历史文件夹后缀为 "
+									"Data": "手动删除笔记本、文档和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "资源文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时会生成历史，历史文件夹后缀为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -457,6 +474,43 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240402173746-e726apc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240402173746-e726apc",
+						"updated": "20240402173808"
+					},
+					"Children": [
+						{
+							"ID": "20240402173746-k4p1tqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240402173746-k4p1tqy",
+								"updated": "20240402173808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在大纲面板拖拽大纲项目时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-outline"
 								},
 								{
 									"Type": "NodeText",

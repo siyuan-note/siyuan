@@ -94,7 +94,7 @@ func LoginAuth(c *gin.Context) {
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
-		logging.LogWarnf("invalid auth code")
+		logging.LogWarnf("invalid auth code [ip=%s]", util.GetRemoteAddr(c.Request))
 
 		util.WrongAuthCount++
 		workspaceSession.Captcha = gulu.Rand.String(7)
@@ -113,7 +113,7 @@ func LoginAuth(c *gin.Context) {
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
 	workspaceSession.Captcha = gulu.Rand.String(7)
-	logging.LogInfof("auth success")
+	logging.LogInfof("auth success [ip=%s]", util.GetRemoteAddr(c.Request))
 	if err := session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)
@@ -235,14 +235,24 @@ func CheckAuth(c *gin.Context) {
 
 	// 通过 API token (header: Authorization)
 	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
+		var token string
 		if strings.HasPrefix(authHeader, "Token ") {
-			token := strings.TrimPrefix(authHeader, "Token ")
+			token = strings.TrimPrefix(authHeader, "Token ")
+		} else if strings.HasPrefix(authHeader, "token ") {
+			token = strings.TrimPrefix(authHeader, "token ")
+		} else if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else if strings.HasPrefix(authHeader, "bearer ") {
+			token = strings.TrimPrefix(authHeader, "bearer ")
+		}
+
+		if "" != token {
 			if Conf.Api.Token == token {
 				c.Next()
 				return
 			}
 
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
 			c.Abort()
 			return
 		}
@@ -255,7 +265,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
 		c.Abort()
 		return
 	}
@@ -285,7 +295,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [session]"})
 		c.Abort()
 		return
 	}

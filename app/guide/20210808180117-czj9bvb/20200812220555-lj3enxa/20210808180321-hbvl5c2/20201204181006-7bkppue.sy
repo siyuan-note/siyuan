@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20240308162603"
+		"updated": "20240403150838"
 	},
 	"Children": [
 		{
@@ -236,7 +236,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20240308162603"
+				"updated": "20240403150838"
 			},
 			"Children": [
 				{
@@ -401,7 +401,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210121193601-uwo8s5h"
+						"id": "20210121193601-uwo8s5h",
+						"updated": "20240403150712"
 					},
 					"Children": [
 						{
@@ -409,7 +410,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131155558-ghlchbx",
-								"updated": "20210504092933"
+								"updated": "20240403150712"
 							},
 							"Children": [
 								{
@@ -423,24 +424,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为 blocks 列表，参数为 SQL 语句："
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​：该函数用于查询数据库，返回值为 blocks 列表，请参考下面的例子"
 								}
 							]
 						}
@@ -454,7 +438,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210504093313-4aoyxd0"
+						"id": "20210504093313-4aoyxd0",
+						"updated": "20240403150838"
 					},
 					"Children": [
 						{
@@ -462,7 +447,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210504093313-ya53o58",
-								"updated": "20210504093332"
+								"updated": "20240403150838"
 							},
 							"Children": [
 								{
@@ -476,24 +461,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为 spans 列表，参数为 SQL 语句："
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​：该函数用于查询数据库，返回值为 spans 列表，请参考下面的例子"
 								}
 							]
 						}

@@ -75,7 +75,7 @@ const hotKey2Electron = (key) => {
     if (key.indexOf("⌥") > -1) {
         electronKey += "Alt+";
     }
-    return electronKey + key.substr(key.length - 1);
+    return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "");
 };
 
 const exitApp = (port, errorWindowId) => {
@@ -433,7 +433,6 @@ const initKernel = (workspace, port, lang) => {
             backgroundColor: "#1e1e1e",
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
-
         let bootIndex = path.join(appDir, "app", "electron", "boot.html");
         if (isDevEnv) {
             bootIndex = path.join(appDir, "electron", "boot.html");
@@ -682,8 +681,9 @@ app.whenReady().then(() => {
 
         resetTrayMenu(tray, lang, mainWindow);
     };
+
     const getWindowByContentId = (id) => {
-        return BrowserWindow.fromId(BrowserWindow.getAllWindows().find((win) => win.webContents.id === id).id);
+        return BrowserWindow.getAllWindows().find((win) => win.webContents.id === id);
     };
 
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
@@ -696,6 +696,9 @@ app.whenReady().then(() => {
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }
+        if (data.cmd === "getContentsId") {
+            return event.sender.id;
+        }
         if (data.cmd === "setProxy") {
             return setProxy(data.proxyURL, event.sender);
         }
@@ -703,10 +706,18 @@ app.whenReady().then(() => {
             return dialog.showSaveDialog(data);
         }
         if (data.cmd === "isFullScreen") {
-            return getWindowByContentId(event.sender.id).isFullScreen();
+            const wnd = getWindowByContentId(event.sender.id);
+            if (!wnd) {
+                return false;
+            }
+            return wnd.isFullScreen();
         }
         if (data.cmd === "isMaximized") {
-            return getWindowByContentId(event.sender.id).isMaximized();
+            const wnd = getWindowByContentId(event.sender.id);
+            if (!wnd) {
+                return false;
+            }
+            return wnd.isMaximized();
         }
         if (data.cmd === "getMicrophone") {
             return systemPreferences.getMediaAccessStatus("microphone");
@@ -743,6 +754,9 @@ app.whenReady().then(() => {
         }
         initEventId.push(event.sender.id);
         const currentWindow = getWindowByContentId(event.sender.id);
+        if (!currentWindow) {
+            return;
+        }
         currentWindow.on("focus", () => {
             event.sender.send("siyuan-event", "focus");
         });
@@ -778,22 +792,37 @@ app.whenReady().then(() => {
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;
-            case "unregisterAll":
-                globalShortcut.unregisterAll();
+            case "unregisterGlobalShortcut":
+                globalShortcut.unregister(hotKey2Electron(data.accelerator));
                 break;
             case "show":
+                if (!currentWindow) {
+                    return;
+                }
                 showWindow(currentWindow);
                 break;
             case "hide":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.hide();
                 break;
             case "minimize":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.minimize();
                 break;
             case "maximize":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.maximize();
                 break;
             case "restore":
+                if (!currentWindow) {
+                    return;
+                }
                 if (currentWindow.isFullScreen()) {
                     currentWindow.setFullScreen(false);
                 } else {
@@ -801,12 +830,21 @@ app.whenReady().then(() => {
                 }
                 break;
             case "focus":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.focus();
                 break;
             case "setAlwaysOnTopFalse":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.setAlwaysOnTop(false);
                 break;
             case "setAlwaysOnTopTrue":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.setAlwaysOnTop(true);
                 break;
             case "clearCache":
@@ -819,9 +857,15 @@ app.whenReady().then(() => {
                 event.sender.undo();
                 break;
             case "destroy":
+                if (!currentWindow) {
+                    return;
+                }
                 currentWindow.destroy();
                 break;
             case "closeButtonBehavior":
+                if (!currentWindow) {
+                    return;
+                }
                 if (currentWindow.isFullScreen()) {
                     currentWindow.once("leave-full-screen", () => {
                         currentWindow.hide();
@@ -855,21 +899,18 @@ app.whenReady().then(() => {
             }
             data.filePaths = result.filePaths;
             data.webContentsId = event.sender.id;
-            getWindowByContentId(event.sender.id).getParentWindow().send("siyuan-export-pdf", data);
+            getWindowByContentId(data.parentWindowId).send("siyuan-export-pdf", data);
         });
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
-        const parentWnd = getWindowByContentId(event.sender.id);
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
-        const width = parentWnd.getBounds().width * 0.8;
-        const height = parentWnd.getBounds().height * 0.8;
+        const wndBounds = getWindowByContentId(event.sender.id).getBounds();
+        const wndScreen = screen.getDisplayNearestPoint({x: wndBounds.x, y: wndBounds.y});
         const printWin = new BrowserWindow({
-            parent: parentWnd,
-            modal: false,
             show: true,
-            width: width,
-            height: height,
-            resizable: false,
+            width: Math.floor(wndScreen.size.width * 0.8),
+            height: Math.floor(wndScreen.size.height * 0.8),
+            resizable: true,
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
@@ -881,6 +922,7 @@ app.whenReady().then(() => {
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
+        printWin.center();
         printWin.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + printWin.webContents.userAgent;
         printWin.loadURL(data);
         printWin.webContents.on("will-navigate", (nEvent) => {
@@ -901,8 +943,8 @@ app.whenReady().then(() => {
         const win = new BrowserWindow({
             show: true,
             trafficLightPosition: {x: 8, y: 13},
-            width: data.width || mainScreen.size.width * 0.7,
-            height: data.height || mainScreen.size.height * 0.9,
+            width: Math.floor(data.width || mainScreen.size.width * 0.7),
+            height: Math.floor(data.height || mainScreen.size.height * 0.9),
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,
@@ -972,6 +1014,9 @@ app.whenReady().then(() => {
             tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
             tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
             const mainWindow = getWindowByContentId(event.sender.id);
+            if (!mainWindow) {
+                return;
+            }
             resetTrayMenu(tray, data.languages, mainWindow);
             tray.on("click", () => {
                 showHideWindow(tray, data.languages, mainWindow);
@@ -987,7 +1032,6 @@ app.whenReady().then(() => {
         await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
-        globalShortcut.unregisterAll();
         if (!data.hotkeys || data.hotkeys.length === 0) {
             return;
         }
@@ -996,31 +1040,32 @@ app.whenReady().then(() => {
             if (!shortcut) {
                 return;
             }
+            if (globalShortcut.isRegistered(shortcut)) {
+                globalShortcut.unregister(shortcut);
+            }
             if (index === 0) {
                 globalShortcut.register(shortcut, () => {
-                    workspaces.forEach(workspaceItem => {
+                    workspaces.find(workspaceItem => {
                         const mainWindow = workspaceItem.browserWindow;
-                        if (mainWindow.isMinimized()) {
-                            mainWindow.restore();
-                            mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
-                        } else {
-                            if (mainWindow.isVisible()) {
-                                if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258
+                        if (event.sender.id === mainWindow.webContents.id) {
+                            if (mainWindow.isMinimized()) {
+                                mainWindow.restore();
+                                mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
+                            } else {
+                                if (mainWindow.isVisible()) {
                                     if (!mainWindow.isFocused()) {
                                         mainWindow.show();
                                     } else {
                                         hideWindow(mainWindow);
                                     }
                                 } else {
-                                    hideWindow(mainWindow);
+                                    mainWindow.show();
                                 }
-                            } else {
-                                mainWindow.show();
                             }
-                        }
-
-                        if ("win32" === process.platform || "linux" === process.platform) {
-                            resetTrayMenu(workspaceItem.tray, data.languages, mainWindow);
+                            if ("win32" === process.platform || "linux" === process.platform) {
+                                resetTrayMenu(workspaceItem.tray, data.languages, mainWindow);
+                            }
+                            return true;
                         }
                     });
                 });

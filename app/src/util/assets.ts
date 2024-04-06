@@ -9,7 +9,7 @@ import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
 
-const loadThirdIcon = (iconURL: string, data: IAppearance) => {
+const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
     addScript(iconURL, "iconDefaultScript").then(() => {
         if (!["ant", "material"].includes(data.icon)) {
             const iconScriptElement = document.getElementById("iconScript");
@@ -21,7 +21,7 @@ const loadThirdIcon = (iconURL: string, data: IAppearance) => {
     });
 };
 
-export const loadAssets = (data: IAppearance) => {
+export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-theme-mode", getThemeMode());

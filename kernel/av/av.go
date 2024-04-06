@@ -91,20 +91,23 @@ type Key struct {
 
 	// 以下是某些列类型的特有属性
 
-	// 单选/多选列
+	// 单选/多选
 	Options []*SelectOption `json:"options,omitempty"` // 选项列表
 
-	// 数字列
+	// 数字
 	NumberFormat NumberFormat `json:"numberFormat"` // 列数字格式化
 
-	// 模板列
+	// 模板
 	Template string `json:"template"` // 模板内容
 
-	// 关联列
+	// 关联
 	Relation *Relation `json:"relation,omitempty"` // 关联信息
 
-	// 汇总列
+	// 汇总
 	Rollup *Rollup `json:"rollup,omitempty"` // 汇总信息
+
+	// 日期
+	Date *Date `json:"date,omitempty"` // 日期设置
 }
 
 func NewKey(id, name, icon string, keyType KeyType) *Key {
@@ -114,6 +117,10 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 		Type: keyType,
 		Icon: icon,
 	}
+}
+
+type Date struct {
+	AutoFillNow bool `json:"autoFillNow"` // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 }
 
 type Rollup struct {
@@ -172,7 +179,7 @@ func NewTableView() (ret *View) {
 	return
 }
 
-func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
+func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKey *Key) {
 	name := getI18nName("table")
 	view = &View{
 		ID:         ast.NewNodeID(),
@@ -188,6 +195,9 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey *Key) {
 	}
 	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
 	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
+
+	selectKey = NewKey(ast.NewNodeID(), getI18nName("select"), "", KeyTypeSelect)
+	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{ID: selectKey.ID})
 	return
 }
 
@@ -202,11 +212,11 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
-	view, blockKey := NewTableViewWithBlockKey(ast.NewNodeID())
+	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,
-		KeyValues: []*KeyValues{{Key: blockKey}},
+		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
 	}
@@ -417,7 +427,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 
 			if 0 == v.UpdatedAt {
-				v.UpdatedAt = v.CreatedAt
+				v.UpdatedAt = v.CreatedAt + 1000
 			}
 		}
 	}
@@ -518,6 +528,22 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	}
 	ret = av.Views[0]
 	return
+}
+
+func (av *AttributeView) ExistBlock(blockID string) bool {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock != kv.Key.Type {
+			continue
+		}
+
+		for _, v := range kv.Values {
+			if v.BlockID == blockID {
+				return true
+			}
+		}
+		return false
+	}
+	return false
 }
 
 func (av *AttributeView) GetValue(keyID, blockID string) (ret *Value) {

@@ -7,10 +7,10 @@ import {App} from "../index";
 
 export class Search extends Model {
     public element: HTMLElement;
-    public config: ISearchOption;
+    public config: Config.IUILayoutTabSearchConfig;
     public editors: { edit: Protyle, unRefEdit: Protyle };
 
-    constructor(options: { tab: Tab, config: ISearchOption, app: App }) {
+    constructor(options: { tab: Tab, config: Config.IUILayoutTabSearchConfig, app: App }) {
         super({
             app: options.app,
             id: options.tab.id,

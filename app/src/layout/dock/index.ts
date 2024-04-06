@@ -35,7 +35,7 @@ export class Dock {
         app: App,
         data: {
             pin: boolean,
-            data: IDockTab[][]
+            data: Config.IUILayoutDockTab[][]
         },
         position: TDockPosition
     }) {
@@ -679,7 +679,7 @@ export class Dock {
         return max;
     }
 
-    public genButton(data: IDockTab[], index: number, tabIndex?: number) {
+    public genButton(data: Config.IUILayoutDockTab[], index: number, tabIndex?: number) {
         let html = "";
         data.forEach(item => {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {

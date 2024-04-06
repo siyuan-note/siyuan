@@ -36,6 +36,12 @@
     font-size: 12px;
   }
 
+  &--list {
+    padding: 0 4px;
+    margin-right: 4px;
+    font-family: var(--b3-font-family-code);
+  }
+
   &--secondary {
     background-color: var(--b3-theme-secondary);
     color: var(--b3-theme-on-secondary);

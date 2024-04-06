@@ -805,7 +805,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				for _, blockID := range relVal.Relation.BlockIDs {
 					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
 					if nil == destVal {
-						continue
+						if destAv.ExistBlock(blockID) { // 数据库中存在行但是列值不存在是数据未初始化，这里补一个默认值
+							destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
+						}
+						if nil == destVal {
+							continue
+						}
 					}
 					if av.KeyTypeNumber == destKey.Type {
 						destVal.Number.Format = destKey.NumberFormat
@@ -990,7 +995,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ av.KeyType
 		ret.CreatedAt = time.Now().UnixMilli()
 	}
 	if 0 == ret.UpdatedAt {
-		ret.UpdatedAt = ret.CreatedAt
+		ret.UpdatedAt = ret.CreatedAt + 1000
 	}
 
 	switch typ {
@@ -1078,9 +1083,18 @@ func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		if 0 < len(rowValue.Values) {
 			v := rowValue.Values[0]
 			if av.KeyTypeNumber == v.Type {
-				dataModel[rowValue.Key.Name] = v.Number.Content
+				if nil != v.Number && v.Number.IsNotEmpty {
+					dataModel[rowValue.Key.Name] = v.Number.Content
+				}
 			} else if av.KeyTypeDate == v.Type {
-				dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+				if nil != v.Date && v.Date.IsNotEmpty {
+					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+				}
+			} else if av.KeyTypeRollup == v.Type {
+				if 0 < len(v.Rollup.Contents) && av.KeyTypeNumber == v.Rollup.Contents[0].Type {
+					// 汇总数字时仅取第一个数字填充模板
+					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
+				}
 			} else {
 				dataModel[rowValue.Key.Name] = v.String()
 			}

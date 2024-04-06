@@ -36,6 +36,7 @@ func ParseJSONWithoutFix(jsonData []byte, options *parse.Options) (ret *parse.Tr
 
 	ret = &parse.Tree{Name: "", ID: root.ID, Root: &ast.Node{Type: ast.NodeDocument, ID: root.ID, Spec: root.Spec}, Context: &parse.Context{ParseOption: options}}
 	ret.Root.KramdownIAL = parse.Map2IAL(root.Properties)
+	ret.Root.SetIALAttr("type", "doc")
 	ret.Context.Tip = ret.Root
 	if nil == root.Children {
 		return
@@ -57,6 +58,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 
 	ret = &parse.Tree{Name: "", ID: root.ID, Root: &ast.Node{Type: ast.NodeDocument, ID: root.ID, Spec: root.Spec}, Context: &parse.Context{ParseOption: options}}
 	ret.Root.KramdownIAL = parse.Map2IAL(root.Properties)
+	ret.Root.SetIALAttr("type", "doc")
 	for _, kv := range ret.Root.KramdownIAL {
 		if strings.Contains(kv[1], "\n") {
 			val := kv[1]
@@ -229,11 +231,6 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 	case ast.NodeText:
 		if nil != tip.LastChild && ast.NodeTagOpenMarker == tip.LastChild.Type && 1 > len(node.Tokens) {
 			node.Tokens = []byte("Untitled")
-			*needFix = true
-		}
-		if 1 == len(node.Tokens) && bytes.Equal(node.Tokens, []byte("\n")) {
-			// https://ld246.com/article/1710381064911
-			node.Tokens = []byte("")
 			*needFix = true
 		}
 	case ast.NodeTagCloseMarker:

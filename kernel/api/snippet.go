@@ -70,6 +70,10 @@ func getSnippet(c *gin.Context) {
 	if 0 == enabledArg {
 		enabled = false
 	}
+	var keyword string
+	if nil != arg["keyword"] {
+		keyword = arg["keyword"].(string)
+	}
 
 	confSnippets, err := model.LoadSnippets()
 	if nil != err {
@@ -84,6 +88,17 @@ func getSnippet(c *gin.Context) {
 			snippets = append(snippets, s)
 		}
 	}
+
+	if "" != keyword {
+		var snippetsFiltered []*conf.Snippet
+		for _, s := range snippets {
+			if strings.Contains(strings.ToLower(s.Name), strings.ToLower(keyword)) || strings.Contains(strings.ToLower(s.Content), strings.ToLower(keyword)) {
+				snippetsFiltered = append(snippetsFiltered, s)
+			}
+		}
+		snippets = snippetsFiltered
+	}
+
 	if 1 > len(snippets) {
 		snippets = []*conf.Snippet{}
 	}

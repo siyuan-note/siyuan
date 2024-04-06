@@ -25,7 +25,7 @@ import (
 )
 
 type Sortable interface {
-	SortRows()
+	SortRows(attrView *AttributeView)
 }
 
 type ViewSort struct {
@@ -40,7 +40,7 @@ const (
 	SortOrderDesc SortOrder = "DESC"
 )
 
-func (value *Value) Compare(other *Value) int {
+func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
@@ -48,13 +48,21 @@ func (value *Value) Compare(other *Value) int {
 		}
 	case KeyTypeText:
 		if nil != value.Text && nil != other.Text {
+			if "" == value.Text.Content {
+				if "" == other.Text.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Text.Content {
+				return -1
+			}
 			return strings.Compare(value.Text.Content, other.Text.Content)
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other.Number {
 			if value.Number.IsNotEmpty {
 				if !other.Number.IsNotEmpty {
-					return 1
+					return -1
 				}
 
 				if value.Number.Content > other.Number.Content {
@@ -65,17 +73,17 @@ func (value *Value) Compare(other *Value) int {
 				}
 				return 0
 			} else {
-				if other.Number.IsNotEmpty {
-					return -1
+				if !other.Number.IsNotEmpty {
+					return 0
 				}
-				return 0
+				return 1
 			}
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
 			if value.Date.IsNotEmpty {
 				if !other.Date.IsNotEmpty {
-					return 1
+					return -1
 				}
 				if value.Date.Content > other.Date.Content {
 					return 1
@@ -85,10 +93,10 @@ func (value *Value) Compare(other *Value) int {
 				}
 				return 0
 			} else {
-				if other.Date.IsNotEmpty {
-					return -1
+				if !other.Date.IsNotEmpty {
+					return 0
 				}
-				return 0
+				return 1
 			}
 		}
 	case KeyTypeCreated:
@@ -112,27 +120,66 @@ func (value *Value) Compare(other *Value) int {
 			return 0
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
-		if nil != value.MSelect && nil != other.MSelect {
-			var v1 string
-			for _, v := range value.MSelect {
-				v1 += v.Content
+		if 0 < len(value.MSelect) && 0 < len(other.MSelect) {
+			v1 := value.MSelect[0].Content
+			v2 := other.MSelect[0].Content
+			if v1 == v2 {
+				return 0
 			}
-			var v2 string
-			for _, v := range other.MSelect {
-				v2 += v.Content
+
+			key, _ := attrView.GetKey(value.KeyID)
+			if nil != key {
+				optionSort := map[string]int{}
+				for i, op := range key.Options {
+					optionSort[op.Name] = i
+				}
+
+				v1Sort := optionSort[v1]
+				v2Sort := optionSort[v2]
+				if v1Sort > v2Sort {
+					return 1
+				}
+				if v1Sort < v2Sort {
+					return -1
+				}
+				return 0
 			}
 			return strings.Compare(v1, v2)
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {
+			if "" == value.URL.Content {
+				if "" == other.URL.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.URL.Content {
+				return -1
+			}
 			return strings.Compare(value.URL.Content, other.URL.Content)
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other.Email {
+			if "" == value.Email.Content {
+				if "" == other.Email.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Email.Content {
+				return -1
+			}
 			return strings.Compare(value.Email.Content, other.Email.Content)
 		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other.Phone {
+			if "" == value.Phone.Content {
+				if "" == other.Phone.Content {
+					return 0
+				}
+				return 1
+			} else if "" == other.Phone.Content {
+				return -1
+			}
 			return strings.Compare(value.Phone.Content, other.Phone.Content)
 		}
 	case KeyTypeMAsset:

@@ -286,7 +286,7 @@ export abstract class Constants {
     // "⌘", "⇧", "⌥", "⌃"
     // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape" 不可自定义
-    public static readonly SIYUAN_KEYMAP: IKeymap = {
+    public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
@@ -451,7 +451,7 @@ export abstract class Constants {
         plugin: {},
     };
 
-    public static readonly SIYUAN_EMPTY_LAYOUT: Record<string, unknown> = {
+    public static readonly SIYUAN_EMPTY_LAYOUT: Config.IUiLayout = {
         hideDock: false,
         layout: {
             "direction": "tb",
@@ -482,7 +482,13 @@ export abstract class Constants {
                     "size": "auto",
                     "type": "center",
                     "instance": "Layout",
-                    "children": [{"instance": "Wnd", "children": [{"instance": "Tab", "children": []}]}]
+                    "children": [{
+                        "instance": "Wnd",
+                        "children": [{
+                            "instance": "Tab",
+                            "children": []
+                        }]
+                    }]
                 }, {
                     "direction": "tb",
                     "size": "0px",
@@ -580,9 +586,7 @@ export abstract class Constants {
         }
     };
 
-    public static readonly SIYUAN_DEFAULT_REPLACETYPES: {
-        [key: string]: boolean;
-    } = {
+    public static readonly SIYUAN_DEFAULT_REPLACETYPES: Required<Config.IUILayoutTabSearchConfigReplaceTypes> = {
         "text": true,
         "imgText": true,
         "imgTitle": true,
@@ -669,6 +673,9 @@ export abstract class Constants {
     // third: "yul", "solidity", "abap", "hlsl", "gdscript"
     public static readonly ALIAS_CODE_LANGUAGES: string[] = [
         "js", "ts", "html", "toml", "c#", "bat",
+    ];
+    public static readonly SIYUAN_RENDER_CODE_LANGUAGES: string[] = [
+        "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"
     ];
 
     // Google Analytics 事件

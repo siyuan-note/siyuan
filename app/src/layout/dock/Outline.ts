@@ -15,6 +15,7 @@ import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {transaction} from "../../protyle/wysiwyg/transaction";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -98,7 +99,7 @@ export class Outline extends Model {
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="b3-list-item fn__none"></div>
-<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
+<div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.tree = new Tree({
@@ -206,7 +207,7 @@ export class Outline extends Model {
                 target = target.parentElement;
             }
         });
-
+        this.bindSort();
         if (this.isPreview) {
             if (this.blockId) {
                 fetchPost("/api/export/preview", {
@@ -223,6 +224,113 @@ export class Outline extends Model {
                 this.update(response);
             });
         }
+    }
+
+    private bindSort() {
+        this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            const item = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+            if (!item || item.tagName !== "LI") {
+                return;
+            }
+            const documentSelf = document;
+            documentSelf.ondragstart = () => false;
+            let ghostElement: HTMLElement;
+            let selectItem: HTMLElement;
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX || this.element.getAttribute("data-loading") === "true") {
+                    return;
+                }
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                if (!ghostElement) {
+                    item.style.opacity = "0.38";
+                    ghostElement = item.cloneNode(true) as HTMLElement;
+                    this.element.append(ghostElement);
+                    ghostElement.setAttribute("id", "dragGhost");
+                    ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
+                    ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+                }
+                ghostElement.style.top = moveEvent.clientY + "px";
+                ghostElement.style.left = moveEvent.clientX + "px";
+                selectItem = hasClosestByClassName(moveEvent.target as HTMLElement, "b3-list-item") as HTMLElement;
+                if (!selectItem || selectItem.tagName !== "LI" || selectItem.isSameNode(item) || selectItem.style.position === "fixed" || !this.element.contains(selectItem)) {
+                    return;
+                }
+                this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                });
+                const selectRect = selectItem.getBoundingClientRect();
+                if (moveEvent.clientY > selectRect.bottom - 10) {
+                    selectItem.classList.add("dragover__bottom");
+                } else if (moveEvent.clientY < selectRect.top + 10) {
+                    selectItem.classList.add("dragover__top");
+                } else {
+                    selectItem.classList.add("dragover");
+                }
+            };
+
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                ghostElement.remove();
+                item.style.opacity = "";
+                if (!selectItem) {
+                    selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
+                }
+                if (selectItem && selectItem.className.indexOf("dragover") > -1) {
+                    getAllModels().editor.find(editItem => {
+                        if (editItem.editor.protyle.block.rootID === this.blockId) {
+                            let previousID;
+                            let parentID;
+                            const undoPreviousID = (item.previousElementSibling && item.previousElementSibling.tagName === "UL") ? item.previousElementSibling.previousElementSibling.getAttribute("data-node-id") : item.previousElementSibling?.getAttribute("data-node-id");
+                            const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                            if (selectItem.classList.contains("dragover")) {
+                                parentID = selectItem.getAttribute("data-node-id");
+                                if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
+                                    selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
+                                } else {
+                                    selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
+                                    item.remove();
+                                }
+                            } else if (selectItem.classList.contains("dragover__top")) {
+                                parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                                if (selectItem.previousElementSibling && selectItem.previousElementSibling.tagName === "UL") {
+                                    previousID = selectItem.previousElementSibling.previousElementSibling.getAttribute("data-node-id");
+                                } else {
+                                    previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                                }
+                                if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
+                                    return true;
+                                }
+                                selectItem.before(item);
+                            } else if (selectItem.classList.contains("dragover__bottom")) {
+                                previousID = selectItem.getAttribute("data-node-id");
+                                selectItem.after(item);
+                            }
+                            this.element.setAttribute("data-loading", "true");
+                            transaction(editItem.editor.protyle, [{
+                                action: "moveOutlineHeading",
+                                id: item.dataset.nodeId,
+                                previousID,
+                                parentID,
+                            }], [{
+                                action: "moveOutlineHeading",
+                                id: item.dataset.nodeId,
+                                previousID: undoPreviousID,
+                                parentID: undoParentID,
+                            }]);
+                            return true;
+                        }
+                    });
+                }
+                this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                });
+            };
+        });
     }
 
     public updateDocTitle(ial?: IObject) {
@@ -362,5 +470,6 @@ export class Outline extends Model {
                 currentElement.classList.add("b3-list-item--focus");
             }
         }
+        this.element.removeAttribute("data-loading")
     }
 }

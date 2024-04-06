@@ -101,7 +101,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 
 		if "" == avName {
-			avName = "Untitled"
+			avName = Conf.language(105)
 		}
 
 		attrView := &AttrView{ID: avID, Name: avName}
@@ -253,7 +253,7 @@ func GetBlockIndex(id string) (ret int) {
 	}
 
 	rootChild := node
-	for ; nil == rootChild.Parent || ast.NodeDocument != rootChild.Parent.Type; rootChild = rootChild.Parent {
+	for ; nil != rootChild.Parent && ast.NodeDocument != rootChild.Parent.Type; rootChild = rootChild.Parent {
 	}
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -293,11 +293,14 @@ func GetBlocksIndexes(ids []string) (ret map[string]int) {
 		}
 
 		if !n.IsChildBlockOf(tree.Root, 1) {
+			if n.IsBlock() {
+				nodesIndexes[n.ID] = idx
+			}
 			return ast.WalkContinue
 		}
 
-		nodesIndexes[n.ID] = idx
 		idx++
+		nodesIndexes[n.ID] = idx
 		return ast.WalkContinue
 	})
 
@@ -358,9 +361,9 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 			fc = fc.Next
 		}
 
-		name := util.EscapeHTML(parent.IALAttr("name"))
+		name := parent.IALAttr("name")
 		if ast.NodeDocument == parent.Type {
-			name = util.EscapeHTML(box.Name) + util.EscapeHTML(hPath)
+			name = box.Name + hPath
 		} else if ast.NodeAttributeView == parent.Type {
 			name = treenode.GetAttributeViewName(parent.AttributeViewID)
 		} else {
@@ -390,10 +393,11 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 		}
 
 		name = strings.ReplaceAll(name, editor.Caret, "")
+		name = util.EscapeHTML(name)
 		if add {
 			ret = append([]*BlockPath{{
 				ID:      id,
-				Name:    util.EscapeHTML(name),
+				Name:    name,
 				Type:    parent.Type.String(),
 				SubType: treenode.SubTypeAbbr(parent),
 			}}, ret...)
@@ -412,9 +416,10 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 
 			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {
 				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes), maxNameLen)
+				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{
 					ID:      b.ID,
-					Name:    util.EscapeHTML(name),
+					Name:    name,
 					Type:    b.Type.String(),
 					SubType: treenode.SubTypeAbbr(b),
 				}}, ret...)

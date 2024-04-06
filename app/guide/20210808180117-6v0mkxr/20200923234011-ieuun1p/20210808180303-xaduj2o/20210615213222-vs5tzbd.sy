@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20230422102255"
+		"type": "doc",
+		"updated": "20240402174245"
 	},
 	"Children": [
 		{
@@ -183,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20230403114455"
+				"updated": "20240402174245"
 			},
 			"Children": [
 				{
@@ -208,7 +209,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Every 10 minutes, a history will be generated for the documents updated within these 10 minutes (the interval can be set by "
+									"Data": "Every 10 minutes, "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated for the documents updated within these 10 minutes (the interval can be set by "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -272,7 +281,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When synchronizing in the cloud, the local data covered by the cloud will generate a history, and the suffix of the history folder is "
+									"Data": "When synchronizing in the cloud, the local data covered by the cloud will generate "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history, and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -357,7 +374,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", a history will be generated, and the suffix of the history folder is "
+									"Data": ", "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated, and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -405,7 +430,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", a history will be generated, and the suffix of the history folder is "
+									"Data": ", "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated, and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -429,7 +462,7 @@
 					},
 					"Properties": {
 						"id": "20230403114321-4rwhj6j",
-						"updated": "20230403114424"
+						"updated": "20240402174245"
 					},
 					"Children": [
 						{
@@ -437,7 +470,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230403114321-tou7etc",
-								"updated": "20230403114424"
+								"updated": "20240402174245"
 							},
 							"Children": [
 								{
@@ -451,12 +484,49 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, a history will be generated, and the suffix of the history folder "
+									"Data": "​, a history will be generated, and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240402174218-u5vrt8y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240402174218-u5vrt8y",
+						"updated": "20240402174243"
+					},
+					"Children": [
+						{
+							"ID": "20240402174218-9x6w0bk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240402174218-9x6w0bk",
+								"updated": "20240402174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When dragging an outline item in the outline panel, a history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-outline"
 								},
 								{
 									"Type": "NodeText",

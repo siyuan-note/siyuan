@@ -98,7 +98,6 @@ export const initAbout = () => {
     <button class="b3-button b3-button--outline fn__block" id="exportData">
        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
-    <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
 </div>
 <div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
@@ -110,7 +109,6 @@ export const initAbout = () => {
         <input id="importData" class="b3-form__upload" type="file">
         <svg><use xlink:href="#iconDownload"></use></svg> ${window.siyuan.languages.import}
     </button>
-    <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
 </div>
 <div class="b3-label${(!window.siyuan.config.readonly && (isInAndroid() || isInIOS())) ? "" : " fn__none"}">
@@ -131,7 +129,7 @@ export const initAbout = () => {
             <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}
         </button>
     </div>
-    <div class="b3-label__text">${window.siyuan.languages.about14}</div>
+    <div class="b3-label__text" id="tokenTip">${window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token)}</div>
 </div>
 <div class="b3-label">
     <div class="config-about__logo">
@@ -369,6 +367,7 @@ export const initAbout = () => {
             tokenElement.addEventListener("change", () => {
                 fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
                     window.siyuan.config.api.token = tokenElement.value;
+                    modelMainElement.querySelector("#tokenTip").innerHTML = window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token);
                 });
             });
         }

@@ -16,7 +16,8 @@ import {
     processSync,
     progressBackgroundTask,
     progressLoading,
-    progressStatus, reloadSync,
+    progressStatus,
+    reloadSync,
     setTitle,
     transactionError
 } from "./dialog/processSystem";
@@ -64,6 +65,9 @@ export class App {
                                 break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
+                                break;
+                            case "reloaddoc":
+                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false);
                                 break;
                             case "readonly":
                                 window.siyuan.config.editor.readOnly = data.data;

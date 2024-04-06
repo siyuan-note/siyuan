@@ -13,9 +13,9 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     switch (value.type) {
         case "block":
             if (value?.isDetached) {
-                html = `<span data-id="${value.block?.id}">${value.block?.content || "Untitled"}</span>`;
+                html = `<span data-id="${value.block?.id}">${value.block?.content || window.siyuan.languages.untitled}</span>`;
             } else {
-                html = `<span data-type="block-ref" data-id="${value.block?.id}" data-subtype="s" class="av__celltext--ref">${value.block?.content || "Untitled"}</span>`;
+                html = `<span data-type="block-ref" data-id="${value.block?.id}" data-subtype="s" class="av__celltext--ref">${value.block?.content || window.siyuan.languages.untitled}</span>`;
             }
             break;
         case "text":

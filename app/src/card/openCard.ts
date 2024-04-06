@@ -13,6 +13,9 @@ import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
 /// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import * as dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
@@ -61,6 +64,7 @@ export const genCardHTML = (options: {
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
     <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
+    <svg class="toolbar__icon" data-type="more"><use xlink:href="#iconMore"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
     /// #else
@@ -83,8 +87,8 @@ export const genCardHTML = (options: {
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
         <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
-        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openInNewTab}">
-            <svg><use xlink:href="#iconLayoutRight"></use></svg>
+        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
+            <svg><use xlink:href="#iconOpen"></use></svg>
         </div>
     </div>`;
     /// #endif
@@ -199,7 +203,6 @@ export const bindCardEvent = async (options: {
         });
     }
     options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
-    genCardCount(options.cardsData, index);
     const actionElements = options.element.querySelectorAll(".card__action");
     if (options.index === 0) {
         actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
@@ -210,11 +213,12 @@ export const bindCardEvent = async (options: {
     const filterElement = options.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
+        const docId = filterElement.getAttribute("data-id");
         fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
             (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-            rootID: filterElement.getAttribute("data-id"),
-            deckID: filterElement.getAttribute("data-id"),
-            notebook: filterElement.getAttribute("data-id"),
+            rootID: docId,
+            deckID: docId,
+            notebook: docId,
         }, async (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
@@ -235,10 +239,12 @@ export const bindCardEvent = async (options: {
         });
     };
 
+    countElement.innerHTML = genCardCount(options.cardsData, index);
     options.element.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];
+        const docId = filterElement.getAttribute("data-id");
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
                 type = "1";
@@ -271,25 +277,92 @@ export const bindCardEvent = async (options: {
             if (moreElement) {
                 event.stopPropagation();
                 event.preventDefault();
-                if (filterElement.getAttribute("data-cardtype") === "all") {
+                if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
                     showMessage(window.siyuan.languages.noSupportTip);
                     return;
                 }
                 const menu = new Menu();
                 menu.addItem({
                     icon: "iconClock",
-                    label: window.siyuan.languages.updatedTime,
+                    label: window.siyuan.languages.setDueTime,
                     click() {
-
+                        const timedialog = new Dialog({
+                            title: window.siyuan.languages.setDueTime,
+                            content: `<div class="b3-dialog__content">
+    <div class="b3-label__text">${window.siyuan.languages.showCardDay}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" value="1" type="number" step="1" min="1">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                            width: isMobile() ? "92vw" : "520px",
+                        });
+                        const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
+                        const btnsElement = timedialog.element.querySelectorAll(".b3-button");
+                        timedialog.bindInput(inputElement, () => {
+                            (btnsElement[1] as HTMLButtonElement).click();
+                        });
+                        inputElement.focus();
+                        inputElement.select();
+                        btnsElement[0].addEventListener("click", () => {
+                            timedialog.destroy();
+                        });
+                        btnsElement[1].addEventListener("click", () => {
+                            fetchPost("/api/riff/batchSetRiffCardsDueTime", {
+                                cardDues: [{
+                                    id: currentCard.cardID,
+                                    due: dayjs().day(parseInt(inputElement.value)).format("YYYYMMDDHHmmss")
+                                }]
+                            }, () => {
+                                actionElements[0].classList.add("fn__none");
+                                actionElements[1].classList.remove("fn__none");
+                                if (currentCard.state === 0) {
+                                    options.cardsData.unreviewedNewCardCount--;
+                                } else {
+                                    options.cardsData.unreviewedOldCardCount--;
+                                }
+                                options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                                options.cardsData.cards.splice(index, 1);
+                                index--;
+                                timedialog.destroy();
+                            });
+                        });
                     }
                 });
-                menu.addItem({
-                    icon: "iconRefresh",
-                    label: window.siyuan.languages.reset,
-                    click() {
-
-                    }
-                });
+                if (currentCard.state !== 0) {
+                    menu.addItem({
+                        icon: "iconRefresh",
+                        label: window.siyuan.languages.reset,
+                        click() {
+                            fetchPost("/api/riff/resetRiffCards", {
+                                type: filterElement.getAttribute("data-cardtype"),
+                                id: docId,
+                                deckID: Constants.QUICK_DECK_ID,
+                                blockIDs: [currentCard.blockID],
+                            }, () => {
+                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
+                                currentCard.lapses = 0;
+                                currentCard.lastReview = -62135596800000;
+                                currentCard.reps = 0;
+                                currentCard.state = 0;
+                                currentCard.nextDues = {
+                                    1: minLang,
+                                    2: minLang.replace("1", "5"),
+                                    3: minLang.replace("1", "10"),
+                                    4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
+                                };
+                                actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
+                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex];
+                                });
+                                options.cardsData.unreviewedOldCardCount--;
+                                options.cardsData.unreviewedNewCardCount++;
+                                countElement.innerHTML = genCardCount(options.cardsData, index);
+                            });
+                        }
+                    });
+                }
                 menu.addItem({
                     icon: "iconTrashcan",
                     label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
@@ -316,55 +389,93 @@ export const bindCardEvent = async (options: {
                     iconHTML: "",
                     type: "readonly",
                     label: `<div class="fn__flex">
-    <div class="fn__flex-1">${window.siyuan.languages.forgetCount}</div>
+    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.forgetCount}</div>
     <div class="fn__space"></div>
     <div>${currentCard.lapses}</div>
-</div>
-<div class="fn__flex${currentCard.lastReview > 0 ? "" : " fn__none"}">
-    <div class="fn__flex-1">${window.siyuan.languages.lastReviewTime}</div>
-    <div class="fn__space"></div>
-    <div>${dayjs(currentCard.lastReview).format("YYYY-MM-DD")}</div>
-</div>
-<div class="fn__flex">
-    <div class="fn__flex-1">${window.siyuan.languages.revisionCount}</div>
+</div><div class="fn__flex">
+    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.revisionCount}</div>
     <div class="fn__space"></div>
     <div>${currentCard.reps}</div>
-</div>
-<div class="fn__flex">
-    <div class="fn__flex-1">${window.siyuan.languages.cardStatus}</div>
+</div><div class="fn__flex">
+    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.cardStatus}</div>
     <div class="fn__space"></div>
-    <div class="${window.siyuan.languages.cardStatus === 0 ? "ft__primary" : "ft__success"}">${window.siyuan.languages.cardStatus === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
+    <div class="${currentCard.state === 0 ? "ft__primary" : "ft__success"}">${currentCard.state === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
+</div><div class="fn__flex${currentCard.lastReview > 0 ? "" : " fn__none"}">
+    <div class="fn__flex-1 ft__breakword" style="width: 170px;">${window.siyuan.languages.lastReviewTime}</div>
+    <div class="fn__space"></div>
+    <div>${dayjs(currentCard.lastReview).format("YYYY-MM-DD")}</div>
 </div>`,
                 });
-                const rect = target.getBoundingClientRect();
+                /// #if MOBILE
+                menu.fullscreen();
+                /// #else
+                const rect = moreElement.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
                     y: rect.bottom
                 });
+                /// #endif
                 return;
             }
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
-                openFile({
-                    app: options.app,
-                    position: "right",
-                    custom: {
-                        icon: "iconRiffCard",
-                        title: window.siyuan.languages.spaceRepetition,
-                        data: {
-                            cardsData: options.cardsData,
-                            index,
-                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                            id: filterElement.getAttribute("data-id"),
-                            title: options.title
-                        },
-                        id: "siyuan-card"
-                    },
+                const stickMenu = new Menu();
+                stickMenu.addItem({
+                    icon: "iconLayoutRight",
+                    label: window.siyuan.languages.insertRight,
+                    click() {
+                        openFile({
+                            app: options.app,
+                            position: "right",
+                            custom: {
+                                icon: "iconRiffCard",
+                                title: window.siyuan.languages.spaceRepetition,
+                                data: {
+                                    cardsData: options.cardsData,
+                                    index,
+                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                    id: docId,
+                                    title: options.title
+                                },
+                                id: "siyuan-card"
+                            },
+                        });
+                        options.dialog.destroy();
+                    }
                 });
-                if (options.dialog) {
-                    options.dialog.destroy();
-                }
+                /// #if !BROWSER
+                stickMenu.addItem({
+                    icon: "iconOpenWindow",
+                    label: window.siyuan.languages.openByNewWindow,
+                    click() {
+                        const json = {
+                            "title": window.siyuan.languages.spaceRepetition,
+                            "icon": "iconRiffCard",
+                            "instance": "Tab",
+                            "children": {
+                                "instance": "Custom",
+                                "customModelType": "siyuan-card",
+                                "customModelData": {
+                                    "cardType": filterElement.getAttribute("data-cardtype"),
+                                    "id": docId,
+                                    "title": options.title
+                                }
+                            }
+                        };
+                        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
+                            // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
+                            url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+                        });
+                        options.dialog.destroy();
+                    }
+                });
+                /// #endif
+                const rect = sticktabElement.getBoundingClientRect();
+                stickMenu.open({
+                    x: rect.left,
+                    y: rect.bottom
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -509,9 +620,9 @@ export const bindCardEvent = async (options: {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
                     fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
                         (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                        rootID: filterElement.getAttribute("data-id"),
-                        deckID: filterElement.getAttribute("data-id"),
-                        notebook: filterElement.getAttribute("data-id"),
+                        rootID: docId,
+                        deckID: docId,
+                        notebook: docId,
                         reviewedCards: options.cardsData.cards
                     }, async (result) => {
                         emitEvent(options.app, options.cardsData.cards[index - 1], type);

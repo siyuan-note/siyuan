@@ -491,7 +491,7 @@ func exit(c *gin.Context) {
 		execInstallPkg = int(execInstallPkgArg.(float64))
 	}
 
-	exitCode := model.Close(force, execInstallPkg)
+	exitCode := model.Close(force, true, execInstallPkg)
 	ret.Code = exitCode
 	switch exitCode {
 	case 0:

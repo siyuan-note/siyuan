@@ -424,6 +424,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 0 != groupBy {
 		// 按文档分组后不支持替换 Need to be reminded that replacement operations are not supported after grouping by doc https://github.com/siyuan-note/siyuan/issues/10161
+		// 因为分组条件传入以后搜索只能命中文档块，会导致 全部替换 失效
 		err = errors.New(Conf.Language(221))
 		return
 	}
@@ -592,7 +593,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
 							if 0 == method {
-								if bytes.Contains(n.Tokens, []byte(keyword)) {
+								if strings.Contains(n.TextMarkTextContent, keyword) {
 									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 								}
 							} else if 3 == method {
@@ -971,6 +972,10 @@ func buildTypeFilter(types map[string]bool) string {
 		s.HTMLBlock = types["htmlBlock"]
 		s.EmbedBlock = types["embedBlock"]
 		s.DatabaseBlock = types["databaseBlock"]
+		s.AudioBlock = types["audioBlock"]
+		s.VideoBlock = types["videoBlock"]
+		s.IFrameBlock = types["iframeBlock"]
+		s.WidgetBlock = types["widgetBlock"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -985,6 +990,10 @@ func buildTypeFilter(types map[string]bool) string {
 		s.HTMLBlock = Conf.Search.HTMLBlock
 		s.EmbedBlock = Conf.Search.EmbedBlock
 		s.DatabaseBlock = Conf.Search.DatabaseBlock
+		s.AudioBlock = Conf.Search.AudioBlock
+		s.VideoBlock = Conf.Search.VideoBlock
+		s.IFrameBlock = Conf.Search.IFrameBlock
+		s.WidgetBlock = Conf.Search.WidgetBlock
 	}
 	return s.TypeFilter()
 }
@@ -1036,8 +1045,8 @@ func removeLimitClause(stmt string) string {
 func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
 	keyword = filterQueryInvisibleChars(keyword)
 
-	if ast.IsNodeIDPattern(keyword) {
-		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36, 1, 32)
+	if id := extractID(keyword); "" != id {
+		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+id+"'", 36, 1, 32)
 		return
 	}
 
@@ -1093,6 +1102,23 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
+	}
+	return
+}
+
+func extractID(content string) (ret string) {
+	// Improve block ref search ID extraction https://github.com/siyuan-note/siyuan/issues/10848
+
+	if 22 > len(content) {
+		return
+	}
+
+	// 从第一个字符开始循环，直到找到一个合法的 ID 为止
+	for i := 0; i < len(content)-21; i++ {
+		if ast.IsNodeIDPattern(content[i : i+22]) {
+			ret = content[i : i+22]
+			return
+		}
 	}
 	return
 }
@@ -1153,13 +1179,13 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		table = "blocks_fts_case_insensitive"
 	}
 	projections := "id, parent_id, root_id, hash, box, path, " +
-		// Improve the highlight snippet when search result content is too long https://github.com/siyuan-note/siyuan/issues/9215
-		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS hpath, " +
-		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS name, " +
-		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS alias, " +
-		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS memo, " +
+		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
+		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
+		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
+		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
+		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
 		"tag, " +
-		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 192) AS content, " +
+		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
@@ -1291,7 +1317,20 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	}
 
 	id := sqlBlock.ID
-	content := util.EscapeHTML(sqlBlock.Content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
+	content := sqlBlock.Content
+	if 1 < strings.Count(content, search.SearchMarkRight) && strings.HasSuffix(content, search.SearchMarkRight+"...") {
+		// 返回多个关键字命中时需要检查最后一个关键字是否被截断
+		firstKeyword := gulu.Str.SubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		lastKeyword := gulu.Str.LastSubStringBetween(content, search.SearchMarkLeft, search.SearchMarkRight)
+		if firstKeyword != lastKeyword {
+			// 如果第一个关键字和最后一个关键字不相同，说明最后一个关键字被截断了
+			// 此时需要将 content 中的最后一个关键字替换为完整的关键字
+			content = strings.TrimSuffix(content, search.SearchMarkLeft+lastKeyword+search.SearchMarkRight+"...")
+			content += search.SearchMarkLeft + firstKeyword + search.SearchMarkRight + "..."
+		}
+	}
+
+	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
 	markdown := maxContent(sqlBlock.Markdown, 5120)

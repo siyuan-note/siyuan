@@ -1,6 +1,7 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {fetchSyncPost} from "../../../util/fetch";
 
 const calcItem = (options: {
     menu: Menu,
@@ -74,17 +75,17 @@ const calcItem = (options: {
     });
 };
 
-export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement, panelData?: {
+export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, panelData?: {
     data: IAV,
     colId: string,
     blockID: string
 }) => {
     let rowElement: HTMLElement | false;
     let type;
-    let colId;
-    let avId;
-    let oldOperator;
-    let blockID;
+    let colId: string;
+    let avId: string;
+    let oldOperator: string;
+    let blockID: string;
     if (panelData) {
         avId = panelData.data.id;
         type = calcElement.dataset.colType as TAVCol;
@@ -250,7 +251,42 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement, panelD
             target: calcElement
         });
     }
-    if (["number", "template"].includes(type)) {
+    let rollupIsNumber = false;
+    if (type === "rollup") {
+        let relationKeyID: string;
+        let keyID: string;
+        let avData = panelData?.data;
+        if (!avData) {
+            const avResponse = await fetchSyncPost("api/av/renderAttributeView", {id: avId});
+            avData = avResponse.data;
+        }
+        avData.view.columns.find((item) => {
+            if (item.id === colId) {
+                relationKeyID = item.rollup?.relationKeyID;
+                keyID = item.rollup?.keyID;
+                return true;
+            }
+        });
+        if (relationKeyID && keyID) {
+            let relationAvId: string;
+            avData.view.columns.find((item) => {
+                if (item.id === relationKeyID) {
+                    relationAvId = item.relation?.avID;
+                    return true;
+                }
+            });
+            if (relationAvId) {
+                const colResponse = await fetchSyncPost("api/av/getAttributeView", {id: relationAvId});
+                colResponse.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
+                    if (item.key.id === keyID) {
+                        rollupIsNumber = item.key.type === "number";
+                        return true;
+                    }
+                });
+            }
+        }
+    }
+    if (["number", "template"].includes(type) || rollupIsNumber) {
         calcItem({
             menu,
             protyle,

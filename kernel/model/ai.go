@@ -84,8 +84,8 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
-	if 7 < len(contextMsgs) {
-		contextMsgs = contextMsgs[len(contextMsgs)-7:]
+	if Conf.AI.OpenAI.APIMaxContexts < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-Conf.AI.OpenAI.APIMaxContexts:]
 	}
 
 	var gpt GPT
@@ -96,7 +96,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 	}
 
 	buf := &bytes.Buffer{}
-	for i := 0; i < 7; i++ {
+	for i := 0; i < Conf.AI.OpenAI.APIMaxContexts; i++ {
 		part, stop, chatErr := gpt.chat(msg, contextMsgs)
 		buf.WriteString(part)
 
@@ -170,7 +170,7 @@ type OpenAIGPT struct {
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, Conf.AI.OpenAI.APIModel, Conf.AI.OpenAI.APIMaxTokens, Conf.AI.OpenAI.APITimeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, Conf.AI.OpenAI.APIModel, Conf.AI.OpenAI.APIMaxTokens, Conf.AI.OpenAI.APITemperature, Conf.AI.OpenAI.APITimeout)
 }
 
 type CloudGPT struct {

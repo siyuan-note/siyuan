@@ -99,10 +99,10 @@ export const setFilter = async (options: {
                     newValue = {type: filterValue.type};
                 } else {
                     newValue = genCellValue(filterValue.type, {
-                        isNotEmpty2: textElements[1].value !== "",
+                        isNotEmpty2: textElements[2].value !== "",
                         isNotEmpty: textElements[0].value !== "",
                         content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
-                        content2: textElements[1].value ? new Date(textElements[1].value + " 00:00").getTime() : null,
+                        content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : null,
                         hasEndDate: newFilter.operator === "Is between",
                         isNotTime: true,
                     });

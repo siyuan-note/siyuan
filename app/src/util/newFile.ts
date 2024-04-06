@@ -96,7 +96,7 @@ export const newFile = (optios: {
             if (data.data.path.startsWith("/") || optios.currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: optios.notebookId,
-                    path: pathPosix().join(data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
+                    path: pathPosix().join(data.data.path, optios.name || (data.data.path.endsWith("/") ? window.siyuan.languages.untitled : "")),
                     // 根目录时无法确定 parentID
                     markdown: ""
                 }, response => {
@@ -117,7 +117,7 @@ export const newFile = (optios: {
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: optios.notebookId,
-                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || (data.data.path.endsWith("/") ? "Untitled" : "")),
+                        path: pathPosix().join(responseHPath.data, data.data.path, optios.name || (data.data.path.endsWith("/") ? window.siyuan.languages.untitled : "")),
                         parentID: getDisplayName(optios.currentPath, true, true),
                         markdown: ""
                     }, response => {
@@ -134,7 +134,7 @@ export const newFile = (optios: {
                 });
             }
         } else {
-            const title = pathPosix().basename(data.data.path || "Untitled");
+            const title = pathPosix().basename(data.data.path || window.siyuan.languages.untitled);
             if (!validateName(title)) {
                 return;
             }
@@ -191,12 +191,12 @@ export const newFileByName = (app: App, value: string) => {
     newFile({
         app,
         useSavePath: true,
-        name: replaceFileName(value.trim()) || "Untitled"
+        name: replaceFileName(value.trim()) || window.siyuan.languages.untitled
     });
 };
 
 export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeElement: HTMLElement, pathDir: string) => {
-    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
+    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || window.siyuan.languages.untitled;
     const hPath = pathPosix().join(pathDir, newFileName);
     fetchPost("/api/filetree/getIDsByHPath", {
         path: hPath,

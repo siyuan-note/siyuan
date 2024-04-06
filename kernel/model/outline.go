@@ -26,6 +26,187 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
+	headingID := operation.ID
+	previousID := operation.PreviousID
+	parentID := operation.ParentID
+
+	tree, err := tx.loadTree(headingID)
+	if nil != err {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
+	}
+	operation.RetData = tree.Root.ID
+
+	if headingID == parentID || headingID == previousID {
+		return
+	}
+
+	heading := treenode.GetNodeInTree(tree, headingID)
+	if nil == heading {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
+	}
+
+	if ast.NodeDocument != heading.Parent.Type {
+		// 仅支持文档根节点下第一层标题，不支持容器块内标题
+		util.PushMsg(Conf.language(240), 5000)
+		return
+	}
+
+	headings := []*ast.Node{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			headings = append(headings, n)
+		}
+		return ast.WalkContinue
+	})
+
+	headingChildren := treenode.HeadingChildren(heading)
+
+	if "" != previousID {
+		previousHeading := treenode.GetNodeInTree(tree, previousID)
+		if nil == previousHeading {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
+		}
+
+		if ast.NodeDocument != previousHeading.Parent.Type {
+			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
+			return
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == previousID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
+		}
+
+		generateOpTypeHistory(tree, HistoryOpOutline)
+
+		targetNode := previousHeading
+		previousHeadingChildren := treenode.HeadingChildren(previousHeading)
+		if 0 < len(previousHeadingChildren) {
+			targetNode = previousHeadingChildren[len(previousHeadingChildren)-1]
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == targetNode.ID {
+				// 目标节点是当前标题的子节点，不需要移动
+				return
+			}
+		}
+
+		diffLevel := heading.HeadingLevel - previousHeading.HeadingLevel
+		heading.HeadingLevel = previousHeading.HeadingLevel
+
+		for i := len(headingChildren) - 1; i >= 0; i-- {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+				if 6 < child.HeadingLevel {
+					child.HeadingLevel = 6
+				}
+			}
+			targetNode.InsertAfter(child)
+		}
+		targetNode.InsertAfter(heading)
+	} else if "" != parentID {
+		parentHeading := treenode.GetNodeInTree(tree, parentID)
+		if nil == parentHeading {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: parentID}
+		}
+
+		if ast.NodeDocument != parentHeading.Parent.Type {
+			// 仅支持文档根节点下第一层标题，不支持容器块内标题
+			util.PushMsg(Conf.language(240), 5000)
+			return
+		}
+
+		for _, h := range headingChildren {
+			if h.ID == parentID {
+				// 不能移动到自己的子标题下
+				util.PushMsg(Conf.language(241), 5000)
+				return
+			}
+		}
+
+		generateOpTypeHistory(tree, HistoryOpOutline)
+
+		targetNode := parentHeading
+		parentHeadingChildren := treenode.HeadingChildren(parentHeading)
+		// 找到下方第一个非标题节点
+		var tmp []*ast.Node
+		for _, child := range parentHeadingChildren {
+			if ast.NodeHeading == child.Type {
+				break
+			}
+			tmp = append(tmp, child)
+		}
+		parentHeadingChildren = tmp
+		if 0 < len(parentHeadingChildren) {
+			for _, child := range parentHeadingChildren {
+				if child.ID == headingID {
+					break
+				}
+				targetNode = child
+			}
+		}
+
+		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
+		heading.HeadingLevel = parentHeading.HeadingLevel + 1
+		if 6 < heading.HeadingLevel {
+			heading.HeadingLevel = 6
+		}
+
+		for i := len(headingChildren) - 1; i >= 0; i-- {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+				if 6 < child.HeadingLevel {
+					child.HeadingLevel = 6
+				}
+			}
+			targetNode.InsertAfter(child)
+		}
+		targetNode.InsertAfter(heading)
+	} else {
+		generateOpTypeHistory(tree, HistoryOpOutline)
+
+		// 移到第一个标题前
+		var firstHeading *ast.Node
+		for n := tree.Root.FirstChild; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type {
+				firstHeading = n
+				break
+			}
+		}
+		if nil == firstHeading || firstHeading.ID == heading.ID {
+			return
+		}
+
+		diffLevel := heading.HeadingLevel - firstHeading.HeadingLevel
+		heading.HeadingLevel = firstHeading.HeadingLevel
+
+		firstHeading.InsertBefore(heading)
+		for i := 0; i < len(headingChildren); i++ {
+			child := headingChildren[i]
+			if ast.NodeHeading == child.Type {
+				child.HeadingLevel -= diffLevel
+				if 6 < child.HeadingLevel {
+					child.HeadingLevel = 6
+				}
+			}
+			firstHeading.InsertBefore(child)
+		}
+	}
+
+	if err = tx.writeTree(tree); nil != err {
+		return
+	}
+	return
+}
+
 func Outline(rootID string) (ret []*Path, err error) {
 	time.Sleep(util.FrontendQueueInterval)
 	WaitForWritingFiles()

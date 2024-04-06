@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20240308162730"
+		"updated": "20240403151002"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20240308162730"
+				"updated": "20240403151002"
 			},
 			"Children": [
 				{
@@ -378,7 +378,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210121193829-wfzsf6m"
+						"id": "20210121193829-wfzsf6m",
+						"updated": "20240403150956"
 					},
 					"Children": [
 						{
@@ -386,7 +387,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162138-7ufhbho",
-								"updated": "20210504093006"
+								"updated": "20240403150956"
 							},
 							"Children": [
 								{
@@ -400,40 +401,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", and the return value is "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " list of blocks,  and the parameter is "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " SQL statement: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​: This function is used to query the database, and the return value is a list of blocks,  please refer to the example below"
 								}
 							]
 						}
@@ -447,7 +415,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210504093232-vukp34t"
+						"id": "20210504093232-vukp34t",
+						"updated": "20240403151002"
 					},
 					"Children": [
 						{
@@ -455,7 +424,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210504093232-6wxl589",
-								"updated": "20210504093302"
+								"updated": "20240403151002"
 							},
 							"Children": [
 								{
@@ -469,40 +438,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", and the return value is "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " list of spans,  and the parameter is "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " SQL statement: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​: This function is used to query the database, and the return value is a list of spans,  please refer to the example below"
 								}
 							]
 						}

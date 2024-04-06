@@ -1056,9 +1056,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragoverElement: Element;
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        if (protyle.disabled) {
+        if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
             event.stopPropagation();
+            event.dataTransfer.dropEffect = "none";
             return;
         }
         const contentRect = protyle.contentElement.getBoundingClientRect();

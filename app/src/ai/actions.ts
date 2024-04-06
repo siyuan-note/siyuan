@@ -35,9 +35,9 @@ const editDialog = (customName: string, customMemo: string) => {
     <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.aiCustomAction}"></textarea>
 </div>
 <div class="b3-dialog__action">
+    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
@@ -47,13 +47,13 @@ const editDialog = (customName: string, customMemo: string) => {
     const customElement = dialog.element.querySelector("textarea");
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(customElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
+        (btnsElement[2] as HTMLButtonElement).click();
     });
     customElement.value = customMemo;
-    btnsElement[0].addEventListener("click", () => {
+    btnsElement[1].addEventListener("click", () => {
         dialog.destroy();
     });
-    btnsElement[1].addEventListener("click", () => {
+    btnsElement[2].addEventListener("click", () => {
         window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
             name: string,
             memo: string
@@ -67,7 +67,7 @@ const editDialog = (customName: string, customMemo: string) => {
         });
         dialog.destroy();
     });
-    btnsElement[2].addEventListener("click", () => {
+    btnsElement[0].addEventListener("click", () => {
         window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
             name: string,
             memo: string
@@ -185,31 +185,6 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             ${window.siyuan.languages.aiContinueWrite}
         </div>
         <div class="b3-menu__separator"></div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [zh-Hans]">
-            ${window.siyuan.languages.aiTranslate_zh_Hans}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [zh-Hant]">
-            ${window.siyuan.languages.aiTranslate_zh_Hant}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [ja-JP]">
-            ${window.siyuan.languages.aiTranslate_ja_JP}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [ko-KR]">
-            ${window.siyuan.languages.aiTranslate_ko_KR}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [en-US]">
-            ${window.siyuan.languages.aiTranslate_en_US}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [es-ES]">
-            ${window.siyuan.languages.aiTranslate_es_ES}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [fr-FR]">
-            ${window.siyuan.languages.aiTranslate_fr_FR}
-        </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Translate as follows to [de-DE]">
-            ${window.siyuan.languages.aiTranslate_de_DE}
-        </div>
-        <div class="b3-menu__separator"></div>
         <div class="b3-list-item b3-list-item--narrow" data-action="${window.siyuan.languages.aiExtractSummary}">
             ${window.siyuan.languages.aiExtractSummary}
         </div>
@@ -222,6 +197,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         <div class="b3-list-item b3-list-item--narrow" data-action="Clear context">
             ${window.siyuan.languages.clearContext}
         </div>
+        <div class="b3-menu__separator"></div>
         <div class="b3-list-item b3-list-item--narrow" data-type="custom">
             ${window.siyuan.languages.aiCustomAction}
         </div>

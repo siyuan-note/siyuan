@@ -29,10 +29,10 @@ import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
 import {checkFold} from "../util/noRelyPCFunction";
 
-const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
+const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
         if (!window.siyuan.config.keymap[key1]) {
-            window.siyuan.config.keymap[key1] = keymap;
+            window.siyuan.config.keymap[key1] = keymap as Config.IKeymapGeneral;
             return false;
         }
     } else {
@@ -41,7 +41,7 @@ const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edi
             return false;
         }
         if (!window.siyuan.config.keymap[key1][key2]) {
-            window.siyuan.config.keymap[key1][key2] = keymap;
+            (window.siyuan.config.keymap[key1][key2] as Config.IKeymapEditor[typeof key2]) = keymap as Config.IKeymapEditor[typeof key2];
             return false;
         }
     }

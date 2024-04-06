@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {saveExport} from "../protyle/export";
-import {openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -476,7 +476,7 @@ export const exportMd = (id: string) => {
                 });
                 btnsElement[1].addEventListener("click", () => {
                     if (inputElement.value.trim() === "") {
-                        inputElement.value = "Untitled";
+                        inputElement.value = window.siyuan.languages.untitled;
                     } else {
                         inputElement.value = replaceFileName(inputElement.value);
                     }
@@ -682,7 +682,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
-        label: window.siyuan.languages.useBrowserView,
+        label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? "Click" : "",
         click: () => {
             openByMobile(src);
@@ -718,33 +718,49 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                     openAssetNewWindow(src.trim());
                 }
             });
+            submenu.push({
+                icon: "iconFolder",
+                label: window.siyuan.languages.showInFolder,
+                accelerator: showAccelerator ? "⌘Click" : "",
+                click: () => {
+                    openBy(src, "folder");
+                }
+            });
+            submenu.push({
+                label: window.siyuan.languages.useDefault,
+                accelerator: showAccelerator ? "⇧Click" : "",
+                click() {
+                    openBy(src, "app");
+                }
+            });
             /// #endif
         } else {
+            /// #if !BROWSER
             submenu.push({
-                label: window.siyuan.languages.useBrowserView,
+                label: window.siyuan.languages.useDefault,
+                accelerator: showAccelerator ? "Click" : "",
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            submenu.push({
+                icon: "iconFolder",
+                label: window.siyuan.languages.showInFolder,
+                accelerator: showAccelerator ? "⌘Click" : "",
+                click: () => {
+                    openBy(src, "folder");
+                }
+            });
+            /// #else
+            submenu.push({
+                label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
                 accelerator: showAccelerator ? "Click" : "",
                 click: () => {
                     openByMobile(src);
                 }
             });
+            /// #endif
         }
-        /// #if !BROWSER
-        submenu.push({
-            icon: "iconFolder",
-            label: window.siyuan.languages.showInFolder,
-            accelerator: showAccelerator ? "⌘Click" : "",
-            click: () => {
-                openBy(src, "folder");
-            }
-        });
-        submenu.push({
-            label: window.siyuan.languages.useDefault,
-            accelerator: showAccelerator ? "⇧Click" : "",
-            click() {
-                openBy(src, "app");
-            }
-        });
-        /// #endif
     } else if (src) {
         if (0 > src.indexOf(":")) {
             // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
@@ -763,7 +779,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         });
         /// #else
         submenu.push({
-            label: window.siyuan.languages.useBrowserView,
+            label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? "Click" : "",
             click: () => {
                 openByMobile(src);

@@ -173,8 +173,7 @@
 									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "\n"
+									"Type": "NodeText"
 								}
 							]
 						}
@@ -493,8 +492,7 @@
 									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
 								},
 								{
-									"Type": "NodeText",
-									"Data": "\n"
+									"Type": "NodeText"
 								}
 							]
 						}

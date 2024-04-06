@@ -19,15 +19,176 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/88250/gulu"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"sync"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
+
+func BatchUpdateBazaarPackages(frontend string) {
+	plugins, widgets, icons, themes, templates := UpdatedPackages(frontend)
+
+	total := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
+	if 1 > total {
+		return
+	}
+
+	util.PushEndlessProgress(fmt.Sprintf(Conf.language(235), 1, total))
+	defer util.PushClearProgress()
+	count := 1
+	for _, plugin := range plugins {
+		err := bazaar.InstallPlugin(plugin.RepoURL, plugin.RepoHash, filepath.Join(util.DataDir, "plugins", plugin.Name), Conf.System.ID)
+		if nil != err {
+			logging.LogErrorf("update plugin [%s] failed: %s", plugin.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			return
+		}
+
+		count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, plugin.Name))
+	}
+
+	for _, widget := range widgets {
+		err := bazaar.InstallWidget(widget.RepoURL, widget.RepoHash, filepath.Join(util.DataDir, "widgets", widget.Name), Conf.System.ID)
+		if nil != err {
+			logging.LogErrorf("update widget [%s] failed: %s", widget.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			return
+		}
+
+		count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, widget.Name))
+	}
+
+	for _, icon := range icons {
+		err := bazaar.InstallIcon(icon.RepoURL, icon.RepoHash, filepath.Join(util.IconsPath, icon.Name), Conf.System.ID)
+		if nil != err {
+			logging.LogErrorf("update icon [%s] failed: %s", icon.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			return
+		}
+
+		count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, icon.Name))
+	}
+
+	for _, template := range templates {
+		err := bazaar.InstallTemplate(template.RepoURL, template.RepoHash, filepath.Join(util.DataDir, "templates", template.Name), Conf.System.ID)
+		if nil != err {
+			logging.LogErrorf("update template [%s] failed: %s", template.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			return
+		}
+
+		count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, template.Name))
+	}
+
+	for _, theme := range themes {
+		err := bazaar.InstallTheme(theme.RepoURL, theme.RepoHash, filepath.Join(util.ThemesPath, theme.Name), Conf.System.ID)
+		if nil != err {
+			logging.LogErrorf("update theme [%s] failed: %s", theme.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			return
+		}
+
+		count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, theme.Name))
+	}
+
+	util.ReloadUI()
+
+	go func() {
+		util.WaitForUILoaded()
+		time.Sleep(500)
+		util.PushMsg(fmt.Sprintf(Conf.language(237), total), 5000)
+	}()
+
+	return
+}
+
+func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*bazaar.Widget, icons []*bazaar.Icon, themes []*bazaar.Theme, templates []*bazaar.Template) {
+	wg := &sync.WaitGroup{}
+	wg.Add(5)
+	go func() {
+		defer wg.Done()
+		tmp := InstalledPlugins(frontend, "")
+		for _, plugin := range tmp {
+			if plugin.Outdated {
+				plugins = append(plugins, plugin)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		tmp := InstalledWidgets("")
+		for _, widget := range tmp {
+			if widget.Outdated {
+				widgets = append(widgets, widget)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		tmp := InstalledIcons("")
+		for _, icon := range tmp {
+			if icon.Outdated {
+				icons = append(icons, icon)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		tmp := InstalledThemes("")
+		for _, theme := range tmp {
+			if theme.Outdated {
+				themes = append(themes, theme)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		tmp := InstalledTemplates("")
+		for _, template := range tmp {
+			if template.Outdated {
+				templates = append(templates, template)
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	if 1 > len(plugins) {
+		plugins = []*bazaar.Plugin{}
+	}
+
+	if 1 > len(widgets) {
+		widgets = []*bazaar.Widget{}
+	}
+
+	if 1 > len(icons) {
+		icons = []*bazaar.Icon{}
+	}
+
+	if 1 > len(themes) {
+		themes = []*bazaar.Theme{}
+	}
+
+	if 1 > len(templates) {
+		templates = []*bazaar.Template{}
+	}
+	return
+}
 
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)

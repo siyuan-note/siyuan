@@ -1,14 +1,15 @@
 import {
-    focusBlock, focusByOffset,
-    focusByRange, focusByWbr,
-    getEditorRange, getSelectionOffset,
+    focusBlock,
+    focusByOffset,
+    focusByRange,
+    focusByWbr,
+    getEditorRange,
+    getSelectionOffset,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
-import {
-    openFileAttr,
-} from "../../menus/commonMenuItem";
+import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
 import {isMac, readText, writeText} from "../util/compatibility";
@@ -81,6 +82,14 @@ export class Title {
 
             if (commonHotkey(protyle, event)) {
                 return true;
+            }
+            if (matchHotKey("⇧⌘V", event)) {
+                navigator.clipboard.readText().then(textPlain => {
+                    textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                    const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                    document.execCommand("insertText", false, replaceFileName(content));
+                    this.rename(protyle);
+                });
             }
             if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
                 const ids = protyle.path.split("/");
@@ -210,6 +219,7 @@ export class Title {
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.paste,
+                icon: "iconPaste",
                 accelerator: "⌘V",
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
@@ -217,6 +227,18 @@ export class Title {
                     const text = await readText();
                     document.execCommand("insertText", false, replaceFileName(text));
                     this.rename(protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.pasteAsPlainText,
+                accelerator: "⇧⌘V",
+                click: async () => {
+                    navigator.clipboard.readText().then(textPlain => {
+                        textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        document.execCommand("insertText", false, replaceFileName(content));
+                        this.rename(protyle);
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -264,7 +286,7 @@ export class Title {
 
     public setTitle(title: string) {
         if (code160to32(title) !== code160to32(this.editElement.textContent)) {
-            this.editElement.textContent = title === "Untitled" ? "" : title;
+            this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
         }
     }
 

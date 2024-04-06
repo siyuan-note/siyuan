@@ -66,6 +66,17 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
+func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
+	for _, tx := range *transactions {
+		for _, op := range tx.DoOperations {
+			if "moveOutlineHeading" == op.Action {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func WaitForWritingFiles() {
 	var printLog bool
 	var lastPrintLog bool
@@ -195,6 +206,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doDelete(op)
 		case "move":
 			ret = tx.doMove(op)
+		case "moveOutlineHeading":
+			ret = tx.doMoveOutlineHeading(op)
 		case "append":
 			ret = tx.doAppend(op)
 		case "appendInsert":
@@ -279,6 +292,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUpdateAttrViewColRollup(op)
 		case "hideAttrViewName":
 			ret = tx.doHideAttrViewName(op)
+		case "setAttrViewColDate":
+			ret = tx.doSetAttrViewColDate(op)
 		}
 
 		if nil != ret {

@@ -89,7 +89,7 @@ export const image = {
                     event.stopPropagation();
                     break;
                 } else if (type === "copy") {
-                    writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim());
+                    writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim().replace("assets/", ""));
                 } else if (type === "open") {
                     /// #if !BROWSER
                     openBy(target.parentElement.getAttribute("data-path"), "folder");
@@ -138,18 +138,14 @@ export const image = {
         let html = "";
         let boxOpenHTML = "";
         if (!isBrowser() && action) {
-            boxOpenHTML = `<span data-type="open" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.showInFolder}">
+            boxOpenHTML = `<span data-type="open" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.showInFolder}">
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
         }
         let boxClearHTML = "";
         if (action) {
-            boxClearHTML = `<span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
+            boxClearHTML = `<span data-type="clear" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
-</span>`;
-        } else {
-            boxClearHTML = `<span data-type="copy" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
-    <svg><use xlink:href="#iconCopy"></use></svg>
 </span>`;
         }
         data.forEach((item) => {
@@ -157,6 +153,9 @@ export const image = {
             const dataPath = item.substr(idx);
             html += `<li data-path="${dataPath}"  class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${escapeHtml(item)}</span>
+    <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>
     ${boxOpenHTML}
     ${boxClearHTML}
 </li>`;

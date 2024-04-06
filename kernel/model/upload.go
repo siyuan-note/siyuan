@@ -147,6 +147,11 @@ func Upload(c *gin.Context) {
 	var errFiles []string
 	succMap := map[string]interface{}{}
 	files := form.File["file[]"]
+	skipIfDuplicated := false // 默认不跳过重复文件，但是有的场景需要跳过，比如上传 PDF 标注图片 https://github.com/siyuan-note/siyuan/issues/10666
+	if nil != form.Value["skipIfDuplicated"] {
+		skipIfDuplicated = "true" == form.Value["skipIfDuplicated"][0]
+	}
+
 	for _, file := range files {
 		baseName := file.Filename
 
@@ -182,6 +187,21 @@ func Upload(c *gin.Context) {
 			// 已经存在同样数据的资源文件的话不重复保存
 			succMap[baseName] = existAsset.Path
 		} else {
+			if skipIfDuplicated {
+				// https://github.com/siyuan-note/siyuan/issues/10666
+				matches, globErr := filepath.Glob(assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext) + "*")
+				if nil != globErr {
+					logging.LogErrorf("glob failed: %s", globErr)
+				} else {
+					if 0 < len(matches) {
+						fName = filepath.Base(matches[0])
+						succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+						f.Close()
+						break
+					}
+				}
+			}
+
 			fName = util.AssetName(fName)
 			writePath := filepath.Join(assetsDirPath, fName)
 			tmpDir := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))

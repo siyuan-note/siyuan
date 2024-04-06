@@ -9,7 +9,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 
-export const filterMenu = (config: ISearchOption, cb: () => void) => {
+export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     const filterDialog = new Dialog({
         title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
@@ -130,6 +130,42 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="databaseBlock" type="checkbox"${config.types.databaseBlock ? " checked" : ""}>
     </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconVideo"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.video}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="videoBlock" type="checkbox"${config.types.videoBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconRecord"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.audio}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="audioBlock" type="checkbox"${config.types.audioBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconLanguage"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            IFrame
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="iframeBlock" type="checkbox"${config.types.iframeBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconBoth"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.widget}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="widgetBlock" type="checkbox"${config.types.widgetBlock ? " checked" : ""}>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -145,16 +181,16 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
     });
     btnsElement[1].addEventListener("click", () => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
-            config.types[item.getAttribute("data-type") as TSearchFilter] = item.checked;
+            config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
         });
         cb();
         filterDialog.destroy();
     });
 };
 
-export const replaceFilterMenu = (config: ISearchOption) => {
+export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
     let html = "";
-    Object.keys(Constants.SIYUAN_DEFAULT_REPLACETYPES).forEach((key) => {
+    Object.keys(Constants.SIYUAN_DEFAULT_REPLACETYPES).forEach((key: keyof Config.IUILayoutTabSearchConfigReplaceTypes) => {
         html += `<label class="fn__flex b3-label">
     <span class="fn__space"></span>
     <div class="fn__flex-1 fn__flex-center">
@@ -181,13 +217,13 @@ export const replaceFilterMenu = (config: ISearchOption) => {
     });
     btnsElement[1].addEventListener("click", () => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
-            config.replaceTypes[item.getAttribute("data-type") as TSearchFilter] = item.checked;
+            config.replaceTypes[item.getAttribute("data-type") as keyof (typeof config.replaceTypes)] = item.checked;
         });
         filterDialog.destroy();
     });
 };
 
-export const queryMenu = (config: ISearchOption, cb: () => void) => {
+export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
         window.siyuan.menus.menu.remove();
@@ -233,8 +269,8 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
     }).element);
 };
 
-const saveCriterionData = (config: ISearchOption,
-                           criteriaData: ISearchOption[],
+const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
+                           criteriaData: Config.IUILayoutTabSearchConfig[],
                            element: Element,
                            value: string,
                            saveDialog: Dialog) => {
@@ -253,8 +289,8 @@ const saveCriterionData = (config: ISearchOption,
     });
 };
 
-export const saveCriterion = (config: ISearchOption,
-                              criteriaData: ISearchOption[],
+export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
+                              criteriaData: Config.IUILayoutTabSearchConfig[],
                               element: Element) => {
     const saveDialog = new Dialog({
         title: window.siyuan.languages.saveCriterion,
@@ -357,8 +393,8 @@ export const saveCriterion = (config: ISearchOption,
     });
 };
 
-export const moreMenu = async (config: ISearchOption,
-                               criteriaData: ISearchOption[],
+export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
+                               criteriaData: Config.IUILayoutTabSearchConfig[],
                                element: Element,
                                cb: () => void,
                                removeCriterion: () => void,
@@ -569,7 +605,7 @@ export const moreMenu = async (config: ISearchOption,
     }).element);
 };
 
-const configIsSame = (config: ISearchOption, config2: ISearchOption) => {
+const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.IUILayoutTabSearchConfig) => {
     if (config2.group === config.group && config2.hPath === config.hPath && config2.hasReplace === config.hasReplace &&
         config2.k === config.k && config2.method === config.method && config2.r === config.r &&
         config2.sort === config.sort && objEquals(config2.types, config.types) &&
@@ -579,10 +615,10 @@ const configIsSame = (config: ISearchOption, config2: ISearchOption) => {
     return false;
 };
 
-export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[], config: ISearchOption) => {
+export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTabSearchConfig[], config: Config.IUILayoutTabSearchConfig) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
-        response.data.forEach((item: ISearchOption, index: number) => {
+        response.data.forEach((item: Config.IUILayoutTabSearchConfig, index: number) => {
             data.push(item);
             let isSame = false;
             if (configIsSame(item, config)) {

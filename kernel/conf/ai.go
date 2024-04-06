@@ -29,24 +29,28 @@ type AI struct {
 }
 
 type OpenAI struct {
-	APIKey       string `json:"apiKey"`
-	APITimeout   int    `json:"apiTimeout"`
-	APIProxy     string `json:"apiProxy"`
-	APIModel     string `json:"apiModel"`
-	APIMaxTokens int    `json:"apiMaxTokens"`
-	APIBaseURL   string `json:"apiBaseURL"`
-	APIUserAgent string `json:"apiUserAgent"`
-	APIProvider  string `json:"apiProvider"` // OpenAI, Azure
-	APIVersion   string `json:"apiVersion"`  // Azure API version
+	APIKey         string  `json:"apiKey"`
+	APITimeout     int     `json:"apiTimeout"`
+	APIProxy       string  `json:"apiProxy"`
+	APIModel       string  `json:"apiModel"`
+	APIMaxTokens   int     `json:"apiMaxTokens"`
+	APITemperature float64 `json:"apiTemperature"`
+	APIMaxContexts int     `json:"apiMaxContexts"`
+	APIBaseURL     string  `json:"apiBaseURL"`
+	APIUserAgent   string  `json:"apiUserAgent"`
+	APIProvider    string  `json:"apiProvider"` // OpenAI, Azure
+	APIVersion     string  `json:"apiVersion"`  // Azure API version
 }
 
 func NewAI() *AI {
 	openAI := &OpenAI{
-		APITimeout:   30,
-		APIModel:     openai.GPT3Dot5Turbo,
-		APIBaseURL:   "https://api.openai.com/v1",
-		APIUserAgent: util.UserAgent,
-		APIProvider:  "OpenAI",
+		APITemperature: 1.0,
+		APIMaxContexts: 7,
+		APITimeout:     30,
+		APIModel:       openai.GPT3Dot5Turbo,
+		APIBaseURL:     "https://api.openai.com/v1",
+		APIUserAgent:   util.UserAgent,
+		APIProvider:    "OpenAI",
 	}
 
 	openAI.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -66,6 +70,20 @@ func NewAI() *AI {
 		maxTokensInt, err := strconv.Atoi(maxTokens)
 		if nil == err {
 			openAI.APIMaxTokens = maxTokensInt
+		}
+	}
+
+	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+		temperatureFloat, err := strconv.ParseFloat(temperature, 64)
+		if nil == err {
+			openAI.APITemperature = temperatureFloat
+		}
+	}
+
+	if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
+		maxContextsInt, err := strconv.Atoi(maxContexts)
+		if nil == err {
+			openAI.APIMaxContexts = maxContextsInt
 		}
 	}
 

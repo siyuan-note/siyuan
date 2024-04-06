@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
-		"updated": "20220605170337"
+		"type": "doc",
+		"updated": "20240403150944"
 	},
 	"Children": [
 		{
@@ -207,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20220605170337"
+				"updated": "20240403150944"
 			},
 			"Children": [
 				{
@@ -372,7 +373,7 @@
 					},
 					"Properties": {
 						"id": "20211226123024-e42d7xq",
-						"updated": "20211228141606"
+						"updated": "20240403150942"
 					},
 					"Children": [
 						{
@@ -380,7 +381,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123024-vxjdsno",
-								"updated": "20211228141606"
+								"updated": "20240403150942"
 							},
 							"Children": [
 								{
@@ -394,24 +395,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值為 blocks 列表，參數為 SQL 語句："
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM blocks LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​：該函數用於查詢資料庫，返回值為 blocks 列表，請參考下面的例子"
 								}
 							]
 						}
@@ -426,7 +410,7 @@
 					},
 					"Properties": {
 						"id": "20211226123024-69kddle",
-						"updated": "20211228141602"
+						"updated": "20240403150944"
 					},
 					"Children": [
 						{
@@ -434,7 +418,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123024-4qwyf3w",
-								"updated": "20211228141602"
+								"updated": "20240403150944"
 							},
 							"Children": [
 								{
@@ -448,24 +432,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值為 spans 列表，參數為 SQL 語句："
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{sql \u0026quot;SELECT * FROM spans LIMIT 7\u0026quot;}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​：該函數用於查詢資料庫，返回值為 spans 列表，請參考下面的例子"
 								}
 							]
 						}

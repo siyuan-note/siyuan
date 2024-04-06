@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
-		"updated": "20230713213240"
+		"type": "doc",
+		"updated": "20240402174257"
 	},
 	"Children": [
 		{
@@ -183,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-p6jpw7s",
-				"updated": "20230403114139"
+				"updated": "20240402174257"
 			},
 			"Children": [
 				{
@@ -457,6 +458,43 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240402174257-jk88juq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240402174257-jk88juq",
+						"updated": "20240402174257"
+					},
+					"Children": [
+						{
+							"ID": "20240402174257-a7ei3il",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240402174257-a7ei3il",
+								"updated": "20240402174257"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在大綱面板拖曳大綱專案時會產生歷史，歷史資料夾後綴為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-outline"
 								},
 								{
 									"Type": "NodeText",

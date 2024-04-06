@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -34,6 +35,44 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func globalCopyFiles(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var srcs []string
+	srcsArg := arg["srcs"].([]interface{})
+	for _, s := range srcsArg {
+		srcs = append(srcs, s.(string))
+	}
+
+	for _, src := range srcs {
+		if !filelock.IsExist(src) {
+			msg := fmt.Sprintf("file [%s] does not exist", src)
+			logging.LogErrorf(msg)
+			ret.Code = -1
+			ret.Msg = msg
+			return
+		}
+	}
+
+	destDir := arg["destDir"].(string) // 相对于工作空间的路径
+	destDir = filepath.Join(util.WorkspaceDir, destDir)
+	for _, src := range srcs {
+		dest := filepath.Join(destDir, filepath.Base(src))
+		if err := filelock.Copy(src, dest); nil != err {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+}
 
 func copyFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

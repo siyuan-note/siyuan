@@ -11,14 +11,14 @@ export class Layout {
     public element: HTMLElement;
     public children?: Array<Layout | Wnd>;
     public parent?: Layout;
-    public direction: TDirection;
-    public type?: TLayout;
+    public direction: Config.TUILayoutDirection;
+    public type?: Config.TUILayoutType;
     public id?: string;
-    public resize?: TDirection;
+    public resize?: Config.TUILayoutDirection;
     public size?: string;
 
     constructor(options?: ILayoutOptions) {
-        const mergedOptions = Object.assign({
+        const mergedOptions: ILayoutOptions = Object.assign({
             direction: "tb",
             size: "auto",
             type: "normal"

@@ -12,7 +12,7 @@ import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
 
 export const keymap = {
     element: undefined as Element,
-    _genItem(keymap: Record<string, IKeymapItem>, keys: string) {
+    _genItem(keymap: Record<string, Config.IKey>, keys: string) {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
@@ -48,6 +48,25 @@ export const keymap = {
     </span>
     <span data-type="update" class="config-keymap__key">${keyValue}</span>
     <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${command.langKey}" data-value="${command.customHotkey}" data-default="${command.hotkey}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
+</label>`;
+            });
+            Object.keys(item.docks).forEach(key => {
+                const dockConfig = item.docks[key].config;
+                if (!dockConfig.hotkey) {
+                    return;
+                }
+                const dockKeymap = window.siyuan.config.keymap.plugin[item.name][key];
+                const keyValue = updateHotkeyTip(dockKeymap.custom);
+                commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+    <span class="b3-list-item__text">${dockConfig.title}</span>
+    <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+    <span data-type="clear" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    </span>
+    <span data-type="update" class="config-keymap__key">${keyValue}</span>
+    <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${key}" data-value="${dockKeymap.custom}" data-default="${dockKeymap.default}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
 </label>`;
             });
             if (commandHTML) {
@@ -166,7 +185,8 @@ export const keymap = {
 </div>`;
     },
     _setkeymap(app: App) {
-        const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+        const data: Config.IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+        const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom;
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             const newHotkey = item.getAttribute("data-value");
@@ -192,6 +212,12 @@ export const keymap = {
         fetchPost("/api/setting/setKeymap", {
             data
         }, () => {
+            if (oldToggleWin !== window.siyuan.config.keymap.general.toggleWin.custom) {
+                ipcRenderer.send(Constants.SIYUAN_CMD, {
+                    cmd: "unregisterGlobalShortcut",
+                    accelerator: oldToggleWin
+                });
+            }
             sendGlobalShortcut(app);
         });
     },
@@ -279,7 +305,8 @@ export const keymap = {
         /// #if !BROWSER
         searchKeymapElement.addEventListener("focus", () => {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
-                cmd: "unregisterAll",
+                cmd: "unregisterGlobalShortcut",
+                accelerator: window.siyuan.config.keymap.general.toggleWin.custom
             });
         });
         /// #endif
@@ -306,6 +333,12 @@ export const keymap = {
                 fetchPost("/api/setting/setKeymap", {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {
+                    if (window.siyuan.config.keymap.general.toggleWin.default !== window.siyuan.config.keymap.general.toggleWin.custom) {
+                        ipcRenderer.send(Constants.SIYUAN_CMD, {
+                            cmd: "unregisterGlobalShortcut",
+                            accelerator: window.siyuan.config.keymap.general.toggleWin.custom
+                        });
+                    }
                     window.location.reload();
                     sendGlobalShortcut(app);
                 });
@@ -425,7 +458,8 @@ export const keymap = {
             /// #if !BROWSER
             item.addEventListener("focus", () => {
                 ipcRenderer.send(Constants.SIYUAN_CMD, {
-                    cmd: "unregisterAll",
+                    cmd: "unregisterGlobalShortcut",
+                    accelerator: window.siyuan.config.keymap.general.toggleWin.custom
                 });
             });
             /// #endif

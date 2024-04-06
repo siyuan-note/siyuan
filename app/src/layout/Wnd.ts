@@ -39,6 +39,7 @@ import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {setPadding} from "../protyle/ui/initUI";
+import {setPosition} from "../util/setPosition";
 
 export class Wnd {
     private app: App;
@@ -47,9 +48,9 @@ export class Wnd {
     public element: HTMLElement;
     public headersElement: HTMLElement;
     public children: Tab[] = [];
-    public resize?: TDirection;
+    public resize?: Config.TUILayoutDirection;
 
-    constructor(app: App, resize?: TDirection, parentType?: TLayout) {
+    constructor(app: App, resize?: Config.TUILayoutDirection, parentType?: Config.TUILayoutType) {
         this.id = genUUID();
         this.app = app;
         this.resize = resize;
@@ -617,6 +618,7 @@ export class Wnd {
                             this.removeTab(item.getAttribute("data-id"));
                             if (element.previousElementSibling || element.nextElementSibling) {
                                 element.remove();
+                                setPosition(window.siyuan.menus.menu.element, rect.left + rect.width - window.siyuan.menus.menu.element.clientWidth, rect.top + rect.height);
                             } else {
                                 window.siyuan.menus.menu.remove();
                             }
@@ -896,7 +898,7 @@ export class Wnd {
         /// #endif
     }
 
-    public split(direction: TDirection) {
+    public split(direction: Config.TUILayoutDirection) {
         if (this.children.length === 1 && !this.children[0].headElement) {
             // 场景：没有打开的文档，点击标签面板打开
             return this;

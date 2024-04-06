@@ -62,7 +62,7 @@ openTab = (options: {
     asset?: {
         path: string,
     },
-    search?: ISearchOption
+    search?: Config.IUILayoutTabSearchConfig
     card?: {
         type: TCardType,
         id?: string, //  cardType 为 all 时不传，否则传文档或笔记本 id

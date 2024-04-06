@@ -120,6 +120,8 @@
         white-space: break-spaces;
         line-height: 26px;
         margin: 8px 0;
+        // 移动端面包屑过长
+        word-wrap: break-word;
       }
 
       &__icon {
@@ -230,7 +232,7 @@
       max-width: 374px;
       white-space: normal;
       word-break: break-all;
-      line-height: 16px;
+      line-height: 18px;
       margin: 4px 0;
     }
 
@@ -280,6 +282,18 @@
       margin: 0 0 0 8px;
       height: 10px;
     }
+  }
+
+  &__checked {
+    width: 22px;
+    height: 22px;
+    align-self: center;
+    margin-left: 8px;
+    color: var(--b3-theme-on-surface-light);
+    border-radius: var(--b3-border-radius);
+    padding: 4px;
+    box-sizing: border-box;
+    translate: var(--b3-transition);
   }
 
   &__separator {

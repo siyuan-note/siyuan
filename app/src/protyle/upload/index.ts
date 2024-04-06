@@ -168,6 +168,15 @@ export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: b
         id: protyle.block.rootID
     }, (response) => {
         hideMessage(msgId);
+        let tip = "";
+        Object.keys(response.data.succMap).forEach(name => {
+            if (response.data.succMap[name].startsWith("file:")) {
+                tip += name + ", ";
+            }
+        });
+        if (tip) {
+            showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${tip.substring(0, tip.length - 2)}</b>`));
+        }
         genUploadedLabel(JSON.stringify(response), protyle);
     });
 };

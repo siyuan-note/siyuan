@@ -55,6 +55,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";
 import {Menu} from "../plugin/Menu";
+import {getFirstBlock} from "../protyle/wysiwyg/getBlock";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -603,6 +604,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         h: 26
     });
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+    window.siyuan.menus.menu.data = element;
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         window.siyuan.menus.menu.element.querySelector("input").select();
@@ -834,8 +836,19 @@ export const zoomOut = (options: {
         if (options.focusId) {
             const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
             if (focusElement) {
-                focusBlock(focusElement);
-                focusElement.scrollIntoView();
+                // 退出聚焦后块在折叠中 https://github.com/siyuan-note/siyuan/issues/10746
+                let showElement = focusElement;
+                while (showElement.getBoundingClientRect().height === 0) {
+                    showElement = showElement.parentElement;
+                }
+                if (showElement.classList.contains("protyle-wysiwyg")) {
+                    // 闪卡退出聚焦元素被隐藏 https://github.com/siyuan-note/siyuan/issues/10058#issuecomment-2029524211
+                    showElement = focusElement.previousElementSibling || focusElement.nextElementSibling;
+                } else {
+                    showElement = getFirstBlock(showElement);
+                }
+                focusBlock(showElement);
+                showElement.scrollIntoView();
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
                 fetchPost("/api/filetree/getDoc", {
                     id: options.focusId,
@@ -1870,9 +1883,8 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return -1;
     }
-    // 0 正常；1 折叠
-    let fold = "0";
-    if (nodeElement.getAttribute("fold") === "1") {
+    const hasFold = nodeElement.getAttribute("fold") === "1";
+    if (hasFold) {
         if (typeof isOpen === "boolean" && !isOpen) {
             return -1;
         }
@@ -1885,7 +1897,6 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         if (typeof isOpen === "boolean" && isOpen) {
             return -1;
         }
-        fold = "1";
         nodeElement.setAttribute("fold", "1");
         // 光标在子列表中，再次 focus 段尾的时候不会变 https://ld246.com/article/1647099132461
         if (getSelection().rangeCount > 0) {
@@ -1909,7 +1920,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     }
     const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {
-        if (fold === "0") {
+        if (hasFold) {
             nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" src="/stage/loading-pure.svg"></div>');
             transaction(protyle, [{
                 action: "unfoldHeading",
@@ -1933,14 +1944,14 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         transaction(protyle, [{
             action: "setAttrs",
             id,
-            data: JSON.stringify({fold})
+            data: JSON.stringify({fold: hasFold ? "" : "1"})
         }], [{
             action: "setAttrs",
             id,
-            data: JSON.stringify({fold: fold === "0" ? "1" : "0"})
+            data: JSON.stringify({fold: hasFold ? "1" : ""})
         }]);
     }
     // 折叠后，防止滚动条滚动后调用 get 请求 https://github.com/siyuan-note/siyuan/issues/2248
     preventScroll(protyle);
-    return fold;
+    return !hasFold ? 1 : 0;
 };

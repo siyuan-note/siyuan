@@ -530,9 +530,25 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	return
 }
 
+var (
+	packageLocks     = map[string]*sync.Mutex{}
+	packageLocksLock = sync.Mutex{}
+)
+
 func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (data []byte, err error) {
+	packageLocksLock.Lock()
+	defer packageLocksLock.Unlock()
+
 	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
-	pushID := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
+	repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
+	lock, ok := packageLocks[repoURLHash]
+	if !ok {
+		lock = &sync.Mutex{}
+		packageLocks[repoURLHash] = lock
+	}
+	lock.Lock()
+	defer lock.Unlock()
+
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
 	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
@@ -540,7 +556,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 		if pushProgress {
 			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
 			//logging.LogDebugf("downloading bazaar package [%f]", progress)
-			util.PushDownloadProgress(pushID, progress)
+			util.PushDownloadProgress(repoURL, progress)
 		}
 	}).Get(u)
 	if nil != err {

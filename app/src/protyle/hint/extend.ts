@@ -47,7 +47,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: Constants.ZWSP + 5,
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
     },{
-        filter: ["数据库", "属性视图", "shujuku", "shuxingshitu", "sjk", "sxst", "database", "attribute view"],
+        filter: ["数据库", "视图", "shujuku", "shitu", "sjk", "st", "database", "view", "db"],
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
     }, {

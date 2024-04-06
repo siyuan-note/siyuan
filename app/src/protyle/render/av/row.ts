@@ -171,7 +171,7 @@ ${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' dat
             if (hideTextCell) {
                 currentRow.remove();
                 showMessage(window.siyuan.languages.insertRowTip);
-            } else {
+            } else if (srcIDs.length === 1) {
                 popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             }
             setPage(blockElement);
@@ -250,7 +250,7 @@ export const setPageSize = (options: {
     menu.addItem({
         iconHTML: "",
         label: "10",
-        accelerator: currentPageSize === "10" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "10",
         click() {
             updatePageSize({
                 currentPageSize,
@@ -263,7 +263,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "25" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "25",
         label: "25",
         click() {
             updatePageSize({
@@ -277,7 +277,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "50" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "50",
         label: "50",
         click() {
             updatePageSize({
@@ -291,7 +291,7 @@ export const setPageSize = (options: {
     });
     menu.addItem({
         iconHTML: "",
-        accelerator: currentPageSize === "100" ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+        checked: currentPageSize === "100",
         label: "100",
         click() {
             updatePageSize({
@@ -348,5 +348,36 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     });
     stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
     updateHeader(blockElement.querySelector(".av__row"));
+    blockElement.setAttribute("updated", newUpdated);
+};
+
+export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: number, previousID: string) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const srcIDs: string[] = [];
+    new Array(count).fill(0).forEach(() => {
+        srcIDs.push(Lute.NewNodeID());
+    });
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    transaction(protyle, [{
+        action: "insertAttrViewBlock",
+        avID,
+        previousID,
+        srcIDs,
+        isDetached: true,
+        blockID: blockElement.dataset.nodeId,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
+    }], [{
+        action: "removeAttrViewBlock",
+        srcIDs,
+        avID,
+    }, {
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated")
+    }]);
+    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
     blockElement.setAttribute("updated", newUpdated);
 };

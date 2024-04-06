@@ -9,15 +9,21 @@ import {genAVValueHTML} from "./blockAttr";
 import {escapeAttr} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
-const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
+const filterSelectHTML = (key: string, options: { name: string, color: string }[], selected: string[] = []) => {
     let html = "";
     let hasMatch = false;
+    if (selected.length === 0) {
+        document.querySelectorAll(".av__panel .b3-chips .b3-chip").forEach((item: HTMLElement) => {
+            selected.push(item.dataset.content);
+        });
+    }
+    const checkedName = document.querySelector('.av__panel .b3-menu__item--current[data-type="addColOptionOrCell"]')?.getAttribute("data-name") || "";
     if (options) {
         options.forEach(item => {
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${checkedName === item.name ? " b3-menu__item--current" : ""}" data-name="${item.name}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
@@ -25,6 +31,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
         </span>
     </div>
     <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
+    ${selected.includes(item.name) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>' : ""}
 </button>`;
             }
             if (key === item.name) {
@@ -33,6 +40,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
         });
     }
     if (!hasMatch && key) {
+        html = html.replace('class="b3-menu__item b3-menu__item--current"', 'class="b3-menu__item"');
         const colorIndex = (options?.length || 0) % 13 + 1;
         html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -43,11 +51,11 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
 </div>
 <span class="b3-menu__accelerator">Enter</span>
 </button>${html}`;
-    } else {
+    } else if (html.indexOf("b3-menu__item--current") === -1) {
         if (key) {
-            html = html.replace(`class="b3-menu__item" data-name="${key}"` , `class="b3-menu__item b3-menu__item--current" data-name="${key}"`);
+            html = html.replace(`class="b3-menu__item" data-name="${key}"`, `class="b3-menu__item b3-menu__item--current" data-name="${key}"`);
         } else {
-            html = html.replace('class="b3-menu__item"' , 'class="b3-menu__item b3-menu__item--current"');
+            html = html.replace('class="b3-menu__item"', 'class="b3-menu__item b3-menu__item--current"');
         }
     }
     return html;
@@ -113,6 +121,12 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
         }
     });
     transaction(protyle, doOperations, undoOperations);
+    Array.from(document.querySelectorAll(".av__panel .b3-menu__item")).find((item: HTMLElement) => {
+        if (item.dataset.name === target.dataset.content) {
+            item.querySelector(".b3-menu__checked")?.remove();
+            return true;
+        }
+    });
     target.remove();
 };
 
@@ -287,15 +301,15 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     menu.addSeparator();
     Array.from(Array(13).keys()).forEach(index => {
         menu.addItem({
-            accelerator: parseInt(color) === index + 1 ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
+            checked: parseInt(color) === index + 1,
             iconHTML: "",
             label: `<span class="color__square"  style="padding: 5px;margin: 2px;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
             click(element) {
-                if (element.lastElementChild.classList.contains("b3-menu__accelerator")) {
+                if (element.lastElementChild.classList.contains("b3-menu__checked")) {
                     return;
                 }
-                element.parentElement.querySelector(".b3-menu__accelerator")?.remove();
-                element.insertAdjacentHTML("beforeend", '<span class="b3-menu__accelerator"><svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg></span>');
+                element.parentElement.querySelector(".b3-menu__checked")?.remove();
+                element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>');
                 transaction(protyle, [{
                     action: "updateAttrViewColOption",
                     id: colId,
@@ -413,7 +427,11 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
-            addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement, blockElement);
+            if (currentElement.querySelector(".b3-menu__checked")) {
+                removeCellOption(protyle, data, cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(currentElement.dataset.name)}"]`), blockElement);
+            } else {
+                addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement, blockElement);
+            }
         } else if (event.key === "Backspace" && inputElement.value === "") {
             removeCellOption(protyle, data, cellElements, inputElement.previousElementSibling as HTMLElement, blockElement);
         }
@@ -562,7 +580,9 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     });
 
     let selectedHTML = "";
+    const selected: string[] = [];
     genCellValueByElement(colData.type, cellElements[0]).mSelect?.forEach((item) => {
+        selected.push(item.content);
         selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
@@ -571,6 +591,6 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     ${selectedHTML}
     <input>
 </div>
-<div>${filterSelectHTML("", colData.options)}</div>
+<div>${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;
 };

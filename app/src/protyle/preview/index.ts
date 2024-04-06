@@ -74,10 +74,6 @@ export class Preview {
         this.element.appendChild(previewElement);
 
         this.element.addEventListener("click", (event) => {
-            if (protyle.model) {
-                setPanelFocus(protyle.model.element.parentElement.parentElement);
-                updateOutline(getAllModels(), protyle.model.editor.protyle);
-            }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.tagName === "A") {

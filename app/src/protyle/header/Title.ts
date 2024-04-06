@@ -49,16 +49,6 @@ export class Title {
             this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {
-            if (protyle.model) {
-                setPanelFocus(protyle.model.element.parentElement.parentElement);
-                updatePanelByEditor({
-                    protyle: protyle,
-                    focus: false,
-                    pushBackStack: false,
-                    reload: false,
-                    resize: false,
-                });
-            }
             protyle.toolbar?.element.classList.add("fn__none");
         });
         this.editElement.addEventListener("input", (event: InputEvent) => {

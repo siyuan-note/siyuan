@@ -1,5 +1,9 @@
 import {getAllModels} from "../../layout/getAll";
-import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByClassName
+} from "../../protyle/util/hasClosest";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {isWindow} from "../../util/functions";
 import {writeText} from "../../protyle/util/compatibility";
@@ -44,6 +48,13 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         window.siyuan.layout.rightDock.hideDock();
     }
 
+    const protyleElement  = hasClosestByClassName(event.target, "protyle", true);
+    if (protyleElement) {
+        const wysiwygElement = protyleElement.querySelector(".protyle-wysiwyg");
+        if (wysiwygElement.getAttribute("data-readonly") === "true" || !wysiwygElement.contains(event.target)) {
+            wysiwygElement.dispatchEvent(new Event("focusin"));
+        }
+    }
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
         let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd();

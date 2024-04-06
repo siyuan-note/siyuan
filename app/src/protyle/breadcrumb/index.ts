@@ -62,11 +62,6 @@ ${padHTML}
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
-            /// #if !MOBILE
-            if (protyle.model) {
-                setPanelFocus(protyle.model.element.parentElement.parentElement);
-            }
-            /// #endif
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");

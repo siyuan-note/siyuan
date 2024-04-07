@@ -64,6 +64,9 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		return
 	}
 	attributeViewName = attrView.Name
+	if "" == attributeViewName {
+		attributeViewName = Conf.language(105)
+	}
 
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 

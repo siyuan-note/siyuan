@@ -781,6 +781,10 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal, destKey.NumberFormat)}}
 		}
 	case CalcOperatorRange:
+		if 2 > len(r.Contents) {
+			return
+		}
+
 		minVal := math.MaxFloat64
 		maxVal := -math.MaxFloat64
 		earliest := int64(0)

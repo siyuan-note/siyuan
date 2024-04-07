@@ -12,29 +12,35 @@ import {toggleUpdateRelationBtn} from "./relation";
 import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
 import * as dayjs from "dayjs";
+import {setPosition} from "../../../util/setPosition";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
-    type: TAVCol,
-    avID: string,
     colId: string,
-    newValue: string,
-    icon: string
     viewID: string,
-    blockElement: Element
+    blockElement: Element,
+    data: IAV,
 }) => {
-    const id = Lute.NewNodeID();
-    const nameMatch = options.newValue.match(/^(.*) \((\d+)\)$/);
+    let newColData: IAVColumn;
+    options.data.view.columns.find((item: IAVColumn, index) => {
+        if (item.id === options.colId) {
+            newColData = JSON.parse(JSON.stringify(item));
+            options.data.view.columns.splice(index + 1, 0, newColData);
+            return true;
+        }
+    });
+    const nameMatch = newColData.name.match(/^(.*) \((\d+)\)$/);
     if (nameMatch) {
-        options.newValue = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
+        newColData.name = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
     } else {
-        options.newValue = `${options.newValue} (1)`;
+        newColData.name = `${newColData.name} (1)`;
     }
+    newColData.id = Lute.NewNodeID();
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     const blockId = options.blockElement.getAttribute("data-node-id");
-    if (["select", "mSelect", "rollup"].includes(options.type)) {
+    if (["select", "mSelect", "rollup"].includes(newColData.type)) {
         fetchPost("/api/av/renderAttributeView", {
-            id: options.avID,
+            id: options.data.id,
             viewID: options.viewID
         }, (response) => {
             const data = response.data as IAV;
@@ -47,16 +53,16 @@ export const duplicateCol = (options: {
             });
             transaction(options.protyle, [{
                 action: "addAttrViewCol",
-                name: options.newValue,
-                avID: options.avID,
-                type: options.type,
-                data: options.icon,
+                name: newColData.name,
+                avID: options.data.id,
+                type: newColData.type,
+                data: newColData.icon,
                 previousID: options.colId,
-                id
+                id: newColData.id
             }, {
                 action: "updateAttrViewColOptions",
-                id,
-                avID: options.avID,
+                id: newColData.id,
+                avID: options.data.id,
                 data: colOptions
             }, {
                 action: "doUpdateUpdated",
@@ -64,8 +70,8 @@ export const duplicateCol = (options: {
                 data: newUpdated,
             }], [{
                 action: "removeAttrViewCol",
-                id,
-                avID: options.avID,
+                id: newColData.id,
+                avID: options.data.id,
             }, {
                 action: "doUpdateUpdated",
                 id: blockId,
@@ -75,11 +81,11 @@ export const duplicateCol = (options: {
     } else {
         transaction(options.protyle, [{
             action: "addAttrViewCol",
-            name: options.newValue,
-            avID: options.avID,
-            type: options.type,
-            data: options.icon,
-            id,
+            name: newColData.name,
+            avID: options.data.id,
+            type: newColData.type,
+            data: newColData.icon,
+            id: newColData.id,
             previousID: options.colId,
         }, {
             action: "doUpdateUpdated",
@@ -87,8 +93,8 @@ export const duplicateCol = (options: {
             data: newUpdated,
         }], [{
             action: "removeAttrViewCol",
-            id,
-            avID: options.avID,
+            id: newColData.id,
+            avID: options.data.id,
         }, {
             action: "doUpdateUpdated",
             id: blockId,
@@ -98,11 +104,12 @@ export const duplicateCol = (options: {
     addAttrViewColAnimation({
         blockElement: options.blockElement,
         protyle: options.protyle,
-        type: options.type,
-        name: options.newValue,
-        icon: options.icon,
+        type: newColData.type,
+        name: newColData.name,
+        icon: newColData.icon,
         previousID: options.colId,
-        id
+        data: options.data,
+        id: newColData.id,
     });
     options.blockElement.setAttribute("updated", newUpdated);
 };
@@ -521,11 +528,13 @@ const addAttrViewColAnimation = (options: {
     name: string,
     id: string,
     icon?: string,
-    previousID: string
+    previousID: string,
+    data?: IAV
 }) => {
     if (!options.blockElement) {
         return;
     }
+    const nodeId = options.blockElement.getAttribute("data-node-id");
     if (options.blockElement.classList.contains("av")) {
         options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
             let previousElement;
@@ -548,7 +557,6 @@ const addAttrViewColAnimation = (options: {
             previousElement.insertAdjacentHTML("afterend", html);
         });
     } else {
-        const nodeId = options.blockElement.getAttribute("data-node-id");
         options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", `<div class="block__icons av__row" data-id="${nodeId}" data-col-id="${options.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
@@ -560,6 +568,27 @@ const addAttrViewColAnimation = (options: {
     </div>
 </div>`);
     }
+    const menuElement = document.querySelector(".av__panel .b3-menu") as HTMLElement;
+    if (menuElement && options.data && options.blockElement.classList.contains("av")) {
+        menuElement.innerHTML = getEditHTML({
+            protyle: options.protyle,
+            data: options.data,
+            colId: options.id,
+            isCustomAttr: false
+        });
+        bindEditEvent({
+            protyle: options.protyle,
+            data: options.data,
+            menuElement,
+            isCustomAttr: false,
+            blockID: nodeId
+        });
+        const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+        if (tabRect) {
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+        }
+        return;
+    }
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -567,7 +596,7 @@ const addAttrViewColAnimation = (options: {
         colId: options.id,
         editData: {
             previousID: options.previousID,
-            colData: genColDataByType(options.type, options.id),
+            colData: genColDataByType(options.type, options.id, options.name),
         }
     });
     window.siyuan.menus.menu.remove();
@@ -824,16 +853,17 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 icon: "iconCopy",
                 label: window.siyuan.languages.duplicate,
                 click() {
-                    duplicateCol({
-                        blockElement,
-                        viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                        protyle,
-                        type,
-                        avID,
-                        colId,
-                        icon: menu.element.querySelector(".block__icon").getAttribute("data-icon"),
-                        newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
-                    });
+                    fetchPost("/api/av/renderAttributeView", {
+                        id: avID,
+                    }, (response) => {
+                        duplicateCol({
+                            blockElement,
+                            viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            protyle,
+                            colId,
+                            data: response.data
+                        });
+                    })
                 }
             });
         }
@@ -1476,12 +1506,12 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     return menu;
 };
 
-const genColDataByType = (type: TAVCol, id: string) => {
+const genColDataByType = (type: TAVCol, id: string, name: string) => {
     const colData: IAVColumn = {
         hidden: false,
         icon: "",
         id,
-        name: getColNameByType(type),
+        name,
         numberFormat: "",
         pin: false,
         template: "",

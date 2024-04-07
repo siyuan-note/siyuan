@@ -7,7 +7,7 @@
 		"id": "20240317200013-fim8wm8",
 		"title": "扩展开发",
 		"type": "doc",
-		"updated": "20240317202200"
+		"updated": "20240407172150"
 	},
 	"Children": [
 		{
@@ -277,7 +277,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317201708-e6uwpl2",
-				"updated": "20240317202200"
+				"updated": "20240407172150"
 			},
 			"Children": [
 				{
@@ -362,7 +362,7 @@
 					},
 					"Properties": {
 						"id": "20240317201924-6yrpv38",
-						"updated": "20240317202200"
+						"updated": "20240407172150"
 					},
 					"Children": [
 						{
@@ -384,7 +384,7 @@
 							"Type": "NodeBlockquote",
 							"Properties": {
 								"id": "20240317201924-ljq7w3h",
-								"updated": "20240317201924"
+								"updated": "20240407172150"
 							},
 							"Children": [
 								{
@@ -396,22 +396,12 @@
 									"Type": "NodeParagraph",
 									"Properties": {
 										"id": "20240317201924-fr7chfe",
-										"updated": "20240317201924"
+										"updated": "20240407172150"
 									},
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "详情请见 "
-										},
-										{
-											"Type": "NodeTextMark",
-											"TextMarkType": "a",
-											"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/9807",
-											"TextMarkTextContent": "Github Issue #9807"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "。"
+											"Data": "详情请见 Github Issue #9807。"
 										}
 									]
 								}

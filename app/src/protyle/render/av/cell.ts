@@ -725,11 +725,15 @@ const renderRollup = (cellValue: IAVCellValue) => {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;
-        if (dataValue && dataValue.isNotEmpty) {
-            text += dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-        }
-        if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
-            text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+        if (dataValue.formattedContent) {
+            text = dataValue.formattedContent
+        } else {
+            if (dataValue && dataValue.isNotEmpty) {
+                text = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+            }
+            if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+                text = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+            }
         }
         if (text) {
             text = `<span class="av__celltext">${text}</span>`;

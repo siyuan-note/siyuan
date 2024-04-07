@@ -887,7 +887,11 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupCalc") {
-                    openCalcMenu(options.protyle, target, {data, colId: options.colId, blockID});
+                    openCalcMenu(options.protyle, target, {
+                        data,
+                        colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
+                        blockID
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

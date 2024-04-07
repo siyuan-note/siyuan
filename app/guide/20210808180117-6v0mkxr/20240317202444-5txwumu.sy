@@ -7,7 +7,7 @@
 		"id": "20240317202444-5txwumu",
 		"title": "Extend development",
 		"type": "doc",
-		"updated": "20240317202840"
+		"updated": "20240407172201"
 	},
 	"Children": [
 		{
@@ -283,7 +283,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317202702-wczm3on",
-				"updated": "20240317202840"
+				"updated": "20240407172201"
 			},
 			"Children": [
 				{
@@ -377,7 +377,7 @@
 					},
 					"Properties": {
 						"id": "20240317202755-i4ttgax",
-						"updated": "20240317202837"
+						"updated": "20240407172201"
 					},
 					"Children": [
 						{
@@ -399,7 +399,7 @@
 							"Type": "NodeBlockquote",
 							"Properties": {
 								"id": "20240317202837-ahu56j5",
-								"updated": "20240317202837"
+								"updated": "20240407172201"
 							},
 							"Children": [
 								{
@@ -411,22 +411,12 @@
 									"Type": "NodeParagraph",
 									"Properties": {
 										"id": "20240317202837-83ygog5",
-										"updated": "20240317202837"
+										"updated": "20240407172201"
 									},
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "For more details, please refer to "
-										},
-										{
-											"Type": "NodeTextMark",
-											"TextMarkType": "a",
-											"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/9807",
-											"TextMarkTextContent": "Github Issue #9807"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "."
+											"Data": "For more details, please refer to Github Issue #9807."
 										}
 									]
 								}

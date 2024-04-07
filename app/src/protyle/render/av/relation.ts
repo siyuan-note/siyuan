@@ -330,8 +330,8 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     });
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
-<div class="b3-menu__item fn__flex-column fn__flex" data-type="nobg">
-    <input class="b3-text-field fn__flex-shrink"/>
+<div class="b3-menu__item" data-type="nobg">
+    <input class="b3-text-field fn__flex-1"/>
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);" data-id="" class="popover__block fn__pointer"></span>
 </div>

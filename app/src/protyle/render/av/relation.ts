@@ -277,7 +277,6 @@ export const bindRelationEvent = (options: {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || window.siyuan.languages.untitled);
             }
         });
-        options.menuElement.querySelector(".b3-menu__label").innerHTML = `<span data-id="${response.data.blockID}" class="popover__block">${response.data.name}</span>`;
         options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML("empty")}`;
@@ -286,6 +285,9 @@ ${html || genSelectItemHTML("empty")}`;
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();
+        const databaseName = inputElement.parentElement.querySelector(".popover__block");
+        databaseName.innerHTML = response.data.name;
+        databaseName.setAttribute("data-id", response.data.blockIDs[0]);
         const listElement = options.menuElement.querySelector(".b3-menu__items");
         inputElement.addEventListener("keydown", (event) => {
             event.stopPropagation();
@@ -328,9 +330,10 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     });
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
-<div class="b3-menu__item fn__flex-column" data-type="nobg">
-    <div class="b3-menu__label">&nbsp;</div>
+<div class="b3-menu__item fn__flex-column fn__flex" data-type="nobg">
     <input class="b3-text-field fn__flex-shrink"/>
+    <span class="fn__space"></span>
+    <span style="color: var(--b3-protyle-inline-blockref-color);" data-id="" class="popover__block fn__pointer"></span>
 </div>
 <div class="fn__hr"></div>
 <div class="b3-menu__items">

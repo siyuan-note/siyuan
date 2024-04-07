@@ -820,7 +820,7 @@ export const openMenuPanel = (options: {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
                         data,
-                        colId: target.parentElement.dataset.id,
+                        colId: target.dataset.id,
                         isCustomAttr
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
@@ -1188,24 +1188,24 @@ const getPropertiesHTML = (data: IAVTable) => {
     let hideHTML = "";
     data.columns.forEach((item: IAVColumn) => {
         if (item.hidden) {
-            hideHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
+            hideHTML += `<button class="b3-menu__item" data-type="editCol" draggable="true" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${item.name}
     </div>
     <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEye"></use></svg>
-    <svg class="b3-menu__action" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
         } else {
-            showHTML += `<button class="b3-menu__item" draggable="true" data-id="${item.id}">
+            showHTML += `<button class="b3-menu__item" data-type="editCol" draggable="true" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${item.name}
     </div>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEyeoff"></use></svg>
-    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="editCol"><use xlink:href="#iconEdit"></use></svg>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
         }
     });

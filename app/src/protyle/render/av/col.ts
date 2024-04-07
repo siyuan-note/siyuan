@@ -131,7 +131,7 @@ export const getEditHTML = (options: {
     <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
     <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
 </button>
-<button class="b3-menu__item" data-type="goUpdateColType">
+<button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" ? "disabled" : ""}>
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
@@ -200,22 +200,22 @@ export const getEditHTML = (options: {
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
 </label>`;
     }
-    return `<div class="b3-menu__items">
-    ${html}
-    <button class="b3-menu__separator"></button>
-    <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
-        <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
-        <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
-    </button>
-    <button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
-        <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
-        <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
-    </button>
-    <button class="b3-menu__item" data-type="removeCol">
-        <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
-        <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
-    </button>
-</div>
+    if (colData.type !== "block") {
+        html += ` <button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
+    <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
+</button>
+<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
+</button>
+<button class="b3-menu__item" data-type="removeCol">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+</button>`
+    }
+    return `<div class="b3-menu__items">${html}</div>
 <div class="b3-menu__items fn__none">
     <button class="b3-menu__item" data-type="nobg" data-col-id="${colData.id}">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goEditCol">
@@ -444,6 +444,8 @@ export const getColNameByType = (type: TAVCol) => {
             return window.siyuan.languages.assets;
         case "checkbox":
             return window.siyuan.languages.checkbox;
+        case "block":
+            return window.siyuan.languages["_attrView"].key;
     }
 };
 
@@ -520,7 +522,7 @@ const addAttrViewColAnimation = (options: {
         const nodeId = options.blockElement.getAttribute("data-node-id");
         options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", `<div class="block__icons av__row" data-id="${nodeId}" data-col-id="${options.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo ariaLabel" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
+    <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
         <svg class="block__logoicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
         <span>${getColNameByType(options.type)}</span>
     </div>
@@ -614,27 +616,25 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
         }
     });
-    if (type !== "block") {
-        menu.addItem({
-            icon: "iconEdit",
-            label: window.siyuan.languages.edit,
-            click() {
-                const colName = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
-                openMenuPanel({
-                    protyle,
-                    blockElement,
-                    type: "edit",
-                    colId,
-                    cb(avElement) {
-                        // 修改名字后点击编辑，需要更新名字
-                        const editNameElement = avElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
-                        editNameElement.value = colName;
-                        editNameElement.select();
-                    }
-                });
-            }
-        });
-    }
+    menu.addItem({
+        icon: "iconEdit",
+        label: window.siyuan.languages.edit,
+        click() {
+            const colName = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "edit",
+                colId,
+                cb(avElement) {
+                    // 修改名字后点击编辑，需要更新名字
+                    const editNameElement = avElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
+                    editNameElement.value = colName;
+                    editNameElement.select();
+                }
+            });
+        }
+    });
     menu.addSeparator();
     menu.addItem({
         icon: "iconUp",

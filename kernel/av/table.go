@@ -1666,8 +1666,8 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 			}
 		}
 		sort.Float64s(values)
-		if len(values) > 0 {
-			if len(values)%2 == 0 {
+		if 0 < len(values) {
+			if 0 == len(values)%2 {
 				col.Calc.Result = &Value{Number: NewFormattedValueNumber((values[len(values)/2-1]+values[len(values)/2])/2, col.NumberFormat)}
 			} else {
 				col.Calc.Result = &Value{Number: NewFormattedValueNumber(values[len(values)/2], col.NumberFormat)}

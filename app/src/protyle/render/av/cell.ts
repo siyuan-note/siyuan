@@ -861,5 +861,7 @@ export const addDragFill = (cellElement: Element) => {
         return;
     }
     cellElement.classList.add("av__cell--active");
-    cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+    if (!cellElement.querySelector(".av__drag-fill")) {
+        cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+    }
 };

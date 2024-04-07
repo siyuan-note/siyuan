@@ -220,7 +220,7 @@ export const getEditHTML = (options: {
 <button class="b3-menu__item" data-type="removeCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
-</button>`
+</button>`;
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -352,7 +352,7 @@ export const bindEditEvent = (options: {
                 data: !wrapElement.checked,
                 blockID: options.blockID
             }]);
-        })
+        });
     }
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
     if (addOptionElement) {
@@ -863,7 +863,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             colId,
                             data: response.data
                         });
-                    })
+                    });
                 }
             });
         }

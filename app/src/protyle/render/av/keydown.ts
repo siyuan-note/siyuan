@@ -28,7 +28,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        const avPanelElement = document.querySelector(".av__panel")
+        const avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement &&
             (event.key === "Escape" || event.key.startsWith("ArrowLeft") || event.key === "Enter" || matchHotKey("⇥", event) || matchHotKey("⇧⇥", event))) {
             avPanelElement.remove();

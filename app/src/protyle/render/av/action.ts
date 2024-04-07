@@ -304,9 +304,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     updateHeader(rowElement);
-    const keyCellElement = rowElements[0].querySelector('.av__cell[data-block-id]') as HTMLElement
+    const keyCellElement = rowElements[0].querySelector(".av__cell[data-block-id]") as HTMLElement;
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
-        const blockId = rowElements[0].getAttribute("data-id")
+        const blockId = rowElements[0].getAttribute("data-id");
         openEditorTab(protyle.app, blockId);
         menu.addItem({
             label: window.siyuan.languages.copy,
@@ -318,7 +318,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             label: window.siyuan.languages.unbindBlock,
             icon: "iconLinkOff",
             click() {
-                updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement])
+                updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
             }
         });
     }

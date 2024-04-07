@@ -15,7 +15,7 @@ import {zoomOut} from "../../menus/protyle";
 import {getEditorRange} from "../util/selection";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {saveLayout, setPanelFocus} from "../../layout/util";
+import {saveLayout} from "../../layout/util";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -565,7 +565,7 @@ ${padHTML}
         let range: Range;
         let blockElement: Element;
         if (nodeElement) {
-            blockElement = nodeElement
+            blockElement = nodeElement;
         } else if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {

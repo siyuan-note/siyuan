@@ -470,6 +470,6 @@ export class Outline extends Model {
                 currentElement.classList.add("b3-list-item--focus");
             }
         }
-        this.element.removeAttribute("data-loading")
+        this.element.removeAttribute("data-loading");
     }
 }

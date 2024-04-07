@@ -150,7 +150,7 @@ export const bindViewEvent = (options: {
             }]);
             options.blockElement.querySelector(".av__title").classList.remove("av__title--hide");
         }
-    })
+    });
 };
 
 export const getViewHTML = (data: IAVTable) => {

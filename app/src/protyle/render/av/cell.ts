@@ -726,7 +726,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;
         if (dataValue.formattedContent) {
-            text = dataValue.formattedContent
+            text = dataValue.formattedContent;
         } else {
             if (dataValue && dataValue.isNotEmpty) {
                 text = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");

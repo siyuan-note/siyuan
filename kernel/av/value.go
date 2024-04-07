@@ -810,7 +810,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
 		}
 		if 0 != earliest && 0 != latest {
-			r.Contents = []*Value{{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
@@ -825,7 +825,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 != earliest {
-			r.Contents = []*Value{{Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -840,7 +840,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 != latest {
-			r.Contents = []*Value{{Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
 		}
 	case CalcOperatorChecked:
 		countChecked := 0

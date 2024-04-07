@@ -78,7 +78,7 @@ func Widgets() (widgets []*Widget) {
 		widget.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		widget.Funding = repo.Package.Funding
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
-		widget.PreferredName = getPreferredName(widget.Package)
+		widget.PreferredName = GetPreferredName(widget.Package)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		widget.Updated = repo.Updated
 		widget.Stars = repo.Stars
@@ -140,7 +140,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
-		widget.PreferredName = getPreferredName(widget.Package)
+		widget.PreferredName = GetPreferredName(widget.Package)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {

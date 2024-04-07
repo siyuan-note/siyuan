@@ -162,7 +162,7 @@ export const openMenuPanel = (options: {
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
             } else if (options.type === "edit") {
-                bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
+                bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
                 bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
             }
@@ -358,7 +358,7 @@ export const openMenuPanel = (options: {
                         colId,
                         isCustomAttr
                     });
-                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
+                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
                 }
                 return;
             }
@@ -823,7 +823,7 @@ export const openMenuPanel = (options: {
                         colId: target.dataset.id,
                         isCustomAttr
                     });
-                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
+                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
@@ -940,7 +940,7 @@ export const openMenuPanel = (options: {
                             colId,
                             isCustomAttr
                         });
-                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
+                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(data.view);
                     }
@@ -972,7 +972,7 @@ export const openMenuPanel = (options: {
                             colId,
                             isCustomAttr
                         });
-                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr});
+                        bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(data.view);
                     }

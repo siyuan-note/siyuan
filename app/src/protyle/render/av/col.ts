@@ -201,7 +201,7 @@ export const getEditHTML = (options: {
 </label>`;
     }
     if (colData.type !== "block") {
-        html += ` <button class="b3-menu__separator"></button>
+        html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
@@ -215,7 +215,15 @@ export const getEditHTML = (options: {
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`
     }
-    return `<div class="b3-menu__items">${html}</div>
+    return `<div class="b3-menu__items">
+    ${html}
+    <button class="b3-menu__separator"></button>
+    <label class="b3-menu__item">
+        <span class="fn__flex-center">${window.siyuan.languages.wrap}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input data-type="wrap" type="checkbox" class="b3-switch b3-switch--menu" ${colData.wrap ? " checked" : ""}>
+    </label>
+</div>
 <div class="b3-menu__items fn__none">
     <button class="b3-menu__item" data-type="nobg" data-col-id="${colData.id}">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goEditCol">
@@ -245,6 +253,7 @@ export const getEditHTML = (options: {
 export const bindEditEvent = (options: {
     protyle: IProtyle,
     data: IAV,
+    blockID: string,
     menuElement: HTMLElement,
     isCustomAttr: boolean
 }) => {
@@ -320,6 +329,24 @@ export const bindEditEvent = (options: {
         });
     }
 
+    const wrapElement = options.menuElement.querySelector('.b3-switch[data-type="wrap"]') as HTMLInputElement;
+    if (wrapElement) {
+        wrapElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                action: "setAttrViewColWrap",
+                id: colId,
+                avID,
+                data: wrapElement.checked,
+                blockID: options.blockID
+            }], [{
+                action: "setAttrViewColWrap",
+                id: colId,
+                avID,
+                data: !wrapElement.checked,
+                blockID: options.blockID
+            }]);
+        })
+    }
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
     if (addOptionElement) {
         addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -365,12 +392,14 @@ export const bindEditEvent = (options: {
                     protyle: options.protyle,
                     menuElement: options.menuElement,
                     data: options.data,
-                    isCustomAttr: options.isCustomAttr
+                    isCustomAttr: options.isCustomAttr,
+                    blockID: options.blockID
                 });
                 (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
             }
         });
     }
+
     const fillCreatedElement = options.menuElement.querySelector('[data-type="fillCreated"]') as HTMLInputElement;
     if (fillCreatedElement) {
         fillCreatedElement.addEventListener("change", () => {
@@ -840,8 +869,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         menu.addSeparator();
     }
     menu.addItem({
-        label: `<label class="fn__flex" style="margin: 4px 0;padding-right: 6px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
+        label: `<label class="fn__flex"><span class="fn__flex-center">${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch b3-switch--menu"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
         bind(element) {
             const inputElement = element.querySelector("input") as HTMLInputElement;
             inputElement.addEventListener("change", () => {

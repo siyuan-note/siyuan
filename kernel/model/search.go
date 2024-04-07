@@ -369,7 +369,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 		b.RefText = getBlockRefText(b.ID, tree)
 
 		hitFirstChildID := false
-		if b.IsContainerBlock() {
+		if b.IsContainerBlock() && "NodeDocument" != b.Type {
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := cachedTrees[b.RootID]
 			if nil == tree {

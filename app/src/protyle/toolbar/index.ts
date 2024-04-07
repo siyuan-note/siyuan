@@ -1464,7 +1464,7 @@ export class Toolbar {
             }
             upDownHint(listElement, event);
             if (event.key === "Enter") {
-                hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").textContent, protyle);
+                hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-content"), protyle);
                 this.subElement.classList.add("fn__none");
                 event.preventDefault();
             } else if (event.key === "Escape") {
@@ -1478,8 +1478,11 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
-                    searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
+                response.data.blocks.forEach((item: { path: string, content: string,name:string }, index: number) => {
+                    searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+    ${item.name}
+    <span class="b3-list-item__meta">${item.content}</span>
+</div>`;
                 });
                 listElement.innerHTML = searchHTML;
             });
@@ -1490,7 +1493,7 @@ export class Toolbar {
             if (!listElement) {
                 return;
             }
-            hintRenderWidget(listElement.textContent, protyle);
+            hintRenderWidget(listElement.dataset.content, protyle);
         });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
@@ -1501,8 +1504,11 @@ export class Toolbar {
             k: "",
         }, (response) => {
             let html = "";
-            response.data.blocks.forEach((item: { content: string }, index: number) => {
-                html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
+            response.data.blocks.forEach((item: { content: string, name: string }, index: number) => {
+                html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-content="${item.content}">
+${item.name}
+<span class="b3-list-item__meta">${item.content}</span>
+</div>`;
             });
             this.subElement.querySelector(".b3-list--background").innerHTML = html;
             /// #if !MOBILE

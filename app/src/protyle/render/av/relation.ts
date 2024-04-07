@@ -290,7 +290,6 @@ ${html || genSelectItemHTML("empty")}`;
         databaseName.setAttribute("data-id", response.data.blockIDs[0]);
         const listElement = options.menuElement.querySelector(".b3-menu__items");
         inputElement.addEventListener("keydown", (event) => {
-            event.stopPropagation();
             if (event.isComposing) {
                 return;
             }

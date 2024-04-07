@@ -86,7 +86,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	if keywordArg := arg["keyword"]; nil != keywordArg {
 		keyword = keywordArg.(string)
 	}
-	attributeViewName, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
+	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -94,8 +94,9 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"name": attributeViewName,
-		"rows": rows,
+		"name":     attributeViewName,
+		"blockIDs": databaseBlockIDs,
+		"rows":     rows,
 	}
 }
 

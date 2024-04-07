@@ -55,7 +55,7 @@ func SetDatabaseBlockView(blockID, viewID string) (err error) {
 	return
 }
 
-func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) (attributeViewName string, keyValues *av.KeyValues, err error) {
+func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) (attributeViewName string, databaseBlockIDs []string, keyValues *av.KeyValues, err error) {
 	waitForSyncingStorages()
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -64,6 +64,8 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		return
 	}
 	attributeViewName = attrView.Name
+
+	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 
 	keyValues = attrView.GetBlockKeyValues()
 	// 过滤掉不在视图中的值

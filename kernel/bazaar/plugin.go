@@ -82,7 +82,7 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		plugin.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		plugin.Funding = repo.Package.Funding
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
-		plugin.PreferredName = getPreferredName(plugin.Package)
+		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
 		plugin.Updated = repo.Updated
 		plugin.Stars = repo.Stars
@@ -136,7 +136,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		}
 
 		found = true
-		displayName = getPreferredName(plugin.Package)
+		displayName = GetPreferredName(plugin.Package)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 	}
 	return
@@ -179,7 +179,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
-		plugin.PreferredName = getPreferredName(plugin.Package)
+		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {

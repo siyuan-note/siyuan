@@ -161,7 +161,7 @@ func getPreferredReadme(readme *Readme) string {
 	return ret
 }
 
-func getPreferredName(pkg *Package) string {
+func GetPreferredName(pkg *Package) string {
 	if nil == pkg.DisplayName {
 		return pkg.Name
 	}

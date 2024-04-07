@@ -501,9 +501,9 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 		formatted = contentTime.Format("2006-01-02 15:04")
 	}
 
+	content2Time := time.UnixMilli(content2)
 	if hasEndDate {
 		var formattedContent2 string
-		content2Time := time.UnixMilli(content2)
 		if isNotTime {
 			formattedContent2 = content2Time.Format("2006-01-02")
 		} else {
@@ -523,6 +523,8 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 	ret = &ValueDate{
 		Content:          content,
 		Content2:         content2,
+		IsNotEmpty:       true,
+		IsNotEmpty2:      !content2Time.IsZero(),
 		HasEndDate:       hasEndDate,
 		IsNotTime:        true,
 		FormattedContent: formatted,

@@ -277,7 +277,7 @@ export const bindRelationEvent = (options: {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || window.siyuan.languages.untitled);
             }
         });
-        options.menuElement.querySelector(".b3-menu__label").innerHTML = response.data.name;
+        options.menuElement.querySelector(".b3-menu__label").innerHTML = `<span data-id="${response.data.blockID}" class="popover__block">${response.data.name}</span>`;
         options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML("empty")}`;

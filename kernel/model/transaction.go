@@ -1315,7 +1315,7 @@ func (tx *Transaction) commit() (err error) {
 
 		var sources []interface{}
 		for _, op := range tx.DoOperations {
-			sources = append(sources, op.Action)
+			sources = append(sources, op)
 		}
 		util.PushSaveDoc(tree.ID, "tx", sources)
 	}

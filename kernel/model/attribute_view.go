@@ -2039,23 +2039,29 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 		return
 	}
 
-	// 不允许重复添加相同的块到属性视图中
+	var content string
+	if !isDetached {
+		content = getNodeRefText(node)
+	}
+
+	now := time.Now().UnixMilli()
+
+	// 检查是否重复添加相同的块
 	blockValues := attrView.GetBlockKeyValues()
 	for _, blockValue := range blockValues.Values {
 		if blockValue.Block.ID == addingBlockID {
 			if !isDetached {
-				// 重复绑定一下，比如剪切数据库块的场景需要
-				bindBlockAv0(tx, avID, blockID, node, tree)
+				// 重复绑定一下，比如剪切数据库块、取消绑定块后再次添加的场景需要
+				bindBlockAv0(tx, avID, node, tree)
+				blockValue.IsDetached = isDetached
+				blockValue.Block.Content = content
+				blockValue.UpdatedAt = now
+				err = av.SaveAttributeView(attrView)
 			}
 			return
 		}
 	}
 
-	var content string
-	if !isDetached {
-		content = getNodeRefText(node)
-	}
-	now := time.Now().UnixMilli()
 	blockValue := &av.Value{
 		ID:         ast.NewNodeID(),
 		KeyID:      blockValues.Key.ID,
@@ -2148,7 +2154,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 	}
 
 	if !isDetached {
-		bindBlockAv0(tx, avID, blockID, node, tree)
+		bindBlockAv0(tx, avID, node, tree)
 	}
 
 	for _, v := range attrView.Views {
@@ -3069,6 +3075,11 @@ func unbindBlockAv(tx *Transaction, avID, blockID string) {
 		node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 	}
 
+	avNames := getAvNames(attrs[av.NodeAttrNameAvs])
+	if "" != avNames {
+		attrs[av.NodeAttrViewNames] = avNames
+	}
+
 	if nil != tx {
 		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {
@@ -3087,11 +3098,11 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 		return
 	}
 
-	bindBlockAv0(tx, avID, blockID, node, tree)
+	bindBlockAv0(tx, avID, node, tree)
 	return
 }
 
-func bindBlockAv0(tx *Transaction, avID, blockID string, node *ast.Node, tree *parse.Tree) {
+func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	if "" == attrs[av.NodeAttrNameAvs] {
 		attrs[av.NodeAttrNameAvs] = avID
@@ -3114,7 +3125,7 @@ func bindBlockAv0(tx *Transaction, avID, blockID string, node *ast.Node, tree *p
 		err = setNodeAttrs(node, tree, attrs)
 	}
 	if nil != err {
-		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
 		return
 	}
 	return

@@ -52,7 +52,6 @@ Most features are free, even for commercial use.
   * Markdown WYSIWYG
   * List outline
   * Block zoom-in
-  * Block horizontal layout
   * Million-word large document editing
   * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
   * Web clipping
@@ -64,7 +63,9 @@ Most features are free, even for commercial use.
   * Copy to WeChat MP, Zhihu and Yuque
 * Database
   * Table view
-* Spaced repetition
+* Flashcard spaced repetition
+* AI writing and q/a chat via OpenAI API
+* Tesseract OCR 
 * Multi-tab, drag and drop to split screen
 * Template snippet
 * JavaScript/CSS snippet

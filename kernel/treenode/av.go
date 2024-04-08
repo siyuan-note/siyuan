@@ -26,6 +26,41 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
+func BatchGetMirrorAttrViewBlockIDs(avIDs []string) (ret map[string]string) {
+	av.AttributeViewBlocksLock.Lock()
+	defer av.AttributeViewBlocksLock.Unlock()
+
+	ret = map[string]string{}
+
+	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
+	if !filelock.IsExist(blocks) {
+		return
+	}
+
+	data, err := filelock.ReadFile(blocks)
+	if nil != err {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+		return
+	}
+
+	avBlocks := map[string][]string{}
+	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
+		return
+	}
+
+	for _, avID := range avIDs {
+		blockIDs := avBlocks[avID]
+		for _, blockID := range blockIDs {
+			if nil != GetBlockTree(blockID) {
+				ret[avID] = blockID
+				break
+			}
+		}
+	}
+	return
+}
+
 func GetMirrorAttrViewBlockIDs(avID string) (ret []string) {
 	av.AttributeViewBlocksLock.Lock()
 	defer av.AttributeViewBlocksLock.Unlock()

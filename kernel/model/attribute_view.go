@@ -34,7 +34,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -190,36 +189,69 @@ type SearchAttributeViewResult struct {
 	HPath   string `json:"hPath"`
 }
 
-func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchAttributeViewResult, pageCount int) {
+func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 	waitForSyncingStorages()
 	ret = []*SearchAttributeViewResult{}
-
-	var blocks []*Block
 	keyword = strings.TrimSpace(keyword)
-	if "" == keyword {
-		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'av' ORDER BY updated DESC LIMIT 10", page, pageSize)
-		blocks = fromSQLBlocks(&sqlBlocks, "", 36)
-		pageCount = 1
-	} else {
-		var matchedBlockCount int
-		blocks, matchedBlockCount, _ = fullTextSearchByKeyword(keyword, "", "", "('av')", "", 36, page, pageSize)
-		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+
+	avs := map[string]string{}
+	avDir := filepath.Join(util.DataDir, "storage", "av")
+	const limit = 16
+	entries, err := os.ReadDir(avDir)
+	if nil != err {
+		logging.LogErrorf("read directory [%s] failed: %s", avDir, err)
+		return
 	}
 
+	count := 0
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		id := strings.TrimSuffix(entry.Name(), ".json")
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+
+		name, _ := av.GetAttributeViewNameByPath(filepath.Join(avDir, entry.Name()))
+		if "" == name {
+			continue
+		}
+
+		if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
+			avs[id] = name
+			count++
+			if limit <= count {
+				break
+			}
+		}
+	}
+
+	var avIDs []string
+	for avID := range avs {
+		avIDs = append(avIDs, avID)
+	}
+	blockIDs := treenode.BatchGetMirrorAttrViewBlockIDs(avIDs)
 	trees := map[string]*parse.Tree{}
-	for _, block := range blocks {
-		tree := trees[block.RootID]
+	for _, blockID := range blockIDs {
+		bt := treenode.GetBlockTree(blockID)
+		if nil == bt {
+			continue
+		}
+
+		tree := trees[bt.RootID]
 		if nil == tree {
-			tree, _ = LoadTreeByBlockID(block.ID)
+			tree, _ = LoadTreeByBlockID(blockID)
 			if nil != tree {
-				trees[block.RootID] = tree
+				trees[bt.RootID] = tree
 			}
 		}
 		if nil == tree {
 			continue
 		}
 
-		node := treenode.GetNodeInTree(tree, block.ID)
+		node := treenode.GetNodeInTree(tree, blockID)
 		if nil == node {
 			continue
 		}
@@ -229,8 +261,8 @@ func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchA
 		}
 
 		avID := node.AttributeViewID
-		attrView, _ := av.ParseAttributeView(avID)
-		if nil == attrView {
+		name := avs[avID]
+		if "" == name {
 			continue
 		}
 
@@ -255,8 +287,8 @@ func SearchAttributeView(keyword string, page int, pageSize int) (ret []*SearchA
 		if !exist {
 			ret = append(ret, &SearchAttributeViewResult{
 				AvID:    avID,
-				AvName:  attrView.Name,
-				BlockID: block.ID,
+				AvName:  name,
+				BlockID: blockID,
 				HPath:   hPath,
 			})
 		}

@@ -65,7 +65,7 @@ export const initStatus = (isWindow = false) => {
                 window.siyuan.menus.menu.remove();
                 window.siyuan.menus.menu.element.setAttribute("data-name", "statusHelp");
                 window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.help,
+                    label: window.siyuan.languages.userGuide,
                     icon: "iconHelp",
                     click: () => {
                         mountHelp();

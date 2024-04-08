@@ -187,6 +187,7 @@ export abstract class Constants {
         zh_CHT: "20211226090932-5lcq56f",
         en_US: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
+        es_ES: "20210808180117-6v0mkxr",
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 

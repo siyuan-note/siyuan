@@ -194,7 +194,7 @@ export const newCenterEmptyTab = (app: App) => {
     </div>
     <div class="b3-list-item" id="editorEmptyHelp">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg>
-        <span>${window.siyuan.languages.help}</span>
+        <span>${window.siyuan.languages.userGuide}</span>
     </div>
 </div>`,
         callback(tab: Tab) {

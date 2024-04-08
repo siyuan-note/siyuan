@@ -357,11 +357,12 @@ export class Outline extends Model {
     }
 
     private onTransaction(data: IWebSocketData) {
-        if (this.isPreview) {
+        if (this.isPreview || data.data.rootID !== this.blockId) {
             return;
         }
         let needReload = false;
-        data.data[0].doOperations.forEach((item: IOperation) => {
+        const ops = data.data.sources[0];
+        ops.doOperations.forEach((item: IOperation) => {
             if ((item.action === "update" || item.action === "insert") &&
                 (item.data.indexOf('data-type="NodeHeading"') > -1 || item.data.indexOf(`<div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"><wbr></div>`) > -1)) {
                 needReload = true;
@@ -369,8 +370,8 @@ export class Outline extends Model {
                 needReload = true;
             }
         });
-        if (data.data[0].undoOperations) {
-            data.data[0].undoOperations.forEach((item: IOperation) => {
+        if (ops.undoOperations) {
+            ops.undoOperations.forEach((item: IOperation) => {
                 if (item.action === "update" && item.data.indexOf('data-type="NodeHeading"') > -1) {
                     needReload = true;
                 }

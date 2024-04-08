@@ -286,11 +286,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		attrView, err := av.ParseAttributeView(avID)
 		if nil != err {
 			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+			unbindBlockAv(nil, avID, blockID)
 			return
 		}
 
 		if 1 > len(attrView.Views) {
 			err = av.ErrViewNotFound
+			unbindBlockAv(nil, avID, blockID)
 			return
 		}
 

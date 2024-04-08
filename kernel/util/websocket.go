@@ -221,12 +221,13 @@ func PushReloadDoc(rootID string) {
 }
 
 func PushSaveDoc(rootID, typ string, sources interface{}) {
-	data := map[string]interface{}{
+	evt := NewCmdResult("savedoc", 0, PushModeBroadcast)
+	evt.Data = map[string]interface{}{
 		"rootID":  rootID,
 		"type":    typ,
 		"sources": sources,
 	}
-	BroadcastByType("main", "savedoc", 0, "", data)
+	PushEvent(evt)
 }
 
 func PushProtyleReload(rootID string) {

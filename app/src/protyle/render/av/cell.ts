@@ -440,7 +440,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         });
     }
     avMaskElement.addEventListener("click", (event) => {
-        if ((event.target as HTMLElement).classList.contains("av__mask") && document.activeElement.tagName !== "TEXTAREA") {
+        if ((event.target as HTMLElement).classList.contains("av__mask")
+            && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);
             avMaskElement?.remove();
         }

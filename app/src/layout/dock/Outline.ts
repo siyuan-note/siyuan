@@ -236,8 +236,15 @@ export class Outline extends Model {
             documentSelf.ondragstart = () => false;
             let ghostElement: HTMLElement;
             let selectItem: HTMLElement;
+            let editor: IProtyle
+            getAllModels().editor.find(editItem => {
+                if (editItem.editor.protyle.block.rootID === this.blockId) {
+                    editor = editItem.editor.protyle;
+                    return true;
+                }
+            });
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX || this.element.getAttribute("data-loading") === "true") {
+                if (!editor || editor.disabled || moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX || this.element.getAttribute("data-loading") === "true") {
                     return;
                 }
                 moveEvent.preventDefault();
@@ -275,56 +282,52 @@ export class Outline extends Model {
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
-                ghostElement.remove();
+                ghostElement?.remove();
                 item.style.opacity = "";
                 if (!selectItem) {
                     selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
                 }
-                if (selectItem && selectItem.className.indexOf("dragover") > -1) {
-                    getAllModels().editor.find(editItem => {
-                        if (editItem.editor.protyle.block.rootID === this.blockId) {
-                            let previousID;
-                            let parentID;
-                            const undoPreviousID = (item.previousElementSibling && item.previousElementSibling.tagName === "UL") ? item.previousElementSibling.previousElementSibling.getAttribute("data-node-id") : item.previousElementSibling?.getAttribute("data-node-id");
-                            const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
-                            if (selectItem.classList.contains("dragover")) {
-                                parentID = selectItem.getAttribute("data-node-id");
-                                if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
-                                    selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
-                                } else {
-                                    selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
-                                    item.remove();
-                                }
-                            } else if (selectItem.classList.contains("dragover__top")) {
-                                parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
-                                if (selectItem.previousElementSibling && selectItem.previousElementSibling.tagName === "UL") {
-                                    previousID = selectItem.previousElementSibling.previousElementSibling.getAttribute("data-node-id");
-                                } else {
-                                    previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
-                                }
-                                if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
-                                    return true;
-                                }
-                                selectItem.before(item);
-                            } else if (selectItem.classList.contains("dragover__bottom")) {
-                                previousID = selectItem.getAttribute("data-node-id");
-                                selectItem.after(item);
-                            }
-                            this.element.setAttribute("data-loading", "true");
-                            transaction(editItem.editor.protyle, [{
-                                action: "moveOutlineHeading",
-                                id: item.dataset.nodeId,
-                                previousID,
-                                parentID,
-                            }], [{
-                                action: "moveOutlineHeading",
-                                id: item.dataset.nodeId,
-                                previousID: undoPreviousID,
-                                parentID: undoParentID,
-                            }]);
+                if (selectItem && selectItem.className.indexOf("dragover") > -1 && editor) {
+                    let previousID;
+                    let parentID;
+                    const undoPreviousID = (item.previousElementSibling && item.previousElementSibling.tagName === "UL") ? item.previousElementSibling.previousElementSibling.getAttribute("data-node-id") : item.previousElementSibling?.getAttribute("data-node-id");
+                    const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                    if (selectItem.classList.contains("dragover")) {
+                        parentID = selectItem.getAttribute("data-node-id");
+                        if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
+                            selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
+                        } else {
+                            selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
+                            item.remove();
+                        }
+                    } else if (selectItem.classList.contains("dragover__top")) {
+                        parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                        if (selectItem.previousElementSibling && selectItem.previousElementSibling.tagName === "UL") {
+                            previousID = selectItem.previousElementSibling.previousElementSibling.getAttribute("data-node-id");
+                        } else {
+                            previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                        }
+                        if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
                             return true;
                         }
-                    });
+                        selectItem.before(item);
+                    } else if (selectItem.classList.contains("dragover__bottom")) {
+                        previousID = selectItem.getAttribute("data-node-id");
+                        selectItem.after(item);
+                    }
+                    this.element.setAttribute("data-loading", "true");
+                    transaction(editor, [{
+                        action: "moveOutlineHeading",
+                        id: item.dataset.nodeId,
+                        previousID,
+                        parentID,
+                    }], [{
+                        action: "moveOutlineHeading",
+                        id: item.dataset.nodeId,
+                        previousID: undoPreviousID,
+                        parentID: undoParentID,
+                    }]);
+                    return true;
                 }
                 this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover");

@@ -64,7 +64,7 @@ Most features are free, even for commercial use.
 * Database
   * Table view
 * Flashcard spaced repetition
-* AI writing and q/a chat via OpenAI API
+* AI writing and Q/A chat via OpenAI API
 * Tesseract OCR 
 * Multi-tab, drag and drop to split screen
 * Template snippet

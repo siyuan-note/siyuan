@@ -726,7 +726,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;
         if (dataValue.formattedContent) {
-            text = dataValue.formattedContent
+            text = dataValue.formattedContent;
         } else {
             if (dataValue && dataValue.isNotEmpty) {
                 text = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
@@ -861,5 +861,7 @@ export const addDragFill = (cellElement: Element) => {
         return;
     }
     cellElement.classList.add("av__cell--active");
-    cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+    if (!cellElement.querySelector(".av__drag-fill")) {
+        cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+    }
 };

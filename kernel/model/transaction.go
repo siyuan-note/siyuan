@@ -1312,10 +1312,15 @@ func (tx *Transaction) commit() (err error) {
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}
+
+		var sources []interface{}
+		for _, op := range tx.DoOperations {
+			sources = append(sources, op.Action)
+		}
+		util.PushSaveDoc(tree.ID, "tx", sources)
 	}
 	refreshDynamicRefTexts(tx.nodes, tx.trees)
 	IncSync()
-	tx.trees = nil
 	tx.state.Store(2)
 	tx.m.Unlock()
 	return

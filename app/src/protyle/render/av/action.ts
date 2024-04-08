@@ -9,7 +9,7 @@ import {
     getTypeByCellElement,
     popTextCell,
     renderCell,
-    renderCellAttr,
+    renderCellAttr, updateCellsValue,
     updateHeaderCell
 } from "./cell";
 import {getColIconByType, showColMenu} from "./col";
@@ -304,18 +304,27 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     updateHeader(rowElement);
-    if (rowElements.length === 1 && !rowElements[0].querySelector('[data-detached="true"]')) {
-        openEditorTab(protyle.app, rowElements[0].getAttribute("data-id"));
+    const keyCellElement = rowElements[0].querySelector(".av__cell[data-block-id]") as HTMLElement;
+    if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
+        const blockId = rowElements[0].getAttribute("data-id");
+        openEditorTab(protyle.app, blockId);
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu(rowElements[0].getAttribute("data-id"))
+            submenu: copySubMenu(blockId)
+        });
+        menu.addItem({
+            label: window.siyuan.languages.unbindBlock,
+            icon: "iconLinkOff",
+            click() {
+                updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
+            }
         });
     }
     if (!protyle.disabled) {
         if (rowElements.length === 1) {
-            if (!rowElements[0].querySelector('[data-detached="true"]')) {
+            if (keyCellElement.getAttribute("data-detached") !== "true") {
                 menu.addSeparator();
             }
             menu.addItem({

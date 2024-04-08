@@ -14,6 +14,7 @@ import {MobileCustom} from "../mobile/dock/MobileCustom";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
+import {clearOBG} from "../layout/dock/util";
 
 export class Plugin {
     private app: App;
@@ -268,6 +269,7 @@ export class Plugin {
                 update: options.update,
             });
             customObj.element.addEventListener("click", () => {
+                clearOBG();
                 setPanelFocus(customObj.element.parentElement.parentElement);
             });
             return customObj;

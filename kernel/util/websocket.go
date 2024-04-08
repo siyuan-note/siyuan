@@ -220,6 +220,15 @@ func PushReloadDoc(rootID string) {
 	BroadcastByType("main", "reloaddoc", 0, "", rootID)
 }
 
+func PushSaveDoc(rootID, typ string, sources interface{}) {
+	data := map[string]interface{}{
+		"rootID":  rootID,
+		"type":    typ,
+		"sources": sources,
+	}
+	BroadcastByType("main", "savedoc", 0, "", data)
+}
+
 func PushProtyleReload(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }

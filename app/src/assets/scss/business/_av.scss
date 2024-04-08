@@ -42,6 +42,10 @@
     .layout-tab-bar {
       background-color: transparent;
       font-size: 87.5%;
+
+      .item__text {
+        padding-left: 5px;
+      }
     }
   }
 
@@ -268,7 +272,7 @@
     }
 
     &--header {
-      padding: 5px;
+      padding: 5px 8px;
       display: flex;
       align-items: center;
       transition: background 20ms ease-in 0s;

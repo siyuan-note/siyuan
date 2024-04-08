@@ -793,7 +793,9 @@ app.whenReady().then(() => {
                 event.sender.openDevTools({mode: "bottom"});
                 break;
             case "unregisterGlobalShortcut":
-                globalShortcut.unregister(hotKey2Electron(data.accelerator));
+                if (data.accelerator) {
+                    globalShortcut.unregister(hotKey2Electron(data.accelerator));
+                }
                 break;
             case "show":
                 if (!currentWindow) {

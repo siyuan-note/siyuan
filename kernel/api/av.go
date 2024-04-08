@@ -318,22 +318,9 @@ func searchAttributeView(c *gin.Context) {
 	}
 
 	keyword := arg["keyword"].(string)
-	page := 1
-	pageArg := arg["page"]
-	if nil != pageArg {
-		page = int(pageArg.(float64))
-	}
-
-	pageSize := 10
-	pageSizeArg := arg["pageSize"]
-	if nil != pageSizeArg {
-		pageSize = int(pageSizeArg.(float64))
-	}
-
-	results, total := model.SearchAttributeView(keyword, page, pageSize)
+	results := model.SearchAttributeView(keyword)
 	ret.Data = map[string]interface{}{
 		"results": results,
-		"total":   total,
 	}
 }
 

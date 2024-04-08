@@ -229,9 +229,13 @@ func GetAttributeViewName(avID string) (ret string, err error) {
 		return
 	}
 
+	return GetAttributeViewNameByPath(avJSONPath)
+}
+
+func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
 	data, err := filelock.ReadFile(avJSONPath)
 	if nil != err {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
+		logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
 		return
 	}
 

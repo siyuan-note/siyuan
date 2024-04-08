@@ -1314,9 +1314,7 @@ func (tx *Transaction) commit() (err error) {
 		}
 
 		var sources []interface{}
-		for _, op := range tx.DoOperations {
-			sources = append(sources, op)
-		}
+		sources = append(sources, tx)
 		util.PushSaveDoc(tree.ID, "tx", sources)
 	}
 	refreshDynamicRefTexts(tx.nodes, tx.trees)

@@ -1200,8 +1200,18 @@ app.whenReady().then(() => {
     });
 });
 
-app.on("open-url", (event, url) => { // for macOS
+app.on("open-url", async (event, url) => { // for macOS
     if (url.startsWith("siyuan://")) {
+        if (workspaces.length === 0) {
+            let index = 0;
+            while (index < 10) {
+                index++;
+                await sleep(500);
+                if (workspaces.length > 0) {
+                    break;
+                }
+            }
+        }
         workspaces.forEach(item => {
             if (item.browserWindow && !item.browserWindow.isDestroyed()) {
                 item.browserWindow.webContents.send("siyuan-open-url", url);

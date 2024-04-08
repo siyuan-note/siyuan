@@ -48,7 +48,7 @@ export class Outline extends Model {
             msgCallback(data) {
                 if (data) {
                     switch (data.cmd) {
-                        case "transactions":
+                        case "savedoc":
                             this.onTransaction(data);
                             break;
                         case "rename":

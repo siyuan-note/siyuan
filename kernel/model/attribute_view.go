@@ -774,7 +774,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 			}
 
 			if 0 == v.UpdatedAt {
-				v.UpdatedAt = v.CreatedAt + 1000
+				v.UpdatedAt = v.CreatedAt
 			}
 		}
 	}

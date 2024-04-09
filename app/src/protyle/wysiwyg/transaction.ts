@@ -122,6 +122,9 @@ const promiseTransaction = () => {
                             item.remove();
                         }
                     });
+                    if (protyle.disabled) {
+                        disabledProtyle(protyle);
+                    }
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
                     avRender(protyle.wysiwyg.element, protyle);
@@ -402,6 +405,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
         });
         if (operation.retData) {
+            if (protyle.disabled) {
+                disabledProtyle(protyle);
+            }
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);

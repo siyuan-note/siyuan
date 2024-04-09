@@ -236,7 +236,7 @@ export class Outline extends Model {
             documentSelf.ondragstart = () => false;
             let ghostElement: HTMLElement;
             let selectItem: HTMLElement;
-            let editor: IProtyle
+            let editor: IProtyle;
             getAllModels().editor.find(editItem => {
                 if (editItem.editor.protyle.block.rootID === this.blockId) {
                     editor = editItem.editor.protyle;

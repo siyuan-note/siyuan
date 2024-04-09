@@ -233,4 +233,4 @@ export const clearOBG = () => {
         item.blockId = "";
         item.render(undefined);
     });
-}
+};

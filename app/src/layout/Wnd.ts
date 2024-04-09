@@ -716,7 +716,7 @@ export class Wnd {
                     // 关闭分屏页签后光标消失
                     const editors = getAllModels().editor;
                     if (editors.length === 0) {
-                       clearOBG()
+                       clearOBG();
                     } else {
                         editors.forEach(item => {
                             if (!item.element.classList.contains("fn__none")) {

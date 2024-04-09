@@ -182,7 +182,8 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			return getAttributeViewContent(node.AttributeViewID)
 		}
 
-		return getAttributeViewName(node.AttributeViewID)
+		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
+		return ret
 	}
 
 	buf := bytes.Buffer{}
@@ -341,7 +342,7 @@ func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {
 
 func CountBlockNodes(node *ast.Node) (ret int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
+		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeListItem == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
 			return ast.WalkContinue
 		}
 
@@ -545,49 +546,6 @@ func IsChartCodeBlockCode(code *ast.Node) bool {
 	return render.NoHighlight(language)
 }
 
-func GetAttributeViewName(avID string) (name string) {
-	if "" == avID {
-		return
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	for _, v := range attrView.Views {
-		buf.WriteString(v.Name)
-		buf.WriteByte(' ')
-	}
-
-	name = strings.TrimSpace(buf.String())
-	return
-}
-
-func getAttributeViewName(avID string) (name string) {
-	if "" == avID {
-		return
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	buf.WriteString(attrView.Name)
-	buf.WriteByte(' ')
-	for _, v := range attrView.Views {
-		buf.WriteString(v.Name)
-		buf.WriteByte(' ')
-	}
-	name = strings.TrimSpace(buf.String())
-	return
-}
-
 func getAttributeViewContent(avID string) (content string) {
 	if "" == avID {
 		return
@@ -676,6 +634,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Template:     key.Template,
 			Relation:     key.Relation,
 			Rollup:       key.Rollup,
+			Date:         key.Date,
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,

@@ -28,6 +28,7 @@ import {Search} from "../search";
 import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
 import {preventScroll} from "../protyle/scroll/preventScroll";
+import {clearOBG} from "../layout/dock/util";
 
 export const openFileById = async (options: {
     app: App,
@@ -86,9 +87,14 @@ export const openFile = async (options: IOpenFileOptions) => {
     document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
         item.remove();
     });
+    // 打开 PDF 时移除文档光标
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
     const allModels = getAllModels();
     // 文档已打开
     if (options.assetPath) {
+        clearOBG();
         const asset = allModels.asset.find((item) => {
             if (item.path == options.assetPath) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
@@ -106,6 +112,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             return asset.parent;
         }
     } else if (options.custom) {
+        clearOBG();
         const custom = allModels.custom.find((item) => {
             if (objEquals(item.data, options.custom.data) && (!options.custom.id || options.custom.id === item.type)) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
@@ -129,6 +136,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             return hasModel;
         }
     } else if (options.searchData) {
+        clearOBG();
         const search = allModels.search.find((item) => {
             if (objEquals(item.config, options.searchData)) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
@@ -547,14 +555,14 @@ export const isCurrentEditor = (blockId: string) => {
     if (activeElement) {
         const tab = getInstanceById(activeElement.getAttribute("data-id"));
         if (tab instanceof Tab && tab.model instanceof Editor) {
-            if (tab.model.editor.protyle.block.rootID !== blockId &&
-                tab.model.editor.protyle.block.parentID !== blockId &&  // updateBacklinkGraph 时会传入 parentID
-                tab.model.editor.protyle.block.id !== blockId) {
-                return false;
+            if (tab.model.editor.protyle.block.rootID === blockId ||
+                tab.model.editor.protyle.block.parentID === blockId ||  // updateBacklinkGraph 时会传入 parentID
+                tab.model.editor.protyle.block.id === blockId) {
+                return true;
             }
         }
     }
-    return true;
+    return false;
 };
 
 export const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {

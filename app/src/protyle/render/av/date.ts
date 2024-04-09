@@ -73,7 +73,7 @@ export const bindDateEvent = (options: {
     inputElements.forEach(item => {
         item.addEventListener("keydown", (event) => {
             if (event.isComposing) {
-                return
+                return;
             }
             if (event.key === "Enter") {
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
@@ -87,7 +87,7 @@ export const bindDateEvent = (options: {
                 document.querySelector(".av__panel")?.remove();
             }
         });
-    })
+    });
     inputElements[0].addEventListener("change", () => {
         inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
     });

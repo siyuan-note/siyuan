@@ -106,10 +106,11 @@ type TableColumn struct {
 	// 以下是某些列类型的特有属性
 
 	Options      []*SelectOption `json:"options,omitempty"`  // 选项列表
-	NumberFormat NumberFormat    `json:"numberFormat"`       // 列数字格式化
-	Template     string          `json:"template"`           // 模板内容
+	NumberFormat NumberFormat    `json:"numberFormat"`       // 数字列格式化
+	Template     string          `json:"template"`           // 模板列内容
 	Relation     *Relation       `json:"relation,omitempty"` // 关联列
 	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总列
+	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
 type TableCell struct {
@@ -1665,8 +1666,8 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 			}
 		}
 		sort.Float64s(values)
-		if len(values) > 0 {
-			if len(values)%2 == 0 {
+		if 0 < len(values) {
+			if 0 == len(values)%2 {
 				col.Calc.Result = &Value{Number: NewFormattedValueNumber((values[len(values)/2-1]+values[len(values)/2])/2, col.NumberFormat)}
 			} else {
 				col.Calc.Result = &Value{Number: NewFormattedValueNumber(values[len(values)/2], col.NumberFormat)}

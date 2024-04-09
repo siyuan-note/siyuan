@@ -15,7 +15,7 @@ import {zoomOut} from "../../menus/protyle";
 import {getEditorRange} from "../util/selection";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {saveLayout, setPanelFocus} from "../../layout/util";
+import {saveLayout} from "../../layout/util";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -62,11 +62,6 @@ ${padHTML}
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
-            /// #if !MOBILE
-            if (protyle.model) {
-                setPanelFocus(protyle.model.element.parentElement.parentElement);
-            }
-            /// #endif
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");
@@ -565,11 +560,13 @@ ${padHTML}
         });
     }
 
-    public render(protyle: IProtyle, update = false) {
+    public render(protyle: IProtyle, update = false, nodeElement?: Element | false) {
         /// #if !MOBILE
         let range: Range;
         let blockElement: Element;
-        if (getSelection().rangeCount > 0) {
+        if (nodeElement) {
+            blockElement = nodeElement;
+        } else if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
                 if (protyle.element.id === "searchPreview") {

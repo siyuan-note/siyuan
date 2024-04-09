@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -42,6 +43,7 @@ import (
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -447,6 +449,10 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 
 func ContentStat(content string) (ret *util.BlockStatResult) {
 	luteEngine := util.NewLute()
+	return contentStat(content, luteEngine)
+}
+
+func contentStat(content string, luteEngine *lute.Lute) (ret *util.BlockStatResult) {
 	tree := luteEngine.BlockDOM2Tree(content)
 	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
 	return &util.BlockStatResult{
@@ -478,6 +484,10 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 		}
 
 		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			continue
+		}
+
 		runeCnt, wordCnt, linkCnt, imgCnt, refCnt := node.Stat()
 		ret.RuneCount += runeCnt
 		ret.WordCount += wordCnt
@@ -496,7 +506,94 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 		return
 	}
 
+	var databaseBlockNodes []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+
+		databaseBlockNodes = append(databaseBlockNodes, n)
+		return ast.WalkContinue
+	})
+
+	luteEngine := util.NewLute()
+	var dbRuneCnt, dbWordCnt, dbLinkCnt, dbImgCnt, dbRefCnt int
+	for _, n := range databaseBlockNodes {
+		if "" == n.AttributeViewID {
+			continue
+		}
+
+		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
+		if nil == attrView {
+			continue
+		}
+
+		content := bytes.Buffer{}
+		for _, kValues := range attrView.KeyValues {
+			for _, v := range kValues.Values {
+				switch kValues.Key.Type {
+				case av.KeyTypeURL:
+					if v.IsEmpty() {
+						continue
+					}
+
+					dbLinkCnt++
+					content.WriteString(v.URL.Content)
+				case av.KeyTypeMAsset:
+					if v.IsEmpty() {
+						continue
+					}
+
+					for _, asset := range v.MAsset {
+						if av.AssetTypeImage == asset.Type {
+							dbImgCnt++
+						}
+					}
+				case av.KeyTypeBlock:
+					if v.IsEmpty() {
+						continue
+					}
+
+					if !v.IsDetached {
+						dbRefCnt++
+					}
+					content.WriteString(v.Block.Content)
+				case av.KeyTypeText:
+					if v.IsEmpty() {
+						continue
+					}
+					content.WriteString(v.Text.Content)
+				case av.KeyTypeNumber:
+					if v.IsEmpty() {
+						continue
+					}
+					v.Number.FormatNumber()
+					content.WriteString(v.Number.FormattedContent)
+				case av.KeyTypeEmail:
+					if v.IsEmpty() {
+						continue
+					}
+					content.WriteString(v.Email.Content)
+				case av.KeyTypePhone:
+					if v.IsEmpty() {
+						continue
+					}
+					content.WriteString(v.Phone.Content)
+				}
+			}
+		}
+
+		dbStat := contentStat(content.String(), luteEngine)
+		dbRuneCnt += dbStat.RuneCount
+		dbWordCnt += dbStat.WordCount
+	}
+
 	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	runeCnt += dbRuneCnt
+	wordCnt += dbWordCnt
+	linkCnt += dbLinkCnt
+	imgCnt += dbImgCnt
+	refCnt += dbRefCnt
 	return &util.BlockStatResult{
 		RuneCount:  runeCnt,
 		WordCount:  wordCnt,
@@ -665,7 +762,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			childCount += treenode.CountBlockNodes(n)
 		}
 
-		if childCount > Conf.Editor.DynamicLoadBlocks {
+		if childCount > Conf.Editor.DynamicLoadBlocks && blockCount > conf.MinDynamicLoadBlocks {
 			scroll = true
 			return ast.WalkStop
 		}

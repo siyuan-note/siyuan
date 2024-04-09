@@ -32,7 +32,7 @@ export const setEmpty = (app: App) => {
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
 <div class="b3-list-item" id="emptyHelp">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.help}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.userGuide}</span>
 </div>`;
     emptyElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

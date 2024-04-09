@@ -242,11 +242,11 @@ func InitConf() {
 	if 1 > Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 30
 	}
-	if 48 > Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = 48
+	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}
-	if 1024 < Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = 1024
+	if conf.MaxDynamicLoadBlocks < Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = conf.MaxDynamicLoadBlocks
 	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0

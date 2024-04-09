@@ -10,6 +10,7 @@
 
   &__container {
     overflow: auto;
+    cursor: auto;
   }
 
   &__pulse {
@@ -41,6 +42,10 @@
     .layout-tab-bar {
       background-color: transparent;
       font-size: 87.5%;
+
+      .item__text {
+        padding-left: 5px;
+      }
     }
   }
 
@@ -267,7 +272,7 @@
     }
 
     &--header {
-      padding: 5px;
+      padding: 5px 8px;
       display: flex;
       align-items: center;
       transition: background 20ms ease-in 0s;
@@ -455,6 +460,11 @@
 
       &__item {
         transition: margin .2s cubic-bezier(0, 0, .2, 1) 0ms;
+
+        &[disabled] {
+          opacity: .38;
+          cursor: not-allowed;
+        }
       }
 
       &__item:hover .b3-menu__action {

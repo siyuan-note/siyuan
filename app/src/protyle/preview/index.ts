@@ -10,9 +10,8 @@ import {getSearch, isMobile} from "../../util/functions";
 import {shell} from "electron";
 /// #endif
 /// #if !MOBILE
-import {openAsset, openBy, updateOutline} from "../../editor/util";
+import {openAsset, openBy} from "../../editor/util";
 import {getAllModels} from "../../layout/getAll";
-import {setPanelFocus} from "../../layout/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
@@ -74,10 +73,6 @@ export class Preview {
         this.element.appendChild(previewElement);
 
         this.element.addEventListener("click", (event) => {
-            if (protyle.model) {
-                setPanelFocus(protyle.model.element.parentElement.parentElement);
-                updateOutline(getAllModels(), protyle.model.editor.protyle);
-            }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.tagName === "A") {

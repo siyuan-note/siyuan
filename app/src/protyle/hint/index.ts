@@ -305,22 +305,22 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     return;
                 }
                 event.stopPropagation();
-                this.genSearchHTML(protyle, searchElement, nodeElement, oldValue);
+                this.genSearchHTML(protyle, searchElement, nodeElement, oldValue, source);
             });
             searchElement.addEventListener("compositionend", (event: InputEvent) => {
                 event.stopPropagation();
-                this.genSearchHTML(protyle, searchElement, nodeElement, oldValue);
+                this.genSearchHTML(protyle, searchElement, nodeElement, oldValue, source);
             });
         }
     }
 
-    private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string) {
+    private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string, source: THintSource) {
         this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
         fetchPost("/api/search/searchRefBlock", {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
             beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
-            rootID: protyle.block.rootID,
+            rootID: source === "av" ? "" : protyle.block.rootID,
         }, (response) => {
             let searchHTML = "";
             if (response.data.newDoc) {

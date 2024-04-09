@@ -14,6 +14,7 @@ import {webViewerPageNumberChanged} from "./pdf/app";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {App} from "../index";
+import {clearOBG} from "../layout/dock/util";
 
 export class Asset extends Model {
     public path: string;
@@ -31,6 +32,7 @@ export class Asset extends Model {
         this.path = options.path;
         this.pdfId = options.page;
         this.element.addEventListener("click", (event) => {
+            clearOBG();
             setPanelFocus(this.element.parentElement.parentElement);
             this.app.plugins.forEach(item => {
                 item.eventBus.emit("click-pdf", {event});

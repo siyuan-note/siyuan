@@ -19,7 +19,7 @@ export class InlineMath extends ToolbarItem {
             let mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math") as Element;
             if (!mathElement && range.startContainer.nodeType !== 3 && range.startContainer.childNodes[range.startOffset]) {
                 const previousSibling = hasPreviousSibling(range.startContainer.childNodes[range.startOffset]) as HTMLElement;
-                if (previousSibling && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                if (previousSibling && previousSibling.nodeType !==3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                     mathElement = previousSibling;
                 }
             }

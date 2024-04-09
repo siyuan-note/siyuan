@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/xrash/smetrics"
 )
 
 func SetDatabaseBlockView(blockID, viewID string) (err error) {
@@ -194,7 +195,12 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 	ret = []*SearchAttributeViewResult{}
 	keyword = strings.TrimSpace(keyword)
 
-	avs := map[string]string{}
+	type result struct {
+		AvID   string
+		AvName string
+		Score  float64
+	}
+	var avs []*result
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	const limit = 16
 	entries, err := os.ReadDir(avDir)
@@ -220,17 +226,23 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 		}
 
 		if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
-			avs[id] = name
+			score := smetrics.JaroWinkler(name, keyword, 0.7, 4)
+			avs = append(avs, &result{AvID: id, AvName: name, Score: score})
 			count++
-			if limit <= count {
+			if "" == keyword && limit <= count {
 				break
 			}
 		}
 	}
 
+	sort.Slice(avs, func(i, j int) bool { return avs[i].Score > avs[j].Score })
+	if limit < len(avs) {
+		avs = avs[:limit]
+	}
+
 	var avIDs []string
-	for avID := range avs {
-		avIDs = append(avIDs, avID)
+	for _, av := range avs {
+		avIDs = append(avIDs, av.AvID)
 	}
 	blockIDs := treenode.BatchGetMirrorAttrViewBlockIDs(avIDs)
 	trees := map[string]*parse.Tree{}
@@ -261,8 +273,14 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 		}
 
 		avID := node.AttributeViewID
-		name := avs[avID]
-		if "" == name {
+		var existAv *result
+		for _, av := range avs {
+			if av.AvID == avID {
+				existAv = av
+				break
+			}
+		}
+		if nil == existAv {
 			continue
 		}
 
@@ -287,7 +305,7 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 		if !exist {
 			ret = append(ret, &SearchAttributeViewResult{
 				AvID:    avID,
-				AvName:  name,
+				AvName:  existAv.AvName,
 				BlockID: blockID,
 				HPath:   hPath,
 			})

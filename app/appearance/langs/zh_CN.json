@@ -225,6 +225,7 @@
   "hide": "隐藏",
   "wrap": "换行",
   "edit": "编辑",
+  "editView": "编辑视图",
   "incompatiblePluginTip": "该插件不支持在当前终端上使用",
   "incompatible": "不兼容",
   "trust": "信任",

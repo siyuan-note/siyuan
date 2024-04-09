@@ -225,6 +225,7 @@
   "hide": "Hide",
   "wrap": "Wrap column",
   "edit": "Edit",
+  "editView": "Edit view",
   "incompatiblePluginTip": "This plugin is not supported on the current terminal",
   "incompatible": "Incompatible",
   "trust": "Trust",

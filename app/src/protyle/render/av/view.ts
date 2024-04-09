@@ -13,7 +13,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     }
     menu.addItem({
         icon: "iconEdit",
-        label: window.siyuan.languages.rename,
+        label: window.siyuan.languages.editView,
         click() {
             document.querySelector(".av__panel")?.remove();
             openMenuPanel({
@@ -26,19 +26,6 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
             });
         }
     });
-    menu.addItem({
-        icon: "iconSettings",
-        label: window.siyuan.languages.config,
-        click() {
-            document.querySelector(".av__panel")?.remove();
-            openMenuPanel({
-                protyle: options.protyle,
-                blockElement: options.blockElement,
-                type: "config"
-            });
-        }
-    });
-    menu.addSeparator();
     menu.addItem({
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,

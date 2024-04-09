@@ -196,20 +196,19 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 	keyword = strings.TrimSpace(keyword)
 
 	type result struct {
-		AvID   string
-		AvName string
-		Score  float64
+		AvID      string
+		AvName    string
+		AvUpdated int64
+		Score     float64
 	}
 	var avs []*result
 	avDir := filepath.Join(util.DataDir, "storage", "av")
-	const limit = 16
 	entries, err := os.ReadDir(avDir)
 	if nil != err {
 		logging.LogErrorf("read directory [%s] failed: %s", avDir, err)
 		return
 	}
 
-	count := 0
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -221,29 +220,39 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 		}
 
 		name, _ := av.GetAttributeViewNameByPath(filepath.Join(avDir, entry.Name()))
-		if "" == name {
-			continue
-		}
-
-		if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
-			score := smetrics.JaroWinkler(name, keyword, 0.7, 4)
-			avs = append(avs, &result{AvID: id, AvName: name, Score: score})
-			count++
-			if "" == keyword && limit <= count {
-				break
+		info, _ := entry.Info()
+		if "" != keyword {
+			if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
+				score := smetrics.JaroWinkler(name, keyword, 0.7, 4)
+				a := &result{AvID: id, AvName: name, Score: score}
+				if nil != info && !info.ModTime().IsZero() {
+					a.AvUpdated = info.ModTime().UnixMilli()
+				}
+				avs = append(avs, a)
 			}
+		} else {
+			a := &result{AvID: id, AvName: name}
+			if nil != info && !info.ModTime().IsZero() {
+				a.AvUpdated = info.ModTime().UnixMilli()
+			}
+			avs = append(avs, a)
 		}
+
 	}
 
-	sort.Slice(avs, func(i, j int) bool { return avs[i].Score > avs[j].Score })
-	if limit < len(avs) {
-		avs = avs[:limit]
+	if "" == keyword {
+		sort.Slice(avs, func(i, j int) bool { return avs[i].AvUpdated > avs[j].AvUpdated })
+	} else {
+		sort.Slice(avs, func(i, j int) bool { return avs[i].Score > avs[j].Score })
 	}
-
+	if 16 < len(avs) {
+		avs = avs[:16]
+	}
 	var avIDs []string
-	for _, av := range avs {
-		avIDs = append(avIDs, av.AvID)
+	for _, a := range avs {
+		avIDs = append(avIDs, a.AvID)
 	}
+
 	blockIDs := treenode.BatchGetMirrorAttrViewBlockIDs(avIDs)
 	trees := map[string]*parse.Tree{}
 	for _, blockID := range blockIDs {

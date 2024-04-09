@@ -3,7 +3,7 @@ name: CD For SiYuan
 on:
   push:
     tags:
-      - '*-dev*'
+      - '*-z*'
   workflow_dispatch:
 
 jobs:

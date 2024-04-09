@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -15,6 +16,30 @@ import (
 var (
 	AttributeViewBlocksLock = sync.Mutex{}
 )
+
+func GetBlockRels() (ret map[string][]string) {
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
+
+	ret = map[string][]string{}
+
+	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
+	if !filelock.IsExist(blocks) {
+		return
+	}
+
+	data, err := filelock.ReadFile(blocks)
+	if nil != err {
+		logging.LogErrorf("read attribute view blocks failed: %s", err)
+		return
+	}
+
+	if err = msgpack.Unmarshal(data, &ret); nil != err {
+		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
+		return
+	}
+	return
+}
 
 func IsMirror(avID string) bool {
 	AttributeViewBlocksLock.Lock()
@@ -76,6 +101,56 @@ func RemoveBlockRel(avID, blockID string) {
 	avBlocks[avID] = newBlockIDs
 
 	data, err = msgpack.Marshal(avBlocks)
+	if nil != err {
+		logging.LogErrorf("marshal attribute view blocks failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(blocks, data); nil != err {
+		logging.LogErrorf("write attribute view blocks failed: %s", err)
+		return
+	}
+}
+
+func BatchUpsertBlockRel(nodes []*ast.Node) {
+	AttributeViewBlocksLock.Lock()
+	defer AttributeViewBlocksLock.Unlock()
+
+	avBlocks := map[string][]string{}
+	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
+	if !filelock.IsExist(blocks) {
+		if err := os.MkdirAll(filepath.Dir(blocks), 0755); nil != err {
+			logging.LogErrorf("create attribute view dir failed: %s", err)
+			return
+		}
+	} else {
+		data, err := filelock.ReadFile(blocks)
+		if nil != err {
+			logging.LogErrorf("read attribute view blocks failed: %s", err)
+			return
+		}
+
+		if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+			logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
+			return
+		}
+	}
+
+	for _, n := range nodes {
+		if ast.NodeAttributeView != n.Type {
+			continue
+		}
+
+		if "" == n.AttributeViewID || "" == n.ID {
+			continue
+		}
+
+		blockIDs := avBlocks[n.AttributeViewID]
+		blockIDs = append(blockIDs, n.ID)
+		blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+		avBlocks[n.AttributeViewID] = blockIDs
+	}
+
+	data, err := msgpack.Marshal(avBlocks)
 	if nil != err {
 		logging.LogErrorf("marshal attribute view blocks failed: %s", err)
 		return

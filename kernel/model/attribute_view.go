@@ -208,7 +208,7 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 		logging.LogErrorf("read directory [%s] failed: %s", avDir, err)
 		return
 	}
-
+	avBlockRels := av.GetBlockRels()
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -216,6 +216,10 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 
 		id := strings.TrimSuffix(entry.Name(), ".json")
 		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+
+		if nil == avBlockRels[id] {
 			continue
 		}
 
@@ -237,23 +241,33 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 			}
 			avs = append(avs, a)
 		}
-
 	}
 
 	if "" == keyword {
 		sort.Slice(avs, func(i, j int) bool { return avs[i].AvUpdated > avs[j].AvUpdated })
 	} else {
-		sort.Slice(avs, func(i, j int) bool { return avs[i].Score > avs[j].Score })
+		sort.SliceStable(avs, func(i, j int) bool {
+			if avs[i].Score == avs[j].Score {
+				return avs[i].AvUpdated > avs[j].AvUpdated
+			}
+			return avs[i].Score > avs[j].Score
+		})
 	}
-	if 16 < len(avs) {
-		avs = avs[:16]
+	if 12 <= len(avs) {
+		avs = avs[:12]
 	}
 	var avIDs []string
 	for _, a := range avs {
 		avIDs = append(avIDs, a.AvID)
 	}
 
-	blockIDs := treenode.BatchGetMirrorAttrViewBlockIDs(avIDs)
+	avBlocks := treenode.BatchGetMirrorAttrViewBlocks(avIDs)
+	var blockIDs []string
+	for _, avBlock := range avBlocks {
+		blockIDs = append(blockIDs, avBlock.BlockIDs...)
+	}
+	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+
 	trees := map[string]*parse.Tree{}
 	for _, blockID := range blockIDs {
 		bt := treenode.GetBlockTree(blockID)

@@ -428,7 +428,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.help,
+            label: window.siyuan.languages.userGuide,
             icon: "iconHelp",
             click: () => {
                 mountHelp();

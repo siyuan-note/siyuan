@@ -82,6 +82,13 @@ jobs:
             build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-linux"
             goos: "linux"
+            goarch: "arm64"
+            suffix: "linux-arm64.tar.gz"
+          - os: ubuntu-20.04
+            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
+            build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
+            electron_args: "dist-linux"
+            goos: "linux"
             goarch: "amd64"
             suffix: "linux.tar.gz"
           - os: macos-latest

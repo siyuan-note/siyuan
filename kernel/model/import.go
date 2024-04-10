@@ -899,6 +899,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
 			}
 		}
+		util.PushClearProgress()
 
 		importTrees = []*parse.Tree{}
 		searchLinks = map[string]string{}

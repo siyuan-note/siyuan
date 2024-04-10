@@ -959,6 +959,10 @@ func deleteByBoxTx(tx *sql.Tx, box string) (err error) {
 }
 
 func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
+	if 1 > len(ids) {
+		return
+	}
+
 	var ftsIDs []string
 	for _, id := range ids {
 		removeBlockCache(id)
@@ -1136,6 +1140,10 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (
 }
 
 func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]interface{}) (err error) {
+	if 1 > len(rootIDs) {
+		return
+	}
+
 	ids := strings.Join(rootIDs, "','")
 	ids = "('" + ids + "')"
 	stmt := "DELETE FROM blocks WHERE root_id IN " + ids

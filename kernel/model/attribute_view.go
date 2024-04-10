@@ -83,9 +83,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 					}
 				}
 
-				if gulu.Str.Contains(kv.Block.ID, view.Table.RowIDs) {
-					tmp[kv.Block.ID] = kv
-				}
+				tmp[kv.Block.ID] = kv
 			}
 		}
 	}

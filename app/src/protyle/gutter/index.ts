@@ -842,6 +842,7 @@ export class Gutter {
                         srcIDs: sourceIds,
                         avID,
                     }]);
+                    focusBlock(selectsElement[0])
                 });
             }
         }).element);
@@ -1302,6 +1303,7 @@ export class Gutter {
                             srcIDs: sourceIds,
                             avID,
                         }]);
+                        focusBlock(nodeElement)
                     });
                 }
             }).element);

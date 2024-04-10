@@ -95,7 +95,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	}
 
 	if 1 > pageSize {
-		pageSize = 32
+		pageSize = 16
 	}
 	start := (page - 1) * pageSize
 	end := start + pageSize

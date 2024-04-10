@@ -1202,7 +1202,9 @@ app.whenReady().then(() => {
 
 app.on("open-url", async (event, url) => { // for macOS
     if (url.startsWith("siyuan://")) {
+        let isBackground = true;
         if (workspaces.length === 0) {
+            isBackground = false;
             let index = 0;
             while (index < 10) {
                 index++;
@@ -1211,6 +1213,9 @@ app.on("open-url", async (event, url) => { // for macOS
                     break;
                 }
             }
+        }
+        if (!isBackground) {
+            await sleep(1500);
         }
         workspaces.forEach(item => {
             if (item.browserWindow && !item.browserWindow.isDestroyed()) {

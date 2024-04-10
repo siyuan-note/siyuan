@@ -2129,6 +2129,7 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 				blockValue.IsDetached = isDetached
 				blockValue.Block.Content = content
 				blockValue.UpdatedAt = now
+				util.PushMsg(Conf.language(242), 3000)
 				err = av.SaveAttributeView(attrView)
 			}
 			return
@@ -2867,6 +2868,17 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	var node *ast.Node
 	if !operation.IsDetached {
 		node, _, _ = getNodeByBlockID(tx, operation.NextID)
+	}
+
+	// 检查是否已经存在绑定块
+	// Improve database primary key binding block https://github.com/siyuan-note/siyuan/issues/10945
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID == operation.NextID {
+				util.PushMsg(Conf.language(242), 3000)
+				return
+			}
+		}
 	}
 
 	for _, keyValues := range attrView.KeyValues {

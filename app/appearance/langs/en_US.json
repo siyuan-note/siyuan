@@ -1471,6 +1471,7 @@
     "238": "Marketplace package [%s] update failed, please try again later",
     "239": "Related operations are being processed, please try again later",
     "240": "Drag heading under container blocks in the doc is not supported",
-    "241": "Drag to its subheading is not supported"
+    "241": "Drag to its subheading is not supported",
+    "242": "The binding block already exists in the current database"
   }
 }

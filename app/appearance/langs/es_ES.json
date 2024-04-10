@@ -1471,6 +1471,7 @@
     "238": "Error en la actualización del paquete Marketplace [%s], inténtalo de nuevo más tarde",
     "239": "Las operaciones relacionadas se están procesando, inténtalo de nuevo más tarde",
     "240": "No se admite arrastrar encabezado debajo de los bloques contenedores en el documento",
-    "241": "No se admite arrastrar a su subtítulo"
+    "241": "No se admite arrastrar a su subtítulo",
+    "242": "El bloque de enlace ya existe en la base de datos actual"
   }
 }

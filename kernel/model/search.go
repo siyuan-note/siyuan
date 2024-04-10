@@ -384,17 +384,22 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 			}
 		}
 
-		if b.ID != id && !hitFirstChildID && b.ID != rootID {
+		if "NodeAttributeView" == b.Type {
+			// 数据库块可以添加到自身数据库块中，当前文档也可以添加到自身数据库块中
 			tmp = append(tmp, b)
+		} else {
+			// 排除自身块、父块和根块
+			if b.ID != id && !hitFirstChildID && b.ID != rootID {
+				tmp = append(tmp, b)
+			}
 		}
+
 	}
 	ret = tmp
 
-	if "" != keyword {
-		if block := treenode.GetBlockTree(id); nil != block {
-			p := path.Join(block.HPath, keyword)
-			newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
-		}
+	if block := treenode.GetBlockTree(id); nil != block {
+		p := path.Join(block.HPath, keyword)
+		newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
 	}
 
 	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378

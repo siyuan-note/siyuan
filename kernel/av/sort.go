@@ -74,9 +74,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			} else {
 				if !other.Number.IsNotEmpty {
-					return 0
+					return 1
 				}
-				return 1
+				return 0
 			}
 		}
 	case KeyTypeDate:
@@ -94,9 +94,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			} else {
 				if !other.Date.IsNotEmpty {
-					return 0
+					return 1
 				}
-				return 1
+				return 0
 			}
 		}
 	case KeyTypeCreated:

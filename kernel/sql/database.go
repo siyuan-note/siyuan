@@ -959,59 +959,25 @@ func deleteByBoxTx(tx *sql.Tx, box string) (err error) {
 }
 
 func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
-	placeholders := strings.Repeat("?,", len(ids))
-	placeholders = placeholders[:len(placeholders)-1]
-	stmt := "DELETE FROM blocks WHERE id IN (" + placeholders + ")"
-	args := make([]interface{}, len(ids))
-	for i, id := range ids {
-		args[i] = id
-	}
-	if err = execStmtTx(tx, stmt, args...); nil != err {
-		return
-	}
-
 	var ftsIDs []string
 	for _, id := range ids {
 		removeBlockCache(id)
 		ftsIDs = append(ftsIDs, "\""+id+"\"")
 	}
-	stmt = "SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + strings.Join(ftsIDs, " OR ") + ")'"
-	rows, err := tx.Query(stmt)
-	if nil != err {
-		logging.LogErrorf("query blocks_fts failed: %s", err)
+
+	stmt := "DELETE FROM blocks WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
+	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
-	var rowIDs []string
-	for rows.Next() {
-		var rowID int
-		if err = rows.Scan(&rowID); nil != err {
-			return
-		}
-		rowIDs = append(rowIDs, fmt.Sprintf("%d", rowID))
-	}
-	rows.Close()
-	stmt = "DELETE FROM blocks_fts WHERE rowid IN (" + strings.Join(rowIDs, ",") + ")"
+
+	ftsIDsMatch := strings.Join(ftsIDs, " OR ")
+	stmt = "DELETE FROM blocks_fts WHERE rowid IN (SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + ftsIDsMatch + ")')"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
 
 	if !caseSensitive {
-		stmt = "SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + strings.Join(ftsIDs, " OR ") + ")'"
-		rows, err = tx.Query(stmt)
-		if nil != err {
-			logging.LogErrorf("query blocks_fts_case_insensitive failed: %s", err)
-			return
-		}
-		rowIDs = nil
-		for rows.Next() {
-			var rowID int
-			if err = rows.Scan(&rowID); nil != err {
-				return
-			}
-			rowIDs = append(rowIDs, fmt.Sprintf("%d", rowID))
-		}
-		rows.Close()
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE rowid IN (" + strings.Join(rowIDs, ",") + ")"
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE rowid IN (SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + ftsIDsMatch + ")')"
 		if err = execStmtTx(tx, stmt); nil != err {
 			return
 		}

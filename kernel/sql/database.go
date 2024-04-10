@@ -130,6 +130,11 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks] failed: %s", err)
 	}
 
+	_, err = db.Exec("CREATE INDEX idx_blocks_id ON blocks(id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_id] failed: %s", err)
+	}
+
 	_, err = db.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_root_id] failed: %s", err)
@@ -139,7 +144,7 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks_fts] failed: %s", err)
 	}
@@ -148,7 +153,7 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts_case_insensitive] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks_fts_case_insensitive] failed: %s", err)
 	}
@@ -954,30 +959,59 @@ func deleteByBoxTx(tx *sql.Tx, box string) (err error) {
 }
 
 func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
-	in := bytes.Buffer{}
-	in.Grow(4096)
-	in.WriteString("(")
+	placeholders := strings.Repeat("?,", len(ids))
+	placeholders = placeholders[:len(placeholders)-1]
+	stmt := "DELETE FROM blocks WHERE id IN (" + placeholders + ")"
+	args := make([]interface{}, len(ids))
 	for i, id := range ids {
-		in.WriteString("'")
-		in.WriteString(id)
-		in.WriteString("'")
-		if i < len(ids)-1 {
-			in.WriteString(",")
-		}
+		args[i] = id
+	}
+	if err = execStmtTx(tx, stmt, args...); nil != err {
+		return
+	}
 
+	var ftsIDs []string
+	for _, id := range ids {
 		removeBlockCache(id)
+		ftsIDs = append(ftsIDs, "\""+id+"\"")
 	}
-	in.WriteString(")")
-	stmt := "DELETE FROM blocks WHERE id IN " + in.String()
+	stmt = "SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + strings.Join(ftsIDs, " OR ") + ")'"
+	rows, err := tx.Query(stmt)
+	if nil != err {
+		logging.LogErrorf("query blocks_fts failed: %s", err)
+		return
+	}
+	var rowIDs []string
+	for rows.Next() {
+		var rowID int
+		if err = rows.Scan(&rowID); nil != err {
+			return
+		}
+		rowIDs = append(rowIDs, fmt.Sprintf("%d", rowID))
+	}
+	rows.Close()
+	stmt = "DELETE FROM blocks_fts WHERE rowid IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE id IN " + in.String()
-	if err = execStmtTx(tx, stmt); nil != err {
-		return
-	}
+
 	if !caseSensitive {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE id IN " + in.String()
+		stmt = "SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + strings.Join(ftsIDs, " OR ") + ")'"
+		rows, err = tx.Query(stmt)
+		if nil != err {
+			logging.LogErrorf("query blocks_fts_case_insensitive failed: %s", err)
+			return
+		}
+		rowIDs = nil
+		for rows.Next() {
+			var rowID int
+			if err = rows.Scan(&rowID); nil != err {
+				return
+			}
+			rowIDs = append(rowIDs, fmt.Sprintf("%d", rowID))
+		}
+		rows.Close()
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE rowid IN (" + strings.Join(rowIDs, ",") + ")"
 		if err = execStmtTx(tx, stmt); nil != err {
 			return
 		}

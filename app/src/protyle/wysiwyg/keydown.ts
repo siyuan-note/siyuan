@@ -697,7 +697,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     event.stopPropagation();
                     event.preventDefault();
-                } else if (nodeEditableElement?.textContent.substr(position.end + 1).indexOf("\n") === -1) {
+                } else if (nodeEditableElement?.textContent.substr(position.end + 1).indexOf("\n") === -1 &&
+                    // table 下方为折叠块
+                    nodeEditableElement.tagName !== "TABLE") {
                     // 下一个块是折叠块
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {

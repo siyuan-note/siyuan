@@ -440,13 +440,13 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 		return
 	}
 
-	if err = deleteSpansByPathTx(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteSpansByRootID(tx, tree.ID); nil != err {
 		return
 	}
-	if err = deleteAssetsByPathTx(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteAssetsByRootID(tx, tree.ID); nil != err {
 		return
 	}
-	if err = deleteAttributesByPathTx(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteAttributesByRootID(tx, tree.ID); nil != err {
 		return
 	}
 	if err = deleteRefsByPathTx(tx, tree.Box, tree.Path); nil != err {

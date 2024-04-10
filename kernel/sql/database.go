@@ -166,6 +166,10 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [spans] failed: %s", err)
 	}
+	_, err = db.Exec("CREATE INDEX idx_spans_root_id ON spans(root_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_spans_root_id] failed: %s", err)
+	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS assets")
 	if nil != err {
@@ -175,6 +179,10 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [assets] failed: %s", err)
 	}
+	_, err = db.Exec("CREATE INDEX idx_assets_root_id ON assets(root_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_assets_root_id] failed: %s", err)
+	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS attributes")
 	if nil != err {
@@ -183,6 +191,10 @@ func initDBTables() {
 	_, err = db.Exec("CREATE TABLE attributes (id, name, value, type, block_id, root_id, box, path)")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [attributes] failed: %s", err)
+	}
+	_, err = db.Exec("CREATE INDEX idx_attributes_root_id ON attributes(root_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_attributes_root_id] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS refs")
@@ -1008,12 +1020,6 @@ func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
 	return
 }
 
-func deleteSpansByPathTx(tx *sql.Tx, box, path string) (err error) {
-	stmt := "DELETE FROM spans WHERE box = ? AND path = ?"
-	err = execStmtTx(tx, stmt, box, path)
-	return
-}
-
 func deleteSpansByRootID(tx *sql.Tx, rootID string) (err error) {
 	stmt := "DELETE FROM spans WHERE root_id =?"
 	err = execStmtTx(tx, stmt, rootID)
@@ -1026,21 +1032,9 @@ func deleteSpansByBoxTx(tx *sql.Tx, box string) (err error) {
 	return
 }
 
-func deleteAssetsByPathTx(tx *sql.Tx, box, path string) (err error) {
-	stmt := "DELETE FROM assets WHERE box = ? AND docpath = ?"
-	err = execStmtTx(tx, stmt, box, path)
-	return
-}
-
-func deleteAttributeByBlockID(tx *sql.Tx, blockID string) (err error) {
-	stmt := "DELETE FROM attributes WHERE block_id = ?"
-	err = execStmtTx(tx, stmt, blockID)
-	return
-}
-
-func deleteAttributesByPathTx(tx *sql.Tx, box, path string) (err error) {
-	stmt := "DELETE FROM attributes WHERE box = ? AND path = ?"
-	err = execStmtTx(tx, stmt, box, path)
+func deleteAssetsByRootID(tx *sql.Tx, rootID string) (err error) {
+	stmt := "DELETE FROM assets WHERE root_id = ?"
+	err = execStmtTx(tx, stmt, rootID)
 	return
 }
 
@@ -1048,6 +1042,13 @@ func deleteAssetsByBoxTx(tx *sql.Tx, box string) (err error) {
 	stmt := "DELETE FROM assets WHERE box = ?"
 	err = execStmtTx(tx, stmt, box)
 	return
+}
+
+func deleteAttributesByRootID(tx *sql.Tx, rootID string) (err error) {
+	stmt := "DELETE FROM attributes WHERE root_id = ?"
+	err = execStmtTx(tx, stmt, rootID)
+	return
+
 }
 
 func deleteAttributesByBoxTx(tx *sql.Tx, box string) (err error) {

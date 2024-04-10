@@ -248,7 +248,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
 				_, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterTime(value.Date.Content, value.Date.IsNotEmpty, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
+				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Date {
 					return true
@@ -257,7 +257,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				otherTime := time.UnixMilli(other.Date.Content)
 				otherStart := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 0, 0, 0, 0, otherTime.Location())
 				otherEnd := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 23, 59, 59, 999999999, otherTime.Location())
-				return filterTime(value.Date.Content, value.Date.IsNotEmpty, otherStart, otherEnd, time.Now(), operator)
+				return filterTime(value.Date.Content, value.Date.IsNotEmpty, otherStart, otherEnd, operator)
 			}
 		}
 	case KeyTypeCreated:
@@ -269,7 +269,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				unit := relativeDate.Unit
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+				return filterRelativeTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
 			} else { // 使用具体时间比较
 				if nil == other.Created {
 					return true
@@ -278,7 +278,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				otherTime := time.UnixMilli(other.Created.Content)
 				otherStart := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 0, 0, 0, 0, otherTime.Location())
 				otherEnd := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 23, 59, 59, 999999999, otherTime.Location())
-				return filterTime(value.Created.Content, value.Created.IsNotEmpty, otherStart, otherEnd, time.Now(), operator)
+				return filterTime(value.Created.Content, value.Created.IsNotEmpty, otherStart, otherEnd, operator)
 			}
 		}
 	case KeyTypeUpdated:
@@ -290,7 +290,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				unit := relativeDate.Unit
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+				return filterRelativeTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
 			} else { // 使用具体时间比较
 				if nil == other.Updated {
 					return true
@@ -299,7 +299,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				otherTime := time.UnixMilli(other.Updated.Content)
 				otherStart := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 0, 0, 0, 0, otherTime.Location())
 				otherEnd := time.Date(otherTime.Year(), otherTime.Month(), otherTime.Day(), 23, 59, 59, 999999999, otherTime.Location())
-				return filterTime(value.Updated.Content, value.Updated.IsNotEmpty, otherStart, otherEnd, time.Now(), operator)
+				return filterTime(value.Updated.Content, value.Updated.IsNotEmpty, otherStart, otherEnd, operator)
 			}
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
@@ -520,7 +520,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	return false
 }
 
-func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherValueEnd, otherValueEnd2 time.Time, operator FilterOperator) bool {
+func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherValueEnd, otherValueEnd2 time.Time, operator FilterOperator) bool {
 	valueTime := time.UnixMilli(valueMills)
 	switch operator {
 	case FilterOperatorIsEqual:
@@ -537,6 +537,31 @@ func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherVa
 		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
 		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2))
+	case FilterOperatorIsEmpty:
+		return !valueIsNotEmpty
+	case FilterOperatorIsNotEmpty:
+		return valueIsNotEmpty
+	}
+	return false
+}
+
+func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherValueEnd time.Time, operator FilterOperator) bool {
+	valueTime := time.UnixMilli(valueMills)
+	switch operator {
+	case FilterOperatorIsEqual:
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd)
+	case FilterOperatorIsNotEqual:
+		return valueTime.Before(otherValueStart) || valueTime.After(otherValueEnd)
+	case FilterOperatorIsGreater:
+		return valueTime.After(otherValueEnd) || valueTime.Equal(otherValueEnd)
+	case FilterOperatorIsGreaterOrEqual:
+		return valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)
+	case FilterOperatorIsLess:
+		return valueTime.Before(otherValueStart)
+	case FilterOperatorIsLessOrEqual:
+		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
+	case FilterOperatorIsBetween:
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))
 	case FilterOperatorIsEmpty:
 		return !valueIsNotEmpty
 	case FilterOperatorIsNotEmpty:

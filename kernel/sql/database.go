@@ -971,13 +971,13 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 	}
 
 	ftsIDsMatch := strings.Join(ftsIDs, " OR ")
-	stmt = "DELETE FROM blocks_fts WHERE rowid IN (SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + ftsIDsMatch + ")')"
+	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + ftsIDsMatch + ")')"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
 
 	if !caseSensitive {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE rowid IN (SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + ftsIDsMatch + ")')"
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE ROWID IN (SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + ftsIDsMatch + ")')"
 		if err = execStmtTx(tx, stmt); nil != err {
 			return
 		}

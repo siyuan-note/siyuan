@@ -439,12 +439,19 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             }
         });
     }
-    avMaskElement.addEventListener("click", (event) => {
+
+    const removeAvMask = (event: Event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")
             && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);
             avMaskElement?.remove();
         }
+    }
+    avMaskElement.addEventListener("click", (event) => {
+        removeAvMask(event)
+    });
+    avMaskElement.addEventListener("contextmenu", (event) => {
+        removeAvMask(event)
     });
 };
 

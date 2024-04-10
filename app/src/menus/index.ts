@@ -7,7 +7,7 @@ import {initNavigationMenu, initFileMenu} from "./navigation";
 import {initTabMenu} from "./tab";
 /// #endif
 import {Menu} from "./Menu";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {App} from "../index";
 
 
@@ -69,6 +69,12 @@ export class Menus {
 
                 if (target.classList.contains("dock__item") && target.getAttribute("data-type")) {
                     initDockMenu(target).popup({x: event.clientX, y: event.clientY});
+                    event.stopPropagation();
+                    break;
+                }
+
+                if (hasClosestByClassName(target, "av__panel") && !hasClosestByClassName(target, "b3-menu")) {
+                    document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}))
                     event.stopPropagation();
                     break;
                 }

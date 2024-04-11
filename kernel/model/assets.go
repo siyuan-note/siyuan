@@ -235,7 +235,7 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 	})
 	if 0 < files {
 		util.PushUpdateMsg(msgId, Conf.Language(113), 7000)
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			return
 		}
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
@@ -422,7 +422,7 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 
 	if 0 < files {
 		util.PushUpdateMsg(msgId, Conf.Language(113), 7000)
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			return
 		}
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)

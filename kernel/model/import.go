@@ -894,8 +894,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		buildBlockRefInText()
 
 		for i, tree := range importTrees {
-			treenode.IndexBlockTree(tree)
-			sql.IndexTreeQueue(tree)
+			indexWriteTreeIndexQueue(tree)
 			if 0 == i%4 {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
 			}

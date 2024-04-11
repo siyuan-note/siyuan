@@ -97,7 +97,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		srcTree.Root.AppendChild(treenode.NewParagraph())
 	}
 	treenode.RemoveBlockTreesByRootID(srcTree.ID)
-	if err = indexWriteJSONQueue(srcTree); nil != err {
+	if err = indexWriteTreeUpsertQueue(srcTree); nil != err {
 		return "", "", err
 	}
 
@@ -105,7 +105,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = "1"
 	box.addMinSort(path.Dir(newTargetPath), newTree.ID)
-	if err = indexWriteJSONQueue(newTree); nil != err {
+	if err = indexWriteTreeUpsertQueue(newTree); nil != err {
 		return "", "", err
 	}
 	IncSync()

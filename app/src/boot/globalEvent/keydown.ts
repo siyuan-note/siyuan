@@ -1715,9 +1715,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.stickSearch.custom, event)) {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
-            openGlobalSearch(app, range.toString(), false);
+            openGlobalSearch(app, range.toString(), true);
         } else {
-            openGlobalSearch(app, "", false);
+            openGlobalSearch(app, "", true);
         }
         event.preventDefault();
         return;

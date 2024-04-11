@@ -3,20 +3,14 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByMatchTag,
-    hasClosestByTag, hasTopClosestByClassName
+    hasClosestByTag,
+    hasTopClosestByClassName
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {
-    copyPlainText,
-    isMac,
-    isOnlyMeta,
-    openByMobile,
-    updateHotkeyTip,
-    writeText
-} from "../util/compatibility";
+import {copyPlainText, isMac, isOnlyMeta, openByMobile, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction,
@@ -842,7 +836,7 @@ export class Gutter {
                         srcIDs: sourceIds,
                         avID,
                     }]);
-                    focusBlock(selectsElement[0])
+                    focusBlock(selectsElement[0]);
                 });
             }
         }).element);
@@ -1303,7 +1297,7 @@ export class Gutter {
                             srcIDs: sourceIds,
                             avID,
                         }]);
-                        focusBlock(nodeElement)
+                        focusBlock(nodeElement);
                     });
                 }
             }).element);

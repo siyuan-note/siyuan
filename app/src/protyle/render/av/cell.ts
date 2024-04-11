@@ -446,12 +446,12 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             updateCellValueByInput(protyle, type, blockElement, cellElements);
             avMaskElement?.remove();
         }
-    }
+    };
     avMaskElement.addEventListener("click", (event) => {
-        removeAvMask(event)
+        removeAvMask(event);
     });
     avMaskElement.addEventListener("contextmenu", (event) => {
-        removeAvMask(event)
+        removeAvMask(event);
     });
 };
 

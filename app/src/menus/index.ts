@@ -3,7 +3,7 @@ import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {initSearchMenu} from "./search";
 import {initDockMenu} from "./dock";
-import {initNavigationMenu, initFileMenu} from "./navigation";
+import {initFileMenu, initNavigationMenu} from "./navigation";
 import {initTabMenu} from "./tab";
 /// #endif
 import {Menu} from "./Menu";
@@ -74,7 +74,7 @@ export class Menus {
                 }
 
                 if (hasClosestByClassName(target, "av__panel") && !hasClosestByClassName(target, "b3-menu")) {
-                    document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}))
+                    document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}));
                     event.stopPropagation();
                     break;
                 }

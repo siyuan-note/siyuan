@@ -925,14 +925,15 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table, err error) {
 	ret = &av.Table{
-		ID:               view.ID,
-		Icon:             view.Icon,
-		Name:             view.Name,
-		HideAttrViewName: view.HideAttrViewName,
-		Columns:          []*av.TableColumn{},
-		Rows:             []*av.TableRow{},
-		Filters:          view.Table.Filters,
-		Sorts:            view.Table.Sorts,
+		ID:                     view.ID,
+		Icon:                   view.Icon,
+		Name:                   view.Name,
+		HideAttrViewName:       view.HideAttrViewName,
+		ShowAttrViewLineNumber: view.ShowAttrViewLineNumber,
+		Columns:                []*av.TableColumn{},
+		Rows:                   []*av.TableRow{},
+		Filters:                view.Table.Filters,
+		Sorts:                  view.Table.Sorts,
 	}
 
 	// 组装列
@@ -1319,6 +1320,32 @@ func hideAttrViewName(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doShowAttrViewLineNumber(operation *Operation) (ret *TxErr) {
+	err := showAttrViewLineNumber(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func showAttrViewLineNumber(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", operation.AvID, err)
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", operation.BlockID, err)
+		return
+	}
+
+	view.ShowAttrViewLineNumber = operation.Data.(bool)
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewColRollup(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColRollup(operation)
 	if nil != err {
@@ -1693,6 +1720,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	view.Name = attrView.GetDuplicateViewName(masterView.Name)
 	view.LayoutType = masterView.LayoutType
 	view.HideAttrViewName = masterView.HideAttrViewName
+	view.ShowAttrViewLineNumber = masterView.ShowAttrViewLineNumber
 
 	for _, col := range masterView.Table.Columns {
 		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{

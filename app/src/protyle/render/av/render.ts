@@ -114,6 +114,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     calcHTML = '<div class="av__colsticky">';
                 }
+                // TODO 添加行好列，根据 showAttrViewLineNumber 决定是否显示 class
+                if (data.showAttrViewLineNumber) {
+                    tableHTML += '<div class="av__cell av__cell--header av__colsticky av__ord_col_only" style="left: 24px; width: 48px; background-color: var(--av-background)" data-only-av-ord="true" data-pin="true" draggable="false" data-dtype="number"><span class="av__celltext fn__flex-1">&nbsp;</span></div>';
+                }
+
                 data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
                         return;
@@ -142,12 +147,17 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
 </div>
 </div>`;
                 // body
-                data.rows.forEach((row: IAVRow) => {
+                data.rows.forEach((row: IAVRow, rowIndex) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">`;
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
                         tableHTML += '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                    }
+
+                    // TODO 添加行好列，根据 showAttrViewLineNumber 决定是否显示 class
+                    if (data.showAttrViewLineNumber) {
+                        tableHTML += `<div class="av__cell av__colsticky av__ord_col_only" style="left: 24px; width: 48px; background-color: var(--av-background)" data-only-av-ord="true" draggable="false"><span class="av__celltext fn__flex-1">${rowIndex + 1}</span></div>`;
                     }
 
                     row.cells.forEach((cell, index) => {

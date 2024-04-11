@@ -49,6 +49,7 @@ type TOperation =
     | "moveOutlineHeading"
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
+    | "showAttrViewLineNumber"
     | "setAttrViewColDate"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
@@ -772,6 +773,7 @@ interface IAVView {
     type: string
     icon: string
     hideAttrViewName: boolean
+    showAttrViewLineNumber: boolean
 }
 
 interface IAVTable extends IAVView {

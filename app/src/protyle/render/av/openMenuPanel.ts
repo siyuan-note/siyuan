@@ -463,6 +463,7 @@ export const openMenuPanel = (options: {
             }
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(avPanelElement) || type) {
+                // TODO FIXME 如果 type 为 True, target 可能为 Falsy，会导致报错中断
                 type = target.dataset.type || type;
                 if (type === "close") {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {

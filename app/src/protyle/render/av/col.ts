@@ -608,6 +608,65 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const blockID = blockElement.getAttribute("data-node-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
+    const isAvOrdCol = cellElement.getAttribute("data-only-av-ord");
+        // TODO found that the underlying cause lies in the excessive intrusion of code
+    // only need:
+    // 1. iconInsertLeft
+    // 2. iconInsertRight
+    // 3. iconEyeoff
+    if (isAvOrdCol) {
+        const menu = new Menu("av-header-cell");
+        menu.addItem({
+            icon: "iconInsertLeft",
+            label: window.siyuan.languages.insertColumnLeft,
+            click() {
+                const addMenu = addCol(protyle, blockElement, cellElement.previousElementSibling?.getAttribute("data-col-id") || "");
+                const addRect = cellElement.getBoundingClientRect();
+                addMenu.open({
+                    x: addRect.left,
+                    y: addRect.bottom,
+                    h: addRect.height
+                });
+            }
+        });
+        menu.addItem({
+            icon: "iconInsertRight",
+            label: window.siyuan.languages.insertColumnRight,
+            click() {
+                const addMenu = addCol(protyle, blockElement, cellElement.getAttribute("data-col-id") || "");
+                const addRect = cellElement.getBoundingClientRect();
+                addMenu.open({
+                    x: addRect.left,
+                    y: addRect.bottom,
+                    h: addRect.height
+                });
+            }
+        });
+        menu.addItem({
+            icon: "iconEyeoff",
+            label: window.siyuan.languages.hide,
+            click() {
+                transaction(protyle, [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: true
+            }], [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: false
+            }]);
+            }
+        });
+        const cellRect = cellElement.getBoundingClientRect();
+        menu.open({
+            x: cellRect.left,
+            y: cellRect.bottom,
+            h: cellRect.height
+        });
+        return;
+    }
     const menu = new Menu("av-header-cell", () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === oldValue) {

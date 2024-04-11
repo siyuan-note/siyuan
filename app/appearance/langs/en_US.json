@@ -1,6 +1,7 @@
 {
   "unbindBlock": "Unbind block",
   "showTitle": "Show database title",
+  "showRowNumber": "Show line number",
   "fillCreated": "Default fill created time",
   "removeCard": "Remove flashcard",
   "updateLayout": "Update layout",

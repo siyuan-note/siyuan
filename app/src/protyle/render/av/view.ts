@@ -151,6 +151,39 @@ export const bindViewEvent = (options: {
             options.blockElement.querySelector(".av__title").classList.remove("av__title--hide");
         }
     });
+    // toggle line number
+    const toggleLineNumberElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-line-number"]') as HTMLInputElement;
+    toggleLineNumberElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        if (toggleLineNumberElement.checked) {
+            // hide line number column
+            transaction(options.protyle, [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: true
+            }], [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: false
+            }]);
+        } else {
+            // show line number column
+            transaction(options.protyle, [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: false
+            }], [{
+                action: "showAttrViewLineNumber",
+                avID,
+                blockID,
+                data: true
+            }]);
+        }
+    });
 };
 
 export const getViewHTML = (data: IAVTable) => {
@@ -193,6 +226,12 @@ export const getViewHTML = (data: IAVTable) => {
     <span class="fn__flex-center">${window.siyuan.languages.showTitle}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${data.hideAttrViewName ? "" : "checked"}>
+</label>
+<label class="b3-menu__item">
+    <svg class="b3-menu__icon"></svg>
+    <span class="fn__flex-center">${window.siyuan.languages.showRowNumber}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="toggle-view-line-number" type="checkbox" class="b3-switch b3-switch--menu" ${data.showAttrViewLineNumber ? "checked" : ""}>
 </label>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="duplicate-view">

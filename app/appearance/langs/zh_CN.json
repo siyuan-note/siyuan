@@ -1,6 +1,7 @@
 {
   "unbindBlock": "取消绑定块",
   "showTitle": "显示数据库标题",
+  "showRowNumber": "显示行号",
   "fillCreated": "默认填充创建时间",
   "removeCard": "移除闪卡",
   "updateLayout": "更新布局",

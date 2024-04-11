@@ -1,6 +1,7 @@
 {
   "unbindBlock": "Dissocier le bloc",
   "showTitle": "Afficher le titre de la base de données",
+  "showRowNumber": "Afficher le numéro de ligne",
   "fillCreated": "Heure de création de remplissage par défaut",
   "removeCard": "Supprimer la flashcard",
   "updateLayout": "Mettre à jour la mise en page",

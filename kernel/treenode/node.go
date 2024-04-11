@@ -18,12 +18,13 @@ package treenode
 
 import (
 	"bytes"
-	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -609,12 +610,13 @@ func getAttributeViewContent(avID string) (content string) {
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
-		ID:               view.ID,
-		Icon:             view.Icon,
-		Name:             view.Name,
-		HideAttrViewName: view.HideAttrViewName,
-		Columns:          []*av.TableColumn{},
-		Rows:             []*av.TableRow{},
+		ID:                     view.ID,
+		Icon:                   view.Icon,
+		Name:                   view.Name,
+		HideAttrViewName:       view.HideAttrViewName,
+		ShowAttrViewLineNumber: view.ShowAttrViewLineNumber,
+		Columns:                []*av.TableColumn{},
+		Rows:                   []*av.TableRow{},
 	}
 
 	// 组装列

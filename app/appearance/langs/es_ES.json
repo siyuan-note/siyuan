@@ -1,6 +1,7 @@
 {
   "unbindBlock": "Desvincular bloque",
   "showTitle": "Mostrar título de la base de datos",
+  "showRowNumber": "Mostrar número de línea",
   "fillCreated": "Hora de creación del relleno predeterminado",
   "removeCard": "Eliminar tarjeta flash",
   "updateLayout": "Actualizar diseño",

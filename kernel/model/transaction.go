@@ -292,6 +292,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUpdateAttrViewColRollup(op)
 		case "hideAttrViewName":
 			ret = tx.doHideAttrViewName(op)
+		case "showAttrViewLineNumber":
+			ret = tx.doShowAttrViewLineNumber(op)
 		case "setAttrViewColDate":
 			ret = tx.doSetAttrViewColDate(op)
 		}

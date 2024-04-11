@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -981,19 +982,35 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		ftsIDs = append(ftsIDs, "\""+id+"\"")
 	}
 
-	stmt := "DELETE FROM blocks WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
+	var rowIDs []string
+	stmt := "SELECT ROWID FROM blocks WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
+	rows, err := tx.Query(stmt)
+	if nil != err {
+		logging.LogErrorf("query block rowIDs failed: %s", err)
+		return
+	}
+	for rows.Next() {
+		var rowID int64
+		if err = rows.Scan(&rowID); nil != err {
+			logging.LogErrorf("scan block rowID failed: %s", err)
+			rows.Close()
+			return
+		}
+		rowIDs = append(rowIDs, strconv.FormatInt(rowID, 10))
+	}
+	rows.Close()
+	stmt = "DELETE FROM blocks WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
 
-	ftsIDsMatch := strings.Join(ftsIDs, " OR ")
-	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (SELECT ROWID FROM blocks_fts WHERE blocks_fts MATCH 'id:(" + ftsIDsMatch + ")')"
+	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
 
 	if !caseSensitive {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE ROWID IN (SELECT ROWID FROM blocks_fts_case_insensitive WHERE blocks_fts_case_insensitive MATCH 'id:(" + ftsIDsMatch + ")')"
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 		if err = execStmtTx(tx, stmt); nil != err {
 			return
 		}

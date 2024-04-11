@@ -597,9 +597,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 上下左右光标移动
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             // 需使用 editabled，否则代码块会把语言字数算入
-            const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement;
+            const tdElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+            const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-            const tdElement = hasClosestByMatchTag(range.startContainer, "TD");
             if (event.key === "ArrowDown" && nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (
                 (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
                 (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
@@ -629,7 +629,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    if (nodeEditableElement?.textContent.substr(0, position.end).indexOf("\n") === -1) {
+                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;
@@ -697,9 +697,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     event.stopPropagation();
                     event.preventDefault();
-                } else if (nodeEditableElement?.textContent.substr(position.end + 1).indexOf("\n") === -1 &&
-                    // table 下方为折叠块
-                    nodeEditableElement.tagName !== "TABLE") {
+                } else if (nodeEditableElement?.innerText.substr(position.end).indexOf("\n") === -1) {
+                    // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
                     // 下一个块是折叠块
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {

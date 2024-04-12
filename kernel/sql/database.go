@@ -999,6 +999,11 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		rowIDs = append(rowIDs, strconv.FormatInt(rowID, 10))
 	}
 	rows.Close()
+
+	if 1 > len(rowIDs) {
+		return
+	}
+
 	stmt = "DELETE FROM blocks WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); nil != err {
 		return

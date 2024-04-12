@@ -1,0 +1,117 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "创建 database 的序号列",
+  "steps": [
+    {
+      "file": "app/src/protyle/render/av/render.ts",
+      "description": "# 按钮入口元素 DOM 节点\n\n添加列的入口按钮，当然还有其他其他入口，但最终是一样的，以这里为例",
+      "line": 141,
+      "selection": {
+        "start": {
+          "line": 141,
+          "character": 5
+        },
+        "end": {
+          "line": 141,
+          "character": 124
+        }
+      }
+    },
+    {
+      "file": "app/src/protyle/render/av/action.ts",
+      "description": "# 点击事件被捕获\n\n点击后会在这里冒泡捕获到",
+      "line": 168
+    },
+    {
+      "file": "app/src/protyle/render/av/action.ts",
+      "description": "# 创建属性类型选择菜单\n\n在这里进行菜单构造，然后打开菜单",
+      "line": 169
+    },
+    {
+      "file": "app/src/protyle/render/av/col.ts",
+      "description": "# 实例化构造菜单",
+      "line": 946,
+      "selection": {
+        "start": {
+          "line": 945,
+          "character": 5
+        },
+        "end": {
+          "line": 945,
+          "character": 44
+        }
+      }
+    },
+    {
+      "file": "app/src/protyle/render/av/col.ts",
+      "description": "# 添加本次实现的列类型，已经触发对应的事务 API\n\n实际上，我们新增的列类型只需要保存属性，所以尽管有三个事务：\n- addAttrViewCol\n- doUpdateUpdated\n- removeAttrViewCol\n\n但实际上我们只需要关注 addAttrViewCol 即可\n",
+      "line": 1469,
+      "selection": {
+        "start": {
+          "line": 1432,
+          "character": 1
+        },
+        "end": {
+          "line": 1469,
+          "character": 8
+        }
+      }
+    },
+    {
+      "file": "kernel/api/router.go",
+      "description": "# 接受到请求入口",
+      "line": 308
+    },
+    {
+      "file": "kernel/api/transaction.go",
+      "description": "# 通过事件进行推送\n\n",
+      "line": 106
+    },
+    {
+      "file": "kernel/model/transaction.go",
+      "description": "# 处理事件入口\n",
+      "line": 123,
+      "selection": {
+        "start": {
+          "line": 123,
+          "character": 13
+        },
+        "end": {
+          "line": 123,
+          "character": 28
+        }
+      }
+    },
+    {
+      "file": "kernel/model/transaction.go",
+      "description": "# 添加列的事务处理入口",
+      "line": 252,
+      "selection": {
+        "start": {
+          "line": 251,
+          "character": 1
+        },
+        "end": {
+          "line": 252,
+          "character": 36
+        }
+      }
+    },
+    {
+      "file": "kernel/model/attribute_view.go",
+      "description": "# 保存到视图属性\n\n新增到匹配，让 lineNumber 能够保存到属性",
+      "line": 2639,
+      "selection": {
+        "start": {
+          "line": 2639,
+          "character": 41
+        },
+        "end": {
+          "line": 2639,
+          "character": 61
+        }
+      }
+    }
+  ],
+  "ref": "feature/add-database-ord-v2-10574"
+}

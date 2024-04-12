@@ -119,6 +119,7 @@
   "goToEditTabPrev": "跳到上一個編輯頁籤",
   "createdTime": "建立時間",
   "updatedTime": "更新時間",
+  "lineNumber": "行號",
   "removeBookmark": "移除 ${x} 中的書籤？",
   "lockEdit": "鎖定編輯",
   "unlockEdit": "解除鎖定",

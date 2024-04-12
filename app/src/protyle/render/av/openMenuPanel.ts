@@ -78,6 +78,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
+            // TODO Silent 自定进入修改状态
             if (options.editData) {
                 if (options.editData.previousID) {
                     data.view.columns.find((item, index) => {
@@ -839,6 +840,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "updateColType") {
+                    // TODO Silent 更新列类型事务
                     if (target.dataset.newType !== target.dataset.oldType) {
                         const name = (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).value;
                         transaction(options.protyle, [{
@@ -854,12 +856,53 @@ export const openMenuPanel = (options: {
                             name,
                             type: target.dataset.oldType as TAVCol,
                         }]);
+
+                        // TODO Silent 需要取消 lineNumber 列的排序和过滤
+                        if (target.dataset.newType === "lineNumber") {
+                            const sortExist = data.view.sorts.find((sort) => sort.column === options.colId);
+                            if (sortExist) {
+                                const oldSorts = Object.assign([], data.view.sorts);
+                                const newSorts = data.view.sorts.filter((sort) => sort.column !== options.colId);
+
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewSorts",
+                                    avID: data.id,
+                                    data: newSorts,
+                                    blockID,
+                                }], [{
+                                    action: "setAttrViewSorts",
+                                    avID: data.id,
+                                    data: oldSorts,
+                                    blockID,
+                                }]);
+                            }
+
+                            const filterExist = data.view.filters.find((filter) => filter.column === options.colId);
+                            if (filterExist) {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                const newFilters = data.view.filters.filter((filter) => filter.column !== options.colId);
+
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID: data.id,
+                                    data: newFilters,
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID: data.id,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                            }
+
+                        }
                     }
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "goUpdateColType") {
+                    // TODO Silent 变更类型需要增加上 行号 类型
                     const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
                         editMenuElement.firstElementChild.classList.add("fn__none");

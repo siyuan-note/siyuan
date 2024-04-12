@@ -43,7 +43,6 @@ import (
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -762,7 +761,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			childCount += treenode.CountBlockNodes(n)
 		}
 
-		if childCount > Conf.Editor.DynamicLoadBlocks && blockCount > conf.MinDynamicLoadBlocks {
+		if childCount > Conf.Editor.DynamicLoadBlocks {
 			scroll = true
 			return ast.WalkStop
 		}

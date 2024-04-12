@@ -51,7 +51,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if (event && event.inputType === "deleteContentForward") {
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
         if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
-            const type = wbrNextElement.getAttribute("data-type").split(" ")
+            const type = wbrNextElement.getAttribute("data-type").split(" ");
             if (type.includes("code") || type.includes("kbd") || type.includes("tag")) {
                 wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
             }

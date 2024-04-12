@@ -125,10 +125,11 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
 };
 
 export const lineNumberRender = (block: HTMLElement) => {
-    if (block.parentElement.getAttribute("lineNumber") === "false") {
+    const lineNumber = block.parentElement.getAttribute("lineNumber")
+    if (lineNumber === "false") {
         return;
     }
-    if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && block.parentElement.getAttribute("lineNumber") !== "true") {
+    if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && lineNumber !== "true") {
         return;
     }
     block.classList.add("protyle-linenumber");

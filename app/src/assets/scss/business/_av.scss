@@ -8,6 +8,11 @@
     opacity: 1;
   }
 
+  &__cursor {
+    width: .1px;
+    height: 0;
+  }
+
   &__container {
     overflow: auto;
     cursor: auto;
@@ -69,13 +74,6 @@
     &:empty::after {
       color: var(--b3-theme-on-surface);
       content: attr(data-tip);
-    }
-
-    &--hide {
-      width: .1px;
-      overflow: hidden;
-      height: 0;
-      min-height: .1px !important;
     }
   }
 

@@ -9,7 +9,7 @@ import {getContenteditableElement, getNextBlock, hasNextSibling, isNotEditBlock}
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
-import {hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
@@ -20,7 +20,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         return;
     }
     if (blockElement.classList.contains("av")) {
-        updateAVName(protyle, blockElement);
+        const avCursorElement = hasClosestByClassName(range.startContainer, "av__cursor")
+        if (avCursorElement) {
+            range.startContainer.textContent = Constants.ZWSP;
+        } else {
+            updateAVName(protyle, blockElement);
+        }
         return;
     }
     const editElement = getContenteditableElement(blockElement) as HTMLElement;

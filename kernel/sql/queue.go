@@ -35,6 +35,7 @@ import (
 var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
+	txLock         = sync.Mutex{}
 )
 
 type dbQueueOperation struct {
@@ -95,29 +96,30 @@ func ClearQueue() {
 }
 
 func FlushQueue() {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-
-	total := len(operationQueue)
+	ops := getOperations()
+	total := len(ops)
 	if 1 > total {
 		return
 	}
 
+	txLock.Lock()
+	defer txLock.Unlock()
+
 	start := time.Now()
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	if 512 < total {
+	if 512 < len(ops) {
 		disableCache()
 		defer enableCache()
 	}
 
 	groupOpsTotal := map[string]int{}
-	for _, op := range operationQueue {
+	for _, op := range ops {
 		groupOpsTotal[op.action]++
 	}
 
 	groupOpsCurrent := map[string]int{}
-	for i, op := range operationQueue {
+	for i, op := range ops {
 		if util.IsExiting.Load() {
 			return
 		}
@@ -149,8 +151,6 @@ func FlushQueue() {
 	if 128 < total {
 		debug.FreeOSMemory()
 	}
-
-	operationQueue = nil
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 7000 < elapsed {
@@ -417,4 +417,13 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 		}
 	}
 	operationQueue = append(operationQueue, newOp)
+}
+
+func getOperations() (ops []*dbQueueOperation) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	ops = operationQueue
+	operationQueue = nil
+	return
 }

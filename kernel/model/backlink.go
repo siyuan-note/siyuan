@@ -521,12 +521,13 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 	for parentID, _ := range parentRefParagraphs {
 		paragraphParentIDs = append(paragraphParentIDs, parentID)
 	}
-	paragraphParents := sql.GetBlocks(paragraphParentIDs)
+	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
+	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
 	processedParagraphs := hashset.New()
 	for _, p := range paragraphParents {
 		// 改进标题下方块和列表项子块引用时的反链定位 https://github.com/siyuan-note/siyuan/issues/7484
-		if "i" == p.Type {
+		if "NodeListItem" == p.Type {
 			refBlock := parentRefParagraphs[p.ID]
 			if nil != refBlock && p.FContent == refBlock.Content { // 使用内容判断是否是列表项下第一个子块
 				// 如果是列表项下第一个子块，则后续会通过列表项传递或关联处理，所以这里就不处理这个段落了
@@ -535,7 +536,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 					refsCount--
 					continue
 				}
-				ret = append(ret, fromSQLBlock(p, "", 12))
+				ret = append(ret, p)
 			}
 		}
 	}

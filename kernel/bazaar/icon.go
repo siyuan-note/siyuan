@@ -51,6 +51,13 @@ func Icons() (icons []*Icon) {
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
 
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			icons = append(icons, pkg.(*Icon))
+			lock.Unlock()
+			return
+		}
+
 		icon := &Icon{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(icon).Get(innerU)
@@ -91,6 +98,8 @@ func Icons() (icons []*Icon) {
 		lock.Lock()
 		icons = append(icons, icon)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, icon)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)

@@ -53,6 +53,13 @@ func Widgets() (widgets []*Widget) {
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
 
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			widgets = append(widgets, pkg.(*Widget))
+			lock.Unlock()
+			return
+		}
+
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(widget).Get(innerU)
@@ -93,6 +100,8 @@ func Widgets() (widgets []*Widget) {
 		lock.Lock()
 		widgets = append(widgets, widget)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, widget)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)

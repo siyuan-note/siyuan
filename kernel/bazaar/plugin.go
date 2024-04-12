@@ -55,6 +55,13 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
 
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			plugins = append(plugins, pkg.(*Plugin))
+			lock.Unlock()
+			return
+		}
+
 		plugin := &Plugin{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(plugin).Get(innerU)
@@ -97,6 +104,8 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		lock.Lock()
 		plugins = append(plugins, plugin)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, plugin)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)

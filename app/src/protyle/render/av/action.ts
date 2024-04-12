@@ -34,6 +34,7 @@ import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, openByMobile, writeText} from "../../util/compatibility";
+import {openSearchAV} from "./relation";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -313,6 +314,32 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             icon: "iconCopy",
             type: "submenu",
             submenu: copySubMenu(blockId)
+        });
+        menu.addItem({
+            label: window.siyuan.languages.addToDatabase,
+            icon: "iconDatabase",
+            click() {
+                openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
+                    const sourceIds: string[] = [blockId];
+                    const avID = listItemElement.dataset.avId;
+                    transaction(protyle, [{
+                        action: "insertAttrViewBlock",
+                        avID,
+                        ignoreFillFilter: true,
+                        srcIDs: sourceIds,
+                        isDetached: false,
+                        blockID: listItemElement.dataset.nodeId
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: listItemElement.dataset.nodeId,
+                        data: dayjs().format("YYYYMMDDHHmmss"),
+                    }], [{
+                        action: "removeAttrViewBlock",
+                        srcIDs: sourceIds,
+                        avID,
+                    }]);
+                });
+            }
         });
         menu.addItem({
             label: window.siyuan.languages.unbindBlock,

@@ -128,6 +128,9 @@ export const lineNumberRender = (block: HTMLElement) => {
     if (block.parentElement.getAttribute("lineNumber") === "false") {
         return;
     }
+    if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && block.parentElement.getAttribute("lineNumber") !== "true") {
+        return;
+    }
     block.classList.add("protyle-linenumber");
     // clientHeight 总是取的整数
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;

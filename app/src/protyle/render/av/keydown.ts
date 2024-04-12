@@ -23,17 +23,20 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (!rowElement) {
             return false;
         }
-        if (event.key === "Backspace" || event.key === "Delete") {
-            updateCellsValue(protyle, nodeElement, undefined, Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")));
-            event.preventDefault();
-            return true;
-        }
         const avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement &&
-            (event.key === "Escape" || event.key.startsWith("ArrowLeft") || event.key === "Enter" || matchHotKey("⇥", event) || matchHotKey("⇧⇥", event))) {
+            (event.key === "Backspace" || event.key === "Delete" || event.key === "Escape" ||
+                event.key.startsWith("ArrowLeft") || event.key === "Enter" || matchHotKey("⇥", event) ||
+                matchHotKey("⇧⇥", event))) {
             avPanelElement.remove();
             event.preventDefault();
             event.stopPropagation();
+            return true;
+        }
+        // 需在 avPanelElement 之后，否则点击资源单元格后删除，资源面板不会更新
+        if (event.key === "Backspace" || event.key === "Delete") {
+            updateCellsValue(protyle, nodeElement, undefined, Array.from(nodeElement.querySelectorAll(".av__cell--active, .av__cell--select")));
+            event.preventDefault();
             return true;
         }
         if (event.key === "Escape") {

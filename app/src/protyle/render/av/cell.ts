@@ -12,6 +12,7 @@ import {getColIconByType} from "./col";
 import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
+import {pathPosix} from "../../../util/pathName";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -133,7 +134,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         type: colType,
         [colType === "select" ? "mSelect" : colType]: value as IAVCellDateValue
     };
-    if (typeof value === "string" && value && colType !== "mAsset") {
+    if (typeof value === "string" && value) {
         if (colType === "number") {
             cellValue = {
                 type: colType,
@@ -180,6 +181,16 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 relation: {blockIDs: [value], contents: []}
+            };
+        } else if (colType === "mAsset") {
+            const type = pathPosix().extname(value).toLowerCase();
+            cellValue = {
+                type: colType,
+                mAsset: [{
+                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
+                    content: value,
+                    name: "",
+                }]
             };
         }
     } else if (typeof value === "undefined" || !value) {

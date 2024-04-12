@@ -675,9 +675,9 @@ export const renderCell = (cellValue: IAVCellValue) => {
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
-                text += `<img class="av__cellassetimg" src="${item.content}">`;
+                text += `<img class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${item.content}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url" data-url="${item.content}">${item.name}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${item.content}" data-url="${item.content}">${item.name}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {

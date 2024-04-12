@@ -53,6 +53,13 @@ func Templates() (templates []*Template) {
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
 
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			templates = append(templates, pkg.(*Template))
+			lock.Unlock()
+			return
+		}
+
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(template).Get(innerU)
@@ -93,6 +100,8 @@ func Templates() (templates []*Template) {
 		lock.Lock()
 		templates = append(templates, template)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, template)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)

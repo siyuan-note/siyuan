@@ -53,6 +53,13 @@ func Themes() (ret []*Theme) {
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
 
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			ret = append(ret, pkg.(*Theme))
+			lock.Unlock()
+			return
+		}
+
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(theme).Get(innerU)
@@ -93,6 +100,8 @@ func Themes() (ret []*Theme) {
 		lock.Lock()
 		ret = append(ret, theme)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, theme)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)

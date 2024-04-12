@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
+	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -680,3 +681,5 @@ func disallowDisplayBazaarPackage(pkg *Package) bool {
 	}
 	return false
 }
+
+var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package

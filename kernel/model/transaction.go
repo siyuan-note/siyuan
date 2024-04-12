@@ -1309,7 +1309,7 @@ func (tx *Transaction) begin() (err error) {
 
 func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			return
 		}
 
@@ -1474,7 +1474,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 	// 3. 保存变更
 	for _, tree := range changedRefTree {
-		indexWriteJSONQueue(tree)
+		indexWriteTreeUpsertQueue(tree)
 	}
 }
 

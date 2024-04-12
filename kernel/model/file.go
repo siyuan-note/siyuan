@@ -1065,7 +1065,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 	return
 }
 
-func writeJSONQueue(tree *parse.Tree) (err error) {
+func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 	if err = filesys.WriteTree(tree); nil != err {
 		return
 	}
@@ -1073,9 +1073,22 @@ func writeJSONQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func indexWriteJSONQueue(tree *parse.Tree) (err error) {
+func writeTreeIndexQueue(tree *parse.Tree) (err error) {
+	if err = filesys.WriteTree(tree); nil != err {
+		return
+	}
+	sql.IndexTreeQueue(tree)
+	return
+}
+
+func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
 	treenode.IndexBlockTree(tree)
-	return writeJSONQueue(tree)
+	return writeTreeIndexQueue(tree)
+}
+
+func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
+	treenode.IndexBlockTree(tree)
+	return writeTreeUpsertQueue(tree)
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
@@ -1181,7 +1194,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		date := time.Now().Format("20060102")
 		if tree.Root.IALAttr("custom-dailynote-"+date) == "" {
 			tree.Root.SetIALAttr("custom-dailynote-"+date, date)
-			if err = indexWriteJSONQueue(tree); nil != err {
+			if err = indexWriteTreeUpsertQueue(tree); nil != err {
 				return
 			}
 		}
@@ -1232,7 +1245,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 			}
 
 			tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-			if err = indexWriteJSONQueue(tree); nil != err {
+			if err = indexWriteTreeUpsertQueue(tree); nil != err {
 				return
 			}
 		}
@@ -1249,7 +1262,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	p = tree.Path
 	date := time.Now().Format("20060102")
 	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
-	if err = indexWriteJSONQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); nil != err {
 		return
 	}
 

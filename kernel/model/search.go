@@ -726,7 +726,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 				return ast.WalkContinue
 			})
 
-			if err = writeJSONQueue(tree); nil != err {
+			if err = writeTreeUpsertQueue(tree); nil != err {
 				return
 			}
 		}

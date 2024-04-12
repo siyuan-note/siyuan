@@ -549,7 +549,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		treenode.IndexBlockTree(tree)
-		sql.UpsertTreeQueue(tree)
+		sql.IndexTreeQueue(tree)
 	}
 
 	IncSync()
@@ -894,7 +894,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		buildBlockRefInText()
 
 		for i, tree := range importTrees {
-			indexWriteJSONQueue(tree)
+			indexWriteTreeIndexQueue(tree)
 			if 0 == i%4 {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
 			}

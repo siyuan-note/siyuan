@@ -93,7 +93,7 @@ func RemoveTag(label string) (err error) {
 			n.Unlink()
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -176,7 +176,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			}
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			util.ClearPushProgress(100)
 			return
 		}

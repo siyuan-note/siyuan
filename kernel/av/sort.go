@@ -18,7 +18,6 @@ package av
 
 import (
 	"bytes"
-	"strconv"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -196,11 +195,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeTemplate:
 		if nil != value.Template && nil != other.Template {
-			vContent := strings.TrimSpace(value.Template.Content)
-			oContent := strings.TrimSpace(other.Template.Content)
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
+			v1, ok1 := util.Convert2Float(value.Template.Content)
+			v2, ok2 := util.Convert2Float(other.Template.Content)
+			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1
 				}
@@ -236,9 +233,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
 
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
+			v1, ok1 := util.Convert2Float(value.Template.Content)
+			v2, ok2 := util.Convert2Float(other.Template.Content)
+			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1
 				}
@@ -265,9 +262,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
 
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
+			v1, ok1 := util.Convert2Float(value.Template.Content)
+			v2, ok2 := util.Convert2Float(other.Template.Content)
+			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1
 				}

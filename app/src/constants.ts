@@ -55,6 +55,8 @@ export abstract class Constants {
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_NEWWINDOW: string = "siyuan-export-newwindow";
 
+    public static readonly SIYUAN_CONTEXT_MENU: string = "siyuan-context-menu";
+
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";

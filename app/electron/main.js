@@ -15,7 +15,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog, systemPreferences, powerMonitor
+    net,
+    app,
+    BrowserWindow,
+    shell,
+    Menu,
+    MenuItem,
+    screen,
+    ipcMain,
+    globalShortcut,
+    Tray,
+    dialog,
+    systemPreferences,
+    powerMonitor
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -381,10 +393,8 @@ const boot = () => {
             label: `Quit ${productName}`, role: "quit",
         },],
     }, {
-        role: "editMenu",
-        submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {
-            role: "pasteAndMatchStyle",
-            accelerator: "CmdOrCtrl+Shift+C"
+        role: "editMenu", submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {
+            role: "pasteAndMatchStyle", accelerator: "CmdOrCtrl+Shift+C"
         }, {role: "selectAll"},],
     }, {
         role: "windowMenu",
@@ -685,7 +695,27 @@ app.whenReady().then(() => {
     const getWindowByContentId = (id) => {
         return BrowserWindow.getAllWindows().find((win) => win.webContents.id === id);
     };
-
+    ipcMain.on("siyuan-context-menu", (event, langs) => {
+        const template = [new MenuItem({
+            role: "undo", label: langs.undo
+        }), new MenuItem({
+            role: "redo", label: langs.redo
+        }), {type: "separator"}, new MenuItem({
+            role: "copy", label: langs.copy
+        }), new MenuItem({
+            role: "cut", label: langs.cut
+        }), new MenuItem({
+            role: "delete", label: langs.delete
+        }), new MenuItem({
+            role: "paste", label: langs.paste
+        }), new MenuItem({
+            role: "pasteAndMatchStyle", label: langs.pasteAsPlainText
+        }), new MenuItem({
+            role: "selectAll", label: langs.selectAll
+        })];
+        const menu = Menu.buildFromTemplate(template)
+        menu.popup({window: BrowserWindow.fromWebContents(event.sender)})
+    });
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
         shell.showItemInFolder(filePath);
     });
@@ -892,8 +922,7 @@ app.whenReady().then(() => {
     });
     ipcMain.on("siyuan-export-pdf", (event, data) => {
         dialog.showOpenDialog({
-            title: data.title,
-            properties: ["createDirectory", "openDirectory"],
+            title: data.title, properties: ["createDirectory", "openDirectory"],
         }).then((result) => {
             if (result.canceled) {
                 event.sender.destroy();

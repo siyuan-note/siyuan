@@ -30,7 +30,7 @@ export class Dock {
     public resizeElement: HTMLElement;
     public pin = true;
     public data: { [key: string]: Model | boolean };
-    private hideResizeTimeout:number;
+    private hideResizeTimeout: number;
 
     constructor(options: {
         app: App,

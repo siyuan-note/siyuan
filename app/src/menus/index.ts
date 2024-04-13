@@ -32,7 +32,7 @@ export class Menus {
                 event.preventDefault();
                 return;
             }
-            if (target.classList.contains("b3-text-field")) {
+            if (target.classList.contains("b3-text-field") || (target.tagName === "INPUT" && (target as HTMLInputElement).type === "text")) {
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_CONTEXT_MENU, {
                     undo: window.siyuan.languages.undo,

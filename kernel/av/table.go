@@ -19,7 +19,8 @@ package av
 import (
 	"math"
 	"sort"
-	"strconv"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // LayoutTable 描述了表格布局的结构。
@@ -413,7 +414,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		sum := 0.0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				sum += val
 			}
 		}
@@ -423,7 +424,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		count := 0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				sum += val
 				count++
 			}
@@ -435,7 +436,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		values := []float64{}
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				values = append(values, val)
 			}
 		}
@@ -451,7 +452,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		minVal := math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val < minVal {
 					minVal = val
 				}
@@ -464,7 +465,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		maxVal := -math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val > maxVal {
 					maxVal = val
 				}
@@ -478,7 +479,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		maxVal := -math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val < minVal {
 					minVal = val
 				}
@@ -1634,7 +1635,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					sum += val
 				}
 			}
@@ -1646,7 +1647,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					sum += val
 					count++
 				}
@@ -1660,7 +1661,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					values = append(values, val)
 				}
 			}
@@ -1678,7 +1679,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					if val < minVal {
 						minVal = val
 					}
@@ -1693,7 +1694,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					if val > maxVal {
 						maxVal = val
 					}
@@ -1709,7 +1710,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String())
 					if val < minVal {
 						minVal = val
 					}

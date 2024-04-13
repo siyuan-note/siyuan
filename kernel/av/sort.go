@@ -233,8 +233,8 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
 
-			v1, ok1 := util.Convert2Float(value.Template.Content)
-			v2, ok2 := util.Convert2Float(other.Template.Content)
+			v1, ok1 := util.Convert2Float(vContent)
+			v2, ok2 := util.Convert2Float(oContent)
 			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1
@@ -262,8 +262,8 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
 
-			v1, ok1 := util.Convert2Float(value.Template.Content)
-			v2, ok2 := util.Convert2Float(other.Template.Content)
+			v1, ok1 := util.Convert2Float(vContent)
+			v2, ok2 := util.Convert2Float(oContent)
 			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1

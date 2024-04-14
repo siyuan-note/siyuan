@@ -2129,7 +2129,6 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 				blockValue.IsDetached = isDetached
 				blockValue.Block.Content = content
 				blockValue.UpdatedAt = now
-				util.PushMsg(Conf.language(242), 3000)
 				err = av.SaveAttributeView(attrView)
 			}
 			return

@@ -598,7 +598,7 @@ func getAttributeViewContent(avID string) (content string) {
 			if nil == cell.Value {
 				continue
 			}
-			buf.WriteString(cell.Value.String())
+			buf.WriteString(cell.Value.String(true))
 			buf.WriteByte(' ')
 		}
 	}
@@ -1055,7 +1055,7 @@ func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
 				}
 			} else {
-				dataModel[rowValue.Key.Name] = v.String()
+				dataModel[rowValue.Key.Name] = v.String(true)
 			}
 		}
 	}

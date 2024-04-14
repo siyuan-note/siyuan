@@ -89,7 +89,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	}
 	keyValues.Values = []*av.Value{}
 	for _, v := range tmp {
-		if strings.Contains(strings.ToLower(v.String()), strings.ToLower(keyword)) {
+		if strings.Contains(strings.ToLower(v.String(true)), strings.ToLower(keyword)) {
 			keyValues.Values = append(keyValues.Values, v)
 		}
 	}
@@ -912,7 +912,7 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
 				}
 			} else {
-				dataModel[rowValue.Key.Name] = v.String()
+				dataModel[rowValue.Key.Name] = v.String(true)
 			}
 		}
 	}
@@ -1218,7 +1218,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			hit := false
 			for _, cell := range row.Cells {
 				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
+					if strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
 						hit = true
 						break
 					}

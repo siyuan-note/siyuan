@@ -1586,8 +1586,8 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					if !uniqueValues[content.String()] {
-						uniqueValues[content.String()] = true
+					if !uniqueValues[content.String(true)] {
+						uniqueValues[content.String(true)] = true
 						countUniqueValues++
 					}
 				}
@@ -1635,7 +1635,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					sum += val
 				}
 			}
@@ -1647,7 +1647,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					sum += val
 					count++
 				}
@@ -1661,7 +1661,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					values = append(values, val)
 				}
 			}
@@ -1679,7 +1679,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					if val < minVal {
 						minVal = val
 					}
@@ -1694,7 +1694,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					if val > maxVal {
 						maxVal = val
 					}
@@ -1710,7 +1710,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := util.Convert2Float(content.String())
+					val, _ := util.Convert2Float(content.String(false))
 					if val < minVal {
 						minVal = val
 					}

@@ -598,7 +598,7 @@ func getAttributeViewContent(avID string) (content string) {
 			if nil == cell.Value {
 				continue
 			}
-			buf.WriteString(cell.Value.String())
+			buf.WriteString(cell.Value.String(true))
 			buf.WriteByte(' ')
 		}
 	}
@@ -1050,12 +1050,33 @@ func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 				}
 			} else if av.KeyTypeRollup == v.Type {
-				if 0 < len(v.Rollup.Contents) && av.KeyTypeNumber == v.Rollup.Contents[0].Type {
-					// 汇总数字时仅取第一个数字填充模板
-					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
+				if 0 < len(v.Rollup.Contents) {
+					var numbers []float64
+					var contents []string
+					for _, content := range v.Rollup.Contents {
+						if av.KeyTypeNumber == content.Type {
+							numbers = append(numbers, content.Number.Content)
+						} else {
+							contents = append(contents, content.String(true))
+						}
+					}
+
+					if 0 < len(numbers) {
+						dataModel[rowValue.Key.Name] = numbers
+					} else {
+						dataModel[rowValue.Key.Name] = contents
+					}
+				}
+			} else if av.KeyTypeRelation == v.Type {
+				if 0 < len(v.Relation.Contents) {
+					var contents []string
+					for _, content := range v.Relation.Contents {
+						contents = append(contents, content.String(true))
+					}
+					dataModel[rowValue.Key.Name] = contents
 				}
 			} else {
-				dataModel[rowValue.Key.Name] = v.String()
+				dataModel[rowValue.Key.Name] = v.String(true)
 			}
 		}
 	}

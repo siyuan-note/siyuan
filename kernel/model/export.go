@@ -148,7 +148,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 					}
 				}
 
-				val = cell.Value.String()
+				val = cell.Value.String(true)
 			}
 
 			rowVal = append(rowVal, val)
@@ -2335,7 +2335,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 						}
 					}
 
-					val = cell.Value.String()
+					val = cell.Value.String(true)
 				}
 				mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
 			}

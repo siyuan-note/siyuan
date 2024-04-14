@@ -129,8 +129,16 @@ style="width: ${column.width || "200px"};">
                     if (pinIndex === index) {
                         tableHTML += "</div>";
                     }
-                    calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
-style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+
+                    // lineNumber type 不参与计算操作
+                    if (column.type === "lineNumber") {
+                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}"  
+                        style="display: flex; width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">&nbsp;</div>`;
+                    } else {
+                        calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
+                        style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+                    }
+
                     if (pinIndex === index) {
                         calcHTML += "</div>";
                     }
@@ -142,7 +150,7 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
 </div>
 </div>`;
                 // body
-                data.rows.forEach((row: IAVRow) => {
+                data.rows.forEach((row: IAVRow, rowIndex: number) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">`;
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -165,7 +173,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";

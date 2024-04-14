@@ -64,7 +64,7 @@ func (value *Value) SetUpdatedAt(mills int64) {
 	}
 }
 
-func (value *Value) String() string {
+func (value *Value) String(format bool) string {
 	if nil == value {
 		return ""
 	}
@@ -84,7 +84,10 @@ func (value *Value) String() string {
 		if nil == value.Number {
 			return ""
 		}
-		return value.Number.FormattedContent
+		if format {
+			return value.Number.FormattedContent
+		}
+		return fmt.Sprintf("%f", value.Number.Content)
 	case KeyTypeDate:
 		if nil == value.Date {
 			return ""
@@ -158,7 +161,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.Relation.Contents {
-			ret = append(ret, v.String())
+			ret = append(ret, v.String(format))
 		}
 		return strings.TrimSpace(strings.Join(ret, ", "))
 	case KeyTypeRollup:
@@ -167,7 +170,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.Rollup.Contents {
-			ret = append(ret, v.String())
+			ret = append(ret, v.String(format))
 		}
 		return strings.TrimSpace(strings.Join(ret, ", "))
 	default:
@@ -679,8 +682,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, v := range r.Contents {
-			if _, ok := uniqueValues[v.String()]; !ok {
-				uniqueValues[v.String()] = true
+			if _, ok := uniqueValues[v.String(true)]; !ok {
+				uniqueValues[v.String(true)] = true
 				countUniqueValues++
 			}
 		}
@@ -688,7 +691,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v.String() {
+			if "" == v.String(true) {
 				countEmpty++
 			}
 		}
@@ -696,7 +699,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorCountNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v.String() {
+			if "" != v.String(true) {
 				countNonEmpty++
 			}
 		}
@@ -704,7 +707,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v.String() {
+			if "" == v.String(true) {
 				countEmpty++
 			}
 		}
@@ -714,7 +717,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorPercentNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v.String() {
+			if "" != v.String(true) {
 				countNonEmpty++
 			}
 		}

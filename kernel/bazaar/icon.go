@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -184,14 +183,9 @@ func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallIcon(installPath string) error {
-	if err := os.RemoveAll(installPath); nil != err {
-		logging.LogErrorf("remove icon [%s] failed: %s", installPath, err)
-		return errors.New("remove community icon failed")
-	}
-	//logging.Logger.Infof("uninstalled icon [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }

@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -186,14 +185,9 @@ func InstallTheme(repoURL, repoHash, installPath string, systemID string) error 
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallTheme(installPath string) error {
-	if err := os.RemoveAll(installPath); nil != err {
-		logging.LogErrorf("remove theme [%s] failed: %s", installPath, err)
-		return errors.New("remove community theme failed")
-	}
-	//logging.Logger.Infof("uninstalled theme [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }

@@ -119,6 +119,7 @@
   "goToEditTabPrev": "跳转到上一个编辑页签",
   "createdTime": "创建时间",
   "updatedTime": "更新时间",
+  "lineNumber": "行号",
   "removeBookmark": "移除 ${x} 中的书签？",
   "lockEdit": "锁定编辑",
   "unlockEdit": "解除锁定",

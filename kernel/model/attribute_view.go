@@ -89,7 +89,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	}
 	keyValues.Values = []*av.Value{}
 	for _, v := range tmp {
-		if strings.Contains(strings.ToLower(v.String()), strings.ToLower(keyword)) {
+		if strings.Contains(strings.ToLower(v.String(true)), strings.ToLower(keyword)) {
 			keyValues.Values = append(keyValues.Values, v)
 		}
 	}
@@ -145,7 +145,7 @@ func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
 	}
 
 	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeRelation != keyValues.Key.Type && av.KeyTypeRollup != keyValues.Key.Type && av.KeyTypeTemplate != keyValues.Key.Type && av.KeyTypeCreated != keyValues.Key.Type && av.KeyTypeUpdated != keyValues.Key.Type {
+		if av.KeyTypeRelation != keyValues.Key.Type && av.KeyTypeRollup != keyValues.Key.Type && av.KeyTypeTemplate != keyValues.Key.Type && av.KeyTypeCreated != keyValues.Key.Type && av.KeyTypeUpdated != keyValues.Key.Type && av.KeyTypeLineNumber != keyValues.Key.Type {
 			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
 				ret = append(ret, keyValues.Key)
 			}
@@ -905,14 +905,33 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 				}
 			} else if av.KeyTypeRollup == v.Type {
-				if 0 < len(v.Rollup.Contents) && av.KeyTypeNumber == v.Rollup.Contents[0].Type {
-					// 模板使用汇总时支持数字计算
-					// Template supports numerical calculations when using rollup https://github.com/siyuan-note/siyuan/issues/10810
-					// 汇总数字时仅取第一个数字填充模板
-					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
+				if 0 < len(v.Rollup.Contents) {
+					var numbers []float64
+					var contents []string
+					for _, content := range v.Rollup.Contents {
+						if av.KeyTypeNumber == content.Type {
+							numbers = append(numbers, content.Number.Content)
+						} else {
+							contents = append(contents, content.String(true))
+						}
+					}
+
+					if 0 < len(numbers) {
+						dataModel[rowValue.Key.Name] = numbers
+					} else {
+						dataModel[rowValue.Key.Name] = contents
+					}
+				}
+			} else if av.KeyTypeRelation == v.Type {
+				if 0 < len(v.Relation.Contents) {
+					var contents []string
+					for _, content := range v.Relation.Contents {
+						contents = append(contents, content.String(true))
+					}
+					dataModel[rowValue.Key.Name] = contents
 				}
 			} else {
-				dataModel[rowValue.Key.Name] = v.String()
+				dataModel[rowValue.Key.Name] = v.String(true)
 			}
 		}
 	}
@@ -1218,7 +1237,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			hit := false
 			for _, cell := range row.Cells {
 				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String()), strings.ToLower(keyword)) {
+					if strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
 						hit = true
 						break
 					}
@@ -2635,7 +2654,7 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 	switch keyTyp {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
-		av.KeyTypeRelation, av.KeyTypeRollup:
+		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 
 		key := av.NewKey(keyID, keyName, keyIcon, keyTyp)
 		if av.KeyTypeRollup == keyTyp {
@@ -2747,7 +2766,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	switch colType {
 	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
-		av.KeyTypeRelation, av.KeyTypeRollup:
+		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = strings.TrimSpace(operation.Name)

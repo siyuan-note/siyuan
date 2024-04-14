@@ -854,6 +854,46 @@ export const openMenuPanel = (options: {
                             name,
                             type: target.dataset.oldType as TAVCol,
                         }]);
+
+                        // 需要取消 lineNumber 列的排序和过滤
+                        if (target.dataset.newType === "lineNumber") {
+                            const sortExist = data.view.sorts.find((sort) => sort.column === options.colId);
+                            if (sortExist) {
+                                const oldSorts = Object.assign([], data.view.sorts);
+                                const newSorts = data.view.sorts.filter((sort) => sort.column !== options.colId);
+
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewSorts",
+                                    avID: data.id,
+                                    data: newSorts,
+                                    blockID,
+                                }], [{
+                                    action: "setAttrViewSorts",
+                                    avID: data.id,
+                                    data: oldSorts,
+                                    blockID,
+                                }]);
+                            }
+
+                            const filterExist = data.view.filters.find((filter) => filter.column === options.colId);
+                            if (filterExist) {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                const newFilters = data.view.filters.filter((filter) => filter.column !== options.colId);
+
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID: data.id,
+                                    data: newFilters,
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID: data.id,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                            }
+
+                        }
                     }
                     avPanelElement.remove();
                     event.preventDefault();

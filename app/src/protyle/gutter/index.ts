@@ -49,6 +49,7 @@ import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu} from "../render/av/action";
 import {openSearchAV} from "../render/av/relation";
 import {getPlainText} from "../util/paste";
+import {Menu} from "../../plugin/Menu";
 
 export class Gutter {
     public element: HTMLElement;
@@ -64,6 +65,7 @@ export class Gutter {
         this.element.className = "protyle-gutters";
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             hideTooltip();
+            window.siyuan.menus.menu.remove();
             const buttonElement = event.target.parentElement;
             let selectIds: string[] = [];
             let selectElements: Element[] = [];
@@ -925,7 +927,10 @@ export class Gutter {
             return;
         }
         hideElements(["util", "toolbar", "hint"], protyle);
-        window.siyuan.menus.menu.remove();
+        const menu = new Menu("gutter");
+        if (menu.isOpen) {
+            return;
+        }
         if (isMobile()) {
             activeBlur();
         }

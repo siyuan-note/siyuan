@@ -462,7 +462,7 @@ export const openMenuPanel = (options: {
             }
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(avPanelElement) || type) {
-                type = target.dataset.type || type;
+                type = target?.dataset.type || type;
                 if (type === "close") {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
                         // 优先关闭资源文件搜索

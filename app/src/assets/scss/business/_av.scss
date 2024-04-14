@@ -48,8 +48,15 @@
       background-color: transparent;
       font-size: 87.5%;
 
+      .item__graphic {
+        height: 1.625em;
+        width: calc(1.625em - 10px);
+        padding: 5px 5px 5px 8px;
+      }
+
       .item__text {
         padding-left: 5px;
+        line-height: normal;
       }
     }
   }
@@ -175,9 +182,9 @@
         }
 
         svg {
-          height: 8px;
-          width: 8px;
           margin-left: 5px;
+          height: 1.625em;
+          width: calc(1.625em - 10px);
         }
 
         span {
@@ -196,7 +203,7 @@
       display: flex;
 
       .b3-button {
-        margin: 3px 0 3px 24px;
+        margin: 5px 0 5px 1.625em;
         color: var(--b3-theme-on-surface);
         background-color: transparent;
         font-size: 75%;
@@ -209,8 +216,8 @@
       }
 
       svg {
-        width: 12px;
-        height: 20px;
+        height: 1.625em;
+        width: calc(1.625em - 8px);
 
         &[data-type="set-page-size"] {
           margin: 0 0 0 4px;
@@ -287,12 +294,11 @@
       }
 
       .av__cellheadericon {
-        height: 1em;
-        width: 1em;
+        height: 1.625em;
+        width: calc(1.625em - 10px);
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;
-        line-height: 1em;
         font-size: inherit;
 
         &--pin {
@@ -315,6 +321,8 @@
     .b3-chip {
       margin: 1px 2px;
       padding: 2px 6px;
+      line-height: calc(1.625em - 6px);
+      font-size: inherit;
     }
   }
 
@@ -345,7 +353,7 @@
       text-overflow: ellipsis;
       display: inline-block;
       vertical-align: top;
-      height: 20px;
+      border-bottom: 0;
     }
 
     & > .av__cellicon {
@@ -357,10 +365,11 @@
 
   &__checkbox {
     color: var(--b3-theme-on-surface);
-    height: 14px;
-    width: 14px;
-    vertical-align: bottom;
-    padding: 4.5px 0;
+    height: 1.625em;
+    width: calc(1.625em - 10px);
+    box-sizing: border-box;
+    padding: 5px 0;
+    display: block;
 
     &:hover {
       color: var(--b3-theme-on-background);
@@ -371,7 +380,7 @@
     svg {
       @extend .av__checkbox;
       opacity: 0;
-      padding: 9.5px 5px;
+      margin: 5px;
       cursor: pointer;
     }
 
@@ -515,11 +524,12 @@
 }
 
 img.av__cellassetimg {
-  max-height: 20px;
+  max-height: calc(1.625em - 2px);
   border-radius: var(--b3-border-radius);
   margin: 1px 2px;
   max-width: none;
   vertical-align: top;
+  font-size: inherit;
 }
 
 html[data-theme-mode="dark"] .av__panel .b3-menu__item[draggable="true"] {

@@ -905,11 +905,30 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 				}
 			} else if av.KeyTypeRollup == v.Type {
-				if 0 < len(v.Rollup.Contents) && av.KeyTypeNumber == v.Rollup.Contents[0].Type {
-					// 模板使用汇总时支持数字计算
-					// Template supports numerical calculations when using rollup https://github.com/siyuan-note/siyuan/issues/10810
-					// 汇总数字时仅取第一个数字填充模板
-					dataModel[rowValue.Key.Name] = v.Rollup.Contents[0].Number.Content
+				if 0 < len(v.Rollup.Contents) {
+					var numbers []float64
+					var contents []string
+					for _, content := range v.Rollup.Contents {
+						if av.KeyTypeNumber == content.Type {
+							numbers = append(numbers, content.Number.Content)
+						} else {
+							contents = append(contents, content.String(true))
+						}
+					}
+
+					if 0 < len(numbers) {
+						dataModel[rowValue.Key.Name] = numbers
+					} else {
+						dataModel[rowValue.Key.Name] = contents
+					}
+				}
+			} else if av.KeyTypeRelation == v.Type {
+				if 0 < len(v.Relation.Contents) {
+					var contents []string
+					for _, content := range v.Relation.Contents {
+						contents = append(contents, content.String(true))
+					}
+					dataModel[rowValue.Key.Name] = contents
 				}
 			} else {
 				dataModel[rowValue.Key.Name] = v.String(true)

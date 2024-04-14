@@ -566,7 +566,8 @@ export const addFilter = (options: {
                 return true;
             }
         });
-        if (!filter && column.type !== "mAsset") {
+        // 该列是行号类型列，则不允许添加到过滤器
+        if (!filter && column.type !== "mAsset" && column.type !== "lineNumber") {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,

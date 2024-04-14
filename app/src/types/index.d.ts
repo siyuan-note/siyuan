@@ -82,6 +82,7 @@ type TAVCol =
     | "created"
     | "updated"
     | "checkbox"
+    | "lineNumber"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="

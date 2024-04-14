@@ -644,7 +644,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
     }
 };
 
-export const renderCell = (cellValue: IAVCellValue) => {
+export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
         text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
@@ -683,6 +683,9 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
         }
         text += "</span>";
+    } else if (["lineNumber"].includes(cellValue.type)) {
+        // 渲染行号
+        text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
@@ -713,8 +716,9 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text = text.substring(0, text.length - 2);
         }
     }
-    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
-        cellValue && cellValue[cellValue.type as "url"].content) {
+
+    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated", "lineNumber"].includes(cellValue.type) &&
+        ( cellValue.type === "lineNumber" || (cellValue && cellValue[cellValue.type as "url"].content))) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
     return text;

@@ -405,10 +405,7 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
         }
         listElement.innerHTML = filterSelectHTML(inputElement.value, colData.options);
     });
-    inputElement.addEventListener("compositionend", (event: InputEvent) => {
-        if (event.isComposing) {
-            return;
-        }
+    inputElement.addEventListener("compositionend", () => {
         listElement.innerHTML = filterSelectHTML(inputElement.value, colData.options);
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {

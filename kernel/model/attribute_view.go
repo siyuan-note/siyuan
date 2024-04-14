@@ -3003,6 +3003,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
+	if "" == val.ID {
+		// 有时前端会误调用该接口（比如创建完快速切换），这里判断一下，避免误更新刚刚创建的值
+		// Primary key value unexpectedly updated when database adds row https://github.com/siyuan-note/siyuan/issues/11018
+		return
+	}
+
 	if av.KeyTypeNumber == val.Type {
 		if nil != val.Number && !val.Number.IsNotEmpty {
 			val.Number.Content = 0

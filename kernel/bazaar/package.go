@@ -19,6 +19,7 @@ package bazaar
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -588,7 +589,26 @@ func incPackageDownloads(repoURLHash, systemID string) {
 		}).Post(u)
 }
 
-func installPackage(data []byte, installPath string) (err error) {
+func uninstallPackage(installPath string) (err error) {
+	if err = os.RemoveAll(installPath); nil != err {
+		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
+		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
+	}
+	packageCache.Flush()
+	return
+}
+
+func installPackage(data []byte, installPath, repoURLHash string) (err error) {
+	err = installPackage0(data, installPath)
+	if nil != err {
+		return
+	}
+
+	packageCache.Delete(strings.TrimPrefix(repoURLHash, "https://github.com/"))
+	return
+}
+
+func installPackage0(data []byte, installPath string) (err error) {
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
 	if err = os.MkdirAll(tmpPackage, 0755); nil != err {
 		return

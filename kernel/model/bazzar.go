@@ -19,16 +19,17 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/88250/gulu"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 func BatchUpdateBazaarPackages(frontend string) {
@@ -202,9 +203,7 @@ func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 		plugin.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
 		if plugin.Installed {
 			if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
-				if plugin.Version != pluginConf.Version {
-					plugin.Outdated = true
-				}
+				plugin.Outdated = 0 > semver.Compare("v"+pluginConf.Version, "v"+plugin.Version)
 			}
 		}
 	}
@@ -273,9 +272,7 @@ func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 		widget.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
 			if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
-				if widget.Version != widgetConf.Version {
-					widget.Outdated = true
-				}
+				widget.Outdated = 0 > semver.Compare("v"+widgetConf.Version, "v"+widget.Version)
 			}
 		}
 	}
@@ -324,10 +321,8 @@ func BazaarIcons(keyword string) (icons []*bazaar.Icon) {
 		for _, icon := range icons {
 			if installed == icon.Name {
 				icon.Installed = true
-				if themeConf, err := bazaar.IconJSON(icon.Name); nil == err {
-					if icon.Version != themeConf.Version {
-						icon.Outdated = true
-					}
+				if iconConf, err := bazaar.IconJSON(icon.Name); nil == err {
+					icon.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+icon.Version)
 				}
 			}
 			icon.Current = icon.Name == Conf.Appearance.Icon
@@ -389,7 +384,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 			if installed == theme.Name {
 				theme.Installed = true
 				if themeConf, err := bazaar.ThemeJSON(theme.Name); nil == err {
-					theme.Outdated = theme.Version != themeConf.Version
+					theme.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+theme.Version)
 				}
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 			}
@@ -462,10 +457,8 @@ func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 	for _, template := range templates {
 		template.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
-			if themeConf, err := bazaar.TemplateJSON(template.Name); nil == err && nil != themeConf {
-				if template.Version != themeConf.Version {
-					template.Outdated = true
-				}
+			if templateConf, err := bazaar.TemplateJSON(template.Name); nil == err && nil != templateConf {
+				template.Outdated = 0 > semver.Compare("v"+templateConf.Version, "v"+template.Version)
 			}
 		}
 	}

@@ -119,6 +119,7 @@
   "goToEditTabPrev": "Ir a la pestaña editada anteriormente",
   "createdTime": "Hora de creación",
   "updatedTime": "Hora actualizada",
+  "lineNumber": "Número de línea",
   "removeBookmark": "¿Eliminar marcador de ${x}?",
   "lockEdit": "Hacer que el documento sea de sólo lectura",
   "unlockEdit": "Hacer que el documento sea escribible",

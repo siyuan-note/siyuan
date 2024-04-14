@@ -142,7 +142,7 @@ style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : 
 </div>
 </div>`;
                 // body
-                data.rows.forEach((row: IAVRow) => {
+                data.rows.forEach((row: IAVRow, rowIndex: number) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">`;
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -165,7 +165,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";

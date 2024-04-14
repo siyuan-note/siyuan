@@ -1,0 +1,22 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "序列号创建点击后交互",
+  "steps": [
+    {
+      "file": "app/src/protyle/render/av/col.ts",
+      "description": "# 行号列属性编辑\n\n在选择“行号”类型后，除了进行事务，还会直接弹出列属性编辑弹出",
+      "line": 1468,
+      "selection": {
+        "start": {
+          "line": 1459,
+          "character": 13
+        },
+        "end": {
+          "line": 1466,
+          "character": 16
+        }
+      }
+    }
+  ],
+  "isPrimary": true
+}

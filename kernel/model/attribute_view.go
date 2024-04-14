@@ -2729,7 +2729,6 @@ func updateAttributeViewColNumberFormat(operation *Operation) (err error) {
 	return
 }
 
-// TODO Silent 更新类型入口
 func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColumn(operation)
 	if nil != err {

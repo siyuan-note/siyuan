@@ -17,7 +17,7 @@ export const addSort = (options: {
     options.data.view.columns.forEach((column) => {
         let hasSort = false;
 
-        // TODO Silent 如果该列是行号类型列，不允许添加排序
+        // 如果该列是行号类型列，不允许添加排序
         if (column.type === "lineNumber") {
             hasSort = true;
         } else {

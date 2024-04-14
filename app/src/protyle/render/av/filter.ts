@@ -520,7 +520,7 @@ export const addFilter = (options: {
                 return true;
             }
         });
-        // TODO Silent 如果该列是行号类型列，则不允许添加到过滤器
+        // 该列是行号类型列，则不允许添加到过滤器
         if (!filter && column.type !== "mAsset" && column.type !== "lineNumber") {
             menu.addItem({
                 label: column.name,

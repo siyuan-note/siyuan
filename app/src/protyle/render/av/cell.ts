@@ -684,7 +684,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         }
         text += "</span>";
     } else if (["lineNumber"].includes(cellValue.type)) {
-        // TODO Silent 渲染行号
+        // 渲染行号
         text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
@@ -717,7 +717,6 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         }
     }
 
-    // TODO Silent 序号类型有复制按钮
     if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated", "lineNumber"].includes(cellValue.type) &&
         ( cellValue.type === "lineNumber" || (cellValue && cellValue[cellValue.type as "url"].content))) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;

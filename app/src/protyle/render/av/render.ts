@@ -129,8 +129,16 @@ style="width: ${column.width || "200px"};">
                     if (pinIndex === index) {
                         tableHTML += "</div>";
                     }
-                    calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
-style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+
+                    // lineNumber type 不参与计算操作
+                    if (column.type === "lineNumber") {
+                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}"  
+                        style="display: flex; width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">&nbsp;</div>`;
+                    } else {
+                        calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
+                        style="width: ${index === 0 ? ((parseInt(column.width || "200") + 24) + "px") : (column.width || "200px")}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+                    }
+
                     if (pinIndex === index) {
                         calcHTML += "</div>";
                     }

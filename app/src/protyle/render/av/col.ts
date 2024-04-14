@@ -252,7 +252,6 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("template", colData.type)}
     ${genUpdateColItem("relation", colData.type)}
     ${genUpdateColItem("rollup", colData.type)}
-    <!-- TODO Silent 添加行号类型到转换列表 -->
     ${genUpdateColItem("lineNumber", colData.type)}
     ${genUpdateColItem("created", colData.type)}
     ${genUpdateColItem("updated", colData.type)}
@@ -595,7 +594,6 @@ const addAttrViewColAnimation = (options: {
         }
         return;
     }
-    // TODO Silent 新建列后入口
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -1440,7 +1438,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             blockElement.setAttribute("updated", newUpdated);
         }
     });
-    // TODO Silent 在创建时间前插入序号
+    // 在创建时间前插入 lineNumber
     menu.addItem({
         icon: "iconSpreadOdd",
         label: window.siyuan.languages.lineNumber,

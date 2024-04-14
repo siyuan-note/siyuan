@@ -236,7 +236,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__cell--header")) {
-            // TODO Silent av 操作交互
             showColMenu(protyle, blockElement, target);
             event.preventDefault();
             event.stopPropagation();

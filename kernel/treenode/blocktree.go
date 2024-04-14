@@ -31,6 +31,7 @@ import (
 	"github.com/panjf2000/ants/v2"
 	util2 "github.com/siyuan-note/dejavu/util"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -503,6 +504,12 @@ func SaveBlockTreeJob() {
 func SaveBlockTree(force bool) {
 	blockTreeLock.Lock()
 	defer blockTreeLock.Unlock()
+
+	if task.ContainIndexTask() {
+		//logging.LogInfof("skip saving block tree because indexing")
+		return
+	}
+	//logging.LogInfof("saving block tree")
 
 	start := time.Now()
 	if err := os.MkdirAll(util.BlockTreePath, 0755); nil != err {

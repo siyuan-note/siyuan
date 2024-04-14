@@ -506,14 +506,15 @@ func FullReindex() {
 }
 
 func fullReindex() {
-	util.PushMsg(Conf.Language(35), 7*1000)
+	util.PushEndlessProgress(Conf.language(35))
+	defer util.PushClearProgress()
+
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {
 		os.Exit(logging.ExitCodeReadOnlyDatabase)
 		return
 	}
-	treenode.InitBlockTree(true)
 
 	sql.IndexIgnoreCached = false
 	openedBoxes := Conf.GetOpenedBoxes()

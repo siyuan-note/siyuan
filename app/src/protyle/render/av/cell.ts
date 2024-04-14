@@ -554,8 +554,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
 
         const rowID = rowElement.getAttribute("data-id");
-        const cellId = item.getAttribute("data-id");
-        const colId = item.getAttribute("data-col-id");
+        const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
+        const colId = item.dataset.colId;
 
         text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);

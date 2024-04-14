@@ -2129,7 +2129,6 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID string,
 				blockValue.IsDetached = isDetached
 				blockValue.Block.Content = content
 				blockValue.UpdatedAt = now
-				util.PushMsg(Conf.language(242), 3000)
 				err = av.SaveAttributeView(attrView)
 			}
 			return
@@ -2971,7 +2970,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 
 		for _, value := range keyValues.Values {
-			if cellID == value.ID {
+			if cellID == value.ID || rowID == value.BlockID {
 				val = value
 				val.Type = keyValues.Key.Type
 				break
@@ -3000,12 +2999,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &val); nil != err {
-		return
-	}
-
-	if "" == val.ID {
-		// 有时前端会误调用该接口（比如创建完快速切换），这里判断一下，避免误更新刚刚创建的值
-		// Primary key value unexpectedly updated when database adds row https://github.com/siyuan-note/siyuan/issues/11018
 		return
 	}
 

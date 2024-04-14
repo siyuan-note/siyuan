@@ -55,7 +55,7 @@ const (
 type RelativeDate struct {
 	Count     int                   `json:"count"`     // 数量
 	Unit      RelativeDateUnit      `json:"unit"`      // 单位：0 天、1 周、2 月、3 年
-	Direction RelativeDateDirection `json:"direction"` // 方向：-1 前、0 这、1 后
+	Direction RelativeDateDirection `json:"direction"` // 方向：-1 前、0 当前、1 后
 }
 
 type FilterOperator string
@@ -571,19 +571,19 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 	case RelativeDateUnitDay:
 		switch direction {
 		case RelativeDateDirectionBefore:
-			// 结束时间使用今天的开始时间
+			// 结束时间：今天的 0 点
 			end = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-			// 开始时间使用结束时间减去 count 天
+			// 开始时间：结束时间减去 count 天
 			start = end.AddDate(0, 0, -count)
 		case RelativeDateDirectionThis:
-			// 开始时间使用今天的开始时间
+			// 开始时间：今天的 0 点
 			start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-			// 结束时间使用开始时间加上 count 天
-			end = start.AddDate(0, 0, count)
+			// 结束时间：今天的 23:59:59.999999999
+			end = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
 		case RelativeDateDirectionAfter:
-			// 开始时间使用今天的结束时间
+			// 开始时间：今天的 23:59:59.999999999
 			start = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
-			// 结束时间使用开始时间加上 count 天
+			// 结束时间：开始时间加上 count 天
 			end = start.AddDate(0, 0, count)
 		}
 	case RelativeDateUnitWeek:
@@ -593,55 +593,55 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 		}
 		switch direction {
 		case RelativeDateDirectionBefore:
-			// 结束时间使用本周的开始时间
-			end = time.Date(now.Year(), now.Month(), now.Day()-weekday, 0, 0, 0, 0, now.Location())
-			// 开始时间使用结束时间减去 count*7 天
+			// 结束时间：本周的周一
+			end = time.Date(now.Year(), now.Month(), now.Day()-weekday+1, 0, 0, 0, 0, now.Location())
+			// 开始时间：结束时间减去 count*7 天
 			start = end.AddDate(0, 0, -count*7)
 		case RelativeDateDirectionThis:
-			// 开始时间使用本周的开始时间
-			start = time.Date(now.Year(), now.Month(), now.Day()-weekday, 0, 0, 0, 0, now.Location())
-			// 结束时间使用开始时间加上 count*7 天
-			end = start.AddDate(0, 0, count*7)
+			// 开始时间：本周的周一
+			start = time.Date(now.Year(), now.Month(), now.Day()-weekday+1, 0, 0, 0, 0, now.Location())
+			// 结束时间：本周的周日
+			end = time.Date(now.Year(), now.Month(), now.Day()-weekday+7, 23, 59, 59, 999999999, now.Location())
 		case RelativeDateDirectionAfter:
-			//  开始时间使用本周的结束时间
+			//  开始时间：本周的周日
 			start = time.Date(now.Year(), now.Month(), now.Day()-weekday+7, 23, 59, 59, 999999999, now.Location())
-			// 结束时间使用开始时间加上 count*7 天
+			// 结束时间：开始时间加上 count*7 天
 			end = start.AddDate(0, 0, count*7)
 		}
 	case RelativeDateUnitMonth:
 		switch direction {
 		case RelativeDateDirectionBefore:
-			// 结束时间使用本月的开始时间
+			// 结束时间：本月的 1 号
 			end = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-			// 开始时间使用结束时间减去 count 个月
+			// 开始时间：结束时间减去 count 个月
 			start = end.AddDate(0, -count, 0)
 		case RelativeDateDirectionThis:
-			// 开始时间使用本月的开始时间
+			// 开始时间：本月的 1 号
 			start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-			// 结束时间使用开始时间加上 count 个月
-			end = start.AddDate(0, count, 0)
+			// 结束时间：下个月的 1 号减去 1 纳秒
+			end = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
 		case RelativeDateDirectionAfter:
-			// 开始时间使用本月的结束时间
+			// 开始时间：下个月的 1 号减去 1 纳秒
 			start = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
-			// 结束时间使用开始时间加上 count 个月
+			// 结束时间：开始时间加上 count 个月
 			end = start.AddDate(0, count, 0)
 		}
 	case RelativeDateUnitYear:
 		switch direction {
 		case RelativeDateDirectionBefore:
-			// 结束时间使用今年的开始时间
+			// 结束时间：今年的 1 月 1 号
 			end = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-			// 开始时间使用结束时间减去 count 年
+			// 开始时间：结束时间减去 count 年
 			start = end.AddDate(-count, 0, 0)
 		case RelativeDateDirectionThis:
-			// 开始时间使用今年的开始时间
+			// 开始时间：今年的 1 月 1 号
 			start = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-			// 结束时间使用开始时间加上 count 年
-			end = start.AddDate(count, 0, 0)
+			// 结束时间：明年的 1 月 1 号减去 1 纳秒
+			end = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
 		case RelativeDateDirectionAfter:
-			// 开始时间使用今年的结束时间
-			start = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Nanosecond)
-			// 结束时间使用开始时间加上 count 年
+			// 开始时间：今年的 12 月 31 号
+			start = time.Date(now.Year(), 12, 31, 23, 59, 59, 999999999, now.Location())
+			// 结束时间：开始时间加上 count 年
 			end = start.AddDate(count, 0, 0)
 		}
 	}

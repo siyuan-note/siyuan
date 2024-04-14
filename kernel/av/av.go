@@ -340,6 +340,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			// 补全 block 的创建时间和更新时间
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
+					logging.LogWarnf("block [%s] created time is empty", v.BlockID)
 					if "" == v.Block.ID {
 						v.Block.ID = v.BlockID
 						if "" == v.Block.ID {
@@ -357,6 +358,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					}
 				}
 				if 0 == v.Block.Updated {
+					logging.LogWarnf("block [%s] updated time is empty", v.BlockID)
 					v.Block.Updated = v.Block.Created
 				}
 			}
@@ -375,6 +377,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 					val.KeyID = kv.Key.ID
 				}
 				if "" == v.KeyID {
+					logging.LogWarnf("value [%s] key id is empty", v.ID)
 					v.KeyID = kv.Key.ID
 				}
 
@@ -417,10 +420,12 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 			// 补全值的创建时间和更新时间
 			if "" == v.ID {
+				logging.LogWarnf("value id is empty")
 				v.ID = ast.NewNodeID()
 			}
 
 			if 0 == v.CreatedAt {
+				logging.LogWarnf("value [%s] created time is empty", v.ID)
 				createdStr := v.ID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
@@ -431,6 +436,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			}
 
 			if 0 == v.UpdatedAt {
+				logging.LogWarnf("value [%s] updated time is empty", v.ID)
 				v.UpdatedAt = v.CreatedAt
 			}
 		}

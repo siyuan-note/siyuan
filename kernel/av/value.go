@@ -208,6 +208,11 @@ func (value *Value) IsEdited() bool {
 		return true
 	}
 
+	if KeyTypeCheckbox == value.Type {
+		// 勾选框不会为空，即使勾选框未勾选，也不算是空，所以不能用下面的 IsEmpty 判断，这里使用更新时间判断是否编辑过 https://github.com/siyuan-note/siyuan/issues/11016
+		return value.CreatedAt != value.UpdatedAt
+	}
+
 	if !value.IsEmpty() {
 		return true
 	}
@@ -279,7 +284,7 @@ func (value *Value) IsEmpty() bool {
 		if nil == value.Checkbox {
 			return true
 		}
-		return !value.Checkbox.Checked
+		return false // 勾选框不会为空
 	case KeyTypeRelation:
 		return 1 > len(value.Relation.Contents)
 	case KeyTypeRollup:

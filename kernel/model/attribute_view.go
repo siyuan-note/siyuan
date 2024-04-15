@@ -3171,11 +3171,9 @@ func unbindBlockAv(tx *Transaction, avID, blockID string) {
 	avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
 	avIDs = gulu.Str.RemoveElem(avIDs, avID)
 	if 0 == len(avIDs) {
-		delete(attrs, av.NodeAttrNameAvs)
-		node.RemoveIALAttr(av.NodeAttrNameAvs)
+		attrs[av.NodeAttrNameAvs] = ""
 	} else {
 		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-		node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 	}
 
 	avNames := getAvNames(attrs[av.NodeAttrNameAvs])

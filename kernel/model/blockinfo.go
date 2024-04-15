@@ -197,6 +197,12 @@ func getNodeRefText0(node *ast.Node) string {
 		return "Video..."
 	case ast.NodeAudio:
 		return "Audio..."
+	case ast.NodeAttributeView:
+		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
+		if "" == ret {
+			ret = "Database " + Conf.language(105)
+		}
+		return ret
 	}
 
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {

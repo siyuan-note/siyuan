@@ -93,7 +93,9 @@ export class Layout {
                 }
             });
         }
-        fixWndFlex1(this);
+        if (id) {
+            fixWndFlex1(this);
+        }
         addResize(child);
         resizeTabs(false);
         child.parent = this;

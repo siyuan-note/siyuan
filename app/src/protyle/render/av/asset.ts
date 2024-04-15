@@ -249,11 +249,6 @@ ${window.siyuan.languages.title}
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
     /// #endif
-    const textElements = menu.element.querySelectorAll("textarea");
-    if (textElements.length > 1) {
-        textElements[1].value = target.dataset.name;
-        textElements[0].value = linkAddress;
-    }
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.right,
@@ -261,6 +256,12 @@ ${window.siyuan.languages.title}
         w: rect.width,
         h: rect.height,
     });
+    const textElements = menu.element.querySelectorAll("textarea");
+    if (textElements.length > 1) {
+        textElements[1].value = target.dataset.name;
+        textElements[0].value = linkAddress;
+        textElements[0].focus();
+    }
 };
 
 export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
@@ -300,6 +301,7 @@ ${window.siyuan.languages.title}
         w: target.parentElement.clientWidth + 8,
         h: rect.height,
     });
+    menu.element.querySelector("textarea").focus();
 };
 
 export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string) => {

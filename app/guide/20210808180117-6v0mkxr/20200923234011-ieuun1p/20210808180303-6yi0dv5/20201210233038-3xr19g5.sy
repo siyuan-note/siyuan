@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20211223192545"
+		"updated": "20240415092701"
 	},
 	"Children": [
 		{
@@ -266,7 +266,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210104091550-zq0ph0f"
+				"id": "20210104091550-zq0ph0f",
+				"updated": "20240415092701"
 			},
 			"Children": [
 				{
@@ -310,19 +311,21 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210104091550-hi3ky7o"
+						"id": "20210104091550-hi3ky7o",
+						"updated": "20240415092701"
 					},
 					"Children": [
 						{
 							"ID": "20210302223904-l78gsey",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223904-l78gsey"
+								"id": "20210302223904-l78gsey",
+								"updated": "20240415092701"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Logically, the document block is a first-level title, and the relative level will be changed according to the insertion position"
+									"Data": "Logically, the document block is a first-level heading, and the relative level will be changed according to the insertion position"
 								}
 							]
 						}
@@ -441,13 +444,10 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091550-fualfrs"
+				"id": "20210104091550-fualfrs",
+				"updated": "20210104091550"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "Convert Heading block to Document block"
@@ -455,144 +455,79 @@
 			]
 		},
 		{
-			"ID": "20210104091550-1pe70bg",
+			"ID": "20240415092450-yckmprz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091550-1pe70bg"
+				"id": "20240415092450-yckmprz",
+				"updated": "20240415092509"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the editor tab, select the heading block to be converted, press and hold the heading block icon, and then drag it to the folder to be placed in the doc tree. If you need to place it on the notebook root folder, drag the heading block icon to the top notebook icon row."
+					"Data": "Select the heading block that needs to be converted in the editor tab, press and hold the heading block icon, and then drag it to the document tree for conversion. After the heading block is converted to a document block:"
 				}
 			]
 		},
 		{
-			"ID": "20210104091550-atbf12t",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091550-atbf12t"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After the heading block is converted to a document block:"
-				}
-			]
-		},
-		{
-			"ID": "20210104091550-nsd8w2j",
+			"ID": "20240415092450-z9g5u00",
 			"Type": "NodeList",
-			"ListData": {
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
-				"id": "20210104091550-nsd8w2j"
+				"id": "20240415092450-z9g5u00",
+				"updated": "20240415092640"
 			},
 			"Children": [
 				{
-					"ID": "20210104091550-85231ks",
+					"ID": "20240415092511-wlz23no",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091550-85231ks"
+						"id": "20240415092511-wlz23no",
+						"updated": "20240415092523"
 					},
 					"Children": [
 						{
-							"ID": "20210302223904-brosops",
+							"ID": "20240415092511-ek4fnkd",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223904-brosops"
+								"id": "20240415092511-ek4fnkd",
+								"updated": "20240415092523"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The heading name will become the document name"
+									"Data": "The heading name will become the document title"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20210104091550-s2nrev0",
+					"ID": "20240415092513-f6xngjx",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091550-s2nrev0"
+						"id": "20240415092513-f6xngjx",
+						"updated": "20240415092640"
 					},
 					"Children": [
 						{
-							"ID": "20210302223904-mleww72",
+							"ID": "20240415092513-gteta4u",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223904-mleww72"
+								"id": "20240415092513-gteta4u",
+								"updated": "20240415092640"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If there are subtitles under the original heading block, the largest level of these subtitles will be used as the first level of the new document, and the remaining subtitles will be adjusted according to the relative level"
-								}
-							]
-						},
-						{
-							"ID": "20210104091550-c8bmph5",
-							"Type": "NodeList",
-							"ListData": {
-								"Tight": true,
-								"BulletChar": 42,
-								"Padding": 2,
-								"Marker": "Kg==",
-								"Num": -1
-							},
-							"Properties": {
-								"id": "20210104091550-c8bmph5"
-							},
-							"Children": [
-								{
-									"ID": "20210104091550-o45r6uw",
-									"Type": "NodeListItem",
-									"Data": "*",
-									"ListData": {
-										"Tight": true,
-										"BulletChar": 42,
-										"Padding": 2,
-										"Marker": "Kg==",
-										"Num": -1
-									},
-									"Properties": {
-										"id": "20210104091550-o45r6uw"
-									},
-									"Children": [
-										{
-											"ID": "20210302223904-62szx4g",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20210302223904-62szx4g"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "For example, the original heading block contains three, four, and five levels of subtitles, and these subtitles will be converted into one, two, and three levels after being converted into a document block"
-												}
-											]
-										}
-									]
+									"Data": "If there are subheadings under the original heading block, the largest level among these subheadings will be used as the second-level heading in the new document. The remaining subheadings will be adjusted according to the relative levels. For example, the original heading block contains three, four, and five. level subheadings, these subheadings will be converted into second, third, and fourth level headings after conversion to document blocks."
 								}
 							]
 						}

@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120422-bkzsd2e",
 		"title": "文檔塊和標題塊的轉換",
-		"updated": "20211228131818"
+		"type": "doc",
+		"updated": "20240415092439"
 	},
 	"Children": [
 		{
@@ -393,125 +394,79 @@
 			]
 		},
 		{
-			"ID": "20211226120500-7k0tzto",
+			"ID": "20240415092439-6is1c68",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226120500-7k0tzto",
-				"updated": "20211228131818"
+				"id": "20240415092439-6is1c68",
+				"updated": "20240415092439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在編輯器分頁中選擇需要轉換的標題塊，按住該標題塊標識圖示，然後將其拖拽到文檔樹需要放置的文件夾中。如果需要放置到筆記本根文件夾上，就將標題塊標識圖示拖動到頂層的筆記本圖示這一行上。"
+					"Data": "在編輯器頁簽中選擇需要轉換的標題塊，按住該標題塊標識圖標，然後就可以將其拖曳到文檔樹上轉換了，標題塊轉換為文檔塊後："
 				}
 			]
 		},
 		{
-			"ID": "20211226120500-ty32b36",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226120500-ty32b36",
-				"updated": "20211225234143"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "標題塊轉換為文檔塊後："
-				}
-			]
-		},
-		{
-			"ID": "20211226120500-u5prece",
+			"ID": "20240415092439-ffkmd1j",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20211226120500-u5prece",
-				"updated": "20211225234143"
+				"id": "20240415092439-ffkmd1j",
+				"updated": "20240415092439"
 			},
 			"Children": [
 				{
-					"ID": "20211226120500-zwcr1cw",
+					"ID": "20240415092439-vuesltm",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120500-zwcr1cw"
+						"id": "20240415092439-vuesltm",
+						"updated": "20240415092439"
 					},
 					"Children": [
 						{
-							"ID": "20211226120500-xq6bldq",
+							"ID": "20240415092439-j4s1hut",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120500-xq6bldq"
+								"id": "20240415092439-j4s1hut",
+								"updated": "20240415092439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "標題名將變為文檔名"
+									"Data": "標題名將變為文件名"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20211226120500-xuzfjwh",
+					"ID": "20240415092439-smqxbga",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120500-xuzfjwh"
+						"id": "20240415092439-smqxbga",
+						"updated": "20240415092439"
 					},
 					"Children": [
 						{
-							"ID": "20211226120500-605u9ez",
+							"ID": "20240415092439-t6bu4l9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120500-605u9ez"
+								"id": "20240415092439-t6bu4l9",
+								"updated": "20240415092439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "原標題塊下如果有子標題，則會按照這些子標題中最大的層級作為新文檔中一級標題，其余子標題會根據相對層級進行調整"
-								}
-							]
-						},
-						{
-							"ID": "20211226120500-rqbu1p5",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20211226120500-rqbu1p5"
-							},
-							"Children": [
-								{
-									"ID": "20211226120500-0brf3va",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226120500-0brf3va"
-									},
-									"Children": [
-										{
-											"ID": "20211226120500-aw5oi3a",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226120500-aw5oi3a"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "比如原標題塊下包含了三、四、五級子標題，則轉換為文檔塊後會將這些子標題轉換為一、二、三級標題"
-												}
-											]
-										}
-									]
+									"Data": "原標題區塊下方如果有子標題，則會依照這些子標題中最大的層級作為新文件中二級標題，其餘子標題會根據相對層級進行調整，例如原標題區塊下方包含了三、四、五 層級子標題，則轉換為文件區塊後會將這些子標題轉換為二、三、四級標題"
 								}
 							]
 						}
@@ -524,7 +479,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120500-8o1jmk7",
-				"updated": "20211226120500"
+				"updated": "20211225234143"
 			}
 		}
 	]

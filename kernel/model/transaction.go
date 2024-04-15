@@ -294,6 +294,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doHideAttrViewName(op)
 		case "setAttrViewColDate":
 			ret = tx.doSetAttrViewColDate(op)
+		case "unbindAttrViewBlock":
+			ret = tx.doUnbindAttrViewBlock(op)
 		}
 
 		if nil != ret {

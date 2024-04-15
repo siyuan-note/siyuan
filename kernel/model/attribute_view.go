@@ -1282,6 +1282,61 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	return
 }
 
+func (tx *Transaction) doUnbindAttrViewBlock(operation *Operation) (ret *TxErr) {
+	err := unbindAttributeViewBlock(operation, tx)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+	return
+}
+
+func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	node, _, _ := getNodeByBlockID(tx, operation.ID)
+	if nil == node {
+		return
+	}
+
+	keyValues := attrView.GetBlockKeyValues()
+	for _, value := range keyValues.Values {
+		if value.BlockID != operation.ID {
+			continue
+		}
+
+		unbindBlockAv(tx, operation.AvID, value.BlockID)
+		value.BlockID = operation.NextID
+		if nil != value.Block {
+			value.Block.ID = operation.NextID
+		}
+		break
+	}
+
+	replacedRowID := false
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
+			for i, rowID := range v.Table.RowIDs {
+				if rowID == operation.ID {
+					v.Table.RowIDs[i] = operation.NextID
+					replacedRowID = true
+					break
+				}
+			}
+
+			if !replacedRowID {
+				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doSetAttrViewColDate(operation *Operation) (ret *TxErr) {
 	err := setAttributeViewColDate(operation)
 	if nil != err {

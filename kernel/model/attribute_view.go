@@ -1301,18 +1301,20 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 		return
 	}
 
-	keyValues := attrView.GetBlockKeyValues()
-	for _, value := range keyValues.Values {
-		if value.BlockID != operation.ID {
-			continue
-		}
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID != operation.ID {
+				continue
+			}
 
-		unbindBlockAv(tx, operation.AvID, value.BlockID)
-		value.BlockID = operation.NextID
-		if nil != value.Block {
-			value.Block.ID = operation.NextID
+			if av.KeyTypeBlock == value.Type {
+				unbindBlockAv(tx, operation.AvID, value.BlockID)
+			}
+			value.BlockID = operation.NextID
+			if nil != value.Block {
+				value.Block.ID = operation.NextID
+			}
 		}
-		break
 	}
 
 	replacedRowID := false
@@ -2956,24 +2958,26 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
-			if value.BlockID == operation.PreviousID {
-				if value.BlockID != operation.NextID {
-					// 换绑
-					unbindBlockAv(tx, operation.AvID, value.BlockID)
-				}
+			if value.BlockID != operation.PreviousID {
+				continue
+			}
 
-				value.BlockID = operation.NextID
-				if nil != value.Block {
-					value.Block.ID = operation.NextID
-					value.IsDetached = operation.IsDetached
-					if !operation.IsDetached {
-						value.Block.Content = getNodeRefText(node)
-					}
-				}
+			if av.KeyTypeBlock == value.Type && value.BlockID != operation.NextID {
+				// 换绑
+				unbindBlockAv(tx, operation.AvID, value.BlockID)
+			}
 
+			value.BlockID = operation.NextID
+			if av.KeyTypeBlock == value.Type && nil != value.Block {
+				value.Block.ID = operation.NextID
+				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					bindBlockAv(tx, operation.AvID, operation.NextID)
+					value.Block.Content = getNodeRefText(node)
 				}
+			}
+
+			if av.KeyTypeBlock == value.Type && !operation.IsDetached {
+				bindBlockAv(tx, operation.AvID, operation.NextID)
 			}
 		}
 	}

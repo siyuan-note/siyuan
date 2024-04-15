@@ -200,7 +200,7 @@ func getNodeRefText0(node *ast.Node) string {
 	case ast.NodeAttributeView:
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
 		if "" == ret {
-			ret = "Database " + Conf.language(105)
+			ret = "Database..."
 		}
 		return ret
 	}

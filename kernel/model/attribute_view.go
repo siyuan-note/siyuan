@@ -901,8 +901,13 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 					dataModel[rowValue.Key.Name] = v.Number.Content
 				}
 			} else if av.KeyTypeDate == v.Type {
-				if nil != v.Date && v.Date.IsNotEmpty {
-					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+				if nil != v.Date {
+					if v.Date.IsNotEmpty {
+						dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+					}
+					if v.Date.IsNotEmpty2 {
+						dataModel[rowValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
+					}
 				}
 			} else if av.KeyTypeRollup == v.Type {
 				if 0 < len(v.Rollup.Contents) {
@@ -1279,6 +1284,63 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 			break
 		}
 	}
+	return
+}
+
+func (tx *Transaction) doUnbindAttrViewBlock(operation *Operation) (ret *TxErr) {
+	err := unbindAttributeViewBlock(operation, tx)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+	return
+}
+
+func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	node, _, _ := getNodeByBlockID(tx, operation.ID)
+	if nil == node {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		for _, value := range keyValues.Values {
+			if value.BlockID != operation.ID {
+				continue
+			}
+
+			if av.KeyTypeBlock == value.Type {
+				unbindBlockAv(tx, operation.AvID, value.BlockID)
+			}
+			value.BlockID = operation.NextID
+			if nil != value.Block {
+				value.Block.ID = operation.NextID
+			}
+		}
+	}
+
+	replacedRowID := false
+	for _, v := range attrView.Views {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
+			for i, rowID := range v.Table.RowIDs {
+				if rowID == operation.ID {
+					v.Table.RowIDs[i] = operation.NextID
+					replacedRowID = true
+					break
+				}
+			}
+
+			if !replacedRowID {
+				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
 	return
 }
 
@@ -2901,24 +2963,26 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
-			if value.BlockID == operation.PreviousID {
-				if value.BlockID != operation.NextID {
-					// 换绑
-					unbindBlockAv(tx, operation.AvID, value.BlockID)
-				}
+			if value.BlockID != operation.PreviousID {
+				continue
+			}
 
-				value.BlockID = operation.NextID
-				if nil != value.Block {
-					value.Block.ID = operation.NextID
-					value.IsDetached = operation.IsDetached
-					if !operation.IsDetached {
-						value.Block.Content = getNodeRefText(node)
-					}
-				}
+			if av.KeyTypeBlock == value.Type && value.BlockID != operation.NextID {
+				// 换绑
+				unbindBlockAv(tx, operation.AvID, value.BlockID)
+			}
 
+			value.BlockID = operation.NextID
+			if av.KeyTypeBlock == value.Type && nil != value.Block {
+				value.Block.ID = operation.NextID
+				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					bindBlockAv(tx, operation.AvID, operation.NextID)
+					value.Block.Content = getNodeRefText(node)
 				}
+			}
+
+			if av.KeyTypeBlock == value.Type && !operation.IsDetached {
+				bindBlockAv(tx, operation.AvID, operation.NextID)
 			}
 		}
 	}
@@ -3171,11 +3235,9 @@ func unbindBlockAv(tx *Transaction, avID, blockID string) {
 	avIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
 	avIDs = gulu.Str.RemoveElem(avIDs, avID)
 	if 0 == len(avIDs) {
-		delete(attrs, av.NodeAttrNameAvs)
-		node.RemoveIALAttr(av.NodeAttrNameAvs)
+		attrs[av.NodeAttrNameAvs] = ""
 	} else {
 		attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-		node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 	}
 
 	avNames := getAvNames(attrs[av.NodeAttrNameAvs])

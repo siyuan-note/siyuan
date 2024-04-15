@@ -69,6 +69,11 @@
       opacity: 1;
     }
 
+    .block__icon svg {
+      height: 1em;
+      width: 1em;
+    }
+
     .b3-text-field {
       transition: var(--b3-width-transition);
     }

@@ -62,6 +62,7 @@ func CreateBox(name string) (id string, err error) {
 	boxConf.Name = name
 	box.SaveConf(boxConf)
 	IncSync()
+	logging.LogInfof("created box [%s]", id)
 	return
 }
 
@@ -86,6 +87,7 @@ func RenameBox(boxID, name string) (err error) {
 	box.Name = name
 	box.SaveConf(boxConf)
 	IncSync()
+	logging.LogInfof("renamed box [%s] to [%s]", boxID, name)
 	return
 }
 
@@ -139,6 +141,8 @@ func RemoveBox(boxID string) (err error) {
 		return
 	}
 	IncSync()
+
+	logging.LogInfof("removed box [%s]", boxID)
 	return
 }
 

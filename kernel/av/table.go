@@ -213,13 +213,17 @@ func (table *Table) SortRows(attrView *AttributeView) {
 		sorted := true
 		for _, colIndexSort := range colIndexSorts {
 			val1 := editedRows[i].Cells[colIndexSort.Index].Value
-			if nil == val1 {
-				return colIndexSort.Order == SortOrderAsc
-			}
-
 			val2 := editedRows[j].Cells[colIndexSort.Index].Value
-			if nil == val2 {
-				return colIndexSort.Order != SortOrderAsc
+			if nil == val1 || val1.IsEmpty() {
+				if nil != val2 && !val2.IsEmpty() {
+					return false
+				}
+				sorted = false
+				continue
+			} else {
+				if nil == val2 || val2.IsEmpty() {
+					return true
+				}
 			}
 
 			result := val1.Compare(val2, attrView)

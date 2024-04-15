@@ -179,6 +179,14 @@ func (table *Table) SortRows(attrView *AttributeView) {
 	for i, row := range table.Rows {
 		for _, colIndexSort := range colIndexSorts {
 			val := table.Rows[i].Cells[colIndexSort.Index].Value
+			if KeyTypeCheckbox == val.Type {
+				if block := row.GetBlockValue(); nil != block && block.IsEdited() {
+					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
+					editedValRows[row.ID] = true
+					break
+				}
+			}
+
 			if val.IsEdited() {
 				// 如果该行某列的值已经编辑过，则该行可参与排序
 				editedValRows[row.ID] = true

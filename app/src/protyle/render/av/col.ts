@@ -522,7 +522,7 @@ export const getColIconByType = (type: TAVCol) => {
         case "checkbox":
             return "iconCheck";
         case "lineNumber":
-            return "iconSpreadOdd";
+            return "iconOrderedList";
     }
 };
 
@@ -1440,7 +1440,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     });
     // 在创建时间前插入 lineNumber
     menu.addItem({
-        icon: "iconSpreadOdd",
+        icon: "iconOrderedList",
         label: window.siyuan.languages.lineNumber,
         click() {
             const id = Lute.NewNodeID();

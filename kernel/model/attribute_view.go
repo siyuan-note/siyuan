@@ -2614,6 +2614,11 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
+	if operation.ID == operation.PreviousID {
+		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
+		return
+	}
+
 	var rowID string
 	var index, previousIndex int
 	for i, r := range view.Table.RowIDs {

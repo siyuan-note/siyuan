@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240308233106"
+		"updated": "20240416105908"
 	},
 	"Children": [
 		{
@@ -2324,7 +2324,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183308-gok25ug",
-				"updated": "20210826181714"
+				"updated": "20240416105908"
 			},
 			"Children": [
 				{
@@ -2518,7 +2518,31 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 选中文档，再使用快捷键；长按快捷键可快速扩选"
+								}
+							]
 						}
 					]
 				},
@@ -2566,7 +2590,31 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 选中文档，再使用快捷键；长按快捷键可快速扩选"
+								}
+							]
 						}
 					]
 				},

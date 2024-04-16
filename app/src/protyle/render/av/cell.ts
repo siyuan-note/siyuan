@@ -593,7 +593,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             doOperations.push({
                 action: "unbindAttrViewBlock",
                 id: rowID,
-                nextID: newId
+                nextID: newId,
+                avID,
             });
             rowElement.dataset.id = newId;
             item.dataset.blockId = newId;

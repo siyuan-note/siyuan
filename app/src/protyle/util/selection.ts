@@ -532,7 +532,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.collapse(true);
             setRange = true;
         } else if (type === "NodeAttributeView") {
-            const cursorElement = element.querySelector(".av__cursor")
+            const cursorElement = element.querySelector(".av__cursor");
             if (cursorElement) {
                 range.setStart(cursorElement.firstChild, 0);
                 setRange = true;

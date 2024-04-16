@@ -160,7 +160,7 @@ export const openOutline = async (protyle: IProtyle) => {
         }
     }), false, false);
     newWnd.element.style.width = "200px";
-    newWnd.element.classList.remove("fn__flex-1")
+    newWnd.element.classList.remove("fn__flex-1");
     switchWnd(newWnd, wnd);
     fixWndFlex1(newWnd.parent);
     saveLayout();

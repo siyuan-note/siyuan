@@ -589,7 +589,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             return;
         }
         if (type === "block" && !item.dataset.detached) {
-            const newId = Lute.NewNodeID()
+            const newId = Lute.NewNodeID();
             doOperations.push({
                 action: "unbindAttrViewBlock",
                 id: rowID,

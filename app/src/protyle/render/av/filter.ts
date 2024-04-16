@@ -57,17 +57,17 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
 
 const filterSelect = (key: string) => {
     window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__item").forEach((item) => {
-        const nameElement = item.querySelector(".b3-chip.b3-chip--middle") as HTMLElement
+        const nameElement = item.querySelector(".b3-chip.b3-chip--middle") as HTMLElement;
         if (nameElement) {
-            const itemName = nameElement.dataset.name.toLowerCase()
+            const itemName = nameElement.dataset.name.toLowerCase();
             if (!key || (key.indexOf(itemName) > -1 || itemName.indexOf(key) > -1)) {
                 item.classList.remove("fn__none");
             } else {
                 item.classList.add("fn__none");
             }
         }
-    })
-}
+    });
+};
 
 export const setFilter = async (options: {
     filter: IAVFilter,
@@ -332,7 +332,7 @@ export const setFilter = async (options: {
                 type: "readonly",
                 label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">`,
                 bind(element) {
-                    const selectSearchElement = element.querySelector("input")
+                    const selectSearchElement = element.querySelector("input");
                     selectSearchElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (event.isComposing) {
                             return;
@@ -344,18 +344,18 @@ export const setFilter = async (options: {
                             }
                             currentElement.dispatchEvent(new CustomEvent("click"));
                         }
-                    })
+                    });
                     selectSearchElement.addEventListener("input", (event: InputEvent) => {
                         if (event.isComposing) {
                             return;
                         }
                         filterSelect(selectSearchElement.value.toLowerCase());
-                    })
+                    });
                     selectSearchElement.addEventListener("compositionend", () => {
                         filterSelect(selectSearchElement.value.toLowerCase());
-                    })
+                    });
                 }
-            })
+            });
         }
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";

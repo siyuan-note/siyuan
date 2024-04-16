@@ -910,7 +910,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
 
 export const fixWndFlex1 = (layout: Layout) => {
     if (layout.children.length < 2) {
-        return
+        return;
     }
     if (layout.children[layout.children.length - 2].element.classList.contains("fn__flex-1")) {
         return;
@@ -919,27 +919,27 @@ export const fixWndFlex1 = (layout: Layout) => {
         if (index !== layout.children.length - 2) {
             if (layout.direction === "lr") {
                 if (item.element.classList.contains("fn__flex-1")) {
-                    item.element.style.width = item.element.clientWidth + "px"
-                    item.element.classList.remove("fn__flex-1")
+                    item.element.style.width = item.element.clientWidth + "px";
+                    item.element.classList.remove("fn__flex-1");
                 }
             } else {
                 if (item.element.classList.contains("fn__flex-1")) {
-                    item.element.style.height = item.element.clientHeight + "px"
-                    item.element.classList.remove("fn__flex-1")
+                    item.element.style.height = item.element.clientHeight + "px";
+                    item.element.classList.remove("fn__flex-1");
                 }
             }
         }
-    })
-    const flex1Element = layout.children[layout.children.length - 2].element
+    });
+    const flex1Element = layout.children[layout.children.length - 2].element;
     if (layout.direction === "lr") {
         if (flex1Element.style.width) {
-            flex1Element.style.width = ""
-            flex1Element.classList.add("fn__flex-1")
+            flex1Element.style.width = "";
+            flex1Element.classList.add("fn__flex-1");
         }
     } else {
         if (flex1Element.style.height) {
-            flex1Element.style.height = ""
-            flex1Element.classList.add("fn__flex-1")
+            flex1Element.style.height = "";
+            flex1Element.classList.add("fn__flex-1");
         }
     }
-}
+};

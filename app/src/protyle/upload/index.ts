@@ -145,20 +145,20 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     });
 
     if ((nodeElement && nodeElement.classList.contains("av"))) {
-        const cellElements: HTMLElement[] = []
+        const cellElements: HTMLElement[] = [];
         nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
             item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
                 if (getTypeByCellElement(cellItem) === "mAsset") {
                     cellElements.push(cellItem);
                 }
-            })
-        })
+            });
+        });
         if (cellElements.length === 0) {
             protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                 if (getTypeByCellElement(item) === "mAsset") {
                     cellElements.push(item);
                 }
-            })
+            });
         }
         if (cellElements.length > 0) {
             updateCellsValue(protyle, nodeElement, avAssets, cellElements);
@@ -170,12 +170,12 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     }
 
     if (document.querySelector(".av__panel")) {
-        const cellElements: HTMLElement[] = []
+        const cellElements: HTMLElement[] = [];
         protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
             if (getTypeByCellElement(item) === "mAsset") {
                 cellElements.push(item);
             }
-        })
+        });
         if (cellElements.length > 0) {
             const blockElement = hasClosestBlock(cellElements[0]);
             if (blockElement) {

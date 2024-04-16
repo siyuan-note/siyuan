@@ -72,7 +72,12 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
-                    mergedOptions: protyleOptions
+                    mergedOptions: protyleOptions,
+                    cb() {
+                        app.plugins.forEach(item => {
+                            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                        });
+                    }
                 });
             } else {
                 fetchPost("/api/filetree/getDoc", {
@@ -83,7 +88,12 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                     onGet({
                         data: getResponse,
                         protyle: window.siyuan.mobile.editor.protyle,
-                        action
+                        action,
+                        afterCB() {
+                            app.plugins.forEach(item => {
+                                item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                            });
+                        }
                     });
                 });
             }
@@ -94,8 +104,5 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === window.siyuan.languages.untitled ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
-        app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
-        });
     });
 };

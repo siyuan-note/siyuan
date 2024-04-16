@@ -328,7 +328,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                     srcIDs: sourceIds,
                     avID,
                 }]);
-                focusByRange(range)
+                focusByRange(range);
             });
         } else {
             const selectElement: Element[] = [];
@@ -363,7 +363,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                     srcIDs: sourceIds,
                     avID,
                 }]);
-                focusByRange(range)
+                focusByRange(range);
             });
         }
         event.preventDefault();

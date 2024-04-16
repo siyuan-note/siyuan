@@ -136,7 +136,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
         return false;
     }
 
-    const avPanelElement = hasClosestByClassName(target, "av__panel");
+    const avPanelElement = hasClosestByClassName(target, "av__panel") || hasClosestByClassName(target, "av__mask");
     if (avPanelElement) {
         // 浮窗上点击 av 操作，浮窗不能消失
         const blockPanel = window.siyuan.blockPanels.find((item) => {

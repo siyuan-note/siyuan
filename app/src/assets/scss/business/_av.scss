@@ -182,6 +182,11 @@
         white-space: nowrap;
         cursor: pointer;
 
+        &:first-child {
+          padding-left: 1.625em;
+          box-sizing: initial;
+        }
+
         &.av__calc--ashow {
           opacity: 1;
         }

@@ -811,7 +811,7 @@ export class Gutter {
                 });
             }
         }).element);
-        const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined
+        const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
@@ -1279,7 +1279,7 @@ export class Gutter {
                     });
                 }
             }).element);
-            const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined
+            const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,

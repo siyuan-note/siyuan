@@ -303,6 +303,10 @@
         text-overflow: ellipsis;
       }
 
+      img.av__cellheadericon {
+        height: calc(1.625em - 10px);
+      }
+
       .av__cellheadericon {
         height: 1.625em;
         width: calc(1.625em - 10px);

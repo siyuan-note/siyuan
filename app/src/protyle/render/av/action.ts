@@ -59,55 +59,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
-    const urlElement = hasClosestByClassName(event.target, "av__celltext--url");
-    if (urlElement) {
-        let linkAddress = urlElement.textContent.trim();
-        if (urlElement.dataset.type === "phone") {
-            linkAddress = "tel:" + linkAddress;
-        } else if (urlElement.dataset.type === "email") {
-            linkAddress = "mailto:" + linkAddress;
-        } else if (urlElement.classList.contains("b3-chip")) {
-            linkAddress = urlElement.dataset.url;
-        }
-        /// #if !MOBILE
-        const suffix = pathPosix().extname(linkAddress);
-        const ctrlIsPressed = isOnlyMeta(event);
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
-            if (event.altKey) {
-                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)));
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else if (event.shiftKey) {
-                /// #if !BROWSER
-                openBy(linkAddress, "app");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else {
-                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
-            }
-        } else {
-            /// #if !BROWSER
-            if (ctrlIsPressed) {
-                openBy(linkAddress, "folder");
-            } else {
-                openBy(linkAddress, "app");
-            }
-            /// #else
-            openByMobile(linkAddress);
-            /// #endif
-        }
-        /// #else
-        openByMobile(linkAddress);
-        /// #endif
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
     const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
     if (imgElement) {
         previewImage((imgElement as HTMLImageElement).src);

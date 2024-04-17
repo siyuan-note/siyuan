@@ -874,20 +874,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
-                                doOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
-                                undoOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID: undoPreviousId,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
+                                if (previousID !== item) {
+                                    doOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                    undoOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID: undoPreviousId,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {

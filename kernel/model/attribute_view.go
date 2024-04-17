@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -499,6 +500,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		//}
 
 		// 渲染模板
+		var renderTemplateErr error
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
@@ -509,9 +511,16 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 						ial = GetBlockAttrsWithoutWaitWriting(block.BlockID)
 					}
 
-					kv.Values[0].Template.Content = renderTemplateCol(ial, flashcard, keyValues, kv.Key.Template)
+					var renderErr error
+					kv.Values[0].Template.Content, renderErr = renderTemplateCol(ial, flashcard, keyValues, kv.Key.Template)
+					if nil != renderErr {
+						renderTemplateErr = renderErr
+					}
 				}
 			}
+		}
+		if nil != renderTemplateErr {
+			util.PushErrMsg(fmt.Sprintf(Conf.Language(44), util.EscapeHTML(renderTemplateErr.Error())), 30000)
 		}
 
 		// Attribute Panel - Database sort attributes by view column order https://github.com/siyuan-note/siyuan/issues/9319
@@ -839,7 +848,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	return
 }
 
-func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []*av.KeyValues, tplContent string) string {
+func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getRowBlockValue(rowValues)
 		if nil != block && nil != block.Block {
@@ -857,10 +866,10 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 	tplFuncMap := util.BuiltInTemplateFuncs()
 	SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
-	tpl, tplErr := goTpl.Parse(tplContent)
-	if nil != tplErr {
-		logging.LogWarnf("parse template [%s] failed: %s", tplContent, tplErr)
-		return ""
+	tpl, err := goTpl.Parse(tplContent)
+	if nil != err {
+		logging.LogWarnf("parse template [%s] failed: %s", tplContent, err)
+		return
 	}
 
 	buf := &bytes.Buffer{}
@@ -943,10 +952,12 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 		}
 	}
 
-	if err := tpl.Execute(buf, dataModel); nil != err {
+	if err = tpl.Execute(buf, dataModel); nil != err {
 		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
+		return
 	}
-	return buf.String()
+	ret = buf.String()
+	return
 }
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table, err error) {
@@ -1219,6 +1230,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	//	}
 	//}
 
+	var renderTemplateErr error
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
@@ -1229,10 +1241,16 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				if nil != block && !block.IsDetached {
 					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
 				}
-				content := renderTemplateCol(ial, flashcards[row.ID], keyValues, cell.Value.Template.Content)
+				content, renderErr := renderTemplateCol(ial, flashcards[row.ID], keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content
+				if nil != renderErr {
+					renderTemplateErr = renderErr
+				}
 			}
 		}
+	}
+	if nil != renderTemplateErr {
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(44), util.EscapeHTML(renderTemplateErr.Error())), 30000)
 	}
 
 	// 根据搜索条件过滤

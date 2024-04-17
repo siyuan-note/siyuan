@@ -765,7 +765,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
 					if nil == destVal {
 						if destAv.ExistBlock(blockID) { // 数据库中存在行但是列值不存在是数据未初始化，这里补一个默认值
-							destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
+							destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
 						}
 						if nil == destVal {
 							continue
@@ -870,7 +870,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 
 func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID string) {
 	if nil == tableCell.Value {
-		tableCell.Value = GetAttributeViewDefaultValue(tableCell.ID, colID, rowID, tableCell.ValueType)
+		tableCell.Value = av.GetAttributeViewDefaultValue(tableCell.ID, colID, rowID, tableCell.ValueType)
 		return
 	}
 
@@ -937,59 +937,6 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 			tableCell.Value.Rollup = &av.ValueRollup{}
 		}
 	}
-}
-
-func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ av.KeyType) (ret *av.Value) {
-	if "" == valueID {
-		valueID = ast.NewNodeID()
-	}
-
-	ret = &av.Value{ID: valueID, KeyID: keyID, BlockID: blockID, Type: typ}
-
-	createdStr := valueID[:len("20060102150405")]
-	created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-	if nil == parseErr {
-		ret.CreatedAt = created.UnixMilli()
-	} else {
-		ret.CreatedAt = time.Now().UnixMilli()
-	}
-	if 0 == ret.UpdatedAt {
-		ret.UpdatedAt = ret.CreatedAt
-	}
-
-	switch typ {
-	case av.KeyTypeText:
-		ret.Text = &av.ValueText{}
-	case av.KeyTypeNumber:
-		ret.Number = &av.ValueNumber{}
-	case av.KeyTypeDate:
-		ret.Date = &av.ValueDate{}
-	case av.KeyTypeSelect:
-		ret.MSelect = []*av.ValueSelect{}
-	case av.KeyTypeMSelect:
-		ret.MSelect = []*av.ValueSelect{}
-	case av.KeyTypeURL:
-		ret.URL = &av.ValueURL{}
-	case av.KeyTypeEmail:
-		ret.Email = &av.ValueEmail{}
-	case av.KeyTypePhone:
-		ret.Phone = &av.ValuePhone{}
-	case av.KeyTypeMAsset:
-		ret.MAsset = []*av.ValueAsset{}
-	case av.KeyTypeTemplate:
-		ret.Template = &av.ValueTemplate{}
-	case av.KeyTypeCreated:
-		ret.Created = &av.ValueCreated{}
-	case av.KeyTypeUpdated:
-		ret.Updated = &av.ValueUpdated{}
-	case av.KeyTypeCheckbox:
-		ret.Checkbox = &av.ValueCheckbox{}
-	case av.KeyTypeRelation:
-		ret.Relation = &av.ValueRelation{}
-	case av.KeyTypeRollup:
-		ret.Rollup = &av.ValueRollup{}
-	}
-	return
 }
 
 func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplContent string) string {

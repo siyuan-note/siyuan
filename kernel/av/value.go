@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -901,4 +902,57 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
 		}
 	}
+}
+
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+	if "" == valueID {
+		valueID = ast.NewNodeID()
+	}
+
+	ret = &Value{ID: valueID, KeyID: keyID, BlockID: blockID, Type: typ}
+
+	createdStr := valueID[:len("20060102150405")]
+	created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+	if nil == parseErr {
+		ret.CreatedAt = created.UnixMilli()
+	} else {
+		ret.CreatedAt = time.Now().UnixMilli()
+	}
+	if 0 == ret.UpdatedAt {
+		ret.UpdatedAt = ret.CreatedAt
+	}
+
+	switch typ {
+	case KeyTypeText:
+		ret.Text = &ValueText{}
+	case KeyTypeNumber:
+		ret.Number = &ValueNumber{}
+	case KeyTypeDate:
+		ret.Date = &ValueDate{}
+	case KeyTypeSelect:
+		ret.MSelect = []*ValueSelect{}
+	case KeyTypeMSelect:
+		ret.MSelect = []*ValueSelect{}
+	case KeyTypeURL:
+		ret.URL = &ValueURL{}
+	case KeyTypeEmail:
+		ret.Email = &ValueEmail{}
+	case KeyTypePhone:
+		ret.Phone = &ValuePhone{}
+	case KeyTypeMAsset:
+		ret.MAsset = []*ValueAsset{}
+	case KeyTypeTemplate:
+		ret.Template = &ValueTemplate{}
+	case KeyTypeCreated:
+		ret.Created = &ValueCreated{}
+	case KeyTypeUpdated:
+		ret.Updated = &ValueUpdated{}
+	case KeyTypeCheckbox:
+		ret.Checkbox = &ValueCheckbox{}
+	case KeyTypeRelation:
+		ret.Relation = &ValueRelation{}
+	case KeyTypeRollup:
+		ret.Rollup = &ValueRollup{}
+	}
+	return
 }

@@ -64,6 +64,17 @@ try {
     app.exit();
 }
 
+const  windowNavigate = (currentWindow) => {
+    currentWindow.webContents.on("will-navigate", (event) => {
+        const url = event.url;
+        if (url.startsWith(localServer)) {
+            return;
+        }
+        event.preventDefault();
+        shell.openExternal(url);
+    });
+};
+
 const setProxy = (proxyURL, webContents) => {
     if (proxyURL.startsWith("://")) {
         console.log("network proxy [system]");
@@ -403,15 +414,7 @@ const boot = () => {
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
     // 当前页面链接使用浏览器打开
-    currentWindow.webContents.on("will-navigate", (event) => {
-        const url = event.url;
-        if (url.startsWith(localServer)) {
-            return;
-        }
-        event.preventDefault();
-        shell.openExternal(url);
-    });
-
+    windowNavigate(currentWindow);
     currentWindow.on("close", (event) => {
         if (currentWindow && !currentWindow.isDestroyed()) {
             currentWindow.webContents.send("siyuan-save-close", false);
@@ -956,13 +959,7 @@ app.whenReady().then(() => {
         printWin.center();
         printWin.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + printWin.webContents.userAgent;
         printWin.loadURL(data);
-        printWin.webContents.on("will-navigate", (nEvent) => {
-            nEvent.preventDefault();
-            if (nEvent.url.startsWith(localServer)) {
-                return;
-            }
-            shell.openExternal(nEvent.url);
-        });
+        windowNavigate(printWin);
     });
     ipcMain.on("siyuan-quit", (event, port) => {
         exitApp(port);
@@ -1000,6 +997,7 @@ app.whenReady().then(() => {
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(data.url);
+        windowNavigate(win);
         win.on("close", (event) => {
             if (win && !win.isDestroyed()) {
                 win.webContents.send("siyuan-save-close");

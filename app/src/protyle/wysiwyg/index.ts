@@ -1985,8 +1985,20 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
-            const aElement = hasClosestByAttribute(event.target, "data-type", "a") || hasClosestByAttribute(event.target, "data-type", "url");
-            const aLink = aElement ? aElement.getAttribute("data-href") : "";
+            const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
+                hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
+            let aLink = aElement ? aElement.getAttribute("data-href") : "";
+            if (aElement && !aLink && aElement.classList.contains("av__celltext--url")) {
+                aLink = aElement.textContent.trim();
+                if (aElement.dataset.type === "phone") {
+                    aLink = "tel:" + aLink;
+                } else if (aElement.dataset.type === "email") {
+                    aLink = "mailto:" + aLink;
+                } else if (aElement.classList.contains("b3-chip")) {
+                    aLink = aElement.dataset.url;
+                }
+            }
+
             if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {
                 event.stopPropagation();
                 event.preventDefault();

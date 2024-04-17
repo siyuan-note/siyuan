@@ -342,7 +342,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	topLevel := treenode.TopHeadingLevel(newTree)
 	for c := newTree.Root.FirstChild; nil != c; c = c.Next {
 		if ast.NodeHeading == c.Type {
-			c.HeadingLevel = c.HeadingLevel - topLevel + 1
+			c.HeadingLevel = c.HeadingLevel - topLevel + 2
 			if 6 < c.HeadingLevel {
 				c.HeadingLevel = 6
 			}

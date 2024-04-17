@@ -50,6 +50,7 @@ type TOperation =
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
     | "setAttrViewColDate"
+    | "unbindAttrViewBlock"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -82,6 +83,7 @@ type TAVCol =
     | "created"
     | "updated"
     | "checkbox"
+    | "lineNumber"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="

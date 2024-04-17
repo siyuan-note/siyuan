@@ -23,6 +23,7 @@ import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 import {openSearchAV} from "../render/av/relation";
 import {transaction} from "../wysiwyg/transaction";
+import {focusByRange} from "../util/selection";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -44,6 +45,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         }).element);
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
+            const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDatabase,
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
@@ -68,6 +70,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                             srcIDs: sourceIds,
                             avID,
                         }]);
+                        focusByRange(range);
                     });
                 }
             }).element);

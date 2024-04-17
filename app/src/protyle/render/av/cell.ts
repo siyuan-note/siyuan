@@ -552,7 +552,6 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (["created", "updated", "template", "rollup"].includes(type)) {
             return;
         }
-
         const rowID = rowElement.getAttribute("data-id");
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
         const colId = item.dataset.colId;
@@ -589,14 +588,26 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (objEquals(cellValue, oldValue)) {
             return;
         }
-        doOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
-            avID,
-            keyID: colId,
-            rowID,
-            data: cellValue
-        });
+        if (type === "block" && !item.dataset.detached) {
+            const newId = Lute.NewNodeID();
+            doOperations.push({
+                action: "unbindAttrViewBlock",
+                id: rowID,
+                nextID: newId,
+                avID,
+            });
+            rowElement.dataset.id = newId;
+            item.dataset.blockId = newId;
+        } else {
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: cellValue
+            });
+        }
         undoOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
@@ -644,7 +655,7 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
     }
 };
 
-export const renderCell = (cellValue: IAVCellValue) => {
+export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     let text = "";
     if (["text", "template"].includes(cellValue.type)) {
         text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
@@ -683,6 +694,9 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
         }
         text += "</span>";
+    } else if (["lineNumber"].includes(cellValue.type)) {
+        // 渲染行号
+        text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
@@ -713,8 +727,9 @@ export const renderCell = (cellValue: IAVCellValue) => {
             text = text.substring(0, text.length - 2);
         }
     }
-    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) &&
-        cellValue && cellValue[cellValue.type as "url"].content) {
+
+    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated", "lineNumber"].includes(cellValue.type) &&
+        (cellValue.type === "lineNumber" || (cellValue && cellValue[cellValue.type as "url"].content))) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
     return text;
@@ -836,7 +851,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     const originKeys = Object.keys(originData);
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
-            if (["rollup", "template", "created", "updated"].includes(item.type)) {
+            if (["rollup", "template", "created", "updated"].includes(item.type) ||
+                (item.type === "block" && item.element.getAttribute("data-detached") !== "true")) {
                 return;
             }
             // https://ld246.com/article/1707975507571 数据库下拉填充数据后异常

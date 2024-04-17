@@ -252,6 +252,7 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("template", colData.type)}
     ${genUpdateColItem("relation", colData.type)}
     ${genUpdateColItem("rollup", colData.type)}
+    ${genUpdateColItem("lineNumber", colData.type)}
     ${genUpdateColItem("created", colData.type)}
     ${genUpdateColItem("updated", colData.type)}
 </div>`;
@@ -482,6 +483,8 @@ export const getColNameByType = (type: TAVCol) => {
             return window.siyuan.languages.checkbox;
         case "block":
             return window.siyuan.languages["_attrView"].key;
+        case "lineNumber":
+            return window.siyuan.languages.lineNumber;
     }
 };
 
@@ -518,6 +521,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconMath";
         case "checkbox":
             return "iconCheck";
+        case "lineNumber":
+            return "iconOrderedList";
     }
 };
 
@@ -694,90 +699,94 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         }
     });
     menu.addSeparator();
-    menu.addItem({
-        icon: "iconUp",
-        label: window.siyuan.languages.asc,
-        click() {
-            fetchPost("/api/av/renderAttributeView", {
-                id: avID,
-            }, (response) => {
-                transaction(protyle, [{
-                    action: "setAttrViewSorts",
-                    avID: response.data.id,
-                    data: [{
-                        column: colId,
-                        order: "ASC"
-                    }],
-                    blockID
-                }], [{
-                    action: "setAttrViewSorts",
-                    avID: response.data.id,
-                    data: response.data.view.sorts,
-                    blockID
-                }]);
-            });
-        }
-    });
-    menu.addItem({
-        icon: "iconDown",
-        label: window.siyuan.languages.desc,
-        click() {
-            fetchPost("/api/av/renderAttributeView", {
-                id: avID,
-            }, (response) => {
-                transaction(protyle, [{
-                    action: "setAttrViewSorts",
-                    avID: response.data.id,
-                    data: [{
-                        column: colId,
-                        order: "DESC"
-                    }],
-                    blockID
-                }], [{
-                    action: "setAttrViewSorts",
-                    avID: response.data.id,
-                    data: response.data.view.sorts,
-                    blockID
-                }]);
-            });
-        }
-    });
-    if (type !== "mAsset") {
+
+    // 行号 类型不参与 排序和筛选
+    if (type !== "lineNumber") {
         menu.addItem({
-            icon: "iconFilter",
-            label: window.siyuan.languages.filter,
+            icon: "iconUp",
+            label: window.siyuan.languages.asc,
             click() {
                 fetchPost("/api/av/renderAttributeView", {
                     id: avID,
                 }, (response) => {
-                    const avData = response.data as IAV;
-                    let filter: IAVFilter;
-                    avData.view.filters.find((item) => {
-                        if (item.column === colId && item.value.type === type) {
-                            filter = item;
-                            return true;
-                        }
-                    });
-                    if (!filter) {
-                        filter = {
+                    transaction(protyle, [{
+                        action: "setAttrViewSorts",
+                        avID: response.data.id,
+                        data: [{
                             column: colId,
-                            operator: getDefaultOperatorByType(type),
-                            value: genCellValue(type, ""),
-                        };
-                        avData.view.filters.push(filter);
-                    }
-                    setFilter({
-                        filter,
-                        protyle,
-                        data: avData,
-                        blockElement: blockElement,
-                        target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
-                    });
+                            order: "ASC"
+                        }],
+                        blockID
+                    }], [{
+                        action: "setAttrViewSorts",
+                        avID: response.data.id,
+                        data: response.data.view.sorts,
+                        blockID
+                    }]);
                 });
             }
         });
+        menu.addItem({
+            icon: "iconDown",
+            label: window.siyuan.languages.desc,
+            click() {
+                fetchPost("/api/av/renderAttributeView", {
+                    id: avID,
+                }, (response) => {
+                    transaction(protyle, [{
+                        action: "setAttrViewSorts",
+                        avID: response.data.id,
+                        data: [{
+                            column: colId,
+                            order: "DESC"
+                        }],
+                        blockID
+                    }], [{
+                        action: "setAttrViewSorts",
+                        avID: response.data.id,
+                        data: response.data.view.sorts,
+                        blockID
+                    }]);
+                });
+            }
+        });
+        if (type !== "mAsset") {
+            menu.addItem({
+                icon: "iconFilter",
+                label: window.siyuan.languages.filter,
+                click() {
+                    fetchPost("/api/av/renderAttributeView", {
+                        id: avID,
+                    }, (response) => {
+                        const avData = response.data as IAV;
+                        let filter: IAVFilter;
+                        avData.view.filters.find((item) => {
+                            if (item.column === colId && item.value.type === type) {
+                                filter = item;
+                                return true;
+                            }
+                        });
+                        if (!filter) {
+                            filter = {
+                                column: colId,
+                                operator: getDefaultOperatorByType(type),
+                                value: genCellValue(type, ""),
+                            };
+                            avData.view.filters.push(filter);
+                        }
+                        setFilter({
+                            filter,
+                            protyle,
+                            data: avData,
+                            blockElement: blockElement,
+                            target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
+                        });
+                    });
+                }
+            });
+        }
+        menu.addSeparator();
     }
-    menu.addSeparator();
 
     menu.addItem({
         icon: "iconInsertLeft",
@@ -1423,6 +1432,44 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
                 protyle: protyle,
                 type: "rollup",
                 name: window.siyuan.languages.rollup,
+                id,
+                previousID
+            });
+            blockElement.setAttribute("updated", newUpdated);
+        }
+    });
+    // 在创建时间前插入 lineNumber
+    menu.addItem({
+        icon: "iconOrderedList",
+        label: window.siyuan.languages.lineNumber,
+        click() {
+            const id = Lute.NewNodeID();
+            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.lineNumber,
+                avID,
+                type: "lineNumber",
+                id,
+                previousID
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: newUpdated,
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: blockElement.getAttribute("updated")
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "lineNumber",
+                name: window.siyuan.languages.lineNumber,
                 id,
                 previousID
             });

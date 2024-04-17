@@ -251,7 +251,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const type = getTypeByCellElement(target);
-                if (type === "updated" || type === "created" || (type === "block" && !target.getAttribute("data-detached"))) {
+                // TODO 点击单元格的时候， lineNumber 选中整行
+                if (type === "updated" || type === "created" || type === "lineNumber" || (type === "block" && !target.getAttribute("data-detached"))) {
                     selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                 } else {
                     scrollElement.querySelectorAll(".av__row--select").forEach(item => {

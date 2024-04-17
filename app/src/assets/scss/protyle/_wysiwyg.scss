@@ -635,7 +635,8 @@
 }
 
 .protyle-wysiwyg:not([contenteditable]),
-.protyle-wysiwyg[data-readonly="true"] {
+.protyle-wysiwyg[data-readonly="true"],
+.protyle-wysiwyg__embed {
   .img:hover .protyle-icons {
     display: none;
   }

@@ -12,6 +12,11 @@
     &:hover {
       background-color: var(--b3-theme-background);
     }
+
+    .av__checkbox {
+      width: 16px;
+      height: 26px;
+    }
   }
 
   &__avheader {

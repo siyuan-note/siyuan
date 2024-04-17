@@ -265,6 +265,9 @@ export class BlockPanel {
         this.element.querySelectorAll(".block__edit").forEach((item: HTMLElement, index) => {
             if (index < 5) {
                 this.initProtyle(item, index === 0 ? () => {
+                    if (!document.contains(this.element)) {
+                        return;
+                    }
                     let targetRect;
                     if (this.targetElement && this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
                         targetRect = this.targetElement.getBoundingClientRect();

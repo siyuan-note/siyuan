@@ -1046,8 +1046,13 @@ func renderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 					dataModel[rowValue.Key.Name] = v.Number.Content
 				}
 			} else if av.KeyTypeDate == v.Type {
-				if nil != v.Date && v.Date.IsNotEmpty {
-					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+				if nil != v.Date {
+					if v.Date.IsNotEmpty {
+						dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+					}
+					if v.Date.IsNotEmpty2 {
+						dataModel[rowValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
+					}
 				}
 			} else if av.KeyTypeRollup == v.Type {
 				if 0 < len(v.Rollup.Contents) {

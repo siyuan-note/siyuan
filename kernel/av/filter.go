@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -121,10 +122,20 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
+		destKey, _ := destAv.GetKey(key.Rollup.KeyID)
+		if nil == destKey {
+			return false
+		}
+
 		for _, blockID := range relVal.Relation.BlockIDs {
 			destVal := destAv.GetValue(key.Rollup.KeyID, blockID)
 			if nil == destVal {
-				continue
+				if destAv.ExistBlock(blockID) { // 数据库中存在行但是列值不存在是数据未初始化，这里补一个默认值
+					destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), key.Rollup.KeyID, blockID, destKey.Type)
+				}
+				if nil == destVal {
+					continue
+				}
 			}
 
 			if destVal.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {

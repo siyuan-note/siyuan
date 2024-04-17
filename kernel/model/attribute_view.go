@@ -894,50 +894,52 @@ func renderTemplateCol(ial map[string]string, flashcard *Flashcard, rowValues []
 	}
 
 	for _, rowValue := range rowValues {
-		if 0 < len(rowValue.Values) {
-			v := rowValue.Values[0]
-			if av.KeyTypeNumber == v.Type {
-				if nil != v.Number && v.Number.IsNotEmpty {
-					dataModel[rowValue.Key.Name] = v.Number.Content
-				}
-			} else if av.KeyTypeDate == v.Type {
-				if nil != v.Date {
-					if v.Date.IsNotEmpty {
-						dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
-					}
-					if v.Date.IsNotEmpty2 {
-						dataModel[rowValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
-					}
-				}
-			} else if av.KeyTypeRollup == v.Type {
-				if 0 < len(v.Rollup.Contents) {
-					var numbers []float64
-					var contents []string
-					for _, content := range v.Rollup.Contents {
-						if av.KeyTypeNumber == content.Type {
-							numbers = append(numbers, content.Number.Content)
-						} else {
-							contents = append(contents, content.String(true))
-						}
-					}
+		if 1 > len(rowValue.Values) {
+			continue
+		}
 
-					if 0 < len(numbers) {
-						dataModel[rowValue.Key.Name] = numbers
-					} else {
-						dataModel[rowValue.Key.Name] = contents
-					}
+		v := rowValue.Values[0]
+		if av.KeyTypeNumber == v.Type {
+			if nil != v.Number && v.Number.IsNotEmpty {
+				dataModel[rowValue.Key.Name] = v.Number.Content
+			}
+		} else if av.KeyTypeDate == v.Type {
+			if nil != v.Date {
+				if v.Date.IsNotEmpty {
+					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
 				}
-			} else if av.KeyTypeRelation == v.Type {
-				if 0 < len(v.Relation.Contents) {
-					var contents []string
-					for _, content := range v.Relation.Contents {
+				if v.Date.IsNotEmpty2 {
+					dataModel[rowValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
+				}
+			}
+		} else if av.KeyTypeRollup == v.Type {
+			if 0 < len(v.Rollup.Contents) {
+				var numbers []float64
+				var contents []string
+				for _, content := range v.Rollup.Contents {
+					if av.KeyTypeNumber == content.Type {
+						numbers = append(numbers, content.Number.Content)
+					} else {
 						contents = append(contents, content.String(true))
 					}
+				}
+
+				if 0 < len(numbers) {
+					dataModel[rowValue.Key.Name] = numbers
+				} else {
 					dataModel[rowValue.Key.Name] = contents
 				}
-			} else {
-				dataModel[rowValue.Key.Name] = v.String(true)
 			}
+		} else if av.KeyTypeRelation == v.Type {
+			if 0 < len(v.Relation.Contents) {
+				var contents []string
+				for _, content := range v.Relation.Contents {
+					contents = append(contents, content.String(true))
+				}
+				dataModel[rowValue.Key.Name] = contents
+			}
+		} else {
+			dataModel[rowValue.Key.Name] = v.String(true)
 		}
 	}
 

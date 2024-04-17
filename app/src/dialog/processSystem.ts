@@ -36,10 +36,10 @@ const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
 };
 
 export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRootIDs: string[] }, hideMsg = true) => {
-   if (hideMsg) {
-       hideMessage();
-   }
-   /// #if MOBILE
+    if (hideMsg) {
+        hideMessage();
+    }
+    /// #if MOBILE
     if (window.siyuan.mobile.popEditor) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
@@ -288,13 +288,18 @@ export const progressStatus = (data: IWebSocketData) => {
             return;
         }
         statusElement.innerHTML = data.msg;
-        statusElement.classList.remove("status--hide");
         statusElement.style.bottom = "0";
+        setTimeout(() => {
+            statusElement.style.bottom = "";
+        }, 5000);
         return;
     }
     const msgElement = statusElement.querySelector(".status__msg");
     if (msgElement) {
         msgElement.innerHTML = data.msg;
+        setTimeout(() => {
+            msgElement.innerHTML = "";
+        }, 5000);
     }
 };
 

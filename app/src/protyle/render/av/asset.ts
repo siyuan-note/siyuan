@@ -261,6 +261,7 @@ ${window.siyuan.languages.title}
         textElements[1].value = target.dataset.name;
         textElements[0].value = linkAddress;
         textElements[0].focus();
+        textElements[0].select();
     }
 };
 

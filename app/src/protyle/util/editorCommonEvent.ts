@@ -843,19 +843,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 }
                             }
                         }
-                        transaction(protyle, [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }], [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID: oldPreviousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }]);
+                        if (previousID !== oldPreviousID && previousID !== gutterTypes[2]) {
+                            transaction(protyle, [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }], [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID: oldPreviousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }]);
+                        }
                     }
                 } else if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
@@ -874,7 +876,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item) {
+                                if (previousID !== item && undoPreviousId !== previousID) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,

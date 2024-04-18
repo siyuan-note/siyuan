@@ -848,6 +848,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "updateColType") {
                     if (target.dataset.newType !== target.dataset.oldType) {
                         const name = (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).value;
+                        data.view.columns.find((item: IAVColumn) => item.id === options.colId).type = target.dataset.newType as TAVCol;
                         transaction(options.protyle, [{
                             action: "updateAttrViewCol",
                             id: options.colId,
@@ -899,10 +900,16 @@ export const openMenuPanel = (options: {
                                     blockID
                                 }]);
                             }
-
                         }
                     }
-                    avPanelElement.remove();
+                    menuElement.innerHTML = getEditHTML({
+                        protyle: options.protyle,
+                        data,
+                        colId: options.colId,
+                        isCustomAttr
+                    });
+                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

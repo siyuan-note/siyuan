@@ -64,10 +64,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
-	attributeViewName = attrView.Name
-	if "" == attributeViewName {
-		attributeViewName = Conf.language(105)
-	}
+	attributeViewName = getAttrViewName(attrView)
 
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 
@@ -514,7 +511,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					var renderErr error
 					kv.Values[0].Template.Content, renderErr = renderTemplateCol(ial, flashcard, keyValues, kv.Key.Template)
 					if nil != renderErr {
-						renderTemplateErr = renderErr
+						renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), kv.Key.Name, renderErr)
 					}
 				}
 			}
@@ -1244,7 +1241,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				content, renderErr := renderTemplateCol(ial, flashcards[row.ID], keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content
 				if nil != renderErr {
-					renderTemplateErr = renderErr
+					key, _ := attrView.GetKey(cell.Value.KeyID)
+					keyName := ""
+					if nil != key {
+						keyName = key.Name
+					}
+					renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), keyName, renderErr)
 				}
 			}
 		}
@@ -3519,4 +3521,12 @@ func getAttrViewViewByBlockID(attrView *av.AttributeView, blockID string) (ret *
 		viewID = node.IALAttr(av.NodeAttrView)
 	}
 	return attrView.GetCurrentView(viewID)
+}
+
+func getAttrViewName(attrView *av.AttributeView) string {
+	ret := attrView.Name
+	if "" == ret {
+		ret = Conf.language(105)
+	}
+	return ret
 }

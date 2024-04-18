@@ -33,10 +33,13 @@ import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
-import {isOnlyMeta, openByMobile, writeText} from "../../util/compatibility";
+import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {openSearchAV} from "./relation";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
+    if (isOnlyMeta(event)) {
+        return false;
+    }
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
         return false;

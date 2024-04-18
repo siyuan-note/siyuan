@@ -2195,7 +2195,7 @@ export class WYSIWYG {
             }
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
-            if (embedItemElement) {
+            if (embedItemElement && !ctrlIsPressed) {
                 const embedId = embedItemElement.getAttribute("data-id");
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
@@ -2288,7 +2288,7 @@ export class WYSIWYG {
             }
 
             const languageElement = hasClosestByClassName(event.target, "protyle-action__language");
-            if (languageElement && !protyle.disabled) {
+            if (languageElement && !protyle.disabled && !ctrlIsPressed) {
                 protyle.toolbar.showCodeLanguage(protyle, languageElement);
                 event.stopPropagation();
                 event.preventDefault();
@@ -2311,6 +2311,8 @@ export class WYSIWYG {
                         clientX: event.clientX + 4,
                         clientY: event.clientY
                     });
+                    event.stopPropagation();
+                    return;
                 } else if (actionElement.parentElement.classList.contains("li")) {
                     const actionId = actionElement.parentElement.getAttribute("data-node-id");
                     if (event.altKey && !protyle.disabled) {
@@ -2367,9 +2369,9 @@ export class WYSIWYG {
                             }
                         }
                     }
+                    event.stopPropagation();
+                    return;
                 }
-                event.stopPropagation();
-                return;
             }
 
             const selectElement = hasClosestByClassName(event.target, "hr") ||
@@ -2599,6 +2601,10 @@ export class WYSIWYG {
             if (ctrlIsPressed && range.toString() === "") {
                 let ctrlElement = hasClosestBlock(event.target);
                 if (ctrlElement) {
+                    const embedBlockElement = hasClosestByAttribute(ctrlElement, "data-type", "NodeBlockQueryEmbed");
+                    if (embedBlockElement) {
+                        ctrlElement = embedBlockElement;
+                    }
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
                     if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
                         ctrlElement.classList.remove("protyle-wysiwyg--select");

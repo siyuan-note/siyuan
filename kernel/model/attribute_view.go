@@ -2624,6 +2624,11 @@ func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
 }
 
 func sortAttributeViewRow(operation *Operation) (err error) {
+	if operation.ID == operation.PreviousID {
+		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
+		return
+	}
+
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
@@ -2631,11 +2636,6 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
 	if nil != err {
-		return
-	}
-
-	if operation.ID == operation.PreviousID {
-		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
 		return
 	}
 
@@ -2679,6 +2679,11 @@ func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
 }
 
 func SortAttributeViewKey(avID, blockID, keyID, previousKeyID string) (err error) {
+	if keyID == previousKeyID {
+		// 拖拽到自己的右侧，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
+		return
+	}
+
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return

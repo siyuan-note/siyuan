@@ -2624,6 +2624,11 @@ func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
 }
 
 func sortAttributeViewRow(operation *Operation) (err error) {
+	if operation.ID == operation.PreviousID {
+		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
+		return
+	}
+
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
@@ -2631,11 +2636,6 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
 	if nil != err {
-		return
-	}
-
-	if operation.ID == operation.PreviousID {
-		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
 		return
 	}
 
@@ -2679,6 +2679,11 @@ func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
 }
 
 func SortAttributeViewKey(avID, blockID, keyID, previousKeyID string) (err error) {
+	if keyID == previousKeyID {
+		// 拖拽到自己的右侧，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
+		return
+	}
+
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
@@ -3146,12 +3151,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else { // 之前绑定了块
+	} else {                    // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else { // 现在绑定了块
+			} else {                                // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)

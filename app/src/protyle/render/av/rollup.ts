@@ -20,7 +20,6 @@ const updateCol = (options: {
         return;
     }
     options.target.querySelector(".b3-menu__accelerator").textContent = itemElement.querySelector(".b3-list-item__text").textContent;
-
     const colData = options.data.view.columns.find((item) => {
         if (item.id === options.colId) {
             if (!item.rollup) {
@@ -29,14 +28,32 @@ const updateCol = (options: {
             return true;
         }
     });
-    const oldColValue = Object.assign({}, colData.rollup);
     if (options.isRelation) {
-        colData.rollup.relationKeyID = itemElement.dataset.colId;
-        options.target.nextElementSibling.setAttribute("data-av-id", itemElement.dataset.targetAvId);
+        if (itemElement.dataset.colId === colData.rollup?.relationKeyID) {
+            return;
+        }
+        colData.rollup = {
+            relationKeyID: itemElement.dataset.colId
+        };
+        const goSearchRollupTargetElement = options.target.nextElementSibling as HTMLElement;
+        goSearchRollupTargetElement.querySelector(".b3-menu__accelerator").textContent = "";
+        goSearchRollupTargetElement.setAttribute("data-av-id", itemElement.dataset.targetAvId);
+        const goSearchRollupCalcElement = goSearchRollupTargetElement.nextElementSibling as HTMLElement;
+        goSearchRollupCalcElement.removeAttribute("data-col-type");
+        goSearchRollupCalcElement.removeAttribute("data-calc");
+        goSearchRollupCalcElement.querySelector(".b3-menu__accelerator").textContent = window.siyuan.languages.original;
     } else {
+        if (itemElement.dataset.colId === colData.rollup?.keyID) {
+            return;
+        }
         colData.rollup.keyID = itemElement.dataset.colId;
-        options.target.nextElementSibling.setAttribute("data-col-type", itemElement.dataset.colType);
+        delete colData.rollup.calc;
+        const goSearchRollupCalcElement = options.target.nextElementSibling as HTMLElement;
+        goSearchRollupCalcElement.removeAttribute("data-calc");
+        goSearchRollupCalcElement.setAttribute("data-col-type", itemElement.dataset.colType);
+        goSearchRollupCalcElement.querySelector(".b3-menu__accelerator").textContent = window.siyuan.languages.original;
     }
+    const oldColValue = JSON.parse(JSON.stringify(colData.rollup));
     transaction(options.protyle, [{
         action: "updateAttrViewColRollup",
         id: options.colId,

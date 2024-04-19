@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240225111159"
+		"updated": "20240416113842"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122008-1e014nh",
-				"updated": "20240225111159"
+				"updated": "20240416113842"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 					},
 					"Properties": {
 						"id": "20211226122008-9i560vp",
-						"updated": "20211226150308"
+						"updated": "20240416113759"
 					},
 					"Children": [
 						{
@@ -52,7 +52,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122008-mc8bdbc",
-								"updated": "20211226150308"
+								"updated": "20240416113759"
 							},
 							"Children": [
 								{
@@ -60,7 +60,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226115423-d5z1joq",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "請從這裡開始"
+									"TextMarkTextContent": "塊引用"
 								}
 							]
 						}
@@ -75,7 +75,7 @@
 					},
 					"Properties": {
 						"id": "20211226122008-g3h952f",
-						"updated": "20220115193505"
+						"updated": "20240416113842"
 					},
 					"Children": [
 						{
@@ -83,14 +83,14 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122008-9ff5a3r",
-								"updated": "20220115193505"
+								"updated": "20240416113842"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com",
-									"TextMarkTextContent": "超級連結"
+									"TextMarkTextContent": "超連結"
 								}
 							]
 						}

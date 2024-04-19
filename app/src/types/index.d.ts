@@ -199,6 +199,7 @@ interface IPosition {
 interface ISaveLayout {
     name: string,
     layout: IObject
+    time: number
 }
 
 interface IWorkspace {

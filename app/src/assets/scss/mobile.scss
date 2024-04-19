@@ -443,6 +443,7 @@
   box-sizing: border-box;
   background-color: var(--b3-theme-background);
   @extend .fn__ellipsis;
+  z-index: 2;
 }
 
 .protyle {

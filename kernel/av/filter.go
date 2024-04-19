@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -88,7 +89,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		return true
 	}
 
-	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter && nil != filter.Value && KeyTypeRollup == filter.Value.Type &&
+	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type &&
 		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
 		// 单独处理汇总类型的比较
 
@@ -121,10 +122,20 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
+		destKey, _ := destAv.GetKey(key.Rollup.KeyID)
+		if nil == destKey {
+			return false
+		}
+
 		for _, blockID := range relVal.Relation.BlockIDs {
 			destVal := destAv.GetValue(key.Rollup.KeyID, blockID)
 			if nil == destVal {
-				continue
+				if destAv.ExistBlock(blockID) { // 数据库中存在行但是列值不存在是数据未初始化，这里补一个默认值
+					destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), key.Rollup.KeyID, blockID, destKey.Type)
+				}
+				if nil == destVal {
+					continue
+				}
 			}
 
 			if destVal.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
@@ -134,7 +145,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		return false
 	}
 
-	if nil != value.Relation && KeyTypeRelation == value.Type && 0 < len(value.Relation.Contents) && nil != filter && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+	if nil != value.Relation && KeyTypeRelation == value.Type && 0 < len(value.Relation.Contents) && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
 		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
 		// 单独处理关联类型的比较
 
@@ -240,6 +251,19 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeDate:
 		if nil != value.Date {
+			switch operator {
+			case FilterOperatorIsEmpty:
+				return !value.Date.IsNotEmpty
+			case FilterOperatorIsNotEmpty:
+				return value.Date.IsNotEmpty
+			}
+
+			if !value.Date.IsNotEmpty {
+				// 空值不进行比较，直接排除
+				// Database date filter excludes empty values https://github.com/siyuan-note/siyuan/issues/11061
+				return false
+			}
+
 			if nil != relativeDate {
 				// 使用相对时间比较
 

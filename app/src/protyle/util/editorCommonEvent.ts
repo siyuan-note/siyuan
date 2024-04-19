@@ -843,19 +843,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 }
                             }
                         }
-                        transaction(protyle, [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }], [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID: oldPreviousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }]);
+                        if (previousID !== oldPreviousID && previousID !== gutterTypes[2]) {
+                            transaction(protyle, [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }], [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID: oldPreviousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }]);
+                        }
                     }
                 } else if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
@@ -874,20 +876,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
-                                doOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
-                                undoOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID: undoPreviousId,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
+                                if (previousID !== item && undoPreviousId !== previousID) {
+                                    doOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                    undoOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID: undoPreviousId,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
@@ -1063,7 +1067,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+        if (!hasClosestByClassName(event.target, "av__cell") && (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
             protyle.contentElement.scroll({
                 top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
                 behavior: "smooth"

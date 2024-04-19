@@ -787,12 +787,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         }
         menu.addSeparator();
     }
-
     menu.addItem({
         icon: "iconInsertLeft",
         label: window.siyuan.languages.insertColumnLeft,
         click() {
             const addMenu = addCol(protyle, blockElement, cellElement.previousElementSibling?.getAttribute("data-col-id") || "");
+            if (!blockElement.contains(cellElement)) {
+                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`);
+            }
             const addRect = cellElement.getBoundingClientRect();
             addMenu.open({
                 x: addRect.left,
@@ -805,7 +807,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         icon: "iconInsertRight",
         label: window.siyuan.languages.insertColumnRight,
         click() {
-            const addMenu = addCol(protyle, blockElement, cellElement.getAttribute("data-col-id") || "");
+            const addMenu = addCol(protyle, blockElement, colId);
+            if (!blockElement.contains(cellElement)) {
+                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`);
+            }
             const addRect = cellElement.getBoundingClientRect();
             addMenu.open({
                 x: addRect.left,

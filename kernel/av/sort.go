@@ -120,36 +120,49 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect && nil != other.MSelect {
-			var v1 string
-			for _, v := range value.MSelect {
-				v1 += v.Content
-				break
-			}
-			var v2 string
-			for _, v := range other.MSelect {
-				v2 += v.Content
-				break
-			}
-
 			// 按设置的选项顺序排序
 			key, _ := attrView.GetKey(value.KeyID)
+			optionSort := map[string]int{}
 			if nil != key {
-				optionSort := map[string]int{}
 				for i, op := range key.Options {
 					optionSort[op.Name] = i
 				}
-
-				v1Sort := optionSort[v1]
-				v2Sort := optionSort[v2]
-				if v1Sort > v2Sort {
-					return 1
-				}
-				if v1Sort < v2Sort {
-					return -1
-				}
-				return 0
 			}
-			return strings.Compare(v1, v2)
+
+			vLen := len(value.MSelect)
+			oLen := len(other.MSelect)
+			if vLen <= oLen {
+				for i := 0; i < vLen; i++ {
+					v := value.MSelect[i].Content
+					o := other.MSelect[i].Content
+					vSort := optionSort[v]
+					oSort := optionSort[o]
+					if vSort != oSort {
+						return vSort - oSort
+					}
+					s := strings.Compare(v, o)
+					if 0 != s {
+						return s
+					}
+				}
+				return 1
+			} else {
+				for i := 0; i < oLen; i++ {
+					v := value.MSelect[i].Content
+					o := other.MSelect[i].Content
+					vSort := optionSort[v]
+					oSort := optionSort[o]
+					if vSort != oSort {
+						return vSort - oSort
+					}
+					s := strings.Compare(v, o)
+					if 0 != s {
+						return s
+					}
+				}
+				return -1
+			}
+
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {

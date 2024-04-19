@@ -465,9 +465,7 @@ export class Graph extends Model {
                 if (id) {
                     this.blockId = id;
                 }
-                if (!isCurrentEditor(this.blockId) &&
-                    this.graphElement.firstElementChild.classList.contains("fn__none") // 引用右键打开关系图
-                ) {
+                if (this.blockId && !isCurrentEditor(this.blockId) && this.type === "pin") {
                     return;
                 }
                 this.graphData = response.data;

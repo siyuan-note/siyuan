@@ -737,12 +737,11 @@ export class WYSIWYG {
             let moveCellElement: HTMLElement;
             let startFirstElement: Element;
             let endLastElement: Element;
+            this.element.querySelectorAll("iframe").forEach(item => {
+                item.style.pointerEvents = "none"
+            })
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
-                if (moveTarget.tagName === "IFRAME") {
-                    moveTarget.style.pointerEvents = "none";
-                    return;
-                }
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) && !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if ((moveTarget.tagName === "TH" || moveTarget.tagName === "TD") && !moveTarget.isSameNode(target) && (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {
@@ -906,6 +905,15 @@ export class WYSIWYG {
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
+
+                if (currentElement) {
+                    // 从下网上选遇到嵌入块时，选中整个嵌入块
+                    const embedElement = hasClosestByAttribute(currentElement, "data-type", "NodeBlockQueryEmbed")
+                    if (embedElement) {
+                        currentElement = embedElement
+                    }
+                }
+
                 let hasJump = false;
                 const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
@@ -975,6 +983,9 @@ export class WYSIWYG {
                 documentSelf.onselect = null;
                 startFirstElement = undefined;
                 endLastElement = undefined;
+                this.element.querySelectorAll("iframe").forEach(item => {
+                    item.style.pointerEvents = "";
+                })
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (!protyle.disabled && tableBlockElement) {
@@ -1198,9 +1209,6 @@ export class WYSIWYG {
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
-                    if (item.classList.contains("iframe")) {
-                        item.querySelector("iframe").style.pointerEvents = "";
-                    }
                 });
                 countBlockWord(ids);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473

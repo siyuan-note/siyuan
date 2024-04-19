@@ -28,7 +28,7 @@ import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {cancelSB, genEmptyElement, insertEmptyBlock, jumpToParentNext} from "../../block/util";
+import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -98,11 +98,10 @@ export class Gutter {
             ghostElement.className = protyle.wysiwyg.element.className;
             selectElements.forEach(item => {
                 const type = item.getAttribute("data-type");
-                if (["NodeIFrame", "NodeWidget"].includes(type)) {
+                if (item.querySelector("iframe")) {
                     const embedElement = genEmptyElement();
                     embedElement.classList.add("protyle-wysiwyg--select");
-                    const isIFrame = type === "NodeIFrame";
-                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="#icon${isIFrame ? "Language" : "Both"}"></use></svg> ${isIFrame ? "IFrame" : window.siyuan.languages.widget}`;
+                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${ buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
                     ghostElement.append(embedElement);
                 } else {
                     ghostElement.append(item.cloneNode(true));

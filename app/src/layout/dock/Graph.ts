@@ -319,7 +319,7 @@ export class Graph extends Model {
                         target.previousElementSibling.classList.remove("fn__none");
                         (target.previousElementSibling as HTMLInputElement).select();
                     } else if (dataType === "refresh") {
-                        this.searchGraph(false);
+                        this.searchGraph(false, undefined, true);
                     } else if (dataType === "fullscreen") {
                         fullscreen(this.element, target);
                     }
@@ -406,7 +406,7 @@ export class Graph extends Model {
         this.searchGraph(false);
     }
 
-    public searchGraph(focus: boolean, id?: string) {
+    public searchGraph(focus: boolean, id?: string, refresh = false) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate") && !id) {
             return;
@@ -465,7 +465,7 @@ export class Graph extends Model {
                 if (id) {
                     this.blockId = id;
                 }
-                if (this.blockId && !isCurrentEditor(this.blockId) && this.type === "pin") {
+                if (!refresh && this.type === "pin" && this.blockId && !isCurrentEditor(this.blockId)) {
                     return;
                 }
                 this.graphData = response.data;

@@ -925,7 +925,7 @@
   "reset": "Réinitialiser",
   "siyuanNote": "SiYuan",
   "resetLayout": "Restaurer la mise en page par défaut",
-  "tag": "Tag",
+  "tag": "Étiqueter",
   "twoFactorCaptcha": "Vérification en 2 étapes",
   "captcha": "Code de vérification",
   "register": "Créer un nouveau compte",
@@ -990,7 +990,7 @@
   "fileTree14": "Chemin d'enregistrement (prise en charge des variables de modèle de format de date, telles que <code class='fn__code'>/Notes quotidiennes/{{mais | date \"2006/01\"}}/{{mais | date \"2006-01-02\"}}</code>)",
   "fileTree15": "Chemin du modèle (par exemple, <code class='fn__code'>dailynote.md</code>, le fichier doit être placé sous \"l'espace de travail/data/templates/\")",
   "fileTree16": "Nombre maximum à lister",
-  "fileTree17": "S'il y a trop de sous-documents, cette restriction peut être utilisée pour améliorer les performances.",
+  "fileTree17": "S'il y a trop de sous-documents/étiqueter, cette restriction peut être utilisée pour améliorer les performances.",
   "fileTree18": "Permet la création de sous-documents de plus de 7 niveaux",
   "fileTree19": "Certains systèmes d'exploitation ont des limitations techniques qui peuvent empêcher la copie manuelle des données de l'espace de travail après la création de sous-documents supérieurs à 7 niveaux",
   "fileTree20": "Enregistrer avec une seule ligne",
@@ -1473,6 +1473,7 @@
     "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
     "240": "Le déplacement du titre sous les blocs conteneurs dans la doc n'est pas pris en charge",
     "241": "Le glisser vers son sous-titre n'est pas pris en charge",
-    "242": "Le bloc de liaison existe déjà dans la base de données actuelle"
+    "242": "Le bloc de liaison existe déjà dans la base de données actuelle",
+    "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister]."
   }
 }

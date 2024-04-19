@@ -208,6 +208,7 @@ type Tags []*Tag
 
 func BuildTags() (ret *Tags) {
 	WaitForWritingFiles()
+
 	if !sql.IsEmptyQueue() {
 		sql.WaitForWritingDatabase()
 	}
@@ -220,8 +221,28 @@ func BuildTags() (ret *Tags) {
 	}
 	appendTagChildren(&tags, labels)
 	sortTags(tags)
-	ret = &tags
+
+	var total int
+	tmp := &Tags{}
+	for _, tag := range tags {
+		*tmp = append(*tmp, tag)
+		total += countTag(tag)
+		if Conf.FileTree.MaxListCount < total {
+			util.PushMsg(fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+			break
+		}
+	}
+
+	ret = tmp
 	return
+}
+
+func countTag(tag *Tag) int {
+	count := 1
+	for _, child := range tag.tags {
+		count += countTag(child)
+	}
+	return count + tag.Count
 }
 
 func sortTags(tags Tags) {

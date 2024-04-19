@@ -204,5 +204,5 @@ export const getLangByType = (type: string) => {
             lang = window.siyuan.languages.blockEmbed;
             break;
     }
-    return lang
-}
+    return lang;
+};

@@ -215,8 +215,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {
                     const isBottom = targetElement.classList.contains("dragover__bottom");
-                    const previousID = isBottom ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id")
-                    const undoPreviousID = window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id")
+                    const previousID = isBottom ? targetElement.dataset.colId : targetElement.previousElementSibling?.getAttribute("data-col-id");
+                    const undoPreviousID = window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id");
                     if (previousID !== undoPreviousID && previousID !== window.siyuan.dragElement.dataset.colId) {
                         transaction(protyle, [{
                             action: "sortAttrViewCol",

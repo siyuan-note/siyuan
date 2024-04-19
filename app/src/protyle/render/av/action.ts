@@ -21,12 +21,6 @@ import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
-import {pathPosix} from "../../../util/pathName";
-import {Constants} from "../../../constants";
-/// #if !MOBILE
-import {openAsset, openBy} from "../../../editor/util";
-/// #endif
-import {getSearch} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";

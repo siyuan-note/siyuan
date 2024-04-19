@@ -738,8 +738,8 @@ export class WYSIWYG {
             let startFirstElement: Element;
             let endLastElement: Element;
             this.element.querySelectorAll("iframe").forEach(item => {
-                item.style.pointerEvents = "none"
-            })
+                item.style.pointerEvents = "none";
+            });
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select
@@ -907,10 +907,10 @@ export class WYSIWYG {
                 let currentElement: Element | boolean = firstBlockElement;
 
                 if (currentElement) {
-                    // 从下网上选遇到嵌入块时，选中整个嵌入块
-                    const embedElement = hasClosestByAttribute(currentElement, "data-type", "NodeBlockQueryEmbed")
+                    // 从下往上划选遇到嵌入块时，选中整个嵌入块
+                    const embedElement = hasClosestByAttribute(currentElement, "data-type", "NodeBlockQueryEmbed");
                     if (embedElement) {
-                        currentElement = embedElement
+                        currentElement = embedElement;
                     }
                 }
 
@@ -985,7 +985,7 @@ export class WYSIWYG {
                 endLastElement = undefined;
                 this.element.querySelectorAll("iframe").forEach(item => {
                     item.style.pointerEvents = "";
-                })
+                });
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (!protyle.disabled && tableBlockElement) {

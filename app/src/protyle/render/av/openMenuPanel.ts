@@ -390,7 +390,7 @@ export const openMenuPanel = (options: {
             }
 
             if (targetElement.getAttribute("data-type") === "editCol") {
-                const previousID = (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || ""
+                const previousID = (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
                 const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
                 if (previousID !== undoPreviousID && previousID !== sourceId) {
                     transaction(options.protyle, [{

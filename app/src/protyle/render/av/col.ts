@@ -793,7 +793,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         click() {
             const addMenu = addCol(protyle, blockElement, cellElement.previousElementSibling?.getAttribute("data-col-id") || "");
             if (!blockElement.contains(cellElement)) {
-                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`)
+                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`);
             }
             const addRect = cellElement.getBoundingClientRect();
             addMenu.open({
@@ -809,7 +809,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         click() {
             const addMenu = addCol(protyle, blockElement, colId);
             if (!blockElement.contains(cellElement)) {
-                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`)
+                cellElement = blockElement.querySelector(`.av__row--header .av__cell--header[data-col-id="${colId}"]`);
             }
             const addRect = cellElement.getBoundingClientRect();
             addMenu.open({

@@ -34,13 +34,13 @@ const updateCol = (options: {
         }
         colData.rollup = {
             relationKeyID: itemElement.dataset.colId
-        }
-        const goSearchRollupTargetElement = options.target.nextElementSibling as HTMLElement
+        };
+        const goSearchRollupTargetElement = options.target.nextElementSibling as HTMLElement;
         goSearchRollupTargetElement.querySelector(".b3-menu__accelerator").textContent = "";
         goSearchRollupTargetElement.setAttribute("data-av-id", itemElement.dataset.targetAvId);
         const goSearchRollupCalcElement = goSearchRollupTargetElement.nextElementSibling as HTMLElement;
-        goSearchRollupCalcElement.removeAttribute("data-col-type")
-        goSearchRollupCalcElement.removeAttribute("data-calc")
+        goSearchRollupCalcElement.removeAttribute("data-col-type");
+        goSearchRollupCalcElement.removeAttribute("data-calc");
         goSearchRollupCalcElement.querySelector(".b3-menu__accelerator").textContent = window.siyuan.languages.original;
     } else {
         if (itemElement.dataset.colId === colData.rollup?.keyID) {
@@ -49,7 +49,7 @@ const updateCol = (options: {
         colData.rollup.keyID = itemElement.dataset.colId;
         delete colData.rollup.calc;
         const goSearchRollupCalcElement = options.target.nextElementSibling as HTMLElement;
-        goSearchRollupCalcElement.removeAttribute("data-calc")
+        goSearchRollupCalcElement.removeAttribute("data-calc");
         goSearchRollupCalcElement.setAttribute("data-col-type", itemElement.dataset.colType);
         goSearchRollupCalcElement.querySelector(".b3-menu__accelerator").textContent = window.siyuan.languages.original;
     }

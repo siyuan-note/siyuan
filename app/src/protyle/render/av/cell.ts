@@ -648,7 +648,10 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
             cellElement.classList.add("av__cell-uncheck");
         }
     } else if (value.type === "block") {
-        cellElement.setAttribute("data-block-id", value.block.id || "");
+        if (value.block.id) {
+            // 不能设置为空，否则编辑后会临时无 id
+            cellElement.setAttribute("data-block-id", value.block.id);
+        }
         if (value.isDetached) {
             cellElement.setAttribute("data-detached", "true");
         }

@@ -110,7 +110,7 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 
 style="width: ${item.style.width};${item.dataset.dtype === "number" ? "text-align: right;" : ""}" 
-${(item.getAttribute("data-block-id") || item.dataset.dtype === "block") ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
+${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
         if (pinIndex === index) {
             colHTML += "</div>";
         }

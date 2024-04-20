@@ -278,11 +278,14 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         click() {
             openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
                 const srcs: { id: string, content: string }[] = [];
+                const sourceIds: string[] = [];
                 rowElements.forEach(item => {
+                    const rowId =  item.getAttribute("data-id")
                     srcs.push({
                         content:  item.querySelector(".av__cell[data-block-id] .av__celltext").textContent.trim(),
-                        id: item.getAttribute("data-id")
+                        id: rowId
                     });
+                    sourceIds.push(rowId);
                 })
                 const avID = listItemElement.dataset.avId;
                 transaction(protyle, [{

@@ -186,8 +186,9 @@ type SearchAttributeViewResult struct {
 	HPath   string `json:"hPath"`
 }
 
-func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
+func SearchAttributeView(keyword string, excludes []string) (ret []*SearchAttributeViewResult) {
 	waitForSyncingStorages()
+
 	ret = []*SearchAttributeViewResult{}
 	keyword = strings.TrimSpace(keyword)
 
@@ -321,7 +322,7 @@ func SearchAttributeView(keyword string) (ret []*SearchAttributeViewResult) {
 			hPath = box.Name + hPath
 		}
 
-		if !exist {
+		if !exist && !gulu.Str.Contains(avID, excludes) {
 			ret = append(ret, &SearchAttributeViewResult{
 				AvID:    avID,
 				AvName:  existAv.AvName,

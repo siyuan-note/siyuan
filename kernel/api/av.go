@@ -318,7 +318,13 @@ func searchAttributeView(c *gin.Context) {
 	}
 
 	keyword := arg["keyword"].(string)
-	results := model.SearchAttributeView(keyword)
+	var excludes []string
+	if nil != arg["excludes"] {
+		for _, e := range arg["excludes"].([]interface{}) {
+			excludes = append(excludes, e.(string))
+		}
+	}
+	results := model.SearchAttributeView(keyword, excludes)
 	ret.Data = map[string]interface{}{
 		"results": results,
 	}

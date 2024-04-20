@@ -2165,7 +2165,16 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached, operation.IgnoreFillFilterVal)
+	var srcs []map[string]interface{}
+	if 0 < len(operation.Srcs) {
+		srcs = operation.Srcs
+	} else {
+		for _, srcID := range operation.SrcIDs {
+			srcs = append(srcs, map[string]interface{}{"id": srcID})
+		}
+	}
+
+	err := AddAttributeViewBlock(tx, srcs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached, operation.IgnoreFillFilterVal)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}

@@ -2165,25 +2165,17 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	var srcs []map[string]interface{}
-	if 0 < len(operation.Srcs) {
-		srcs = operation.Srcs
-	} else {
-		for _, srcID := range operation.SrcIDs {
-			srcs = append(srcs, map[string]interface{}{"id": srcID})
-		}
-	}
-
-	err := AddAttributeViewBlock(tx, srcs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IsDetached, operation.IgnoreFillFilterVal)
+	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.PreviousID, operation.IgnoreFillFilterVal)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, previousBlockID string, isDetached, ignoreFillFilter bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, previousBlockID string, ignoreFillFilter bool) (err error) {
 	for _, src := range srcs {
 		srcID := src["id"].(string)
+		isDetached := src["isDetached"].(bool)
 		var tree *parse.Tree
 		if !isDetached {
 			var loadErr error
@@ -3166,12 +3158,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else {                    // 之前绑定了块
+	} else { // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else {                                // 现在绑定了块
+			} else { // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)

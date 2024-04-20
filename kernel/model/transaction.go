@@ -1263,8 +1263,8 @@ type Operation struct {
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
 	AvID                string                   `json:"avID"`              // 属性视图 ID
-	SrcIDs              []string                 `json:"srcIDs"`            // 用于将块拖拽到属性视图中
-	Srcs                []map[string]interface{} `json:"srcs"`              // 属性视图中多选 添加到数据库
+	SrcIDs              []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs                []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
 	IsDetached          bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
 	IgnoreFillFilterVal bool                     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
 	Name                string                   `json:"name"`              // 属性视图列名

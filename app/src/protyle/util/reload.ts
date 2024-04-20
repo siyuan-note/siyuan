@@ -31,7 +31,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
         const isMention = protyle.element.getAttribute("data-ismention") === "true";
         const tabElement = hasClosestByClassName(protyle.element, "sy__backlink");
         if (tabElement) {
-            const inputsElement = tabElement.querySelectorAll(".b3-form__icon-input") as NodeListOf<HTMLInputElement>;
+            const inputsElement = tabElement.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,

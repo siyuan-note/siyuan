@@ -738,7 +738,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "append") {
-        reloadProtyle(protyle, false);
+        // 目前只有移动块的时候会调用，反连面板就自己点击刷新处理。
+        if (!protyle.options.backlinkData) {
+            reloadProtyle(protyle, false);
+        }
         return;
     }
     if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewColOptions",

@@ -6,7 +6,8 @@
 		"icon": "1f680",
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
-		"updated": "20231014100732"
+		"type": "doc",
+		"updated": "20240420104851"
 	},
 	"Children": [
 		{
@@ -530,7 +531,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-udux4az",
-				"updated": "20230406155736"
+				"updated": "20240420104851"
 			},
 			"Children": [
 				{
@@ -570,7 +571,7 @@
 					},
 					"Properties": {
 						"id": "20230405172238-vzn3127",
-						"updated": "20230405172505"
+						"updated": "20240420104851"
 					},
 					"Children": [
 						{
@@ -578,7 +579,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405172238-jpeu5bm",
-								"updated": "20230405172505"
+								"updated": "20240420104851"
 							},
 							"Children": [
 								{
@@ -592,7 +593,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​, especially for scenarios with many formula blocks, code blocks or chart blocks"
+									"Data": "​, especially for scenarios with many formula blocks, code blocks or chart blocks. There is no specific optimal value for this parameter, please refer to your experience after adjustment"
 								}
 							]
 						}

@@ -214,10 +214,18 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             } else {
                 protyle = activeTab.model.editors.unRefEdit.protyle;
             }
-        } else if (activeTab.model instanceof Custom && activeTab.model.data?.editor instanceof Protyle) {
-            protyle = activeTab.model.data.editor.protyle;
-        } else {
-            return false;
+        } else if (activeTab.model instanceof Custom && activeTab.model.editors?.length > 0) {
+            if (range) {
+                activeTab.model.editors.find(item => {
+                    if (item.protyle.element.contains(range.startContainer)) {
+                        protyle = item.protyle;
+                        return true;
+                    }
+                })
+            }
+        }
+        if (!protyle) {
+            return;
         }
     } else if (!protyle) {
         if (!protyle && range) {

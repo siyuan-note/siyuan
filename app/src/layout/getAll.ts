@@ -24,9 +24,9 @@ export const getAllEditor = () => {
         editors.push(item.editors.unRefEdit);
     });
     models.custom.forEach(item => {
-        if (item.data?.editor instanceof Protyle) {
-            editors.push(item.data.editor);
-        }
+        item.editors?.forEach(eItem => {
+            editors.push(eItem)
+        })
     });
     models.backlink.forEach(item => {
         item.editors.forEach(editorItem => {

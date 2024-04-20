@@ -2198,7 +2198,10 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 			}
 		}
 
-		srcContent := src["content"].(string)
+		var srcContent string
+		if nil != src["content"] {
+			srcContent = src["content"].(string)
+		}
 		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, srcID, srcContent, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
 			return avErr
 		}

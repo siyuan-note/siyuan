@@ -394,7 +394,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         if (operation.action === "setAttrViewColWidth") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-                if (!cellElement || cellElement.style.width === operation.data) {
+                if (!cellElement || cellElement.style.width === operation.data || item.getAttribute("custom-sy-av-view") !== operation.keyID) {
                     return;
                 }
                 item.querySelectorAll(".av__row").forEach(rowItem => {

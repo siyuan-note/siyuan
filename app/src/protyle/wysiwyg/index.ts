@@ -439,18 +439,21 @@ export class WYSIWYG {
                     if (!newWidth || newWidth === oldWidth) {
                         return;
                     }
+                    const viewId = nodeElement.getAttribute("custom-sy-av-view");
                     transaction(protyle, [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
                         data: newWidth + "px",
-                        blockID
+                        blockID,
+                        keyID: viewId  // 仅前端使用，用于推送时不影响其他视图 https://github.com/siyuan-note/siyuan/issues/11019
                     }], [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
                         data: oldWidth + "px",
-                        blockID
+                        blockID,
+                        keyID: viewId
                     }]);
                 };
                 this.preventClick = true;

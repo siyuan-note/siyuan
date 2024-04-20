@@ -146,6 +146,11 @@
 
     &--header {
       z-index: 3;
+
+      & > .block__icons svg {
+        height: calc(1.625em - 10px);
+        width: calc(1.625em - 10px);
+      }
     }
 
     &--header,

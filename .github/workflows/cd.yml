@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   create_release:
     name: Create Release
     runs-on: ubuntu-latest
@@ -158,6 +157,8 @@ jobs:
     - name: Building UI
       run: pnpm run build
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
+      env:
+        COREPACK_ENABLE_STRICT: 0
 
     - name: Remove Build Directory
       uses: JesseTG/rm@v1.0.2
@@ -202,6 +203,8 @@ jobs:
     - name: Building Electron
       run: pnpm run ${{ matrix.config.electron_args }}
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
+      env:
+        COREPACK_ENABLE_STRICT: 0
 
     - name: Upload Release
       uses: actions/upload-release-asset@v1

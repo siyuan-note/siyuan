@@ -522,12 +522,14 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			title := node.IALAttr("title")
 			if 0 == method {
 				if strings.Contains(title, keyword) {
-					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, replacement)
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
 				}
 			} else if 3 == method {
 				if nil != r && r.MatchString(title) {
-					renameRootTitles[node.ID] = r.ReplaceAllString(title, replacement)
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
 				}
 			}

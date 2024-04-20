@@ -265,32 +265,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             submenu: copySubMenu(blockId)
         });
         menu.addItem({
-            label: window.siyuan.languages.addToDatabase,
-            icon: "iconDatabase",
-            click() {
-                openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
-                    const sourceIds: string[] = [blockId];
-                    const avID = listItemElement.dataset.avId;
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        ignoreFillFilter: true,
-                        srcIDs: sourceIds,
-                        isDetached: false,
-                        blockID: listItemElement.dataset.nodeId
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.nodeId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs: sourceIds,
-                        avID,
-                    }]);
-                });
-            }
-        });
-        menu.addItem({
             label: window.siyuan.languages.unbindBlock,
             icon: "iconLinkOff",
             click() {
@@ -298,6 +272,38 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             }
         });
     }
+    menu.addItem({
+        label: window.siyuan.languages.addToDatabase,
+        icon: "iconDatabase",
+        click() {
+            openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
+                const srcs: { id: string, content: string }[] = [];
+                rowElements.forEach(item => {
+                    srcs.push({
+                        content:  item.querySelector(".av__cell[data-block-id] .av__celltext").textContent.trim(),
+                        id: item.getAttribute("data-id")
+                    });
+                })
+                const avID = listItemElement.dataset.avId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    ignoreFillFilter: true,
+                    srcs,
+                    isDetached: false,
+                    blockID: listItemElement.dataset.nodeId
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.nodeId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: sourceIds,
+                    avID,
+                }]);
+            });
+        }
+    });
     if (!protyle.disabled) {
         if (rowElements.length === 1) {
             if (keyCellElement.getAttribute("data-detached") !== "true") {

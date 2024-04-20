@@ -127,8 +127,12 @@ func addAttributeViewValues(c *gin.Context) {
 	if nil != arg["ignoreFillFilter"] {
 		ignoreFillFilter = arg["ignoreFillFilter"].(bool)
 	}
+	var content string
+	if nil != arg["content"] {
+		content = arg["content"].(string)
+	}
 
-	err := model.AddAttributeViewBlock(nil, srcIDs, avID, blockID, previousID, isDetached, ignoreFillFilter)
+	err := model.AddAttributeViewBlock(nil, srcIDs, avID, blockID, previousID, content, isDetached, ignoreFillFilter)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

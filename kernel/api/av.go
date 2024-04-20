@@ -114,10 +114,6 @@ func addAttributeViewValues(c *gin.Context) {
 	if blockIDArg := arg["blockID"]; nil != blockIDArg {
 		blockID = blockIDArg.(string)
 	}
-	var srcIDs []string
-	for _, v := range arg["srcIDs"].([]interface{}) {
-		srcIDs = append(srcIDs, v.(string))
-	}
 	var previousID string
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
@@ -129,11 +125,19 @@ func addAttributeViewValues(c *gin.Context) {
 	}
 
 	var srcs []map[string]interface{}
-	for _, srcID := range srcIDs {
-		src := map[string]interface{}{
-			"id": srcID,
+	if nil != arg["srcIDs"] {
+		var srcIDs []string
+		for _, v := range arg["srcIDs"].([]interface{}) {
+			srcIDs = append(srcIDs, v.(string))
 		}
-		srcs = append(srcs, src)
+		for _, srcID := range srcIDs {
+			src := map[string]interface{}{
+				"id": srcID,
+			}
+			srcs = append(srcs, src)
+		}
+	} else {
+		srcs = arg["srcs"].([]map[string]interface{})
 	}
 	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, previousID, isDetached, ignoreFillFilter)
 	if nil != err {

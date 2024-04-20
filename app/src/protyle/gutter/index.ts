@@ -101,7 +101,7 @@ export class Gutter {
                 if (item.querySelector("iframe")) {
                     const embedElement = genEmptyElement();
                     embedElement.classList.add("protyle-wysiwyg--select");
-                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${ buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
+                    getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
                     ghostElement.append(embedElement);
                 } else {
                     ghostElement.append(item.cloneNode(true));
@@ -235,8 +235,11 @@ export class Gutter {
                         action: "insertAttrViewBlock",
                         avID,
                         previousID,
-                        srcIDs,
-                        isDetached: true,
+                        srcs: [{
+                            id: srcIDs[0],
+                            isDetached: true,
+                            content: ""
+                        }],
                         blockID: id,
                     }, {
                         action: "doUpdateUpdated",
@@ -817,17 +820,21 @@ export class Gutter {
             icon: "iconDatabase",
             click: () => {
                 openSearchAV("", selectsElement[0] as HTMLElement, (listItemElement) => {
-                    const sourceIds: string[] = [];
+                    const srcIDs: string[] = [];
+                    const srcs: IOperationSrcs[] = [];
                     selectsElement.forEach(item => {
-                        sourceIds.push(item.getAttribute("data-node-id"));
+                        srcIDs.push(item.getAttribute("data-node-id"));
+                        srcs.push({
+                            id:item.getAttribute("data-node-id"),
+                            isDetached: false,
+                        });
                     });
                     const avID = listItemElement.dataset.avId;
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
-                        srcIDs: sourceIds,
+                        srcs,
                         ignoreFillFilter: true,
-                        isDetached: false,
                         blockID: listItemElement.dataset.blockId
                     }, {
                         action: "doUpdateUpdated",
@@ -835,7 +842,7 @@ export class Gutter {
                         data: dayjs().format("YYYYMMDDHHmmss"),
                     }], [{
                         action: "removeAttrViewBlock",
-                        srcIDs: sourceIds,
+                        srcIDs,
                         avID,
                     }]);
                     focusByRange(range);
@@ -1285,14 +1292,15 @@ export class Gutter {
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {
-                        const sourceIds: string[] = [id];
                         const avID = listItemElement.dataset.avId;
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
-                            srcIDs: sourceIds,
+                            srcs:[{
+                                id,
+                                isDetached: false
+                            }],
                             ignoreFillFilter: true,
-                            isDetached: false,
                             blockID: listItemElement.dataset.blockId
                         }, {
                             action: "doUpdateUpdated",
@@ -1300,7 +1308,7 @@ export class Gutter {
                             data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
-                            srcIDs: sourceIds,
+                            srcIDs: [id],
                             avID,
                         }]);
                         focusByRange(range);

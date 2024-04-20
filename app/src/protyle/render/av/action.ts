@@ -4,7 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {
-    addDragFill,
+    addDragFill, genCellValueByElement,
     getCellText,
     getTypeByCellElement,
     popTextCell,
@@ -277,13 +277,15 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         icon: "iconDatabase",
         click() {
             openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
-                const srcs: { id: string, content: string }[] = [];
+                const srcs: IOperationSrcs[] = [];
                 const sourceIds: string[] = [];
                 rowElements.forEach(item => {
-                    const rowId =  item.getAttribute("data-id")
+                    const rowId = item.getAttribute("data-id")
+                    const blockValue = genCellValueByElement("block", item.querySelector(".av__cell[data-block-id]"));
                     srcs.push({
-                        content:  item.querySelector(".av__cell[data-block-id] .av__celltext").textContent.trim(),
-                        id: rowId
+                        content: blockValue.block.content,
+                        id: rowId,
+                        isDetached: blockValue.isDetached,
                     });
                     sourceIds.push(rowId);
                 })
@@ -293,7 +295,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     avID,
                     ignoreFillFilter: true,
                     srcs,
-                    isDetached: false,
                     blockID: listItemElement.dataset.nodeId
                 }, {
                     action: "doUpdateUpdated",

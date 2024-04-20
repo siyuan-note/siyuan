@@ -52,14 +52,15 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 icon: "iconDatabase",
                 click: () => {
                     openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
-                        const sourceIds: string[] = [response.data.rootID];
                         const avID = listItemElement.dataset.avId;
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
                             ignoreFillFilter: true,
-                            srcIDs: sourceIds,
-                            isDetached: false,
+                            srcs: [{
+                                id: response.data.rootID,
+                                isDetached: false
+                            }],
                             blockID: listItemElement.dataset.nodeId
                         }, {
                             action: "doUpdateUpdated",
@@ -67,7 +68,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                             data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",
-                            srcIDs: sourceIds,
+                            srcIDs: [response.data.rootID],
                             avID,
                         }]);
                         focusByRange(range);

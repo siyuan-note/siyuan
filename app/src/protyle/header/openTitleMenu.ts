@@ -61,10 +61,10 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                                 id: response.data.rootID,
                                 isDetached: false
                             }],
-                            blockID: listItemElement.dataset.nodeId
+                            blockID: listItemElement.dataset.blockId
                         }, {
                             action: "doUpdateUpdated",
-                            id: listItemElement.dataset.nodeId,
+                            id: listItemElement.dataset.blockId,
                             data: dayjs().format("YYYYMMDDHHmmss"),
                         }], [{
                             action: "removeAttrViewBlock",

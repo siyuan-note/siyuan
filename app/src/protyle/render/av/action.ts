@@ -295,10 +295,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     avID,
                     ignoreFillFilter: true,
                     srcs,
-                    blockID: listItemElement.dataset.nodeId
+                    blockID: listItemElement.dataset.blockId
                 }, {
                     action: "doUpdateUpdated",
-                    id: listItemElement.dataset.nodeId,
+                    id: listItemElement.dataset.blockId,
                     data: dayjs().format("YYYYMMDDHHmmss"),
                 }], [{
                     action: "removeAttrViewBlock",

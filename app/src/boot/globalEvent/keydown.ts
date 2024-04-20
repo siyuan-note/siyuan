@@ -319,10 +319,10 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                         id: protyle.block.rootID,
                         isDetached: false
                     }],
-                    blockID: listItemElement.dataset.nodeId
+                    blockID: listItemElement.dataset.blockId
                 }, {
                     action: "doUpdateUpdated",
-                    id: listItemElement.dataset.nodeId,
+                    id: listItemElement.dataset.blockId,
                     data: dayjs().format("YYYYMMDDHHmmss"),
                 }], [{
                     action: "removeAttrViewBlock",

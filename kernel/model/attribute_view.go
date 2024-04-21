@@ -1339,6 +1339,7 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 				unbindBlockAv(tx, operation.AvID, value.BlockID)
 			}
 			value.BlockID = operation.NextID
+			value.IsDetached = true
 			if nil != value.Block {
 				value.Block.ID = operation.NextID
 			}

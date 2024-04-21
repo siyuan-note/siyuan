@@ -29,6 +29,7 @@ import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {openSearchAV} from "./relation";
+import {Constants} from "../../../constants";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -87,7 +88,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
-        searchElement.focus();
+        setTimeout(() => {
+            searchElement.focus();
+        }, Constants.TIMEOUT_TRANSITION);
         event.preventDefault();
         event.stopPropagation();
         return true;

@@ -162,7 +162,7 @@ func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
-		if task.Contain(task.DatabaseIndex, task.DatabaseIndexFull) {
+		if task.ContainIndexTask() {
 			err = ErrIndexing
 			return
 		}
@@ -187,7 +187,7 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
-		if task.Contain(task.DatabaseIndex, task.DatabaseIndexFull) {
+		if task.ContainIndexTask() {
 			err = ErrIndexing
 			return
 		}

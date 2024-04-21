@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -52,6 +51,13 @@ func Themes() (ret []*Theme) {
 
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
+
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			ret = append(ret, pkg.(*Theme))
+			lock.Unlock()
+			return
+		}
 
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
@@ -93,6 +99,8 @@ func Themes() (ret []*Theme) {
 		lock.Lock()
 		ret = append(ret, theme)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, theme)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
@@ -177,14 +185,9 @@ func InstallTheme(repoURL, repoHash, installPath string, systemID string) error 
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallTheme(installPath string) error {
-	if err := os.RemoveAll(installPath); nil != err {
-		logging.LogErrorf("remove theme [%s] failed: %s", installPath, err)
-		return errors.New("remove community theme failed")
-	}
-	//logging.Logger.Infof("uninstalled theme [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }

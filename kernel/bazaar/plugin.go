@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -27,7 +26,6 @@ import (
 
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -54,6 +52,13 @@ func Plugins(frontend string) (plugins []*Plugin) {
 
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
+
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			plugins = append(plugins, pkg.(*Plugin))
+			lock.Unlock()
+			return
+		}
 
 		plugin := &Plugin{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
@@ -97,6 +102,8 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		lock.Lock()
 		plugins = append(plugins, plugin)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, plugin)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
@@ -211,16 +218,11 @@ func InstallPlugin(repoURL, repoHash, installPath string, systemID string) error
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallPlugin(installPath string) error {
-	if err := filelock.Remove(installPath); nil != err {
-		logging.LogErrorf("remove plugin [%s] failed: %s", installPath, err)
-		return errors.New("remove community plugin failed")
-	}
-	//logging.Logger.Infof("uninstalled plugin [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }
 
 func isIncompatiblePlugin(plugin *Plugin, currentFrontend string) bool {

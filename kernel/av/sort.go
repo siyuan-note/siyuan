@@ -18,7 +18,6 @@ package av
 
 import (
 	"bytes"
-	"strconv"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -74,9 +73,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			} else {
 				if !other.Number.IsNotEmpty {
-					return 0
+					return 1
 				}
-				return 1
+				return 0
 			}
 		}
 	case KeyTypeDate:
@@ -94,9 +93,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			} else {
 				if !other.Date.IsNotEmpty {
-					return 0
+					return 1
 				}
-				return 1
+				return 0
 			}
 		}
 	case KeyTypeCreated:
@@ -120,31 +119,50 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			return 0
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
-		if 0 < len(value.MSelect) && 0 < len(other.MSelect) {
-			v1 := value.MSelect[0].Content
-			v2 := other.MSelect[0].Content
-			if v1 == v2 {
-				return 0
-			}
-
+		if nil != value.MSelect && nil != other.MSelect {
+			// 按设置的选项顺序排序
 			key, _ := attrView.GetKey(value.KeyID)
+			optionSort := map[string]int{}
 			if nil != key {
-				optionSort := map[string]int{}
 				for i, op := range key.Options {
 					optionSort[op.Name] = i
 				}
-
-				v1Sort := optionSort[v1]
-				v2Sort := optionSort[v2]
-				if v1Sort > v2Sort {
-					return 1
-				}
-				if v1Sort < v2Sort {
-					return -1
-				}
-				return 0
 			}
-			return strings.Compare(v1, v2)
+
+			vLen := len(value.MSelect)
+			oLen := len(other.MSelect)
+			if vLen <= oLen {
+				for i := 0; i < vLen; i++ {
+					v := value.MSelect[i].Content
+					o := other.MSelect[i].Content
+					vSort := optionSort[v]
+					oSort := optionSort[o]
+					if vSort != oSort {
+						return vSort - oSort
+					}
+					s := strings.Compare(v, o)
+					if 0 != s {
+						return s
+					}
+				}
+				return 1
+			} else {
+				for i := 0; i < oLen; i++ {
+					v := value.MSelect[i].Content
+					o := other.MSelect[i].Content
+					vSort := optionSort[v]
+					oSort := optionSort[o]
+					if vSort != oSort {
+						return vSort - oSort
+					}
+					s := strings.Compare(v, o)
+					if 0 != s {
+						return s
+					}
+				}
+				return -1
+			}
+
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {
@@ -196,11 +214,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeTemplate:
 		if nil != value.Template && nil != other.Template {
-			vContent := strings.TrimSpace(value.Template.Content)
-			oContent := strings.TrimSpace(other.Template.Content)
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
+			v1, ok1 := util.Convert2Float(value.Template.Content)
+			v2, ok2 := util.Convert2Float(other.Template.Content)
+			if ok1 && ok2 {
 				if v1 > v2 {
 					return 1
 				}
@@ -223,59 +239,62 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeRelation:
 		if nil != value.Relation && nil != other.Relation {
+			if 1 < len(value.Relation.Contents) && 1 < len(other.Relation.Contents) && KeyTypeNumber == value.Relation.Contents[0].Type && KeyTypeNumber == other.Relation.Contents[0].Type {
+				v1, ok1 := util.Convert2Float(value.Relation.Contents[0].String(false))
+				v2, ok2 := util.Convert2Float(other.Relation.Contents[0].String(false))
+				if ok1 && ok2 {
+					if v1 > v2 {
+						return 1
+					}
+					if v1 < v2 {
+						return -1
+					}
+					return 0
+				}
+			}
+
 			vContentBuf := bytes.Buffer{}
 			for _, c := range value.Relation.Contents {
-				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteString(c.String(true))
 				vContentBuf.WriteByte(' ')
 			}
 			vContent := strings.TrimSpace(vContentBuf.String())
 			oContentBuf := bytes.Buffer{}
 			for _, c := range other.Relation.Contents {
-				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteString(c.String(true))
 				oContentBuf.WriteByte(' ')
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
-
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
-				if v1 > v2 {
-					return 1
-				}
-
-				if v1 < v2 {
-					return -1
-				}
-				return 0
-			}
 			return strings.Compare(vContent, oContent)
 		}
 	case KeyTypeRollup:
 		if nil != value.Rollup && nil != other.Rollup {
+			if 1 < len(value.Rollup.Contents) && 1 < len(other.Rollup.Contents) && KeyTypeNumber == value.Rollup.Contents[0].Type && KeyTypeNumber == other.Rollup.Contents[0].Type {
+				v1, ok1 := util.Convert2Float(value.Rollup.Contents[0].String(false))
+				v2, ok2 := util.Convert2Float(other.Rollup.Contents[0].String(false))
+				if ok1 && ok2 {
+					if v1 > v2 {
+						return 1
+					}
+					if v1 < v2 {
+						return -1
+					}
+					return 0
+				}
+			}
+
 			vContentBuf := bytes.Buffer{}
 			for _, c := range value.Rollup.Contents {
-				vContentBuf.WriteString(c.String())
+				vContentBuf.WriteString(c.String(true))
 				vContentBuf.WriteByte(' ')
 			}
 			vContent := strings.TrimSpace(vContentBuf.String())
 			oContentBuf := bytes.Buffer{}
 			for _, c := range other.Rollup.Contents {
-				oContentBuf.WriteString(c.String())
+				oContentBuf.WriteString(c.String(true))
 				oContentBuf.WriteByte(' ')
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
-
-			if util.IsNumeric(vContent) && util.IsNumeric(oContent) {
-				v1, _ := strconv.ParseFloat(vContent, 64)
-				v2, _ := strconv.ParseFloat(oContent, 64)
-				if v1 > v2 {
-					return 1
-				}
-				if v1 < v2 {
-					return -1
-				}
-				return 0
-			}
 			return strings.Compare(vContent, oContent)
 		}
 	}

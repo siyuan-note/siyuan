@@ -22,6 +22,10 @@ export const getCurrentEditor = () => {
 export const openMobileFileById = (app: App, id: string, action = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
+    const avPanelElement = document.querySelector(".av__panel");
+    if (avPanelElement && !avPanelElement.classList.contains("fn__none")) {
+        avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+    }
     if (window.siyuan.mobile.editor) {
         saveScroll(window.siyuan.mobile.editor.protyle);
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobile.editor.protyle);
@@ -72,7 +76,12 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
-                    mergedOptions: protyleOptions
+                    mergedOptions: protyleOptions,
+                    cb() {
+                        app.plugins.forEach(item => {
+                            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                        });
+                    }
                 });
             } else {
                 fetchPost("/api/filetree/getDoc", {
@@ -83,7 +92,12 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                     onGet({
                         data: getResponse,
                         protyle: window.siyuan.mobile.editor.protyle,
-                        action
+                        action,
+                        afterCB() {
+                            app.plugins.forEach(item => {
+                                item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                            });
+                        }
                     });
                 });
             }
@@ -94,8 +108,5 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === window.siyuan.languages.untitled ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
-        app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
-        });
     });
 };

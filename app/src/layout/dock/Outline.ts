@@ -229,7 +229,7 @@ export class Outline extends Model {
     private bindSort() {
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             const item = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-            if (!item || item.tagName !== "LI") {
+            if (!item || item.tagName !== "LI" || this.element.getAttribute("data-loading") === "true") {
                 return;
             }
             const documentSelf = document;
@@ -244,7 +244,7 @@ export class Outline extends Model {
                 }
             });
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (!editor || editor.disabled || moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX || this.element.getAttribute("data-loading") === "true") {
+                if (!editor || editor.disabled || moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX) {
                     return;
                 }
                 moveEvent.preventDefault();
@@ -327,6 +327,10 @@ export class Outline extends Model {
                         previousID: undoPreviousID,
                         parentID: undoParentID,
                     }]);
+                    // https://github.com/siyuan-note/siyuan/issues/10828#issuecomment-2044099675
+                    editor.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"] [contenteditable="true"][spellcheck]').forEach(item => {
+                        item.setAttribute("contenteditable", "false");
+                    });
                     return true;
                 }
                 this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {

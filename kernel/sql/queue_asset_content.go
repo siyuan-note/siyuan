@@ -33,8 +33,7 @@ import (
 var (
 	assetContentOperationQueue []*assetContentDBQueueOperation
 	assetContentDBQueueLock    = sync.Mutex{}
-
-	assetContentTxLock = sync.Mutex{}
+	assetContentTxLock         = sync.Mutex{}
 )
 
 type assetContentDBQueueOperation struct {
@@ -51,7 +50,8 @@ func FlushAssetContentTxJob() {
 
 func FlushAssetContentQueue() {
 	ops := getAssetContentOperations()
-	if 1 > len(ops) {
+	total := len(ops)
+	if 1 > total {
 		return
 	}
 
@@ -97,7 +97,7 @@ func FlushAssetContentQueue() {
 		}
 	}
 
-	if 128 < len(ops) {
+	if 128 < total {
 		debug.FreeOSMemory()
 	}
 
@@ -122,24 +122,24 @@ func execAssetContentOp(op *assetContentDBQueueOperation, tx *sql.Tx, context ma
 }
 
 func DeleteAssetContentsByPathQueue(path string) {
-	assetContentTxLock.Lock()
-	defer assetContentTxLock.Unlock()
+	assetContentDBQueueLock.Lock()
+	defer assetContentDBQueueLock.Unlock()
 
 	newOp := &assetContentDBQueueOperation{inQueueTime: time.Now(), action: "deletePath", path: path}
 	assetContentOperationQueue = append(assetContentOperationQueue, newOp)
 }
 
 func IndexAssetContentsQueue(assetContents []*AssetContent) {
-	assetContentTxLock.Lock()
-	defer assetContentTxLock.Unlock()
+	assetContentDBQueueLock.Lock()
+	defer assetContentDBQueueLock.Unlock()
 
 	newOp := &assetContentDBQueueOperation{inQueueTime: time.Now(), action: "index", assetContents: assetContents}
 	assetContentOperationQueue = append(assetContentOperationQueue, newOp)
 }
 
 func getAssetContentOperations() (ops []*assetContentDBQueueOperation) {
-	assetContentTxLock.Lock()
-	defer assetContentTxLock.Unlock()
+	assetContentDBQueueLock.Lock()
+	defer assetContentDBQueueLock.Unlock()
 
 	ops = assetContentOperationQueue
 	assetContentOperationQueue = nil

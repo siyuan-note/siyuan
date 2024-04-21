@@ -799,6 +799,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
 
                 const sourceIds: string [] = [];
+                const srcs: IOperationSrcs[] = [];
                 sourceElements.forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
                     item.removeAttribute("select-start");
@@ -807,7 +808,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
                         markItem.outerHTML = markItem.innerHTML;
                     });
-                    sourceIds.push(item.getAttribute("data-node-id"));
+                    const id = item.getAttribute("data-node-id")
+                    sourceIds.push(id);
+                    srcs.push({
+                        id,
+                        isDetached: false,
+                    })
                 });
 
                 hideElements(["gutter"], protyle);
@@ -843,19 +849,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 }
                             }
                         }
-                        transaction(protyle, [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }], [{
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID: oldPreviousID,
-                            id: gutterTypes[2],
-                            blockID: blockElement.dataset.nodeId,
-                        }]);
+                        if (previousID !== oldPreviousID && previousID !== gutterTypes[2]) {
+                            transaction(protyle, [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }], [{
+                                action: "sortAttrViewCol",
+                                avID,
+                                previousID: oldPreviousID,
+                                id: gutterTypes[2],
+                                blockID: blockElement.dataset.nodeId,
+                            }]);
+                        }
                     }
                 } else if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
@@ -874,20 +882,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
-                                doOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
-                                undoOperations.push({
-                                    action: "sortAttrViewRow",
-                                    avID,
-                                    previousID: undoPreviousId,
-                                    id: item,
-                                    blockID: blockElement.dataset.nodeId,
-                                });
+                                if (previousID !== item && undoPreviousId !== previousID) {
+                                    doOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                    undoOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID: undoPreviousId,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
@@ -896,8 +906,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
-                                srcIDs: sourceIds,
-                                isDetached: false,
+                                srcs,
                                 blockID: blockElement.dataset.nodeId
                             }, {
                                 action: "doUpdateUpdated",
@@ -963,12 +972,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     const avID = blockElement.getAttribute("data-av-id");
                     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                    const srcs: IOperationSrcs[] = [];
+                    ids.forEach(id => {
+                        srcs.push({
+                            id,
+                            isDetached: false,
+                        });
+                    });
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
                         previousID,
-                        srcIDs: ids,
-                        isDetached: false,
+                        srcs,
                         blockID: blockElement.dataset.nodeId,
                     }, {
                         action: "doUpdateUpdated",
@@ -1063,7 +1078,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+        if (!hasClosestByClassName(event.target, "av__cell") && (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
             protyle.contentElement.scroll({
                 top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
                 behavior: "smooth"

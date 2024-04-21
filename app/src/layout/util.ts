@@ -1,39 +1,39 @@
-import { Layout } from "./index";
-import { Wnd } from "./Wnd";
-import { Tab } from "./Tab";
-import { Model } from "./Model";
-import { Graph } from "./dock/Graph";
-import { Editor } from "../editor";
-import { Files } from "./dock/Files";
-import { Outline } from "./dock/Outline";
-import { Bookmark } from "./dock/Bookmark";
-import { Tag } from "./dock/Tag";
-import { getAllModels, getAllTabs } from "./getAll";
-import { Asset } from "../asset";
-import { Search } from "../search";
-import { Dock } from "./dock";
-import { focusByOffset, focusByRange, getSelectionOffset } from "../protyle/util/selection";
-import { hideElements } from "../protyle/ui/hideElements";
-import { fetchPost } from "../util/fetch";
-import { hasClosestBlock, hasClosestByClassName } from "../protyle/util/hasClosest";
-import { getContenteditableElement } from "../protyle/wysiwyg/getBlock";
-import { Constants } from "../constants";
-import { saveScroll } from "../protyle/scroll/saveScroll";
-import { Backlink } from "./dock/Backlink";
-import { openFileById } from "../editor/util";
-import { isWindow } from "../util/functions";
+import {Layout} from "./index";
+import {Wnd} from "./Wnd";
+import {Tab} from "./Tab";
+import {Model} from "./Model";
+import {Graph} from "./dock/Graph";
+import {Editor} from "../editor";
+import {Files} from "./dock/Files";
+import {Outline} from "./dock/Outline";
+import {Bookmark} from "./dock/Bookmark";
+import {Tag} from "./dock/Tag";
+import {getAllModels, getAllTabs} from "./getAll";
+import {Asset} from "../asset";
+import {Search} from "../search";
+import {Dock} from "./dock";
+import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
+import {hideElements} from "../protyle/ui/hideElements";
+import {fetchPost} from "../util/fetch";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
+import {Constants} from "../constants";
+import {saveScroll} from "../protyle/scroll/saveScroll";
+import {Backlink} from "./dock/Backlink";
+import {openFileById} from "../editor/util";
+import {isWindow} from "../util/functions";
 /// #if !BROWSER
-import { setTabPosition } from "../window/setHeader";
+import {setTabPosition} from "../window/setHeader";
 /// #endif
-import { showMessage } from "../dialog/message";
-import { getIdZoomInByPath } from "../util/pathName";
-import { Custom } from "./dock/Custom";
-import { newCardModel } from "../card/newCardTab";
-import { App } from "../index";
-import { afterLoadPlugin } from "../plugin/loader";
-import { setTitle } from "../dialog/processSystem";
-import { newCenterEmptyTab, resizeTabs } from "./tabUtil";
-import { setStorageVal } from "../protyle/util/compatibility";
+import {showMessage} from "../dialog/message";
+import {getIdZoomInByPath} from "../util/pathName";
+import {Custom} from "./dock/Custom";
+import {newCardModel} from "../card/newCardTab";
+import {App} from "../index";
+import {afterLoadPlugin} from "../plugin/loader";
+import {setTitle} from "../dialog/processSystem";
+import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -169,7 +169,7 @@ const dockToJSON = (dock: Dock) => {
 };
 
 export const resetLayout = () => {
-    fetchPost("/api/system/setUILayout", { layout: {} }, () => {
+    fetchPost("/api/system/setUILayout", {layout: {}}, () => {
         window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
         setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
         window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
@@ -290,9 +290,9 @@ const JSONToDock = (json: any, app: App) => {
         initInternalDock(existItem);
     });
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;
-    window.siyuan.layout.leftDock = new Dock({ position: "Left", data: json.left, app });
-    window.siyuan.layout.rightDock = new Dock({ position: "Right", data: json.right, app });
-    window.siyuan.layout.bottomDock = new Dock({ position: "Bottom", data: json.bottom, app });
+    window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left, app});
+    window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right, app});
+    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
 };
 
 export const JSONToCenter = (
@@ -579,8 +579,6 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         json.instance = "Custom";
         json.customModelType = layout.type;
         json.customModelData = Object.assign({}, layout.data);
-        // https://github.com/siyuan-note/siyuan/issues/9250
-        delete json.customModelData.editor;
     }
 
     if (layout instanceof Layout || layout instanceof Wnd) {
@@ -906,4 +904,40 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             adjustLayout(item);
         }
     });
+};
+
+export const fixWndFlex1 = (layout: Layout) => {
+    if (layout.children.length < 2) {
+        return;
+    }
+    if (layout.children[layout.children.length - 2].element.classList.contains("fn__flex-1")) {
+        return;
+    }
+    layout.children.forEach((item, index) => {
+        if (index !== layout.children.length - 2) {
+            if (layout.direction === "lr") {
+                if (item.element.classList.contains("fn__flex-1")) {
+                    item.element.style.width = item.element.clientWidth + "px";
+                    item.element.classList.remove("fn__flex-1");
+                }
+            } else {
+                if (item.element.classList.contains("fn__flex-1")) {
+                    item.element.style.height = item.element.clientHeight + "px";
+                    item.element.classList.remove("fn__flex-1");
+                }
+            }
+        }
+    });
+    const flex1Element = layout.children[layout.children.length - 2].element;
+    if (layout.direction === "lr") {
+        if (flex1Element.style.width) {
+            flex1Element.style.width = "";
+            flex1Element.classList.add("fn__flex-1");
+        }
+    } else {
+        if (flex1Element.style.height) {
+            flex1Element.style.height = "";
+            flex1Element.classList.add("fn__flex-1");
+        }
+    }
 };

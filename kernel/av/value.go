@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -64,7 +65,7 @@ func (value *Value) SetUpdatedAt(mills int64) {
 	}
 }
 
-func (value *Value) String() string {
+func (value *Value) String(format bool) string {
 	if nil == value {
 		return ""
 	}
@@ -84,7 +85,10 @@ func (value *Value) String() string {
 		if nil == value.Number {
 			return ""
 		}
-		return value.Number.FormattedContent
+		if format {
+			return value.Number.FormattedContent
+		}
+		return fmt.Sprintf("%f", value.Number.Content)
 	case KeyTypeDate:
 		if nil == value.Date {
 			return ""
@@ -158,7 +162,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.Relation.Contents {
-			ret = append(ret, v.String())
+			ret = append(ret, v.String(format))
 		}
 		return strings.TrimSpace(strings.Join(ret, ", "))
 	case KeyTypeRollup:
@@ -167,7 +171,7 @@ func (value *Value) String() string {
 		}
 		var ret []string
 		for _, v := range value.Rollup.Contents {
-			ret = append(ret, v.String())
+			ret = append(ret, v.String(format))
 		}
 		return strings.TrimSpace(strings.Join(ret, ", "))
 	default:
@@ -203,6 +207,11 @@ func (value *Value) IsEdited() bool {
 
 	if KeyTypeUpdated == value.Type || KeyTypeCreated == value.Type {
 		return true
+	}
+
+	if KeyTypeCheckbox == value.Type {
+		// 勾选框不会为空，即使勾选框未勾选，也不算是空，所以不能用下面的 IsEmpty 判断，这里使用更新时间判断是否编辑过 https://github.com/siyuan-note/siyuan/issues/11016
+		return value.CreatedAt != value.UpdatedAt
 	}
 
 	if !value.IsEmpty() {
@@ -276,7 +285,7 @@ func (value *Value) IsEmpty() bool {
 		if nil == value.Checkbox {
 			return true
 		}
-		return !value.Checkbox.Checked
+		return false // 勾选框不会为空
 	case KeyTypeRelation:
 		return 1 > len(value.Relation.Contents)
 	case KeyTypeRollup:
@@ -679,8 +688,8 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, v := range r.Contents {
-			if _, ok := uniqueValues[v.String()]; !ok {
-				uniqueValues[v.String()] = true
+			if _, ok := uniqueValues[v.String(true)]; !ok {
+				uniqueValues[v.String(true)] = true
 				countUniqueValues++
 			}
 		}
@@ -688,7 +697,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v.String() {
+			if "" == v.String(true) {
 				countEmpty++
 			}
 		}
@@ -696,7 +705,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorCountNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v.String() {
+			if "" != v.String(true) {
 				countNonEmpty++
 			}
 		}
@@ -704,7 +713,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
-			if "" == v.String() {
+			if "" == v.String(true) {
 				countEmpty++
 			}
 		}
@@ -714,7 +723,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	case CalcOperatorPercentNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
-			if "" != v.String() {
+			if "" != v.String(true) {
 				countNonEmpty++
 			}
 		}
@@ -893,4 +902,57 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
 		}
 	}
+}
+
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+	if "" == valueID {
+		valueID = ast.NewNodeID()
+	}
+
+	ret = &Value{ID: valueID, KeyID: keyID, BlockID: blockID, Type: typ}
+
+	createdStr := valueID[:len("20060102150405")]
+	created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+	if nil == parseErr {
+		ret.CreatedAt = created.UnixMilli()
+	} else {
+		ret.CreatedAt = time.Now().UnixMilli()
+	}
+	if 0 == ret.UpdatedAt {
+		ret.UpdatedAt = ret.CreatedAt
+	}
+
+	switch typ {
+	case KeyTypeText:
+		ret.Text = &ValueText{}
+	case KeyTypeNumber:
+		ret.Number = &ValueNumber{}
+	case KeyTypeDate:
+		ret.Date = &ValueDate{}
+	case KeyTypeSelect:
+		ret.MSelect = []*ValueSelect{}
+	case KeyTypeMSelect:
+		ret.MSelect = []*ValueSelect{}
+	case KeyTypeURL:
+		ret.URL = &ValueURL{}
+	case KeyTypeEmail:
+		ret.Email = &ValueEmail{}
+	case KeyTypePhone:
+		ret.Phone = &ValuePhone{}
+	case KeyTypeMAsset:
+		ret.MAsset = []*ValueAsset{}
+	case KeyTypeTemplate:
+		ret.Template = &ValueTemplate{}
+	case KeyTypeCreated:
+		ret.Created = &ValueCreated{}
+	case KeyTypeUpdated:
+		ret.Updated = &ValueUpdated{}
+	case KeyTypeCheckbox:
+		ret.Checkbox = &ValueCheckbox{}
+	case KeyTypeRelation:
+		ret.Relation = &ValueRelation{}
+	case KeyTypeRollup:
+		ret.Rollup = &ValueRollup{}
+	}
+	return
 }

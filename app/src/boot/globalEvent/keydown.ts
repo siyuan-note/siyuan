@@ -214,10 +214,18 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             } else {
                 protyle = activeTab.model.editors.unRefEdit.protyle;
             }
-        } else if (activeTab.model instanceof Custom && activeTab.model.data?.editor instanceof Protyle) {
-            protyle = activeTab.model.data.editor.protyle;
-        } else {
-            return false;
+        } else if (activeTab.model instanceof Custom && activeTab.model.editors?.length > 0) {
+            if (range) {
+                activeTab.model.editors.find(item => {
+                    if (item.protyle.element.contains(range.startContainer)) {
+                        protyle = item.protyle;
+                        return true;
+                    }
+                })
+            }
+        }
+        if (!protyle) {
+            return;
         }
     } else if (!protyle) {
         if (!protyle && range) {
@@ -310,24 +318,26 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.addToDatabase.custom, event)) {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
-                const sourceIds: string[] = [protyle.block.rootID];
                 const avID = listItemElement.dataset.avId;
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",
                     avID,
                     ignoreFillFilter: true,
-                    srcIDs: sourceIds,
-                    isDetached: false,
-                    blockID: listItemElement.dataset.nodeId
+                    srcs: [{
+                        id: protyle.block.rootID,
+                        isDetached: false
+                    }],
+                    blockID: listItemElement.dataset.blockId
                 }, {
                     action: "doUpdateUpdated",
-                    id: listItemElement.dataset.nodeId,
+                    id: listItemElement.dataset.blockId,
                     data: dayjs().format("YYYYMMDDHHmmss"),
                 }], [{
                     action: "removeAttrViewBlock",
-                    srcIDs: sourceIds,
+                    srcIDs: [protyle.block.rootID],
                     avID,
                 }]);
+                focusByRange(range);
             });
         } else {
             const selectElement: Element[] = [];
@@ -341,17 +351,21 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 }
             }
             openSearchAV("", selectElement[0] as HTMLElement, (listItemElement) => {
-                const sourceIds: string[] = [];
+                const srcIDs: string[] = [];
+                const srcs: IOperationSrcs[] = [];
                 selectElement.forEach(item => {
-                    sourceIds.push(item.getAttribute("data-node-id"));
+                    srcIDs.push(item.getAttribute("data-node-id"));
+                    srcs.push({
+                        id: item.getAttribute("data-node-id"),
+                        isDetached: false
+                    });
                 });
                 const avID = listItemElement.dataset.avId;
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",
                     avID,
                     ignoreFillFilter: true,
-                    srcIDs: sourceIds,
-                    isDetached: false,
+                    srcs,
                     blockID: listItemElement.dataset.blockId
                 }, {
                     action: "doUpdateUpdated",
@@ -359,9 +373,10 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                     data: dayjs().format("YYYYMMDDHHmmss"),
                 }], [{
                     action: "removeAttrViewBlock",
-                    srcIDs: sourceIds,
+                    srcIDs,
                     avID,
                 }]);
+                focusByRange(range);
             });
         }
         event.preventDefault();
@@ -1715,9 +1730,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.stickSearch.custom, event)) {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
-            openGlobalSearch(app, range.toString(), false);
+            openGlobalSearch(app, range.toString(), true);
         } else {
-            openGlobalSearch(app, "", false);
+            openGlobalSearch(app, "", true);
         }
         event.preventDefault();
         return;

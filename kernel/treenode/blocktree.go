@@ -31,6 +31,7 @@ import (
 	"github.com/panjf2000/ants/v2"
 	util2 "github.com/siyuan-note/dejavu/util"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -191,6 +192,19 @@ func GetBlockTreeRootByHPathPreferredParentID(boxID, hPath, preferredParentID st
 	}
 	ret = roots[0]
 	return
+}
+
+func ExistBlockTree(id string) bool {
+	hash := btHash(id)
+	val, ok := blockTrees.Load(hash)
+	if !ok {
+		return false
+	}
+	slice := val.(*btSlice)
+	slice.m.Lock()
+	_, ok = slice.data[id]
+	slice.m.Unlock()
+	return ok
 }
 
 func GetBlockTree(id string) (ret *BlockTree) {
@@ -503,6 +517,12 @@ func SaveBlockTreeJob() {
 func SaveBlockTree(force bool) {
 	blockTreeLock.Lock()
 	defer blockTreeLock.Unlock()
+
+	if task.ContainIndexTask() {
+		//logging.LogInfof("skip saving block tree because indexing")
+		return
+	}
+	//logging.LogInfof("saving block tree")
 
 	start := time.Now()
 	if err := os.MkdirAll(util.BlockTreePath, 0755); nil != err {

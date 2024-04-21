@@ -132,8 +132,20 @@ func InitConf() {
 	}
 
 	if "" != util.Lang {
-		Conf.Lang = util.Lang
-		logging.LogInfof("initialized the specified language [%s]", util.Lang)
+		initialized := false
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// 移动端以上次设置的外观语言为准
+			if "" != Conf.Lang && util.Lang != Conf.Lang {
+				util.Lang = Conf.Lang
+				logging.LogInfof("use the last specified language [%s]", util.Lang)
+				initialized = true
+			}
+		}
+
+		if !initialized {
+			Conf.Lang = util.Lang
+			logging.LogInfof("initialized the specified language [%s]", util.Lang)
+		}
 	} else {
 		if "" == Conf.Lang {
 			// 未指定外观语言时使用系统语言

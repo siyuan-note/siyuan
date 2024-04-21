@@ -10,6 +10,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {openMenuPanel} from "./openMenuPanel";
 import {fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
+import {upDownHint} from "../../../util/upDownHint";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number", "date", "created", "updated"].includes(type)) {
@@ -54,6 +55,20 @@ const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
     }
 };
 
+const filterSelect = (key: string) => {
+    window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__item").forEach((item) => {
+        const nameElement = item.querySelector(".b3-chip.b3-chip--middle") as HTMLElement;
+        if (nameElement) {
+            const itemName = nameElement.dataset.name.toLowerCase();
+            if (!key || (key.indexOf(itemName) > -1 || itemName.indexOf(key) > -1)) {
+                item.classList.remove("fn__none");
+            } else {
+                item.classList.add("fn__none");
+            }
+        }
+    });
+};
+
 export const setFilter = async (options: {
     filter: IAVFilter,
     protyle: IProtyle,
@@ -81,38 +96,7 @@ export const setFilter = async (options: {
         };
         let hasMatch = false;
         let newValue;
-        if (textElements.length > 0) {
-            if (["date", "updated", "created"].includes(filterValue.type)) {
-                const typeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
-                const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
-                if (typeElement.value === "custom") {
-                    newFilter.relativeDate = {
-                        count: parseInt((directElements[0].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
-                        unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
-                        direction: parseInt(directElements[0].value)
-                    };
-                    newFilter.relativeDate2 = {
-                        count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
-                        unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
-                        direction: parseInt(directElements[1].value)
-                    };
-                    newValue = {type: filterValue.type};
-                } else {
-                    newValue = genCellValue(filterValue.type, {
-                        isNotEmpty2: textElements[2].value !== "",
-                        isNotEmpty: textElements[0].value !== "",
-                        content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
-                        content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : null,
-                        hasEndDate: newFilter.operator === "Is between",
-                        isNotTime: true,
-                    });
-                    newFilter.relativeDate = null;
-                    newFilter.relativeDate2 = null;
-                }
-            } else {
-                newValue = genCellValue(filterValue.type, textElements[0].value);
-            }
-        } else if (filterValue.type === "select" || filterValue.type === "mSelect") {
+        if (filterValue.type === "select" || filterValue.type === "mSelect") {
             const mSelect: {
                 color: string,
                 content: string
@@ -127,6 +111,35 @@ export const setFilter = async (options: {
                 }
             });
             newValue = genCellValue(filterValue.type, mSelect);
+        } else if (["date", "updated", "created"].includes(filterValue.type)) {
+            const typeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
+            const directElements = menu.element.querySelectorAll('.b3-select[data-type="dataDirection"]') as NodeListOf<HTMLSelectElement>;
+            if (typeElement.value === "custom") {
+                newFilter.relativeDate = {
+                    count: parseInt((directElements[0].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                    unit: parseInt((directElements[0].parentElement.lastElementChild as HTMLSelectElement).value),
+                    direction: parseInt(directElements[0].value)
+                };
+                newFilter.relativeDate2 = {
+                    count: parseInt((directElements[1].parentElement.querySelector(".b3-text-field") as HTMLInputElement).value || "1"),
+                    unit: parseInt((directElements[1].parentElement.lastElementChild as HTMLSelectElement).value),
+                    direction: parseInt(directElements[1].value)
+                };
+                newValue = {type: filterValue.type};
+            } else {
+                newValue = genCellValue(filterValue.type, {
+                    isNotEmpty2: textElements[2].value !== "",
+                    isNotEmpty: textElements[0].value !== "",
+                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
+                    content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : null,
+                    hasEndDate: newFilter.operator === "Is between",
+                    isNotTime: true,
+                });
+                newFilter.relativeDate = null;
+                newFilter.relativeDate2 = null;
+            }
+        } else if (["text", "url", "block", "email", "phone", "template", "relation", "number"].includes(filterValue.type)) {
+            newValue = genCellValue(filterValue.type, textElements[0].value);
         } else if (filterValue.type === "checkbox") {
             newValue = genCellValue(filterValue.type, {
                 checked: newFilter.operator === "Is true"
@@ -313,6 +326,37 @@ export const setFilter = async (options: {
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
     if (filterValue.type === "select" || filterValue.type === "mSelect") {
+        if (colData.options?.length > 0) {
+            menu.addItem({
+                iconHTML: "",
+                type: "readonly",
+                label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">`,
+                bind(element) {
+                    const selectSearchElement = element.querySelector("input");
+                    selectSearchElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                        if (event.isComposing) {
+                            return;
+                        }
+                        let currentElement = upDownHint(menu.element.querySelector(".b3-menu__items"), event, "b3-menu__item--current", element.nextElementSibling);
+                        if (event.key === "Enter") {
+                            if (!currentElement) {
+                                currentElement = menu.element.querySelector(".b3-menu__item--current");
+                            }
+                            currentElement.dispatchEvent(new CustomEvent("click"));
+                        }
+                    });
+                    selectSearchElement.addEventListener("input", (event: InputEvent) => {
+                        if (event.isComposing) {
+                            return;
+                        }
+                        filterSelect(selectSearchElement.value.toLowerCase());
+                    });
+                    selectSearchElement.addEventListener("compositionend", () => {
+                        filterSelect(selectSearchElement.value.toLowerCase());
+                    });
+                }
+            });
+        }
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
             filterValue?.mSelect?.find((optionItem: IAVCellSelectValue) => {
@@ -483,18 +527,20 @@ export const setFilter = async (options: {
     });
 
     const textElements: NodeListOf<HTMLInputElement> = menu.element.querySelectorAll(".b3-text-field");
-    textElements.forEach(item => {
-        item.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (event.isComposing) {
-                event.preventDefault();
-                return;
-            }
-            if (event.key === "Enter") {
-                menu.close();
-                event.preventDefault();
-            }
+    if (filterValue.type !== "select" && filterValue.type !== "mSelect") {
+        textElements.forEach(item => {
+            item.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    event.preventDefault();
+                    return;
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                    event.preventDefault();
+                }
+            });
         });
-    });
+    }
     toggleEmpty(selectElement, selectElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {
@@ -520,7 +566,8 @@ export const addFilter = (options: {
                 return true;
             }
         });
-        if (!filter && column.type !== "mAsset") {
+        // 该列是行号类型列，则不允许添加到过滤器
+        if (!filter && column.type !== "mAsset" && column.type !== "lineNumber") {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,

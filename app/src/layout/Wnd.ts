@@ -1,6 +1,7 @@
 import {Layout} from "./index";
 import {genUUID} from "../util/genID";
 import {
+    fixWndFlex1,
     getInstanceById,
     getWndByLayout, JSONToCenter,
     newModelByInitData, pdfIsLoading, saveLayout,
@@ -716,7 +717,7 @@ export class Wnd {
                     // 关闭分屏页签后光标消失
                     const editors = getAllModels().editor;
                     if (editors.length === 0) {
-                       clearOBG();
+                        clearOBG();
                     } else {
                         editors.forEach(item => {
                             if (!item.element.classList.contains("fn__none")) {
@@ -965,13 +966,6 @@ export class Wnd {
                         }
                         previous.resize = undefined;
                         previous.element.classList.add("fn__flex-1");
-                    } else if (!previous.element.classList.contains("fn__flex-1")) {
-                        // 分屏后要均分 https://github.com/siyuan-note/siyuan/issues/5657
-                        if (layout.direction === "lr") {
-                            previous.element.style.width = (previous.element.clientWidth + element.clientWidth) + "px";
-                        } else {
-                            previous.element.style.height = (previous.element.clientHeight + element.clientHeight) + "px";
-                        }
                     }
                     // https://github.com/siyuan-note/siyuan/issues/5844
                     if (layout.children.length > 2 && index === 0) {
@@ -988,6 +982,7 @@ export class Wnd {
             element.nextElementSibling.remove();
         }
         element.remove();
+        fixWndFlex1(layout);
         resizeTabs();
     }
 }

@@ -1,6 +1,7 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {App} from "../../index";
+import {Protyle} from "../../protyle";
 
 export class Custom extends Model {
     public element: Element;
@@ -12,6 +13,7 @@ export class Custom extends Model {
     public beforeDestroy: () => void;
     public resize: () => void;
     public update: () => void;
+    public editors: Protyle[] = [];
 
     constructor(options: {
         app: App,

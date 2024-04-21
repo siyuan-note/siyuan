@@ -189,7 +189,7 @@ export const getLocalStorage = (cb: () => void) => {
             dark: "dark",
             annoColor: "var(--b3-pdf-background1)"
         };
-        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}}
+        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
         defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};

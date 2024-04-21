@@ -281,6 +281,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				}
 				return ast.WalkContinue
 			})
+
+			// 关联数据库和块
+			avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+			av.BatchUpsertBlockRel(avNodes)
 		}
 	}
 
@@ -545,7 +549,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		treenode.IndexBlockTree(tree)
-		sql.UpsertTreeQueue(tree)
+		sql.IndexTreeQueue(tree)
 	}
 
 	IncSync()
@@ -890,11 +894,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		buildBlockRefInText()
 
 		for i, tree := range importTrees {
-			indexWriteJSONQueue(tree)
+			indexWriteTreeIndexQueue(tree)
 			if 0 == i%4 {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
 			}
 		}
+		util.PushClearProgress()
 
 		importTrees = []*parse.Tree{}
 		searchLinks = map[string]string{}

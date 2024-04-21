@@ -250,7 +250,7 @@
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 2;
     }
 
     &__content {
@@ -269,7 +269,7 @@
       padding: 16px 16px 16px 0;
       box-sizing: border-box;
       opacity: 0;
-      z-index: 1;
+      z-index: 3;
       border-radius: var(--b3-border-radius-b);
 
       &--show {

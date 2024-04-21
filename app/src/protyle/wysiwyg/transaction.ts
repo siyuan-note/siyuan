@@ -122,6 +122,9 @@ const promiseTransaction = () => {
                             item.remove();
                         }
                     });
+                    if (protyle.disabled) {
+                        disabledProtyle(protyle);
+                    }
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
                     avRender(protyle.wysiwyg.element, protyle);
@@ -188,6 +191,7 @@ const promiseTransaction = () => {
                         blockRender(protyle, item);
                     }
                 });
+                hideElements(["gutter"], protyle);
                 return;
             }
             if (operation.action === "move") {
@@ -402,6 +406,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
         });
         if (operation.retData) {
+            if (protyle.disabled) {
+                disabledProtyle(protyle);
+            }
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
@@ -731,7 +738,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "append") {
-        reloadProtyle(protyle, false);
+        // 目前只有移动块的时候会调用，反连面板就自己点击刷新处理。
+        if (!protyle.options.backlinkData) {
+            reloadProtyle(protyle, false);
+        }
         return;
     }
     if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewColOptions",

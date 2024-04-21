@@ -1763,7 +1763,7 @@ export class WYSIWYG {
                 return;
             }
             const blockElement = hasClosestBlock(event.target);
-            if (blockElement && (!getContenteditableElement(blockElement) || hasClosestByClassName(event.target, "av__cursor"))) {
+            if (blockElement && !getContenteditableElement(blockElement)) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;

@@ -930,11 +930,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 if (selectElements.length > 0) {
                     selectElements[0].setAttribute("data-reftext", "true");
+                    focusByRange(getEditorRange(nodeElement));
+                    document.execCommand("copy");
                 } else {
-                    nodeElement.setAttribute("data-reftext", "true");
+                    writeText(`((${nodeElement.getAttribute("data-node-id")} "*"))`);
                 }
-                focusByRange(getEditorRange(nodeElement));
-                document.execCommand("copy");
             }
             event.preventDefault();
             event.stopPropagation();

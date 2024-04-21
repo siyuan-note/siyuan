@@ -1339,6 +1339,7 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 				unbindBlockAv(tx, operation.AvID, value.BlockID)
 			}
 			value.BlockID = operation.NextID
+			value.IsDetached = true
 			if nil != value.Block {
 				value.Block.ID = operation.NextID
 			}
@@ -1602,7 +1603,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 	if !isSameAv {
 		err = av.SaveAttributeView(destAv)
-		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
+		util.PushReloadAttrView(destAv.ID)
 	}
 
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
@@ -2419,7 +2420,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
-		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": relatedAvID})
+		util.PushReloadAttrView(relatedAvID)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2648,23 +2649,23 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 	}
 
 	var rowID string
-	var index, previousIndex int
+	var idx, previousIndex int
 	for i, r := range view.Table.RowIDs {
 		if r == operation.ID {
 			rowID = r
-			index = i
+			idx = i
 			break
 		}
 	}
 	if "" == rowID {
 		rowID = operation.ID
 		view.Table.RowIDs = append(view.Table.RowIDs, rowID)
-		index = len(view.Table.RowIDs) - 1
+		idx = len(view.Table.RowIDs) - 1
 	}
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		view.Table.RowIDs = append(view.Table.RowIDs[:index], view.Table.RowIDs[index+1:]...)
+		view.Table.RowIDs = append(view.Table.RowIDs[:idx], view.Table.RowIDs[idx+1:]...)
 		for i, r := range view.Table.RowIDs {
 			if r == operation.PreviousID {
 				previousIndex = i + 1
@@ -2934,7 +2935,7 @@ func RemoveAttributeViewKey(avID, keyID string) (err error) {
 				}
 
 				av.SaveAttributeView(destAv)
-				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": destAv.ID})
+				util.PushReloadAttrView(destAv.ID)
 
 				if !destAvRelSrcAv {
 					av.RemoveAvRel(destAv.ID, attrView.ID)
@@ -3250,7 +3251,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
-		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": relatedAvID})
+		util.PushReloadAttrView(relatedAvID)
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

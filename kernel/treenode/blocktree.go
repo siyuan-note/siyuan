@@ -194,6 +194,19 @@ func GetBlockTreeRootByHPathPreferredParentID(boxID, hPath, preferredParentID st
 	return
 }
 
+func ExistBlockTree(id string) bool {
+	hash := btHash(id)
+	val, ok := blockTrees.Load(hash)
+	if !ok {
+		return false
+	}
+	slice := val.(*btSlice)
+	slice.m.Lock()
+	_, ok = slice.data[id]
+	slice.m.Unlock()
+	return ok
+}
+
 func GetBlockTree(id string) (ret *BlockTree) {
 	if "" == id {
 		return

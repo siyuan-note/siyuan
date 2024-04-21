@@ -799,6 +799,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 }
 
 func removeAvBlockRel(node *ast.Node) {
+	var avIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -806,10 +807,16 @@ func removeAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
-			av.RemoveBlockRel(avID, n.ID)
+			if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
+				avIDs = append(avIDs, avID)
+			}
 		}
 		return ast.WalkContinue
 	})
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+	for _, avID := range avIDs {
+		util.PushReloadAttrView(avID)
+	}
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
@@ -854,7 +861,7 @@ func syncDelete2AttributeView(node *ast.Node) {
 	})
 
 	for _, avID := range changedAvIDs.Values() {
-		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+		util.PushReloadAttrView(avID.(string))
 	}
 }
 
@@ -1127,6 +1134,7 @@ func refreshHeadingChildrenUpdated(heading *ast.Node, updated string) {
 }
 
 func upsertAvBlockRel(node *ast.Node) {
+	var avIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1134,10 +1142,16 @@ func upsertAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
-			av.UpsertBlockRel(avID, n.ID)
+			if changed := av.UpsertBlockRel(avID, n.ID); changed {
+				avIDs = append(avIDs, avID)
+			}
 		}
 		return ast.WalkContinue
 	})
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+	for _, avID := range avIDs {
+		util.PushReloadAttrView(avID)
+	}
 }
 
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
@@ -1471,7 +1485,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 			if changedAv {
 				av.SaveAttributeView(attrView)
-				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+				util.PushReloadAttrView(avID)
 			}
 		}
 	}

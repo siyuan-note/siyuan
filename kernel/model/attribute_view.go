@@ -2649,23 +2649,23 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 	}
 
 	var rowID string
-	var index, previousIndex int
+	var idx, previousIndex int
 	for i, r := range view.Table.RowIDs {
 		if r == operation.ID {
 			rowID = r
-			index = i
+			idx = i
 			break
 		}
 	}
 	if "" == rowID {
 		rowID = operation.ID
 		view.Table.RowIDs = append(view.Table.RowIDs, rowID)
-		index = len(view.Table.RowIDs) - 1
+		idx = len(view.Table.RowIDs) - 1
 	}
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		view.Table.RowIDs = append(view.Table.RowIDs[:index], view.Table.RowIDs[index+1:]...)
+		view.Table.RowIDs = append(view.Table.RowIDs[:idx], view.Table.RowIDs[idx+1:]...)
 		for i, r := range view.Table.RowIDs {
 			if r == operation.PreviousID {
 				previousIndex = i + 1

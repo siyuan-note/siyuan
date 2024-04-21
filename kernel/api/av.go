@@ -135,7 +135,7 @@ func addAttributeViewValues(c *gin.Context) {
 		return
 	}
 
-	pushRefreshAttrView(avID)
+	util.PushReloadAttrView(avID)
 }
 
 func removeAttributeViewValues(c *gin.Context) {
@@ -160,7 +160,7 @@ func removeAttributeViewValues(c *gin.Context) {
 		return
 	}
 
-	pushRefreshAttrView(avID)
+	util.PushReloadAttrView(avID)
 }
 
 func addAttributeViewKey(c *gin.Context) {
@@ -186,7 +186,7 @@ func addAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	pushRefreshAttrView(avID)
+	util.PushReloadAttrView(avID)
 }
 
 func removeAttributeViewKey(c *gin.Context) {
@@ -208,7 +208,7 @@ func removeAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	pushRefreshAttrView(avID)
+	util.PushReloadAttrView(avID)
 }
 
 func sortAttributeViewKey(c *gin.Context) {
@@ -235,7 +235,7 @@ func sortAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	pushRefreshAttrView(avID)
+	util.PushReloadAttrView(avID)
 }
 
 func getAttributeViewFilterSort(c *gin.Context) {
@@ -509,9 +509,5 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	blockAttributeViewKeys := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, cellID, value)
 	ret.Data = blockAttributeViewKeys
 
-	pushRefreshAttrView(avID)
-}
-
-func pushRefreshAttrView(avID string) {
-	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+	util.PushReloadAttrView(avID)
 }

@@ -66,7 +66,7 @@ func IsMirror(avID string) bool {
 	return nil != blockIDs && 1 < len(blockIDs)
 }
 
-func RemoveBlockRel(avID, blockID string) {
+func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret bool) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
@@ -95,10 +95,13 @@ func RemoveBlockRel(avID, blockID string) {
 	var newBlockIDs []string
 	for _, v := range blockIDs {
 		if v != blockID {
-			newBlockIDs = append(newBlockIDs, v)
+			if existBlockTree(v) {
+				newBlockIDs = append(newBlockIDs, v)
+			}
 		}
 	}
 	avBlocks[avID] = newBlockIDs
+	ret = len(newBlockIDs) != len(blockIDs)
 
 	data, err = msgpack.Marshal(avBlocks)
 	if nil != err {
@@ -109,6 +112,7 @@ func RemoveBlockRel(avID, blockID string) {
 		logging.LogErrorf("write attribute view blocks failed: %s", err)
 		return
 	}
+	return
 }
 
 func BatchUpsertBlockRel(nodes []*ast.Node) {
@@ -161,7 +165,7 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 	}
 }
 
-func UpsertBlockRel(avID, blockID string) {
+func UpsertBlockRel(avID, blockID string) (ret bool) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
@@ -186,9 +190,11 @@ func UpsertBlockRel(avID, blockID string) {
 	}
 
 	blockIDs := avBlocks[avID]
+	oldLen := len(blockIDs)
 	blockIDs = append(blockIDs, blockID)
 	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
 	avBlocks[avID] = blockIDs
+	ret = oldLen != len(blockIDs)
 
 	data, err := msgpack.Marshal(avBlocks)
 	if nil != err {
@@ -199,4 +205,5 @@ func UpsertBlockRel(avID, blockID string) {
 		logging.LogErrorf("write attribute view blocks failed: %s", err)
 		return
 	}
+	return
 }

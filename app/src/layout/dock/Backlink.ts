@@ -595,8 +595,7 @@ export class Backlink extends Model {
                         this.status[this.blockId].backlinkMOpenIds.push(data.backmentions[index].id);
                     }
                 });
-                if (window.siyuan.config.editor.backmentionExpandCount === 0) {
-                    // 设置为 0 时需折叠
+                if (data.mentionsCount === 0) {
                     this.status[this.blockId].backlinkMStatus = 3;
                 } else {
                     if (data.linkRefsCount === 0) {

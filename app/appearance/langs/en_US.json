@@ -378,7 +378,7 @@
   "sortByRankDesc": "Relevance DESC",
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save query criteria",
-  "useCriterion": "After clearing, the last query condition can be used",
+  "useCriterion": "Search criteria will be saved for next query",
   "removeCriterion": "Remove query criteria",
   "group": "Group",
   "noGroupBy": "No grouping",

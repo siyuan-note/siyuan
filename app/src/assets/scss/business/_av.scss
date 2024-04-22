@@ -122,9 +122,11 @@
 
     &.dragover__bottom {
       border-bottom-color: var(--b3-theme-primary-lighter);
+      z-index: 3;
     }
 
     &.dragover__top {
+      z-index: 3;
       box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
     }
 

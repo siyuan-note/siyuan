@@ -532,7 +532,7 @@ export class WYSIWYG {
             }
             // av cell select
             const avCellElement = hasClosestByClassName(target, "av__cell");
-            if (!protyle.disabled && avCellElement && avCellElement.dataset.id) {
+            if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !hasClosestByAttribute(avCellElement, "data-type", "NodeBlockQueryEmbed")) {
                 const nodeElement = hasClosestBlock(avCellElement);
                 if (!nodeElement) {
                     return;

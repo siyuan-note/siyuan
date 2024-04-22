@@ -1158,7 +1158,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement) {
                 const targetRowElement = hasClosestByClassName(targetElement, "av__row--header");
                 const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header");
-                if (!targetRowElement || !dragRowElement ||
+                if (targetElement.isSameNode(window.siyuan.dragElement) || !targetRowElement || !dragRowElement ||
                     (targetRowElement && dragRowElement && !targetRowElement.isSameNode(dragRowElement))
                 ) {
                     targetElement = false;
@@ -1200,11 +1200,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
             if (targetElement.classList.contains("av__cell")) {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
-                    !targetElement.classList.contains("av__row")) {
+                    !targetElement.classList.contains("av__row") && !targetElement.previousElementSibling.isSameNode(window.siyuan.dragElement)) {
                     targetElement.classList.add("dragover__left");
                 } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX <= nodeRect.right + 1 &&
-                    !targetElement.classList.contains("av__row")) {
-                    targetElement.classList.add("dragover__right");
+                    !targetElement.classList.contains("av__row") && !targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling)) {
+                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") && targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling.lastElementChild)) {
+                        // 拖拽到固定列的最后一个元素
+                    } else {
+                        targetElement.classList.add("dragover__right");
+                    }
                 }
                 return;
             }
@@ -1238,6 +1242,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
                 // 表头不能拖到自己上
+                return;
+            }
+            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2] === targetElement.getAttribute("data-id")) {
+                // 行不能拖到自己上
                 return;
             }
             const isSelf = gutterTypes[2].split(",").find((item: string) => {

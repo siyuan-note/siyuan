@@ -281,6 +281,11 @@
       border-right-color: var(--b3-theme-primary-lighter);
     }
 
+    &.dragover__left,
+    &.dragover__right {
+      z-index: 2;
+    }
+
     &--select {
       background-color: var(--b3-menu-background);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0 var(--b3-theme-primary-lighter) inset;
@@ -528,18 +533,10 @@
 .dragover__top,
 .dragover__bottom {
   .av__colsticky {
-    z-index: 0;
-
-    & > div {
+    &.av__firstcol,
+    & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
       background-color: transparent;
     }
-  }
-}
-
-.dragover__bottom + .av__row,
-.av__row:has(+ .dragover__top) {
-  .av__colsticky > div {
-    background-color: transparent;
   }
 }
 

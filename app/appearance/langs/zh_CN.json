@@ -1,4 +1,5 @@
 {
+  "copyAsPNG": "复制为 PNG",
   "unbindBlock": "取消绑定块",
   "showTitle": "显示数据库标题",
   "fillCreated": "默认填充创建时间",

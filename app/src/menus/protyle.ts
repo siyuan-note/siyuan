@@ -2,7 +2,8 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasClosestByMatchTag, hasTopClosestByClassName
+    hasClosestByMatchTag,
+    hasTopClosestByClassName
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
@@ -949,7 +950,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.copy + " PNG",
+        label: window.siyuan.languages.copyAsPNG,
         accelerator: window.siyuan.config.keymap.editor.general.copyBlockRef.custom,
         icon: "iconImage",
         click() {

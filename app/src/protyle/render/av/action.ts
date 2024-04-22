@@ -4,7 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {
-    addDragFill,
+    addDragFill, genCellValueByElement,
     getCellText,
     getTypeByCellElement,
     popTextCell,
@@ -21,21 +21,20 @@ import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
-import {pathPosix} from "../../../util/pathName";
-import {Constants} from "../../../constants";
-/// #if !MOBILE
-import {openAsset, openBy} from "../../../editor/util";
-/// #endif
-import {getSearch} from "../../../util/functions";
 import {unicode2Emoji} from "../../../emoji";
 import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
 import {addView, openViewMenu} from "./view";
-import {isOnlyMeta, openByMobile, writeText} from "../../util/compatibility";
+import {isOnlyMeta, writeText} from "../../util/compatibility";
+import {openSearchAV} from "./relation";
+import {Constants} from "../../../constants";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
+    if (isOnlyMeta(event)) {
+        return false;
+    }
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
         return false;
@@ -54,55 +53,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (firstColElement) {
         window.siyuan.menus.menu.remove();
         selectRow(firstColElement, "toggle");
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-    const urlElement = hasClosestByClassName(event.target, "av__celltext--url");
-    if (urlElement) {
-        let linkAddress = urlElement.textContent.trim();
-        if (urlElement.dataset.type === "phone") {
-            linkAddress = "tel:" + linkAddress;
-        } else if (urlElement.dataset.type === "email") {
-            linkAddress = "mailto:" + linkAddress;
-        } else if (urlElement.classList.contains("b3-chip")) {
-            linkAddress = urlElement.dataset.url;
-        }
-        /// #if !MOBILE
-        const suffix = pathPosix().extname(linkAddress);
-        const ctrlIsPressed = isOnlyMeta(event);
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
-            if (event.altKey) {
-                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)));
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else if (event.shiftKey) {
-                /// #if !BROWSER
-                openBy(linkAddress, "app");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else {
-                openAsset(protyle.app, linkAddress.trim(), parseInt(getSearch("page", linkAddress)), "right");
-            }
-        } else {
-            /// #if !BROWSER
-            if (ctrlIsPressed) {
-                openBy(linkAddress, "folder");
-            } else {
-                openBy(linkAddress, "app");
-            }
-            /// #else
-            openByMobile(linkAddress);
-            /// #endif
-        }
-        /// #else
-        openByMobile(linkAddress);
-        /// #endif
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -138,7 +88,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
-        searchElement.focus();
+        setTimeout(() => {
+            searchElement.focus();
+        }, Constants.TIMEOUT_TRANSITION);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -250,7 +202,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const type = getTypeByCellElement(target);
-                if (type === "updated" || type === "created" || (type === "block" && !target.getAttribute("data-detached"))) {
+                // TODO 点击单元格的时候， lineNumber 选中整行
+                if (type === "updated" || type === "created" || type === "lineNumber" || (type === "block" && !target.getAttribute("data-detached"))) {
                     selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                 } else {
                     scrollElement.querySelectorAll(".av__row--select").forEach(item => {
@@ -322,6 +275,42 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             }
         });
     }
+    menu.addItem({
+        label: window.siyuan.languages.addToDatabase,
+        icon: "iconDatabase",
+        click() {
+            openSearchAV(blockElement.getAttribute("data-av-id"), rowElements[0] as HTMLElement, (listItemElement) => {
+                const srcs: IOperationSrcs[] = [];
+                const sourceIds: string[] = [];
+                rowElements.forEach(item => {
+                    const rowId = item.getAttribute("data-id")
+                    const blockValue = genCellValueByElement("block", item.querySelector(".av__cell[data-block-id]"));
+                    srcs.push({
+                        content: blockValue.block.content,
+                        id: rowId,
+                        isDetached: blockValue.isDetached,
+                    });
+                    sourceIds.push(rowId);
+                })
+                const avID = listItemElement.dataset.avId;
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    ignoreFillFilter: true,
+                    srcs,
+                    blockID: listItemElement.dataset.blockId
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: sourceIds,
+                    avID,
+                }]);
+            });
+        }
+    });
     if (!protyle.disabled) {
         if (rowElements.length === 1) {
             if (keyCellElement.getAttribute("data-detached") !== "true") {

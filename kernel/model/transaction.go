@@ -294,6 +294,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doHideAttrViewName(op)
 		case "setAttrViewColDate":
 			ret = tx.doSetAttrViewColDate(op)
+		case "unbindAttrViewBlock":
+			ret = tx.doUnbindAttrViewBlock(op)
 		}
 
 		if nil != ret {
@@ -797,6 +799,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 }
 
 func removeAvBlockRel(node *ast.Node) {
+	var avIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -804,10 +807,16 @@ func removeAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
-			av.RemoveBlockRel(avID, n.ID)
+			if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
+				avIDs = append(avIDs, avID)
+			}
 		}
 		return ast.WalkContinue
 	})
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+	for _, avID := range avIDs {
+		util.PushReloadAttrView(avID)
+	}
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
@@ -852,7 +861,7 @@ func syncDelete2AttributeView(node *ast.Node) {
 	})
 
 	for _, avID := range changedAvIDs.Values() {
-		util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+		util.PushReloadAttrView(avID.(string))
 	}
 }
 
@@ -1125,6 +1134,7 @@ func refreshHeadingChildrenUpdated(heading *ast.Node, updated string) {
 }
 
 func upsertAvBlockRel(node *ast.Node) {
+	var avIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1132,10 +1142,16 @@ func upsertAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
-			av.UpsertBlockRel(avID, n.ID)
+			if changed := av.UpsertBlockRel(avID, n.ID); changed {
+				avIDs = append(avIDs, avID)
+			}
 		}
 		return ast.WalkContinue
 	})
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+	for _, avID := range avIDs {
+		util.PushReloadAttrView(avID)
+	}
 }
 
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
@@ -1243,6 +1259,7 @@ func createdUpdated(node *ast.Node) {
 	parents := treenode.ParentNodes(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段
 		parent.SetIALAttr("updated", updated)
+		cache.PutBlockIAL(parent.ID, parse.IAL2Map(parent.KramdownIAL))
 	}
 }
 
@@ -1259,17 +1276,18 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID                string   `json:"avID"`              // 属性视图 ID
-	SrcIDs              []string `json:"srcIDs"`            // 用于将块拖拽到属性视图中
-	IsDetached          bool     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
-	IgnoreFillFilterVal bool     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
-	Name                string   `json:"name"`              // 属性视图列名
-	Typ                 string   `json:"type"`              // 属性视图列类型
-	Format              string   `json:"format"`            // 属性视图列格式化
-	KeyID               string   `json:"keyID"`             // 属性视列 ID
-	RowID               string   `json:"rowID"`             // 属性视图行 ID
-	IsTwoWay            bool     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
-	BackRelationKeyID   string   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
+	AvID                string                   `json:"avID"`              // 属性视图 ID
+	SrcIDs              []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs                []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
+	IsDetached          bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
+	IgnoreFillFilterVal bool                     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
+	Name                string                   `json:"name"`              // 属性视图列名
+	Typ                 string                   `json:"type"`              // 属性视图列类型
+	Format              string                   `json:"format"`            // 属性视图列格式化
+	KeyID               string                   `json:"keyID"`             // 属性视列 ID
+	RowID               string                   `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
 }
 
 type Transaction struct {
@@ -1309,7 +1327,7 @@ func (tx *Transaction) begin() (err error) {
 
 func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
-		if err = writeJSONQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); nil != err {
 			return
 		}
 
@@ -1467,14 +1485,14 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 			if changedAv {
 				av.SaveAttributeView(attrView)
-				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+				util.PushReloadAttrView(avID)
 			}
 		}
 	}
 
 	// 3. 保存变更
 	for _, tree := range changedRefTree {
-		indexWriteJSONQueue(tree)
+		indexWriteTreeUpsertQueue(tree)
 	}
 }
 

@@ -115,17 +115,13 @@ var uniqueActions = []string{
 	AssetContentDatabaseIndexCommit,
 }
 
-func Contain(action string, moreActions ...string) bool {
-	actions := append(moreActions, action)
-	actions = gulu.Str.RemoveDuplicatedElem(actions)
-
-	queueLock.Lock()
-	for _, task := range taskQueue {
-		if gulu.Str.Contains(task.Action, actions) {
+func ContainIndexTask() bool {
+	actions := getCurrentActions()
+	for _, action := range actions {
+		if gulu.Str.Contains(action, []string{DatabaseIndexFull, DatabaseIndex}) {
 			return true
 		}
 	}
-	queueLock.Unlock()
 	return false
 }
 

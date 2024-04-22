@@ -87,7 +87,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 		node.SetIALAttr(attrName, timed)
 		util.PushMsg(fmt.Sprintf(Conf.Language(101), time.UnixMilli(timedMills).Format("2006-01-02 15:04")), 5000)
 	}
-	if err = indexWriteJSONQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); nil != err {
 		return
 	}
 	IncSync()
@@ -143,7 +143,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 	}
 
 	for _, tree := range trees {
-		if err = indexWriteJSONQueue(tree); nil != err {
+		if err = indexWriteTreeUpsertQueue(tree); nil != err {
 			return
 		}
 	}
@@ -180,7 +180,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 		return
 	}
 
-	if err = indexWriteJSONQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); nil != err {
 		return
 	}
 
@@ -279,7 +279,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		updateRefTextRenameDoc(tree)
 	}
 
-	if err = indexWriteJSONQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); nil != err {
 		return
 	}
 	IncSync()

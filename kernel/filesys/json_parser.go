@@ -144,6 +144,21 @@ func genTreeByJSON(node *ast.Node, tree *parse.Tree, idMap *map[string]bool, nee
 				*needFix = true
 				return // 忽略空查询嵌入块
 			}
+		case ast.NodeCodeBlock:
+			if 4 > len(node.Children) {
+				// https://ld246.com/article/1713689223067
+				existCode := false
+				for _, child := range node.Children {
+					if ast.NodeCodeBlockCode.String() == child.TypeStr {
+						existCode = true
+						break
+					}
+				}
+				if !existCode {
+					*needFix = true
+					return // 忽略空代码块
+				}
+			}
 		}
 
 		fixLegacyData(tree.Context.Tip, node, idMap, needFix, needMigrate2Spec1)

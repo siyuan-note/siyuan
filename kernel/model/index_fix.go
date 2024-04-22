@@ -481,7 +481,7 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 	if "" == updated {
 		updated = util.TimeFromID(tree.Root.ID)
 		tree.Root.SetIALAttr("updated", updated)
-		indexWriteJSONQueue(tree)
+		indexWriteTreeUpsertQueue(tree)
 	} else {
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(tree)

@@ -15,6 +15,7 @@ let firstDirection: "toLeft" | "toRight";
 let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 let scrollBlock: boolean;
+let isFirstMove = true;
 
 const popSide = (render = true) => {
     if (render) {
@@ -32,6 +33,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
         event.preventDefault();
         return;
     }
+    isFirstMove = true;
     const target = event.target as HTMLElement;
     if (!clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
@@ -52,6 +54,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     // 有些事件不经过 touchmove
 
     if (scrollBlock) {
+        closePanel();
         return;
     }
 
@@ -152,6 +155,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         time = 0;
         event.stopImmediatePropagation();
     }
+    isFirstMove = true;
     scrollBlock = false;
 };
 
@@ -232,7 +236,7 @@ export const handleTouchMove = (event: TouchEvent) => {
             } else if (scrollElement.dataset.type === "NodeMathBlock") {
                 scrollElement = target;
                 while (scrollElement && scrollElement.dataset.type !== "NodeMathBlock") {
-                    if (scrollElement.nodeType === 1 && scrollElement.scrollWidth > scrollElement.clientWidth) {
+                    if (scrollElement.nodeType === 1 && scrollElement.scrollLeft > 0) {
                         break;
                     }
                     scrollElement = scrollElement.parentElement;
@@ -250,7 +254,12 @@ export const handleTouchMove = (event: TouchEvent) => {
                 return;
             }
         }
-
+        if (isFirstMove) {
+            sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
+            document.getElementById("sidebar").style.zIndex = (++window.siyuan.zIndex).toString();
+            document.getElementById("menu").style.zIndex = (++window.siyuan.zIndex).toString();
+            isFirstMove = false;
+        }
         const windowWidth = window.innerWidth;
         const menuElement = hasClosestByAttribute(target, "id", "menu");
         if (menuElement) {

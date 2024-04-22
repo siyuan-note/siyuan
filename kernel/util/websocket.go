@@ -216,6 +216,10 @@ func PushClearProgress() {
 	BroadcastByType("main", "cprogress", 0, "", nil)
 }
 
+func PushReloadAttrView(avID string) {
+	BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+}
+
 func PushReloadDoc(rootID string) {
 	BroadcastByType("main", "reloaddoc", 0, "", rootID)
 }

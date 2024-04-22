@@ -491,7 +491,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         return false;
     }
     // hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等，删除段落块后，光标位置矫正 https://github.com/siyuan-note/siyuan/issues/4143
-    if (element.classList.contains("render-node") || element.classList.contains("iframe") || element.classList.contains("hr")) {
+    if (element.classList.contains("render-node") || element.classList.contains("iframe") || element.classList.contains("hr") || element.classList.contains("av")) {
         const range = document.createRange();
         const type = element.getAttribute("data-type");
         let setRange = false;
@@ -531,23 +531,20 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.selectNodeContents(element);
             range.collapse(true);
             setRange = true;
+        } else if (type === "NodeAttributeView") {
+            const cursorElement = element.querySelector(".av__cursor");
+            if (cursorElement) {
+                range.setStart(cursorElement.firstChild, 0);
+                setRange = true;
+            } else {
+                return false;
+            }
         }
         if (setRange) {
             focusByRange(range);
             return range;
         } else {
             focusSideBlock(element);
-            return false;
-        }
-    } else if (element.classList.contains("av")) {
-        const avTitleElement = element.querySelector(".av__title");
-        if (avTitleElement) {
-            const range = document.createRange();
-            range.selectNodeContents(avTitleElement);
-            range.collapse();
-            focusByRange(range);
-            return range;
-        } else {
             return false;
         }
     }

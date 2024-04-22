@@ -212,7 +212,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         iconHTML: "",
         type: "readonly",
         label: `<div>ID</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" readonly>${refElement.getAttribute("data-id") || ""}</textarea>
+<textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" readonly>${refElement.getAttribute("data-id") || ""}</textarea>
 <div class="fn__hr"></div>
 <div>${window.siyuan.languages.anchor}</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>`,
@@ -902,7 +902,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             iconHTML: "",
             type: "readonly",
             label: `<div>${window.siyuan.languages.imageURL}</div>
-<textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea>
+<textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea>
 <div class="fn__hr"></div>
 <div>${window.siyuan.languages.title}</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>
@@ -997,7 +997,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             submenu: [{
                 iconHTML: "",
                 type: "readonly",
-                label: `<textarea data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
+                label: `<textarea spellcheck="false" data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
                 bind(element) {
                     element.style.maxWidth = "none";
                     fetchPost("/api/asset/getImageOCRText", {
@@ -1130,7 +1130,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         iconHTML: "",
         type: "readonly",
         label: `<div>${window.siyuan.languages.link}</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
+<textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
 <div>${window.siyuan.languages.anchor}</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>
@@ -1467,7 +1467,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const subMenus: IMenu[] = [{
         iconHTML: "",
         type: "readonly",
-        label: `<textarea rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
+        label: `<textarea spellcheck="false" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
         bind(element) {
             element.style.maxWidth = "none";
             element.querySelector("textarea").addEventListener("change", (event) => {
@@ -1537,7 +1537,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const subMenus: IMenu[] = [{
         iconHTML: "",
         type: "readonly",
-        label: `<textarea rows="1" style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
+        label: `<textarea spellcheck="false" rows="1" style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
         bind(element) {
             element.style.maxWidth = "none";
             element.querySelector("textarea").addEventListener("change", (event) => {

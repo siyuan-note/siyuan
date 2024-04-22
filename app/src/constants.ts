@@ -55,6 +55,8 @@ export abstract class Constants {
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_NEWWINDOW: string = "siyuan-export-newwindow";
 
+    public static readonly SIYUAN_CONTEXT_MENU: string = "siyuan-context-menu";
+
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
@@ -530,13 +532,13 @@ export abstract class Constants {
             data: [
                 [{
                     type: "file",
-                    size: {width: 227, height: 0},
+                    size: {width: 232, height: 0},
                     show: true,
                     icon: "iconFiles",
                     hotkeyLangId: "fileTree",
                 }, {
                     type: "outline",
-                    size: {width: 227, height: 0},
+                    size: {width: 232, height: 0},
                     show: false,
                     icon: "iconAlignCenter",
                     hotkeyLangId: "outline",
@@ -548,13 +550,13 @@ export abstract class Constants {
                     hotkeyLangId: "inbox",
                 }], [{
                     type: "bookmark",
-                    size: {width: 227, height: 0},
+                    size: {width: 232, height: 0},
                     show: false,
                     icon: "iconBookmark",
                     hotkeyLangId: "bookmark",
                 }, {
                     type: "tag",
-                    size: {width: 227, height: 0},
+                    size: {width: 232, height: 0},
                     show: false,
                     icon: "iconTags",
                     hotkeyLangId: "tag",

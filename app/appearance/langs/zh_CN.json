@@ -119,6 +119,7 @@
   "goToEditTabPrev": "跳转到上一个编辑页签",
   "createdTime": "创建时间",
   "updatedTime": "更新时间",
+  "lineNumber": "行号",
   "removeBookmark": "移除 ${x} 中的书签？",
   "lockEdit": "锁定编辑",
   "unlockEdit": "解除锁定",
@@ -377,7 +378,7 @@
   "sortByRankDesc": "按相关度降序",
   "sortByRankAsc": "按相关度升序",
   "saveCriterion": "保存查询条件",
-  "useCriterion": "清空后可使用上一次的查询条件",
+  "useCriterion": "搜索条件将保存到下一次查询中",
   "removeCriterion": "清空查询条件",
   "group": "分组",
   "noGroupBy": "不分组",
@@ -989,7 +990,7 @@
   "fileTree14": "存放路径（可使用日期格式模板变量，例如 <code class='fn__code'>/日记/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>）",
   "fileTree15": "模板路径（例如 <code class='fn__code'>dailynote.md</code>，需要将该文件放置于工作空间/data/templates/ 下）",
   "fileTree16": "最大列出数量",
-  "fileTree17": "如果子文档非常多，可通过该项限制以提升性能",
+  "fileTree17": "如果子文档/标签非常多，可通过该项限制以提升性能",
   "fileTree18": "允许创建深度大于 7 层的子文档",
   "fileTree19": "一些操作系统存在技术限制导致创建大于 7 层的子文档后可能无法正常手动复制工作空间数据",
   "fileTree20": "使用单行保存",
@@ -1471,6 +1472,8 @@
     "238": "集市包 [%s] 更新失败，请稍后再试",
     "239": "相关操作正在处理中，请稍后再试",
     "240": "不支持拖拽文档中容器块下的标题",
-    "241": "不支持拖拽为自己的子标题"
+    "241": "不支持拖拽为自己的子标题",
+    "242": "当前数据库中已经存在该绑定块",
+    "243": "仅列出前 [%d] 个标签（含子标签），如需调整请修改 [设置 - 文档树 - 最大列出数量]"
   }
 }

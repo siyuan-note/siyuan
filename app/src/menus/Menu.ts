@@ -110,9 +110,9 @@ export class Menu {
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
-        window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
-        window.siyuan.menus.menu.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
-        window.siyuan.menus.menu.data = undefined;    // 移除数据
+        this.element.removeAttribute("data-name");    // 标识再次点击不消失
+        this.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
+        this.data = undefined;    // 移除数据
     }
 
     public append(element?: HTMLElement, index?: number) {
@@ -136,7 +136,7 @@ export class Menu {
         window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x - (options.isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
+        setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

@@ -439,18 +439,21 @@ export class WYSIWYG {
                     if (!newWidth || newWidth === oldWidth) {
                         return;
                     }
+                    const viewId = nodeElement.getAttribute("custom-sy-av-view");
                     transaction(protyle, [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
                         data: newWidth + "px",
-                        blockID
+                        blockID,
+                        keyID: viewId  // 仅前端使用，用于推送时不影响其他视图 https://github.com/siyuan-note/siyuan/issues/11019
                     }], [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
                         data: oldWidth + "px",
-                        blockID
+                        blockID,
+                        keyID: viewId
                     }]);
                 };
                 this.preventClick = true;
@@ -737,12 +740,11 @@ export class WYSIWYG {
             let moveCellElement: HTMLElement;
             let startFirstElement: Element;
             let endLastElement: Element;
+            this.element.querySelectorAll("iframe").forEach(item => {
+                item.style.pointerEvents = "none";
+            });
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
-                if (moveTarget.tagName === "IFRAME") {
-                    moveTarget.style.pointerEvents = "none";
-                    return;
-                }
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) && !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if ((moveTarget.tagName === "TH" || moveTarget.tagName === "TD") && !moveTarget.isSameNode(target) && (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {
@@ -906,6 +908,15 @@ export class WYSIWYG {
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
+
+                if (currentElement) {
+                    // 从下往上划选遇到嵌入块时，选中整个嵌入块
+                    const embedElement = hasClosestByAttribute(currentElement, "data-type", "NodeBlockQueryEmbed");
+                    if (embedElement) {
+                        currentElement = embedElement;
+                    }
+                }
+
                 let hasJump = false;
                 const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
@@ -975,6 +986,9 @@ export class WYSIWYG {
                 documentSelf.onselect = null;
                 startFirstElement = undefined;
                 endLastElement = undefined;
+                this.element.querySelectorAll("iframe").forEach(item => {
+                    item.style.pointerEvents = "";
+                });
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (!protyle.disabled && tableBlockElement) {
@@ -1198,9 +1212,6 @@ export class WYSIWYG {
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
-                    if (item.classList.contains("iframe")) {
-                        item.querySelector("iframe").style.pointerEvents = "";
-                    }
                 });
                 countBlockWord(ids);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473
@@ -1842,7 +1853,7 @@ export class WYSIWYG {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {
-                input(protyle, blockElement, range, true);
+                input(protyle, blockElement, range, true, event);
             }
             event.stopPropagation();
         });
@@ -1985,8 +1996,20 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
-            const aElement = hasClosestByAttribute(event.target, "data-type", "a") || hasClosestByAttribute(event.target, "data-type", "url");
-            const aLink = aElement ? aElement.getAttribute("data-href") : "";
+            const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
+                hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
+            let aLink = aElement ? aElement.getAttribute("data-href") : "";
+            if (aElement && !aLink && aElement.classList.contains("av__celltext--url")) {
+                aLink = aElement.textContent.trim();
+                if (aElement.dataset.type === "phone") {
+                    aLink = "tel:" + aLink;
+                } else if (aElement.dataset.type === "email") {
+                    aLink = "mailto:" + aLink;
+                } else if (aElement.classList.contains("b3-chip")) {
+                    aLink = aElement.dataset.url;
+                }
+            }
+
             if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -2183,7 +2206,7 @@ export class WYSIWYG {
             }
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
-            if (embedItemElement) {
+            if (embedItemElement && !ctrlIsPressed) {
                 const embedId = embedItemElement.getAttribute("data-id");
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
@@ -2276,7 +2299,7 @@ export class WYSIWYG {
             }
 
             const languageElement = hasClosestByClassName(event.target, "protyle-action__language");
-            if (languageElement && !protyle.disabled) {
+            if (languageElement && !protyle.disabled && !ctrlIsPressed) {
                 protyle.toolbar.showCodeLanguage(protyle, languageElement);
                 event.stopPropagation();
                 event.preventDefault();
@@ -2299,6 +2322,8 @@ export class WYSIWYG {
                         clientX: event.clientX + 4,
                         clientY: event.clientY
                     });
+                    event.stopPropagation();
+                    return;
                 } else if (actionElement.parentElement.classList.contains("li")) {
                     const actionId = actionElement.parentElement.getAttribute("data-node-id");
                     if (event.altKey && !protyle.disabled) {
@@ -2355,9 +2380,9 @@ export class WYSIWYG {
                             }
                         }
                     }
+                    event.stopPropagation();
+                    return;
                 }
-                event.stopPropagation();
-                return;
             }
 
             const selectElement = hasClosestByClassName(event.target, "hr") ||
@@ -2587,6 +2612,10 @@ export class WYSIWYG {
             if (ctrlIsPressed && range.toString() === "") {
                 let ctrlElement = hasClosestBlock(event.target);
                 if (ctrlElement) {
+                    const embedBlockElement = hasClosestByAttribute(ctrlElement, "data-type", "NodeBlockQueryEmbed");
+                    if (embedBlockElement) {
+                        ctrlElement = embedBlockElement;
+                    }
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
                     if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
                         ctrlElement.classList.remove("protyle-wysiwyg--select");

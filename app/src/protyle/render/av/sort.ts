@@ -16,12 +16,19 @@ export const addSort = (options: {
     const menu = new Menu("av-add-sort");
     options.data.view.columns.forEach((column) => {
         let hasSort = false;
-        options.data.view.sorts.find((sort) => {
-            if (sort.column === column.id) {
-                hasSort = true;
-                return true;
-            }
-        });
+
+        // 如果该列是行号类型列，不允许添加排序
+        if (column.type === "lineNumber") {
+            hasSort = true;
+        } else {
+            options.data.view.sorts.find((sort) => {
+                if (sort.column === column.id) {
+                    hasSort = true;
+                    return true;
+                }
+            });
+        }
+        
         if (!hasSort) {
             menu.addItem({
                 label: column.name,

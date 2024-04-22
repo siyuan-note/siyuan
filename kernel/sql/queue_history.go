@@ -33,8 +33,7 @@ import (
 var (
 	historyOperationQueue []*historyDBQueueOperation
 	historyDBQueueLock    = sync.Mutex{}
-
-	historyTxLock = sync.Mutex{}
+	historyTxLock         = sync.Mutex{}
 )
 
 type historyDBQueueOperation struct {
@@ -51,7 +50,8 @@ func FlushHistoryTxJob() {
 
 func FlushHistoryQueue() {
 	ops := getHistoryOperations()
-	if 1 > len(ops) {
+	total := len(ops)
+	if 1 > total {
 		return
 	}
 
@@ -97,7 +97,7 @@ func FlushHistoryQueue() {
 		}
 	}
 
-	if 128 < len(ops) {
+	if 128 < total {
 		debug.FreeOSMemory()
 	}
 

@@ -19,6 +19,7 @@ package bazaar
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,6 +30,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
+	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -552,7 +554,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
 	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
 			//logging.LogDebugf("downloading bazaar package [%f]", progress)
@@ -587,7 +589,26 @@ func incPackageDownloads(repoURLHash, systemID string) {
 		}).Post(u)
 }
 
-func installPackage(data []byte, installPath string) (err error) {
+func uninstallPackage(installPath string) (err error) {
+	if err = os.RemoveAll(installPath); nil != err {
+		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
+		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
+	}
+	packageCache.Flush()
+	return
+}
+
+func installPackage(data []byte, installPath, repoURLHash string) (err error) {
+	err = installPackage0(data, installPath)
+	if nil != err {
+		return
+	}
+
+	packageCache.Delete(strings.TrimPrefix(repoURLHash, "https://github.com/"))
+	return
+}
+
+func installPackage0(data []byte, installPath string) (err error) {
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
 	if err = os.MkdirAll(tmpPackage, 0755); nil != err {
 		return
@@ -680,3 +701,5 @@ func disallowDisplayBazaarPackage(pkg *Package) bool {
 	}
 	return false
 }
+
+var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package

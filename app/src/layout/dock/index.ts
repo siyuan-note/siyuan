@@ -30,6 +30,7 @@ export class Dock {
     public resizeElement: HTMLElement;
     public pin = true;
     public data: { [key: string]: Model | boolean };
+    private hideResizeTimeout: number;
 
     constructor(options: {
         app: App,
@@ -360,6 +361,7 @@ export class Dock {
                     this.layout.element.style.height = "0px";
                 }
                 this.resizeElement.classList.add("fn__none");
+                clearTimeout(this.hideResizeTimeout);
                 this.hideDock();
             }
             if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
@@ -516,7 +518,7 @@ export class Dock {
             }
             if (this.pin) {
                 this.layout.element.style.opacity = "";
-                setTimeout(() => {
+                this.hideResizeTimeout = window.setTimeout(() => {
                     this.resizeElement.classList.remove("fn__none");
                 }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }

@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -26,7 +25,6 @@ import (
 
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -52,6 +50,13 @@ func Widgets() (widgets []*Widget) {
 
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
+
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			widgets = append(widgets, pkg.(*Widget))
+			lock.Unlock()
+			return
+		}
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
@@ -93,6 +98,8 @@ func Widgets() (widgets []*Widget) {
 		lock.Lock()
 		widgets = append(widgets, widget)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, widget)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
@@ -171,14 +178,9 @@ func InstallWidget(repoURL, repoHash, installPath string, systemID string) error
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallWidget(installPath string) error {
-	if err := filelock.Remove(installPath); nil != err {
-		logging.LogErrorf("remove widget [%s] failed: %s", installPath, err)
-		return errors.New("remove community widget failed")
-	}
-	//logging.Logger.Infof("uninstalled widget [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }

@@ -19,7 +19,8 @@ package av
 import (
 	"math"
 	"sort"
-	"strconv"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // LayoutTable 描述了表格布局的结构。
@@ -178,6 +179,14 @@ func (table *Table) SortRows(attrView *AttributeView) {
 	for i, row := range table.Rows {
 		for _, colIndexSort := range colIndexSorts {
 			val := table.Rows[i].Cells[colIndexSort.Index].Value
+			if KeyTypeCheckbox == val.Type {
+				if block := row.GetBlockValue(); nil != block && block.IsEdited() {
+					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
+					editedValRows[row.ID] = true
+					break
+				}
+			}
+
 			if val.IsEdited() {
 				// 如果该行某列的值已经编辑过，则该行可参与排序
 				editedValRows[row.ID] = true
@@ -212,13 +221,17 @@ func (table *Table) SortRows(attrView *AttributeView) {
 		sorted := true
 		for _, colIndexSort := range colIndexSorts {
 			val1 := editedRows[i].Cells[colIndexSort.Index].Value
-			if nil == val1 {
-				return colIndexSort.Order == SortOrderAsc
-			}
-
 			val2 := editedRows[j].Cells[colIndexSort.Index].Value
-			if nil == val2 {
-				return colIndexSort.Order != SortOrderAsc
+			if nil == val1 || val1.IsEmpty() {
+				if nil != val2 && !val2.IsEmpty() {
+					return false
+				}
+				sorted = false
+				continue
+			} else {
+				if nil == val2 || val2.IsEmpty() {
+					return true
+				}
 			}
 
 			result := val1.Compare(val2, attrView)
@@ -413,7 +426,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		sum := 0.0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				sum += val
 			}
 		}
@@ -423,7 +436,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		count := 0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				sum += val
 				count++
 			}
@@ -435,7 +448,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		values := []float64{}
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				values = append(values, val)
 			}
 		}
@@ -451,7 +464,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		minVal := math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val < minVal {
 					minVal = val
 				}
@@ -464,7 +477,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		maxVal := -math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val > maxVal {
 					maxVal = val
 				}
@@ -478,7 +491,7 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		maxVal := -math.MaxFloat64
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
-				val, _ := strconv.ParseFloat(row.Cells[colIndex].Value.Template.Content, 64)
+				val, _ := util.Convert2Float(row.Cells[colIndex].Value.Template.Content)
 				if val < minVal {
 					minVal = val
 				}
@@ -1585,8 +1598,8 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					if !uniqueValues[content.String()] {
-						uniqueValues[content.String()] = true
+					if !uniqueValues[content.String(true)] {
+						uniqueValues[content.String(true)] = true
 						countUniqueValues++
 					}
 				}
@@ -1634,7 +1647,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					sum += val
 				}
 			}
@@ -1646,7 +1659,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					sum += val
 					count++
 				}
@@ -1660,7 +1673,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					values = append(values, val)
 				}
 			}
@@ -1678,7 +1691,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					if val < minVal {
 						minVal = val
 					}
@@ -1693,7 +1706,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					if val > maxVal {
 						maxVal = val
 					}
@@ -1709,7 +1722,7 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup && 0 < len(row.Cells[colIndex].Value.Rollup.Contents) {
 				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
-					val, _ := strconv.ParseFloat(content.String(), 64)
+					val, _ := util.Convert2Float(content.String(false))
 					if val < minVal {
 						minVal = val
 					}

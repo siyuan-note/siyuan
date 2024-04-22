@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -50,6 +49,13 @@ func Icons() (icons []*Icon) {
 
 		repo := arg.(*StageRepo)
 		repoURL := repo.URL
+
+		if pkg, found := packageCache.Get(repoURL); found {
+			lock.Lock()
+			icons = append(icons, pkg.(*Icon))
+			lock.Unlock()
+			return
+		}
 
 		icon := &Icon{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
@@ -91,6 +97,8 @@ func Icons() (icons []*Icon) {
 		lock.Lock()
 		icons = append(icons, icon)
 		lock.Unlock()
+
+		packageCache.SetDefault(repoURL, icon)
 	})
 	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
@@ -175,14 +183,9 @@ func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {
 	if nil != err {
 		return err
 	}
-	return installPackage(data, installPath)
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func UninstallIcon(installPath string) error {
-	if err := os.RemoveAll(installPath); nil != err {
-		logging.LogErrorf("remove icon [%s] failed: %s", installPath, err)
-		return errors.New("remove community icon failed")
-	}
-	//logging.Logger.Infof("uninstalled icon [%s]", installPath)
-	return nil
+	return uninstallPackage(installPath)
 }

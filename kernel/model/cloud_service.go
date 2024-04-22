@@ -210,6 +210,7 @@ var (
 )
 
 func RefreshCheckJob() {
+	go util.GetRhyResult(true) // 发一次请求进行结果缓存
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()
@@ -246,7 +247,7 @@ func refreshSubscriptionExpirationRemind() {
 
 		if 0 < remains && expireDay > remains {
 			util.WaitForUILoaded()
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 7)
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
 			return
 		}

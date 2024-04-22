@@ -205,7 +205,7 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 			}
 		}
 
-		if err = indexWriteJSONQueue(tree); nil != err {
+		if err = indexWriteTreeUpsertQueue(tree); nil != err {
 			return
 		}
 	}
@@ -317,11 +317,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	}
 	refPivot.Unlink()
 
-	if err = indexWriteJSONQueue(refTree); nil != err {
+	if err = indexWriteTreeUpsertQueue(refTree); nil != err {
 		return
 	}
 	if !sameTree {
-		if err = indexWriteJSONQueue(defTree); nil != err {
+		if err = indexWriteTreeUpsertQueue(defTree); nil != err {
 			return
 		}
 	}

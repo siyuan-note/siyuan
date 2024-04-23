@@ -849,7 +849,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			if KeyTypeDate == v.Type && nil != v.Date && v.Date.IsNotEmpty {
 				if 0 == latest || latest < v.Date.Content {
 					latest = v.Date.Content
-					isNotTime = v.Date.IsNotEmpty
+					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
 			}

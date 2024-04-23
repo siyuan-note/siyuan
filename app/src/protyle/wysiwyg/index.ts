@@ -1998,7 +1998,7 @@ export class WYSIWYG {
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
-            let aLink = aElement ? aElement.getAttribute("data-href") : "";
+            let aLink = aElement ? (aElement.getAttribute("data-href") || "") : "";
             if (aElement && !aLink && aElement.classList.contains("av__celltext--url")) {
                 aLink = aElement.textContent.trim();
                 if (aElement.dataset.type === "phone") {
@@ -2121,7 +2121,8 @@ export class WYSIWYG {
                 return;
             }
 
-            if (aElement && range.toString() === "") {
+            // 如果aLink 为空时，当 data-type="a inline-math" 可继续后续操作
+            if (aElement && range.toString() === "" && aLink) {
                 event.stopPropagation();
                 event.preventDefault();
                 let linkAddress = Lute.UnEscapeHTMLStr(aLink);

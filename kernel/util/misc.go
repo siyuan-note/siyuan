@@ -135,3 +135,18 @@ func ContainsSubStr(s string, subStrs []string) bool {
 	}
 	return false
 }
+
+func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
+	if old == new {
+		return strs, false
+	}
+
+	for i, v := range strs {
+		if v == old {
+			strs[i] = new
+			changed = true
+		}
+	}
+	ret = strs
+	return
+}

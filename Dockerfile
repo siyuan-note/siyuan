@@ -1,7 +1,7 @@
 FROM node:21 as NODE_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
-RUN cd app && npm install -g pnpm && pnpm install && pnpm run build
+RUN cd app && npm install -g pnpm@9.0.2 && pnpm install && pnpm run build
 
 FROM golang:alpine as GO_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/

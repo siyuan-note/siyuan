@@ -774,7 +774,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
                 if (event.key === "Delete" || matchHotKey("⌃D", event)) {
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
-                    if (position.end === editElement.textContent.length) {
+                    if (position.end === editElement.textContent.length ||
+                        // 软换行后删除 https://github.com/siyuan-note/siyuan/issues/11118
+                        (position.end === editElement.textContent.length - 1 && editElement.textContent.endsWith("\n"))) {
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
                             const nextRange = focusBlock(nextElement);

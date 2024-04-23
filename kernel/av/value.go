@@ -693,7 +693,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countUniqueValues++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
@@ -701,7 +701,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}}
 	case CalcOperatorCountNotEmpty:
 		countNonEmpty := 0
 		for _, v := range r.Contents {
@@ -709,7 +709,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				countNonEmpty++
 			}
 		}
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty), NumberFormatNone)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, v := range r.Contents {
@@ -718,7 +718,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 < len(r.Contents) {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countEmpty*100/len(r.Contents)), NumberFormatNone)}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countEmpty/len(r.Contents)), NumberFormatPercent)}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNonEmpty := 0
@@ -728,7 +728,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 < len(r.Contents) {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty*100/len(r.Contents)), NumberFormatNone)}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty/len(r.Contents)), NumberFormatPercent)}}
 		}
 	case CalcOperatorSum:
 		sum := 0.0

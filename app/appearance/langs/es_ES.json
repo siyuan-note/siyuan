@@ -1475,6 +1475,8 @@
     "240": "No se admite arrastrar encabezado debajo de los bloques contenedores en el documento",
     "241": "No se admite arrastrar a su subtítulo",
     "242": "El bloque de enlace ya existe en la base de datos actual",
-    "243": "Enumere solo las primeras [%d] etiquetas (incluidas las subetiquetas), modifique [Configuración - Árbol de documentos - Número máximo a listar]"
+    "243": "Enumere solo las primeras [%d] etiquetas (incluidas las subetiquetas), modifique [Configuración - Árbol de documentos - Número máximo a listar]",
+    "244": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]",
+    "245": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]. Para salir normalmente, necesita usar [Salir de la aplicación] en el panel derecho"
   }
 }

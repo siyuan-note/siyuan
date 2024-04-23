@@ -80,6 +80,7 @@ type AppConf struct {
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
+	State          int              `json:"state"`          // 运行状态，0：已经正常退出，1：运行中
 
 	m *sync.Mutex
 }
@@ -464,6 +465,21 @@ func InitConf() {
 
 	Conf.LocalIPs = util.GetLocalIPs()
 
+	if 1 == Conf.State {
+		// 上次未正常退出
+		go func() {
+			util.WaitForUILoaded()
+			time.Sleep(2 * time.Second)
+			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+				util.PushMsg(Conf.language(245), 15000)
+			} else {
+				util.PushMsg(Conf.language(244), 15000)
+			}
+		}()
+	}
+
+	Conf.State = 1 // 运行中
+
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
 
@@ -702,6 +718,7 @@ func (conf *AppConf) save0(data []byte) {
 }
 
 func (conf *AppConf) Close() {
+	conf.State = 0 // 已经正常退出
 	conf.Save()
 }
 

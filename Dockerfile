@@ -1,7 +1,20 @@
 FROM node:21 as NODE_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
-RUN cd app && npm install -g pnpm@9.0.2 && pnpm install && pnpm run build
+RUN apt-get update && \
+    apt-get install -y jq && \
+    rm -rf /var/lib/apt/lists/*
+RUN cd app && \
+packageManager=$(jq -r '.packageManager' package.json) && \
+if [ -n "$packageManager" ]; then \
+    npm install -g $packageManager; \
+else \
+    echo "No packageManager field found in package.json"; \
+    npm install -g pnpm; \
+fi && \
+pnpm install --registry=http://registry.npmjs.org/ --silent && \
+pnpm run build
+RUN apt-get purge -y jq
 
 FROM golang:alpine as GO_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/

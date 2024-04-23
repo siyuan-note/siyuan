@@ -65,7 +65,6 @@ import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
-import {Protyle} from "../../protyle";
 import {transaction} from "../../protyle/wysiwyg/transaction";
 import {quickMakeCard} from "../../card/makeCard";
 import {copyPNG} from "../../menus/util";
@@ -221,7 +220,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                         protyle = item.protyle;
                         return true;
                     }
-                })
+                });
             }
         }
         if (!protyle) {

@@ -191,11 +191,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-                let avBackground = '--av-background:var(--b3-theme-background)'
+                let avBackground = "--av-background:var(--b3-theme-background)";
                 if (e.style.backgroundColor) {
-                    avBackground = '--av-background:' + e.style.backgroundColor
+                    avBackground = "--av-background:" + e.style.backgroundColor;
                 } else if (hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed")) {
-                    avBackground = '--av-background:var(--b3-theme-surface)'
+                    avBackground = "--av-background:var(--b3-theme-surface)";
                 }
                 e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">
     <div class="av__header">

@@ -4,25 +4,25 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {
-    addDragFill, genCellValueByElement,
+    addDragFill,
+    genCellValueByElement,
     getCellText,
     getTypeByCellElement,
     popTextCell,
     renderCell,
-    renderCellAttr, updateCellsValue,
+    renderCellAttr,
+    updateCellsValue,
     updateHeaderCell
 } from "./cell";
-import {getColIconByType, showColMenu} from "./col";
-import {deleteRow, insertRows, setPageSize, updateHeader} from "./row";
+import {addCol, getColIconByType, showColMenu} from "./col";
+import {deleteRow, insertRows, selectRow, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
-import {addCol} from "./col";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
-import {selectRow} from "./row";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
@@ -283,7 +283,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 const srcs: IOperationSrcs[] = [];
                 const sourceIds: string[] = [];
                 rowElements.forEach(item => {
-                    const rowId = item.getAttribute("data-id")
+                    const rowId = item.getAttribute("data-id");
                     const blockValue = genCellValueByElement("block", item.querySelector(".av__cell[data-block-id]"));
                     srcs.push({
                         content: blockValue.block.content,
@@ -291,7 +291,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         isDetached: blockValue.isDetached,
                     });
                     sourceIds.push(rowId);
-                })
+                });
                 const avID = listItemElement.dataset.avId;
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",

@@ -808,12 +808,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
                         markItem.outerHTML = markItem.innerHTML;
                     });
-                    const id = item.getAttribute("data-node-id")
+                    const id = item.getAttribute("data-node-id");
                     sourceIds.push(id);
                     srcs.push({
                         id,
                         isDetached: false,
-                    })
+                    });
                 });
 
                 hideElements(["gutter"], protyle);

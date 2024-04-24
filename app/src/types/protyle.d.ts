@@ -240,7 +240,7 @@ declare class Lute {
 
     public MarkdownStr(name: string, md: string): string;
 
-    public IsValidLinkDest(text: string): boolean;
+    public GetLinkDest(text: string): string;
 
     public BlockDOM2InlineBlockDOM(html: string): string;
 

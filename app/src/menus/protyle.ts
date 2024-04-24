@@ -1294,7 +1294,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     });
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-    if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
+    if (focusText || protyle.lute.GetLinkDest(linkAddress)) {
         inputElements[1].select();
     } else {
         inputElements[0].select();

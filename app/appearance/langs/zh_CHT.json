@@ -1,4 +1,6 @@
 {
+  "containerBlockTip1": "啟用容器區塊後會導致搜尋結果重複",
+  "containerBlockTip2": "啟用文件區塊目前僅支援搜尋文件名稱",
   "copyAsPNG": "複製為 PNG",
   "unbindBlock": "取消綁定區塊",
   "showTitle": "顯示資料庫標題",

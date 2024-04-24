@@ -1,4 +1,6 @@
 {
+  "containerBlockTip1": "Enabling container blocks will result in duplicate search results",
+  "containerBlockTip2": "Enabling document blocks currently only supports searching for document titles",
   "copyAsPNG": "Copy as PNG",
   "unbindBlock": "Unbind block",
   "showTitle": "Show database title",

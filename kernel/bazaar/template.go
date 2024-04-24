@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dustin/go-humanize"
+	"github.com/88250/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"

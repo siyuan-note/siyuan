@@ -1474,11 +1474,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
 	go func() {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
-			// 移动端不推送差异详情
-			upsertRootIDs = []string{}
-		}
-
 		util.WaitForUILoaded()
 
 		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {

@@ -543,13 +543,13 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 			CloudName: d.Name,
 		}
 		if conf.ProviderSiYuan == Conf.Sync.Provider {
-			sync.HSize = humanize.Bytes(uint64(dirSize))
+			sync.HSize = humanize.BytesCustomCeil(uint64(dirSize), 2)
 		}
 		syncDirs = append(syncDirs, sync)
 	}
 	hSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
-		hSize = humanize.Bytes(uint64(size))
+		hSize = humanize.BytesCustomCeil(uint64(size), 2)
 	}
 	return
 }

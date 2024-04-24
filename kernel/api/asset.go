@@ -82,7 +82,7 @@ func statAsset(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"size":     info.Size(),
-		"hSize":    humanize.Bytes(uint64(info.Size())),
+		"hSize":    humanize.BytesCustomCeil(uint64(info.Size()), 2),
 		"created":  created,
 		"hCreated": hCreated,
 		"updated":  updated,

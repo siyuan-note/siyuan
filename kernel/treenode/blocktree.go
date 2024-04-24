@@ -506,7 +506,7 @@ func InitBlockTree(force bool) {
 	p.Release()
 
 	elapsed := time.Since(start).Seconds()
-	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size.Load())), util.BlockTreePath, elapsed)
+	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(size.Load()), 2), util.BlockTreePath, elapsed)
 	return
 }
 
@@ -569,7 +569,7 @@ func SaveBlockTree(force bool) {
 
 	elapsed := time.Since(start).Seconds()
 	if 2 < elapsed {
-		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(size), util.BlockTreePath, elapsed)
+		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(size, 2), util.BlockTreePath, elapsed)
 	}
 }
 

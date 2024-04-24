@@ -89,7 +89,7 @@ func Widgets() (widgets []*Widget) {
 		widget.Stars = repo.Stars
 		widget.OpenIssues = repo.OpenIssues
 		widget.Size = repo.Size
-		widget.HSize = humanize.Bytes(uint64(widget.Size))
+		widget.HSize = humanize.BytesCustomCeil(uint64(widget.Size), 2)
 		widget.HUpdated = formatUpdated(widget.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -157,7 +157,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		widget.InstallSize = installSize
-		widget.HInstallSize = humanize.Bytes(uint64(installSize))
+		widget.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
 		readmeFilename := getPreferredReadme(widget.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

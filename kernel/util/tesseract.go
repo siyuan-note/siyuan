@@ -184,7 +184,7 @@ func InitTesseract() {
 	}
 
 	TesseractLangs = filterTesseractLangs(langs)
-	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.Bytes(TesseractMaxSize), strings.Join(TesseractLangs, "+"))
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.BytesCustomCeil(TesseractMaxSize, 2), strings.Join(TesseractLangs, "+"))
 	tesseractInited.Store(true)
 }
 

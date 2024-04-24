@@ -90,7 +90,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	t, _ := time.ParseInLocation("20060102150405", ret.ID[:14], time.Local)
 	ret.CTime = t.Unix()
 	ret.HCtime = t.Format("2006-01-02 15:04:05")
-	ret.HSize = humanize.Bytes(ret.Size)
+	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
 
 	mTime := t
 	if updated := ial["updated"]; "" != updated {

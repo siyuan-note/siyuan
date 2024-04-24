@@ -1958,15 +1958,15 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 	hTrafficAPIGet = "-"
 	hTrafficAPIPut = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
-		s.HSize = humanize.Bytes(uint64(syncSize))
-		b.HSize = humanize.Bytes(uint64(backupSize))
-		hAssetSize = humanize.Bytes(uint64(assetSize))
-		hSize = humanize.Bytes(uint64(totalSize))
+		s.HSize = humanize.BytesCustomCeil(uint64(syncSize), 2)
+		b.HSize = humanize.BytesCustomCeil(uint64(backupSize), 2)
+		hAssetSize = humanize.BytesCustomCeil(uint64(assetSize), 2)
+		hSize = humanize.BytesCustomCeil(uint64(totalSize), 2)
 		u := Conf.GetUser()
-		hTotalSize = humanize.Bytes(uint64(u.UserSiYuanRepoSize))
-		hExchangeSize = humanize.Bytes(uint64(u.UserSiYuanPointExchangeRepoSize))
-		hTrafficUploadSize = humanize.Bytes(uint64(u.UserTrafficUpload))
-		hTrafficDownloadSize = humanize.Bytes(uint64(u.UserTrafficDownload))
+		hTotalSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2)
+		hExchangeSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanPointExchangeRepoSize), 2)
+		hTrafficUploadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficUpload), 2)
+		hTrafficDownloadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficDownload), 2)
 		hTrafficAPIGet = humanize.SIWithDigits(u.UserTrafficAPIGet, 2, "")
 		hTrafficAPIPut = humanize.SIWithDigits(u.UserTrafficAPIPut, 2, "")
 	}

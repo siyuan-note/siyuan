@@ -233,7 +233,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  removeRight.ID,
 			Title:   title,
 			Path:    removeRight.Path,
-			HSize:   humanize.Bytes(uint64(removeRight.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(removeRight.Size), 2),
 			Updated: removeRight.Updated,
 		})
 	}
@@ -251,7 +251,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  addLeft.ID,
 			Title:   title,
 			Path:    addLeft.Path,
-			HSize:   humanize.Bytes(uint64(addLeft.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(addLeft.Size), 2),
 			Updated: addLeft.Updated,
 		})
 	}
@@ -269,7 +269,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateLeft.ID,
 			Title:   title,
 			Path:    updateLeft.Path,
-			HSize:   humanize.Bytes(uint64(updateLeft.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(updateLeft.Size), 2),
 			Updated: updateLeft.Updated,
 		})
 	}
@@ -287,7 +287,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateRight.ID,
 			Title:   title,
 			Path:    updateRight.Path,
-			HSize:   humanize.Bytes(uint64(updateRight.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(updateRight.Size), 2),
 			Updated: updateRight.Updated,
 		})
 	}
@@ -500,7 +500,7 @@ func PurgeCloud() (err error) {
 
 	deletedIndexes := stat.Indexes
 	deletedObjects := stat.Objects
-	deletedSize := humanize.Bytes(uint64(stat.Size))
+	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(232), deletedIndexes, deletedObjects, deletedSize)
 	util.PushMsg(msg, 5000)
 	return
@@ -523,7 +523,7 @@ func PurgeRepo() (err error) {
 
 	deletedIndexes := stat.Indexes
 	deletedObjects := stat.Objects
-	deletedSize := humanize.Bytes(uint64(stat.Size))
+	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
 	util.PushMsg(msg, 5000)
 	return
@@ -696,7 +696,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	if nil != err {
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.Bytes(uint64(downloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.BytesCustomCeil(uint64(downloadBytes), 2))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -737,7 +737,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		err = errors.New(fmt.Sprintf(Conf.Language(84), formatRepoErrorMsg(err)))
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.Bytes(uint64(uploadBytes)))
+	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.BytesCustomCeil(uint64(uploadBytes), 2))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -1039,9 +1039,9 @@ func syncRepoDownload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1053,7 +1053,7 @@ func syncRepoDownload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1110,9 +1110,9 @@ func syncRepoUpload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1124,7 +1124,7 @@ func syncRepoUpload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1218,9 +1218,9 @@ func bootSyncRepo() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1303,9 +1303,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1324,7 +1324,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1341,7 +1341,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
-		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)),
+		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
 		elapsed.Seconds(),
 		len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
 

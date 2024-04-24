@@ -236,7 +236,7 @@ func fromSQLAssetContent(assetContent *sql.AssetContent, beforeLen int) *AssetCo
 		Ext:     assetContent.Ext,
 		Path:    assetContent.Path,
 		Size:    assetContent.Size,
-		HSize:   humanize.Bytes(uint64(assetContent.Size)),
+		HSize:   humanize.BytesCustomCeil(uint64(assetContent.Size), 2),
 		Updated: assetContent.Updated,
 		Content: content,
 	}

@@ -49,9 +49,12 @@
       font-size: 87.5%;
 
       .item__graphic {
-        height: 1.625em;
+        height: calc(1.625em - 10px);
         width: calc(1.625em - 10px);
-        padding: 5px 5px 5px 8px;
+        padding: 10px 5px 10px 8px;
+        line-height: calc(1.625em - 10px);
+        font-size: inherit;
+        text-align: center;
       }
 
       .item__text {

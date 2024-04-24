@@ -1479,6 +1479,7 @@
     "242": "The binding block already exists in the current database",
     "243": "Only list the first [%d] tags (including subtags), if you need to adjust, please modify [Settings - Doc Tree - Maximum number to list]",
     "244": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]",
-    "245": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]. To exit normally, you need to use [Exit Application] in the right panel"
+    "245": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]. To exit normally, you need to use [Exit Application] in the right panel",
+    "246": "The document title cannot contain / and has been replaced with _"
   }
 }

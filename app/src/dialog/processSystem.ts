@@ -278,6 +278,7 @@ export const transactionError = () => {
     });
 };
 
+let statusMobileTimeout:number;
 export const progressStatus = (data: IWebSocketData) => {
     const statusElement = document.querySelector("#status") as HTMLElement;
     if (!statusElement) {
@@ -287,9 +288,10 @@ export const progressStatus = (data: IWebSocketData) => {
         if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
             return;
         }
+        clearTimeout(statusMobileTimeout);
         statusElement.innerHTML = data.msg;
         statusElement.style.bottom = "0";
-        setTimeout(() => {
+        statusMobileTimeout = window.setTimeout(() => {
             statusElement.style.bottom = "";
         }, 5000);
         return;

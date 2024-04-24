@@ -30,9 +30,9 @@ import (
 
 	"code.sajari.com/docconv"
 	"github.com/88250/epub"
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/dustin/go-humanize"
 	"github.com/klippa-app/go-pdfium"
 	"github.com/klippa-app/go-pdfium/requests"
 	"github.com/klippa-app/go-pdfium/webassembly"

@@ -30,6 +30,6 @@ func NeedWarnDiskUsage(dataSize int64) bool {
 		logging.LogErrorf("get disk usage failed: %s", err)
 		return false
 	}
-	logging.LogInfof("disk usage [total=%s, used=%s, free=%s]", humanize.Bytes(usage.Total), humanize.Bytes(usage.Used), humanize.Bytes(usage.Free))
+	logging.LogInfof("disk usage [total=%s, used=%s, free=%s]", humanize.BytesCustomCeil(usage.Total, 2), humanize.BytesCustomCeil(usage.Used, 2), humanize.BytesCustomCeil(usage.Free, 2))
 	return usage.Free < uint64(dataSize*2)
 }

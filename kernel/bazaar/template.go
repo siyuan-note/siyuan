@@ -89,7 +89,7 @@ func Templates() (templates []*Template) {
 		template.Stars = repo.Stars
 		template.OpenIssues = repo.OpenIssues
 		template.Size = repo.Size
-		template.HSize = humanize.Bytes(uint64(template.Size))
+		template.HSize = humanize.BytesCustomCeil(uint64(template.Size), 2)
 		template.HUpdated = formatUpdated(template.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -159,7 +159,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		template.InstallSize = installSize
-		template.HInstallSize = humanize.Bytes(uint64(installSize))
+		template.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
 		readmeFilename := getPreferredReadme(template.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

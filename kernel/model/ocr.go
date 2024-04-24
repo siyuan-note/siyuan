@@ -136,7 +136,7 @@ func LoadAssetsTexts() {
 	debug.FreeOSMemory()
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
-		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
+		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
 	}
 	return
 }
@@ -165,7 +165,7 @@ func SaveAssetsTexts() {
 	debug.FreeOSMemory()
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
-		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
+		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
 	}
 
 	util.AssetsTextsChanged.Store(false)

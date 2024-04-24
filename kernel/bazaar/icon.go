@@ -88,7 +88,7 @@ func Icons() (icons []*Icon) {
 		icon.Stars = repo.Stars
 		icon.OpenIssues = repo.OpenIssues
 		icon.Size = repo.Size
-		icon.HSize = humanize.Bytes(uint64(icon.Size))
+		icon.HSize = humanize.BytesCustomCeil(uint64(icon.Size), 2)
 		icon.HUpdated = formatUpdated(icon.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -158,7 +158,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		icon.InstallSize = installSize
-		icon.HInstallSize = humanize.Bytes(uint64(installSize))
+		icon.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
 		readmeFilename := getPreferredReadme(icon.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

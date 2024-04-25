@@ -536,6 +536,8 @@ declare namespace Config {
          * The storage path of the new document created using block references
          */
         refCreateSavePath: string;
+        refCreateSaveBox: string;
+        docCreateSaveBox: string;
         /**
          * Close the secondary confirmation when deleting a document
          */

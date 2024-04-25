@@ -95,7 +95,7 @@ export const newFile = (optios: {
         if ((data.data.path.indexOf("/") > -1 && optios.useSavePath) || optios.name) {
             if (data.data.path.startsWith("/") || optios.currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
-                    notebook: optios.notebookId,
+                    notebook: data.data.box,
                     path: pathPosix().join(data.data.path, optios.name || (data.data.path.endsWith("/") ? window.siyuan.languages.untitled : "")),
                     // 根目录时无法确定 parentID
                     markdown: ""
@@ -112,11 +112,11 @@ export const newFile = (optios: {
                 });
             } else {
                 fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: optios.notebookId,
+                    notebook: data.data.box,
                     path: optios.currentPath.endsWith(".sy") ? optios.currentPath : optios.currentPath + ".sy"
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
-                        notebook: optios.notebookId,
+                        notebook: data.data.box,
                         path: pathPosix().join(responseHPath.data, data.data.path, optios.name || (data.data.path.endsWith("/") ? window.siyuan.languages.untitled : "")),
                         parentID: getDisplayName(optios.currentPath, true, true),
                         markdown: ""
@@ -144,7 +144,7 @@ export const newFile = (optios: {
                 optios.paths[optios.paths.indexOf(undefined)] = newPath;
             }
             fetchPost("/api/filetree/createDoc", {
-                notebook: optios.notebookId,
+                notebook: data.data.box,
                 path: newPath,
                 title,
                 md: "",
@@ -169,7 +169,7 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
                 cb(getDisplayName(data.data.path, false, true));
             } else {
                 fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: notebookId,
+                    notebook: data.data.box,
                     path: pathString
                 }, (response) => {
                     cb(getDisplayName(pathPosix().join(response.data, data.data.path), false, true));
@@ -177,7 +177,7 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
             }
         } else {
             fetchPost("/api/filetree/getHPathByPath", {
-                notebook: notebookId,
+                notebook: data.data.box,
                 path: pathString
             }, (response) => {
                 cb(getDisplayName(response.data, false, true));

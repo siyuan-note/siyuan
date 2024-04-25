@@ -1,4 +1,5 @@
 {
+  "currentNotebook": "Carnet actuel",
   "containerBlockTip1": "L'activation des blocs de conteneurs entraînera des résultats de recherche en double",
   "containerBlockTip2": "L'activation des blocs de documents ne prend actuellement en charge que la recherche de titres de documents",
   "copyAsPNG": "Copier en tant PNG",

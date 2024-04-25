@@ -716,6 +716,7 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 	if "" != docCreateSaveBox {
 		if nil == model.Conf.Box(docCreateSaveBox) {
+			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
 			docCreateSaveBox = notebook
 		}
 	}
@@ -731,6 +732,13 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 	if "/" == docCreateSavePathTpl {
 		docCreateSavePathTpl = "/Untitled"
+	}
+
+	if docCreateSaveBox != notebook {
+		if "" != docCreateSavePathTpl && !strings.HasPrefix(docCreateSavePathTpl, "/") {
+			// 如果配置的笔记本不是当前笔记本，则将相对路径转换为绝对路径
+			docCreateSavePathTpl = "/" + docCreateSavePathTpl
+		}
 	}
 
 	docCreateSavePath, err := model.RenderGoTemplate(docCreateSavePathTpl)
@@ -769,6 +777,7 @@ func getRefCreateSavePath(c *gin.Context) {
 	}
 	if "" != refCreateSaveBox {
 		if nil == model.Conf.Box(refCreateSaveBox) {
+			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
 			refCreateSaveBox = notebook
 		}
 	}
@@ -777,6 +786,13 @@ func getRefCreateSavePath(c *gin.Context) {
 	}
 	if "" == refCreateSavePathTpl {
 		refCreateSavePathTpl = model.Conf.FileTree.RefCreateSavePath
+	}
+
+	if refCreateSaveBox != notebook {
+		if "" != refCreateSavePathTpl && !strings.HasPrefix(refCreateSavePathTpl, "/") {
+			// 如果配置的笔记本不是当前笔记本，则将相对路径转换为绝对路径
+			refCreateSavePathTpl = "/" + refCreateSavePathTpl
+		}
 	}
 
 	refCreateSavePath, err := model.RenderGoTemplate(refCreateSavePathTpl)

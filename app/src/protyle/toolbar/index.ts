@@ -456,7 +456,7 @@ export class Toolbar {
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
-                // 在 a 元素中 ctrl+m 需继承其链接，也许不需要？没有用户反馈之前先保持现装
+                // 在 a 元素中 ctrl+m 需继承其链接，也许不需要？没有用户反馈之前先保持现状
                 // if (type !== "a" && rangeTypes.includes("a") && nextElement.dataset.type.split(" ").includes("a") &&
                 //     nextElement.isSameNode(previousElement)) {
                 //     inlineElement.setAttribute("data-href", nextElement.getAttribute("data-href"));

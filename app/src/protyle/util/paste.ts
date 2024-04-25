@@ -191,7 +191,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
         } else if (isFileAnnotation(textPlain)) {
             textPlain = textPlain.replace(/".+">>$/, `"${range.toString()}">>`);
         } else {
-            const linkDest = protyle.lute.GetLinkDest(textPlain)
+            const linkDest = protyle.lute.GetLinkDest(textPlain);
             if (linkDest) {
                 textPlain = `[${range.toString()}](${linkDest})`;
             }
@@ -448,7 +448,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     return;
                 } else {
                     // https://github.com/siyuan-note/siyuan/issues/8475
-                    const linkDest = protyle.lute.GetLinkDest(textPlain)
+                    const linkDest = protyle.lute.GetLinkDest(textPlain);
                     if (linkDest) {
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",

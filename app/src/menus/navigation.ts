@@ -59,7 +59,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             click: () => {
                 openSearchAV("", selectItemElements[0] as HTMLElement, (listItemElement) => {
                     const avID = listItemElement.dataset.avId;
-                    const srcs: IOperationSrcs[] = []
+                    const srcs: IOperationSrcs[] = [];
                     blockIDs.forEach(id => {
                         srcs.push({
                             id,

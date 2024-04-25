@@ -280,7 +280,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 if (document.querySelector(".av__panel .b3-form__upload") && files && files.length > 0) {
                     uploadFiles(protyle, files);
                 }
-            })
+            });
             element.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 const blockElement = hasClosestBlock(target);
@@ -302,7 +302,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     } else if (type === "mAsset") {
                         element.querySelectorAll('.custom-attr__avvalue[data-type="mAsset"]').forEach(item => {
                             item.removeAttribute("data-active");
-                        })
+                        });
                         target.setAttribute("data-active", "true");
                         target.focus();
                         popTextCell(protyle, [target], "mAsset");

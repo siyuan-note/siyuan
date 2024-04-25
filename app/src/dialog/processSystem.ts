@@ -297,7 +297,7 @@ export const progressStatus = (data: IWebSocketData) => {
     } else {
         const msgElement = statusElement.querySelector(".status__msg");
         if (msgElement) {
-            clearTimeout(statusTimeout)
+            clearTimeout(statusTimeout);
             msgElement.innerHTML = data.msg;
             statusTimeout = window.setTimeout(() => {
                 msgElement.innerHTML = "";

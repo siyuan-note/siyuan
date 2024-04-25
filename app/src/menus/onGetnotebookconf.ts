@@ -22,7 +22,14 @@ declare interface INotebookConf {
 
 export const genNotebookOption = (id: string) => {
     let html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
+    const helpIds: string[] = [];
+    Object.keys(Constants.HELP_PATH).forEach((key: "zh_CN") => {
+        helpIds.push(Constants.HELP_PATH[key]);
+    });
     window.siyuan.notebooks.forEach((item) => {
+        if (helpIds.includes(item.id)) {
+            return;
+        }
         html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${item.name}</option>`;
     });
     return html;

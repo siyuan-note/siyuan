@@ -692,6 +692,38 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
+
+    if (matchHotKey(window.siyuan.config.keymap.general.addToDatabase.custom, event)) {
+        const srcs: IOperationSrcs[] = [];
+        liElements.forEach(item => {
+            const id = item.getAttribute("data-node-id");
+            if (id) {
+                srcs.push({
+                    id,
+                    isDetached: false
+                });
+            }
+        });
+        if (srcs.length > 0) {
+            openSearchAV("", liElements[0] as HTMLElement, (listItemElement) => {
+                const avID = listItemElement.dataset.avId;
+                transaction(undefined, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    ignoreFillFilter: true,
+                    srcs,
+                    blockID: listItemElement.dataset.blockId
+                }, {
+                    action: "doUpdateUpdated",
+                    id: listItemElement.dataset.blockId,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                }]);
+            });
+        }
+        event.preventDefault();
+        return true;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
         window.siyuan.menus.menu.remove();
         rename({

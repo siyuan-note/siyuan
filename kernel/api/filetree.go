@@ -704,9 +704,17 @@ func getDocCreateSavePath(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	box := model.Conf.Box(notebook)
+	var docCreateSaveBox string
 	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
 	if nil != box {
+		docCreateSaveBox = box.GetConf().DocCreateSaveBox
 		docCreateSavePathTpl = box.GetConf().DocCreateSavePath
+	}
+	if "" == docCreateSaveBox {
+		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
+	}
+	if "" == docCreateSaveBox {
+		docCreateSaveBox = notebook
 	}
 	if "" == docCreateSavePathTpl {
 		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
@@ -719,14 +727,16 @@ func getDocCreateSavePath(c *gin.Context) {
 		docCreateSavePathTpl = "/Untitled"
 	}
 
-	p, err := model.RenderGoTemplate(docCreateSavePathTpl)
+	docCreateSavePath, err := model.RenderGoTemplate(docCreateSavePathTpl)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+
 	ret.Data = map[string]interface{}{
-		"path": p,
+		"box":  docCreateSaveBox,
+		"path": docCreateSavePath,
 	}
 }
 
@@ -741,22 +751,31 @@ func getRefCreateSavePath(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	box := model.Conf.Box(notebook)
-	refCreateSavePath := model.Conf.FileTree.RefCreateSavePath
+	var refCreateSaveBox string
+	refCreateSavePathTpl := model.Conf.FileTree.RefCreateSavePath
 	if nil != box {
-		refCreateSavePath = box.GetConf().RefCreateSavePath
+		refCreateSaveBox = box.GetConf().RefCreateSaveBox
+		refCreateSavePathTpl = box.GetConf().RefCreateSavePath
 	}
-	if "" == refCreateSavePath {
-		refCreateSavePath = model.Conf.FileTree.RefCreateSavePath
+	if "" == refCreateSaveBox {
+		refCreateSaveBox = model.Conf.FileTree.RefCreateSaveBox
+	}
+	if "" == refCreateSaveBox {
+		refCreateSaveBox = notebook
+	}
+	if "" == refCreateSavePathTpl {
+		refCreateSavePathTpl = model.Conf.FileTree.RefCreateSavePath
 	}
 
-	p, err := model.RenderGoTemplate(refCreateSavePath)
+	refCreateSavePath, err := model.RenderGoTemplate(refCreateSavePathTpl)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = map[string]interface{}{
-		"path": p,
+		"box":  refCreateSaveBox,
+		"path": refCreateSavePath,
 	}
 }
 

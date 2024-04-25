@@ -104,6 +104,7 @@
 .protyle-select {
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);
+  z-index: 3; // 需大于 database header and footer
 }
 
 .protyle-breadcrumb {

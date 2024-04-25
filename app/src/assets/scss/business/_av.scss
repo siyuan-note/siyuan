@@ -519,7 +519,20 @@
   }
 }
 
-.protyle-wysiwyg--select,
+.protyle-wysiwyg--select {
+  .av__row--header,
+  .av__row--footer,
+  .av__row--footer .av__colsticky,
+  .av__row--select .av__cell,
+  .av__colsticky.av__firstcol,
+  .av__colsticky > div,
+  .av__cell--select,
+  .av__cell--active,
+  .av__counter {
+    background-color: var(--b3-av-background-hl) !important;
+  }
+}
+
 .protyle-wysiwyg--hl {
   .av__row--header,
   .av__row--footer,

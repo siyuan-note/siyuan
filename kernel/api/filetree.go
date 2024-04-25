@@ -707,11 +707,17 @@ func getDocCreateSavePath(c *gin.Context) {
 	var docCreateSaveBox string
 	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
 	if nil != box {
-		docCreateSaveBox = box.GetConf().DocCreateSaveBox
-		docCreateSavePathTpl = box.GetConf().DocCreateSavePath
+		boxConf := box.GetConf()
+		docCreateSaveBox = boxConf.DocCreateSaveBox
+		docCreateSavePathTpl = boxConf.DocCreateSavePath
 	}
 	if "" == docCreateSaveBox {
 		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
+	}
+	if "" != docCreateSaveBox {
+		if nil == model.Conf.Box(docCreateSaveBox) {
+			docCreateSaveBox = notebook
+		}
 	}
 	if "" == docCreateSaveBox {
 		docCreateSaveBox = notebook
@@ -754,11 +760,17 @@ func getRefCreateSavePath(c *gin.Context) {
 	var refCreateSaveBox string
 	refCreateSavePathTpl := model.Conf.FileTree.RefCreateSavePath
 	if nil != box {
-		refCreateSaveBox = box.GetConf().RefCreateSaveBox
-		refCreateSavePathTpl = box.GetConf().RefCreateSavePath
+		boxConf := box.GetConf()
+		refCreateSaveBox = boxConf.RefCreateSaveBox
+		refCreateSavePathTpl = boxConf.RefCreateSavePath
 	}
 	if "" == refCreateSaveBox {
 		refCreateSaveBox = model.Conf.FileTree.RefCreateSaveBox
+	}
+	if "" != refCreateSaveBox {
+		if nil == model.Conf.Box(refCreateSaveBox) {
+			refCreateSaveBox = notebook
+		}
 	}
 	if "" == refCreateSaveBox {
 		refCreateSaveBox = notebook

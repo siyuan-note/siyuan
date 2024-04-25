@@ -111,10 +111,9 @@ export const newFile = (optios: {
                     /// #endif
                 });
             } else {
-                // TODO
                 fetchPost("/api/filetree/getHPathByPath", {
                     notebook: data.data.box,
-                    path: optios.currentPath.endsWith(".sy") ? optios.currentPath : optios.currentPath + ".sy"
+                    path: optios.notebookId === data.data.box ? (optios.currentPath.endsWith(".sy") ? optios.currentPath : optios.currentPath + ".sy") : (data.data.path || "/")
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: data.data.box,
@@ -140,7 +139,7 @@ export const newFile = (optios: {
                 return;
             }
             const id = Lute.NewNodeID();
-            const newPath = pathPosix().join(getDisplayName(optios.currentPath, false, true), id + ".sy");
+            const newPath = optios.notebookId === data.data.box ? (pathPosix().join(getDisplayName(optios.currentPath, false, true), id + ".sy")) : (data.data.path || "/");
             if (optios.paths) {
                 optios.paths[optios.paths.indexOf(undefined)] = newPath;
             }

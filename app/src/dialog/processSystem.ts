@@ -278,7 +278,7 @@ export const transactionError = () => {
     });
 };
 
-let statusMobileTimeout:number;
+let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
     const statusElement = document.querySelector("#status") as HTMLElement;
     if (!statusElement) {
@@ -288,20 +288,21 @@ export const progressStatus = (data: IWebSocketData) => {
         if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
             return;
         }
-        clearTimeout(statusMobileTimeout);
+        clearTimeout(statusTimeout);
         statusElement.innerHTML = data.msg;
         statusElement.style.bottom = "0";
-        statusMobileTimeout = window.setTimeout(() => {
+        statusTimeout = window.setTimeout(() => {
             statusElement.style.bottom = "";
         }, 5000);
-        return;
-    }
-    const msgElement = statusElement.querySelector(".status__msg");
-    if (msgElement) {
-        msgElement.innerHTML = data.msg;
-        setTimeout(() => {
-            msgElement.innerHTML = "";
-        }, 5000);
+    } else {
+        const msgElement = statusElement.querySelector(".status__msg");
+        if (msgElement) {
+            clearTimeout(statusTimeout)
+            msgElement.innerHTML = data.msg;
+            statusTimeout = window.setTimeout(() => {
+                msgElement.innerHTML = "";
+            }, 5000);
+        }
     }
 };
 

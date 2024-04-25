@@ -1026,11 +1026,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         notebook: protyle.notebookId,
                         path: protyle.path,
                     }, (response) => {
-                        newFileBySelect(protyle, selectText, nodeElement, response.data);
+                        newFileBySelect(protyle, selectText, nodeElement, response.data, protyle.notebookId);
                     });
                 } else {
-                    getSavePath(protyle.path, protyle.notebookId, (pathString) => {
-                        newFileBySelect(protyle, selectText, nodeElement, pathString);
+                    getSavePath(protyle.path, protyle.notebookId, (pathString, targetNotebookId) => {
+                        newFileBySelect(protyle, selectText, nodeElement, pathString, targetNotebookId);
                     });
                 }
             }

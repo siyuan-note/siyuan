@@ -92,6 +92,9 @@ export const newFile = (optios: {
         optios.currentPath = resultData.currentPath;
     }
     fetchPost("/api/filetree/getDocCreateSavePath", {notebook: optios.notebookId}, (data) => {
+        if (!optios.useSavePath) {
+            data.data.box = optios.notebookId;
+        }
         if ((data.data.path.indexOf("/") > -1 && optios.useSavePath) || optios.name) {
             if (data.data.path.startsWith("/") || optios.currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
@@ -138,8 +141,27 @@ export const newFile = (optios: {
             if (!validateName(title)) {
                 return;
             }
+            if (optios.notebookId !== data.data.box) {
+                fetchPost("/api/filetree/createDocWithMd", {
+                    notebook: data.data.box,
+                    path: pathPosix().join(data.data.path || "/", optios.name || (data.data.path.endsWith("/") ? window.siyuan.languages.untitled : "")),
+                    markdown: ""
+                }, response => {
+                    /// #if !MOBILE
+                    openFileById({
+                        app: optios.app,
+                        id: response.data,
+                        action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
+                    });
+                    /// #else
+                    openMobileFileById(optios.app, response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    /// #endif
+                });
+                return;
+            }
+
             const id = Lute.NewNodeID();
-            const newPath = optios.notebookId === data.data.box ? (pathPosix().join(getDisplayName(optios.currentPath, false, true), id + ".sy")) : (data.data.path || "/");
+            const newPath = (pathPosix().join(getDisplayName(optios.currentPath, false, true), id + ".sy"));
             if (optios.paths) {
                 optios.paths[optios.paths.indexOf(undefined)] = newPath;
             }

@@ -186,7 +186,7 @@ type SearchAttributeViewResult struct {
 	HPath   string `json:"hPath"`
 }
 
-func SearchAttributeView(keyword string, excludes []string) (ret []*SearchAttributeViewResult) {
+func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAttributeViewResult) {
 	waitForSyncingStorages()
 
 	ret = []*SearchAttributeViewResult{}
@@ -311,6 +311,9 @@ func SearchAttributeView(keyword string, excludes []string) (ret []*SearchAttrib
 				break
 			}
 		}
+		if exist {
+			continue
+		}
 
 		var hPath string
 		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
@@ -322,7 +325,7 @@ func SearchAttributeView(keyword string, excludes []string) (ret []*SearchAttrib
 			hPath = box.Name + hPath
 		}
 
-		if !exist && !gulu.Str.Contains(avID, excludes) {
+		if !gulu.Str.Contains(avID, excludeAvIDs) {
 			ret = append(ret, &SearchAttributeViewResult{
 				AvID:    avID,
 				AvName:  existAv.AvName,

@@ -164,13 +164,17 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
     fetchPost("/api/filetree/getRefCreateSavePath", {
         notebook: notebookId
     }, (data) => {
+        let targetPath = pathString;
+        if (notebookId !== data.data.box) {
+            targetPath = data.data.path || "/";
+        }
         if (data.data.path) {
             if (data.data.path.startsWith("/")) {
                 cb(getDisplayName(data.data.path, false, true));
             } else {
                 fetchPost("/api/filetree/getHPathByPath", {
                     notebook: data.data.box,
-                    path: pathString
+                    path: targetPath
                 }, (response) => {
                     cb(getDisplayName(pathPosix().join(response.data, data.data.path), false, true));
                 });
@@ -178,7 +182,7 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
         } else {
             fetchPost("/api/filetree/getHPathByPath", {
                 notebook: data.data.box,
-                path: pathString
+                path: targetPath
             }, (response) => {
                 cb(getDisplayName(response.data, false, true));
             });

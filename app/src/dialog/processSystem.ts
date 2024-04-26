@@ -284,6 +284,7 @@ export const progressStatus = (data: IWebSocketData) => {
     if (!statusElement) {
         return;
     }
+
     if (isMobile()) {
         if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
             return;
@@ -293,7 +294,7 @@ export const progressStatus = (data: IWebSocketData) => {
         statusElement.style.bottom = "0";
         statusTimeout = window.setTimeout(() => {
             statusElement.style.bottom = "";
-        }, 5000);
+        }, 7000);
     } else {
         const msgElement = statusElement.querySelector(".status__msg");
         if (msgElement) {
@@ -301,7 +302,7 @@ export const progressStatus = (data: IWebSocketData) => {
             msgElement.innerHTML = data.msg;
             statusTimeout = window.setTimeout(() => {
                 msgElement.innerHTML = "";
-            }, 5000);
+            }, 7000);
         }
     }
 };

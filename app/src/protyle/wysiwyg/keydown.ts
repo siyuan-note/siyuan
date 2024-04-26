@@ -38,7 +38,7 @@ import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rena
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
-import {openBy, openFileById} from "../../editor/util";
+import {openBy, openFileById, openLink} from "../../editor/util";
 /// #endif
 import {
     alignImgCenter,
@@ -1578,6 +1578,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         /// #endif
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
+            const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
+            if (aElement) {
+                openLink(protyle, aElement.getAttribute("data-href"), event, false);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            return;
+        }
 
         // 置于最后，太多快捷键会使用到选中元素
         if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {

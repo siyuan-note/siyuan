@@ -58,7 +58,7 @@ import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
-import {openAsset, openBy, openFileById} from "../../editor/util";
+import {openAsset, openBy, openFileById, openLink} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
@@ -2125,59 +2125,7 @@ export class WYSIWYG {
             if (aElement && range.toString() === "" && aLink) {
                 event.stopPropagation();
                 event.preventDefault();
-                let linkAddress = Lute.UnEscapeHTMLStr(aLink);
-                /// #if MOBILE
-                openByMobile(linkAddress);
-                /// #else
-                if (isLocalPath(linkAddress)) {
-                    const linkPathname = linkAddress.split("?page")[0];
-                    if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkPathname)) &&
-                        (!linkPathname.endsWith(".pdf") ||
-                            (linkPathname.endsWith(".pdf") && !linkAddress.startsWith("file://")))
-                    ) {
-                        if (event.altKey) {
-                            openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
-                        } else if (ctrlIsPressed) {
-                            /// #if !BROWSER
-                            openBy(linkAddress, "folder");
-                            /// #else
-                            openByMobile(linkAddress);
-                            /// #endif
-                        } else if (event.shiftKey) {
-                            /// #if !BROWSER
-                            openBy(linkAddress, "app");
-                            /// #else
-                            openByMobile(linkAddress);
-                            /// #endif
-                        } else {
-                            openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
-                        }
-                    } else {
-                        /// #if !BROWSER
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else {
-                            openBy(linkAddress, "app");
-                        }
-                        /// #else
-                        openByMobile(linkAddress);
-                        /// #endif
-                    }
-                } else if (linkAddress) {
-                    if (0 > linkAddress.indexOf(":")) {
-                        // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
-                        // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
-                        linkAddress = `https://${linkAddress}`;
-                    }
-                    /// #if !BROWSER
-                    shell.openExternal(linkAddress).catch((e) => {
-                        showMessage(e);
-                    });
-                    /// #else
-                    openByMobile(linkAddress);
-                    /// #endif
-                }
-                /// #endif
+                openLink(protyle, aLink, event, ctrlIsPressed);
                 return;
             }
 

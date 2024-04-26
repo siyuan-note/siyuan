@@ -727,12 +727,6 @@ func getDocCreateSavePath(c *gin.Context) {
 		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
 	}
 	docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
-	if "../" == docCreateSavePathTpl {
-		docCreateSavePathTpl = "../Untitled"
-	}
-	if "/" == docCreateSavePathTpl {
-		docCreateSavePathTpl = "/Untitled"
-	}
 
 	if docCreateSaveBox != notebook {
 		if "" != docCreateSavePathTpl && !strings.HasPrefix(docCreateSavePathTpl, "/") {

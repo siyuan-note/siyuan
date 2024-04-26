@@ -217,12 +217,6 @@ func InitConf() {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
 	Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
-	if "../" == Conf.FileTree.DocCreateSavePath {
-		Conf.FileTree.DocCreateSavePath = "../Untitled"
-	}
-	if "/" == Conf.FileTree.DocCreateSavePath {
-		Conf.FileTree.DocCreateSavePath = "/Untitled"
-	}
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion

@@ -162,7 +162,6 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				}
 				return 0
 			}
-
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {

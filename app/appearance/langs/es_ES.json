@@ -1,4 +1,12 @@
 {
+  "editorMarkdownInlineSup": "Sintaxis de superíndice en línea de Markdown",
+  "editorMarkdownInlineSupTip": "Después de habilitar, se admitirá la entrada de superíndice en línea <code class='fn__code'>^foo^</code>",
+  "editorMarkdownInlineSub": "Sintaxis del subíndice en línea de Markdown",
+  "editorMarkdownInlineSubTip": "Después de habilitar, se admitirá la entrada de subíndice en línea <code class='fn__code'>~foo~</code>",
+  "editorMarkdownInlineTag": "Sintaxis de etiquetas en línea de Markdown",
+  "editorMarkdownInlineTagTip": "Después de habilitar, se admitirá la entrada de etiquetas en línea <code class='fn__code'>#foo#</code>",
+  "editorMarkdownInlineMath": "Sintaxis de fórmula en línea de Markdown",
+  "editorMarkdownInlineMathTip": "Después de habilitar, se admitirá la entrada de fórmula en línea <code class='fn__code'>$foo$</code>",
   "currentNotebook": "Cuaderno actual",
   "containerBlockTip1": "Habilitar bloques de contenedores generará resultados de búsqueda duplicados",
   "containerBlockTip2": "Habilitar bloques de documentos actualmente solo admite la búsqueda de títulos de documentos",

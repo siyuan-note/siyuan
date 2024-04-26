@@ -267,6 +267,10 @@ func InitConf() {
 	if 0 > Conf.Editor.BackmentionExpandCount {
 		Conf.Editor.BackmentionExpandCount = 0
 	}
+	if nil == Conf.Editor.Markdown {
+		Conf.Editor.Markdown = &util.Markdown{}
+	}
+	util.MarkdownSettings = Conf.Editor.Markdown
 
 	if nil == Conf.Export {
 		Conf.Export = conf.NewExport()

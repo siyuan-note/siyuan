@@ -24,6 +24,21 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+// MarkdownSettings 运行时 Markdown 配置。
+var MarkdownSettings = &Markdown{
+	InlineSup:  false,
+	InlineSub:  false,
+	InlineTag:  false,
+	InlineMath: false,
+}
+
+type Markdown struct {
+	InlineSup  bool `json:"inlineSup"`  // 是否启用行级上标
+	InlineSub  bool `json:"inlineSub"`  // 是否启用行级下标
+	InlineTag  bool `json:"inlineTag"`  // 是否启用行级标签
+	InlineMath bool `json:"inlineMath"` // 是否启用行级公式
+}
+
 func NewLute() (ret *lute.Lute) {
 	ret = lute.New()
 	ret.SetTextMark(true)
@@ -36,9 +51,12 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetImgPathAllowSpace(true)
 	ret.SetGitConflict(true)
 	ret.SetMark(true)
-	ret.SetSup(true)
-	ret.SetSub(true)
+	ret.SetSup(MarkdownSettings.InlineSup)
+	ret.SetSub(MarkdownSettings.InlineSub)
+	ret.SetTag(MarkdownSettings.InlineTag)
+	ret.SetInlineMath(MarkdownSettings.InlineMath)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
+	ret.SetGFMStrikethrough1(false)
 	ret.SetFootnotes(false)
 	ret.SetToC(false)
 	ret.SetIndentCodeBlock(false)

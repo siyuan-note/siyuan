@@ -1,4 +1,12 @@
 {
+  "editorMarkdownInlineSup": "Syntaxe exposant Markdown en ligne",
+  "editorMarkdownInlineSupTip": "Après l'activation, la saisie en exposant <code class='fn__code'>^foo^</code> en ligne sera prise en charge",
+  "editorMarkdownInlineSub": "Syntaxe d'indice en ligne Markdown",
+  "editorMarkdownInlineSubTip": "Après l'activation, la saisie en indice <code class='fn__code'>~foo~</code> en ligne sera prise en charge",
+  "editorMarkdownInlineTag": "Syntaxe des balises en ligne Markdown",
+  "editorMarkdownInlineTagTip": "Après l'activation, la saisie de balises en ligne <code class='fn__code'>#foo#</code> sera prise en charge",
+  "editorMarkdownInlineMath": "Syntaxe de formule en ligne Markdown",
+  "editorMarkdownInlineMathTip": "Après l'activation, la saisie de formule en ligne <code class='fn__code'>$foo$</code> sera prise en charge",
   "currentNotebook": "Carnet actuel",
   "containerBlockTip1": "L'activation des blocs de conteneurs entraînera des résultats de recherche en double",
   "containerBlockTip2": "L'activation des blocs de documents ne prend actuellement en charge que la recherche de titres de documents",

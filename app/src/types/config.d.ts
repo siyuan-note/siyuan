@@ -280,9 +280,37 @@ declare namespace Config {
     }
 
     /**
+     * SiYuan editor markdown related configuration
+     */
+    interface IMarkdown {
+        /**
+         * Whether to enable the inline superscript
+         */
+        inlineSup: boolean;
+        /**
+         * Whether to enable the inline subscript
+         */
+        inlineSub: boolean;
+        /**
+         * Whether to enable the inline tag
+         */
+        inlineTag: boolean;
+        /**
+         * Whether to enable the inline math
+         */
+        inlineMath: boolean;
+    }
+
+    /**
      * SiYuan editor related configuration
      */
     export interface IEditor {
+
+        /**
+         * Markdown configuration
+         */
+        markdown: IMarkdown;
+
         /**
          * The default number of backlinks to expand
          */

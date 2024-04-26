@@ -330,6 +330,8 @@ func setEditor(c *gin.Context) {
 		util.BroadcastByType("main", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 	}
 
+	util.MarkdownSettings = model.Conf.Editor.Markdown
+
 	ret.Data = model.Conf.Editor
 }
 

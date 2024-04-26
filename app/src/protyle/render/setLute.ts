@@ -25,8 +25,11 @@ export const setLute = (options: ILuteOptions) => {
     lute.SetTag(true);
     lute.SetSuperBlock(true);
     lute.SetMark(true);
-    lute.SetSup(true);
-    lute.SetSub(true);
+    lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+    lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+    lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+    lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    lute.SetGFMStrikethrough1(false);
     lute.SetSpin(true);
     lute.SetProtyleWYSIWYG(true);
     if (options.lazyLoadImage) {

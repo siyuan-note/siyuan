@@ -1,4 +1,12 @@
 {
+  "editorMarkdownInlineSup": "Markdown 行級上標語法",
+  "editorMarkdownInlineSupTip": "啟用後將支援 <code class='fn__code'>^foo^</code> 行級上標輸入",
+  "editorMarkdownInlineSub": "Markdown 行級下標語法",
+  "editorMarkdownInlineSubTip": "啟用後將支援 <code class='fn__code'>~foo~</code> 行級下標輸入",
+  "editorMarkdownInlineTag": "Markdown 行級標籤語法",
+  "editorMarkdownInlineTagTip": "啟用後將支援 <code class='fn__code'>#foo#</code> 行級標籤輸入",
+  "editorMarkdownInlineMath": "Markdown 行級公式語法",
+  "editorMarkdownInlineMathTip": "啟用後將支援 <code class='fn__code'>$foo$</code> 行級公式輸入",
   "currentNotebook": "目前筆記本",
   "containerBlockTip1": "啟用容器區塊後會導致搜尋結果重複",
   "containerBlockTip2": "啟用文件區塊目前僅支援搜尋文件名稱",

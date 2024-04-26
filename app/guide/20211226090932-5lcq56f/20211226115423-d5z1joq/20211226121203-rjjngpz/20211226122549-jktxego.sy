@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20240426101104"
+		"updated": "20240426233618"
 	},
 	"Children": [
 		{
@@ -3067,7 +3067,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20240308233137"
+				"updated": "20240426233618"
 			},
 			"Children": [
 				{
@@ -6351,7 +6351,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "游標需停留在引用元素內"
+									"Data": "游標需停留在引用/超連結/資源檔案/PDF 標註引用元素內"
 								}
 							]
 						}

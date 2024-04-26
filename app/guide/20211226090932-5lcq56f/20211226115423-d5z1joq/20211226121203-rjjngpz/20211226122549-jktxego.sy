@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20240416113937"
+		"updated": "20240426101104"
 	},
 	"Children": [
 		{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20240308232846"
+				"updated": "20240426100801"
 			},
 			"Children": [
 				{
@@ -494,7 +494,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取上一個編輯分頁"
+									"Data": "跳到上一個編輯分頁"
 								}
 							]
 						},
@@ -542,7 +542,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選中上一個編輯分頁"
+									"Data": "跳到上一個編輯分頁"
 								}
 							]
 						},
@@ -590,7 +590,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第一個分頁"
+									"Data": "跳到第一個分頁"
 								}
 							]
 						},
@@ -638,7 +638,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第二個分頁"
+									"Data": "跳到第二個分頁"
 								}
 							]
 						},
@@ -653,7 +653,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+2"
 								},
 								{
 									"Type": "NodeText",
@@ -686,7 +686,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第三個分頁"
+									"Data": "跳到第三個分頁"
 								}
 							]
 						},
@@ -701,7 +701,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+3"
 								},
 								{
 									"Type": "NodeText",
@@ -734,7 +734,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第四個分頁"
+									"Data": "跳到第四個分頁"
 								}
 							]
 						},
@@ -749,7 +749,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+4"
 								},
 								{
 									"Type": "NodeText",
@@ -782,7 +782,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第五個分頁"
+									"Data": "跳到第五個分頁"
 								}
 							]
 						},
@@ -797,7 +797,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+5"
 								},
 								{
 									"Type": "NodeText",
@@ -830,7 +830,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第六個分頁"
+									"Data": "跳到第六個分頁"
 								}
 							]
 						},
@@ -845,7 +845,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+6"
 								},
 								{
 									"Type": "NodeText",
@@ -878,7 +878,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第七個分頁"
+									"Data": "跳到第七個分頁"
 								}
 							]
 						},
@@ -893,7 +893,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+7"
 								},
 								{
 									"Type": "NodeText",
@@ -926,7 +926,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第八個分頁"
+									"Data": "跳到第八個分頁"
 								}
 							]
 						},
@@ -941,7 +941,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+8"
 								},
 								{
 									"Type": "NodeText",
@@ -974,7 +974,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取第九個分頁"
+									"Data": "跳到第九個/最後一個分頁"
 								}
 							]
 						},
@@ -989,7 +989,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+9"
 								},
 								{
 									"Type": "NodeText",
@@ -2318,7 +2318,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-eu9085n",
-				"updated": "20240416113937"
+				"updated": "20240426101104"
 			},
 			"Children": [
 				{
@@ -2389,6 +2389,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘/"
 								},
 								{
 									"Type": "NodeText",

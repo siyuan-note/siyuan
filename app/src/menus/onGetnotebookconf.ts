@@ -20,14 +20,14 @@ declare interface INotebookConf {
     }
 }
 
-export const genNotebookOption = (id: string) => {
+export const genNotebookOption = (id: string, notebookId?: string) => {
     let html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
     const helpIds: string[] = [];
     Object.keys(Constants.HELP_PATH).forEach((key: "zh_CN") => {
         helpIds.push(Constants.HELP_PATH[key]);
     });
     window.siyuan.notebooks.forEach((item) => {
-        if (helpIds.includes(item.id)) {
+        if (helpIds.includes(item.id) || item.id === notebookId) {
             return;
         }
         html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${item.name}</option>`;
@@ -45,7 +45,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     <span class="fn__hr"></span>
     <div class="fn__flex">
-        <select style="min-width: 200px" class="b3-select" id="docCreateSaveBox">${genNotebookOption(data.conf.docCreateSaveBox)}</select>
+        <select style="min-width: 200px" class="b3-select" id="docCreateSaveBox">${genNotebookOption(data.conf.docCreateSaveBox, data.box)}</select>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" id="docCreateSavePath" value="">
     </div>
@@ -55,7 +55,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
     <span class="fn__hr"></span>
     <div class="fn__flex">
-        <select style="min-width: 200px" class="b3-select" id="refCreateSaveBox">${genNotebookOption(data.conf.refCreateSaveBox)}</select>
+        <select style="min-width: 200px" class="b3-select" id="refCreateSaveBox">${genNotebookOption(data.conf.refCreateSaveBox, data.box)}</select>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" id="refCreateSavePath" value="">
     </div>

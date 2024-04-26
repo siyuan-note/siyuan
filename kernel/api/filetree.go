@@ -707,11 +707,18 @@ func getDocCreateSavePath(c *gin.Context) {
 	var docCreateSaveBox string
 	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
 	if nil != box {
-		docCreateSaveBox = box.GetConf().DocCreateSaveBox
-		docCreateSavePathTpl = box.GetConf().DocCreateSavePath
+		boxConf := box.GetConf()
+		docCreateSaveBox = boxConf.DocCreateSaveBox
+		docCreateSavePathTpl = boxConf.DocCreateSavePath
 	}
 	if "" == docCreateSaveBox {
 		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
+	}
+	if "" != docCreateSaveBox {
+		if nil == model.Conf.Box(docCreateSaveBox) {
+			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
+			docCreateSaveBox = notebook
+		}
 	}
 	if "" == docCreateSaveBox {
 		docCreateSaveBox = notebook
@@ -725,6 +732,13 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 	if "/" == docCreateSavePathTpl {
 		docCreateSavePathTpl = "/Untitled"
+	}
+
+	if docCreateSaveBox != notebook {
+		if "" != docCreateSavePathTpl && !strings.HasPrefix(docCreateSavePathTpl, "/") {
+			// 如果配置的笔记本不是当前笔记本，则将相对路径转换为绝对路径
+			docCreateSavePathTpl = "/" + docCreateSavePathTpl
+		}
 	}
 
 	docCreateSavePath, err := model.RenderGoTemplate(docCreateSavePathTpl)
@@ -754,17 +768,31 @@ func getRefCreateSavePath(c *gin.Context) {
 	var refCreateSaveBox string
 	refCreateSavePathTpl := model.Conf.FileTree.RefCreateSavePath
 	if nil != box {
-		refCreateSaveBox = box.GetConf().RefCreateSaveBox
-		refCreateSavePathTpl = box.GetConf().RefCreateSavePath
+		boxConf := box.GetConf()
+		refCreateSaveBox = boxConf.RefCreateSaveBox
+		refCreateSavePathTpl = boxConf.RefCreateSavePath
 	}
 	if "" == refCreateSaveBox {
 		refCreateSaveBox = model.Conf.FileTree.RefCreateSaveBox
+	}
+	if "" != refCreateSaveBox {
+		if nil == model.Conf.Box(refCreateSaveBox) {
+			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
+			refCreateSaveBox = notebook
+		}
 	}
 	if "" == refCreateSaveBox {
 		refCreateSaveBox = notebook
 	}
 	if "" == refCreateSavePathTpl {
 		refCreateSavePathTpl = model.Conf.FileTree.RefCreateSavePath
+	}
+
+	if refCreateSaveBox != notebook {
+		if "" != refCreateSavePathTpl && !strings.HasPrefix(refCreateSavePathTpl, "/") {
+			// 如果配置的笔记本不是当前笔记本，则将相对路径转换为绝对路径
+			refCreateSavePathTpl = "/" + refCreateSavePathTpl
+		}
 	}
 
 	refCreateSavePath, err := model.RenderGoTemplate(refCreateSavePathTpl)

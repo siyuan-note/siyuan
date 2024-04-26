@@ -11,14 +11,19 @@ on:
     branches:
       - master
 
+# ref https://docs.github.com/zh/actions/learn-github-actions/variables
+env:
+  repo_name_android: "siyuan-android"
+  repo_name: "siyuan"
+  repo_owner: "siyuan-note"
+  package_json: "app/package.json"
+  docker_hub_owner: "b3log"
+  docker_hub_repo: "siyuan"
+
 jobs:
   build:
     name: build
     runs-on: ubuntu-latest
-    strategy:
-        matrix:
-          string:
-            - package_json: "app/package.json"
     permissions:
       packages: write
       contents: read
@@ -34,7 +39,7 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: version
         with:
-          cmd: "jq .version ${{ matrix.string.package_json }} -r"
+          cmd: "jq .version ${{ env.package_json }} -r"
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -67,9 +72,9 @@ jobs:
       - name: Build the Docker image use Workflow Dispatch inputs' version
         if: ${{ github.event_name == 'workflow_dispatch' && !github.event.inputs.image_tag == '' }}
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t b3log/siyuan:latest -t b3log/siyuan:v${{ github.event.inputs.image_tag }} .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ github.event.inputs.image_tag }} .
       - name: Build the Docker image use package_json version
         if: ${{ github.event_name == 'push' || github.event.inputs.image_tag == '' }}
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t b3log/siyuan:latest -t b3log/siyuan:v${{ steps.version.outputs.value }} .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
     

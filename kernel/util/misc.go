@@ -120,6 +120,15 @@ func RemoveRedundantSpace(str string) string {
 
 func Convert2Float(s string) (float64, bool) {
 	s = gulu.Str.RemoveInvisible(s)
+	s = strings.ReplaceAll(s, " ", "")
+	s = strings.ReplaceAll(s, ",", "")
+	buf := bytes.Buffer{}
+	for _, r := range s {
+		if unicode.IsDigit(r) || '.' == r {
+			buf.WriteRune(r)
+		}
+	}
+	s = buf.String()
 	ret, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
 	if nil != err {
 		return 0, false

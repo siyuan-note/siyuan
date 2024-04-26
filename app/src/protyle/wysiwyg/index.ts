@@ -16,8 +16,7 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
-import {getSearch, isMobile} from "../../util/functions";
-import {isLocalPath, pathPosix} from "../../util/pathName";
+import {isMobile} from "../../util/functions";
 import {genEmptyElement} from "../../block/util";
 import {previewDocImage} from "../preview/image";
 import {
@@ -2107,17 +2106,7 @@ export class WYSIWYG {
                 event.preventDefault();
                 const fileIds = fileElement.getAttribute("data-id").split("/");
                 const linkAddress = `assets/${fileIds[1]}`;
-                /// #if MOBILE
-                openByMobile(linkAddress);
-                /// #else
-                if (ctrlIsPressed) {
-                    openBy(linkAddress, "folder");
-                } else if (event.shiftKey) {
-                    openBy(linkAddress, "app");
-                } else {
-                    openAsset(protyle.app, linkAddress, fileIds[2], "right");
-                }
-                /// #endif
+                openLink(protyle, linkAddress, event, ctrlIsPressed);
                 return;
             }
 

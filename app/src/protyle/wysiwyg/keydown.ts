@@ -1582,9 +1582,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
             const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
             if (aElement) {
-                openLink(protyle, aElement.getAttribute("data-href"), event, false);
+                openLink(protyle, aElement.getAttribute("data-href"), undefined, false);
                 event.preventDefault();
                 event.stopPropagation();
+                return;
+            }
+            const fileElement = hasClosestByAttribute(range.startContainer, "data-type", "file-annotation-ref");
+            if (fileElement) {
+                const fileIds = fileElement.getAttribute("data-id").split("/");
+                const linkAddress = `assets/${fileIds[1]}`;
+                openLink(protyle, linkAddress, undefined, false);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
             }
             return;
         }

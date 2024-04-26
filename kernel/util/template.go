@@ -17,13 +17,15 @@
 package util
 
 import (
+	"math"
+	"text/template"
+	"time"
+
+	"github.com/88250/go-humanize"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
 	"github.com/spf13/cast"
-	"math"
-	"text/template"
-	"time"
 )
 
 func BuiltInTemplateFuncs() (ret template.FuncMap) {
@@ -37,6 +39,7 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["log"] = log
 	ret["logf"] = logf
 	ret["parseTime"] = parseTime
+	ret["FormatFloat"] = FormatFloat
 	return
 }
 
@@ -55,4 +58,8 @@ func parseTime(dateStr string) time.Time {
 		return now
 	}
 	return retTime
+}
+
+func FormatFloat(format string, n float64) string {
+	return humanize.FormatFloat(format, n)
 }

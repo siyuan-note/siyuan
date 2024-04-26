@@ -1,10 +1,10 @@
 {
   "editorMarkdownInlineSup": "Markdown 行级上标语法",
-  "editorMarkdownInlineSupTip": "启用后将支持 <code class='fn__code'>^foo^</code> 上标语法输入",
+  "editorMarkdownInlineSupTip": "启用后将支持 <code class='fn__code'>^foo^</code> 行级上标语法输入",
   "editorMarkdownInlineSub": "Markdown 行级下标语法",
-  "editorMarkdownInlineSubTip": "启用后将支持 <code class='fn__code'>~foo~</code> 下标语法输入",
+  "editorMarkdownInlineSubTip": "启用后将支持 <code class='fn__code'>~foo~</code> 行级下标语法输入",
   "editorMarkdownInlineTag": "Markdown 行级标签语法",
-  "editorMarkdownInlineTagTip": "启用后将支持 <code class='fn__code'>#foo#</code> 标签语法输入",
+  "editorMarkdownInlineTagTip": "启用后将支持 <code class='fn__code'>#foo#</code> 行级标签语法输入",
   "editorMarkdownInlineMath": "Markdown 行级公式语法",
   "editorMarkdownInlineMathTip": "启用后将支持 <code class='fn__code'>$foo$</code> 行级公式语法输入",
   "currentNotebook": "当前笔记本",

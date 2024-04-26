@@ -291,13 +291,16 @@ func IndexEmbedBlockJob() {
 func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
 		markdown := strings.TrimSpace(embedBlock.Markdown)
-		stmt := strings.TrimPrefix(markdown, "{{")
-		stmt = strings.TrimSuffix(stmt, "}}")
-		stmt = html.UnescapeString(stmt)
-		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+		markdown = strings.TrimPrefix(markdown, "{{")
+		content := strings.TrimSuffix(markdown, "}}")
 
+		// 嵌入块的 Markdown 内容需要反转义
+		stmt := html.UnescapeString(content)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 		stmt = strings.TrimSpace(stmt)
+
 		if strings.HasPrefix(stmt, "//!js") {
+			// https://github.com/siyuan-note/siyuan/issues/9648
 			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
 			continue
 		}

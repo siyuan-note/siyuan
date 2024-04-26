@@ -194,7 +194,7 @@ func UpsertBlockRel(avID, blockID string) (ret bool) {
 	blockIDs = append(blockIDs, blockID)
 	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
 	avBlocks[avID] = blockIDs
-	ret = oldLen != len(blockIDs)
+	ret = oldLen != len(blockIDs) && 0 != oldLen
 
 	data, err := msgpack.Marshal(avBlocks)
 	if nil != err {

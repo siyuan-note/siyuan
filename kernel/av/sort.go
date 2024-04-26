@@ -145,7 +145,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 						return s
 					}
 				}
-				return 1
+				return 0
 			} else {
 				for i := 0; i < oLen; i++ {
 					v := value.MSelect[i].Content
@@ -160,7 +160,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 						return s
 					}
 				}
-				return -1
+				return 0
 			}
 
 		}

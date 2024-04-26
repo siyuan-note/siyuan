@@ -182,7 +182,8 @@ export class Tab {
                 this.headElement.querySelector(".item__text").classList.add("fn__none");
             }
         } else {
-            this.headElement.querySelector(".item__icon").remove();
+            // 添加图标后刷新界面，没有 icon
+            this.headElement.querySelector(".item__icon")?.remove();
             this.headElement.querySelector(".item__text").classList.remove("fn__none");
         }
     }

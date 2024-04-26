@@ -10,11 +10,12 @@ import {lineNumberRender} from "../render/highlightRender";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
+    protyle.contentElement.innerHTML = `<div class="protyle-top"></div>`
     if (protyle.options.render.background) {
-        protyle.contentElement.appendChild(protyle.background.element);
+        protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
     }
     if (protyle.options.render.title) {
-        protyle.contentElement.appendChild(protyle.title.element);
+        protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
     }
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
@@ -142,11 +143,10 @@ export const setPadding = (protyle: IProtyle) => {
         protyle.wysiwyg.element.style.padding = `16px ${left}px ${bottomHeight} ${right}px`;
     }
     if (protyle.options.render.background) {
-        protyle.background.element.lastElementChild.setAttribute("style", `left:${left}px`);
-        protyle.background.element.querySelector(".protyle-background__img .protyle-icons").setAttribute("style", `right:${left}px`);
+        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px`);
     }
     if (protyle.options.render.title) {
-        protyle.title.element.style.margin = `16px ${left}px 0 ${right}px`;
+        protyle.title.element.style.margin = `5px ${left}px 0 ${right}px`;
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         const editorAttrElement = document.getElementById("editorAttr");

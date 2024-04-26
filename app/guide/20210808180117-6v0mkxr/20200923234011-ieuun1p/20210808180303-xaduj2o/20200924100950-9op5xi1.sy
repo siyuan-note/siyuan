@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20240416115710"
+		"updated": "20240426101110"
 	},
 	"Children": [
 		{
@@ -40,7 +40,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20240308232956"
+				"updated": "20240426100644"
 			},
 			"Children": [
 				{
@@ -502,7 +502,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select next edit tab"
+									"Data": "Jump to next edit tab"
 								}
 							]
 						},
@@ -550,7 +550,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select previous edit tab"
+									"Data": "Jump to previous edit tab"
 								}
 							]
 						},
@@ -598,7 +598,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the first tab"
+									"Data": "Jump to the first tab"
 								}
 							]
 						},
@@ -646,7 +646,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the second tab"
+									"Data": "Jump to the second tab"
 								}
 							]
 						},
@@ -661,7 +661,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+2"
 								},
 								{
 									"Type": "NodeText",
@@ -694,7 +694,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the third tab"
+									"Data": "Jump to the third tab"
 								}
 							]
 						},
@@ -709,7 +709,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+3"
 								},
 								{
 									"Type": "NodeText",
@@ -742,7 +742,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the fourth tab"
+									"Data": "Jump to the fourth tab"
 								}
 							]
 						},
@@ -757,7 +757,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+4"
 								},
 								{
 									"Type": "NodeText",
@@ -790,7 +790,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the fifth tab"
+									"Data": "Jump to the fifth tab"
 								}
 							]
 						},
@@ -805,7 +805,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+5"
 								},
 								{
 									"Type": "NodeText",
@@ -838,7 +838,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the sixth tab"
+									"Data": "Jump to the sixth tab"
 								}
 							]
 						},
@@ -853,7 +853,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+6"
 								},
 								{
 									"Type": "NodeText",
@@ -886,7 +886,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the seventh tab"
+									"Data": "Jump to the seventh tab"
 								}
 							]
 						},
@@ -901,7 +901,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+7"
 								},
 								{
 									"Type": "NodeText",
@@ -934,7 +934,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the eighth tab"
+									"Data": "Jump to the eighth tab"
 								}
 							]
 						},
@@ -949,7 +949,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+8"
 								},
 								{
 									"Type": "NodeText",
@@ -982,7 +982,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select the ninth tab"
+									"Data": "Jump to the ninth/last tab"
 								}
 							]
 						},
@@ -997,7 +997,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+9"
 								},
 								{
 									"Type": "NodeText",
@@ -2326,7 +2326,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183314-axmylf4",
-				"updated": "20240416115710"
+				"updated": "20240426101110"
 			},
 			"Children": [
 				{
@@ -2397,6 +2397,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘/"
 								},
 								{
 									"Type": "NodeText",

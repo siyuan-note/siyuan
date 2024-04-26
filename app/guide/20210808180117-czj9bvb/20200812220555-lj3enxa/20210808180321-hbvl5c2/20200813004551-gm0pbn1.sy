@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240416105908"
+		"updated": "20240426101023"
 	},
 	"Children": [
 		{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20240308232815"
+				"updated": "20240426100731"
 			},
 			"Children": [
 				{
@@ -494,7 +494,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中下一个编辑页签"
+									"Data": "跳转到下一个编辑页签"
 								}
 							]
 						},
@@ -542,7 +542,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中上一个编辑页签"
+									"Data": "跳转到上一个编辑页签"
 								}
 							]
 						},
@@ -596,7 +596,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第一个页签"
+									"Data": "跳转到第一个页签"
 								}
 							]
 						},
@@ -644,7 +644,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第二个页签"
+									"Data": "跳转到第二个页签"
 								}
 							]
 						},
@@ -659,7 +659,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+2"
 								},
 								{
 									"Type": "NodeText",
@@ -692,7 +692,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第三个页签"
+									"Data": "跳转到第三个页签"
 								}
 							]
 						},
@@ -707,7 +707,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+3"
 								},
 								{
 									"Type": "NodeText",
@@ -740,7 +740,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第四个页签"
+									"Data": "跳转到第四个页签"
 								}
 							]
 						},
@@ -755,7 +755,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+4"
 								},
 								{
 									"Type": "NodeText",
@@ -788,7 +788,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第五个页签"
+									"Data": "跳转到第五个页签"
 								}
 							]
 						},
@@ -803,7 +803,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+5"
 								},
 								{
 									"Type": "NodeText",
@@ -836,7 +836,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第六个页签"
+									"Data": "跳转到第六个页签"
 								}
 							]
 						},
@@ -851,7 +851,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+6"
 								},
 								{
 									"Type": "NodeText",
@@ -884,7 +884,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第七个页签"
+									"Data": "跳转到第七个页签"
 								}
 							]
 						},
@@ -899,7 +899,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+7"
 								},
 								{
 									"Type": "NodeText",
@@ -932,7 +932,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第八个页签"
+									"Data": "跳转到第八个页签"
 								}
 							]
 						},
@@ -947,7 +947,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+8"
 								},
 								{
 									"Type": "NodeText",
@@ -980,7 +980,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中第九个页签"
+									"Data": "跳转到第九个/最后一个页签"
 								}
 							]
 						},
@@ -995,7 +995,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+1"
+									"TextMarkTextContent": "Ctrl+9"
 								},
 								{
 									"Type": "NodeText",
@@ -1028,7 +1028,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中下一个页签"
+									"Data": "跳转到下一个页签"
 								}
 							]
 						},
@@ -1076,7 +1076,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选中上一个页签"
+									"Data": "跳转到上一个页签"
 								}
 							]
 						},
@@ -2324,7 +2324,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210826183308-gok25ug",
-				"updated": "20240416105908"
+				"updated": "20240426101023"
 			},
 			"Children": [
 				{
@@ -2395,6 +2395,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘/"
 								},
 								{
 									"Type": "NodeText",

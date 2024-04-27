@@ -251,6 +251,11 @@ func searchTreeInFilesystem(rootID string) {
 		return
 	}
 
+	if nil == Conf.Box(boxID) {
+		// 如果笔记本不存在或者已经关闭，则不处理 https://github.com/siyuan-note/siyuan/issues/11149
+		return
+	}
+
 	treenode.IndexBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	logging.LogInfof("reindexed tree by filesystem [rootID=%s]", rootID)

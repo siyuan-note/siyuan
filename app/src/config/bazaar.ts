@@ -386,7 +386,7 @@ export const bazaar = {
             if (["icons", "themes"].includes(bazaarType)) {
                 showSwitch = true;
             }
-            const counterElement = contentElement.parentElement.querySelector(".counter");
+            const counterElement = contentElement.previousElementSibling.querySelector(".counter");
             if (response.data.packages.length === 0) {
                 counterElement.classList.add("fn__none");
             } else {

@@ -424,41 +424,6 @@ func setAutoLaunch(c *gin.Context) {
 	autoLaunch := int(arg["autoLaunch"].(float64))
 	model.Conf.System.AutoLaunch2 = autoLaunch
 	model.Conf.Save()
-
-	windowStateConf := filepath.Join(util.ConfDir, "windowState.json")
-	windowState := map[string]interface{}{}
-	if gulu.File.IsExist(windowStateConf) {
-		succ := false
-		const maxRetry = 7
-		for i := 0; i < maxRetry; i++ {
-			data, err := os.ReadFile(windowStateConf)
-			if nil != err {
-				logging.LogErrorf("read [windowState.json] failed [%d/%d]: %s", i, maxRetry, err)
-				time.Sleep(time.Second)
-			} else {
-				if err = gulu.JSON.UnmarshalJSON(data, &windowState); nil != err {
-					logging.LogErrorf("unmarshal [windowState.json] failed: %s", err)
-				} else {
-					succ = true
-					break
-				}
-			}
-		}
-		if !succ {
-			logging.LogErrorf("read [windowState.json] failed")
-		}
-	}
-	windowState["autoLaunch"] = autoLaunch
-
-	data, err := gulu.JSON.MarshalJSON(windowState)
-	if nil != err {
-		logging.LogErrorf("marshal [windowState.json] failed: %s", err)
-		return
-	}
-
-	if err = gulu.File.WriteFileSafer(windowStateConf, data, 0644); nil != err {
-		logging.LogErrorf("create [windowState.json] failed: %s", err)
-	}
 }
 
 func setDownloadInstallPkg(c *gin.Context) {

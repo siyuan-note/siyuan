@@ -230,7 +230,7 @@ const writeLog = (out) => {
     }
 };
 
-const boot = () => {
+const initMainWindow = () => {
     let windowStateInitialized = true;
     // 恢复主窗体状态
     let oldWindowState = {};
@@ -1019,7 +1019,7 @@ app.whenReady().then(() => {
         if (!foundWorkspace) {
             initKernel(data.workspace, "", "").then((isSucc) => {
                 if (isSucc) {
-                    boot();
+                    initMainWindow();
                 }
             });
         }
@@ -1149,7 +1149,7 @@ app.whenReady().then(() => {
         ipcMain.on("siyuan-first-init", (event, data) => {
             initKernel(data.workspace, "", data.lang).then((isSucc) => {
                 if (isSucc) {
-                    boot();
+                    initMainWindow();
                 }
             });
             firstOpenWindow.destroy();
@@ -1173,7 +1173,7 @@ app.whenReady().then(() => {
         }
         initKernel(workspace, port, "").then((isSucc) => {
             if (isSucc) {
-                boot();
+                initMainWindow();
             }
         });
     }
@@ -1280,7 +1280,7 @@ app.on("second-instance", (event, argv) => {
     if (workspace) {
         initKernel(workspace, port, "").then((isSucc) => {
             if (isSucc) {
-                boot();
+                initMainWindow();
             }
         });
         return;
@@ -1306,7 +1306,7 @@ app.on("activate", () => {
         }
     }
     if (BrowserWindow.getAllWindows().length === 0) {
-        boot();
+        initMainWindow();
     }
 });
 

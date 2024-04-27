@@ -1,4 +1,7 @@
 {
+  "autoLaunchMode0": "Do not launch automatically",
+  "autoLaunchMode1": "Auto launch after booting",
+  "autoLaunchMode2": "Auto launch and minimize the main interface after booting",
   "editorMarkdownInlineSup": "Markdown inline superscript syntax",
   "editorMarkdownInlineSupTip": "After enabling, <code class='fn__code'>^foo^</code> inline superscript syntax input will be supported",
   "editorMarkdownInlineSub": "Markdown inline subscript syntax",

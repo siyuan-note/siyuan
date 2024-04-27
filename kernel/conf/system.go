@@ -42,7 +42,7 @@ type System struct {
 	UploadErrLog           bool `json:"uploadErrLog"`
 	DisableGoogleAnalytics bool `json:"disableGoogleAnalytics"`
 	DownloadInstallPkg     bool `json:"downloadInstallPkg"`
-	AutoLaunch             bool `json:"autoLaunch"`
+	AutoLaunch2            int  `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
 	LockScreenMode         int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 }
 

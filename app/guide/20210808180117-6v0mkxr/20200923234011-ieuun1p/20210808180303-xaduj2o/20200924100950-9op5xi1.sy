@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20240426101110"
+		"updated": "20240426233832"
 	},
 	"Children": [
 		{
@@ -3079,7 +3079,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20240308233242"
+				"updated": "20240426233832"
 			},
 			"Children": [
 				{
@@ -6295,7 +6295,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The cursor needs to stay within the referenced element"
+									"Data": "The cursor needs to stay within the reference/hyperlink/asset/PDF annotation reference element"
 								}
 							]
 						}

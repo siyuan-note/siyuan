@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240426101023"
+		"updated": "20240426233401"
 	},
 	"Children": [
 		{
@@ -3075,7 +3075,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20240308233106"
+				"updated": "20240426233401"
 			},
 			"Children": [
 				{
@@ -6339,7 +6339,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "光标需停留在引用元素内"
+									"Data": "光标需停留在引用/超链接/资源文件/PDF 标注引用元素内"
 								}
 							]
 						}

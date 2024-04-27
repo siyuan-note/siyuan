@@ -404,11 +404,11 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	} else {
 		stmt += "1=1"
 	}
+	if "all" != op {
+		stmt += " AND op = '" + op + "'"
+	}
 
 	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {
-		if "all" != op {
-			stmt += " AND op = '" + op + "'"
-		}
 		if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 			stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
 		}

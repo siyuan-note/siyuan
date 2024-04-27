@@ -1,4 +1,6 @@
 {
+  "allowHTMLBLockScript": "Permitir la ejecución de scripts dentro de bloques HTML",
+  "allowHTMLBLockScriptTip": "Después de habilitarlo, el script en el bloque HTML no se desinfectará. Tenga en cuenta el riesgo potencial de ataques XSS",
   "autoLaunchMode0": "No iniciar automáticamente",
   "autoLaunchMode1": "Inicio automático después del arranque",
   "autoLaunchMode2": "Iniciar automáticamente y minimizar la interfaz principal después del arranque",

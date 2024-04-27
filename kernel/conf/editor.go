@@ -19,6 +19,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Editor struct {
+	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 块内脚本
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
 	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
 	FontFamily                      string         `json:"fontFamily"`                      // 字体

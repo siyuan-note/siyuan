@@ -269,6 +269,14 @@ export const editor = {
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.allowHTMLBLockScript}
+        <div class="b3-label__text">${window.siyuan.languages.allowHTMLBLockScriptTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="allowHTMLBLockScript" type="checkbox"${window.siyuan.config.editor.allowHTMLBLockScript ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.editorMarkdownInlineSup}
         <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSupTip}</div>
     </div>
@@ -338,6 +346,7 @@ export const editor = {
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 markdown: markdown,
+                allowHTMLBLockScript: (editor.element.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked,
                 justify: (editor.element.querySelector("#justify") as HTMLInputElement).checked,
                 rtl: (editor.element.querySelector("#rtl") as HTMLInputElement).checked,
                 readOnly: (editor.element.querySelector("#readOnly") as HTMLInputElement).checked,

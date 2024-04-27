@@ -307,6 +307,11 @@ declare namespace Config {
     export interface IEditor {
 
         /**
+         * Whether to allow to execute javascript in the HTML block
+         */
+        allowHTMLBLockScript: boolean;
+
+        /**
          * Markdown configuration
          */
         markdown: IMarkdown;

@@ -22,7 +22,9 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "outdent", "floatWindowMode", "floatWindowModeTip", "justify", "justifyTip", "rtl", "rtlTip", "spellcheck",
             "spellcheckTip", "backlinkExpand", "backlinkExpandTip", "onlySearchForDoc", "onlySearchForDocTip",
             "dynamicLoadBlocks", "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip",
-            "listItemDotNumberClickFocus", "listItemDotNumberClickFocusTip"
+            "listItemDotNumberClickFocus", "listItemDotNumberClickFocusTip", "editorMarkdownInlineSup", "editorMarkdownInlineSupTip",
+            "editorMarkdownInlineSub", "editorMarkdownInlineSubTip", "editorMarkdownInlineTag", "editorMarkdownInlineTagTip",
+            "editorMarkdownInlineMath", "editorMarkdownInlineMathTip", "allowHTMLBLockScript", "allowHTMLBLockScriptTip",
         ]),
 
         // 文档树

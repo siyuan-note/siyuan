@@ -1,4 +1,6 @@
 {
+  "allowHTMLBLockScript": "Allow execution of scripts within HTML blocks",
+  "allowHTMLBLockScriptTip": "After enabling, the script in the HTML block will not be sanitized, Please be aware of the potential risk of XSS attacks",
   "autoLaunchMode0": "Do not launch automatically",
   "autoLaunchMode1": "Auto launch after booting",
   "autoLaunchMode2": "Auto launch and minimize the main interface after booting",

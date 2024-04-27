@@ -1,7 +1,7 @@
 {
   "autoLaunchMode0": "Ne pas lancer automatiquement",
   "autoLaunchMode1": "Lancement automatique après le démarrage",
-  "autoLaunchMode2": "Lancement automatique et réduction de l'interface après le démarrage",
+  "autoLaunchMode2": "Lancement automatique et minimisation de l'interface principale après le démarrage",
   "editorMarkdownInlineSup": "Syntaxe exposant Markdown en ligne",
   "editorMarkdownInlineSupTip": "Après l'activation, la saisie de la syntaxe en exposant <code class='fn__code'>^foo^</code> en ligne sera prise en charge",
   "editorMarkdownInlineSub": "Syntaxe d'indice en ligne Markdown",

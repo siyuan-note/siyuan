@@ -110,7 +110,6 @@ var uniqueActions = []string{
 	HistoryGenerateDoc,
 	HistoryDatabaseIndexFull,
 	HistoryDatabaseIndexCommit,
-	DatabaseIndexEmbedBlock,
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
 }

@@ -115,13 +115,14 @@ func InitConf() {
 	Conf = &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
-		data, err := os.ReadFile(confPath)
-		if nil != err {
+		if data, err := os.ReadFile(confPath); nil != err {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
-		}
-		err = gulu.JSON.UnmarshalJSON(data, Conf)
-		if err != nil {
-			logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+		} else {
+			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+			} else {
+				logging.LogInfof("loaded conf [%s]", confPath)
+			}
 		}
 	}
 

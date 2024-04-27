@@ -2,8 +2,9 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {looseJsonParse} from "../../util/functions";
 
-const ABCJS_PARAMS_KEY = "%%abcjsParams:";
+const ABCJS_PARAMS_KEY = "%%params:";
 
 // Read the abcjsParams from the content if it exists.
 // The params *must* be the first line of the content in the form:
@@ -18,7 +19,7 @@ const getAbcParams = (abcString: string): any => {
     if (firstLine.startsWith(ABCJS_PARAMS_KEY)) {
         try {
             const jsonString = firstLine.substring(ABCJS_PARAMS_KEY.length);
-            params = { ...params, ...JSON.parse(jsonString) };
+            params = { ...params, ...looseJsonParse(jsonString) };
         } catch (e) {
             console.error(`Failed to parse ABCJS params: ${e}`);
         }

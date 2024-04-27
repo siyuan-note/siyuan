@@ -1351,8 +1351,11 @@ declare namespace Config {
         appDir: string;
         /**
          * Boot automatically
+         * - `0`: Do not boot automatically
+         * - `1`: Boot automatically
+         * - `2`: Boot automatically + Minimize UI
          */
-        autoLaunch: boolean;
+        autoLaunch: number;
         /**
          * The absolute path of the `conf` directory of the current workspace
          */

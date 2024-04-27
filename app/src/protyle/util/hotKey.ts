@@ -113,7 +113,7 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         }
         const isMatchKey = keyCode === Constants.KEYCODELIST[event.keyCode];
         // 是否匹配 ⌥[] / ⌥⌘[]
-        if (isMatchKey && event.altKey && !event.shiftKey &&
+        if (isMatchKey && event.altKey && !event.shiftKey && hotKeys.length < 4 &&
             (hotKeys.length === 3 ? (isOnlyMeta(event) && hotKey.startsWith("⌥⌘")) : isNotCtrl(event))) {
             return true;
         }

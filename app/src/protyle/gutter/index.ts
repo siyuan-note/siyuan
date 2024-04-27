@@ -56,11 +56,9 @@ export class Gutter {
     private gutterTip: string;
 
     constructor(protyle: IProtyle) {
-        if (isMac()) {
-            this.gutterTip = window.siyuan.languages.gutterTip;
-        } else {
-            this.gutterTip = window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
-        }
+        this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))
+            .replace("⌘↑", updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom))
+            .replace("⌥⌘A", updateHotkeyTip(window.siyuan.config.keymap.editor.general.attr.custom));
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
@@ -825,7 +823,7 @@ export class Gutter {
                     selectsElement.forEach(item => {
                         srcIDs.push(item.getAttribute("data-node-id"));
                         srcs.push({
-                            id:item.getAttribute("data-node-id"),
+                            id: item.getAttribute("data-node-id"),
                             isDetached: false,
                         });
                     });
@@ -1296,7 +1294,7 @@ export class Gutter {
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
                             avID,
-                            srcs:[{
+                            srcs: [{
                                 id,
                                 isDetached: false
                             }],

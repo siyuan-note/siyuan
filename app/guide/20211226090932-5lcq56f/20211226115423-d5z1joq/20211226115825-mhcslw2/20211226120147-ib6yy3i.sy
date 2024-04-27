@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
-		"updated": "20220429115701"
+		"type": "doc",
+		"updated": "20240427230732"
 	},
 	"Children": [
 		{
@@ -1499,9 +1500,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115013-bsph7kh",
-				"updated": "20220429115013"
+				"updated": "20240427230731"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -1509,7 +1514,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用 HTML 塊時不會對其中的代碼進行安全過濾，請確認代碼安全後再使用，以免遭遇跨站腳本攻擊（XSS）。"
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240427230732-snprakd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427230732-snprakd",
+				"updated": "20240427230732"
+			},
+			"Children": [
+				{
+					"ID": "20240427230732-tgvmt21",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230732-tgvmt21",
+						"updated": "20240427230732"
+					},
+					"Children": [
+						{
+							"ID": "20240427230732-p75fah5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230732-p75fah5",
+								"updated": "20240427230732"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 HTML 區塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "允許執行 HTML 區塊內腳本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427230732-dhlczme",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230732-dhlczme",
+						"updated": "20240427230732"
+					},
+					"Children": [
+						{
+							"ID": "20240427230732-an8u8ps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230732-an8u8ps",
+								"updated": "20240427230732"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "因為 Markdown 規範對 HTML 區塊解析規則較為複雜，建議使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 包裹 HTML 程式碼並去掉空白行"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

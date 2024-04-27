@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240416105853"
+		"updated": "20240427230913"
 	},
 	"Children": [
 		{
@@ -2263,7 +2263,7 @@
 			"Data": "\u003cdiv\u003e\n\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World\n\u003c/div\u003e",
 			"Properties": {
 				"id": "20220312004517-f6i1k8m",
-				"updated": "20220828102447"
+				"updated": "20240427230559"
 			}
 		},
 		{
@@ -2271,93 +2271,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312122055-qsltja9",
-				"updated": "20220312122518"
+				"updated": "20240427230913"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "更多细节请参考 "
+				},
+				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427230507-yeaxqbs",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML 块注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "："
-				}
-			]
-		},
-		{
-			"ID": "20220828102305-kv9o4nz",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220828102305-kv9o4nz",
-				"updated": "20220828102421"
-			},
-			"Children": [
-				{
-					"ID": "20220828102306-gt8j7lc",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102306-gt8j7lc",
-						"updated": "20220828102306"
-					},
-					"Children": [
-						{
-							"ID": "20220828102306-4yswrhi",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102306-4yswrhi",
-								"updated": "20220828102306"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "使用 HTML 块时不会对其中的代码进行安全过滤，请确认代码安全后再使用，以免遭遇跨站脚本攻击（XSS）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220828102307-hhuecb8",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102307-hhuecb8",
-						"updated": "20220828102421"
-					},
-					"Children": [
-						{
-							"ID": "20220828102307-t8ssvfi",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102307-t8ssvfi",
-								"updated": "20220828102421"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "因为 Markdown 规范对 HTML 块解析规则较为复杂，建议使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 包裹 HTML 代码并去掉空行"
-								}
-							]
-						}
-					]
+					"Data": "。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20220623201527"
+		"updated": "20240427231144"
 	},
 	"Children": [
 		{
@@ -1552,9 +1552,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115221-suekrrv",
-				"updated": "20220429115221"
+				"updated": "20240427231027"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -1562,7 +1566,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": The code in the HTML block will not be safely filtered when using it. Please confirm the code is safe before using it to avoid cross-site scripting (XSS)."
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240427231112-lcwev4m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427231112-lcwev4m",
+				"updated": "20240427231144"
+			},
+			"Children": [
+				{
+					"ID": "20240427231112-q60pwo8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427231112-q60pwo8",
+						"updated": "20240427231144"
+					},
+					"Children": [
+						{
+							"ID": "20240427231112-e7j3mqt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427231112-e7j3mqt",
+								"updated": "20240427231144"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using HTML blocks, the code in them will be security filtered by default. If filtering is not required, please enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Allow execution of scripts within HTML blocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427231112-o1imtjo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427231112-o1imtjo",
+						"updated": "20240427231112"
+					},
+					"Children": [
+						{
+							"ID": "20240427231112-3txbq9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427231112-3txbq9w",
+								"updated": "20240427231112"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Because the Markdown specification has complicated parsing rules for HTML blocks, it is recommended to use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to wrap HTML code and remove blank lines."
+								}
+							]
+						}
+					]
 				}
 			]
 		},

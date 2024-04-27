@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20240416114218"
+		"updated": "20240427231204"
 	},
 	"Children": [
 		{
@@ -2281,93 +2281,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312122714-jgaetrv",
-				"updated": "20220828102557"
+				"updated": "20240427231204"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427231112-lcwev4m",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML Block Notes"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": "
-				}
-			]
-		},
-		{
-			"ID": "20220828102558-h9c9bwe",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220828102558-h9c9bwe",
-				"updated": "20220828102558"
-			},
-			"Children": [
-				{
-					"ID": "20220828102558-8ibvw54",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102558-8ibvw54",
-						"updated": "20220828102558"
-					},
-					"Children": [
-						{
-							"ID": "20220828102558-zt2eu0w",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102558-zt2eu0w",
-								"updated": "20220828102558"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "When using the HTML block, the code in it will not be security filtered, please confirm the code is safe before using it to avoid cross-site scripting attack (XSS)"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220828102558-r1v2xmr",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102558-r1v2xmr",
-						"updated": "20220828102558"
-					},
-					"Children": [
-						{
-							"ID": "20220828102558-1cg51k8",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102558-1cg51k8",
-								"updated": "20220828102558"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Because the Markdown specification is more complicated for HTML block parsing rules, it is recommended to use "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " to wrap HTML code and remove blank lines"
-								}
-							]
-						}
-					]
+					"Data": " for more details."
 				}
 			]
 		},

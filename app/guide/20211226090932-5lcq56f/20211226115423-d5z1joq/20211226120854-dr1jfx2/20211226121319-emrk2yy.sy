@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240416113842"
+		"updated": "20240427231052"
 	},
 	"Children": [
 		{
@@ -2273,93 +2273,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312122707-8258e11",
-				"updated": "20220828102532"
+				"updated": "20240427231052"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "更多細節請參考 "
+				},
+				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240427230732-snprakd",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "HTML 區塊注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "："
-				}
-			]
-		},
-		{
-			"ID": "20220828102532-4j8tblh",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220828102532-4j8tblh",
-				"updated": "20220828102532"
-			},
-			"Children": [
-				{
-					"ID": "20220828102532-69g744z",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102532-69g744z",
-						"updated": "20220828102532"
-					},
-					"Children": [
-						{
-							"ID": "20220828102532-ozh8pha",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102532-ozh8pha",
-								"updated": "20220828102532"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "使用 HTML 塊時不會對其中的代碼進行安全過濾，請確認代碼安全後再使用，以免遭遇跨站腳本攻擊（XSS）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220828102532-xrle9qv",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220828102532-xrle9qv",
-						"updated": "20220828102532"
-					},
-					"Children": [
-						{
-							"ID": "20220828102532-u9zdtto",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220828102532-u9zdtto",
-								"updated": "20220828102532"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "因為 Markdown 規範對 HTML 塊解析規則較為複雜，建議使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 包裹 HTML 代碼並去掉空行"
-								}
-							]
-						}
-					]
+					"Data": "。"
 				}
 			]
 		},

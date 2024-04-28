@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -480,8 +481,8 @@ func GetNotebookHistory() (ret []*History, err error) {
 }
 
 func generateAssetsHistory() {
-	files := recentModifiedAssets()
-	if 1 > len(files) {
+	assets := recentModifiedAssets()
+	if 1 > len(assets) {
 		return
 	}
 
@@ -491,7 +492,7 @@ func generateAssetsHistory() {
 		return
 	}
 
-	for _, file := range files {
+	for _, file := range assets {
 		historyPath := filepath.Join(historyDir, "assets", strings.TrimPrefix(file, filepath.Join(util.DataDir, "assets")))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
 			logging.LogErrorf("generate history failed: %s", err)
@@ -626,28 +627,16 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 	return
 }
 
-var (
-	assetsUpdated = map[string]int64{}
-)
+var assetsLatestHistoryTime = time.Now().Unix()
 
 func recentModifiedAssets() (ret []string) {
-	filelock.Walk(filepath.Join(util.DataDir, "assets"), func(path string, info fs.FileInfo, err error) error {
-		if nil == info {
-			return nil
+	assets := cache.GetAssets()
+	for _, asset := range assets {
+		if asset.Updated > assetsLatestHistoryTime {
+			ret = append(ret, filepath.Join(util.DataDir, asset.Path))
 		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		updated := info.ModTime().Unix()
-		oldUpdated, ok := assetsUpdated[path]
-		if ok && updated > oldUpdated {
-			ret = append(ret, path)
-		}
-		assetsUpdated[path] = updated
-		return nil
-	})
+	}
+	assetsLatestHistoryTime = time.Now().Unix()
 	return
 }
 

@@ -33,7 +33,7 @@ import {enter, softEnter} from "./enter";
 import {fixTable} from "../util/table";
 import {turnsIntoOneTransaction, turnsIntoTransaction, updateBatchTransaction, updateTransaction} from "./transaction";
 import {fontEvent} from "../toolbar/Font";
-import {listIndent, listOutdent} from "./list";
+import {addSubList, listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
@@ -866,16 +866,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 回车
-        if (!event.altKey && isNotCtrl(event) && event.key === "Enter") {
-            if (!event.shiftKey) {
-                enter(nodeElement, range, protyle);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+        if (isNotCtrl(event) && event.key === "Enter") {
+            if (event.altKey) {
+                addSubList(protyle, nodeElement, range);
+            } else {
+                if (!event.shiftKey) {
+                    enter(nodeElement, range, protyle);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             }
         }
 

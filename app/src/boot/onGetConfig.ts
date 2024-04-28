@@ -197,7 +197,11 @@ export const initWindow = async (app: App) => {
         });
     };
 
-    ipcRenderer.send(Constants.SIYUAN_EVENT, "onEvent");
+    if (window.siyuan.config.system.autoLaunch2 === 2) {
+        ipcRenderer.send(Constants.SIYUAN_CMD, "minimize");
+    }
+
+    ipcRenderer.send(Constants.SIYUAN_EVENT);
     ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
         if (cmd === "focus") {
             // 由于 https://github.com/siyuan-note/siyuan/issues/10060 和新版 electron 应用切出再切进会保持光标，故移除 focus

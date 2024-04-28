@@ -1360,7 +1360,7 @@ declare namespace Config {
          * - `1`: Boot automatically
          * - `2`: Boot automatically + Minimize UI
          */
-        autoLaunch: number;
+        autoLaunch2: number;
         /**
          * The absolute path of the `conf` directory of the current workspace
          */

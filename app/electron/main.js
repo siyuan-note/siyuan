@@ -64,7 +64,7 @@ try {
     app.exit();
 }
 
-const  windowNavigate = (currentWindow) => {
+const windowNavigate = (currentWindow) => {
     currentWindow.webContents.on("will-navigate", (event) => {
         const url = event.url;
         if (url.startsWith(localServer)) {
@@ -896,6 +896,9 @@ app.whenReady().then(() => {
                     return;
                 }
                 currentWindow.destroy();
+                break;
+            case "writeLog":
+                writeLog(data.msg);
                 break;
             case "closeButtonBehavior":
                 if (!currentWindow) {

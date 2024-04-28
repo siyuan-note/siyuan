@@ -69,7 +69,8 @@ func generateFileHistory() {
 		box.generateDocHistory0()
 	}
 
-	// 目前没有生成资源文件历史 https://github.com/siyuan-note/siyuan/issues/11177
+	// 生成资源文件历史
+	generateAssetsHistory()
 
 	historyDir := util.HistoryDir
 	clearOutdatedHistoryDir(historyDir)
@@ -478,6 +479,35 @@ func GetNotebookHistory() (ret []*History, err error) {
 	return
 }
 
+func generateAssetsHistory() {
+	files := recentModifiedAssets()
+	if 1 > len(files) {
+		return
+	}
+
+	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	if nil != err {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
+	for _, file := range files {
+		historyPath := filepath.Join(historyDir, "assets", strings.TrimPrefix(file, filepath.Join(util.DataDir, "assets")))
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		if err = filelock.Copy(file, historyPath); nil != err {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", file, historyPath, err)
+			return
+		}
+	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
+}
+
 func (box *Box) generateDocHistory0() {
 	files := box.recentModifiedDocs()
 	if 1 > len(files) {
@@ -593,6 +623,31 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 		return nil
 	})
 	box.UpdateHistoryGenerated()
+	return
+}
+
+var (
+	assetsUpdated = map[string]int64{}
+)
+
+func recentModifiedAssets() (ret []string) {
+	filelock.Walk(filepath.Join(util.DataDir, "assets"), func(path string, info fs.FileInfo, err error) error {
+		if nil == info {
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		updated := info.ModTime().Unix()
+		oldUpdated, ok := assetsUpdated[path]
+		if ok && updated > oldUpdated {
+			ret = append(ret, path)
+		}
+		assetsUpdated[path] = updated
+		return nil
+	})
 	return
 }
 

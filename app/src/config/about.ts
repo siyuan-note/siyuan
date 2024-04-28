@@ -23,9 +23,9 @@ export const about = {
     </div>
     <span class="fn__space"></span>
     <select class="b3-select fn__flex-center fn__size200" id="autoLaunch">
-      <option value="0" ${window.siyuan.config.system.autoLaunch === 0 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode0}</option>
-      <option value="1" ${window.siyuan.config.system.autoLaunch === 1 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode1}</option>
-      <option value="2" ${window.siyuan.config.system.autoLaunch === 2 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode2}</option>
+      <option value="0" ${window.siyuan.config.system.autoLaunch2 === 0 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode0}</option>
+      <option value="1" ${window.siyuan.config.system.autoLaunch2 === 1 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode1}</option>
+      <option value="2" ${window.siyuan.config.system.autoLaunch2 === 2 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode2}</option>
     </select>    
 </div>
 <label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore || window.siyuan.config.system.container !== "std" ? " fn__none" : ""}">
@@ -354,7 +354,7 @@ export const about = {
         autoLaunchElement.addEventListener("change", () => {
             const autoLaunchMode = parseInt(autoLaunchElement.value)
             fetchPost("/api/system/setAutoLaunch", {autoLaunch: autoLaunchMode}, () => {
-                window.siyuan.config.system.autoLaunch = autoLaunchMode;
+                window.siyuan.config.system.autoLaunch2 = autoLaunchMode;
                 ipcRenderer.send(Constants.SIYUAN_AUTO_LAUNCH, {openAtLogin: 0 != autoLaunchMode});
             });
         });

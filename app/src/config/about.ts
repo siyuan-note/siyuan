@@ -80,7 +80,7 @@ export const about = {
         <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
-<div class="b3-label config__item${(isBrowser() && !isInAndroid()) ? " fn__none" : " fn__flex"}">
+<div class="b3-label config__item${(isBrowser() && !isInAndroid() && !isInIOS()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>

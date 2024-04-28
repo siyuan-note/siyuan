@@ -315,7 +315,9 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		return backmentions[i].ID > backmentions[j].ID
 	})
 
-	mentionsCount = len(backmentions)
+	for _, backmention := range backmentions {
+		mentionsCount += backmention.Count
+	}
 
 	// 添加笔记本名称
 	var boxIDs []string

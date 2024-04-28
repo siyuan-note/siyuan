@@ -94,6 +94,9 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		plugin.OpenIssues = repo.OpenIssues
 		plugin.Size = repo.Size
 		plugin.HSize = humanize.BytesCustomCeil(uint64(plugin.Size), 2)
+		plugin.InstallSize = repo.InstallSize
+		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
+		packageInstallSizeCache.SetDefault(plugin.RepoURL, plugin.InstallSize)
 		plugin.HUpdated = formatUpdated(plugin.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -194,9 +197,14 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			continue
 		}
 		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
-		installSize, _ := util.SizeOfDirectory(installPath)
-		plugin.InstallSize = installSize
-		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
+		if installSize, ok := packageInstallSizeCache.Get(plugin.RepoURL); ok {
+			plugin.InstallSize = installSize.(int64)
+		} else {
+			is, _ := util.SizeOfDirectory(installPath)
+			plugin.InstallSize = is
+			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
+		}
+		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
 		readmeFilename := getPreferredReadme(plugin.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

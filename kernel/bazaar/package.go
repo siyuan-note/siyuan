@@ -121,11 +121,12 @@ type StagePackage struct {
 }
 
 type StageRepo struct {
-	URL        string `json:"url"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
+	URL         string `json:"url"`
+	Updated     string `json:"updated"`
+	Stars       int    `json:"stars"`
+	OpenIssues  int    `json:"openIssues"`
+	Size        int64  `json:"size"`
+	InstallSize int64  `json:"installSize"`
 
 	Package *StagePackage `json:"package"`
 }
@@ -703,3 +704,5 @@ func disallowDisplayBazaarPackage(pkg *Package) bool {
 }
 
 var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package
+
+var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64

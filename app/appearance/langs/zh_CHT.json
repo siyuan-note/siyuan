@@ -1224,7 +1224,7 @@
     "task.database.index.ref": "執行資料庫索引引用",
     "task.database.index.fix": "執行資料庫索引訂正",
     "task.ocr.image": "執行圖片 OCR 提取文字",
-    "task.history.generateDoc": "執行生成文件歷史",
+    "task.history.generateFile": "執行生成文件歷史",
     "task.history.database.index.full": "執行歷史資料庫重建索引",
     "task.history.database.index.commit": "執行歷史資料庫索引提交",
     "task.database.index.embedBlock": "執行資料庫索引嵌入塊",

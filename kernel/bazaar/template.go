@@ -90,6 +90,9 @@ func Templates() (templates []*Template) {
 		template.OpenIssues = repo.OpenIssues
 		template.Size = repo.Size
 		template.HSize = humanize.BytesCustomCeil(uint64(template.Size), 2)
+		template.InstallSize = repo.InstallSize
+		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
+		packageInstallSizeCache.SetDefault(template.RepoURL, template.InstallSize)
 		template.HUpdated = formatUpdated(template.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -157,9 +160,14 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 		template.HInstallDate = info.ModTime().Format("2006-01-02")
-		installSize, _ := util.SizeOfDirectory(installPath)
-		template.InstallSize = installSize
-		template.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
+		if installSize, ok := packageInstallSizeCache.Get(template.RepoURL); ok {
+			template.InstallSize = installSize.(int64)
+		} else {
+			is, _ := util.SizeOfDirectory(installPath)
+			template.InstallSize = is
+			packageInstallSizeCache.SetDefault(template.RepoURL, is)
+		}
+		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
 		readmeFilename := getPreferredReadme(template.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

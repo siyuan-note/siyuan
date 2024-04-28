@@ -91,6 +91,9 @@ func Themes() (ret []*Theme) {
 		theme.OpenIssues = repo.OpenIssues
 		theme.Size = repo.Size
 		theme.HSize = humanize.BytesCustomCeil(uint64(theme.Size), 2)
+		theme.InstallSize = repo.InstallSize
+		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
+		packageInstallSizeCache.SetDefault(theme.RepoURL, theme.InstallSize)
 		theme.HUpdated = formatUpdated(theme.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -158,9 +161,14 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 		theme.HInstallDate = info.ModTime().Format("2006-01-02")
-		installSize, _ := util.SizeOfDirectory(installPath)
-		theme.InstallSize = installSize
-		theme.HInstallSize = humanize.BytesCustomCeil(uint64(installSize), 2)
+		if installSize, ok := packageInstallSizeCache.Get(theme.RepoURL); ok {
+			theme.InstallSize = installSize.(int64)
+		} else {
+			is, _ := util.SizeOfDirectory(installPath)
+			theme.InstallSize = is
+			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
+		}
+		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
 		readmeFilename := getPreferredReadme(theme.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

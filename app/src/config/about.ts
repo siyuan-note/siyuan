@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {isInAndroid, isInIOS, isIPad, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -25,7 +25,7 @@ export const about = {
     <select class="b3-select fn__flex-center fn__size200" id="autoLaunch">
       <option value="0" ${window.siyuan.config.system.autoLaunch2 === 0 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode0}</option>
       <option value="1" ${window.siyuan.config.system.autoLaunch2 === 1 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode1}</option>
-      <option value="2" ${window.siyuan.config.system.autoLaunch2 === 2 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode2}</option>
+      ${isMac() ? "" : `<option value="2" ${window.siyuan.config.system.autoLaunch2 === 2 ? "selected" : ""}>${window.siyuan.languages.autoLaunchMode2}</option>`}
     </select>    
 </div>
 <label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore || window.siyuan.config.system.container !== "std" ? " fn__none" : ""}">
@@ -355,7 +355,10 @@ export const about = {
             const autoLaunchMode = parseInt(autoLaunchElement.value)
             fetchPost("/api/system/setAutoLaunch", {autoLaunch: autoLaunchMode}, () => {
                 window.siyuan.config.system.autoLaunch2 = autoLaunchMode;
-                ipcRenderer.send(Constants.SIYUAN_AUTO_LAUNCH, {openAtLogin: 0 != autoLaunchMode});
+                ipcRenderer.send(Constants.SIYUAN_AUTO_LAUNCH, {
+                    openAtLogin: 0 !== autoLaunchMode,
+                    openAsHidden: 2 === autoLaunchMode
+                });
             });
         });
         /// #endif

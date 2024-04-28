@@ -382,11 +382,15 @@ const initMainWindow = () => {
 
     // 主界面事件监听
     currentWindow.once("ready-to-show", () => {
-        currentWindow.show();
-        if (windowState.isMaximized) {
-            currentWindow.maximize();
+        if (workspaces.length === 0 && openAsHidden) {
+            bootWindow.minimize();
         } else {
-            currentWindow.unmaximize();
+            currentWindow.show();
+            if (windowState.isMaximized) {
+                currentWindow.maximize();
+            } else {
+                currentWindow.unmaximize();
+            }
         }
         if (bootWindow && !bootWindow.isDestroyed()) {
             bootWindow.destroy();
@@ -451,7 +455,11 @@ const initKernel = (workspace, port, lang) => {
             bootIndex = path.join(appDir, "electron", "boot.html");
         }
         bootWindow.loadFile(bootIndex, {query: {v: appVer}});
-        bootWindow.show();
+        if (openAsHidden) {
+            bootWindow.minimize();
+        } else {
+            bootWindow.show();
+        }
 
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
         const kernelPath = path.join(appDir, "kernel", kernelName);
@@ -625,10 +633,14 @@ let argStart = 1;
 if (!app.isPackaged) {
     argStart = 2;
 }
+let openAsHidden = false;
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
-    if (arg.startsWith("--workspace=") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
+    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
         // 跳过内置参数
+        if (arg.startsWith("--openAsHidden")) {
+            openAsHidden = true;
+        }
         continue;
     }
 
@@ -1118,7 +1130,10 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-auto-launch", (event, data) => {
-        app.setLoginItemSettings({openAtLogin: data.openAtLogin});
+        app.setLoginItemSettings({
+            openAtLogin: data.openAtLogin,
+            args: data.openAsHidden ? ["--openAsHidden"] : ""
+        });
     });
 
     if (firstOpen) {

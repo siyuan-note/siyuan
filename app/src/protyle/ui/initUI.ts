@@ -143,7 +143,7 @@ export const setPadding = (protyle: IProtyle) => {
         protyle.wysiwyg.element.style.padding = `16px ${left}px ${bottomHeight} ${right}px`;
     }
     if (protyle.options.render.background) {
-        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px`);
+        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${left}px`);
     }
     if (protyle.options.render.title) {
         protyle.title.element.style.margin = `5px ${left}px 0 ${right}px`;

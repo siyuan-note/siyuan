@@ -62,7 +62,9 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         }
     }
 
-    if (!nodeElement) {
+    if (!nodeElement &&
+        // https://github.com/siyuan-note/siyuan/issues/11175
+        document.activeElement?.tagName !== "TEXTAREA" && document.activeElement?.tagName !== "INPUT") {
         nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer) as HTMLElement;
     }
     if (!nodeElement) {

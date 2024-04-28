@@ -60,6 +60,9 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
     if (lastSubItem.parentElement.getAttribute("fold") === "1") {
         setFold(protyle, lastSubItem.parentElement, true);
     }
+    if (parentItemElement.getAttribute("fold") === "1") {
+        setFold(protyle, parentItemElement, true);
+    }
     transaction(protyle, [{
         action: "insert",
         id,

@@ -382,8 +382,8 @@ const initMainWindow = () => {
 
     // 主界面事件监听
     currentWindow.once("ready-to-show", () => {
-        if (workspaces.length === 0 && openAsHidden) {
-            bootWindow.minimize();
+        if (1 === workspaces.length && openAsHidden) {
+            currentWindow.minimize();
         } else {
             currentWindow.show();
             if (windowState.isMaximized) {
@@ -444,6 +444,7 @@ const showWindow = (wnd) => {
 const initKernel = (workspace, port, lang) => {
     return new Promise(async (resolve) => {
         bootWindow = new BrowserWindow({
+            show: false,
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
             frame: false,
@@ -640,6 +641,7 @@ for (let i = argStart; i < process.argv.length; i++) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
             openAsHidden = true;
+            writeLog("open as hidden");
         }
         continue;
     }

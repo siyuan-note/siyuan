@@ -46,7 +46,6 @@
 
     .layout-tab-bar {
       background-color: transparent;
-      font-size: 87.5%;
 
       .item__graphic {
         height: calc(1.625em - 10px);
@@ -67,6 +66,7 @@
   &__views {
     align-items: center;
     box-shadow: 0 -1px inset var(--b3-theme-background-light);
+    font-size: 87.5%;
 
     &--show .block__icon {
       opacity: 1;
@@ -152,9 +152,9 @@
     &--header {
       z-index: 3;
 
-      & > .block__icons svg {
-        height: calc(1.625em - 10px);
-        width: calc(1.625em - 10px);
+      & > .block__icons > .block__icon svg {
+        height: 1em;
+        width: 1em;
       }
     }
 

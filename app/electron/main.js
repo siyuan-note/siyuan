@@ -230,6 +230,11 @@ const writeLog = (out) => {
     }
 };
 
+let openAsHidden = false;
+isOpenAsHidden = function () {
+    return 1 === workspaces.length && openAsHidden;
+}
+
 const initMainWindow = () => {
     let windowStateInitialized = true;
     // 恢复主窗体状态
@@ -382,7 +387,7 @@ const initMainWindow = () => {
 
     // 主界面事件监听
     currentWindow.once("ready-to-show", () => {
-        if (1 === workspaces.length && openAsHidden) {
+        if (isOpenAsHidden()) {
             currentWindow.minimize();
         } else {
             currentWindow.show();
@@ -449,6 +454,7 @@ const initKernel = (workspace, port, lang) => {
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
             frame: false,
             backgroundColor: "#1e1e1e",
+            resizable: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
         let bootIndex = path.join(appDir, "app", "electron", "boot.html");
@@ -568,9 +574,7 @@ const initKernel = (workspace, port, lang) => {
             try {
                 const apiResult = await net.fetch(getServer() + "/api/system/version");
                 apiData = await apiResult.json();
-                bootWindow.setResizable(false);
                 bootWindow.loadURL(getServer() + "/appearance/boot/index.html");
-                bootWindow.show();
                 break;
             } catch (e) {
                 writeLog("get kernel version failed: " + e.message);
@@ -634,7 +638,7 @@ let argStart = 1;
 if (!app.isPackaged) {
     argStart = 2;
 }
-let openAsHidden = false;
+
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
     if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {

@@ -30,22 +30,44 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
     const typeElement = element.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
     const notebookElement = element.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
-    window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] = notebookElement.value;
-    setStorageVal(Constants.LOCAL_HISTORYNOTEID, window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID]);
     const docElement = element.querySelector('.history__text[data-type="docPanel"]');
     const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
     docElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
-    if (typeElement.value === "0" || typeElement.value === "1") {
-        opElement.removeAttribute("disabled");
-        notebookElement.removeAttribute("disabled");
-        assetElement.classList.add("fn__none");
-    } else {
-        opElement.setAttribute("disabled", "disabled");
+    if (typeElement.value === "2") {
         notebookElement.setAttribute("disabled", "disabled");
         assetElement.classList.remove("fn__none");
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2) {
+            opElement.value = "all";
+        }
+        opElement.querySelector('option[value="clean"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="update"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="delete"]').classList.add("fn__none")
+        opElement.querySelector('option[value="format"]').classList.add("fn__none")
+        opElement.querySelector('option[value="sync"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="replace"]').classList.add("fn__none")
+        opElement.querySelector('option[value="outline"]').classList.add("fn__none")
+    } else {
+        notebookElement.removeAttribute("disabled");
+        assetElement.classList.add("fn__none");
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2) {
+            opElement.value = "all";
+        }
+        opElement.querySelector('option[value="clean"]').classList.add("fn__none")
+        opElement.querySelector('option[value="update"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="delete"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="format"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="sync"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="replace"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="outline"]').classList.remove("fn__none")
     }
+    window.siyuan.storage[Constants.LOCAL_HISTORY] = {
+        notebookId: notebookElement.value,
+        type: parseInt(typeElement.value),
+        operation: opElement.value
+    };
+    setStorageVal(Constants.LOCAL_HISTORY, window.siyuan.storage[Constants.LOCAL_HISTORY]);
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
         query: inputElement.value,
@@ -303,19 +325,11 @@ export const openHistory = (app: App) => {
         return;
     }
 
-    let existLocalHistoryNoteID = false;
+    const localHistory = window.siyuan.storage[Constants.LOCAL_HISTORY];
+    let notebookSelectHTML = `<option value='%' ${localHistory.notebookId === "%" ? "selected" : ""}>${window.siyuan.languages.allNotebooks}</option>`;
     window.siyuan.notebooks.forEach((item) => {
         if (!item.closed) {
-            if (item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID]) {
-                existLocalHistoryNoteID = true;
-            }
-        }
-    });
-
-    let notebookSelectHTML = `<option value='%' ${!existLocalHistoryNoteID ? "selected" : ""}>${window.siyuan.languages.allNotebooks}</option>`;
-    window.siyuan.notebooks.forEach((item) => {
-        if (!item.closed) {
-            notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${escapeHtml(item.name)}</option>`;
+            notebookSelectHTML += ` <option value="${item.id}"${item.id === localHistory.notebookId ? " selected" : ""}>${escapeHtml(item.name)}</option>`;
         }
     });
 
@@ -342,20 +356,20 @@ export const openHistory = (app: App) => {
                     </div>
                     <span class="fn__space"></span>
                     <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
-                        <option value="0" selected>${window.siyuan.languages.docName}</option>
-                        <option value="1">${window.siyuan.languages.docNameAndContent}</option>
-                        <option value="2">${window.siyuan.languages.assets}</option>
+                        <option value="0" ${localHistory.type === 0 ? "selected" : ""}>${window.siyuan.languages.docName}</option>
+                        <option value="1" ${localHistory.type === 1 ? "selected" : ""}>${window.siyuan.languages.docNameAndContent}</option>
+                        <option value="2" ${localHistory.type === 2 ? "selected" : ""}>${window.siyuan.languages.assets}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">
-                        <option value="all" selected>${window.siyuan.languages.allOp}</option>
-                        <option value="clean">${window.siyuan.languages.historyClean}</option>
-                        <option value="update">${window.siyuan.languages.historyUpdate}</option>
-                        <option value="delete">${window.siyuan.languages.historyDelete}</option>
-                        <option value="format">${window.siyuan.languages.historyFormat}</option>
-                        <option value="sync">${window.siyuan.languages.historySync}</option>
-                        <option value="replace">${window.siyuan.languages.historyReplace}</option>
-                        <option value="outline">${window.siyuan.languages.historyOutline}</option>
+                        <option value="all" ${localHistory.operation === "all" ? "selected" : ""}>${window.siyuan.languages.allOp}</option>
+                        <option value="clean" ${localHistory.operation === "clean" ? "selected" : ""}>${window.siyuan.languages.historyClean}</option>
+                        <option value="update" ${localHistory.operation === "update" ? "selected" : ""}>${window.siyuan.languages.historyUpdate}</option>
+                        <option value="delete" ${localHistory.operation === "delete" ? "selected" : ""}>${window.siyuan.languages.historyDelete}</option>
+                        <option value="format" ${localHistory.operation === "format" ? "selected" : ""}>${window.siyuan.languages.historyFormat}</option>
+                        <option value="sync" ${localHistory.operation === "sync" ? "selected" : ""}>${window.siyuan.languages.historySync}</option>
+                        <option value="replace" ${localHistory.operation === "replace" ? "selected" : ""}>${window.siyuan.languages.historyReplace}</option>
+                        <option value="outline" ${localHistory.operation === "outline" ? "selected" : ""}>${window.siyuan.languages.historyOutline}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="notebookselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">

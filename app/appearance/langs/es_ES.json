@@ -1492,8 +1492,8 @@
     "241": "No se admite arrastrar a su subtítulo",
     "242": "El bloque de enlace ya existe en la base de datos actual",
     "243": "Enumere solo las primeras [%d] etiquetas (incluidas las subetiquetas), modifique [Configuración - Árbol de documentos - Número máximo a listar]",
-    "244": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]",
-    "245": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]. Para salir normalmente, necesita usar [Salir de la aplicación] en el panel derecho",
+    "244": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]. En el futuro, salga del programa por completo antes de apagar la computadora",
+    "245": "No salió normalmente después del último uso. Se recomienda ejecutar [Árbol de documentos - Reconstruir índice]. En el futuro, utilice [Salir de la aplicación] en el panel derecho para salir normalmente",
     "246": "El título del documento no puede contener / y ha sido reemplazado por _"
   }
 }

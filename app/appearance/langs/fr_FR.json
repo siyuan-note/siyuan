@@ -1492,8 +1492,8 @@
     "241": "Le glisser vers son sous-titre n'est pas pris en charge",
     "242": "Le bloc de liaison existe déjà dans la base de données actuelle",
     "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
-    "244": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Rebuild Index]",
-    "245": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Rebuild Index]. Pour quitter normalement, vous devez utiliser [Quitter l'application] dans le panneau de droite",
+    "244": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur",
+    "245": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez utiliser [Quitter l'application] dans le panneau de droite pour quitter normalement",
     "246": "Le titre du document ne peut pas contenir / et a été remplacé par _"
   }
 }

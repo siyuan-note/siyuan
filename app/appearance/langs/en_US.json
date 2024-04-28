@@ -1492,8 +1492,8 @@
     "241": "Drag to its subheading is not supported",
     "242": "The binding block already exists in the current database",
     "243": "Only list the first [%d] tags (including subtags), if you need to adjust, please modify [Settings - Doc Tree - Maximum number to list]",
-    "244": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]",
-    "245": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]. To exit normally, you need to use [Exit Application] in the right panel",
+    "244": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]. In the future, please exit the program completely before shutting down the computer",
+    "245": "It did not exit normally after the last use. It is recommended to execute [Doc Tree - Rebuild Index]. In the future, please use [Exit Application] in the right panel to exit normally",
     "246": "The document title cannot contain / and has been replaced with _"
   }
 }

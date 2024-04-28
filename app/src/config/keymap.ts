@@ -212,6 +212,10 @@ export const keymap = {
         fetchPost("/api/setting/setKeymap", {
             data
         }, () => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, {
+                cmd: "writeLog",
+                msg: "user update keymap:" + JSON.stringify(window.siyuan.config.keymap)
+            });
             if (oldToggleWin !== window.siyuan.config.keymap.general.toggleWin.custom) {
                 ipcRenderer.send(Constants.SIYUAN_CMD, {
                     cmd: "unregisterGlobalShortcut",
@@ -333,6 +337,10 @@ export const keymap = {
                 fetchPost("/api/setting/setKeymap", {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {
+                    ipcRenderer.send(Constants.SIYUAN_CMD, {
+                        cmd: "writeLog",
+                        msg: "user reset keymap"
+                    });
                     if (window.siyuan.config.keymap.general.toggleWin.default !== window.siyuan.config.keymap.general.toggleWin.custom) {
                         ipcRenderer.send(Constants.SIYUAN_CMD, {
                             cmd: "unregisterGlobalShortcut",

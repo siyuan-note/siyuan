@@ -329,7 +329,7 @@ export const keymap = {
             keymap.search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
-            confirmDialog(window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
+            confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
                 fetchPost("/api/setting/setKeymap", {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {

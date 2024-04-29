@@ -21,17 +21,29 @@ export const commandPanel = (app: App) => {
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--background fn__flex-1" id="commands"></ul>
     <div class="fn__hr"></div>
+    <div class="search__tip">
+        <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
+        <kbd>Enter/Click</kbd> ${window.siyuan.languages.confirm}
+        <kbd>Esc</kbd> ${window.siyuan.languages.close}
+    </div>
 </div>`
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");
+    /// #if !MOBILE
+    let html = ""
+    Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
+        html += `<li class="b3-list-item" data-command="${key}">
+    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+    <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.general[key].custom)}</span>
+</li>`;
+    });
+    listElement.insertAdjacentHTML("beforeend", html);
+    /// #endif
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item");
-            if (listElement.childElementCount === 0) {
-                liElement.classList.add("b3-list-item--focus");
-            }
             liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
@@ -49,12 +61,9 @@ export const commandPanel = (app: App) => {
     if (listElement.childElementCount === 0) {
         const liElement = document.createElement("li");
         liElement.classList.add("b3-list-item", "b3-list-item--focus");
-        liElement.innerHTML = `<span class="b3-list-item__text" style="-webkit-line-clamp: inherit;">${isMobile() ? window.siyuan.languages._kernel[122] : window.siyuan.languages.commandEmpty}</span>`;
+        liElement.innerHTML = `<span class="b3-list-item__text" style="-webkit-line-clamp: inherit;">${window.siyuan.languages._kernel[122]}</span>`;
         liElement.addEventListener("click", () => {
             dialog.destroy();
-            /// #if !MOBILE
-            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-            /// #endif
         });
         listElement.insertAdjacentElement("beforeend", liElement);
     } else {
@@ -72,7 +81,12 @@ export const commandPanel = (app: App) => {
         if (event.key === "Enter") {
             const currentElement = listElement.querySelector(".b3-list-item--focus");
             if (currentElement) {
-                currentElement.dispatchEvent(new CustomEvent("click"));
+                const command = currentElement.getAttribute("data-command");
+                if (command) {
+                    execByCommand(command, app);
+                } else {
+                    currentElement.dispatchEvent(new CustomEvent("click"));
+                }
             }
             dialog.destroy();
         } else if (event.key === "Escape") {
@@ -107,4 +121,11 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
             element.classList.add("fn__none");
         }
     });
+};
+
+const execByCommand = (command: string, app: App) => {
+    switch (command) {
+        case "openSetting":
+            break;
+    }
 };

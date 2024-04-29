@@ -42,6 +42,9 @@ export const initBar = (app: App) => {
 <div id="barPlugins" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.plugin}">
     <svg><use xlink:href="#iconPlugin"></use></svg>
 </div>
+<div id="barCommand" class="toolbar__item ariaLabel" aria-label="${window.siyuan.config.keymap.general.commandPanel.custom}">
+    <svg><use xlink:href="#iconLayoutBottom"></use></svg>
+</div>
 <div id="barSearch" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
@@ -179,6 +182,10 @@ export const initBar = (app: App) => {
                 openPlugin(app, target);
                 event.stopPropagation();
                 break;
+            } else if (targetId === "barCommand") {
+                commandPanel(app);
+                event.stopPropagation();
+                break;
             } else if (targetId === "barZoom") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                     window.siyuan.menus.menu.element.getAttribute("data-name") === "barZoom") {
@@ -303,14 +310,6 @@ const openPlugin = (app: App, target: Element) => {
             }
         });
     }
-    menu.addItem({
-        icon: "iconLayoutBottom",
-        accelerator: window.siyuan.config.keymap.general.commandPanel.custom,
-        label: window.siyuan.languages.commandPanel,
-        click() {
-            commandPanel(app);
-        }
-    });
     menu.addSeparator();
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {

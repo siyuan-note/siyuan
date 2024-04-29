@@ -132,10 +132,12 @@ func SaveAssetsTexts() {
 }
 
 func SetAssetText(asset, text string) {
+	var oldText string
 	assetsTextsLock.Lock()
+	oldText = assetsTexts[asset]
 	assetsTexts[asset] = text
 	assetsTextsLock.Unlock()
-	if "" != text {
+	if oldText != text {
 		assetsTextsChanged.Store(true)
 	}
 }

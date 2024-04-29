@@ -48,22 +48,23 @@ export class Setting {
             if (!item.actionElement && item.createActionElement) {
                 actionElement = item.createActionElement();
             }
-            if (actionElement && actionElement.tagName === "TEXTAREA") {
-                html = `<label class="b3-label fn__flex">
-    <div class="fn__flex-1">
+            const tagName = actionElement?.classList.contains("b3-switch")?"label":"div";
+            if (item.direction === "row") {
+                html = `<${tagName} class="b3-label">
+    <div class="fn__block">
         ${item.title}
         ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
         <div class="fn__hr"></div>
     </div>
-</label>`;
+</${tagName}>`;
             } else {
-                html = `<label class="fn__flex b3-label config__item">
+                html = `<${tagName} class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${item.title}
         ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
     </div>
     <span class="fn__space${actionElement ? "" : " fn__none"}"></span>
-</label>`;
+</${tagName}>`;
             }
             contentElement.insertAdjacentHTML("beforeend", html);
             if (actionElement) {
@@ -72,14 +73,17 @@ export class Setting {
                         btnsElement[1].dispatchEvent(new CustomEvent("click"));
                     }, actionElement.tagName === "INPUT");
                 }
-                if (actionElement.tagName === "TEXTAREA") {
+                if (item.direction === "row") {
                     contentElement.lastElementChild.lastElementChild.insertAdjacentElement("beforeend", actionElement);
+                    actionElement.classList.add("fn__block");
                 } else {
+                    actionElement.classList.remove("fn__block");
+                    actionElement.classList.add("fn__flex-center", "fn__size200");
                     contentElement.lastElementChild.insertAdjacentElement("beforeend", actionElement);
                 }
             }
         });
-        contentElement.querySelector("input")?.focus();
+        (contentElement.querySelector("input, textarea") as HTMLElement)?.focus();
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();

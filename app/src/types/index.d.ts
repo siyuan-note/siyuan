@@ -236,6 +236,7 @@ interface IPluginSettingOption {
     title: string
     description?: string
     actionElement?: HTMLElement
+    direction?: "column"|"row"
 
     createActionElement?(): HTMLElement
 }

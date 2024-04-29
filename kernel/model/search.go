@@ -804,7 +804,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 			}
 
 			var replaceNodes []*ast.Node
-			for rNode := tree.Root.FirstChild; nil != rNode; rNode = rNode.Next {
+			for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
 				replaceNodes = append(replaceNodes, rNode)
 			}
 

@@ -30,8 +30,8 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     let top = targetRect.bottom;
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
-    if (position.startsWith("right")) {
-        // block icon
+    if (position?.startsWith("right")) {
+        // block icon and background icon
         left = targetRect.right - messageElement.clientWidth;
     }
     if (position?.endsWith("bottom")) {

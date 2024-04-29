@@ -1,12 +1,12 @@
-import {Dialog} from "../dialog";
-import {App} from "../index";
-import {upDownHint} from "../util/upDownHint";
+import {Dialog} from "../../dialog";
+import {App} from "../../index";
+import {upDownHint} from "../../util/upDownHint";
 /// #if !MOBILE
-import {openSetting} from "../config";
+import {openSetting} from "../../config";
 /// #endif
-import {updateHotkeyTip} from "../protyle/util/compatibility";
-import {isMobile} from "../util/functions";
-import {Constants} from "../constants";
+import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {isMobile} from "../../util/functions";
+import {Constants} from "../../constants";
 
 export const commandPanel = (app: App) => {
     const dialog = new Dialog({

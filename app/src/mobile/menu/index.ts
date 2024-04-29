@@ -20,7 +20,7 @@ import {isHuawei, isInAndroid, isInIOS} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
 import {afterLoadPlugin} from "../../plugin/loader";
 import {Menu} from "../../plugin/Menu";
-import {commandPanel} from "../../plugin/commandPanel";
+import {commandPanel} from "../../boot/globalEvent/commandPanel";
 
 export const popMenu = () => {
     activeBlur();

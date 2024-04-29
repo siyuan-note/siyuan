@@ -59,7 +59,6 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {fullscreen, updateReadonly} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
-import {commandPanel} from "../../plugin/commandPanel";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";
@@ -76,6 +75,7 @@ import {zoomOut} from "../../menus/protyle";
 import {openSearchAV} from "../../protyle/render/av/relation";
 import * as dayjs from "dayjs";
 import {getPlainText} from "../../protyle/util/paste";
+import {commandPanel} from "./commandPanel";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();

@@ -29,14 +29,14 @@ export const commandPanel = (app: App) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");
     /// #if !MOBILE
-    let html = ""
-    Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
-        html += `<li class="b3-list-item" data-command="${key}">
-    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
-    <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.general[key].custom)}</span>
-</li>`;
-    });
-    listElement.insertAdjacentHTML("beforeend", html);
+//     let html = ""
+//     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
+//         html += `<li class="b3-list-item" data-command="${key}">
+//     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+//     <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.general[key].custom)}</span>
+// </li>`;
+//     });
+//     listElement.insertAdjacentHTML("beforeend", html);
     /// #endif
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {

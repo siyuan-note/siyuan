@@ -18,9 +18,7 @@ export const commandPanel = (app: App) => {
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
     </div>
-    <div class="fn__hr"></div>
-    <ul class="b3-list b3-list--background fn__flex-1" id="commands"></ul>
-    <div class="fn__hr"></div>
+    <ul class="b3-list b3-list--background search__list" id="commands"></ul>
     <div class="search__tip">
         <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
         <kbd>Enter/Click</kbd> ${window.siyuan.languages.confirm}

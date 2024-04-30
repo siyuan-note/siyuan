@@ -710,7 +710,7 @@ func getDocCreateSavePath(c *gin.Context) {
 		docCreateSaveBox = boxConf.DocCreateSaveBox
 		docCreateSavePathTpl = boxConf.DocCreateSavePath
 	}
-	if "" == docCreateSaveBox {
+	if "" == docCreateSaveBox && "" == docCreateSavePathTpl {
 		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
 	}
 	if "" != docCreateSaveBox {
@@ -765,7 +765,7 @@ func getRefCreateSavePath(c *gin.Context) {
 		refCreateSaveBox = boxConf.RefCreateSaveBox
 		refCreateSavePathTpl = boxConf.RefCreateSavePath
 	}
-	if "" == refCreateSaveBox {
+	if "" == refCreateSaveBox && "" == refCreateSavePathTpl {
 		refCreateSaveBox = model.Conf.FileTree.RefCreateSaveBox
 	}
 	if "" != refCreateSaveBox {

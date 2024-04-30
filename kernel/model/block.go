@@ -129,6 +129,25 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		return
 	}
 
+	var parentList *ast.Node
+	for p := node.Parent; nil != p; p = p.Parent {
+		if ast.NodeList == p.Type {
+			parentList = p
+			break
+		}
+	}
+
+	if nil != parentList {
+		parent = parentList.ID
+		if node.Previous != nil {
+			previous = node.Previous.ID
+		}
+		if node.Next != nil {
+			next = node.Next.ID
+		}
+		return
+	}
+
 	if nil != node.Parent && node.Parent.IsBlock() {
 		parent = node.Parent.ID
 	}

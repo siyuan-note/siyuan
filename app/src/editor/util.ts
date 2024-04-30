@@ -698,17 +698,27 @@ export const openBy = (url: string, type: "folder" | "app") => {
 
 export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);
+    let pdfParams;
+    if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
+        const pdfAddress = linkAddress.split("/");
+        if (pdfAddress.length === 3 && pdfAddress[0] === "assets" && pdfAddress[1].endsWith(".pdf") && /\d{14}-\w{7}/.test(pdfAddress[2])) {
+            linkAddress = `assets/${pdfAddress[1]}`;
+            pdfParams = pdfAddress[2];
+        } else {
+            pdfParams = parseInt(getSearch("page", linkAddress));
+            linkAddress = linkAddress.split("?page")[0];
+        }
+    }
     /// #if MOBILE
     openByMobile(linkAddress);
     /// #else
     if (isLocalPath(linkAddress)) {
-        const linkPathname = linkAddress.split("?page")[0];
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkPathname)) &&
-            (!linkPathname.endsWith(".pdf") ||
-                (linkPathname.endsWith(".pdf") && !linkAddress.startsWith("file://")))
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkAddress)) &&
+            (!linkAddress.endsWith(".pdf") ||
+                (linkAddress.endsWith(".pdf") && !linkAddress.startsWith("file://")))
         ) {
             if (event && event.altKey) {
-                openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
+                openAsset(protyle.app, linkAddress, pdfParams);
             } else if (ctrlIsPressed) {
                 /// #if !BROWSER
                 openBy(linkAddress, "folder");
@@ -722,7 +732,7 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
                 openByMobile(linkAddress);
                 /// #endif
             } else {
-                openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
+                openAsset(protyle.app, linkAddress, pdfParams, "right");
             }
         } else {
             /// #if !BROWSER

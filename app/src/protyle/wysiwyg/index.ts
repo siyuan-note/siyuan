@@ -2104,9 +2104,7 @@ export class WYSIWYG {
             if (fileElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
-                const fileIds = fileElement.getAttribute("data-id").split("/");
-                const linkAddress = `assets/${fileIds[1]}`;
-                openLink(protyle, linkAddress, event, ctrlIsPressed);
+                openLink(protyle, fileElement.getAttribute("data-id"), event, ctrlIsPressed);
                 return;
             }
 

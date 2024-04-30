@@ -129,36 +129,76 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		return
 	}
 
+	parentListCount := 0
 	var parentList *ast.Node
 	for p := node.Parent; nil != p; p = p.Parent {
 		if ast.NodeList == p.Type {
-			parentList = p
-			break
+			parentListCount++
+			if 1 < parentListCount {
+				parentList = p
+				break
+			}
 		}
 	}
 
 	if nil != parentList {
 		parent = parentList.ID
-		if node.Previous != nil {
-			previous = node.Previous.ID
+		if flb := treenode.FirstLeafBlock(parentList); nil != flb {
+			parent = flb.ID
 		}
-		if node.Next != nil {
-			next = node.Next.ID
+
+		if parentList.Previous != nil {
+			previous = parentList.Previous.ID
+			if flb := treenode.FirstLeafBlock(parentList.Previous); nil != flb {
+				previous = flb.ID
+			}
+		}
+		if parentList.Next != nil {
+			next = parentList.Next.ID
+			if flb := treenode.FirstLeafBlock(parentList.Next); nil != flb {
+				next = flb.ID
+			}
 		}
 		return
 	}
 
 	if nil != node.Parent && node.Parent.IsBlock() {
 		parent = node.Parent.ID
+		if flb := treenode.FirstLeafBlock(node.Parent); nil != flb {
+			parent = flb.ID
+		}
+
+		if ast.NodeDocument == node.Parent.Type {
+			if nil != node.Previous && node.Previous.IsBlock() {
+				previous = node.Previous.ID
+				if flb := treenode.FirstLeafBlock(node.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != node.Next && node.Next.IsBlock() {
+				next = node.Next.ID
+				if flb := treenode.FirstLeafBlock(node.Next); nil != flb {
+					next = flb.ID
+				}
+			}
+		} else {
+			if nil != node.Parent.Previous && node.Parent.Previous.IsBlock() {
+				previous = node.Parent.Previous.ID
+				if flb := treenode.FirstLeafBlock(node.Parent.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != node.Parent.Next && node.Parent.Next.IsBlock() {
+				next = node.Parent.Next.ID
+				if flb := treenode.FirstLeafBlock(node.Parent.Next); nil != flb {
+					next = flb.ID
+				}
+			}
+		}
 	}
 
-	if nil != node.Previous && node.Previous.IsBlock() {
-		previous = node.Previous.ID
-	}
-
-	if nil != node.Next && node.Next.IsBlock() {
-		next = node.Next.ID
-	}
 	return
 }
 

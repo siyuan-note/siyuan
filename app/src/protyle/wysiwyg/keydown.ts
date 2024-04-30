@@ -421,19 +421,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey("⇧↓", event)) {
             downSelect({
-                protyle, event, nodeElement, editorElement, range,
+                protyle,
+                event,
+                nodeElement,
+                editorElement,
+                range,
                 cb(selectElements) {
                     const startEndElement = getStartEndElement(selectElements);
                     if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
                         const nextElement = startEndElement.endElement.nextElementSibling as HTMLElement;
                         if (nextElement && nextElement.getAttribute("data-node-id")) {
-                            nextElement.classList.add("protyle-wysiwyg--select");
-                            nextElement.setAttribute("select-end", "true");
-                            startEndElement.endElement.removeAttribute("select-end");
-                            const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
-                            if (bottom > 0) {
-                                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
-                                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                            if (nextElement.getBoundingClientRect().width === 0) {
+                                // https://github.com/siyuan-note/siyuan/issues/11194
+                                hideElements(["select"], protyle);
+                                startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                            } else {
+                                nextElement.classList.add("protyle-wysiwyg--select");
+                                nextElement.setAttribute("select-end", "true");
+                                startEndElement.endElement.removeAttribute("select-end");
+                                const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
+                                if (bottom > 0) {
+                                    protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
+                                    protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                                }
                             }
                         } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);

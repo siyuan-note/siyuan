@@ -360,10 +360,6 @@ export class Files extends Model {
                     }
                     target = target.parentElement;
                 }
-            } else {
-                this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
-                    item.classList.remove("b3-list-item--focus");
-                });
             }
             if (needFocus) {
                 setPanelFocus(this.element.parentElement);

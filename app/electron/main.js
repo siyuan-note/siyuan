@@ -231,9 +231,9 @@ const writeLog = (out) => {
 };
 
 let openAsHidden = false;
-isOpenAsHidden = function () {
+const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
-}
+};
 
 const initMainWindow = () => {
     let windowStateInitialized = true;

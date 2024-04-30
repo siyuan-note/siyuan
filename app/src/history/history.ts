@@ -42,25 +42,25 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2) {
             opElement.value = "all";
         }
-        opElement.querySelector('option[value="clean"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="update"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="delete"]').classList.add("fn__none")
-        opElement.querySelector('option[value="format"]').classList.add("fn__none")
-        opElement.querySelector('option[value="sync"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="replace"]').classList.add("fn__none")
-        opElement.querySelector('option[value="outline"]').classList.add("fn__none")
+        opElement.querySelector('option[value="clean"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="update"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="delete"]').classList.add("fn__none");
+        opElement.querySelector('option[value="format"]').classList.add("fn__none");
+        opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="replace"]').classList.add("fn__none");
+        opElement.querySelector('option[value="outline"]').classList.add("fn__none");
     } else {
         notebookElement.removeAttribute("disabled");
         if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2) {
             opElement.value = "all";
         }
-        opElement.querySelector('option[value="clean"]').classList.add("fn__none")
-        opElement.querySelector('option[value="update"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="delete"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="format"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="sync"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="replace"]').classList.remove("fn__none")
-        opElement.querySelector('option[value="outline"]').classList.remove("fn__none")
+        opElement.querySelector('option[value="clean"]').classList.add("fn__none");
+        opElement.querySelector('option[value="update"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="delete"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="format"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="replace"]').classList.remove("fn__none");
+        opElement.querySelector('option[value="outline"]').classList.remove("fn__none");
     }
     window.siyuan.storage[Constants.LOCAL_HISTORY] = {
         notebookId: notebookElement.value,

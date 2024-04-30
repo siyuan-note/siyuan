@@ -224,7 +224,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 mathRender(realElement);
                 if (index === tempElement.content.childElementCount - 1) {
                     // https://github.com/siyuan-note/siyuan/issues/11156
-                    const currentWbrElement = blockElement.querySelector("wbr")
+                    const currentWbrElement = blockElement.querySelector("wbr");
                     if (currentWbrElement && currentWbrElement.parentElement.tagName === "SPAN" && currentWbrElement.parentElement.innerHTML === "<wbr>") {
                         const types = currentWbrElement.parentElement.getAttribute("data-type") || "";
                         if (types.includes("sup") || types.includes("u") || types.includes("sub")) {

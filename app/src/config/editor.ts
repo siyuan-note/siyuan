@@ -336,7 +336,7 @@ export const editor = {
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "1024";
             }
 
-            let markdown = {
+            const markdown = {
                 inlineSup: (editor.element.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
                 inlineSub: (editor.element.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
                 inlineTag: (editor.element.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,

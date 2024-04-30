@@ -19,7 +19,7 @@ import {Files} from "../../layout/dock/Files";
 /// #endif
 
 export const commandPanel = (app: App) => {
-    const range = getSelection().getRangeAt(0)
+    const range = getSelection().getRangeAt(0);
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "80vw",
         height: isMobile() ? "80vh" : "70vh",
@@ -83,7 +83,7 @@ export const commandPanel = (app: App) => {
     inputElement.focus();
     /// #if !MOBILE
     listElement.addEventListener("click", (event: KeyboardEvent) => {
-        const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item")
+        const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
         if (liElement) {
             const command = liElement.getAttribute("data-command");
             if (command) {
@@ -93,7 +93,7 @@ export const commandPanel = (app: App) => {
                 event.stopPropagation();
             }
         }
-    })
+    });
     /// #endif
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();

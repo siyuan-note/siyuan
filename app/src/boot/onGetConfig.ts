@@ -34,7 +34,7 @@ const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "g
         if (!window.siyuan.config.keymap[key1]) {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "writeLog",
-                msg: 'window.siyuan.config.keymap.general is not found'
+                msg: "window.siyuan.config.keymap.general is not found"
             });
             window.siyuan.config.keymap[key1] = keymap as Config.IKeymapGeneral;
             return false;
@@ -43,7 +43,7 @@ const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "g
         if (!window.siyuan.config.keymap[key1]) {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "writeLog",
-                msg: 'window.siyuan.config.keymap.editor is not found'
+                msg: "window.siyuan.config.keymap.editor is not found"
             });
             window.siyuan.config.keymap[key1] = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP.editor));
             return false;

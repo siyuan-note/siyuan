@@ -33,7 +33,7 @@ export const genNotebookOption = (id: string, notebookId?: string) => {
         html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${item.name}</option>`;
     });
     return html;
-}
+};
 
 export const onGetnotebookconf = (data: INotebookConf) => {
     const titleHTML = `<div class="fn__flex">${escapeHtml(data.name)}

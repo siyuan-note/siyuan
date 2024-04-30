@@ -452,20 +452,20 @@ export class Background {
                 html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${item}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}<span class="fn__space"></span>
-<button class="b3-button b3-button--cancel fn__flex-center" data-menu="true" data-type="tag"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addTag}</button>`
-            this.tagsElement.classList.remove("fn__none")
-            this.actionElements[0].classList.add("fn__none")
+<button class="b3-button b3-button--cancel fn__flex-center" data-menu="true" data-type="tag"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addTag}</button>`;
+            this.tagsElement.classList.remove("fn__none");
+            this.actionElements[0].classList.add("fn__none");
         } else {
-            this.tagsElement.classList.add("fn__none")
-            this.actionElements[0].classList.remove("fn__none")
+            this.tagsElement.classList.add("fn__none");
+            this.actionElements[0].classList.remove("fn__none");
         }
 
         if (icon) {
             this.iconElement.classList.remove("fn__none");
             this.iconElement.innerHTML = unicode2Emoji(icon);
-            this.actionElements[1].classList.add("fn__none")
+            this.actionElements[1].classList.add("fn__none");
         } else {
-            this.actionElements[1].classList.remove("fn__none")
+            this.actionElements[1].classList.remove("fn__none");
             this.iconElement.classList.add("fn__none");
         }
 
@@ -483,16 +483,16 @@ export class Background {
                 this.imgElement.setAttribute("src", this.transparentData);
                 this.element.querySelector('[data-type="position"]').classList.add("fn__none");
             }
-            this.actionElements[2].classList.add("fn__none")
+            this.actionElements[2].classList.add("fn__none");
             this.imgElement.parentElement.classList.remove("fn__none");
             this.iconElement.style.marginTop = "";
             /// #if MOBILE
             // 移动端键盘弹起和点击加号需保持滚动高度一致
-            this.imgElement.style.height = "200px"
+            this.imgElement.style.height = "200px";
             /// #endif
         } else {
             this.imgElement.parentElement.classList.add("fn__none");
-            this.actionElements[2].classList.remove("fn__none")
+            this.actionElements[2].classList.remove("fn__none");
             this.iconElement.style.marginTop = "8px";
         }
     }

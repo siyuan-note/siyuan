@@ -513,7 +513,7 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	if 2 < len(data) {
 		if 255 == data[0] && 254 == data[1] {
 			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		} else if 254 == data[1] && 255 == data[0] {
+		} else if 254 == data[0] && 255 == data[1] {
 			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
 		}
 	}

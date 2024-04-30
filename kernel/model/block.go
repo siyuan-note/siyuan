@@ -114,33 +114,33 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
-func GetParentNextChildID(id string) string {
+func GetBlockSiblingID(id string) (parent, previous, next string) {
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
-		return ""
+		return
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return ""
+		return
 	}
 
-	for p := node.Parent; nil != p; p = p.Parent {
-		if ast.NodeDocument == p.Type {
-			if nil != node.Next {
-				return node.Next.ID
-			}
-			return ""
-		}
-
-		for f := p.Next; nil != f; f = f.Next {
-			// 遍历取下一个块级元素（比如跳过超级块 Close 节点）
-			if f.IsBlock() {
-				return f.ID
-			}
-		}
+	if !node.IsBlock() {
+		return
 	}
-	return ""
+
+	if nil != node.Parent && node.Parent.IsBlock() {
+		parent = node.Parent.ID
+	}
+
+	if nil != node.Previous && node.Previous.IsBlock() {
+		previous = node.Previous.ID
+	}
+
+	if nil != node.Next && node.Next.IsBlock() {
+		next = node.Next.ID
+	}
+	return
 }
 
 func IsBlockFolded(id string) bool {

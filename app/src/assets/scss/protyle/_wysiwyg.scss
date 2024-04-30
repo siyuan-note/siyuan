@@ -160,8 +160,13 @@
     }
 
     &.sb {
-      padding: 0;
+      padding: 0.5rem;
       max-width: 100%;
+      border: solid 1px var(--b3-theme-background-light)
+      
+      & :not(.sb)[data-type] {
+        background: linear-gradient(90deg,transparent,var(--b3-theme-surface-light));
+      }
 
       &[data-sb-layout="col"] {
         display: flex;

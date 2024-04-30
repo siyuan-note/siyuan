@@ -43,7 +43,7 @@ export const initBar = (app: App) => {
     <svg><use xlink:href="#iconPlugin"></use></svg>
 </div>
 <div id="barCommand" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.commandPanel} ${updateHotkeyTip(window.siyuan.config.keymap.general.commandPanel.custom)}">
-    <svg><use xlink:href="#iconLayoutBottom"></use></svg>
+    <svg><use xlink:href="#iconTerminal"></use></svg>
 </div>
 <div id="barSearch" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>

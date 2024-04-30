@@ -179,7 +179,7 @@ export const initRightMenu = (app: App) => {
             } else if (target.id === "menuPlugin") {
                 const menu = new Menu();
                 menu.addItem({
-                    icon: "iconLayoutBottom",
+                    icon: "iconTerminal",
                     label: window.siyuan.languages.commandPanel,
                     click() {
                         commandPanel(app);

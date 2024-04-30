@@ -29,8 +29,7 @@ import {makeCard} from "../card/makeCard";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openByMobile} from "../protyle/util/compatibility";
-import {openSearchAV} from "../protyle/render/av/relation";
-import * as dayjs from "dayjs";
+import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -57,27 +56,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                openSearchAV("", selectItemElements[0] as HTMLElement, (listItemElement) => {
-                    const avID = listItemElement.dataset.avId;
-                    const srcs: IOperationSrcs[] = [];
-                    blockIDs.forEach(id => {
-                        srcs.push({
-                            id,
-                            isDetached: false
-                        });
-                    });
-                    transaction(undefined, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        ignoreFillFilter: true,
-                        srcs,
-                        blockID: listItemElement.dataset.blockId
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }]);
-                });
+                addFilesToDatabase(Array.from(selectItemElements));
             }
         }).element);
     }
@@ -478,23 +457,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                openSearchAV("", liElement as HTMLElement, (listItemElement) => {
-                    const avID = listItemElement.dataset.avId;
-                    transaction(undefined, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        ignoreFillFilter: true,
-                        srcs: [{
-                            id,
-                            isDetached: false
-                        }],
-                        blockID: listItemElement.dataset.blockId
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }]);
-                });
+                addFilesToDatabase([liElement]);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

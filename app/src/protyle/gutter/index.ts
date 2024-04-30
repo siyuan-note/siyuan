@@ -47,9 +47,9 @@ import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu} from "../render/av/action";
-import {openSearchAV} from "../render/av/relation";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
+import {addEditorToDatabase} from "../render/av/addToDatabase";
 
 export class Gutter {
     public element: HTMLElement;
@@ -817,34 +817,7 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                openSearchAV("", selectsElement[0] as HTMLElement, (listItemElement) => {
-                    const srcIDs: string[] = [];
-                    const srcs: IOperationSrcs[] = [];
-                    selectsElement.forEach(item => {
-                        srcIDs.push(item.getAttribute("data-node-id"));
-                        srcs.push({
-                            id: item.getAttribute("data-node-id"),
-                            isDetached: false,
-                        });
-                    });
-                    const avID = listItemElement.dataset.avId;
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        srcs,
-                        ignoreFillFilter: true,
-                        blockID: listItemElement.dataset.blockId
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs,
-                        avID,
-                    }]);
-                    focusByRange(range);
-                });
+                addEditorToDatabase(protyle, range);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1289,28 +1262,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
-                    openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {
-                        const avID = listItemElement.dataset.avId;
-                        transaction(protyle, [{
-                            action: "insertAttrViewBlock",
-                            avID,
-                            srcs: [{
-                                id,
-                                isDetached: false
-                            }],
-                            ignoreFillFilter: true,
-                            blockID: listItemElement.dataset.blockId
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: listItemElement.dataset.blockId,
-                            data: dayjs().format("YYYYMMDDHHmmss"),
-                        }], [{
-                            action: "removeAttrViewBlock",
-                            srcIDs: [id],
-                            avID,
-                        }]);
-                        focusByRange(range);
-                    });
+                    addEditorToDatabase(protyle, range);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

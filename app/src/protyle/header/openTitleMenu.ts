@@ -21,9 +21,7 @@ import {openDocHistory} from "../../history/doc";
 import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
-import {openSearchAV} from "../render/av/relation";
-import {transaction} from "../wysiwyg/transaction";
-import {focusByRange} from "../util/selection";
+import {addEditorToDatabase} from "../render/av/addToDatabase";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -51,28 +49,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
-                    openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
-                        const avID = listItemElement.dataset.avId;
-                        transaction(protyle, [{
-                            action: "insertAttrViewBlock",
-                            avID,
-                            ignoreFillFilter: true,
-                            srcs: [{
-                                id: response.data.rootID,
-                                isDetached: false
-                            }],
-                            blockID: listItemElement.dataset.blockId
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: listItemElement.dataset.blockId,
-                            data: dayjs().format("YYYYMMDDHHmmss"),
-                        }], [{
-                            action: "removeAttrViewBlock",
-                            srcIDs: [response.data.rootID],
-                            avID,
-                        }]);
-                        focusByRange(range);
-                    });
+                    addEditorToDatabase(protyle, range, "title");
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

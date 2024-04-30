@@ -28,7 +28,13 @@ import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParentNext} from "../../block/util";
+import {
+    cancelSB,
+    genEmptyElement,
+    getLangByType,
+    insertEmptyBlock,
+    jumpToParent,
+} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -1630,9 +1636,26 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.editor.general.jumpToParentNext.custom,
             click() {
                 hideElements(["select"], protyle);
-                jumpToParentNext(protyle, nodeElement);
+                jumpToParent(protyle, nodeElement, "next");
             }
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.jumpToParentPrev,
+            accelerator: window.siyuan.config.keymap.editor.general.jumpToParentPrev.custom,
+            click() {
+                hideElements(["select"], protyle);
+                jumpToParent(protyle, nodeElement, "previous");
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.jumpToParent,
+            accelerator: window.siyuan.config.keymap.editor.general.jumpToParent.custom,
+            click() {
+                hideElements(["select"], protyle);
+                jumpToParent(protyle, nodeElement, "parent");
+            }
+        }).element);
+
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 
         if (type !== "NodeThematicBreak") {

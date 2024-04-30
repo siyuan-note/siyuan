@@ -399,6 +399,8 @@ export abstract class Constants {
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
                 jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
+                jumpToParentPrev: {default: "⇧⌘M", custom: "⇧⌘M"},
+                jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"}
             },

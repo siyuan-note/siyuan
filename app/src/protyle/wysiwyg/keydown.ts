@@ -35,7 +35,7 @@ import {turnsIntoOneTransaction, turnsIntoTransaction, updateBatchTransaction, u
 import {fontEvent} from "../toolbar/Font";
 import {addSubList, listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
-import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
+import {insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById, openLink} from "../../editor/util";
@@ -1358,7 +1358,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentNext.custom, event)) {
-            jumpToParentNext(protyle, nodeElement);
+            jumpToParent(protyle, nodeElement, "next");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParent.custom, event)) {
+            jumpToParent(protyle, nodeElement, "parent");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentPrev.custom, event)) {
+            jumpToParent(protyle, nodeElement, "previous");
             event.preventDefault();
             event.stopPropagation();
             return true;

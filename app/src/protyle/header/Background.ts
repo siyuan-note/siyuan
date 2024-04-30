@@ -143,7 +143,7 @@ export class Background {
         this.tagsElement = this.element.querySelector(".b3-chips") as HTMLElement;
         this.iconElement = this.element.querySelector(".protyle-background__icon") as HTMLElement;
         this.imgElement = this.element.querySelector(".protyle-background__img img") as HTMLImageElement;
-        this.actionElements = this.element.querySelectorAll(".protyle-background__action .b3-button");
+        this.actionElements = this.element.querySelectorAll(".protyle-background__action:not(.fn__flex-center) .b3-button");
 
         this.element.addEventListener("dragover", async (event) => {
             event.preventDefault();
@@ -452,7 +452,9 @@ export class Background {
                 html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${item}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}<span class="fn__space"></span>
-<button class="b3-button b3-button--cancel fn__flex-center" data-menu="true" data-type="tag"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addTag}</button>`;
+<div class="protyle-background__action fn__flex-center">
+    <button class="b3-button b3-button--cancel" style="margin-top: 0" data-menu="true" data-type="tag"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addTag}</button>
+</div>`;
             this.tagsElement.classList.remove("fn__none");
             this.actionElements[0].classList.add("fn__none");
         } else {

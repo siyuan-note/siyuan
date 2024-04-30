@@ -506,14 +506,22 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 
 	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
 	if nil != err {
-		ret = "Load bazaar package's README.md failed: " + err.Error()
-		return
+		ret = fmt.Sprintf("Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
+		if readme == repo.Package.Readme.Default || "" == strings.TrimSpace(repo.Package.Readme.Default) {
+			return
+		}
+		readme = repo.Package.Readme.Default
+		data, err = downloadPackage(repoURLHash+"/"+readme, false, "")
+		if nil != err {
+			ret += fmt.Sprintf("<br>Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
+			return
+		}
 	}
 
 	if 2 < len(data) {
 		if 255 == data[0] && 254 == data[1] {
 			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		} else if 254 == data[1] && 255 == data[0] {
+		} else if 254 == data[0] && 255 == data[1] {
 			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
 		}
 	}

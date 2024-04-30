@@ -481,6 +481,8 @@
   "copyPlainText": "複製純文字",
   "findInDoc": "${x} 個文檔中匹配 ${y} 項",
   "jumpToParentNext": "跳轉到父級的下一個塊",
+  "jumpToParentPrev": "跳轉到父級的上一個塊",
+  "jumpToParent": "跳轉到父級",
   "initRepoKeyTip": "如果其他設備上已經初始化過密鑰，請使用 [導入密鑰] 或者通過相同的密碼生成密鑰，否則無法雲端同步資料，所以請務必在所有設備上使用相同的密鑰",
   "crossKeepLazyLoad": "跨頁多選需在更多菜單中選中【保持已載入內容】",
   "keepLazyLoad": "保持已載入的內容",

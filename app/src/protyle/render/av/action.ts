@@ -260,7 +260,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     const keyCellElement = rowElements[0].querySelector(".av__cell[data-block-id]") as HTMLElement;
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
         const blockId = rowElements[0].getAttribute("data-id");
-        openEditorTab(protyle.app, blockId);
+        openEditorTab(protyle.app, [blockId]);
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",

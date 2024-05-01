@@ -49,6 +49,9 @@ export class Setting {
                 actionElement = item.createActionElement();
             }
             const tagName = actionElement?.classList.contains("b3-switch")?"label":"div";
+            if (item.direction === undefined) {
+                item.direction = ["TEXTAREA"].includes(actionElement.tagName) ? 'row' : 'column';
+            }
             if (item.direction === "row") {
                 html = `<${tagName} class="b3-label">
     <div class="fn__block">

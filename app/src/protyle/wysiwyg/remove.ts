@@ -1,17 +1,13 @@
-import {
-    focusBlock,
-    focusByRange,
-    focusByWbr,
-    getSelectionOffset,
-    setLastNodeRange
-} from "../util/selection";
+import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
     getTopAloneElement,
-    getTopEmptyElement, hasNextSibling, hasPreviousSibling
+    getTopEmptyElement,
+    hasNextSibling,
+    hasPreviousSibling
 } from "./getBlock";
 import {transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
@@ -417,7 +413,7 @@ export const removeImage = (imgSelectElement: Element, nodeElement: HTMLElement,
     imgSelectElement.remove();
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
     focusByWbr(nodeElement, range);
-    // 不太难清楚为什么删除图片后无法上下键定位，但重绘后就好了 https://ld246.com/article/1714314625702
+    // 不太清楚为什么删除图片后无法上下键定位，但重绘后就好了 https://ld246.com/article/1714314625702
     const editElement = getContenteditableElement(nodeElement);
     if (editElement.innerHTML.trim() === "") {
         editElement.innerHTML = "";

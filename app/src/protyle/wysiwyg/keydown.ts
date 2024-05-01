@@ -806,7 +806,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.stopPropagation();
                         event.preventDefault();
                         return;
-                    } else
+                    } else {
                         // 图片前 Delete 无效 https://github.com/siyuan-note/siyuan/issues/11209
                         let nextSibling = hasNextSibling(range.startContainer) as Element;
                         if (nextSibling) {

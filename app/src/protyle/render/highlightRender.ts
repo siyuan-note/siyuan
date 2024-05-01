@@ -102,14 +102,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                         languageElement.style.marginLeft = "";
                     }
                 }
-                // 搜索定位
-                const layoutElement = hasClosestByClassName(block, "search__layout", true);
-                if (layoutElement && block.parentElement.getAttribute("data-node-id") === layoutElement.querySelector("#searchList > .b3-list-item--focus")?.getAttribute("data-node-id")) {
-                    const matchElement = block.querySelector('span[data-type="search-mark"]');
-                    if (matchElement) {
-                        matchElement.scrollIntoView();
-                    }
-                }
                 block.innerHTML = window.hljs.highlight(
                     block.textContent + (block.textContent.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
                     {

@@ -145,20 +145,20 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 
 	if nil != parentList {
 		parent = parentList.ID
-		if flb := treenode.FirstLeafBlock(parentList); nil != flb {
+		if flb := firstChild(parentList); nil != flb {
 			parent = flb.ID
 		}
 
 		if parentListItem.Previous != nil {
 			previous = parentListItem.Previous.ID
-			if flb := treenode.FirstLeafBlock(parentListItem.Previous); nil != flb {
+			if flb := firstChild(parentListItem.Previous); nil != flb {
 				previous = flb.ID
 			}
 		}
 
 		if parentListItem.Next != nil {
 			next = parentListItem.Next.ID
-			if flb := treenode.FirstLeafBlock(parentListItem.Next); nil != flb {
+			if flb := firstChild(parentListItem.Next); nil != flb {
 				next = flb.ID
 			}
 		}
@@ -171,41 +171,58 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 
 	if nil != current.Parent && current.Parent.IsBlock() {
 		parent = current.Parent.ID
-		if flb := treenode.FirstLeafBlock(current.Parent); nil != flb {
+		if flb := firstChild(current.Parent); nil != flb {
 			parent = flb.ID
 		}
 
 		if ast.NodeDocument == current.Parent.Type {
+			parent = current.Parent.ID
+
 			if nil != current.Previous && current.Previous.IsBlock() {
 				previous = current.Previous.ID
-				if flb := treenode.FirstLeafBlock(current.Previous); nil != flb {
+				if flb := firstChild(current.Previous); nil != flb {
 					previous = flb.ID
 				}
 			}
 
 			if nil != current.Next && current.Next.IsBlock() {
 				next = current.Next.ID
-				if flb := treenode.FirstLeafBlock(current.Next); nil != flb {
+				if flb := firstChild(current.Next); nil != flb {
 					next = flb.ID
 				}
 			}
 		} else {
 			if nil != current.Parent.Previous && current.Parent.Previous.IsBlock() {
 				previous = current.Parent.Previous.ID
-				if flb := treenode.FirstLeafBlock(current.Parent.Previous); nil != flb {
+				if flb := firstChild(current.Parent.Previous); nil != flb {
 					previous = flb.ID
 				}
 			}
 
 			if nil != current.Parent.Next && current.Parent.Next.IsBlock() {
 				next = current.Parent.Next.ID
-				if flb := treenode.FirstLeafBlock(current.Parent.Next); nil != flb {
+				if flb := firstChild(current.Parent.Next); nil != flb {
 					next = flb.ID
 				}
 			}
 		}
 	}
 
+	return
+}
+
+func firstChild(node *ast.Node) (ret *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsBlock() {
+			ret = n
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
 	return
 }
 

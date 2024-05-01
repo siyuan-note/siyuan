@@ -24,7 +24,7 @@ import {
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement,
+    getTopAloneElement, hasNextSibling,
     hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
@@ -806,6 +806,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.stopPropagation();
                         event.preventDefault();
                         return;
+                    } else
+                        // 图片前 Delete 无效 https://github.com/siyuan-note/siyuan/issues/11209
+                        let nextSibling = hasNextSibling(range.startContainer) as Element;
+                        if (nextSibling) {
+                            if (nextSibling.nodeType === 3 && nextSibling.textContent === Constants.ZWSP) {
+                                nextSibling = nextSibling.nextSibling as Element;
+                            }
+                            if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
+                                removeImage(nextSibling as Element, nodeElement, range, protyle);
+                                event.stopPropagation();
+                                event.preventDefault();
+                                return;
+                            }
+                        }
                     }
                 } else {
                     const currentNode = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement;

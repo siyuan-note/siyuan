@@ -157,7 +157,7 @@ export class BlockPanel {
                 action.push(Constants.CB_GET_ALL);
             } else {
                 action.push(Constants.CB_GET_CONTEXT);
-                action.push(Constants.CB_GET_HL);
+                // 不需要高亮 https://github.com/siyuan-note/siyuan/issues/11160#issuecomment-2084652764
             }
 
             if (this.isBacklink) {

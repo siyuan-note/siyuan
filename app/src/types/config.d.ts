@@ -263,7 +263,7 @@ declare namespace Config {
      * User interface language
      * Same as {@link IAppearance.lang}
      */
-    export type TLang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN" | "jp_JP";
+    export type TLang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN" | "ja_JP";
 
     /**
      * SiYuan bazaar related configuration

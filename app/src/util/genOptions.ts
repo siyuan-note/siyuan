@@ -9,3 +9,12 @@ export const genOptions = (data: string[] | { label: string, name: string }[], k
     });
     return html;
 };
+
+export const genLangOptions = (data: { label: string, name: string }[], key: string) => {
+    let html = "";
+    data.forEach((item: { label: string, name: string }) => {
+        html += `<option value="${item.name}" ${key === item.name ? "selected" : ""}>${item.label} (${item.name})</option>`;
+    });
+    return html;
+};
+

@@ -80,10 +80,11 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
         if (!targetId) {
             return;
         }
+
         openFileById({
             app: protyle.app,
             id: targetId,
-            action: [Constants.CB_GET_FOCUS]
+            action: [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]
         })
     });
 };

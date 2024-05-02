@@ -171,15 +171,15 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         hideElements(["util"], protyle);
         return;
     }
+    const blockType = blockElement.getAttribute("data-type")
     // 空代码块直接删除
-    if (blockElement.getAttribute("data-type") === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
+    if (blockType === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
         blockElement.classList.add("protyle-wysiwyg--select");
         removeBlock(protyle, blockElement, range, type);
         return;
     }
     // 设置 bq 和代码块光标
-    if (blockElement.getAttribute("data-type") === "NodeCodeBlock" ||
-        blockElement.getAttribute("data-type") === "NodeTable") {
+    if (["NodeCodeBlock", "NodeTable", "NodeAttributeView"].includes(blockType)) {
         if (blockElement.previousElementSibling) {
             focusBlock(blockElement.previousElementSibling, undefined, false);
         }
@@ -230,7 +230,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
-    if (blockElement.getAttribute("data-type") === "NodeHeading") {
+    if (blockType === "NodeHeading") {
         turnsIntoTransaction({
             protyle: protyle,
             selectsElement: [blockElement],

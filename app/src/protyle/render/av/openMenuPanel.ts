@@ -52,14 +52,20 @@ export const openMenuPanel = (options: {
         avPanelElement.remove();
         return;
     }
-    window.siyuan.menus.menu.remove();
     const avID = options.blockElement.getAttribute("data-av-id");
-    const blockID = options.blockElement.getAttribute("data-node-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
+        avPanelElement = document.querySelector(".av__panel");
+        if (avPanelElement) {
+            avPanelElement.remove();
+            return;
+        }
+        window.siyuan.menus.menu.remove();
+        const blockID = options.blockElement.getAttribute("data-node-id");
+
         const isCustomAttr = !options.blockElement.classList.contains("av");
         const data = response.data as IAV;
         let html;

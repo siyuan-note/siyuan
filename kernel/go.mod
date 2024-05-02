@@ -8,7 +8,7 @@ require (
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
 	github.com/88250/gulu v1.2.3-0.20240501100058-dfdea8ef020e
-	github.com/88250/lute v1.7.7-0.20240501085643-eb6f97b5b990
+	github.com/88250/lute v1.7.7-0.20240502031007-b0b1449cfbd4
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
@@ -42,7 +42,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.2.1
-	github.com/open-spaced-repetition/go-fsrs v1.2.0
+	github.com/open-spaced-repetition/go-fsrs v1.2.1
 	github.com/panjf2000/ants/v2 v2.9.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
@@ -54,9 +54,9 @@ require (
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240318125243-801c98e8f025
 	github.com/siyuan-note/filelock v0.0.0-20240419132904-2fbfe64f1939
-	github.com/siyuan-note/httpclient v0.0.0-20240419132535-231841049644
+	github.com/siyuan-note/httpclient v0.0.0-20240429013218-3caa1f89f9ed
 	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
-	github.com/siyuan-note/riff v0.0.0-20240419132144-b3e8b2b89d0d
+	github.com/siyuan-note/riff v0.0.0-20240502024535-718add51db67
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -97,10 +97,10 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
 	github.com/go-resty/resty/v2 v2.12.0 // indirect
-	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.2.1 // indirect
-	github.com/google/pprof v0.0.0-20240424215950-a892ee059fd6 // indirect
+	github.com/google/pprof v0.0.0-20240430035430-e4905b036c4e // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -129,14 +129,14 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.17.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.17.2 // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/qiniu/go-sdk/v7 v7.20.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/quic-go v0.42.0 // indirect
+	github.com/quic-go/quic-go v0.43.0 // indirect
 	github.com/refraction-networking/utls v1.6.4 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect

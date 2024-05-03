@@ -808,7 +808,7 @@
   "moveToBottomRight": "移動到下側右方",
   "accountDisplayTitle": "首欄顯示頭銜",
   "accountDisplayVIP": "首欄顯示 VIP",
-  "rollbackConfirm": "回復是不可逆的操作，一旦執行回復後資料就無法回到當前狀態，確定使用 <b>${date}</b> 進行回復嗎？",
+  "rollbackConfirm": "回復操作無法撤銷，確定要將 <b>${date}</b> 回復嗎？",
   "pdfTip": "PDF 匯出不支援深色主題",
   "pdfConfirm": "是否使用已選擇的淺色主題繼續匯出？",
   "import": "導入",

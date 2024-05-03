@@ -808,7 +808,7 @@
   "moveToBottomRight": "Mover a la parte inferior derecha",
   "accountDisplayTitle": "Mostrar el icono del título",
   "accountDisplayVIP": "Mostrar el icono VIP",
-  "rollbackConfirm": "La reversión es una operación irreversible. Una vez realizada la reversión, los datos no pueden volver al estado actual. ¿Está seguro de hacer <b>${date}</b> una reversión?",
+  "rollbackConfirm": "La operación de retroceso no se puede deshacer, ¿estás seguro de que quieres revertir <b>${date}</b> ?",
   "pdfTip": "La exportación de PDF no es compatible con el tema oscuro",
   "pdfConfirm": "¿Desea seguir exportando con el tema Claro seleccionado?",
   "import": "Importar",

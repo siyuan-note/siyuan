@@ -808,7 +808,7 @@
   "moveToBottomRight": "Déplacer vers la Bas à Droit",
   "accountDisplayTitle": "Afficher l'icône du titre",
   "accountDisplayVIP": "Afficher l'icône VIP",
-  "rollbackConfirm": "La restauration est une opération irréversible. Une fois la restauration effectuée, les données ne peuvent pas être restaurées à leur état actuel. Êtes-vous sûr d'utiliser <b>${date}</b> pour la restauration ?",
+  "rollbackConfirm": "L'opération de retour en arrière est irréversible. Êtes-vous sûr de vouloir revenir en arrière à la date <b>${date}</b> ?",
   "pdfTip": "L'exportation de PDF ne supporte pas le thème Dark",
   "pdfConfirm": "Voulez-vous continuer à exporter avec le thème clear sélectionné ?",
   "import": "Importer",

@@ -808,7 +808,7 @@
   "moveToBottomRight": "移动到下侧右方",
   "accountDisplayTitle": "顶栏显示头衔",
   "accountDisplayVIP": "顶栏显示 VIP",
-  "rollbackConfirm": "回滚是不可逆的操作，一旦执行回滚后数据就无法回到当前状态，确定使用 <b>${date}</b> 进行回滚吗？",
+  "rollbackConfirm": "回滚操作无法撤销，确定要将 <b>${date}</b> 回滚吗？",
   "pdfTip": "PDF 导出不支持深色主题",
   "pdfConfirm": "是否使用已选择的浅色主题继续导出？",
   "import": "导入",

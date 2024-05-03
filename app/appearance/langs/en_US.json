@@ -808,7 +808,7 @@
   "moveToBottomRight": "Move to the Bottom Right",
   "accountDisplayTitle": "Display the title icon",
   "accountDisplayVIP": "Display the VIP icon",
-  "rollbackConfirm": "Rollback is an irreversible operation. Once the rollback is performed, the data cannot be returned to the current state. Are you sure to use <b>${date}</b> to rollback?",
+  "rollbackConfirm": "Rollback operation cannot be undone, are you sure you want to rollback <b>${date}</b> ?",
   "pdfTip": "PDF export does not support Dark theme",
   "pdfConfirm": "Do you want to continue exporting with the selected Light theme?",
   "import": "Import",

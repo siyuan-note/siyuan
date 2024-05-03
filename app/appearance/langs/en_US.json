@@ -268,7 +268,7 @@
   "passwordNoMatch": "The passwords entered twice do not match",
   "cloudConfigTip": "Please configure in [Settings - Cloud]",
   "confirmUninstall": "Are you sure you want to uninstall ${name}?",
-  "scrollGetMore": "scroll up and down to load more",
+  "scrollGetMore": "Scroll up and down to load more",
   "flashcardNewCard": "New",
   "flashcardReviewCard": "Old",
   "flashcardDueCard": "Due",

@@ -62,9 +62,13 @@ export class Gutter {
     private gutterTip: string;
 
     constructor(protyle: IProtyle) {
-        this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))
-            .replace("⌘↑", updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom))
-            .replace("⌥⌘A", updateHotkeyTip(window.siyuan.config.keymap.editor.general.attr.custom));
+        if (!isMac()) {
+            this.gutterTip = window.siyuan.languages.gutterTip;
+        } else {
+            this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))
+                .replace("⌘↑", updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom))
+                .replace("⌥⌘A", updateHotkeyTip(window.siyuan.config.keymap.editor.general.attr.custom)).replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
+        }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {

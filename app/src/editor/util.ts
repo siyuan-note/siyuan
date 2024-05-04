@@ -5,7 +5,7 @@ import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../l
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, isLocalPath, pathPosix, showFileInFolder} from "../util/pathName";
+import {getDisplayName, pathPosix, showFileInFolder} from "../util/pathName";
 import {Constants} from "../constants";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
@@ -22,14 +22,13 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "..
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
-import {getSearch, objEquals} from "../util/functions";
+import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
 import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
-import {openByMobile} from "../protyle/util/compatibility";
 
 export const openFileById = async (options: {
     app: App,
@@ -692,72 +691,6 @@ export const openBy = (url: string, type: "folder" | "app") => {
             }
         }
         showFileInFolder(address);
-    }
-    /// #endif
-};
-
-export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
-    let linkAddress = Lute.UnEscapeHTMLStr(aLink);
-    let pdfParams;
-    if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
-        const pdfAddress = linkAddress.split("/");
-        if (pdfAddress.length === 3 && pdfAddress[0] === "assets" && pdfAddress[1].endsWith(".pdf") && /\d{14}-\w{7}/.test(pdfAddress[2])) {
-            linkAddress = `assets/${pdfAddress[1]}`;
-            pdfParams = pdfAddress[2];
-        } else {
-            pdfParams = parseInt(getSearch("page", linkAddress));
-            linkAddress = linkAddress.split("?page")[0];
-        }
-    }
-    /// #if MOBILE
-    openByMobile(linkAddress);
-    /// #else
-    if (isLocalPath(linkAddress)) {
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkAddress)) &&
-            (!linkAddress.endsWith(".pdf") ||
-                (linkAddress.endsWith(".pdf") && !linkAddress.startsWith("file://")))
-        ) {
-            if (event && event.altKey) {
-                openAsset(protyle.app, linkAddress, pdfParams);
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else if (event && event.shiftKey) {
-                /// #if !BROWSER
-                openBy(linkAddress, "app");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else {
-                openAsset(protyle.app, linkAddress, pdfParams, "right");
-            }
-        } else {
-            /// #if !BROWSER
-            if (ctrlIsPressed) {
-                openBy(linkAddress, "folder");
-            } else {
-                openBy(linkAddress, "app");
-            }
-            /// #else
-            openByMobile(linkAddress);
-            /// #endif
-        }
-    } else if (linkAddress) {
-        if (0 > linkAddress.indexOf(":")) {
-            // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
-            // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
-            linkAddress = `https://${linkAddress}`;
-        }
-        /// #if !BROWSER
-        shell.openExternal(linkAddress).catch((e) => {
-            showMessage(e);
-        });
-        /// #else
-        openByMobile(linkAddress);
-        /// #endif
     }
     /// #endif
 };

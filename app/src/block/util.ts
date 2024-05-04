@@ -1,6 +1,6 @@
-import {focusBlock, focusByWbr, getEditorRange} from "../protyle/util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getNextBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {focusByWbr, getEditorRange} from "../protyle/util/selection";
+import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -9,6 +9,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {blockRender} from "../protyle/render/blockRender";
 import {fetchPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
+import {openMobileFileById} from "../mobile/editor";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
@@ -80,12 +81,15 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
         if (!targetId) {
             return;
         }
-
+        /// #if !MOBILE
         openFileById({
             app: protyle.app,
             id: targetId,
             action: [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]
         })
+        /// #else
+        openMobileFileById(protyle.app, targetId, [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]);
+        /// #endif
     });
 };
 

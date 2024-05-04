@@ -86,7 +86,7 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
             app: protyle.app,
             id: targetId,
             action: [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]
-        })
+        });
         /// #else
         openMobileFileById(protyle.app, targetId, [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]);
         /// #endif

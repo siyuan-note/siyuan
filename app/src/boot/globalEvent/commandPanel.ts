@@ -37,7 +37,7 @@ export const commandPanel = (app: App) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");
     /// #if !MOBILE
-    let html = ""
+    let html = "";
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
         if (["addToDatabase"].includes(key)) {
             html += `<li class="b3-list-item" data-command="${key}">

@@ -57,7 +57,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                             zoomIn
                         });
                     });
-                })
+                });
             }
         }
     }, {
@@ -83,7 +83,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                             zoomIn
                         });
                     });
-                })
+                });
             }
         }
     }];

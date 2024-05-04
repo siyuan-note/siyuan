@@ -171,7 +171,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         hideElements(["util"], protyle);
         return;
     }
-    const blockType = blockElement.getAttribute("data-type")
+    const blockType = blockElement.getAttribute("data-type");
     // 空代码块直接删除
     if (blockType === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
         blockElement.classList.add("protyle-wysiwyg--select");

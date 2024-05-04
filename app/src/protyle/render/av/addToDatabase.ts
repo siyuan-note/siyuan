@@ -31,7 +31,7 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
             }]);
         });
     }
-}
+};
 
 export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: string) => {
     if (protyle.title?.editElement.contains(range.startContainer) || type === "title") {
@@ -100,4 +100,4 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             focusByRange(range);
         });
     }
-}
+};

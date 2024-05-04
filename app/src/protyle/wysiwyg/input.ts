@@ -157,7 +157,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         log("SpinBlockDOM", html, "result", protyle.options.debugger);
         let scrollLeft: number;
         if (blockElement.classList.contains("table")) {
-            scrollLeft = getContenteditableElement(blockElement).scrollLeft;
+            scrollLeft = blockElement.firstElementChild.scrollLeft;
         }
         if (/<span data-type="backslash">.+<\/span><wbr>/.test(html)) {
             // 转义不需要添加 zwsp
@@ -235,7 +235,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                     protyle.hint.render(protyle);
                     // 表格出现滚动条，输入数字会向前滚 https://github.com/siyuan-note/siyuan/issues/3650
                     if (scrollLeft > 0) {
-                        getContenteditableElement(realElement).scrollLeft = scrollLeft;
+                        blockElement.firstElementChild.scrollLeft = scrollLeft;
                     }
                 }
             }

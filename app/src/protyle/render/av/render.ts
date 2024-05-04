@@ -226,7 +226,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             <span data-type="av-search-icon" class="block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </span>
-            <div style="position: relative">
+            <div style="position: relative" class="fn__flex">
                 <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
@@ -354,6 +354,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 addClearButton({
                     inputElement: searchInputElement,
                     right: 0,
+                    width: "1em",
                     height: searchInputElement.clientHeight,
                     clearCB() {
                         viewsElement.classList.remove("av__views--show");

@@ -38,7 +38,7 @@ import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rena
 import {insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
-import {openBy, openFileById, openLink} from "../../editor/util";
+import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {
     alignImgCenter,
@@ -66,6 +66,7 @@ import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
+import {openLink} from "../../editor/openLink";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";

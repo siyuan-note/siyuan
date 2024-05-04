@@ -57,7 +57,7 @@ import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
-import {openFileById, openLink} from "../../editor/util";
+import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
@@ -90,6 +90,7 @@ import {
     updateCellsValue
 } from "../render/av/cell";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {openLink} from "../../editor/openLink";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};

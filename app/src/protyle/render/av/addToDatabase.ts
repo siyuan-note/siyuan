@@ -58,26 +58,32 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             focusByRange(range);
         });
     } else {
-        const selectElement: Element[] = [];
-        protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-            selectElement.push(item);
+        let targetElement: HTMLElement
+        const ids: string[] = []
+        protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach((item: HTMLElement) => {
+            if (!targetElement) {
+                targetElement = item;
+            }
+            ids.push(item.getAttribute("data-node-id"));
         });
-        if (selectElement.length === 0) {
+        if (!targetElement) {
             const nodeElement = hasClosestBlock(range.startContainer);
             if (nodeElement) {
-                selectElement.push(nodeElement);
+                targetElement = nodeElement;
+                ids.push(nodeElement.getAttribute("data-node-id"));
             }
         }
-        if (selectElement.length === 0) {
-            return;
+        if (!targetElement) {
+            targetElement = protyle.wysiwyg.element;
+            ids.push(protyle.block.rootID);
         }
-        openSearchAV("", selectElement[0] as HTMLElement, (listItemElement) => {
+        openSearchAV("", targetElement, (listItemElement) => {
             const srcIDs: string[] = [];
             const srcs: IOperationSrcs[] = [];
-            selectElement.forEach(item => {
-                srcIDs.push(item.getAttribute("data-node-id"));
+            ids.forEach(item => {
+                srcIDs.push(item);
                 srcs.push({
-                    id: item.getAttribute("data-node-id"),
+                    id: item,
                     isDetached: false
                 });
             });

@@ -4,17 +4,18 @@ import {upDownHint} from "../../util/upDownHint";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
-import {getActiveTab, getDockByType} from "../../layout/tabUtil";
 import {Editor} from "../../editor";
-import {Search} from "../../search";
 /// #if !MOBILE
+import {getActiveTab, getDockByType} from "../../layout/tabUtil";
 import {Custom} from "../../layout/dock/Custom";
 import {getAllModels} from "../../layout/getAll";
 import {Files} from "../../layout/dock/Files";
+import {Search} from "../../search";
 /// #endif
 import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/addToDatabase";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {newDailyNote} from "../../util/mount";
+import {getCurrentEditor} from "../../mobile/editor";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().getRangeAt(0);
@@ -37,7 +38,6 @@ export const commandPanel = (app: App) => {
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");
-    /// #if !MOBILE
     let html = "";
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
         if (["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "graphView", "globalGraph"].includes(key)) {
@@ -48,7 +48,6 @@ export const commandPanel = (app: App) => {
         }
     });
     listElement.insertAdjacentHTML("beforeend", html);
-    /// #endif
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
@@ -81,7 +80,6 @@ export const commandPanel = (app: App) => {
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
-    /// #if !MOBILE
     listElement.addEventListener("click", (event: KeyboardEvent) => {
         const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
         if (liElement) {
@@ -94,7 +92,6 @@ export const commandPanel = (app: App) => {
             }
         }
     });
-    /// #endif
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();
         if (event.isComposing) {
@@ -153,10 +150,76 @@ export const execByCommand = (options: {
     protyle?: IProtyle,
     fileLiElements?: Element[]
 }) => {
-    /// #if !MOBILE
+    /// #if MOBILE
+    switch (options.command) {
+        case "fileTree":
+            getDockByType("file").toggleModel("file");
+            return;
+        case "outline":
+            getDockByType("outline").toggleModel("outline");
+            return;
+        case "bookmark":
+            getDockByType("bookmark").toggleModel("bookmark");
+            return;
+        case "tag":
+            getDockByType("tag").toggleModel("tag");
+            return;
+        case "inbox":
+            getDockByType("inbox").toggleModel("inbox");
+            return;
+        case "backlinks":
+            getDockByType("backlink").toggleModel("backlink");
+            return;
+        case "graphView":
+            getDockByType("graph").toggleModel("graph");
+            return;
+        case "globalGraph":
+            getDockByType("globalGraph").toggleModel("globalGraph");
+            return;
+    }
+    /// #else
+    switch (options.command) {
+        case "fileTree":
+            getDockByType("file").toggleModel("file");
+            return;
+        case "outline":
+            getDockByType("outline").toggleModel("outline");
+            return;
+        case "bookmark":
+            getDockByType("bookmark").toggleModel("bookmark");
+            return;
+        case "tag":
+            getDockByType("tag").toggleModel("tag");
+            return;
+        case "inbox":
+            getDockByType("inbox").toggleModel("inbox");
+            return;
+        case "backlinks":
+            getDockByType("backlink").toggleModel("backlink");
+            return;
+        case "graphView":
+            getDockByType("graph").toggleModel("graph");
+            return;
+        case "globalGraph":
+            getDockByType("globalGraph").toggleModel("globalGraph");
+            return;
+    }
+    /// #endif
+    switch (options.command) {
+        case "dailyNote":
+            newDailyNote(options.app);
+            return;
+    }
+
     const isFileFocus = document.querySelector(".layout__tab--active")?.classList.contains("sy__file");
 
     let protyle = options.protyle;
+    /// #if MOBILE
+    if (!protyle) {
+        protyle = getCurrentEditor().protyle;
+        options.previousRange = protyle.toolbar.range;
+    }
+    /// #endif
     const range: Range = options.previousRange || getSelection().getRangeAt(0);
     let fileLiElements = options.fileLiElements;
     if (!isFileFocus && !protyle) {
@@ -261,33 +324,5 @@ export const execByCommand = (options: {
                 addFilesToDatabase(fileLiElements);
             }
             break;
-        case "fileTree":
-            getDockByType("file").toggleModel("file");
-            break;
-        case "outline":
-            getDockByType("outline").toggleModel("outline");
-            break;
-        case "bookmark":
-            getDockByType("bookmark").toggleModel("bookmark");
-            break;
-        case "tag":
-            getDockByType("tag").toggleModel("tag");
-            break;
-        case "dailyNote":
-            newDailyNote(options.app);
-            break;
-        case "inbox":
-            getDockByType("inbox").toggleModel("inbox");
-            break;
-        case "backlinks":
-            getDockByType("backlink").toggleModel("backlink");
-            break;
-        case "graphView":
-            getDockByType("graph").toggleModel("graph");
-            break;
-        case "globalGraph":
-            getDockByType("globalGraph").toggleModel("globalGraph");
-            break;
     }
-    /// #endif
 };

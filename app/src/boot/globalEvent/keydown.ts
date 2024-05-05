@@ -74,6 +74,7 @@ import {historyKeydown} from "../../history/keydown";
 import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
 import {commandPanel, execByCommand} from "./commandPanel";
+import {filterHotkey} from "./commonHotkey";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1099,71 +1100,9 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
-    // https://github.com/siyuan-note/siyuan/issues/9848 忘记为什么要阻止了 .av__mask 的情况，测了下没问题就先移除
-    if (document.getElementById("progress") || document.getElementById("errorLog") || event.isComposing) {
+    if (filterHotkey(event, app)) {
         return;
     }
-    const target = event.target as HTMLElement;
-    if (isNotCtrl(event) && !event.shiftKey && !event.altKey &&
-        !["INPUT", "TEXTAREA"].includes(target.tagName) &&
-        ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p", "enter", "a", "s", "d", "f", "q", "x"].includes(event.key.toLowerCase())) {
-        let cardElement: Element;
-        window.siyuan.dialogs.find(item => {
-            if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {
-                cardElement = item.element;
-                return true;
-            }
-        });
-        if (!cardElement) {
-            cardElement = document.querySelector(`.layout__wnd--active div[data-key="${Constants.DIALOG_OPENCARD}"]:not(.fn__none)`);
-        }
-        if (cardElement) {
-            event.preventDefault();
-            cardElement.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
-            return;
-        }
-    }
-
-    // 仅处理以下快捷键操作
-    if (isNotCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey &&
-        Constants.KEYCODELIST[event.keyCode] !== "PageUp" &&
-        Constants.KEYCODELIST[event.keyCode] !== "PageDown" &&
-        event.key !== "Home" && event.key !== "End" &&
-        !/^F\d{1,2}$/.test(event.key) && event.key.indexOf("Arrow") === -1 && event.key !== "Enter" && event.key !== "Backspace" && event.key !== "Delete") {
-        return;
-    }
-
-    if (!event.altKey && !event.shiftKey && isOnlyMeta(event)) {
-        if ((isMac() ? event.key === "Meta" : event.key === "Control") || isOnlyMeta(event)) {
-            window.siyuan.ctrlIsPressed = true;
-            if ((event.key === "Meta" || event.key === "Control") &&
-                window.siyuan.config.editor.floatWindowMode === 1 && !event.repeat) {
-                showPopover(app);
-            }
-        } else {
-            window.siyuan.ctrlIsPressed = false;
-        }
-    }
-
-    if (!event.altKey && event.shiftKey && isNotCtrl(event)) {
-        if (event.key === "Shift") {
-            window.siyuan.shiftIsPressed = true;
-            if (!event.repeat) {
-                showPopover(app, true);
-            }
-        } else {
-            window.siyuan.shiftIsPressed = false;
-        }
-    }
-
-    if (event.altKey && !event.shiftKey && isNotCtrl(event)) {
-        if (event.key === "Alt") {
-            window.siyuan.altIsPressed = true;
-        } else {
-            window.siyuan.altIsPressed = false;
-        }
-    }
-
     if (switchDialog &&
         (matchAuxiliaryHotKey(window.siyuan.config.keymap.general.goToEditTabNext.custom, event) ||
             matchAuxiliaryHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event))

@@ -62,6 +62,9 @@ export const initRightMenu = (app: App) => {
     <div id="menuSearch" class="b3-menu__item">
         <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
     </div>
+    <div id="menuCommand" class="b3-menu__item">
+        <svg class="b3-menu__icon"><use xlink:href="#iconTerminal"></use></svg><span class="b3-menu__label">${window.siyuan.languages.commandPanel}</span>
+    </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">
         <svg class="b3-menu__icon"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-menu__label">${window.siyuan.languages.syncNow}</span>
     </div>
@@ -136,6 +139,12 @@ export const initRightMenu = (app: App) => {
                 event.preventDefault();
                 event.stopPropagation();
                 break;
+            } else if (target.id === "menuCommand") {
+                closePanel();
+                commandPanel(app);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
             } else if (target.id === "menuSearch") {
                 popSearch(app);
                 event.preventDefault();
@@ -178,16 +187,6 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuPlugin") {
                 const menu = new Menu();
-                menu.addItem({
-                    icon: "iconTerminal",
-                    label: window.siyuan.languages.commandPanel,
-                    click() {
-                        commandPanel(app);
-                    }
-                });
-                if (unPinsMenu.length > 0) {
-                    menu.addSeparator();
-                }
                 unPinsMenu.forEach(item => {
                     menu.addItem(item);
                 });

@@ -10,10 +10,11 @@ import {Search} from "../../search";
 /// #if !MOBILE
 import {Custom} from "../../layout/dock/Custom";
 import {getAllModels} from "../../layout/getAll";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Files} from "../../layout/dock/Files";
-import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/addToDatabase";
 /// #endif
+import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/addToDatabase";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {newDailyNote} from "../../util/mount";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().getRangeAt(0);
@@ -39,7 +40,7 @@ export const commandPanel = (app: App) => {
     /// #if !MOBILE
     let html = "";
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
-        if (["addToDatabase"].includes(key)) {
+        if (["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "graphView", "globalGraph"].includes(key)) {
             html += `<li class="b3-list-item" data-command="${key}">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.general[key].custom)}</span>
@@ -259,6 +260,33 @@ export const execByCommand = (options: {
             } else {
                 addFilesToDatabase(fileLiElements);
             }
+            break;
+        case "fileTree":
+            getDockByType("file").toggleModel("file");
+            break;
+        case "outline":
+            getDockByType("outline").toggleModel("outline");
+            break;
+        case "bookmark":
+            getDockByType("bookmark").toggleModel("bookmark");
+            break;
+        case "tag":
+            getDockByType("tag").toggleModel("tag");
+            break;
+        case "dailyNote":
+            newDailyNote(options.app);
+            break;
+        case "inbox":
+            getDockByType("inbox").toggleModel("inbox");
+            break;
+        case "backlinks":
+            getDockByType("backlink").toggleModel("backlink");
+            break;
+        case "graphView":
+            getDockByType("graph").toggleModel("graph");
+            break;
+        case "globalGraph":
+            getDockByType("globalGraph").toggleModel("globalGraph");
             break;
     }
     /// #endif

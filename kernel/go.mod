@@ -7,7 +7,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
-	github.com/88250/gulu v1.2.3-0.20240505085123-dca01813eb6a
+	github.com/88250/gulu v1.2.3-0.20240505150113-bc43bd50f866
 	github.com/88250/lute v1.7.7-0.20240502031007-b0b1449cfbd4
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -50,10 +50,10 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.22.0
 	github.com/shirou/gopsutil/v3 v3.24.3
-	github.com/siyuan-note/dejavu v0.0.0-20240505091218-cbce2d6e7b7c
+	github.com/siyuan-note/dejavu v0.0.0-20240505150554-89d085757f43
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240318125243-801c98e8f025
-	github.com/siyuan-note/filelock v0.0.0-20240505090505-cfe824d7d4fb
+	github.com/siyuan-note/filelock v0.0.0-20240505150405-3de3a406d257
 	github.com/siyuan-note/httpclient v0.0.0-20240429013218-3caa1f89f9ed
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240502024535-718add51db67

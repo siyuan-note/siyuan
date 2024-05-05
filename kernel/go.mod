@@ -53,9 +53,9 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20240425085007-175ccbd84526
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240318125243-801c98e8f025
-	github.com/siyuan-note/filelock v0.0.0-20240419132904-2fbfe64f1939
+	github.com/siyuan-note/filelock v0.0.0-20240505035517-d235b6704da3
 	github.com/siyuan-note/httpclient v0.0.0-20240429013218-3caa1f89f9ed
-	github.com/siyuan-note/logging v0.0.0-20231208035918-61f884c854f0
+	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240502024535-718add51db67
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
@@ -66,7 +66,7 @@ require (
 	golang.org/x/image v0.15.0
 	golang.org/x/mobile v0.0.0-20230901161150-52620a4a7557
 	golang.org/x/mod v0.17.0
-	golang.org/x/text v0.14.0
+	golang.org/x/text v0.15.0
 	golang.org/x/time v0.5.0
 )
 
@@ -136,8 +136,8 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/qiniu/go-sdk/v7 v7.20.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/quic-go v0.43.0 // indirect
-	github.com/refraction-networking/utls v1.6.4 // indirect
+	github.com/quic-go/quic-go v0.43.1 // indirect
+	github.com/refraction-networking/utls v1.6.6 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
@@ -161,7 +161,7 @@ require (
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

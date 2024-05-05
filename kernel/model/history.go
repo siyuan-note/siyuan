@@ -633,7 +633,11 @@ func recentModifiedAssets() (ret []string) {
 	assets := cache.GetAssets()
 	for _, asset := range assets {
 		if asset.Updated > assetsLatestHistoryTime {
-			ret = append(ret, filepath.Join(util.DataDir, asset.Path))
+			absPath := filepath.Join(util.DataDir, asset.Path)
+			if filelock.IsHidden(absPath) {
+				continue
+			}
+			ret = append(ret, absPath)
 		}
 	}
 	assetsLatestHistoryTime = time.Now().Unix()

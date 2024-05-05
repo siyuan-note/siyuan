@@ -1236,6 +1236,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
     }
 
+    const target = event.target as HTMLElement;
     /// #if !BROWSER
     if (matchHotKey("⌘=", event) && !hasClosestByClassName(target, "pdf__outer")) {
         setZoom("zoomIn");

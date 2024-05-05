@@ -16,6 +16,7 @@ import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/a
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {newDailyNote} from "../../util/mount";
 import {getCurrentEditor} from "../../mobile/editor";
+import {openDock} from "../../mobile/dock/util";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().getRangeAt(0);
@@ -153,28 +154,16 @@ export const execByCommand = (options: {
     /// #if MOBILE
     switch (options.command) {
         case "fileTree":
-            getDockByType("file").toggleModel("file");
+            openDock("file");
             return;
         case "outline":
-            getDockByType("outline").toggleModel("outline");
-            return;
         case "bookmark":
-            getDockByType("bookmark").toggleModel("bookmark");
-            return;
         case "tag":
-            getDockByType("tag").toggleModel("tag");
-            return;
         case "inbox":
-            getDockByType("inbox").toggleModel("inbox");
+            openDock(options.command);
             return;
         case "backlinks":
-            getDockByType("backlink").toggleModel("backlink");
-            return;
-        case "graphView":
-            getDockByType("graph").toggleModel("graph");
-            return;
-        case "globalGraph":
-            getDockByType("globalGraph").toggleModel("globalGraph");
+            openDock("backlink");
             return;
     }
     /// #else

@@ -41,7 +41,6 @@ import {unicode2Emoji} from "../../emoji";
 import {deleteFiles} from "../../editor/deleteFile";
 import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
-import {showPopover} from "../../block/popover";
 import {getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {editor} from "../../config/editor";

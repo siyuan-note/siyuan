@@ -126,7 +126,7 @@ export const correctHotkey = (app: App) => {
             /// #endif
         });
     }
-}
+};
 
 export const filterHotkey = (event: KeyboardEvent, app: App) => {
     // https://github.com/siyuan-note/siyuan/issues/9848 忘记为什么要阻止了 .av__mask 的情况，测了下没问题就先移除
@@ -193,4 +193,4 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
             window.siyuan.altIsPressed = false;
         }
     }
-}
+};

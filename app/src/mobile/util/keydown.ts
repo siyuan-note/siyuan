@@ -40,4 +40,4 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-}
+};

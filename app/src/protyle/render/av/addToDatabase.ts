@@ -58,8 +58,8 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             focusByRange(range);
         });
     } else {
-        let targetElement: HTMLElement
-        const ids: string[] = []
+        let targetElement: HTMLElement;
+        const ids: string[] = [];
         protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach((item: HTMLElement) => {
             if (!targetElement) {
                 targetElement = item;

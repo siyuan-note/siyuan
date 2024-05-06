@@ -9,8 +9,11 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 
-const genSearchList = (element: Element, keyword: string, avId: string, excludes = true, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeView", {keyword, excludes: excludes ? [avId] : undefined}, (response) => {
+const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
+    fetchPost("/api/av/searchAttributeView", {
+        keyword,
+        excludes: (excludes && avId) ? [avId] : undefined
+    }, (response) => {
         let html = "";
         response.data.results.forEach((item: {
             avID: string

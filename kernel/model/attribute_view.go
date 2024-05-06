@@ -1611,10 +1611,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			srcKeyValues := keyValues
 			for _, srcVal := range srcKeyValues.Values {
 				for _, blockID := range srcVal.Relation.BlockIDs {
-					destVal := &av.Value{ID: ast.NewNodeID(), KeyID: destKeyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+					destVal := &av.Value{ID: ast.NewNodeID(), KeyID: destKeyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}, CreatedAt: now, UpdatedAt: now + 1000}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
-					destVal.SetUpdatedAt(now)
 					destKeyValues.Values = append(destKeyValues.Values, destVal)
 				}
 			}
@@ -3186,12 +3185,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else {                    // 之前绑定了块
+	} else { // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else {                                // 现在绑定了块
+			} else { // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
@@ -3237,13 +3236,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 						destVal := keyValues.GetValue(blockID)
 						if nil == destVal {
-							destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+							destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}, CreatedAt: now, UpdatedAt: now + 1000}
 							keyValues.Values = append(keyValues.Values, destVal)
 						}
 
 						destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
 						destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
-						destVal.SetUpdatedAt(now)
 						break
 					}
 				}

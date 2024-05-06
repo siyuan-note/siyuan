@@ -9,8 +9,8 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 
-const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeView", {keyword, excludes: [avId]}, (response) => {
+const genSearchList = (element: Element, keyword: string, avId: string, excludes = true, cb?: () => void) => {
+    fetchPost("/api/av/searchAttributeView", {keyword, excludes: excludes ? [avId] : undefined}, (response) => {
         let html = "";
         response.data.results.forEach((item: {
             avID: string
@@ -45,7 +45,7 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     }
 };
 
-export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void) => {
+export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void, excludes = true) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
@@ -86,10 +86,10 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 if (event.isComposing) {
                     return;
                 }
-                genSearchList(listElement, inputElement.value, avId);
+                genSearchList(listElement, inputElement.value, avId, excludes);
             });
             inputElement.addEventListener("compositionend", () => {
-                genSearchList(listElement, inputElement.value, avId);
+                genSearchList(listElement, inputElement.value, avId, excludes);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
@@ -103,7 +103,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                     window.siyuan.menus.menu.remove();
                 }
             });
-            genSearchList(listElement, "", avId, () => {
+            genSearchList(listElement, "", avId, excludes, () => {
                 const rect = target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,

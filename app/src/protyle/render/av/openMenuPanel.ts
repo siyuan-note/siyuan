@@ -930,7 +930,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchAV") {
-                    openSearchAV(avID, target);
+                    openSearchAV(avID, target, undefined, false);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

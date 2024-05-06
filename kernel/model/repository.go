@@ -41,6 +41,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -1427,6 +1428,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			upsertTrees++
 		}
 	}
+
+	clearWidgetsDir := hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1444,6 +1447,12 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
 		}
+
+		if strings.HasPrefix(file.Path, "/widgets/") {
+			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
+				clearWidgetsDir.Add(parts[2])
+			}
+		}
 	}
 
 	if needReloadFlashcard {
@@ -1456,6 +1465,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	if needReloadPlugin {
 		pushReloadPlugin()
+	}
+
+	for _, widgetDir := range clearWidgetsDir.Values() {
+		widgetDirPath := filepath.Join(util.DataDir, "widgets", widgetDir.(string))
+		gulu.File.RemoveEmptyDirs(widgetDirPath)
 	}
 
 	syncingFiles = sync.Map{}

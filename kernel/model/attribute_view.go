@@ -1574,6 +1574,8 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 				name = srcAv.Name + " " + operation.Format
 			}
 			backRelKey.Name = strings.TrimSpace(name)
+		} else {
+			backRelKey.Relation.BackKeyID = ""
 		}
 	}
 
@@ -3188,12 +3190,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else {                    // 之前绑定了块
+	} else { // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else {                                // 现在绑定了块
+			} else { // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)

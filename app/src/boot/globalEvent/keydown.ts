@@ -1274,10 +1274,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return;
     }
-    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
-        if (!window.siyuan.config.readonly) {
-            openHistory(app);
-        }
+    if (matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
+        openHistory(app);
         event.preventDefault();
         return;
     }
@@ -1448,25 +1446,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
     // close tab
     if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
+        execByCommand({
+            command: "closeTab"
+        });
         event.preventDefault();
-        const activeTabElement = document.querySelector(".layout__tab--active");
-        if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-            let type = "";
-            Array.from(activeTabElement.classList).find(item => {
-                if (item.startsWith("sy__")) {
-                    type = item.replace("sy__", "");
-                    return true;
-                }
-            });
-            if (type) {
-                getDockByType(type)?.toggleModel(type, false, true);
-            }
-            return;
-        }
-        const tab = getActiveTab(false);
-        if (tab) {
-            tab.parent.removeTab(tab.id);
-        }
         return;
     }
 
@@ -1527,69 +1510,40 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeOthers.custom, event) && !event.repeat) {
-        const tab = getActiveTab(false);
-        if (tab) {
-            closeTabByType(tab, "closeOthers");
-        }
+        execByCommand({
+            command: "closeOthers"
+        });
         event.preventDefault();
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeAll.custom, event) && !event.repeat) {
-        const tab = getActiveTab(false);
-        if (tab) {
-            closeTabByType(tab, "closeAll");
-        }
+        execByCommand({
+            command: "closeAll"
+        });
         event.preventDefault();
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.closeUnmodified.custom, event) && !event.repeat) {
-        const tab = getActiveTab(false);
-        if (tab) {
-            const unmodifiedTabs: Tab[] = [];
-            tab.parent.children.forEach((item: Tab) => {
-                const editor = item.model as Editor;
-                if (!editor || (editor.editor?.protyle && !editor.editor?.protyle.updated)) {
-                    unmodifiedTabs.push(item);
-                }
-            });
-            if (unmodifiedTabs.length > 0) {
-                closeTabByType(tab, "other", unmodifiedTabs);
-            }
-        }
+        execByCommand({
+            command: "closeUnmodified"
+        });
         event.preventDefault();
         return;
     }
-    if ((matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event) || matchHotKey(window.siyuan.config.keymap.general.closeRight.custom, event)) &&
-        !event.repeat) {
-        const tab = getActiveTab(false);
-        if (tab) {
-            const leftTabs: Tab[] = [];
-            const rightTabs: Tab[] = [];
-            let midIndex = -1;
-            tab.parent.children.forEach((item: Tab, index: number) => {
-                if (item.id === tab.id) {
-                    midIndex = index;
-                }
-                if (midIndex === -1) {
-                    leftTabs.push(item);
-                } else if (index > midIndex) {
-                    rightTabs.push(item);
-                }
-            });
-            if (matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event)) {
-                if (leftTabs.length > 0) {
-                    closeTabByType(tab, "other", leftTabs);
-                }
-            } else {
-                if (rightTabs.length > 0) {
-                    closeTabByType(tab, "other", rightTabs);
-                }
-            }
-        }
+    if (matchHotKey(window.siyuan.config.keymap.general.closeLeft.custom, event) && !event.repeat) {
+        execByCommand({
+            command: "closeLeft"
+        });
         event.preventDefault();
         return;
     }
-
+    if (matchHotKey(window.siyuan.config.keymap.general.closeRight.custom, event) && !event.repeat) {
+        execByCommand({
+            command: "closeRight"
+        });
+        event.preventDefault();
+        return;
+    }
     if ((
         matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.splitMoveR.custom, event) ||

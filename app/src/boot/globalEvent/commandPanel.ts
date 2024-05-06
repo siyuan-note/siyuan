@@ -5,18 +5,23 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {Editor} from "../../editor";
-/// #if !MOBILE
-import {getActiveTab, getDockByType} from "../../layout/tabUtil";
+/// #if MOBILE
+import {getCurrentEditor} from "../../mobile/editor";
+import {openDock} from "../../mobile/dock/util";
+import {popMenu} from "../../mobile/menu";
+/// #else
+import {closeTabByType, getActiveTab, getDockByType} from "../../layout/tabUtil";
 import {Custom} from "../../layout/dock/Custom";
 import {getAllModels} from "../../layout/getAll";
 import {Files} from "../../layout/dock/Files";
 import {Search} from "../../search";
+import {openSetting} from "../../config";
+import {Tab} from "../../layout/Tab";
 /// #endif
+import {openHistory} from "../../history/history";
 import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/addToDatabase";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {newDailyNote} from "../../util/mount";
-import {getCurrentEditor} from "../../mobile/editor";
-import {openDock} from "../../mobile/dock/util";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().getRangeAt(0);
@@ -43,8 +48,8 @@ export const commandPanel = (app: App) => {
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
         let keys;
         /// #if MOBILE
-        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
-            "graphView", "globalGraph", "config", "dataHistory"];
+        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "config",
+            "dataHistory"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
@@ -155,7 +160,7 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
 
 export const execByCommand = (options: {
     command: string,
-    app: App,
+    app?: App,
     previousRange?: Range,
     protyle?: IProtyle,
     fileLiElements?: Element[]
@@ -174,6 +179,9 @@ export const execByCommand = (options: {
         case "backlinks":
             openDock("backlink");
             return;
+        case "config":
+            popMenu();
+            return;
     }
     /// #else
     switch (options.command) {
@@ -184,13 +192,9 @@ export const execByCommand = (options: {
             getDockByType("outline").toggleModel("outline");
             return;
         case "bookmark":
-            getDockByType("bookmark").toggleModel("bookmark");
-            return;
         case "tag":
-            getDockByType("tag").toggleModel("tag");
-            return;
         case "inbox":
-            getDockByType("inbox").toggleModel("inbox");
+            getDockByType(options.command).toggleModel(options.command);
             return;
         case "backlinks":
             getDockByType("backlink").toggleModel("backlink");
@@ -201,11 +205,89 @@ export const execByCommand = (options: {
         case "globalGraph":
             getDockByType("globalGraph").toggleModel("globalGraph");
             return;
+        case "config":
+            openSetting(options.app);
+            return;
+    }
+    if (options.command === "closeUnmodified") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            const unmodifiedTabs: Tab[] = [];
+            tab.parent.children.forEach((item: Tab) => {
+                const editor = item.model as Editor;
+                if (!editor || (editor.editor?.protyle && !editor.editor?.protyle.updated)) {
+                    unmodifiedTabs.push(item);
+                }
+            });
+            if (unmodifiedTabs.length > 0) {
+                closeTabByType(tab, "other", unmodifiedTabs);
+            }
+        }
+        return;
+    }
+    if (options.command === "closeTab") {
+        const activeTabElement = document.querySelector(".layout__tab--active");
+        if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
+            let type = "";
+            Array.from(activeTabElement.classList).find(item => {
+                if (item.startsWith("sy__")) {
+                    type = item.replace("sy__", "");
+                    return true;
+                }
+            });
+            if (type) {
+                getDockByType(type)?.toggleModel(type, false, true);
+            }
+            return;
+        }
+        const tab = getActiveTab(false);
+        if (tab) {
+            tab.parent.removeTab(tab.id);
+        }
+        return;
+    }
+    if (options.command === "closeOthers" || options.command === "closeAll") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            closeTabByType(tab, options.command);
+        }
+        return;
+    }
+    if (options.command === "closeLeft" || options.command === "closeRight") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            const leftTabs: Tab[] = [];
+            const rightTabs: Tab[] = [];
+            let midIndex = -1;
+            tab.parent.children.forEach((item: Tab, index: number) => {
+                if (item.id === tab.id) {
+                    midIndex = index;
+                }
+                if (midIndex === -1) {
+                    leftTabs.push(item);
+                } else if (index > midIndex) {
+                    rightTabs.push(item);
+                }
+            });
+            if (options.command === "closeLeft") {
+                if (leftTabs.length > 0) {
+                    closeTabByType(tab, "other", leftTabs);
+                }
+            } else {
+                if (rightTabs.length > 0) {
+                    closeTabByType(tab, "other", rightTabs);
+                }
+            }
+        }
+        return;
     }
     /// #endif
     switch (options.command) {
         case "dailyNote":
             newDailyNote(options.app);
+            return;
+        case "dataHistory":
+            openHistory(options.app);
             return;
     }
 

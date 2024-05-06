@@ -1574,6 +1574,8 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 				name = srcAv.Name + " " + operation.Format
 			}
 			backRelKey.Name = strings.TrimSpace(name)
+		} else {
+			backRelKey.Relation.BackKeyID = ""
 		}
 	}
 
@@ -3165,6 +3167,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if av.KeyTypeRelation == val.Type {
 		// 关联列得 content 是自动渲染的，所以不需要保存
 		val.Relation.Contents = nil
+
+		// 去重
+		val.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(val.Relation.BlockIDs)
 
 		// 计算关联变更模式
 		if len(oldRelationBlockIDs) == len(val.Relation.BlockIDs) {

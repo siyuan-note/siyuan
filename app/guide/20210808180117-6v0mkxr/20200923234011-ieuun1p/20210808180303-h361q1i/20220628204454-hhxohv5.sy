@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
-		"updated": "20220630211219"
+		"type": "doc",
+		"updated": "20220630211201"
 	},
 	"Children": [
 		{
@@ -189,34 +190,6 @@
 			},
 			"Children": [
 				{
-					"ID": "20220630211201-2vvo1yo",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220630211201-2vvo1yo",
-						"updated": "20220630211210"
-					},
-					"Children": [
-						{
-							"ID": "20220630211201-crqr0sj",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220630211201-crqr0sj",
-								"updated": "20220630211210"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Tag"
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20220630211201-xvvr6cb",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -233,7 +206,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-s03kxsh",
-								"updated": "20220630211212"
+								"updated": "20240506221623"
 							},
 							"Children": [
 								{
@@ -345,12 +318,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-z7c6px5",
-								"updated": "20220630211218"
+								"updated": "20240506221619"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Emphasize"
+									"Data": "Italic"
 								}
 							]
 						}

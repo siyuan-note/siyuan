@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220628204444-9n0y9h2",
 		"title": "优化排版",
-		"updated": "20221006214307"
+		"type": "doc",
+		"updated": "20220630211006"
 	},
 	"Children": [
 		{
@@ -224,34 +225,6 @@
 			},
 			"Children": [
 				{
-					"ID": "20220630211007-dsx48yk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220630211007-dsx48yk",
-						"updated": "20220630211007"
-					},
-					"Children": [
-						{
-							"ID": "20220630211007-26zt41e",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220630211007-26zt41e",
-								"updated": "20220630211032"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "标签"
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20220630211033-fnlmuvi",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -267,12 +240,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211033-b7xfx2z",
-								"updated": "20220630211037"
+								"updated": "20240506221311"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "高亮"
+									"Data": "标记"
 								}
 							]
 						}
@@ -375,12 +348,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211101-zcj15cy",
-								"updated": "20220630211108"
+								"updated": "20240506221332"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "强调"
+									"Data": "倾斜"
 								}
 							]
 						}

@@ -149,7 +149,7 @@ export const updateRelation = (options: {
         avID: options.avID,
         keyID: colId,
         id: newAVId || colData.relation.avID,
-        backRelationKeyID: colData.relation.avID === newAVId ? colData.relation.backKeyID : Lute.NewNodeID(),
+        backRelationKeyID: colData.relation.avID === newAVId ? (colData.relation.backKeyID || Lute.NewNodeID()) : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
         format: colNewName

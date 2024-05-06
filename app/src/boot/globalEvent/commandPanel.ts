@@ -41,7 +41,16 @@ export const commandPanel = (app: App) => {
     const listElement = dialog.element.querySelector("#commands");
     let html = "";
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
-        if (["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "graphView", "globalGraph"].includes(key)) {
+        let keys;
+        /// #if MOBILE
+        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
+            "graphView", "globalGraph", "config", "dataHistory"];
+        /// #else
+        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
+            "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
+            "closeUnmodified", "config", "dataHistory"];
+        /// #endif
+        if (keys.includes(key)) {
             html += `<li class="b3-list-item" data-command="${key}">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.general[key].custom)}</span>

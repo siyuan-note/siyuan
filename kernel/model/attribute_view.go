@@ -1577,26 +1577,45 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		}
 	}
 
-	if !destAdded {
-		if operation.IsTwoWay {
-			name := strings.TrimSpace(operation.Name)
-			if "" == name {
-				name = srcAv.Name + " " + operation.Format
+	if !destAdded && operation.IsTwoWay {
+		// 新建双向关联目标字段
+		name := strings.TrimSpace(operation.Name)
+		if "" == name {
+			name = srcAv.Name + " " + operation.Format
+		}
+
+		destKeyValues := &av.KeyValues{
+			Key: &av.Key{
+				ID:       operation.BackRelationKeyID,
+				Name:     name,
+				Type:     av.KeyTypeRelation,
+				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+			},
+		}
+		destAv.KeyValues = append(destAv.KeyValues, destKeyValues)
+
+		for _, v := range destAv.Views {
+			switch v.LayoutType {
+			case av.LayoutTypeTable:
+				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.BackRelationKeyID})
+			}
+		}
+
+		now := time.Now().UnixMilli()
+		// 和现有值进行关联
+		for _, keyValues := range srcAv.KeyValues {
+			if keyValues.Key.ID != operation.KeyID {
+				continue
 			}
 
-			destAv.KeyValues = append(destAv.KeyValues, &av.KeyValues{
-				Key: &av.Key{
-					ID:       operation.BackRelationKeyID,
-					Name:     name,
-					Type:     av.KeyTypeRelation,
-					Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
-				},
-			})
-
-			for _, v := range destAv.Views {
-				switch v.LayoutType {
-				case av.LayoutTypeTable:
-					v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.BackRelationKeyID})
+			srcKeyValues := keyValues
+			for _, srcVal := range srcKeyValues.Values {
+				for _, blockID := range srcVal.Relation.BlockIDs {
+					destVal := &av.Value{ID: ast.NewNodeID(), KeyID: destKeyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
+					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+					destVal.SetUpdatedAt(now)
+					destKeyValues.Values = append(destKeyValues.Values, destVal)
 				}
 			}
 		}
@@ -3167,12 +3186,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else { // 之前绑定了块
+	} else {                    // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else { // 现在绑定了块
+			} else {                                // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
@@ -3195,64 +3214,63 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	val.SetUpdatedAt(now)
 
 	key, _ := attrView.GetKey(val.KeyID)
-	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation {
-		destAv, _ := av.ParseAttributeView(key.Relation.AvID)
-		if nil != destAv {
-			if key.Relation.IsTwoWay {
-				// relationChangeMode
-				// 0：关联列值不变（仅排序），不影响目标值
-				// 1：关联列值增加，增加目标值
-				// 2：关联列值减少，减少目标值
+	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
+		// 双向关联需要同时更新目标字段的值
 
-				if 1 == relationChangeMode {
-					addBlockIDs := val.Relation.BlockIDs
-					for _, bID := range oldRelationBlockIDs {
-						addBlockIDs = gulu.Str.RemoveElem(addBlockIDs, bID)
-					}
+		if destAv, _ := av.ParseAttributeView(key.Relation.AvID); nil != destAv {
+			// relationChangeMode
+			// 0：关联列值不变（仅排序），不影响目标值
+			// 1：关联列值增加，增加目标值
+			// 2：关联列值减少，减少目标值
 
-					for _, blockID := range addBlockIDs {
-						for _, keyValues := range destAv.KeyValues {
-							if keyValues.Key.ID != key.Relation.BackKeyID {
-								continue
-							}
+			if 1 == relationChangeMode {
+				addBlockIDs := val.Relation.BlockIDs
+				for _, bID := range oldRelationBlockIDs {
+					addBlockIDs = gulu.Str.RemoveElem(addBlockIDs, bID)
+				}
 
-							destVal := keyValues.GetValue(blockID)
-							if nil == destVal {
-								destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
-								keyValues.Values = append(keyValues.Values, destVal)
-							}
-
-							destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
-							destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
-							destVal.SetUpdatedAt(now)
-							break
+				for _, blockID := range addBlockIDs {
+					for _, keyValues := range destAv.KeyValues {
+						if keyValues.Key.ID != key.Relation.BackKeyID {
+							continue
 						}
-					}
-				} else if 2 == relationChangeMode {
-					removeBlockIDs := oldRelationBlockIDs
-					for _, bID := range val.Relation.BlockIDs {
-						removeBlockIDs = gulu.Str.RemoveElem(removeBlockIDs, bID)
-					}
 
-					for _, blockID := range removeBlockIDs {
-						for _, keyValues := range destAv.KeyValues {
-							if keyValues.Key.ID != key.Relation.BackKeyID {
-								continue
-							}
+						destVal := keyValues.GetValue(blockID)
+						if nil == destVal {
+							destVal = &av.Value{ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}}
+							keyValues.Values = append(keyValues.Values, destVal)
+						}
 
-							for _, value := range keyValues.Values {
-								if value.BlockID == blockID {
-									value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
-									value.SetUpdatedAt(now)
-									break
-								}
+						destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
+						destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+						destVal.SetUpdatedAt(now)
+						break
+					}
+				}
+			} else if 2 == relationChangeMode {
+				removeBlockIDs := oldRelationBlockIDs
+				for _, bID := range val.Relation.BlockIDs {
+					removeBlockIDs = gulu.Str.RemoveElem(removeBlockIDs, bID)
+				}
+
+				for _, blockID := range removeBlockIDs {
+					for _, keyValues := range destAv.KeyValues {
+						if keyValues.Key.ID != key.Relation.BackKeyID {
+							continue
+						}
+
+						for _, value := range keyValues.Values {
+							if value.BlockID == blockID {
+								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
+								value.SetUpdatedAt(now)
+								break
 							}
 						}
 					}
 				}
-
-				av.SaveAttributeView(destAv)
 			}
+
+			av.SaveAttributeView(destAv)
 		}
 	}
 

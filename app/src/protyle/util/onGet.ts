@@ -225,7 +225,7 @@ const setHTML = (options: {
         protyle.app.plugins.forEach(item => {
             item.eventBus.emit("loaded-protyle-dynamic", {
                 protyle,
-                positon: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+                position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
             });
         });
         return;

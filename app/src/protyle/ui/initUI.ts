@@ -10,7 +10,7 @@ import {lineNumberRender} from "../render/highlightRender";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
-    protyle.contentElement.innerHTML = "<div class=\"protyle-top\"></div>";
+    protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
     if (protyle.options.render.background) {
         protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
     }
@@ -108,39 +108,13 @@ export const setPadding = (protyle: IProtyle) => {
         };
     }
     const oldLeft = parseInt(protyle.wysiwyg.element.style.paddingLeft);
-    let left = 16;
-    let right = 24;
-    if (!isMobile()) {
-        let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
-        if (!isFullWidth) {
-            isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
-        }
-        let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
-        if (isFullWidth === "false" && padding > 96) {
-            if (padding > Constants.SIZE_EDITOR_WIDTH) {
-                // 超宽屏调整 https://ld246.com/article/1668266637363
-                padding = protyle.element.clientWidth * .382 / 1.382;
-            }
-            padding = Math.ceil(padding);
-            left = padding;
-            right = padding;
-        } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {
-            left = 96;
-            right = 96;
-        }
-    }
-    let bottomHeight = "16px";
-    if (protyle.options.typewriterMode) {
-        if (isMobile()) {
-            bottomHeight = window.innerHeight / 5 + "px";
-        } else {
-            bottomHeight = protyle.element.clientHeight / 2 + "px";
-        }
-    }
+    const padding = getPadding(protyle);
+    const left = padding.left;
+    const right = padding.right;
     if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${left}px 4px ${right}px`;
     } else {
-        protyle.wysiwyg.element.style.padding = `16px ${left}px ${bottomHeight} ${right}px`;
+        protyle.wysiwyg.element.style.padding = `${padding.top}px ${left}px ${padding.bottom}px ${right}px`;
     }
     if (protyle.options.render.background) {
         protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${left}px`);
@@ -162,3 +136,38 @@ export const setPadding = (protyle: IProtyle) => {
         padding: Math.abs(oldLeft - parseInt(protyle.wysiwyg.element.style.paddingLeft))
     };
 };
+
+export const getPadding = (protyle: IProtyle) => {
+    let left = 16;
+    let right = 24;
+    let bottom = 16;
+    if (protyle.options.typewriterMode) {
+        if (isMobile()) {
+            bottom = window.innerHeight / 5;
+        } else {
+            bottom = protyle.element.clientHeight / 2;
+        }
+    }
+    if (!isMobile()) {
+        let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
+        if (!isFullWidth) {
+            isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
+        }
+        let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
+        if (isFullWidth === "false" && padding > 96) {
+            if (padding > Constants.SIZE_EDITOR_WIDTH) {
+                // 超宽屏调整 https://ld246.com/article/1668266637363
+                padding = protyle.element.clientWidth * .382 / 1.382;
+            }
+            padding = Math.ceil(padding);
+            left = padding;
+            right = padding;
+        } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {
+            left = 96;
+            right = 96;
+        }
+    }
+    return {
+        left, right, bottom, top: 16
+    }
+}

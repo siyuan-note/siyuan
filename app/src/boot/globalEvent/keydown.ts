@@ -18,7 +18,7 @@ import {newFile} from "../../util/newFile";
 import {Constants} from "../../constants";
 import {openSetting} from "../../config";
 import {getInstanceById} from "../../layout/util";
-import {closeTabByType, copyTab, getActiveTab, getDockByType, resizeTabs, switchTabByIndex} from "../../layout/tabUtil";
+import {copyTab, getActiveTab, getDockByType, resizeTabs, switchTabByIndex} from "../../layout/tabUtil";
 import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {setEditMode} from "../../protyle/util/setEditMode";

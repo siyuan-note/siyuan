@@ -852,7 +852,7 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
-    keyID: string,
+    keyID?: string,
     id?: string,
     type: TAVCol,
     isDetached?: boolean,

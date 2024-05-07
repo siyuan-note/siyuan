@@ -8,7 +8,7 @@
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240508003607"
+		"updated": "20240508011452"
 	},
 	"Children": [
 		{
@@ -1062,7 +1062,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20240508003607-ly1ymgz",
-				"updated": "20240508003607"
+				"updated": "20240508011452"
 			},
 			"Children": [
 				{
@@ -1567,7 +1567,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20240508003423-2ovb6fk",
-						"updated": "20240508003607"
+						"updated": "20240508011452"
 					},
 					"Children": [
 						{
@@ -1598,7 +1598,7 @@
 							"Type": "NodeSuperBlock",
 							"Properties": {
 								"id": "20240508003419-og92k70",
-								"updated": "20240508003243"
+								"updated": "20240508011452"
 							},
 							"Children": [
 								{
@@ -1613,7 +1613,7 @@
 									"Type": "NodeSuperBlock",
 									"Properties": {
 										"id": "20240508003412-r1ijrdy",
-										"updated": "20240508003419"
+										"updated": "20240508011452"
 									},
 									"Children": [
 										{
@@ -1706,6 +1706,23 @@
 													"TextMarkBlockRefID": "20211226121332-irgblss",
 													"TextMarkBlockRefSubtype": "d",
 													"TextMarkTextContent": "資料文件圖庫"
+												}
+											]
+										},
+										{
+											"ID": "20240508011452-3xijmrs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240508011452-3xijmrs",
+												"updated": "20240508011452"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240508010647-8nuyk31",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "收集箱"
 												}
 											]
 										},

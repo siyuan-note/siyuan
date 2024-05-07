@@ -1100,6 +1100,7 @@
   "userName": "用户名",
   "password": "密码",
   "passphrase": "密码",
+  "reEnterPassphrase": "再次输入密码",
   "language": "语言",
   "theme": "主题",
   "about": "关于",

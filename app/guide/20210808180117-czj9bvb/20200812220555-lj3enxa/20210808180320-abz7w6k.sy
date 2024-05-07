@@ -6,7 +6,8 @@
 		"icon": "1f371",
 		"id": "20210808180320-abz7w6k",
 		"title": "编辑器",
-		"updated": "20210808180320"
+		"type": "doc",
+		"updated": "20240507235438"
 	},
 	"Children": [
 		{
@@ -182,12 +183,55 @@
 			]
 		},
 		{
-			"ID": "20210808180320-vyqtyoi",
+			"ID": "20240507235438-05re3zi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210808180320-vyqtyoi",
-				"updated": "20210808180320"
-			}
+				"id": "20240507235438-05re3zi",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200825162036-4dx365o",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "排版元素"
+				}
+			]
+		},
+		{
+			"ID": "20240507235438-ow9015t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235438-ow9015t",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220628204444-9n0y9h2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "优化排版"
+				}
+			]
+		},
+		{
+			"ID": "20240507235438-dyw2otm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235438-dyw2otm",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221016213308-uz5af79",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "通过标题列表概述"
+				}
+			]
 		}
 	]
 }

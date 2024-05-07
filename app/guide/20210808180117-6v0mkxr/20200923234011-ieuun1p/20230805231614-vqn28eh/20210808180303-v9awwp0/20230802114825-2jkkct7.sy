@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230802114825-2jkkct7",
 		"title": "Inbox",
-		"updated": "20230802115024"
+		"type": "doc",
+		"updated": "20240508010253"
 	},
 	"Children": [
 		{
@@ -57,12 +58,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230802114928-gcmnpw5",
-				"updated": "20230802115037"
+				"updated": "20240508010253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Currently, the following methods are provided for data access."
+					"Data": "Currently, the following method are provided for data access."
 				}
 			]
 		},

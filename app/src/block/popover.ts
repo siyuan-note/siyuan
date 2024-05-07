@@ -66,7 +66,8 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {
-                showTooltip(tip, aElement);
+                // https://github.com/siyuan-note/siyuan/issues/11294
+                showTooltip(decodeURIComponent(tip), aElement);
                 event.stopPropagation();
             } else {
                 hideTooltip();

@@ -6,7 +6,8 @@
 		"icon": "1f308",
 		"id": "20210808180303-v9awwp0",
 		"title": "Cloud Services",
-		"updated": "20230805231707"
+		"type": "doc",
+		"updated": "20240508004725"
 	},
 	"Children": [
 		{
@@ -29,9 +30,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230627215141-57hf66s",
-				"updated": "20230802131124"
+				"updated": "20240508004725"
 			},
 			"Children": [
+				{
+					"ID": "20240508004643-z5324av",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508004643-z5324av",
+						"updated": "20240508004644"
+					},
+					"Children": [
+						{
+							"ID": "20240508004643-4ge0n4r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508004643-4ge0n4r",
+								"updated": "20240508004644"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210721112159-9p645xm",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Storage"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20230627215143-rk0fvgy",
 					"Type": "NodeListItem",
@@ -94,6 +126,37 @@
 					]
 				},
 				{
+					"ID": "20230627215154-orvtmhs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215154-orvtmhs",
+						"updated": "20240508004725"
+					},
+					"Children": [
+						{
+							"ID": "20230627215154-a5gj5qo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215154-a5gj5qo",
+								"updated": "20230627215159"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210721160238-yvhbh0h",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Assets hosting"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20230802131114-4anamcv",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -119,36 +182,6 @@
 									"TextMarkBlockRefID": "20230802114825-2jkkct7",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "Inbox"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230627215154-orvtmhs",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230627215154-orvtmhs"
-					},
-					"Children": [
-						{
-							"ID": "20230627215154-a5gj5qo",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230627215154-a5gj5qo",
-								"updated": "20230627215159"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20210721160238-yvhbh0h",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "Assets hosting"
 								}
 							]
 						}

@@ -6,7 +6,8 @@
 		"icon": "1f68c",
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
-		"updated": "20210808180303"
+		"type": "doc",
+		"updated": "20240508004537"
 	},
 	"Children": [
 		{
@@ -14,8 +15,391 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210808180303-1931idj",
-				"updated": "20210808180303"
-			}
+				"updated": "20240508004436"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230106104821-9nfphwm",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Workspace"
+				}
+			]
+		},
+		{
+			"ID": "20240508004438-d49y0r5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004438-d49y0r5",
+				"updated": "20240508004438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100808-j9sddk9",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Import and Export"
+				}
+			]
+		},
+		{
+			"ID": "20240508004440-0kxbkre",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004440-0kxbkre",
+				"updated": "20240508004440"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210505164949-c085p1d",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Web Clipping"
+				}
+			]
+		},
+		{
+			"ID": "20240508004443-yduv1h7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004443-yduv1h7",
+				"updated": "20240508004443"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100906-0u4zfq3",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Window and Tab"
+				}
+			]
+		},
+		{
+			"ID": "20240508004445-8fs1grc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004445-8fs1grc",
+				"updated": "20240508004446"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210110181011-fbhoesf",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Daily notes"
+				}
+			]
+		},
+		{
+			"ID": "20240508004448-m5bxg49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004448-m5bxg49",
+				"updated": "20240508004448"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100635-ms0p9lb",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Bookmark and Tag"
+				}
+			]
+		},
+		{
+			"ID": "20240508004450-1n0jb1j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004450-1n0jb1j",
+				"updated": "20240508004451"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240208172514-9dsv6na",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Database"
+				}
+			]
+		},
+		{
+			"ID": "20240508004453-q3oc1ma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004453-q3oc1ma",
+				"updated": "20240508004453"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210824202056-udkf7wg",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Widgets"
+				}
+			]
+		},
+		{
+			"ID": "20240508004456-oi2vc7t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004456-oi2vc7t",
+				"updated": "20240508004456"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506205948-yah52eb",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Plugins"
+				}
+			]
+		},
+		{
+			"ID": "20240508004458-8ze29km",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004458-8ze29km",
+				"updated": "20240508004458"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100744-br924ar",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Assets"
+				}
+			]
+		},
+		{
+			"ID": "20240508004501-dsk470r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004501-dsk470r",
+				"updated": "20240508004501"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Template snippet"
+				}
+			]
+		},
+		{
+			"ID": "20240508004503-igouzyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004503-igouzyi",
+				"updated": "20240508004503"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210127203829-qe2mzof",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "PDF annotation"
+				}
+			]
+		},
+		{
+			"ID": "20240508004506-l1o6uga",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004506-l1o6uga",
+				"updated": "20240508004506"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211010212318-3wx2kqb",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Virtual reference"
+				}
+			]
+		},
+		{
+			"ID": "20240508004508-qssxra9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004508-qssxra9",
+				"updated": "20240508004509"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210331201142-4g923es",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Hyperlink"
+				}
+			]
+		},
+		{
+			"ID": "20240508004512-8jkoaay",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004512-8jkoaay",
+				"updated": "20240508004513"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210615213222-vs5tzbd",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Data history"
+				}
+			]
+		},
+		{
+			"ID": "20240508004516-03hidmo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004516-03hidmo",
+				"updated": "20240508004516"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221223221636-ms2b4w9",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Flashcards"
+				}
+			]
+		},
+		{
+			"ID": "20240508004518-1149qu7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004518-1149qu7",
+				"updated": "20240508004519"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230304000547-ibldj1z",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Artificial Intelligence"
+				}
+			]
+		},
+		{
+			"ID": "20240508004522-vujpuw1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004522-vujpuw1",
+				"updated": "20240508004522"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100950-9op5xi1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Shortcuts"
+				}
+			]
+		},
+		{
+			"ID": "20240508004525-mkbjhje",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004525-mkbjhje",
+				"updated": "20240508004525"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004194026-s8h2cog",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Use on browser"
+				}
+			]
+		},
+		{
+			"ID": "20240508004528-jzh49m5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004528-jzh49m5",
+				"updated": "20240508004528"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201227201128-m1wrouw",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Docker hosting"
+				}
+			]
+		},
+		{
+			"ID": "20240508004531-frsd2ts",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004531-frsd2ts",
+				"updated": "20240508004531"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100717-yzwzn64",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Kernel parameter"
+				}
+			]
+		},
+		{
+			"ID": "20240508004534-qoadnms",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004534-qoadnms",
+				"updated": "20240508004534"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201227201751-gv0fpx2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Kernel API"
+				}
+			]
+		},
+		{
+			"ID": "20240508004537-14enffy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004537-14enffy",
+				"updated": "20240508004537"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230104152135-1iei0xa",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Share document"
+				}
+			]
 		}
 	]
 }

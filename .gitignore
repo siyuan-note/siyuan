@@ -38,3 +38,6 @@ lerna-debug.log*
 # NPM Package
 package-lock.json
 yarn.lock
+
+# workflows
+**/__pycache__

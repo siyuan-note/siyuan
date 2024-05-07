@@ -351,6 +351,9 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (!menuElement) {
         return;
     }
+    if (menuElement.querySelector(".dragover__bottom, .dragover__top")) {
+        return;
+    }
     const rowElement = hasClosestByClassName(cellElements[0], "av__row");
     if (!rowElement) {
         return;

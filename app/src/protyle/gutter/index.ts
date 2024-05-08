@@ -62,7 +62,7 @@ export class Gutter {
     private gutterTip: string;
 
     constructor(protyle: IProtyle) {
-        if (!isMac()) {
+        if (isMac()) {
             this.gutterTip = window.siyuan.languages.gutterTip;
         } else {
             this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))

@@ -6,16 +6,94 @@
 		"icon": "1f50d",
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
-		"updated": "20211226120946"
+		"type": "doc",
+		"updated": "20240508002838"
 	},
 	"Children": [
 		{
-			"ID": "20211226120933-12nrmzy",
+			"ID": "20240508002838-b2inby3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226120933-12nrmzy",
-				"updated": "20211226120933"
-			}
+				"id": "20240508002838-b2inby3",
+				"updated": "20240508002838"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220415232129-shpzg6r",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "查詢語法"
+				}
+			]
+		},
+		{
+			"ID": "20240508002838-mfvpbim",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002838-mfvpbim",
+				"updated": "20240508002838"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121808-fnxmngk",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "資料庫表"
+				}
+			]
+		},
+		{
+			"ID": "20240508002838-uuy698x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002838-uuy698x",
+				"updated": "20240508002838"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121322-9argcys",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "類型過濾"
+				}
+			]
+		},
+		{
+			"ID": "20240508002838-ocrviez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002838-ocrviez",
+				"updated": "20240508002838"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240119210914-a2tm8c4",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "忽略索引"
+				}
+			]
+		},
+		{
+			"ID": "20240508002838-c82g88v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002838-c82g88v",
+				"updated": "20240508002838"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240119212000-qkldbjm",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "忽略搜尋"
+				}
+			]
 		}
 	]
 }

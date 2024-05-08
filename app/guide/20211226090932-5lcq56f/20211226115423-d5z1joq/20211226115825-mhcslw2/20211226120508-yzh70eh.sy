@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容塊",
-		"updated": "20211228141618"
+		"type": "doc",
+		"updated": "20240508085352"
 	},
 	"Children": [
 		{
@@ -371,7 +372,8 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20211226120744-om182d6",
-				"updated": "20211225234425"
+				"style": "height: 149px;",
+				"updated": "20240508085352"
 			},
 			"Children": [
 				{
@@ -382,7 +384,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND hpath NOT LIKE '%嵌入內容塊%'"
+					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND type = 'p' AND hpath NOT LIKE '%嵌入內容塊%'"
 				},
 				{
 					"Type": "NodeCloseBrace"

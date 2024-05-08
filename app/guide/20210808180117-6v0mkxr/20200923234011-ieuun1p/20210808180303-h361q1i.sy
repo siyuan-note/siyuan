@@ -6,7 +6,8 @@
 		"icon": "1f371",
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
-		"updated": "20210808180303"
+		"type": "doc",
+		"updated": "20240508004216"
 	},
 	"Children": [
 		{
@@ -177,12 +178,55 @@
 			]
 		},
 		{
-			"ID": "20210808180303-a0ht38y",
+			"ID": "20240508004216-2xo697q",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210808180303-a0ht38y",
-				"updated": "20210808180303"
-			}
+				"id": "20240508004216-2xo697q",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924093441-ft2rhps",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Formatting elements"
+				}
+			]
+		},
+		{
+			"ID": "20240508004216-zyuk3yd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004216-zyuk3yd",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220628204454-hhxohv5",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Optimize typography"
+				}
+			]
+		},
+		{
+			"ID": "20240508004216-4uhl2nh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004216-4uhl2nh",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221016204105-qx2aq0g",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Outline by Heading and List"
+				}
+			]
 		}
 	]
 }

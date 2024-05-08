@@ -10,7 +10,7 @@ on:
 env:
   repo_name_android: "siyuan-android"
   repo_name: "siyuan"
-  repo_owner: "siyuan-note"
+  repo_owner: "EightDoor"
   package_json: "app/package.json"
 
 jobs:

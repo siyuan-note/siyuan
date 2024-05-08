@@ -224,7 +224,7 @@ jobs:
         GOPATH: ${{ github.workspace }}/go
         GOARCH: ${{ matrix.config.goarch }}
       
-    - name: Building Electron
+    - name: Building Electron App
       run: pnpm run ${{ matrix.config.electron_args }}
       working-directory: ${{ github.workspace }}/go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/app
 

@@ -99,6 +99,7 @@ export class Background {
     public ial: IObject;
     private imgElement: HTMLImageElement;
     private iconElement: HTMLElement;
+    private actionElements: NodeListOf<Element>;
     private tagsElement: HTMLElement;
     private transparentData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -106,14 +107,14 @@ export class Background {
         this.element = document.createElement("div");
         this.element.className = "protyle-background";
         this.element.innerHTML = `<div class="protyle-background__img">
-    <img class="fn__none">
+    <img src="${this.transparentData}">
     <div class="protyle-icons">
-        <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__sw" style="position: relative" aria-label="${window.siyuan.languages.upload}"><input type="file" style="position: absolute;width: 22px;height: 100%;top: 0;left: 0;opacity: .001;overflow: hidden;cursor: pointer;"><svg><use xlink:href="#iconUpload"></use></svg></span>
-        <span class="protyle-icon b3-tooltips b3-tooltips__sw" data-type="link" aria-label="${window.siyuan.languages.link}"><svg><use xlink:href="#iconLink"></use></svg></span>
-        <span class="protyle-icon b3-tooltips b3-tooltips__sw" data-type="asset" aria-label="${window.siyuan.languages.assets}"><svg><use xlink:href="#iconImage"></use></svg></span>
-        <span class="protyle-icon b3-tooltips b3-tooltips__sw" data-type="show-random" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
-        <span class="protyle-icon b3-tooltips b3-tooltips__sw fn__none" data-type="position" aria-label="${window.siyuan.languages.dragPosition}"><svg><use xlink:href="#iconMove"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__sw" data-type="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first" style="position: relative;overflow: hidden"><input aria-label="${window.siyuan.languages.upload}" class="ariaLabel" data-position="right4bottom" type="file" style="position: absolute;height: 100%;top: 0;right: 0;opacity: .001;overflow: hidden;cursor: pointer;"><svg><use xlink:href="#iconUpload"></use></svg></span>
+        <span class="protyle-icon ariaLabel" data-position="right4bottom" data-type="link" aria-label="${window.siyuan.languages.link}"><svg><use xlink:href="#iconLink"></use></svg></span>
+        <span class="protyle-icon ariaLabel" data-position="right4bottom" data-type="asset" aria-label="${window.siyuan.languages.assets}"><svg><use xlink:href="#iconImage"></use></svg></span>
+        <span class="protyle-icon ariaLabel" data-position="right4bottom" data-type="show-random" aria-label="${window.siyuan.languages.builtIn}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+        <span class="protyle-icon ariaLabel fn__none" data-position="right4bottom" data-type="position" aria-label="${window.siyuan.languages.dragPosition}"><svg><use xlink:href="#iconMove"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="right4bottom" data-type="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>
     <div class="protyle-icons fn__none"><span class="protyle-icon protyle-icon--text">${window.siyuan.languages.dragPosition}</span></div>
     <div class="protyle-icons fn__none" style="opacity: .86;">
@@ -121,18 +122,28 @@ export class Background {
         <span class="protyle-icon protyle-icon--last" data-type="confirm">${window.siyuan.languages.confirm}</span>
     </div>
 </div>
-<div class="b3-chips"></div>
-<div class="protyle-background__iconw">
+<div class="protyle-background__ia">
     <div class="protyle-background__icon" data-menu="true" data-type="open-emoji"></div>
-    <div class="protyle-icons fn__flex-center">
-        <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__s" data-menu="true" data-type="tag" aria-label="${window.siyuan.languages.addTag}"><svg><use xlink:href="#iconTags"></use></svg></span>
-        <span class="protyle-icon b3-tooltips b3-tooltips__s" data-type="icon" aria-label="${window.siyuan.languages.randomIcon}"><svg><use xlink:href="#iconEmoji"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__s" data-type="random" aria-label="${window.siyuan.languages.titleBg}"><svg><use xlink:href="#iconImage"></use></svg></span>
+    <div class="b3-chips fn__none"></div>
+    <div class="protyle-background__action">
+        <button class="b3-button b3-button--cancel" data-menu="true" data-type="tag">
+            <svg><use xlink:href="#iconTags"></use></svg>
+            ${window.siyuan.languages.addTag}
+        </button>
+        <button class="b3-button b3-button--cancel" data-type="icon">
+            <svg><use xlink:href="#iconEmoji"></use></svg>
+            ${window.siyuan.languages.addIcon}
+        </button>
+        <button class="b3-button b3-button--cancel" data-type="random">
+            <svg><use xlink:href="#iconImage"></use></svg>
+            ${window.siyuan.languages.titleBg}
+        </button>
     </div>
 </div>`;
         this.tagsElement = this.element.querySelector(".b3-chips") as HTMLElement;
         this.iconElement = this.element.querySelector(".protyle-background__icon") as HTMLElement;
-        this.imgElement = this.element.firstElementChild.firstElementChild as HTMLImageElement;
+        this.imgElement = this.element.querySelector(".protyle-background__img img") as HTMLImageElement;
+        this.actionElements = this.element.querySelectorAll(".protyle-background__action:not(.fn__flex-center) .b3-button");
 
         this.element.addEventListener("dragover", async (event) => {
             event.preventDefault();
@@ -257,7 +268,7 @@ export class Background {
                         html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card b3-card--wrap"></div>`;
                     });
                     const dialog = new Dialog({
-                        title: window.siyuan.languages.random,
+                        title: window.siyuan.languages.builtIn,
                         content: `<div class="b3-cards">${html}</div>`,
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
@@ -330,12 +341,20 @@ export class Background {
                         if (protyle.model) {
                             protyle.model.parent.setDocIcon(emoji);
                         }
+                        this.iconElement.classList.remove("fn__none");
+                        const rect = this.iconElement.getBoundingClientRect();
+                        openEmojiPanel(protyle.block.rootID, "doc", {
+                            x: rect.left,
+                            y: rect.bottom,
+                            h: rect.height,
+                            w: rect.width
+                        });
                     }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "tag") {
-                    this.openTag(protyle);
+                    this.openTag(protyle, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -432,20 +451,27 @@ export class Background {
             tags.split(",").forEach((item, index) => {
                 html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${item}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
-            this.tagsElement.innerHTML = html;
+            this.tagsElement.innerHTML = `${html}<span class="fn__space"></span>
+<div class="protyle-background__action fn__flex-center">
+    <button class="b3-button b3-button--cancel" style="margin-top: 0" data-menu="true" data-type="tag"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addTag}</button>
+</div>`;
+            this.tagsElement.classList.remove("fn__none");
+            this.actionElements[0].classList.add("fn__none");
         } else {
-            this.tagsElement.innerHTML = "";
+            this.tagsElement.classList.add("fn__none");
+            this.actionElements[0].classList.remove("fn__none");
         }
 
         if (icon) {
             this.iconElement.classList.remove("fn__none");
             this.iconElement.innerHTML = unicode2Emoji(icon);
+            this.actionElements[1].classList.add("fn__none");
         } else {
+            this.actionElements[1].classList.remove("fn__none");
             this.iconElement.classList.add("fn__none");
         }
 
         if (img) {
-            this.imgElement.classList.remove("fn__none");
             // 历史数据解析：background-image: url(\"assets/沙发背景墙11-20220418171700-w6vilzt.jpeg\"); background-position: center -254px; background-size: cover; background-repeat: no-repeat; min-height: 30vh
             this.imgElement.setAttribute("style", Lute.UnEscapeHTMLStr(img));
             if (img.indexOf("url(") > -1) {
@@ -459,23 +485,21 @@ export class Background {
                 this.imgElement.setAttribute("src", this.transparentData);
                 this.element.querySelector('[data-type="position"]').classList.add("fn__none");
             }
-        } else {
-            this.imgElement.classList.add("fn__none");
-        }
-
-        if (img) {
+            this.actionElements[2].classList.add("fn__none");
+            this.imgElement.parentElement.classList.remove("fn__none");
+            this.iconElement.style.marginTop = "";
+            /// #if MOBILE
             // 移动端键盘弹起和点击加号需保持滚动高度一致
-            this.element.style.minHeight = isMobile() ? "200px" : "30vh";
-        } else if (icon) {
-            this.element.style.minHeight = (this.tagsElement.clientHeight + 56) + "px";
-        } else if (tags) {
-            this.element.style.minHeight = this.tagsElement.clientHeight + "px";
+            this.imgElement.style.height = "200px";
+            /// #endif
         } else {
-            this.element.style.minHeight = "0";
+            this.imgElement.parentElement.classList.add("fn__none");
+            this.actionElements[2].classList.remove("fn__none");
+            this.iconElement.style.marginTop = "8px";
         }
     }
 
-    private openTag(protyle: IProtyle) {
+    private openTag(protyle: IProtyle, target: HTMLElement) {
         window.siyuan.menus.menu.remove();
         const menu = new Menu();
         menu.addItem({
@@ -549,7 +573,7 @@ export class Background {
             }
         });
         menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-        const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
+        const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.top + rect.height});
         menu.element.querySelector("input").focus();
     }

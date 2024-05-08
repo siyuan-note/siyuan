@@ -419,11 +419,11 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
                 rowElement.dataset.id = newID;
-                getSavePath(protyle.path, protyle.notebookId, (pathString) => {
+                getSavePath(protyle.path, protyle.notebookId, (pathString, targetNotebookId) => {
                     fetchPost("/api/filetree/createDocWithMd", {
-                        notebook: protyle.notebookId,
+                        notebook: targetNotebookId,
                         path: pathPosix().join(pathString, realFileName),
-                        parentID: protyle.block.rootID,
+                        parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
                         markdown: "",
                         id: newID,
                     }, () => {
@@ -507,11 +507,11 @@ ${genHintItemHTML(item)}
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
-            getSavePath(protyle.path, protyle.notebookId, (pathString) => {
+            getSavePath(protyle.path, protyle.notebookId, (pathString, targetNotebookId) => {
                 fetchPost("/api/filetree/createDocWithMd", {
-                    notebook: protyle.notebookId,
+                    notebook: targetNotebookId,
                     path: pathPosix().join(pathString, realFileName),
-                    parentID: protyle.block.rootID,
+                    parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
                     markdown: ""
                 }, response => {
                     // https://github.com/siyuan-note/siyuan/issues/10133
@@ -624,12 +624,12 @@ ${genHintItemHTML(item)}
                 }, () => {
                     insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`, protyle);
                     /// #if MOBILE
-                    openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
                     /// #else
                     openFileById({
                         app: protyle.app,
                         id: newSubDocId,
-                        action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
+                        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
                     });
                     /// #endif
                 });

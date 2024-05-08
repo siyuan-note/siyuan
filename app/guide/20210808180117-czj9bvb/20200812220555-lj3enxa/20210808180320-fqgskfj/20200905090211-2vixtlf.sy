@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20220429115850"
+		"updated": "20240427230507"
 	},
 	"Children": [
 		{
@@ -1537,9 +1537,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115137-qys9mvv",
-				"updated": "20220429115310"
+				"updated": "20240427230506"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -1547,7 +1551,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用 HTML 块时不会对其中的代码进行安全过滤，请确认代码安全后再使用，以免遭遇跨站脚本攻击（XSS）。"
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240427230507-yeaxqbs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427230507-yeaxqbs",
+				"updated": "20240427230507"
+			},
+			"Children": [
+				{
+					"ID": "20240427230507-x75u8vb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230507-x75u8vb",
+						"updated": "20240427230507"
+					},
+					"Children": [
+						{
+							"ID": "20240427230507-i73h3ru",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230507-i73h3ru",
+								"updated": "20240427230507"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 HTML 块时默认会对其中的代码进行安全过滤，如果不需要过滤，请开启 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "允许执行 HTML 块内脚本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，但请确认代码安全后再开启，以免遭遇跨站脚本攻击（XSS）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427230507-d9kna2p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230507-d9kna2p",
+						"updated": "20240427230507"
+					},
+					"Children": [
+						{
+							"ID": "20240427230507-2qbjv6v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230507-2qbjv6v",
+								"updated": "20240427230507"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "因为 Markdown 规范对 HTML 块解析规则较为复杂，建议使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 包裹 HTML 代码并去掉空行"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

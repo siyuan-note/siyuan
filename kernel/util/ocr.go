@@ -23,49 +23,137 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
-	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
 
 var (
-	TesseractBin       = "tesseract"
-	TesseractEnabled   bool
-	TesseractMaxSize   = 2 * 1000 * uint64(1000)
-	AssetsTexts        = map[string]string{}
-	AssetsTextsLock    = sync.Mutex{}
-	AssetsTextsChanged = atomic.Bool{}
+	TesseractBin     = "tesseract"
+	TesseractEnabled bool
+	TesseractMaxSize = 2 * 1000 * uint64(1000)
+	TesseractLangs   []string
 
-	TesseractLangs []string
+	assetsTexts        = map[string]string{}
+	assetsTextsLock    = sync.Mutex{}
+	assetsTextsChanged = atomic.Bool{}
 )
 
+func CleanNotExistAssetsTexts() {
+	assetsTextsLock.Lock()
+	defer assetsTextsLock.Unlock()
+
+	assetsPath := GetDataAssetsAbsPath()
+	var toRemoves []string
+	for asset, _ := range assetsTexts {
+		assetAbsPath := strings.TrimPrefix(asset, "assets")
+		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
+		if !filelock.IsExist(assetAbsPath) {
+			toRemoves = append(toRemoves, asset)
+		}
+	}
+
+	for _, asset := range toRemoves {
+		delete(assetsTexts, asset)
+		assetsTextsChanged.Store(true)
+	}
+	return
+}
+
+func LoadAssetsTexts() {
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+	if !filelock.IsExist(assetsTextsPath) {
+		return
+	}
+
+	start := time.Now()
+	data, err := filelock.ReadFile(assetsTextsPath)
+	if nil != err {
+		logging.LogErrorf("read assets texts failed: %s", err)
+		return
+	}
+
+	assetsTextsLock.Lock()
+	if err = gulu.JSON.UnmarshalJSON(data, &assetsTexts); nil != err {
+		logging.LogErrorf("unmarshal assets texts failed: %s", err)
+		if err = filelock.Remove(assetsTextsPath); nil != err {
+			logging.LogErrorf("removed corrupted assets texts failed: %s", err)
+		}
+		return
+	}
+	assetsTextsLock.Unlock()
+	debug.FreeOSMemory()
+
+	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
+		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
+	}
+	return
+}
+
+func SaveAssetsTexts() {
+	if !assetsTextsChanged.Load() || !TesseractEnabled {
+		return
+	}
+
+	start := time.Now()
+
+	assetsTextsLock.Lock()
+	data, err := gulu.JSON.MarshalIndentJSON(assetsTexts, "", "  ")
+	if nil != err {
+		logging.LogErrorf("marshal assets texts failed: %s", err)
+		return
+	}
+	assetsTextsLock.Unlock()
+
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+	if err = filelock.WriteFile(assetsTextsPath, data); nil != err {
+		logging.LogErrorf("write assets texts failed: %s", err)
+		return
+	}
+	debug.FreeOSMemory()
+
+	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
+		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
+	}
+
+	assetsTextsChanged.Store(false)
+}
+
 func SetAssetText(asset, text string) {
-	AssetsTextsLock.Lock()
-	AssetsTexts[asset] = text
-	AssetsTextsLock.Unlock()
-	AssetsTextsChanged.Store(true)
+	var oldText string
+	assetsTextsLock.Lock()
+	oldText = assetsTexts[asset]
+	assetsTexts[asset] = text
+	assetsTextsLock.Unlock()
+	if oldText != text {
+		assetsTextsChanged.Store(true)
+	}
 }
 
 func ExistsAssetText(asset string) (ret bool) {
-	AssetsTextsLock.Lock()
-	_, ret = AssetsTexts[asset]
-	AssetsTextsLock.Unlock()
+	assetsTextsLock.Lock()
+	_, ret = assetsTexts[asset]
+	assetsTextsLock.Unlock()
 	return
 }
 
 func GetAssetText(asset string, force bool) (ret string) {
 	if !force {
-		AssetsTextsLock.Lock()
-		ret = AssetsTexts[asset]
-		AssetsTextsLock.Unlock()
+		assetsTextsLock.Lock()
+		ret = assetsTexts[asset]
+		assetsTextsLock.Unlock()
 		return
 	}
 
@@ -73,11 +161,11 @@ func GetAssetText(asset string, force bool) (ret string) {
 	assetAbsPath := strings.TrimPrefix(asset, "assets")
 	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
 	ret = Tesseract(assetAbsPath)
-	AssetsTextsLock.Lock()
-	AssetsTexts[asset] = ret
-	AssetsTextsLock.Unlock()
+	assetsTextsLock.Lock()
+	assetsTexts[asset] = ret
+	assetsTextsLock.Unlock()
 	if "" != ret {
-		AssetsTextsChanged.Store(true)
+		assetsTextsChanged.Store(true)
 	}
 	return
 }
@@ -184,7 +272,7 @@ func InitTesseract() {
 	}
 
 	TesseractLangs = filterTesseractLangs(langs)
-	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.Bytes(TesseractMaxSize), strings.Join(TesseractLangs, "+"))
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.BytesCustomCeil(TesseractMaxSize, 2), strings.Join(TesseractLangs, "+"))
 	tesseractInited.Store(true)
 }
 

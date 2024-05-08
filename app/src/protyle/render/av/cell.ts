@@ -352,11 +352,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     if (["text", "email", "phone", "block", "template"].includes(type)) {
-        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "url") {
-        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
     } else if (type === "number") {
-        html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
+        html = `<input type="number" spellcheck="false" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else {
         if (["select", "mSelect"].includes(type)) {
             openMenuPanel({protyle, blockElement, type: "select", cellElements});

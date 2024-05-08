@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dustin/go-humanize"
+	"github.com/88250/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -90,7 +90,10 @@ func Themes() (ret []*Theme) {
 		theme.Stars = repo.Stars
 		theme.OpenIssues = repo.OpenIssues
 		theme.Size = repo.Size
-		theme.HSize = humanize.Bytes(uint64(theme.Size))
+		theme.HSize = humanize.BytesCustomCeil(uint64(theme.Size), 2)
+		theme.InstallSize = repo.InstallSize
+		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
+		packageInstallSizeCache.SetDefault(theme.RepoURL, theme.InstallSize)
 		theme.HUpdated = formatUpdated(theme.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -158,9 +161,14 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 		theme.HInstallDate = info.ModTime().Format("2006-01-02")
-		installSize, _ := util.SizeOfDirectory(installPath)
-		theme.InstallSize = installSize
-		theme.HInstallSize = humanize.Bytes(uint64(installSize))
+		if installSize, ok := packageInstallSizeCache.Get(theme.RepoURL); ok {
+			theme.InstallSize = installSize.(int64)
+		} else {
+			is, _ := util.SizeOfDirectory(installPath)
+			theme.InstallSize = is
+			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
+		}
+		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
 		readmeFilename := getPreferredReadme(theme.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

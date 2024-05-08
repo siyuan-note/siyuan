@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/djherbis/times"
-	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -82,7 +82,7 @@ func statAsset(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"size":     info.Size(),
-		"hSize":    humanize.Bytes(uint64(info.Size())),
+		"hSize":    humanize.BytesCustomCeil(uint64(info.Size()), 2),
 		"created":  created,
 		"hCreated": hCreated,
 		"updated":  updated,

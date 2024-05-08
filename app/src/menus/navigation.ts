@@ -29,6 +29,7 @@ import {makeCard} from "../card/makeCard";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openByMobile} from "../protyle/util/compatibility";
+import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -42,6 +43,23 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
         Array.from(selectItemElements)
     )));
+    const blockIDs: string[] = [];
+    selectItemElements.forEach(item => {
+        const id = item.getAttribute("data-node-id");
+        if (id) {
+            blockIDs.push(id);
+        }
+    });
+    if (blockIDs.length > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.addToDatabase,
+            accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
+            icon: "iconDatabase",
+            click: () => {
+                addFilesToDatabase(Array.from(selectItemElements));
+            }
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
@@ -51,13 +69,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }
     }).element);
 
-    const blockIDs: string[] = [];
-    selectItemElements.forEach(item => {
-        const id = item.getAttribute("data-node-id");
-        if (id) {
-            blockIDs.push(id);
-        }
-    });
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }
@@ -106,6 +117,8 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         icon: "iconRiffCard",
         submenu: riffCardMenu,
     }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    openEditorTab(app, blockIDs);
     if (app.plugins) {
         emitOpenMenu({
             plugins: app.plugins,
@@ -442,6 +455,14 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             Array.from(fileElement.querySelectorAll(".b3-list-item--focus"))
         )));
         window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.addToDatabase,
+            accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
+            icon: "iconDatabase",
+            click: () => {
+                addFilesToDatabase([liElement]);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
@@ -611,7 +632,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     }
-    openEditorTab(app, id, notebookId, pathString);
+    openEditorTab(app, [id], notebookId, pathString);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.fileHistory,

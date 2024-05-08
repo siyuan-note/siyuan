@@ -294,7 +294,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         response.data.tags.forEach((item: string) => {
             const value = item.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             dataList.push({
-                value: `#${value}#`,
+                value: `<span data-type="tag">${value}</span>`,
                 html: item,
             });
             if (value === response.data.k) {
@@ -303,7 +303,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         });
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
-                value: `#${response.data.k}#`,
+                value: `<span data-type="tag">${response.data.k}</span>`,
                 html: `${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark>`,
             });
             if (dataList.length > 1) {

@@ -202,6 +202,10 @@ declare class Lute {
 
     public SetTag(enable: boolean): void;
 
+    public SetInlineMath(enable: boolean): void;
+
+    public SetGFMStrikethrough1(enable: boolean): void;
+
     public SetMark(enable: boolean): void;
 
     public SetSub(enable: boolean): void;
@@ -240,7 +244,7 @@ declare class Lute {
 
     public MarkdownStr(name: string, md: string): string;
 
-    public IsValidLinkDest(text: string): boolean;
+    public GetLinkDest(text: string): string;
 
     public BlockDOM2InlineBlockDOM(html: string): string;
 

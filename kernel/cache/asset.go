@@ -41,7 +41,10 @@ func GetAssets() (ret map[string]*Asset) {
 	assetsLock.Lock()
 	defer assetsLock.Unlock()
 
-	ret = assetsCache
+	ret = map[string]*Asset{}
+	for k, v := range assetsCache {
+		ret[k] = v
+	}
 	return
 }
 

@@ -16,8 +16,7 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
-import {getSearch, isMobile} from "../../util/functions";
-import {isLocalPath, pathPosix} from "../../util/pathName";
+import {isMobile} from "../../util/functions";
 import {genEmptyElement} from "../../block/util";
 import {previewDocImage} from "../preview/image";
 import {
@@ -46,7 +45,7 @@ import {
 import {transaction, updateTransaction} from "./transaction";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
-import {ipcRenderer, shell} from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
@@ -58,13 +57,13 @@ import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
-import {openAsset, openBy, openFileById} from "../../editor/util";
+import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isOnlyMeta, openByMobile} from "../util/compatibility";
+import {isInIOS, isOnlyMeta} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -91,6 +90,7 @@ import {
     updateCellsValue
 } from "../render/av/cell";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {openLink} from "../../editor/openLink";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -532,7 +532,7 @@ export class WYSIWYG {
             }
             // av cell select
             const avCellElement = hasClosestByClassName(target, "av__cell");
-            if (!protyle.disabled && avCellElement && avCellElement.dataset.id) {
+            if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !hasClosestByAttribute(avCellElement, "data-type", "NodeBlockQueryEmbed")) {
                 const nodeElement = hasClosestBlock(avCellElement);
                 if (!nodeElement) {
                     return;
@@ -1570,7 +1570,7 @@ export class WYSIWYG {
                 } else if (types.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, target);
                     return false;
-                } else if (types.includes("a") && !protyle.disabled) {
+                } else if (types.includes("a")) {
                     linkMenu(protyle, target);
                     if (window.siyuan.config.editor.floatWindowMode === 0 &&
                         target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
@@ -1746,6 +1746,10 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
+            // https://github.com/siyuan-note/siyuan/issues/11241
+            if (event.target.localName === "input" && event.target.getAttribute("data-type") === "av-search") {
+                return;
+            }
             if (protyle.disabled) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -1998,7 +2002,7 @@ export class WYSIWYG {
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
-            let aLink = aElement ? aElement.getAttribute("data-href") : "";
+            let aLink = aElement ? (aElement.getAttribute("data-href") || "") : "";
             if (aElement && !aLink && aElement.classList.contains("av__celltext--url")) {
                 aLink = aElement.textContent.trim();
                 if (aElement.dataset.type === "phone") {
@@ -2105,78 +2109,15 @@ export class WYSIWYG {
             if (fileElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
-                const fileIds = fileElement.getAttribute("data-id").split("/");
-                const linkAddress = `assets/${fileIds[1]}`;
-                /// #if MOBILE
-                openByMobile(linkAddress);
-                /// #else
-                if (ctrlIsPressed) {
-                    openBy(linkAddress, "folder");
-                } else if (event.shiftKey) {
-                    openBy(linkAddress, "app");
-                } else {
-                    openAsset(protyle.app, linkAddress, fileIds[2], "right");
-                }
-                /// #endif
+                openLink(protyle, fileElement.getAttribute("data-id"), event, ctrlIsPressed);
                 return;
             }
 
-            if (aElement && range.toString() === "") {
+            // 如果aLink 为空时，当 data-type="a inline-math" 可继续后续操作
+            if (aElement && range.toString() === "" && aLink) {
                 event.stopPropagation();
                 event.preventDefault();
-                let linkAddress = Lute.UnEscapeHTMLStr(aLink);
-                /// #if MOBILE
-                openByMobile(linkAddress);
-                /// #else
-                if (isLocalPath(linkAddress)) {
-                    const linkPathname = linkAddress.split("?page")[0];
-                    if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkPathname)) &&
-                        (!linkPathname.endsWith(".pdf") ||
-                            (linkPathname.endsWith(".pdf") && !linkAddress.startsWith("file://")))
-                    ) {
-                        if (event.altKey) {
-                            openAsset(protyle.app, linkAddress, parseInt(getSearch("page", linkAddress)));
-                        } else if (ctrlIsPressed) {
-                            /// #if !BROWSER
-                            openBy(linkAddress, "folder");
-                            /// #else
-                            openByMobile(linkAddress);
-                            /// #endif
-                        } else if (event.shiftKey) {
-                            /// #if !BROWSER
-                            openBy(linkAddress, "app");
-                            /// #else
-                            openByMobile(linkAddress);
-                            /// #endif
-                        } else {
-                            openAsset(protyle.app, linkPathname, parseInt(getSearch("page", linkAddress)), "right");
-                        }
-                    } else {
-                        /// #if !BROWSER
-                        if (ctrlIsPressed) {
-                            openBy(linkAddress, "folder");
-                        } else {
-                            openBy(linkAddress, "app");
-                        }
-                        /// #else
-                        openByMobile(linkAddress);
-                        /// #endif
-                    }
-                } else if (linkAddress) {
-                    if (0 > linkAddress.indexOf(":")) {
-                        // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
-                        // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
-                        linkAddress = `https://${linkAddress}`;
-                    }
-                    /// #if !BROWSER
-                    shell.openExternal(linkAddress).catch((e) => {
-                        showMessage(e);
-                    });
-                    /// #else
-                    openByMobile(linkAddress);
-                    /// #endif
-                }
-                /// #endif
+                openLink(protyle, aLink, event, ctrlIsPressed);
                 return;
             }
 

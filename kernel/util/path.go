@@ -182,7 +182,7 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 func NormalizeTimeout(timeout int) int {
 	if 7 > timeout {
 		if 1 > timeout {
-			return 30
+			return 60
 		}
 		return 7
 	}

@@ -104,6 +104,7 @@
 .protyle-select {
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);
+  z-index: 3; // 需大于 database header and footer
 }
 
 .protyle-breadcrumb {
@@ -120,7 +121,7 @@
     margin-left: 8px;
 
     &:disabled {
-        opacity: .38;
+      opacity: .38;
     }
   }
 
@@ -252,23 +253,35 @@
   }
 }
 
+.protyle-top:hover {
+  .protyle-background--enable .protyle-background__action {
+    opacity: .86;
+  }
+}
+
 .protyle-background {
   position: relative;
-  padding-bottom: 40px;
 
   &--enable {
     .protyle-background__img:hover .protyle-icons,
-    &:hover > .protyle-background__iconw > .protyle-icons,
     .protyle-background__icon:hover {
       opacity: .86;
     }
   }
 
-
   &--mobileshow {
     .protyle-background__iconw > .protyle-icons,
     .protyle-background__img .protyle-icons {
       opacity: .86;
+    }
+  }
+
+  &__action {
+    transition: opacity 150ms linear;
+    opacity: 0;
+
+    .b3-button {
+      margin-top: 8px;
     }
   }
 
@@ -281,7 +294,10 @@
     line-height: 80px;
     text-align: center;
     font-family: var(--b3-font-family-emoji);
-    margin-right: 16px;
+    z-index: 1;
+    position: relative;
+    margin-top: -40px;
+    margin-bottom: 8px;
 
     img, svg {
       height: 80px;
@@ -296,7 +312,6 @@
   }
 
   &__img {
-    position: absolute;
     width: 100%;
 
     img {
@@ -308,30 +323,17 @@
     }
 
     .protyle-icons {
-      bottom: 8px;
-      top: auto;
-      margin-left: -44px;
-      left: auto;
-      right: 32px; // 仅 iPone，设置 index 也无效 https://github.com/siyuan-note/siyuan/issues/6926
+      position: absolute;
+      top: 8px;
+      right: 8px;
 
       &:nth-child(3) {
-        right: auto;
-        left: 48%;
-        opacity: .86;
-        top: 50%;
-        bottom: auto;
-        margin-top: -11px;
+        left: 50%;
+        opacity: 0.86;
+        top: 15vh;
+        margin-top: -12px;
+        margin-left: -70px;
       }
-    }
-  }
-
-  &__iconw {
-    bottom: 0;
-    display: flex;
-    position: absolute;
-
-    .protyle-icons {
-      position: initial;
     }
   }
 }

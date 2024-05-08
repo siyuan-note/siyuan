@@ -122,7 +122,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	luteEngine := util.NewStdLute()
-	md := luteEngine.HTML2Md(dom)
+	md, _ := model.HTML2Markdown(dom)
 	md = strings.TrimSpace(md)
 
 	var unlinks []*ast.Node

@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
@@ -191,8 +191,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-
-                e.firstElementChild.outerHTML = `<div class="av__container" style="--av-background:${e.style.backgroundColor || "var(--b3-theme-background)"}">
+                let avBackground = "--av-background:var(--b3-theme-background)";
+                if (e.style.backgroundColor) {
+                    avBackground = "--av-background:" + e.style.backgroundColor;
+                } else if (hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed")) {
+                    avBackground = "--av-background:var(--b3-theme-surface)";
+                }
+                e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">
     <div class="av__header">
         <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
@@ -221,7 +226,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             <span data-type="av-search-icon" class="block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </span>
-            <div style="position: relative">
+            <div style="position: relative" class="fn__flex">
                 <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
@@ -349,6 +354,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 addClearButton({
                     inputElement: searchInputElement,
                     right: 0,
+                    width: "1em",
                     height: searchInputElement.clientHeight,
                     clearCB() {
                         viewsElement.classList.remove("av__views--show");

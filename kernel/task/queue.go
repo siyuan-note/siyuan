@@ -92,7 +92,7 @@ const (
 	DatabaseIndexRef                = "task.database.index.ref"            // 数据库索引引用
 	DatabaseIndexFix                = "task.database.index.fix"            // 数据库索引订正
 	OCRImage                        = "task.ocr.image"                     // 图片 OCR 提取文本
-	HistoryGenerateDoc              = "task.history.generateDoc"           // 生成文件历史
+	HistoryGenerateFile             = "task.history.generateFile"          // 生成文件历史
 	HistoryDatabaseIndexFull        = "task.history.database.index.full"   // 历史数据库重建索引
 	HistoryDatabaseIndexCommit      = "task.history.database.index.commit" // 历史数据库索引提交
 	DatabaseIndexEmbedBlock         = "task.database.index.embedBlock"     // 数据库索引嵌入块
@@ -107,10 +107,9 @@ var uniqueActions = []string{
 	DatabaseIndexFull,
 	DatabaseIndexCommit,
 	OCRImage,
-	HistoryGenerateDoc,
+	HistoryGenerateFile,
 	HistoryDatabaseIndexFull,
 	HistoryDatabaseIndexCommit,
-	DatabaseIndexEmbedBlock,
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
 }

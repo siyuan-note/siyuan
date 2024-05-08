@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dustin/go-humanize"
+	"github.com/88250/go-humanize"
 )
 
 // Weekday returns the day of the week specified by date.

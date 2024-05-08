@@ -7,7 +7,7 @@ import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
 import {escapeAttr} from "../../../util/escape";
-import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {genCellValueByElement} from "./cell";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[], selected: string[] = []) => {
     let html = "";
@@ -66,7 +66,21 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
             item = cellElements[elementIndex] = blockElement.querySelector(`.av__cell[data-id="${item.dataset.id}"]`) as HTMLElement;
         }
         const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
-        const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        let cellValue: IAVCellValue;
+        data.view.rows.find(row => {
+            if (row.id === rowID) {
+                row.cells.find(cell => {
+                    if (cell.value.keyID === item.dataset.colId) {
+                        if (!cell.value.mSelect) {
+                            cell.value.mSelect = [];
+                        }
+                        cellValue = cell.value;
+                        return true;
+                    }
+                });
+                return true;
+            }
+        });
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
             cellValue.mSelect?.find((item, index) => {
@@ -94,17 +108,6 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
             rowID,
             avID: data.id,
             data: oldValue
-        });
-        data.view.rows.find(row => {
-            if (row.id === rowID) {
-                row.cells.find(cell => {
-                    if (cell.id === cellValue.id) {
-                        cell.value = cellValue;
-                        return true;
-                    }
-                });
-                return true;
-            }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellValue);
@@ -470,7 +473,23 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         if (!itemRowElement) {
             return;
         }
-        const cellValue = genCellValueByElement(colData.type, item);
+        let cellValue: IAVCellValue;
+        const rowID = itemRowElement.dataset.id;
+        // 快速选中后如果 render 了再使用 genCellValueByElement 获取的元素和当前选中的不一致， https://github.com/siyuan-note/siyuan/issues/11268
+        data.view.rows.find(row => {
+            if (row.id === rowID) {
+                row.cells.find(cell => {
+                    if (cell.value.keyID === item.dataset.colId) {
+                        if (!cell.value.mSelect) {
+                            cell.value.mSelect = [];
+                        }
+                        cellValue = cell.value;
+                        return true;
+                    }
+                });
+                return true;
+            }
+        });
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (index === 0) {
             if (colData.type === "mSelect") {
@@ -497,7 +516,6 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         } else {
             cellValue.mSelect = mSelectValue;
         }
-        const rowID = itemRowElement.dataset.id;
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -513,17 +531,6 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             rowID,
             avID: data.id,
             data: oldValue
-        });
-        data.view.rows.find(row => {
-            if (row.id === rowID) {
-                row.cells.find(cell => {
-                    if (cell.id === cellValue.id) {
-                        cell.value = cellValue;
-                        return true;
-                    }
-                });
-                return true;
-            }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellValue);

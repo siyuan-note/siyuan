@@ -362,8 +362,9 @@
   [data-subtype="graphviz"] {
     text-align: center;
 
-    & > [contenteditable="false"] svg {
+    [contenteditable="false"] svg {
       border-radius: var(--b3-border-radius);
+      max-width: 100%; // https://github.com/siyuan-note/siyuan/issues/11181
 
       /* 由于会覆盖颜色，先移除看看有没有副作用 https://github.com/siyuan-note/siyuan/issues/7735
       polygon {

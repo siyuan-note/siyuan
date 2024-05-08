@@ -341,7 +341,7 @@ export const bazaar = {
             response.data.widgets.forEach((item: IBazaarItem) => {
                 html += this._genUpdateItemHTML(item, "widgets");
             });
-
+            this._data.update = response.data;
             const allCount = response.data.themes.length + response.data.icons.length + response.data.widgets.length + response.data.plugins.length + response.data.templates.length;
             if (allCount === 0) {
                 this.element.querySelector('[data-type="downloaded-update"]').innerHTML = "";
@@ -357,6 +357,9 @@ export const bazaar = {
         });
     },
     _genMyHTML(bazaarType: TBazaarType, app: App, updateUpdate = true) {
+        if (updateUpdate) {
+            this._getUpdate();
+        }
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
         if (contentElement.getAttribute("data-loading") === "true" ||
             contentElement.previousElementSibling.querySelector(`[data-type="my${bazaarType.replace(bazaarType[0], bazaarType[0].toUpperCase()).substring(0, bazaarType.length - 1)}"]`).classList.contains("b3-button--outline")) {
@@ -383,7 +386,7 @@ export const bazaar = {
             if (["icons", "themes"].includes(bazaarType)) {
                 showSwitch = true;
             }
-            const counterElement = contentElement.parentElement.querySelector(".counter");
+            const counterElement = contentElement.previousElementSibling.querySelector(".counter");
             if (response.data.packages.length === 0) {
                 counterElement.classList.add("fn__none");
             } else {
@@ -451,9 +454,6 @@ export const bazaar = {
             }
             contentElement.innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
-        if (updateUpdate) {
-            this._getUpdate();
-        }
     },
     _data: {
         themes: [] as IBazaarItem[],
@@ -462,16 +462,22 @@ export const bazaar = {
         widgets: [] as IBazaarItem[],
         plugins: [] as IBazaarItem[],
         downloaded: [] as IBazaarItem[],
+        update: {
+            themes: [] as IBazaarItem[],
+            templates: [] as IBazaarItem[],
+            icons: [] as IBazaarItem[],
+            widgets: [] as IBazaarItem[],
+            plugins: [] as IBazaarItem[],
+        }
     },
     _renderReadme(cardElement: HTMLElement, bazaarType: TBazaarType) {
         const dataObj = JSON.parse(cardElement.getAttribute("data-obj"));
         let data: IBazaarItem;
-        (dataObj.downloaded ? bazaar._data.downloaded : bazaar._data[bazaarType]).find((item: IBazaarItem) => {
-            if (item.repoURL === dataObj.repoURL) {
-                data = item;
-                return true;
-            }
-        });
+        if (hasClosestByAttribute(cardElement, "data-type", "downloaded-update")) {
+            data = bazaar._data.update[bazaarType].find((item: IBazaarItem) => item.repoURL === dataObj.repoURL);
+        } else {
+            data = (dataObj.downloaded ? bazaar._data.downloaded : bazaar._data[bazaarType]).find((item: IBazaarItem) => item.repoURL === dataObj.repoURL);
+        }
         const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
         const urls = data.repoURL.split("/");
         urls.pop();
@@ -524,10 +530,12 @@ export const bazaar = {
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${data.version}</div>
     <div class="fn__hr"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${dataObj.downloaded ? data.hInstallDate : data.hUpdated}</div>
+    <div class="fn__hr${dataObj.downloaded ? " fn__none" : ""}"></div>
+    <div class="ft__on-surface ft__smaller${dataObj.downloaded ? " fn__none" : ""}" style="line-height: 20px;">${window.siyuan.languages.pkgSize}<br>${data.hSize}</div>
     <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installSize : window.siyuan.languages.pkgSize}<br>${dataObj.downloaded ? data.hInstallSize : data.hSize}</div>
-    <div class="fn__hr--b${(data.installed || dataObj.downloaded) ? " fn__none" : ""}"></div>
-    <div class="fn__hr--b${(data.installed || dataObj.downloaded) ? " fn__none" : ""}"></div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.installSize}<br>${data.hInstallSize}</div>
+    <div class="fn__hr--b"></div>
+    <div class="fn__hr--b"></div>
     <div${(data.installed || dataObj.downloaded) ? ' class="fn__none"' : ""}>
         <button class="b3-button" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
     </div>
@@ -569,8 +577,8 @@ export const bazaar = {
             </div>
          </div>
     </div>
-    <div class="item__readme b3-typography b3-typography--default"">
-        <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
+    <div class="item__readme b3-typography b3-typography--default">
+        <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
         if (dataObj.downloaded) {
@@ -732,7 +740,7 @@ export const bazaar = {
                                 url = "/api/bazaar/installBazaarPlugin";
                             }
                             if (!target.classList.contains("b3-button")) {
-                                target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
+                                target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
                             fetchPost(url, {
                                 repoURL: dataObj.repoURL,

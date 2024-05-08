@@ -24,7 +24,9 @@ type BoxConf struct {
 	Sort                  int    `json:"sort"`                  // 排序字段
 	Icon                  string `json:"icon"`                  // 图标
 	Closed                bool   `json:"closed"`                // 是否处于关闭状态
+	RefCreateSaveBox      string `json:"refCreateSaveBox"`      // 块引时新建文档存储笔记本
 	RefCreateSavePath     string `json:"refCreateSavePath"`     // 块引时新建文档存储路径
+	DocCreateSaveBox      string `json:"docCreateSaveBox"`      // 新建文档存储笔记本
 	DocCreateSavePath     string `json:"docCreateSavePath"`     // 新建文档存储路径
 	DailyNoteSavePath     string `json:"dailyNoteSavePath"`     // 新建日记存储路径
 	DailyNoteTemplatePath string `json:"dailyNoteTemplatePath"` // 新建日记使用的模板路径

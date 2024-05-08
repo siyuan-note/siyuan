@@ -158,6 +158,10 @@ func PushBackgroundTask(data map[string]interface{}) {
 	BroadcastByType("main", "backgroundtask", 0, "", data)
 }
 
+func PushReloadFiletree() {
+	BroadcastByType("filetree", "reloadFiletree", 0, "", nil)
+}
+
 type BlockStatResult struct {
 	RuneCount  int `json:"runeCount"`
 	WordCount  int `json:"wordCount"`

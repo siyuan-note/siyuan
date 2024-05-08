@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220628204420-ui79vkt",
 		"title": "最佳化排版",
-		"updated": "20230630104730"
+		"type": "doc",
+		"updated": "20240506230836"
 	},
 	"Children": [
 		{
@@ -104,7 +105,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220628215506-srlvfe0",
-				"updated": "20220916195816"
+				"updated": "20240506230235"
 			},
 			"Children": [
 				{
@@ -116,7 +117,7 @@
 					},
 					"Properties": {
 						"id": "20220628215506-tfhl45j",
-						"updated": "20220916195816"
+						"updated": "20240506230217"
 					},
 					"Children": [
 						{
@@ -124,12 +125,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215506-c6atyjn",
-								"updated": "20220916195816"
+								"updated": "20240506230217"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行級代碼"
+									"Data": "行級代碼："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Code"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -144,7 +154,7 @@
 					},
 					"Properties": {
 						"id": "20220628215506-258fpgt",
-						"updated": "20220916195814"
+						"updated": "20240506230235"
 					},
 					"Children": [
 						{
@@ -152,12 +162,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215506-3twrnze",
-								"updated": "20220916195814"
+								"updated": "20240506230235"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行級公式"
+									"Data": "行級公式："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
 								}
 							]
 						}
@@ -185,37 +200,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220630211154-7y2zlnx",
-				"updated": "20220630211154"
+				"updated": "20240506230836"
 			},
 			"Children": [
-				{
-					"ID": "20220630211154-yr6rvir",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220630211154-yr6rvir",
-						"updated": "20220630211154"
-					},
-					"Children": [
-						{
-							"ID": "20220630211154-8ptzt3a",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220630211154-8ptzt3a",
-								"updated": "20220630211154"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "標籤"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20220630211154-gjt0dpy",
 					"Type": "NodeListItem",
@@ -225,7 +212,7 @@
 					},
 					"Properties": {
 						"id": "20220630211154-gjt0dpy",
-						"updated": "20220630211154"
+						"updated": "20240506230836"
 					},
 					"Children": [
 						{
@@ -233,12 +220,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211154-p32qfcb",
-								"updated": "20220630211154"
+								"updated": "20240506230836"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "高亮"
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "標記"
 								}
 							]
 						}
@@ -253,7 +241,7 @@
 					},
 					"Properties": {
 						"id": "20220630211154-t1yonyq",
-						"updated": "20220630211154"
+						"updated": "20240506230015"
 					},
 					"Children": [
 						{
@@ -261,12 +249,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211154-h54yp04",
-								"updated": "20220630211154"
+								"updated": "20240506230015"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "刪除線"
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "刪除線"
 								}
 							]
 						}
@@ -281,7 +270,7 @@
 					},
 					"Properties": {
 						"id": "20220630211154-o3way3q",
-						"updated": "20220630211154"
+						"updated": "20240506230034"
 					},
 					"Children": [
 						{
@@ -289,12 +278,14 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211154-bysdnhn",
-								"updated": "20220630211154"
+								"updated": "20240506230034"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "超連結錨文字"
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com",
+									"TextMarkTextContent": "超連結錨文字"
 								}
 							]
 						}
@@ -337,7 +328,7 @@
 					},
 					"Properties": {
 						"id": "20220630211154-ciwaquv",
-						"updated": "20220630211154"
+						"updated": "20240506230039"
 					},
 					"Children": [
 						{
@@ -345,12 +336,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211154-la9aicz",
-								"updated": "20220630211154"
+								"updated": "20240506230039"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "強調"
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "傾斜"
 								}
 							]
 						}
@@ -365,7 +357,7 @@
 					},
 					"Properties": {
 						"id": "20220630211154-uvdbsdb",
-						"updated": "20220630211154"
+						"updated": "20240506230041"
 					},
 					"Children": [
 						{
@@ -373,12 +365,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211154-of2mnn3",
-								"updated": "20220630211154"
+								"updated": "20240506230041"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "加粗"
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "加粗"
 								}
 							]
 						}

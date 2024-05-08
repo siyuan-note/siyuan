@@ -456,6 +456,11 @@ export class Toolbar {
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
+                // 在 a 元素中 ctrl+m 需继承其链接，也许不需要？没有用户反馈之前先保持现状
+                // if (type !== "a" && rangeTypes.includes("a") && nextElement.dataset.type.split(" ").includes("a") &&
+                //     nextElement.isSameNode(previousElement)) {
+                //     inlineElement.setAttribute("data-href", nextElement.getAttribute("data-href"));
+                // }
                 setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
             } else {
@@ -1478,7 +1483,7 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string,name:string }, index: number) => {
+                response.data.blocks.forEach((item: { path: string, content: string, name: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${item.name}
     <span class="b3-list-item__meta">${item.content}</span>

@@ -43,7 +43,7 @@ export const getTextStar = (blockElement: HTMLElement) => {
         } else if (blockElement.classList.contains("render-node")) {
             // 需在嵌入块后，代码块前
             refText += blockElement.dataset.subtype || Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-        }  else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+        } else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
             Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
                 if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
                     refText = getTextStar(blockElement.querySelector("[data-node-id]"));
@@ -190,8 +190,11 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
             textPlain = textPlain.replace(/'.+'\)\)$/, ` "${range.toString()}"))`);
         } else if (isFileAnnotation(textPlain)) {
             textPlain = textPlain.replace(/".+">>$/, `"${range.toString()}">>`);
-        } else if (protyle.lute.IsValidLinkDest(textPlain)) {
-            textPlain = `[${range.toString()}](${textPlain})`;
+        } else {
+            const linkDest = protyle.lute.GetLinkDest(textPlain);
+            if (linkDest) {
+                textPlain = `[${range.toString()}](${linkDest})`;
+            }
         }
     }
     insertHTML(protyle.lute.Md2BlockDOM(textPlain), protyle);
@@ -443,13 +446,16 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         color: firstLine.substring(2).replace(/ ".+">>$/, "")
                     });
                     return;
-                } else if (protyle.lute.IsValidLinkDest(textPlain)) {
+                } else {
                     // https://github.com/siyuan-note/siyuan/issues/8475
-                    protyle.toolbar.setInlineMark(protyle, "a", "range", {
-                        type: "a",
-                        color: textPlain
-                    });
-                    return;
+                    const linkDest = protyle.lute.GetLinkDest(textPlain);
+                    if (linkDest) {
+                        protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                            type: "a",
+                            color: linkDest
+                        });
+                        return;
+                    }
                 }
             }
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);

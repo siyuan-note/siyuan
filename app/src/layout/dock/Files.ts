@@ -71,7 +71,7 @@ export class Files extends Model {
                         case "create":
                         case "heading2doc":
                         case "li2doc":
-                            this.onMkdir(data.data);
+                            this.selectItem(data.data.box.id, data.data.path);
                             break;
                         case "renamenotebook":
                             this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
@@ -722,45 +722,6 @@ export class Files extends Model {
         } else {
             this.closeElement.lastElementChild.classList.add("fn__none");
             this.closeElement.classList.remove("fn__flex-1");
-        }
-    }
-
-    private onMkdir(data: {
-        box: INotebook,
-        path: string,
-    }) {
-        let targetElement = this.element.querySelector(`ul[data-url="${data.box.id}"]`);
-        let folderPath = pathPosix().dirname(data.path) + ".sy";
-        while (folderPath !== "/") {
-            targetElement = targetElement.querySelector(`li[data-path="${folderPath}"]`);
-            if (targetElement) {
-                break;
-            } else {
-                targetElement = this.element.querySelector(`ul[data-url="${data.box.id}"]`);
-                // 向上查找
-                if (folderPath === "/.sy") {
-                    folderPath = "/"; // https://github.com/siyuan-note/siyuan/issues/3895
-                } else {
-                    folderPath = pathPosix().dirname(folderPath) + ".sy";
-                }
-            }
-        }
-        if (targetElement.tagName === "UL") {
-            // 日记不存在时，创建日记需要添加文档
-            targetElement = targetElement.firstElementChild as HTMLElement;
-        }
-
-        if (targetElement) {
-            targetElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
-            targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
-            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
-            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
-                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
-            }
-            if (targetElement.nextElementSibling && targetElement.nextElementSibling.tagName === "UL") {
-                targetElement.nextElementSibling.remove();
-            }
-            this.getLeaf(targetElement, data.box.id);
         }
     }
 

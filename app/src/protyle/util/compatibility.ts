@@ -195,6 +195,9 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
+        defaultStorage[Constants.LOCAL_HISTORY] = {
+            notebookId: "%", type: 0, operation: "all"
+        };
         defaultStorage[Constants.LOCAL_FLASHCARD] = {
             fullscreen: false
         };
@@ -256,7 +259,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
-            Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF,
+            Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {

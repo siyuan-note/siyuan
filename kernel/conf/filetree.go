@@ -23,7 +23,9 @@ import (
 type FileTree struct {
 	AlwaysSelectOpenedFile  bool   `json:"alwaysSelectOpenedFile"`  // 是否自动选中当前打开的文件
 	OpenFilesUseCurrentTab  bool   `json:"openFilesUseCurrentTab"`  // 在当前页签打开文件
+	RefCreateSaveBox        string `json:"refCreateSaveBox"`        // 块引时新建文档存储笔记本
 	RefCreateSavePath       string `json:"refCreateSavePath"`       // 块引时新建文档存储路径
+	DocCreateSaveBox        string `json:"docCreateSaveBox"`        // 新建文档存储笔记本
 	DocCreateSavePath       string `json:"docCreateSavePath"`       // 新建文档存储路径
 	MaxListCount            int    `json:"maxListCount"`            // 最大列出数量
 	MaxOpenTabCount         int    `json:"maxOpenTabCount"`         // 最大打开页签数量

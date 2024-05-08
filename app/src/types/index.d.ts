@@ -236,6 +236,7 @@ interface IPluginSettingOption {
     title: string
     description?: string
     actionElement?: HTMLElement
+    direction?: "column" | "row"
 
     createActionElement?(): HTMLElement
 }
@@ -833,7 +834,7 @@ interface IAVColumn {
         name: string,
         color: string,
     }[],
-    relation?: IAVCellRelationValue,
+    relation?: IAVColumnRelation,
     rollup?: IAVCellRollupValue
 }
 
@@ -851,6 +852,7 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
+    keyID?: string,
     id?: string,
     type: TAVCol,
     isDetached?: boolean,
@@ -884,16 +886,18 @@ interface IAVCellValue {
     checkbox?: {
         checked: boolean
     }
-    relation?: {
-        blockIDs: string[]
-        contents?: IAVCellValue[]
-    }
+    relation?: IAVCellRelationValue
     rollup?: {
         contents?: IAVCellValue[]
     }
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
+}
+
+interface IAVCellRelationValue {
+    blockIDs: string[]
+    contents?: IAVCellValue[]
 }
 
 interface IAVCellDateValue {
@@ -917,7 +921,7 @@ interface IAVCellAssetValue {
     type: "file" | "image"
 }
 
-interface IAVCellRelationValue {
+interface IAVColumnRelation {
     avID?: string
     backKeyID?: string
     isTwoWay?: boolean

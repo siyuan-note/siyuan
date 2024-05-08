@@ -24,7 +24,7 @@ import {
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement,
+    getTopAloneElement, hasNextSibling,
     hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
@@ -33,9 +33,9 @@ import {enter, softEnter} from "./enter";
 import {fixTable} from "../util/table";
 import {turnsIntoOneTransaction, turnsIntoTransaction, updateBatchTransaction, updateTransaction} from "./transaction";
 import {fontEvent} from "../toolbar/Font";
-import {listIndent, listOutdent} from "./list";
+import {addSubList, listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
-import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
+import {insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
@@ -66,6 +66,7 @@ import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
+import {openLink} from "../../editor/openLink";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -171,6 +172,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             nodeElement.querySelector("wbr").remove();
             // 光标位于引用结尾后 ctrl+b 偶尔会失效
             range = cloneRange;
+            // 会导致  protyle.toolbar.range 和 range 不一致，先在有问题的地方重置一下 https://github.com/siyuan-note/siyuan/issues/10933
         }
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -420,19 +422,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey("⇧↓", event)) {
             downSelect({
-                protyle, event, nodeElement, editorElement, range,
+                protyle,
+                event,
+                nodeElement,
+                editorElement,
+                range,
                 cb(selectElements) {
                     const startEndElement = getStartEndElement(selectElements);
                     if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
                         const nextElement = startEndElement.endElement.nextElementSibling as HTMLElement;
                         if (nextElement && nextElement.getAttribute("data-node-id")) {
-                            nextElement.classList.add("protyle-wysiwyg--select");
-                            nextElement.setAttribute("select-end", "true");
-                            startEndElement.endElement.removeAttribute("select-end");
-                            const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
-                            if (bottom > 0) {
-                                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
-                                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                            if (nextElement.getBoundingClientRect().width === 0) {
+                                // https://github.com/siyuan-note/siyuan/issues/11194
+                                hideElements(["select"], protyle);
+                                startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                            } else {
+                                nextElement.classList.add("protyle-wysiwyg--select");
+                                nextElement.setAttribute("select-end", "true");
+                                startEndElement.endElement.removeAttribute("select-end");
+                                const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
+                                if (bottom > 0) {
+                                    protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
+                                    protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                                }
                             }
                         } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);
@@ -594,6 +606,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const selectText = range.toString();
+
         // 上下左右光标移动
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             // 需使用 editabled，否则代码块会把语言字数算入
@@ -774,7 +787,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
                 if (event.key === "Delete" || matchHotKey("⌃D", event)) {
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
-                    if (position.end === editElement.textContent.length) {
+                    if (position.end === editElement.textContent.length ||
+                        // 软换行后删除 https://github.com/siyuan-note/siyuan/issues/11118
+                        (position.end === editElement.textContent.length - 1 && editElement.textContent.endsWith("\n"))) {
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
                             const nextRange = focusBlock(nextElement);
@@ -792,6 +807,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.stopPropagation();
                         event.preventDefault();
                         return;
+                    } else {
+                        // 图片前 Delete 无效 https://github.com/siyuan-note/siyuan/issues/11209
+                        let nextSibling = hasNextSibling(range.startContainer) as Element;
+                        if (nextSibling) {
+                            if (nextSibling.nodeType === 3 && nextSibling.textContent === Constants.ZWSP) {
+                                nextSibling = nextSibling.nextSibling as Element;
+                            }
+                            if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
+                                removeImage(nextSibling as Element, nodeElement, range, protyle);
+                                event.stopPropagation();
+                                event.preventDefault();
+                                return;
+                            }
+                        }
                     }
                 } else {
                     const currentNode = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement;
@@ -862,16 +891,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 回车
-        if (!event.altKey && isNotCtrl(event) && event.key === "Enter") {
-            if (!event.shiftKey) {
-                enter(nodeElement, range, protyle);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+        if (isNotCtrl(event) && event.key === "Enter") {
+            if (event.altKey) {
+                addSubList(protyle, nodeElement, range);
+            } else {
+                if (!event.shiftKey) {
+                    enter(nodeElement, range, protyle);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             }
         }
 
@@ -1022,11 +1055,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         notebook: protyle.notebookId,
                         path: protyle.path,
                     }, (response) => {
-                        newFileBySelect(protyle, selectText, nodeElement, response.data);
+                        newFileBySelect(protyle, selectText, nodeElement, response.data, protyle.notebookId);
                     });
                 } else {
-                    getSavePath(protyle.path, protyle.notebookId, (pathString) => {
-                        newFileBySelect(protyle, selectText, nodeElement, pathString);
+                    getSavePath(protyle.path, protyle.notebookId, (pathString, targetNotebookId) => {
+                        newFileBySelect(protyle, selectText, nodeElement, pathString, targetNotebookId);
                     });
                 }
             }
@@ -1240,7 +1273,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return false;
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
-                    protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
+                    // 设置 lastHTMLs 会导致  protyle.toolbar.range 和 range 不一致，需重置一下 https://github.com/siyuan-note/siyuan/issues/10933
+                    protyle.toolbar.range = range;
                     if (["block-ref"].includes(menuItem.name) && protyle.toolbar.range.toString() === "") {
                         return true;
                     }
@@ -1339,7 +1373,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentNext.custom, event)) {
-            jumpToParentNext(protyle, nodeElement);
+            jumpToParent(protyle, nodeElement, "next");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParent.custom, event)) {
+            jumpToParent(protyle, nodeElement, "parent");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentPrev.custom, event)) {
+            jumpToParent(protyle, nodeElement, "previous");
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1573,6 +1619,26 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         /// #endif
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
+            const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
+            if (aElement) {
+                openLink(protyle, aElement.getAttribute("data-href"), undefined, false);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            const fileElement = hasClosestByAttribute(range.startContainer, "data-type", "file-annotation-ref");
+            if (fileElement) {
+                const fileIds = fileElement.getAttribute("data-id").split("/");
+                const linkAddress = `assets/${fileIds[1]}`;
+                openLink(protyle, linkAddress, undefined, false);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            return;
+        }
 
         // 置于最后，太多快捷键会使用到选中元素
         if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {

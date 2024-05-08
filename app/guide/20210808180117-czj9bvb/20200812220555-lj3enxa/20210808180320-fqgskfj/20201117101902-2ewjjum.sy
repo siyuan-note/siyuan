@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20211223192455"
+		"updated": "20240508085440"
 	},
 	"Children": [
 		{
@@ -419,7 +419,7 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20210111224926-ju1sd4d",
-				"updated": "20211222185346"
+				"updated": "20240508085440"
 			},
 			"Children": [
 				{
@@ -430,7 +430,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND hpath NOT LIKE '%嵌入内容块%'"
+					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND type = 'p' AND hpath NOT LIKE '%嵌入内容块%'"
 				},
 				{
 					"Type": "NodeCloseBrace"

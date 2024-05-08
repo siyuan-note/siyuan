@@ -6,7 +6,8 @@
 		"icon": "1f308",
 		"id": "20211226121232-23s79xr",
 		"title": "雲端服務",
-		"updated": "20230805232827"
+		"type": "doc",
+		"updated": "20240508011443"
 	},
 	"Children": [
 		{
@@ -29,9 +30,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230627214440-h0iez4q",
-				"updated": "20230627214441"
+				"updated": "20240508011443"
 			},
 			"Children": [
+				{
+					"ID": "20240508003304-en4q3yl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508003304-en4q3yl",
+						"updated": "20240508003305"
+					},
+					"Children": [
+						{
+							"ID": "20240508003304-xj199m6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508003304-xj199m6",
+								"updated": "20240508003305"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121503-k3jma6m",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "存儲空間"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20230627214441-1quupl3",
 					"Type": "NodeListItem",
@@ -118,6 +150,37 @@
 									"TextMarkBlockRefID": "20211226121332-irgblss",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "資料文件圖庫"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508011443-qfxem3n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508011443-qfxem3n",
+						"updated": "20240508011443"
+					},
+					"Children": [
+						{
+							"ID": "20240508011443-l0vn0ye",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508011443-l0vn0ye",
+								"updated": "20240508011443"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240508010647-8nuyk31",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "收集箱"
 								}
 							]
 						}

@@ -26,6 +26,11 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
     }
     protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     protyle.lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
+    protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+    protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+    protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+    protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    protyle.lute.SetGFMStrikethrough1(false);
     addLoading(protyle);
     if (protyle.options.backlinkData) {
         const isMention = protyle.element.getAttribute("data-ismention") === "true";

@@ -302,7 +302,7 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
     <div class="fn__hr--b"></div>
     <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.passphrase}">
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.duplicate} ${window.siyuan.languages.passphrase}">
+    <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.reEnterPassphrase}">
 </div>
 <div class="b3-dialog__action">
     <label>

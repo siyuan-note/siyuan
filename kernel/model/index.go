@@ -27,11 +27,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -203,7 +204,7 @@ func index(boxID string) {
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
-	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.BytesCustomCeil(uint64(treeSize), 2))
 	debug.FreeOSMemory()
 	return
 }
@@ -289,14 +290,22 @@ func IndexEmbedBlockJob() {
 
 func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
-		md := strings.TrimSpace(embedBlock.Markdown)
-		if strings.Contains(md, "//js") {
+		markdown := strings.TrimSpace(embedBlock.Markdown)
+		markdown = strings.TrimPrefix(markdown, "{{")
+		stmt := strings.TrimSuffix(markdown, "}}")
+
+		// 嵌入块的 Markdown 内容需要反转义
+		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+
+		// 需要移除首尾的空白字符以判断是否具有 //!js 标记
+		stmt = strings.TrimSpace(stmt)
+		if strings.HasPrefix(stmt, "//!js") {
+			// https://github.com/siyuan-note/siyuan/issues/9648
 			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
 			continue
 		}
 
-		stmt := strings.TrimPrefix(md, "{{")
-		stmt = strings.TrimSuffix(stmt, "}}")
 		if !strings.Contains(strings.ToLower(stmt), "select") {
 			continue
 		}

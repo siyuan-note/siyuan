@@ -5,9 +5,9 @@ echo 'Building UI'
 cd app
 call pnpm install
 call pnpm run build
-call pnpm run build:export
-echo "build export assets"
-
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 cd ..
 
 echo 'Cleaning Builds'
@@ -29,12 +29,18 @@ set GOOS=windows
 set GOARCH=amd64
 @REM you can use `go mod tidy` to update kernel dependency before build
 go build --tags fts5 -v -o "../app/kernel/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 
 cd ..
 
-echo 'Building Electron'
+echo 'Building Electron App'
 cd app
 call pnpm run dist
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 cd ..
 
 echo 'Building Appx'

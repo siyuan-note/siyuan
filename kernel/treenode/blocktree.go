@@ -24,10 +24,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	util2 "github.com/siyuan-note/dejavu/util"
 	"github.com/siyuan-note/logging"
@@ -506,7 +506,7 @@ func InitBlockTree(force bool) {
 	p.Release()
 
 	elapsed := time.Since(start).Seconds()
-	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size.Load())), util.BlockTreePath, elapsed)
+	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(size.Load()), 2), util.BlockTreePath, elapsed)
 	return
 }
 
@@ -569,7 +569,7 @@ func SaveBlockTree(force bool) {
 
 	elapsed := time.Since(start).Seconds()
 	if 2 < elapsed {
-		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(size), util.BlockTreePath, elapsed)
+		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(size, 2), util.BlockTreePath, elapsed)
 	}
 }
 

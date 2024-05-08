@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dustin/go-humanize"
+	"github.com/88250/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -89,7 +89,10 @@ func Widgets() (widgets []*Widget) {
 		widget.Stars = repo.Stars
 		widget.OpenIssues = repo.OpenIssues
 		widget.Size = repo.Size
-		widget.HSize = humanize.Bytes(uint64(widget.Size))
+		widget.HSize = humanize.BytesCustomCeil(uint64(widget.Size), 2)
+		widget.InstallSize = repo.InstallSize
+		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
+		packageInstallSizeCache.SetDefault(widget.RepoURL, widget.InstallSize)
 		widget.HUpdated = formatUpdated(widget.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
 		if nil != pkg {
@@ -155,9 +158,14 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 		widget.HInstallDate = info.ModTime().Format("2006-01-02")
-		installSize, _ := util.SizeOfDirectory(installPath)
-		widget.InstallSize = installSize
-		widget.HInstallSize = humanize.Bytes(uint64(installSize))
+		if installSize, ok := packageInstallSizeCache.Get(widget.RepoURL); ok {
+			widget.InstallSize = installSize.(int64)
+		} else {
+			is, _ := util.SizeOfDirectory(installPath)
+			widget.InstallSize = is
+			packageInstallSizeCache.SetDefault(widget.RepoURL, is)
+		}
+		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
 		readmeFilename := getPreferredReadme(widget.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {

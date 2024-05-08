@@ -2,7 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "../../util/assets";
-import {hasClosestByClassName} from "../util/hasClosest";
 
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let codeElements: NodeListOf<Element>;
@@ -100,14 +99,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     block.nextElementSibling.remove();
                     if (languageElement) {
                         languageElement.style.marginLeft = "";
-                    }
-                }
-                // 搜索定位
-                const layoutElement = hasClosestByClassName(block, "search__layout", true);
-                if (layoutElement && block.parentElement.getAttribute("data-node-id") === layoutElement.querySelector("#searchList > .b3-list-item--focus")?.getAttribute("data-node-id")) {
-                    const matchElement = block.querySelector('span[data-type="search-mark"]');
-                    if (matchElement) {
-                        matchElement.scrollIntoView();
                     }
                 }
                 block.innerHTML = window.hljs.highlight(

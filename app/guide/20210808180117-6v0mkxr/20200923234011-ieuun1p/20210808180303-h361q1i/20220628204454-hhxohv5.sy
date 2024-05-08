@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
-		"updated": "20220630211219"
+		"type": "doc",
+		"updated": "20240506230917"
 	},
 	"Children": [
 		{
@@ -104,7 +105,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220628215200-rkz9o7o",
-				"updated": "20220628215340"
+				"updated": "20240506230150"
 			},
 			"Children": [
 				{
@@ -116,7 +117,7 @@
 					},
 					"Properties": {
 						"id": "20220628215200-jdgcfne",
-						"updated": "20220628215335"
+						"updated": "20240506230145"
 					},
 					"Children": [
 						{
@@ -124,12 +125,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215200-6pyhpe4",
-								"updated": "20220628215335"
+								"updated": "20240506230145"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Inline code"
+									"Data": "Inline code: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Code"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -144,7 +154,7 @@
 					},
 					"Properties": {
 						"id": "20220628215200-ojyqca0",
-						"updated": "20220628215200"
+						"updated": "20240506230150"
 					},
 					"Children": [
 						{
@@ -152,12 +162,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215200-vokqsi7",
-								"updated": "20220628215200"
+								"updated": "20240506230150"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Inline formula"
+									"Data": "Inline formula: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
 								}
 							]
 						}
@@ -185,37 +204,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220630211201-d80xx42",
-				"updated": "20220630211219"
+				"updated": "20240506230917"
 			},
 			"Children": [
-				{
-					"ID": "20220630211201-2vvo1yo",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220630211201-2vvo1yo",
-						"updated": "20220630211210"
-					},
-					"Children": [
-						{
-							"ID": "20220630211201-crqr0sj",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220630211201-crqr0sj",
-								"updated": "20220630211210"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Tag"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20220630211201-xvvr6cb",
 					"Type": "NodeListItem",
@@ -225,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20220630211201-xvvr6cb",
-						"updated": "20220630211212"
+						"updated": "20240506230917"
 					},
 					"Children": [
 						{
@@ -233,12 +224,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-s03kxsh",
-								"updated": "20220630211212"
+								"updated": "20240506230917"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Mark"
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "Mark"
 								}
 							]
 						}
@@ -253,7 +245,7 @@
 					},
 					"Properties": {
 						"id": "20220630211201-lxnn7r2",
-						"updated": "20220630211213"
+						"updated": "20240506230054"
 					},
 					"Children": [
 						{
@@ -261,12 +253,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-5gsz1zv",
-								"updated": "20220630211213"
+								"updated": "20240506230054"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Strikethrough"
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "Strikethrough"
 								}
 							]
 						}
@@ -281,7 +274,7 @@
 					},
 					"Properties": {
 						"id": "20220630211201-vg75q8p",
-						"updated": "20220630211201"
+						"updated": "20240506230115"
 					},
 					"Children": [
 						{
@@ -289,12 +282,14 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-wryew45",
-								"updated": "20220630211201"
+								"updated": "20240506230115"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Hyperlink anchor text"
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io",
+									"TextMarkTextContent": "Hyperlink anchor text"
 								}
 							]
 						}
@@ -337,7 +332,7 @@
 					},
 					"Properties": {
 						"id": "20220630211201-6po0hz5",
-						"updated": "20220630211218"
+						"updated": "20240506230121"
 					},
 					"Children": [
 						{
@@ -345,12 +340,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-z7c6px5",
-								"updated": "20220630211218"
+								"updated": "20240506230121"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Emphasize"
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "Italic"
 								}
 							]
 						}
@@ -365,7 +361,7 @@
 					},
 					"Properties": {
 						"id": "20220630211201-4aezon3",
-						"updated": "20220630211219"
+						"updated": "20240506230123"
 					},
 					"Children": [
 						{
@@ -373,12 +369,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220630211201-4n0bq1l",
-								"updated": "20220630211219"
+								"updated": "20240506230123"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Bold"
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Bold"
 								}
 							]
 						}

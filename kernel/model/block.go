@@ -114,33 +114,116 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
-func GetParentNextChildID(id string) string {
+func GetBlockSiblingID(id string) (parent, previous, next string) {
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
-		return ""
+		return
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return ""
+		return
 	}
 
+	if !node.IsBlock() {
+		return
+	}
+
+	parentListCount := 0
+	var parentList, parentListItem, current *ast.Node
 	for p := node.Parent; nil != p; p = p.Parent {
-		if ast.NodeDocument == p.Type {
-			if nil != node.Next {
-				return node.Next.ID
+		if ast.NodeListItem == p.Type {
+			parentListCount++
+			if 1 < parentListCount {
+				parentList = p.Parent
+				parentListItem = p
+				break
 			}
-			return ""
+			current = p.Parent
+		}
+	}
+
+	if nil != parentList {
+		parent = parentList.ID
+		if flb := firstChild(parentList); nil != flb {
+			parent = flb.ID
 		}
 
-		for f := p.Next; nil != f; f = f.Next {
-			// 遍历取下一个块级元素（比如跳过超级块 Close 节点）
-			if f.IsBlock() {
-				return f.ID
+		if parentListItem.Previous != nil {
+			previous = parentListItem.Previous.ID
+			if flb := firstChild(parentListItem.Previous); nil != flb {
+				previous = flb.ID
+			}
+		}
+
+		if parentListItem.Next != nil {
+			next = parentListItem.Next.ID
+			if flb := firstChild(parentListItem.Next); nil != flb {
+				next = flb.ID
+			}
+		}
+		return
+	}
+
+	if nil == current {
+		current = node
+	}
+
+	if nil != current.Parent && current.Parent.IsBlock() {
+		parent = current.Parent.ID
+		if flb := firstChild(current.Parent); nil != flb {
+			parent = flb.ID
+		}
+
+		if ast.NodeDocument == current.Parent.Type {
+			parent = current.Parent.ID
+
+			if nil != current.Previous && current.Previous.IsBlock() {
+				previous = current.Previous.ID
+				if flb := firstChild(current.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != current.Next && current.Next.IsBlock() {
+				next = current.Next.ID
+				if flb := firstChild(current.Next); nil != flb {
+					next = flb.ID
+				}
+			}
+		} else {
+			if nil != current.Parent.Previous && current.Parent.Previous.IsBlock() {
+				previous = current.Parent.Previous.ID
+				if flb := firstChild(current.Parent.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != current.Parent.Next && current.Parent.Next.IsBlock() {
+				next = current.Parent.Next.ID
+				if flb := firstChild(current.Parent.Next); nil != flb {
+					next = flb.ID
+				}
 			}
 		}
 	}
-	return ""
+
+	return
+}
+
+func firstChild(node *ast.Node) (ret *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsBlock() {
+			ret = n
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
 }
 
 func IsBlockFolded(id string) bool {

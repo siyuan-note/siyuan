@@ -9,8 +9,11 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 
-const genSearchList = (element: Element, keyword: string, avId: string, cb?: () => void) => {
-    fetchPost("/api/av/searchAttributeView", {keyword, excludes: [avId]}, (response) => {
+const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
+    fetchPost("/api/av/searchAttributeView", {
+        keyword,
+        excludes: (excludes && avId) ? [avId] : undefined
+    }, (response) => {
         let html = "";
         response.data.results.forEach((item: {
             avID: string
@@ -45,7 +48,7 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
     }
 };
 
-export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void) => {
+export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void, excludes = true) => {
     window.siyuan.menus.menu.remove();
     const menu = new Menu();
     menu.addItem({
@@ -86,10 +89,10 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 if (event.isComposing) {
                     return;
                 }
-                genSearchList(listElement, inputElement.value, avId);
+                genSearchList(listElement, inputElement.value, avId, excludes);
             });
             inputElement.addEventListener("compositionend", () => {
-                genSearchList(listElement, inputElement.value, avId);
+                genSearchList(listElement, inputElement.value, avId, excludes);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
@@ -103,7 +106,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                     window.siyuan.menus.menu.remove();
                 }
             });
-            genSearchList(listElement, "", avId, () => {
+            genSearchList(listElement, "", avId, excludes, () => {
                 const rect = target.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
@@ -146,7 +149,7 @@ export const updateRelation = (options: {
         avID: options.avID,
         keyID: colId,
         id: newAVId || colData.relation.avID,
-        backRelationKeyID: colData.relation.avID === newAVId ? colData.relation.backKeyID : Lute.NewNodeID(),
+        backRelationKeyID: colData.relation.avID === newAVId ? (colData.relation.backKeyID || Lute.NewNodeID()) : Lute.NewNodeID(),
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
         format: colNewName
@@ -171,7 +174,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     const switchElement = switchItemElement.querySelector(".b3-switch") as HTMLInputElement;
     const inputItemElement = switchItemElement.nextElementSibling;
     const btnElement = inputItemElement.nextElementSibling;
-    const oldValue = JSON.parse(searchElement.dataset.oldValue) as IAVCellRelationValue;
+    const oldValue = JSON.parse(searchElement.dataset.oldValue) as IAVColumnRelation;
     if (oldValue.avID) {
         const inputElement = inputItemElement.querySelector("input") as HTMLInputElement;
         if (resetData) {
@@ -320,7 +323,7 @@ ${html || genSelectItemHTML("empty")}`;
 };
 
 export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
-    let colRelationData: IAVCellRelationValue;
+    let colRelationData: IAVColumnRelation;
     data.view.columns.find(item => {
         if (item.id === cellElements[0].dataset.colId) {
             colRelationData = item.relation;
@@ -348,6 +351,9 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (!menuElement) {
         return;
     }
+    if (menuElement.querySelector(".dragover__bottom, .dragover__top")) {
+        return;
+    }
     const rowElement = hasClosestByClassName(cellElements[0], "av__row");
     if (!rowElement) {
         return;
@@ -355,7 +361,19 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (!nodeElement.contains(cellElements[0])) {
         cellElements[0] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
     }
-    const newValue = genCellValueByElement("relation", cellElements[0]).relation;
+    const newValue:IAVCellRelationValue = {blockIDs: [], contents: []};
+    menuElement.querySelectorAll('[data-type="setRelationCell"]').forEach(item => {
+        const id = item.getAttribute("data-id");
+        newValue.blockIDs.push(id);
+        newValue.contents.push({
+            type: "block",
+            block: {
+                id,
+                content: item.querySelector(".b3-menu__label").textContent
+            },
+            isDetached: !item.querySelector(".popover__block")
+        });
+    });
     if (target.classList.contains("b3-menu__item")) {
         const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");

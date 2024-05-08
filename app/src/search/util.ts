@@ -1189,7 +1189,11 @@ export const getArticle = (options: {
                 if (matchElement) {
                     matchElement.classList.add("search-mark--hl");
                     const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                    const matchRectTop = matchElement.getBoundingClientRect().top;  // 需前置，否则代码高亮后会移除该元素
+                    setTimeout(() => {
+                        // 等待 scrollCenter 定位后再滚动
+                        options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
+                    });
                 }
             });
         });

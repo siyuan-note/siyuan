@@ -2353,6 +2353,12 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID, adding
 							continue
 						}
 
+						if av.KeyTypeBlock == newValue.Type {
+							// 如果是主键的话前面已经添加过了，这里仅修改内容
+							blockValue.Block.Content = newValue.Block.Content
+							break
+						}
+
 						newValue.ID = ast.NewNodeID()
 						newValue.KeyID = keyValues.Key.ID
 						newValue.BlockID = addingBlockID

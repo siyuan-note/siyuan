@@ -2897,6 +2897,11 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = strings.TrimSpace(operation.Name)
 				keyValues.Key.Type = colType
+
+				for _, value := range keyValues.Values {
+					value.Type = colType
+				}
+
 				break
 			}
 		}

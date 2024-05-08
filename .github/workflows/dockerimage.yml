@@ -1,4 +1,4 @@
-name: CD For SiYuan
+name: dockerImage
 
 on:
   push:

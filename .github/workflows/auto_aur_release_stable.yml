@@ -1,14 +1,25 @@
 name: Upload to AUR
 
 on:
-  push:
-    tags:
-      - '!*dev*'
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Check tag aka check release type
+        id: checktag
+        run: |
+          if [[ "${{ github.ref }}" == *"dev"* ]]; then
+            echo "Skip the workflow as the tag contains 'dev'"
+            echo "::set-output name=skip::true"
+          else
+            echo "Continue the workflow"
+            echo "::set-output name=skip::false"
+          fi
+        shell: bash
 
       - name: Extract tag name
         id: get_version

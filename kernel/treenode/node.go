@@ -722,6 +722,10 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				if nil != tableCell.Value && nil != tableCell.Value.Relation {
 					tableCell.Value.Relation.Contents = nil
 				}
+			case av.KeyTypeText: // 渲染文本列
+				if nil != tableCell.Value && nil != tableCell.Value.Text {
+					tableCell.Value.Text.Content = util.EscapeHTML(tableCell.Value.Text.Content)
+				}
 			}
 
 			FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)

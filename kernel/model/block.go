@@ -144,9 +144,6 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 
 	if nil != parentListItem {
 		parent = parentListItem.ID
-		if flb := firstChild(parentListItem); nil != flb {
-			parent = flb.ID
-		}
 
 		if parentListItem.Previous != nil {
 			previous = parentListItem.Previous.ID

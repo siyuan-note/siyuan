@@ -1,0 +1,81 @@
+name: after CI/CD change to release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+    # https://docs.github.com/zh/actions/using-workflows/events-that-trigger-workflows#release
+    # 注意：触发使用的配置是 released 时的 aci.yml 内容，与主分支或者后续更新无关。
+
+# ref https://docs.github.com/zh/actions/learn-github-actions/variables
+env:
+    repo_name: "siyuan"
+    repo_owner: "siyuan-note"
+    name_MD5: "Assets_MD5_Sum.txt"
+    name_SHA256: "Assets_SHA256_Sum.txt"
+
+jobs:
+  release_action:
+    runs-on: ubuntu-latest
+    name: Release Action
+    steps:
+    - name: 🚀 Install dependencies
+      run: npm install axios
+    - name: 🧲 Get Latest Release Assets
+      id: latest_release
+      uses: actions/github-script@v7
+      with:
+          result-encoding: string
+          retries: 3
+          debug: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const axios = require('axios');
+            const fs = require('fs');
+            const { data } = await github.rest.repos.getLatestRelease({ owner: '${{ env.repo_owner }}', repo: '${{ env.repo_name }}' });
+            async function downloadAsset(asset) {
+                const url = asset.browser_download_url;
+                const path = `${asset.name}`;
+                console.log(`Downloading ${url} to${path}`);
+                const response = await axios({
+                url,
+                method: 'GET',
+                responseType: 'stream',
+                });
+                await new Promise((resolve, reject) => {
+                const writer = response.data.pipe(fs.createWriteStream(path));
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+                });
+                console.log(`Downloaded ${path}`);
+            }
+            await Promise.all(data.assets.map(downloadAsset));
+            return data.upload_url;
+      continue-on-error: false
+
+    - name: 💥 Generate Hash for Assets
+      id: generate_hash
+      # 使用了 awk 的内置函数 toupper() 来将哈希值转换为大写，同时使用空格作为字段分隔符。awk 会将每一行的第一个字段（哈希值）转换为大写，并且保留第二个字段（文件名）
+      run: |
+          ls
+          find . -type f -name '${{ env.repo_name }}-*' -exec md5sum {} + | awk '{print toupper($1), $2}' > ${{ env.name_MD5 }}
+          find . -type f -name '${{ env.repo_name }}-*' -exec sha256sum {} + | awk '{print toupper($1), $2}' > ${{ env.name_SHA256 }}
+      continue-on-error: false
+
+    - name: 📤 Upload Assets_MD5_Sum.txt File to Release Asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.latest_release.outputs.result }}
+          asset_path: ./${{ env.name_MD5 }}
+          asset_name: ${{ env.name_MD5 }}
+
+    - name: 📤 Upload Assets_SHA256_Sum.txt File to Release Asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.latest_release.outputs.result }}
+          asset_path: ./${{ env.name_SHA256 }}
+          asset_name: ${{ env.name_SHA256 }}

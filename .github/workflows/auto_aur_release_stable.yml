@@ -1,0 +1,65 @@
+name: Upload to AUR
+
+on:
+  push:
+    tags:
+      - '!*dev*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Extract tag name
+        id: get_version
+        run: echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/tags/}
+
+      - name: Create PKGBUILD
+        run: |
+          cat << EOF >> PKGBUILD
+          # maintainer: zxkmm (IHp4a21tQGhvdG1haWwuY29t)
+          # auto running on siyuan official repo
+          # PKGBUILD is copied from https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=siyuan-appimage
+          # which is made by vvxxp8 <concatenate[g] the characters[x] in square[b] brackets[1] in[5] order[3] at gmail dot com>
+          
+          pkgname=siyuan_stable
+          pkgver=${{ steps.get_version.outputs.TGA_VERSION }}
+          pkgrel=2
+          pkgdesc="auto upload to AUR when SiYuan stable release"
+          arch=("x86_64")
+          url="https://b3log.org/siyuan"
+          license=("AGPL-3.0-only")
+          _pkgname="siyuan-${pkgver}-linux.AppImage"
+          noextract=(${_pkgname})
+          options=("!strip" "!debug")
+          depends=("fuse2")
+          optdepends=('pandoc: docx export')
+          source=("${_pkgname}::https://github.com/siyuan-note/siyuan/releases/download/v${pkgver}/${_pkgname}")
+          sha256sums=("82b184611529957e2b148de7d40463de4bc70a66026f7a4059060a7e018aeb41")
+
+          _installdir=/opt/appimages
+
+          prepare() {
+              chmod a+x ${_pkgname}
+              ./${_pkgname} --appimage-extract >/dev/null
+              sed -i "s+AppRun+${_installdir}/siyuan.AppImage+" "squashfs-root/siyuan.desktop"
+              sed -i "s+^Icon=.*+Icon=siyuan-appimage+" "squashfs-root/siyuan.desktop"
+          }
+
+          package() {
+              install -Dm755 ${_pkgname} "${pkgdir}/${_installdir}/siyuan.AppImage"
+              install -Dm644 "squashfs-root/resources/stage/icon.png" "${pkgdir}/usr/share/icons/hicolor/512x512/apps/siyuan-appimage.png"
+              install -Dm644 "squashfs-root/siyuan.desktop" "${pkgdir}/usr/share/applications/siyuan-appimage.desktop"
+          }
+          EOF
+
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@<TAG>
+        with:
+            pkgname: my-awesome-package
+            pkgbuild: ./PKGBUILD
+            commit_username: ${{ secrets.AUR_USERNAME }}
+            commit_email: ${{ secrets.AUR_EMAIL }}
+            ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+            commit_message: Update AUR package
+            ssh_keyscan_types: rsa,dsa,ecdsa,ed25519

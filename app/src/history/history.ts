@@ -599,11 +599,11 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     chipClass += "b3-chip--warning ";
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
-                                html += `<li data-notebook-id="${docItem.notebook}" title="${escapeAttr(docItem.title)}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
-    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}b3-tooltips b3-tooltips__n" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
-    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
+                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6bottom" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
+    <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__n" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6bottom" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
 </li>`;

@@ -30,7 +30,7 @@ const renderCellURL = (urlContent: string) => {
         // 不是 url 地址
     }
     // https://github.com/siyuan-note/siyuan/issues/9291
-    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${urlContent}"><span>${host}</span><span class="ft__on-surface">${Lute.EscapeHTMLStr(suffix)}</span></span>`;
+    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${urlContent}"><span>${host}</span><span class="ft__on-surface">${suffix}</span></span>`;
 };
 
 export const getCellText = (cellElement: HTMLElement | false) => {
@@ -147,7 +147,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 [colType]: {
-                    content: value
+                    content: ["block", "text", "url", "phone", "email"].includes(colType) ? Lute.EscapeHTMLStr(value) : value
                 }
             };
         } else if (colType === "mSelect" || colType === "select") {
@@ -660,12 +660,10 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
 
 export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     let text = "";
-    if ("template" === cellValue.type) {
-        text = `<span class="av__celltext">${cellValue ? (Lute.EscapeHTMLStr(cellValue.template.content) || "") : ""}</span>`;
-    } else if ("text" === cellValue.type) {
-        text = `<span class="av__celltext">${cellValue ? (Lute.EscapeHTMLStr(cellValue.text.content) || "") : ""}</span>`;
+    if (["text", "template"].includes(cellValue.type)) {
+        text = `<span class="av__celltext">${cellValue ? (cellValue[cellValue.type as "text"].content || "") : ""}</span>`;
     } else if (["email", "phone"].includes(cellValue.type)) {
-        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? Lute.EscapeHTMLStr(cellValue[cellValue.type as "email"].content) : ""}</span>`;
+        text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? cellValue[cellValue.type as "email"].content : ""}</span>`;
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {

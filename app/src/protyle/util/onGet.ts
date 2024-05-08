@@ -207,7 +207,7 @@ const setHTML = (options: {
         }
         protyle.element.removeAttribute("disabled-forever");
         setReadonlyByConfig(protyle, updateReadonly);
-        if (options.action.includes(Constants.CB_GET_OPENNEW)) {
+        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly) {
             updateReadonlyMethod(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
         }
     }

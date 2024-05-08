@@ -624,12 +624,12 @@ ${genHintItemHTML(item)}
                 }, () => {
                     insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`, protyle);
                     /// #if MOBILE
-                    openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
                     /// #else
                     openFileById({
                         app: protyle.app,
                         id: newSubDocId,
-                        action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
+                        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
                     });
                     /// #endif
                 });

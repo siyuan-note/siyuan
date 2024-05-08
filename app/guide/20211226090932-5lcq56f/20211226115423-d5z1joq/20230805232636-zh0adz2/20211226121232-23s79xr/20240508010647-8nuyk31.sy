@@ -204,7 +204,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/image-20220119231126-qt2ooye.png"
+											"Data": "assets/image-20240507233205-gidj803.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -368,7 +368,7 @@
 						},
 						{
 							"Type": "NodeLinkDest",
-							"Data": "assets/image-20220803164828-wrh3h5w.png"
+							"Data": "assets/image-20240508085927-fg29hvp.png"
 						},
 						{
 							"Type": "NodeCloseParen"

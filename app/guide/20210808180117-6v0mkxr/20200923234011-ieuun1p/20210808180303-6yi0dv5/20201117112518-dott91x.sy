@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed Content Block",
 		"type": "doc",
-		"updated": "20221007175159"
+		"updated": "20240508085416"
 	},
 	"Children": [
 		{
@@ -419,7 +419,8 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20210111231445-gwfrxnl",
-				"updated": "20211222185405"
+				"style": "height: 1120px;",
+				"updated": "20240508085416"
 			},
 			"Children": [
 				{
@@ -430,7 +431,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%In SiYuan%' AND content LIKE '%core concept%' AND hpath NOT LIKE '%Embed Content Block%'"
+					"Data": "SELECT * FROM blocks WHERE content LIKE '%In SiYuan%' AND content LIKE '%core concept%' AND type = 'p' AND hpath NOT LIKE '%Embed Content Block%'"
 				},
 				{
 					"Type": "NodeCloseBrace"

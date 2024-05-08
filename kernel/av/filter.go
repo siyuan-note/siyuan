@@ -689,6 +689,13 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Valu
 		return nil
 	}
 
+	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
+		if filter.Value.IsEmpty() {
+			// 在不是过滤空值和非空值的情况下，空值不设置默认值 https://github.com/siyuan-note/siyuan/issues/11297
+			return nil
+		}
+	}
+
 	ret = filter.Value.Clone()
 	ret.CreatedAt = util.CurrentTimeMillis()
 	ret.UpdatedAt = ret.CreatedAt + 1000

@@ -363,7 +363,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
         icon: "iconOpen",
-        accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/Click",
+        accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
@@ -378,7 +378,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.refTab,
         icon: "iconEyeoff",
-        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘Click",
+        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn) => {
                 openFileById({
@@ -394,7 +394,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconLayoutRight",
-        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥Click",
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
@@ -410,7 +410,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
         icon: "iconLayoutBottom",
-        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧Click",
+        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
                 openFileById({
@@ -1392,7 +1392,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     /// #if !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.search,
-        accelerator: "Click",
+        accelerator: window.siyuan.languages.click,
         icon: "iconSearch",
         click() {
             openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false);

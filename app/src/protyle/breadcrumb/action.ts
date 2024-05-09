@@ -1,5 +1,5 @@
 /// #if !MOBILE
-import {getAllModels, getAllWnds} from "../../layout/getAll";
+import {getAllEditor, getAllModels, getAllWnds} from "../../layout/getAll";
 /// #endif
 import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
@@ -24,9 +24,9 @@ export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
         /// #if MOBILE
         reloadProtyle(protyle, false);
         /// #else
-        getAllModels().editor.forEach(item => {
-            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
+        getAllEditor().forEach(item => {
+            if (item.protyle.block.rootID === protyle.block.rootID) {
+                reloadProtyle(item.protyle, item.protyle.element.isSameNode(protyle.element));
             }
         });
         /// #endif

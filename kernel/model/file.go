@@ -89,7 +89,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Bookmark = ial["bookmark"]
 	t, _ := time.ParseInLocation("20060102150405", ret.ID[:14], time.Local)
 	ret.CTime = t.Unix()
-	ret.HCtime = t.Format("2006-01-02 15:04:05")
+	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
 	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
 
 	mTime := t
@@ -100,7 +100,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	}
 
 	ret.Mtime = mTime.Unix()
-	ret.HMtime = util.HumanizeTime(mTime, Conf.Lang)
+	ret.HMtime = mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang)
 	return
 }
 

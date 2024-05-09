@@ -37,7 +37,7 @@ export const commandPanel = (app: App) => {
     <ul class="b3-list b3-list--background search__list" id="commands"></ul>
     <div class="search__tip">
         <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
-        <kbd>Enter/Click</kbd> ${window.siyuan.languages.confirm}
+        <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.confirm}
         <kbd>Esc</kbd> ${window.siyuan.languages.close}
     </div>
 </div>`

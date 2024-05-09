@@ -47,7 +47,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
         <span class="fn__ellipsis">${key}</span>
     </span>
 </div>
-<span class="b3-menu__accelerator">Enter</span>
+<span class="b3-menu__accelerator">${window.siyuan.languages.enterKey}</span>
 </button>${html}`;
     }
     return html;

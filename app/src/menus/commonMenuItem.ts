@@ -683,7 +683,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     /// #if MOBILE
     submenu.push({
         label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
-        accelerator: showAccelerator ? "Click" : "",
+        accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
             openByMobile(src);
         }
@@ -697,7 +697,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
-                accelerator: showAccelerator ? "Click" : "",
+                accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
@@ -705,7 +705,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
-                accelerator: showAccelerator ? "⌥Click" : "",
+                accelerator: showAccelerator ? "⌥" + window.siyuan.languages.click : "",
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)));
                 }
@@ -721,14 +721,14 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘Click" : "",
+                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
                 click: () => {
                     openBy(src, "folder");
                 }
             });
             submenu.push({
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? "⇧Click" : "",
+                accelerator: showAccelerator ? "⇧" + window.siyuan.languages.click : "",
                 click() {
                     openBy(src, "app");
                 }
@@ -738,7 +738,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             /// #if !BROWSER
             submenu.push({
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? "Click" : "",
+                accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click() {
                     openBy(src, "app");
                 }
@@ -746,7 +746,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘Click" : "",
+                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
                 click: () => {
                     openBy(src, "folder");
                 }
@@ -754,7 +754,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             /// #else
             submenu.push({
                 label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
-                accelerator: showAccelerator ? "Click" : "",
+                accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click: () => {
                     openByMobile(src);
                 }
@@ -770,7 +770,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.useDefault,
-            accelerator: showAccelerator ? "Click" : "",
+            accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
                 shell.openExternal(src).catch((e) => {
                     showMessage(e);
@@ -780,7 +780,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         /// #else
         submenu.push({
             label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
-            accelerator: showAccelerator ? "Click" : "",
+            accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
                 openByMobile(src);
             }

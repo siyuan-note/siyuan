@@ -97,7 +97,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
@@ -127,7 +127,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
@@ -150,7 +150,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
@@ -173,7 +173,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
@@ -196,7 +196,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
@@ -219,7 +219,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}">
+                <input class="b3-text-field b3-form__icon-input" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>

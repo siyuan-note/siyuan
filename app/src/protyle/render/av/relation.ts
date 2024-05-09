@@ -362,7 +362,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
         cellElements[0] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
     }
     const newValue:IAVCellRelationValue = {blockIDs: [], contents: []};
-    menuElement.querySelectorAll('[data-type="setRelationCell"]').forEach(item => {
+    menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
         const id = item.getAttribute("data-id");
         newValue.blockIDs.push(id);
         newValue.contents.push({

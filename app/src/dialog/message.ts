@@ -22,7 +22,9 @@ export const initMessage = () => {
             } else if (target.tagName === "A" || target.tagName === "BUTTON") {
                 break;
             } else if (target.classList.contains("b3-snackbar")) {
-                hideMessage(target.getAttribute("data-id"));
+                if (getSelection().rangeCount === 0 || !getSelection().getRangeAt(0).toString()) {
+                    hideMessage(target.getAttribute("data-id"));
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 break;

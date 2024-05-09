@@ -91,6 +91,7 @@ import {
 } from "../render/av/cell";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {openLink} from "../../editor/openLink";
+import {mathRender} from "../render/mathRender";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1443,6 +1444,7 @@ export class WYSIWYG {
                         tempElement.append(range.extractContents());
                         nodeElement.outerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                         nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
+                        mathRender(nodeElement);
                         focusByWbr(nodeElement, range);
                     } else {
                         const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");

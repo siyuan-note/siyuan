@@ -114,6 +114,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     calcHTML = '<div class="av__colsticky">';
                 }
+                let hasCalc = false;
                 data.columns.forEach((column: IAVColumn, index: number) => {
                     if (column.hidden) {
                         return;
@@ -130,12 +131,15 @@ style="width: ${column.width || "200px"};">
                         tableHTML += "</div>";
                     }
 
-                    // lineNumber type 不参与计算操作
                     if (column.type === "lineNumber") {
-                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" style="display: flex; width: ${column.width || "200px"}">&nbsp;</div>`;
+                        // lineNumber type 不参与计算操作
+                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" style="width: ${column.width || "200px"}">&nbsp;</div>`;
                     } else {
                         calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+                    }
+                    if (column.calc && column.calc.operator !== "") {
+                        hasCalc = true
                     }
 
                     if (pinIndex === index) {
@@ -247,7 +251,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
     <div class="av__scroll">
         <div class="av__body">
             ${tableHTML}
-            <div class="av__row--util">
+            <div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
@@ -263,7 +267,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     </button>
                 </div>
             </div>
-            <div class="av__row--footer">${calcHTML}</div>
+            <div class="av__row--footer${hasCalc?" av__readonly--show":""}">${calcHTML}</div>
         </div>
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>

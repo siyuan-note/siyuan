@@ -12,7 +12,7 @@ import {
     focusByWbr,
     focusSideBlock,
     getEditorRange,
-    getSelectionOffset,
+    getSelectionOffset, setFirstNodeRange,
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
@@ -1254,7 +1254,13 @@ export class WYSIWYG {
                         endBlockElement = hasClosestBlock(range.endContainer);
                     }
                     if (startBlockElement && endBlockElement && !endBlockElement.isSameNode(startBlockElement)) {
-                        range.collapse(true);
+                        if (range.startContainer.nodeType === 1 && (range.startContainer as HTMLElement).tagName === "DIV" && (range.startContainer as HTMLElement).classList.contains("protyle-attr")) {
+                            setFirstNodeRange(getContenteditableElement(endBlockElement), range);
+                        } else if (range.endOffset === 0 && range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).tagName === "DIV") {
+                            setLastNodeRange(getContenteditableElement(startBlockElement), range, false);
+                        } else {
+                            range.collapse(true);
+                        }
                     }
                 }
             };

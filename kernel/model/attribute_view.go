@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -378,6 +379,12 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
+			if av.KeyTypeLineNumber == kv.Key.Type {
+				// 属性面板中不显示行号字段
+				// The line number field no longer appears in the database attribute panel https://github.com/siyuan-note/siyuan/issues/11319
+				continue
+			}
+
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {
@@ -2216,6 +2223,8 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, previousBlockID string, ignoreFillFilter bool) (err error) {
+	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
+
 	for _, src := range srcs {
 		srcID := src["id"].(string)
 		isDetached := src["isDetached"].(bool)

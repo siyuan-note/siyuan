@@ -130,12 +130,11 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	}
 
 	parentListCount := 0
-	var parentList, parentListItem, current *ast.Node
+	var parentListItem, current *ast.Node
 	for p := node.Parent; nil != p; p = p.Parent {
 		if ast.NodeListItem == p.Type {
 			parentListCount++
 			if 1 < parentListCount {
-				parentList = p.Parent
 				parentListItem = p
 				break
 			}
@@ -143,11 +142,8 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		}
 	}
 
-	if nil != parentList {
-		parent = parentList.ID
-		if flb := firstChild(parentList); nil != flb {
-			parent = flb.ID
-		}
+	if nil != parentListItem {
+		parent = parentListItem.ID
 
 		if parentListItem.Previous != nil {
 			previous = parentListItem.Previous.ID

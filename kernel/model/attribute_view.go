@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -2216,6 +2217,8 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, previousBlockID string, ignoreFillFilter bool) (err error) {
+	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
+
 	for _, src := range srcs {
 		srcID := src["id"].(string)
 		isDetached := src["isDetached"].(bool)

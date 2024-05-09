@@ -401,6 +401,39 @@ func ParentBlock(node *ast.Node) *ast.Node {
 	return nil
 }
 
+func PreviousBlock(node *ast.Node) *ast.Node {
+	for n := node.Previous; nil != n; n = n.Previous {
+		if "" != n.ID && n.IsBlock() {
+			return n
+		}
+	}
+	return nil
+}
+
+func NextBlock(node *ast.Node) *ast.Node {
+	for n := node.Next; nil != n; n = n.Next {
+		if "" != n.ID && n.IsBlock() {
+			return n
+		}
+	}
+	return nil
+}
+
+func FirstChildBlock(node *ast.Node) (ret *ast.Node) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsBlock() {
+			ret = n
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
 func GetNodeInTree(tree *parse.Tree, id string) (ret *ast.Node) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {

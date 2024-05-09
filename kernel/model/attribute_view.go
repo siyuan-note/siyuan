@@ -379,6 +379,12 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
+			if av.KeyTypeLineNumber == kv.Key.Type {
+				// 属性面板中不显示行号字段
+				// The line number field no longer appears in the database attribute panel https://github.com/siyuan-note/siyuan/issues/11319
+				continue
+			}
+
 			kValues := &av.KeyValues{Key: kv.Key}
 			for _, v := range kv.Values {
 				if v.BlockID == blockID {

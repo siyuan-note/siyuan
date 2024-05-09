@@ -797,7 +797,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 					return
 				}
 
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), filepath.Base(treeAbsPath)))
 				if !bytes.Contains(data, []byte(oldName)) {
 					continue
 				}

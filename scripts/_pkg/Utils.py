@@ -51,7 +51,6 @@ def generate_header_from_repo(repo_name, tag_name, lastestRelease, action_file, 
         return None
 
     return f'''
----
 <p align="center">
 <a href="https://github.com/{repo_name}/actions/workflows/{action_file}"><img src="https://img.shields.io/github/actions/workflow/status/{repo_name}/{action_file}?logo=github&label={action_file}%20Action" style="cursor:pointer;height: 30px;margin: 3px auto;"/></a>
 <a href="https://github.com/{repo_name}/releases/{thisRelease}/"><img src="https://img.shields.io/github/downloads/{repo_name}/{thisRelease}/total?logo=github" style="cursor:pointer;height: 30px;margin: 3px auto;"/></a>

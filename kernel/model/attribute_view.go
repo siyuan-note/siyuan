@@ -1647,7 +1647,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
-	if operation.IsTwoWay {
+	if operation.IsTwoWay && !isSameAv {
 		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
 	}
 	return

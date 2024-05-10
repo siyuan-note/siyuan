@@ -643,55 +643,55 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "em")
 					} else if n.IsTextMarkType("strong") {
 						if !replaceTypes["strong"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "strong")
 					} else if n.IsTextMarkType("kbd") {
 						if !replaceTypes["kbd"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "kbd")
 					} else if n.IsTextMarkType("mark") {
 						if !replaceTypes["mark"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "mark")
 					} else if n.IsTextMarkType("s") {
 						if !replaceTypes["s"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "s")
 					} else if n.IsTextMarkType("sub") {
 						if !replaceTypes["sub"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sub")
 					} else if n.IsTextMarkType("sup") {
 						if !replaceTypes["sup"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sup")
 					} else if n.IsTextMarkType("tag") {
 						if !replaceTypes["tag"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "tag")
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "u")
 					} else if n.IsTextMarkType("inline-math") {
 						if !replaceTypes["inlineMath"] {
 							return ast.WalkContinue
@@ -726,7 +726,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r)
+						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "text")
 					}
 				}
 				return ast.WalkContinue
@@ -761,8 +761,13 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	return
 }
 
-func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp) {
+func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, typ string) {
 	if 0 == method {
+		if "tag" == typ {
+			keyword = strings.TrimPrefix(keyword, "#")
+			keyword = strings.TrimSuffix(keyword, "#")
+		}
+
 		if strings.Contains(n.TextMarkTextContent, keyword) {
 			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 		}

@@ -502,6 +502,7 @@ func genTreeID(tree *parse.Tree) {
 func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 

@@ -41,32 +41,38 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           excludes: prerelease, draft
 
-      - name: Gather Release Information
-        id: release_info
-        run: |
-          echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
-          echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-          changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} ${{ env.repo_owner }}/${{ env.repo_name }})
-          changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ env.repo_owner }}/${{ env.repo_name }})
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "release_body<<$EOF" >> $GITHUB_ENV
-          echo "$changelog_header" >> $GITHUB_ENV
-          echo "$changelog" >> $GITHUB_ENV
-          echo "$EOF" >> $GITHUB_ENV
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract version from package.json
         uses: sergeysova/jq-action@v2
         id: version
         with:
           cmd: 'jq .version ${{ env.package_json }} -r'
 
+      - name: Extract electronVersion from package.json
+        uses: sergeysova/jq-action@v2
+        id: electronVersion
+        with:
+          cmd: "jq .devDependencies.electron ${{ env.package_json }} -r"
+
       - name: Extract packageManager from package.json
         uses: sergeysova/jq-action@v2
         id: packageManager
         with:
             cmd: "jq .packageManager ${{ env.package_json }} -r"
+
+      - name: Gather Release Information
+        id: release_info
+        run: |
+            echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
+            echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+            changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ env.repo_owner }}/${{ env.repo_name }})
+            changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ env.repo_owner }}/${{ env.repo_name }})
+            EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "release_body<<$EOF" >> $GITHUB_ENV
+            echo "$changelog_header" >> $GITHUB_ENV
+            echo "$changelog" >> $GITHUB_ENV
+            echo "$EOF" >> $GITHUB_ENV
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release

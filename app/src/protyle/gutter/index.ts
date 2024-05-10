@@ -283,7 +283,7 @@ export class Gutter {
             }
             if (isOnlyMeta(event)) {
                 zoomOut({protyle, id});
-            } else if (event.altKey && !protyle.disabled) {
+            } else if (event.altKey) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&

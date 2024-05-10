@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-Refactor your thinking
+<em>Refactor your thinking</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
@@ -114,7 +114,7 @@ Mobile:
 
 Desktop:
 
-* [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
+* [Microsoft Store](https://apps.microsoft.com/detail/9p7hpmxp73k4)
 
 ### Docker Hosting
 

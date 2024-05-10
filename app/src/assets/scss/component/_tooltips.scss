@@ -31,6 +31,10 @@
   &--error {
     background: var(--b3-theme-error);
   }
+
+  .ft__on-surface {
+    color: var(--b3-tooltips-second-color);
+  }
 }
 
 .b3-tooltips {

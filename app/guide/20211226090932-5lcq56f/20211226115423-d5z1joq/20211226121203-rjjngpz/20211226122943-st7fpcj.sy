@@ -181,7 +181,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在 PDF 中滑鼠懸浮標注可預覽引用塊"
+									"Data": "在 PDF 中滑鼠懸浮標注可預覽引用標注的塊"
 								}
 							]
 						}

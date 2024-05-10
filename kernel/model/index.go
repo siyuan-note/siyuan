@@ -282,13 +282,18 @@ func IndexRefs() {
 	ResetVirtualBlockRefCache()
 }
 
+var indexEmbedBlockLock = sync.Mutex{}
+
 // IndexEmbedBlockJob 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
 func IndexEmbedBlockJob() {
-	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
-	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock, embedBlocks)
+	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
 }
 
-func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
+func autoIndexEmbedBlock() {
+	indexEmbedBlockLock.Lock()
+	defer indexEmbedBlockLock.Unlock()
+
+	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
 	for i, embedBlock := range embedBlocks {
 		markdown := strings.TrimSpace(embedBlock.Markdown)
 		markdown = strings.TrimPrefix(markdown, "{{")

@@ -3441,7 +3441,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "複製該塊為引用塊"
+									"Data": "複製該塊為塊引用"
 								}
 							]
 						},
@@ -6665,7 +6665,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在下側打開引用塊"
+									"Data": "在下側打開塊引用"
 								}
 							]
 						},
@@ -7444,7 +7444,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊引用"
+									"Data": "引用塊"
 								}
 							]
 						},

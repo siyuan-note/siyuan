@@ -49,7 +49,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
-// 用于执行操作，外加处理当前编辑器中引用块、嵌入块的更新
+// 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
 const promiseTransaction = () => {
     if (window.siyuan.transactions.length === 0) {
         return;
@@ -172,7 +172,7 @@ const promiseTransaction = () => {
                 }
                 // 当前编辑器中更新嵌入块
                 updateEmbed(protyle, operation);
-                // 更新引用块
+                // 更新块引用
                 updateRef(protyle, operation.id);
                 return;
             }
@@ -293,7 +293,7 @@ const promiseTransaction = () => {
                 //         blockRender(protyle, item);
                 //     }
                 // });
-                // 更新引用块
+                // 更新块引用
                 updateRef(protyle, operation.id);
             }
         });
@@ -371,7 +371,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     // 更新 ws 嵌入块
     updateEmbed(protyle, operation);
-    // 更新 ws 引用块
+    // 更新 ws 块引用
     updateRef(protyle, operation.id);
 };
 
@@ -476,7 +476,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         } else { // updateElements 没有包含嵌入块，在悬浮层编辑嵌入块时，嵌入块也需要更新
             // 更新 ws 嵌入块
             updateEmbed(protyle, operation);
-            // 更新 ws 引用块
+            // 更新 ws 块引用
             updateRef(protyle, operation.id);
         }
         return;
@@ -733,7 +733,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 wbrElement.remove();
             }
         });
-        // 更新 ws 引用块
+        // 更新 ws 块引用
         updateRef(protyle, operation.id);
         return;
     }

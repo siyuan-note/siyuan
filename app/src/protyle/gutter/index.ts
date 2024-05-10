@@ -264,6 +264,11 @@ export class Gutter {
                         data: blockElement.getAttribute("updated")
                     }]);
                     insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    if (event.altKey) {
+                        this.element.querySelectorAll("button").forEach(item => {
+                            item.dataset.rowId = srcIDs[0];
+                        });
+                    }
                     blockElement.setAttribute("updated", newUpdated);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {

@@ -249,11 +249,11 @@ func InitConf() {
 	if conf.MaxDynamicLoadBlocks < Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MaxDynamicLoadBlocks
 	}
-	if 0 > Conf.Editor.BacklinkExpandCount {
-		Conf.Editor.BacklinkExpandCount = 0
+	if -1 > Conf.Editor.BacklinkExpandCount {
+		Conf.Editor.BacklinkExpandCount = -1
 	}
-	if 0 > Conf.Editor.BackmentionExpandCount {
-		Conf.Editor.BackmentionExpandCount = 0
+	if -1 > Conf.Editor.BackmentionExpandCount {
+		Conf.Editor.BackmentionExpandCount = -1
 	}
 	if nil == Conf.Editor.Markdown {
 		Conf.Editor.Markdown = &util.Markdown{}

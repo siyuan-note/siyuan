@@ -295,7 +295,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
             const value = item.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             dataList.push({
                 value: `<span data-type="tag">${value}</span>`,
-                html: item,
+                html: `<div class="b3-list-item__text">${item}</div>`,
             });
             if (value === response.data.k) {
                 hasKey = true;
@@ -304,7 +304,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
                 value: `<span data-type="tag">${response.data.k}</span>`,
-                html: `${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark>`,
+                html: `<div class="b3-list-item__text">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div>`,
             });
             if (dataList.length > 1) {
                 dataList[1].focus = true;

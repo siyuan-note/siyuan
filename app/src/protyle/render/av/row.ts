@@ -363,9 +363,12 @@ export const setPageSize = (options: {
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    if (rowElements.length === 0) {
+        return;
+    }
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     const blockIds: string[] = [];
     rowElements.forEach(item => {
         blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));

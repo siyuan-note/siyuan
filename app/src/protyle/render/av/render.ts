@@ -45,6 +45,13 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
             const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
+            const selectRowIds: string[] = [];
+            e.querySelectorAll(".av__row--select").forEach(rowItem => {
+                const rowId = rowItem.getAttribute("data-id");
+                if (rowId) {
+                    selectRowIds.push(rowId);
+                }
+            })
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -267,7 +274,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     </button>
                 </div>
             </div>
-            <div class="av__row--footer${hasCalc?" av__readonly--show":""}">${calcHTML}</div>
+            <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>
         </div>
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
@@ -304,6 +311,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         focusBlock(e);
                     }
                 }
+                selectRowIds.forEach(selectRowId => {
+                    e.querySelector(`.av__row[data-id="${selectRowId}"]`).classList.add("av__row--select");
+                });
                 if (dragFillId) {
                     addDragFill(e.querySelector(`.av__row[data-id="${dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${dragFillId.split(Constants.ZWSP)[1]}"]`));
                 }

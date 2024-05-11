@@ -197,13 +197,13 @@ export const initEditor = () => {
 <div class="b3-label fn__displayblock">
     ${window.siyuan.languages.backlinkExpand}
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="backlinkExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backlinkExpandCount}"/>
+    <input class="b3-text-field fn__block" id="backlinkExpandCount" type="number" min="-1" max="512" value="${window.siyuan.config.editor.backlinkExpandCount}"/>
     <div class="b3-label__text">${window.siyuan.languages.backlinkExpandTip}</div>
 </div>
 <div class="b3-label fn__displayblock">
     ${window.siyuan.languages.backmentionExpand}
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="backmentionExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
+    <input class="b3-text-field fn__block" id="backmentionExpandCount" type="number" min="-1" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
     <div class="b3-label__text">${window.siyuan.languages.backmentionExpandTip}</div>
 </div>
 <div class="b3-label fn__displayblock">

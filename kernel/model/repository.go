@@ -49,7 +49,6 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -1475,7 +1474,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
 
-	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		FullReindex()
 		return

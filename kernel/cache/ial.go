@@ -75,3 +75,7 @@ func GetBlockIAL(id string) (ret map[string]string) {
 func RemoveBlockIAL(id string) {
 	blockIALCache.Del(id)
 }
+
+func ClearBlocksIAL() {
+	blockIALCache.Clear()
+}

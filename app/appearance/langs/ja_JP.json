@@ -425,7 +425,7 @@
   "dynamicLoadBlocks": "動的に読み込まれるブロックの数",
   "dynamicLoadBlocksTip": "この値にはサブブロックの数が含まれます。レンダリングする必要があるコードブロック、数式ブロック、チャートブロックが数多くある場合はあまり大きな数値に設定しないことをお勧めします",
   "backlinkExpand": "バックリンクのデフォルト展開数",
-  "backlinkExpandTip": "<code class='fn__code'>0</code> の場合は展開されません、<code class='fn__code'>-1</code> に設定してパネルを閉じます",
+  "backlinkExpandTip": "<code class='fn__code'>0</code> の場合は展開されません",
   "backmentionExpand": "逆参照のデフォルト展開数",
   "backmentionExpandTip": "<code class='fn__code'>0</code> の場合は展開されません、<code class='fn__code'>-1</code> に設定してパネルを閉じます",
   "googleAnalytics": "Google アナリティクス",

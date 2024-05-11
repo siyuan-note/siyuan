@@ -425,7 +425,7 @@
   "dynamicLoadBlocks": "動態載入塊數",
   "dynamicLoadBlocksTip": "該值包含了子塊數。如果需要渲染的代碼塊、公式塊或圖表塊較多，建議不要設置過大",
   "backlinkExpand": "反向連結預設展開數",
-  "backlinkExpandTip": "配置為 <code class='fn__code'>0</code> 則不展開，配置為 <code class='fn__code'>-1</code> 則收起面板",
+  "backlinkExpandTip": "配置為 <code class='fn__code'>0</code> 則不展開",
   "backmentionExpand": "反向提及默認展開數",
   "backmentionExpandTip": "配置為 <code class='fn__code'>0</code> 則不展開，配置為 <code class='fn__code'>-1</code> 則收起面板",
   "googleAnalytics": "Google Analytics",

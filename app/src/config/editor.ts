@@ -192,7 +192,7 @@ export const editor = {
         <div class="b3-label__text">${window.siyuan.languages.backmentionExpandTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="backmentionExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="backmentionExpandCount" type="number" min="-1" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">

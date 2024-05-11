@@ -8,9 +8,9 @@ class ProtyleHtml extends HTMLElement {
         const shadowRoot = this.attachShadow({mode: 'open'})
         this.display = this.shadowRoot
         // https://github.com/siyuan-note/siyuan/issues/11321
-        this.setAttribute('data-content', Lute.EscapeHTMLStr(this.getAttribute('data-content')))
-        const dataContent = this.getAttribute('data-content')
-        this.display.innerHTML = dataContent
+        const content = Lute.EscapeHTMLStr(this.getAttribute('data-content'))
+        this.setAttribute('data-content', content)
+        this.display.innerHTML = content
     }
 
     static get observedAttributes() {

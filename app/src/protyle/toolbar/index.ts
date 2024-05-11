@@ -995,7 +995,7 @@ export class Toolbar {
         /// #endif
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (types.includes("NodeHTMLBlock")) {
-            textElement.value = renderElement.querySelector("protyle-html").getAttribute("data-content") || "";
+            textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
         } else if (isInlineMemo) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {

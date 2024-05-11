@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20240427230732"
+		"updated": "20240510235243"
 	},
 	"Children": [
 		{
@@ -1764,6 +1764,20 @@
 			]
 		},
 		{
+			"ID": "20240510235226-7fqokpj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235226-7fqokpj",
+				"updated": "20240510235233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無序列表塊只能包含列表項塊，相鄰的無序列表塊間距較大。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-wx6gvu6",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -1935,6 +1949,20 @@
 			]
 		},
 		{
+			"ID": "20240510235224-yj7efu2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235224-yj7efu2",
+				"updated": "20240510235237"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有序列表塊只能包含列表項塊，相鄰的有序列表塊間距較大。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-16ew3ez",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2090,6 +2118,20 @@
 			]
 		},
 		{
+			"ID": "20240510235222-wwcw8cn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235222-wwcw8cn",
+				"updated": "20240510235243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任務列表塊只能包含列表項塊，相鄰的任務列表塊間距較大。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-ot6klof",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2165,6 +2207,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510235159-gjhzzj5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235159-gjhzzj5",
+				"updated": "20240510235159"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表項塊被包含在列表塊內，相鄰的列表項塊間距較小。"
 				}
 			]
 		},

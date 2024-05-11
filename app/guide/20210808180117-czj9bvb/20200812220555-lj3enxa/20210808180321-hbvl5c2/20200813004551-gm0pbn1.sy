@@ -3445,7 +3445,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "复制该块为引用块"
+									"Data": "复制该块为块引用"
 								}
 							]
 						},

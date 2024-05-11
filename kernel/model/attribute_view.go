@@ -1019,14 +1019,6 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			}
 			rows[val.BlockID] = values
 		}
-
-		// 数据订正，补全关联
-		if av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation {
-			av.UpsertAvBackRel(attrView.ID, keyValues.Key.Relation.AvID)
-			if keyValues.Key.Relation.IsTwoWay {
-				av.UpsertAvBackRel(keyValues.Key.Relation.AvID, attrView.ID)
-			}
-		}
 	}
 
 	// 过滤掉不存在的行
@@ -1655,6 +1647,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
+	if operation.IsTwoWay && !isSameAv {
+		av.UpsertAvBackRel(destAv.ID, srcAv.ID)
+	}
 	return
 }
 

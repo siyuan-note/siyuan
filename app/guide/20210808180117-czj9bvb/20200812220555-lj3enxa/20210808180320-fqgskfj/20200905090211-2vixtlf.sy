@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20240427230507"
+		"updated": "20240510235019"
 	},
 	"Children": [
 		{
@@ -1820,10 +1820,25 @@
 			]
 		},
 		{
+			"ID": "20240510234951-58h7o7g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234951-58h7o7g",
+				"updated": "20240510235019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "无序列表块只能包含列表项块，相邻的无序列表块间距较大。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-5p4i03b",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-5p4i03b"
+				"id": "20210104090624-5p4i03b",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -1837,7 +1852,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
 				}
 			]
 		},
@@ -1987,7 +2002,8 @@
 			"ID": "20210104090624-13yo86l",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-13yo86l"
+				"id": "20210104090624-13yo86l",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -2004,6 +2020,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510234949-rphupr1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234949-rphupr1",
+				"updated": "20240510234959"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有序列表块只能包含列表项块，相邻的有序列表块间距较大。"
 				}
 			]
 		},
@@ -2185,6 +2215,20 @@
 			]
 		},
 		{
+			"ID": "20240510234858-y5tx7l9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234858-y5tx7l9",
+				"updated": "20240510234944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任务列表块只能包含列表项块，相邻的任务列表块间距较大。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-n9anlgh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2249,7 +2293,8 @@
 			"ID": "20210104090624-wcbtwum",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-wcbtwum"
+				"id": "20210104090624-wcbtwum",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -2266,6 +2311,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510234715-ystlvq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234715-ystlvq4",
+				"updated": "20240510234833"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表项块被包含在列表块内，相邻的列表项块间距较小。"
 				}
 			]
 		},

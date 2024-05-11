@@ -45,6 +45,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
+        let foldPreviousId: string
         selectElements.find((item: HTMLElement) => {
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
@@ -74,13 +75,27 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
                 // https://github.com/siyuan-note/siyuan/issues/2188
                 setFold(protyle, topElement, undefined, true);
+                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : ""
+                if (typeof foldPreviousId !== "undefined") {
+                    previousID = foldPreviousId;
+                }
                 inserts.push({
                     action: "insert",
                     data: topElement.outerHTML,
                     id,
-                    previousID: selectElements[0].previousElementSibling ? selectElements[0].previousElementSibling.getAttribute("data-node-id") : "",
+                    previousID: previousID,
                     parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
                 });
+                // 折叠块和非折叠块同时删除时撤销异常 https://github.com/siyuan-note/siyuan/issues/11312
+                let foldPreviousElement = getPreviousBlock(topElement);
+                while (foldPreviousElement && foldPreviousElement.childElementCount === 3) {
+                    foldPreviousElement = getPreviousBlock(foldPreviousElement);
+                }
+                if (foldPreviousElement) {
+                    foldPreviousId = foldPreviousElement.getAttribute("data-node-id");
+                } else {
+                    foldPreviousId = "";
+                }
                 // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");
                 // 在折叠标题后输入文字，然后全选删除再撤销会重建索引。因此不能删除折叠标题后新输入的输入折叠标题下的内容
@@ -97,11 +112,15 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 if (topElement.classList.contains("render-node") || topElement.querySelector("div.render-node")) {
                     data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
                 }
+                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
+                if (typeof foldPreviousId !== "undefined") {
+                    previousID = foldPreviousId;
+                }
                 inserts.push({
                     action: "insert",
                     data,
                     id,
-                    previousID: topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "",
+                    previousID,
                     parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
                 });
                 if (topElement.getAttribute("data-subtype") === "o" && topElement.classList.contains("li")) {

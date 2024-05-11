@@ -1935,7 +1935,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {
         if (hasFold) {
-            nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" src="/stage/loading-pure.svg"></div>');
+            nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" height="24px" src="/stage/loading-pure.svg"></div>');
             transaction(protyle, [{
                 action: "unfoldHeading",
                 id,

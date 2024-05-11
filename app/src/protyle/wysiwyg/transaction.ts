@@ -297,6 +297,21 @@ const promiseTransaction = () => {
                 updateRef(protyle, operation.id);
             }
         });
+
+        // 删除仅有的折叠标题后展开内容为空
+        if (protyle.wysiwyg.element.childElementCount === 0) {
+            const newID = Lute.NewNodeID();
+            const emptyElement = genEmptyElement(false, true, newID);
+            protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
+            transaction(protyle, [{
+                action: "insert",
+                data: emptyElement.outerHTML,
+                id: newID,
+                parentID: protyle.block.parentID
+            }]);
+            // 不能撤销，否则就无限循环了
+            focusByWbr(emptyElement, range);
+        }
     });
 };
 

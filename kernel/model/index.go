@@ -115,8 +115,13 @@ func unindex(boxID string) {
 }
 
 func (box *Box) Index() {
+	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
 	task.AppendTask(task.DatabaseIndex, index, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+}
+
+func removeBoxRefs(boxID string) {
+	sql.DeleteBoxRefsQueue(boxID)
 }
 
 func index(boxID string) {
@@ -219,8 +224,6 @@ func IndexRefs() {
 	luteEngine := util.NewLute()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		sql.DeleteBoxRefsQueue(box.ID)
-
 		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {

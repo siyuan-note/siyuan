@@ -86,7 +86,7 @@ func NewEditor() *Editor {
 		Justify:                         false,
 		RTL:                             false,
 		BacklinkExpandCount:             8,
-		BackmentionExpandCount:          8,
+		BackmentionExpandCount:          -1,
 		Markdown:                        util.MarkdownSettings,
 	}
 }

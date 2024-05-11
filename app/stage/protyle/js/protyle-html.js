@@ -7,7 +7,7 @@ class ProtyleHtml extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({mode: 'open'})
     this.display = this.shadowRoot
-    const dataContent = Lute.UnEscapeHTMLStr(this.getAttribute('data-content'))
+    const dataContent = this.getAttribute('data-content')
     this.display.innerHTML = dataContent
   }
 

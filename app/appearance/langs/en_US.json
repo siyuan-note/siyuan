@@ -425,7 +425,7 @@
   "dynamicLoadBlocks": "Number of dynamically loaded blocks",
   "dynamicLoadBlocksTip": "This value contains the number of subblocks. If there are many code blocks, formula blocks or chart blocks that need to be rendered, it is recommended not to set too large",
   "backlinkExpand": "Backlink default expand",
-  "backlinkExpandTip": "If configured as <code class='fn__code'>0</code>, it will not be expanded, if configured as <code class='fn__code'>-1</code>, the panel will be closed",
+  "backlinkExpandTip": "If configured as <code class='fn__code'>0</code>",
   "backmentionExpand": "Backmention default expand",
   "backmentionExpandTip": "If configured as <code class='fn__code'>0</code>, it will not be expanded, if configured as <code class='fn__code'>-1</code>, the panel will be closed",
   "googleAnalytics": "Google Analytics",

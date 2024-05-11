@@ -425,7 +425,7 @@
   "dynamicLoadBlocks": "Nombre de blocs chargés dynamiquement",
   "dynamicLoadBlocksTip": "Cette valeur contient le nombre de sous-blocs. S'il y a beaucoup de blocs de code, de blocs de formule ou de blocs de graphique qui doivent être rendus, il est recommandé de ne pas définir trop grand",
   "backlinkExpand": "Développer le lien retour par défaut",
-  "backlinkExpandTip": "Si configuré comme <code class='fn__code'>0</code>, il ne sera pas développé, s'il est configuré comme <code class='fn__code'>-1</code>, le panneau sera fermé",
+  "backlinkExpandTip": "Si configuré comme <code class='fn__code'>0</code>",
   "backmentionExpand": "Développer la mention par défaut",
   "backmentionExpandTip": "Si configuré comme <code class='fn__code'>0</code>, il ne sera pas développé, s'il est configuré comme <code class='fn__code'>-1</code>, le panneau sera fermé",
   "googleAnalytics": "Google Analytics",

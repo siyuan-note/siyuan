@@ -20,6 +20,7 @@ import (
 	"crypto/rand"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/logging"
 )
@@ -29,8 +30,8 @@ type Account struct {
 	Password string
 	Token    string
 }
-type Claims jwt.MapClaims
 type AccountsMap map[string]*Account
+type ClaimsKeyType string
 
 const (
 	XAuthTokenKey    = "X-Auth-Token"
@@ -39,6 +40,8 @@ const (
 	iss = "siyuan-publish-reverse-proxy-server"
 	sub = "publish"
 	aud = "siyuan-kernel"
+
+	ClaimsKeyReadonly string = "readonly"
 )
 
 var (
@@ -76,11 +79,12 @@ func InitJWT() {
 		t := jwt.NewWithClaims(
 			jwt.SigningMethodHS256,
 			jwt.MapClaims{
-				"iss":      iss,
-				"sub":      sub,
-				"aud":      aud,
-				"jti":      username,
-				"readonly": true,
+				"iss": iss,
+				"sub": sub,
+				"aud": aud,
+				"jti": username,
+
+				ClaimsKeyReadonly: true,
 			},
 		)
 		if token, err := t.SignedString(key); err != nil {
@@ -115,4 +119,13 @@ func ParseXAuthToken(r *http.Request) *jwt.Token {
 		}
 	}
 	return nil
+}
+
+func GetClaims(c *gin.Context, key string) any {
+	if claims, exists := c.Get(ClaimsContextKey); exists {
+		value := claims.(jwt.MapClaims)[key]
+		return value
+	} else {
+		return nil
+	}
 }

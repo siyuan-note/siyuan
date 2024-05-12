@@ -153,8 +153,8 @@ func GetCaptcha(c *gin.Context) {
 
 func CheckReadonly(c *gin.Context) {
 	readonly := false
-	if claims, exists := c.Get(ClaimsContextKey); exists {
-		readonly = claims.(Claims)["readonly"].(bool)
+	if readonly_ := GetClaims(c, ClaimsKeyReadonly); readonly_ != nil {
+		readonly = readonly_.(bool)
 	} else {
 		readonly = util.ReadOnly
 	}
@@ -172,6 +172,7 @@ func CheckReadonly(c *gin.Context) {
 
 func CheckAuth(c *gin.Context) {
 	if token := ParseXAuthToken(c.Request); token != nil {
+		c.Request.Header.Del(XAuthTokenKey)
 		if token.Valid {
 			c.Set(ClaimsContextKey, token.Claims)
 			c.Next()

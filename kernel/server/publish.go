@@ -87,7 +87,12 @@ func (Transport) RoundTrip(request *http.Request) (response *http.Response, err 
 		// Basic Auth
 		username, password, ok := request.BasicAuth()
 		account := model.GetBasicAuthAccount(username)
-		if !ok || account == nil || account.Password != password {
+
+		if !ok ||
+			account == nil ||
+			account.Username == "" || // 匿名用户
+			account.Password != password {
+
 			return &http.Response{
 				StatusCode: http.StatusUnauthorized,
 				Status:     http.StatusText(http.StatusUnauthorized),
@@ -101,13 +106,9 @@ func (Transport) RoundTrip(request *http.Request) (response *http.Response, err 
 				Close:         false,
 				ContentLength: -1,
 			}, nil
-		}
-
-		// set JWT
-		if account != nil {
-			request.Header.Set(model.XAuthTokenKey, account.Token)
 		} else {
-			request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)
+			// set JWT
+			request.Header.Set(model.XAuthTokenKey, account.Token)
 		}
 	} else {
 		request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)

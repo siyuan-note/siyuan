@@ -28,7 +28,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -217,10 +216,8 @@ func getConf(c *gin.Context) {
 	}
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
-	if claims, exists := c.Get(model.ClaimsContextKey); exists {
-		if readonly := claims.(jwt.MapClaims)["readonly"]; readonly != nil {
-			maskedConf.ReadOnly = readonly.(bool)
-		}
+	if readonly := model.GetClaims(c, model.ClaimsKeyReadonly); readonly != nil {
+		maskedConf.ReadOnly = readonly.(bool)
 	}
 
 	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {

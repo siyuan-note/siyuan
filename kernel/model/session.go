@@ -152,7 +152,14 @@ func GetCaptcha(c *gin.Context) {
 }
 
 func CheckReadonly(c *gin.Context) {
-	if util.ReadOnly {
+	readonly := false
+	if claims, exists := c.Get(ClaimsContextKey); exists {
+		readonly = claims.(Claims)["readonly"].(bool)
+	} else {
+		readonly = util.ReadOnly
+	}
+
+	if readonly {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)
@@ -164,6 +171,14 @@ func CheckReadonly(c *gin.Context) {
 }
 
 func CheckAuth(c *gin.Context) {
+	if token := ParseXAuthToken(c.Request); token != nil {
+		if token.Valid {
+			c.Set(ClaimsContextKey, token.Claims)
+			c.Next()
+			return
+		}
+	}
+
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 	localhost := util.IsLocalHost(c.Request.RemoteAddr)
 

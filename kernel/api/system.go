@@ -17,7 +17,6 @@
 package api
 
 import (
-	"github.com/88250/lute"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,8 +24,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/lute"
+
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -212,6 +214,13 @@ func getConf(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "get conf failed: " + err.Error()
 		return
+	}
+
+	// REF: https://github.com/siyuan-note/siyuan/issues/11364
+	if claims, exists := c.Get(model.ClaimsContextKey); exists {
+		if readonly := claims.(jwt.MapClaims)["readonly"]; readonly != nil {
+			maskedConf.ReadOnly = readonly.(bool)
+		}
 	}
 
 	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {

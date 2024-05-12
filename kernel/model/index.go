@@ -112,6 +112,11 @@ func unindex(boxID string) {
 	ids := treenode.RemoveBlockTreesByBoxID(boxID)
 	RemoveRecentDoc(ids)
 	sql.DeleteBoxQueue(boxID)
+
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
 }
 
 func (box *Box) Index() {

@@ -1236,7 +1236,8 @@
     "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données",
     "task.reload.ui": "Interface utilisateur de rechargement de tâche",
     "task.asset.database.index.full": "Exécuter l'index de reconstruction de la base de données d'actifs",
-    "task.asset.database.index.commit": "Exécuter la validation de l'index de la base de données des actifs"
+    "task.asset.database.index.commit": "Exécuter la validation de l'index de la base de données des actifs",
+    "task.cache.virtualBlockRef": "Effectuer une référence virtuelle du cache"
   },
   "_trayMenu": {
     "showWindow": "Afficher la fenêtre principale",

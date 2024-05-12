@@ -31,6 +31,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -99,6 +100,13 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []stri
 }
 
 func CacheVirtualBlockRefJob() {
+	if !Conf.Editor.VirtualBlockRef {
+		return
+	}
+	task.AppendTask(task.CacheVirtualBlockRef, ResetVirtualBlockRefCache)
+}
+
+func cacheVirtualBlockRef() {
 	virtualBlockRefCache.Del("virtual_ref")
 	if !Conf.Editor.VirtualBlockRef {
 		return
@@ -110,7 +118,7 @@ func CacheVirtualBlockRefJob() {
 
 func ResetVirtualBlockRefCache() {
 	virtualBlockRefCache.Clear()
-	CacheVirtualBlockRefJob()
+	cacheVirtualBlockRef()
 }
 
 func AddVirtualBlockRefInclude(keyword []string) {

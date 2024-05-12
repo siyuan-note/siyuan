@@ -99,6 +99,7 @@ const (
 	ReloadUI                        = "task.reload.ui"                     // 重载 UI
 	AssetContentDatabaseIndexFull   = "task.asset.database.index.full"     // 资源文件数据库重建索引
 	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
+	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
 )
 
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。

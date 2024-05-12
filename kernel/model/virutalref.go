@@ -106,19 +106,14 @@ func CacheVirtualBlockRefJob() {
 	task.AppendTask(task.CacheVirtualBlockRef, ResetVirtualBlockRefCache)
 }
 
-func cacheVirtualBlockRef() {
-	virtualBlockRefCache.Del("virtual_ref")
+func ResetVirtualBlockRefCache() {
+	virtualBlockRefCache.Clear()
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
 
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
-}
-
-func ResetVirtualBlockRefCache() {
-	virtualBlockRefCache.Clear()
-	cacheVirtualBlockRef()
 }
 
 func AddVirtualBlockRefInclude(keyword []string) {

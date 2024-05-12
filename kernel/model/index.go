@@ -106,23 +106,26 @@ func listSyFiles(dir string) (ret []string) {
 
 func (box *Box) Unindex() {
 	task.AppendTask(task.DatabaseIndex, unindex, box.ID)
-}
-
-func unindex(boxID string) {
-	ids := treenode.RemoveBlockTreesByBoxID(boxID)
-	RemoveRecentDoc(ids)
-	sql.DeleteBoxQueue(boxID)
-
 	go func() {
 		sql.WaitForWritingDatabase()
 		ResetVirtualBlockRefCache()
 	}()
 }
 
+func unindex(boxID string) {
+	ids := treenode.RemoveBlockTreesByBoxID(boxID)
+	RemoveRecentDoc(ids)
+	sql.DeleteBoxQueue(boxID)
+}
+
 func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
 	task.AppendTask(task.DatabaseIndex, index, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
 }
 
 func removeBoxRefs(boxID string) {
@@ -286,8 +289,6 @@ func IndexRefs() {
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", size, time.Now().Sub(start).Milliseconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
-
-	ResetVirtualBlockRefCache()
 }
 
 var indexEmbedBlockLock = sync.Mutex{}

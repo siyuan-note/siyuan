@@ -2220,6 +2220,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, previousBlockID string, ignoreFillFilter bool) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
+	now := time.Now().UnixMilli()
 	for _, src := range srcs {
 		srcID := src["id"].(string)
 		isDetached := src["isDetached"].(bool)
@@ -2241,14 +2242,14 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(avID, blockID, previousBlockID, srcID, srcContent, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, blockID, previousBlockID, srcID, srcContent, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID, addingBlockContent string, isDetached, ignoreFillFilter bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBlockID, addingBlockContent string, isDetached, ignoreFillFilter bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBlockID)
@@ -2271,8 +2272,6 @@ func addAttributeViewBlock(avID, blockID, previousBlockID, addingBlockID, adding
 	if !isDetached {
 		addingBlockContent = getNodeRefText(node)
 	}
-
-	now := time.Now().UnixMilli()
 
 	// 检查是否重复添加相同的块
 	blockValues := attrView.GetBlockKeyValues()

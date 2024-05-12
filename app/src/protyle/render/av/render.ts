@@ -5,7 +5,7 @@ import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {stickyRow} from "./row";
+import {stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
@@ -311,9 +311,19 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         focusBlock(e);
                     }
                 }
-                selectRowIds.forEach(selectRowId => {
-                    e.querySelector(`.av__row[data-id="${selectRowId}"]`).classList.add("av__row--select");
+                selectRowIds.forEach((selectRowId, index) => {
+                    const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
+                    if (rowElement) {
+                        rowElement.classList.add("av__row--select");
+                        rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+
+                    }
+
+                    if (index === selectRowIds.length - 1 && rowElement) {
+                        updateHeader(rowElement);
+                    }
                 });
+
                 if (dragFillId) {
                     addDragFill(e.querySelector(`.av__row[data-id="${dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${dragFillId.split(Constants.ZWSP)[1]}"]`));
                 }

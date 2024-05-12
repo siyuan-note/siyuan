@@ -404,6 +404,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         const trElement = cellElement.parentElement as HTMLTableRowElement;
         if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
             (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+            insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
             return true;
         }
         let nextElement = trElement.nextElementSibling as HTMLTableRowElement;

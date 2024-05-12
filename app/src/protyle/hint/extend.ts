@@ -51,9 +51,13 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
     }, {
-        filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
+        filter: ["文档", "wendang", "wd", "xjwd", "new doc"],
         value: Constants.ZWSP + 4,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>`,
+    }, {
+        filter: ["子文档", "ziwendang", "zwd", "xjzwd", "create sub doc"],
+        value: Constants.ZWSP + 6,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newSubDoc}</span></div>`,
     }, {
         value: "",
         html: "separator",

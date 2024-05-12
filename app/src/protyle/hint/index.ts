@@ -9,7 +9,7 @@ import {
     getSelectionPosition
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
-import {getSavePath} from "../../util/newFile";
+import {getSavePath, newFile} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -615,6 +615,16 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 return;
             } else if (value === Constants.ZWSP + 4) {
+                // 新建文档
+                newFile({
+                    app: protyle.app,
+                    notebookId: protyle.notebookId,
+                    useSavePath: true,
+                    currentPath: protyle.path,
+                });
+                return;
+            } else if (value === Constants.ZWSP + 6) {
+                // 新建子文档
                 const newSubDocId = Lute.NewNodeID();
                 fetchPost("/api/filetree/createDoc", {
                     notebook: protyle.notebookId,

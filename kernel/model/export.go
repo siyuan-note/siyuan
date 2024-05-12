@@ -180,7 +180,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	}
 	writer.Flush()
 
-	zipPath = exportFolder + ".db.zip"
+	zipPath = getUniqueFilename(exportFolder + ".db.zip")
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {
 		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
@@ -207,6 +207,24 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	}
 	zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func getUniqueFilename(filePath string) string {
+	if !gulu.File.IsExist(filePath) {
+		return filePath
+	}
+
+	ext := filepath.Ext(filePath)
+	base := strings.TrimSuffix(filepath.Base(filePath), ext)
+	dir := filepath.Dir(filePath)
+	i := 1
+	for {
+		newPath := filepath.Join(dir, base+" ("+strconv.Itoa(i)+ext) + ")"
+		if !gulu.File.IsExist(newPath) {
+			return newPath
+		}
+		i++
+	}
 }
 
 func Export2Liandi(id string) (err error) {

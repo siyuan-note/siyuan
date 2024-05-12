@@ -192,7 +192,7 @@ export const getEditHTML = (options: {
     <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
-    <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+    <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${options.data.name} ${colData.name}">
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
@@ -301,6 +301,15 @@ export const bindEditEvent = (options: {
             options.menuElement.parentElement.remove();
         }
     });
+    nameElement.addEventListener("keyup", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        const inputElement = options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement;
+        if (inputElement) {
+            inputElement.setAttribute("placeholder", `${options.data.name} ${nameElement.value}`);
+        }
+    });
     nameElement.select();
     const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement;
     if (tplElement) {
@@ -355,6 +364,7 @@ export const bindEditEvent = (options: {
             }]);
         });
     }
+
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
     if (addOptionElement) {
         addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {

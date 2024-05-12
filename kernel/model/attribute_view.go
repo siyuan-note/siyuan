@@ -3224,12 +3224,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else { // 之前绑定了块
+	} else {                    // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else { // 现在绑定了块
+			} else {                                // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
@@ -3255,7 +3255,14 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 
-		if destAv, _ := av.ParseAttributeView(key.Relation.AvID); nil != destAv {
+		var destAv *av.AttributeView
+		if avID == key.Relation.AvID {
+			destAv = attrView
+		} else {
+			destAv, _ = av.ParseAttributeView(key.Relation.AvID)
+		}
+
+		if nil != destAv {
 			// relationChangeMode
 			// 0：关联列值不变（仅排序），不影响目标值
 			// 1：关联列值增加，增加目标值
@@ -3307,7 +3314,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 				}
 			}
 
-			av.SaveAttributeView(destAv)
+			if destAv != attrView {
+				av.SaveAttributeView(destAv)
+			}
 		}
 	}
 

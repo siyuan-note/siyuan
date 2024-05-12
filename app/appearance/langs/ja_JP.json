@@ -1236,7 +1236,8 @@
     "task.database.index.embedBlock": "データベースのインデックスを埋め込みブロック中",
     "task.reload.ui": "UI の再読み込み中",
     "task.asset.database.index.full": "アセットデータベースのインデックスを再構築中",
-    "task.asset.database.index.commit": "アセットデータベースのインデックスをコミット中"
+    "task.asset.database.index.commit": "アセットデータベースのインデックスをコミット中",
+    "task.cache.virtualBlockRef": "キャッシュ仮想参照を実行"
   },
   "_trayMenu": {
     "showWindow": "ウィンドウを表示",

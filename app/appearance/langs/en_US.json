@@ -1236,7 +1236,8 @@
     "task.database.index.embedBlock": "Execute database index embed block",
     "task.reload.ui": "Execute reload UI",
     "task.asset.database.index.full": "Execute asset database rebuild index",
-    "task.asset.database.index.commit": "Execute asset database index commit"
+    "task.asset.database.index.commit": "Execute asset database index commit",
+    "task.cache.virtualBlockRef": "Execute cache virtual reference"
   },
   "_trayMenu": {
     "showWindow": "Show Window",

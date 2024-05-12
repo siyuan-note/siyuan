@@ -2967,7 +2967,13 @@ func RemoveAttributeViewKey(avID, keyID string) (err error) {
 		if removedKey.Relation.IsTwoWay {
 			// 删除双向关联的目标列
 
-			destAv, _ := av.ParseAttributeView(removedKey.Relation.AvID)
+			var destAv *av.AttributeView
+			if avID == removedKey.Relation.AvID {
+				destAv = attrView
+			} else {
+				destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
+			}
+
 			if nil != destAv {
 				destAvRelSrcAv := false
 				for i, keyValues := range destAv.KeyValues {
@@ -2993,8 +2999,10 @@ func RemoveAttributeViewKey(avID, keyID string) (err error) {
 					}
 				}
 
-				av.SaveAttributeView(destAv)
-				util.PushReloadAttrView(destAv.ID)
+				if destAv != attrView {
+					av.SaveAttributeView(destAv)
+					util.PushReloadAttrView(destAv.ID)
+				}
 
 				if !destAvRelSrcAv {
 					av.RemoveAvRel(destAv.ID, attrView.ID)
@@ -3224,12 +3232,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else {                    // 之前绑定了块
+	} else { // 之前绑定了块
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else {                                // 现在绑定了块
+			} else { // 现在绑定了块
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)

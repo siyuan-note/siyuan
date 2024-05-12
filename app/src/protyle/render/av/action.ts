@@ -167,6 +167,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             protyle.toolbar.range = document.createRange();
             protyle.toolbar.range.selectNodeContents(target);
             focusByRange(protyle.toolbar.range);
+            target.parentElement.classList.add("av__cell--select");
+            addDragFill(target.parentElement);
             hintRef(target.previousElementSibling.textContent.trim(), protyle, "av");
             event.preventDefault();
             event.stopPropagation();

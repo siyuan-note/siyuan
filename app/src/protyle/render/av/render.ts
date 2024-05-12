@@ -51,7 +51,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 if (rowId) {
                     selectRowIds.push(rowId);
                 }
-            })
+            });
             let selectCellId = "";
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
@@ -146,7 +146,7 @@ style="width: ${column.width || "200px"};">
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
                     }
                     if (column.calc && column.calc.operator !== "") {
-                        hasCalc = true
+                        hasCalc = true;
                     }
 
                     if (pinIndex === index) {

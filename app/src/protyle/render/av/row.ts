@@ -108,9 +108,9 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
         colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
-        let lineNumber = ""
+        let lineNumber = "";
         if (getTypeByCellElement(item) === "lineNumber") {
-            const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value")
+            const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value");
             if (lineNumberValue) {
                 lineNumber = (parseInt(lineNumberValue) + 1).toString();
             }
@@ -168,40 +168,40 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
                     });
                 }
                 // 当空或非空外，需要根据值进行判断
-                let isRenderValue = true
+                let isRenderValue = true;
                 if (item.operator !== "Is empty" && item.operator !== "Is not empty") {
                     switch (item.value.type) {
                         case "select":
                         case "mSelect":
                             if (!item.value.mSelect || item.value.mSelect.length === 0) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "block":
                             if (!item.value.block || !item.value.block.content) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "number":
                             if (!item.value.number || !item.value.number.isNotEmpty) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "date":
                         case "created":
                         case "updated":
                             if (!item.value[item.value.type] || !item.value[item.value.type].isNotEmpty) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "mAsset":
                             if (!item.value.mAsset || item.value.mAsset.length === 0) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "checkbox":
                             if (!item.value.checkbox) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                         case "text":
@@ -209,7 +209,7 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
                         case "phone":
                         case "email":
                             if (!item.value[item.value.type] || !item.value[item.value.type].content) {
-                                isRenderValue = false
+                                isRenderValue = false;
                             }
                             break;
                     }

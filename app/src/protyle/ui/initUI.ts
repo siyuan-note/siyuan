@@ -169,5 +169,5 @@ export const getPadding = (protyle: IProtyle) => {
     }
     return {
         left, right, bottom, top: 16
-    }
-}
+    };
+};

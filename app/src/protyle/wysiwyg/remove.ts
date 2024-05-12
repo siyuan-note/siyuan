@@ -45,7 +45,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
-        let foldPreviousId: string
+        let foldPreviousId: string;
         selectElements.find((item: HTMLElement) => {
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
@@ -75,7 +75,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
                 // https://github.com/siyuan-note/siyuan/issues/2188
                 setFold(protyle, topElement, undefined, true);
-                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : ""
+                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 if (typeof foldPreviousId !== "undefined") {
                     previousID = foldPreviousId;
                 }

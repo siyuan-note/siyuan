@@ -652,7 +652,7 @@ export class Toolbar {
                     let previousIsCTK = false;
                     if (currentPreviousSibling) {
                         if (currentPreviousSibling.nodeType === 1) {
-                            const currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ")
+                            const currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ");
                             if (currentPreviousSiblingTypes.includes("code") || currentPreviousSiblingTypes.includes("tag") || currentPreviousSiblingTypes.includes("kbd")) {
                                 previousIsCTK = true;
                             }
@@ -664,7 +664,7 @@ export class Toolbar {
                     let nextIsCTK = false;
                     if (currentNextSibling) {
                         if (currentNextSibling.nodeType === 1) {
-                            const currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ")
+                            const currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ");
                             if (currentNextSiblingTypes.includes("code") || currentNextSiblingTypes.includes("tag") || currentNextSiblingTypes.includes("kbd")) {
                                 nextIsCTK = true;
                             }

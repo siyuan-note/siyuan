@@ -5,6 +5,7 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {isMobile} from "../../util/functions";
+import {showTooltip} from "../../dialog/tooltip";
 
 export class Scroll {
     public element: HTMLElement;
@@ -38,6 +39,7 @@ export class Scroll {
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
+            showTooltip(this.element.getAttribute("aria-label"), this.element);
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
@@ -74,11 +76,14 @@ export class Scroll {
                 data: getResponse,
                 protyle,
                 action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
+                afterCB: () => {
+                    showTooltip(this.element.getAttribute("aria-label"), this.element);
+                }
             });
         });
     }
 
-    public updateIndex(protyle: IProtyle, id: string, cb?:(index: number) => void) {
+    public updateIndex(protyle: IProtyle, id: string, cb?: (index: number) => void) {
         fetchPost("/api/block/getBlockIndex", {id}, (response) => {
             if (!response.data) {
                 return;

@@ -22,7 +22,7 @@ export class Scroll {
         this.parentElement.innerHTML = `<div class="b3-tooltips b3-tooltips__w protyle-scroll__up" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>
-<div class="fn__none protyle-scroll__bar b3-tooltips b3-tooltips__s" aria-label="Blocks 1/1">
+<div class="fn__none protyle-scroll__bar ariaLabel" data-position="right18bottom" aria-label="Blocks 1/1">
     <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
 </div>
 <div class="b3-tooltips b3-tooltips__w protyle-scroll__down" aria-label="${updateHotkeyTip("⌘End")}">

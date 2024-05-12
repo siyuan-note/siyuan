@@ -55,6 +55,12 @@
     .b3-slider {
       width: var(--b3-dynamicscroll-width);
       display: block;
+
+      &::-webkit-slider-runnable-track,
+      &::-webkit-slider-thumb {
+        background-color: var(--b3-border-color);
+        box-shadow: none;
+      }
     }
   }
 }

@@ -588,6 +588,13 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                     lastNode = hasPreviousSibling(cursorElement.lastChild) as HTMLElement;
                 }
                 if (lastNode && lastNode.textContent.endsWith("\n")) {
+                    // https://github.com/siyuan-note/siyuan/issues/11362
+                    if (lastNode.nodeType === 1) {
+                        lastNode = lastNode.lastChild;
+                        while (lastNode && lastNode.textContent.indexOf("\n") === -1) {
+                            lastNode = lastNode.previousSibling;
+                        }
+                    }
                     range = getEditorRange(cursorElement);
                     range.setStart(lastNode, lastNode.textContent.length - 1);
                     focusHljs = true;

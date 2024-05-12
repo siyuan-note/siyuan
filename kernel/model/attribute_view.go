@@ -1603,6 +1603,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		name := strings.TrimSpace(operation.Name)
 		if "" == name {
 			name = srcAv.Name + " " + operation.Format
+			name = strings.TrimSpace(name)
 		}
 
 		destKeyValues := &av.KeyValues{

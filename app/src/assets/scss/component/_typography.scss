@@ -414,6 +414,8 @@
     margin: 0 auto;
     max-width: 100%;
     user-select: none;
+    word-break: keep-all;
+    white-space: nowrap;
 
     & > span:nth-child(1),
     & > span:nth-child(3) {

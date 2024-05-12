@@ -13,6 +13,7 @@ import {Menu} from "./Menu";
 import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {App} from "../index";
 import {Constants} from "../constants";
+import {textMenu} from "./text";
 
 
 export class Menus {
@@ -89,7 +90,15 @@ export class Menus {
                     initDockMenu(target).popup({x: event.clientX, y: event.clientY});
                     event.stopPropagation();
                     break;
+                } else if (dataType === "textMenu") {
+                    /// #if !BROWSER
+                    textMenu(target).open({x: event.clientX, y: event.clientY});
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                    /// #endif
                 }
+
                 target = target.parentElement;
             }
         }, false);

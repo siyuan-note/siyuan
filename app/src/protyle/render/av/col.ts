@@ -185,7 +185,7 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item fn__none">
+<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>

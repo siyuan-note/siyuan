@@ -186,16 +186,10 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
                 switchElement.checked = oldValue.isTwoWay;
             }
         }
-        if (searchElement.dataset.avId === avId && oldValue.avID === avId && oldValue.isTwoWay) {
-            switchItemElement.classList.add("fn__none");
-            inputItemElement.classList.add("fn__none");
+        if (switchElement.checked) {
+            inputItemElement.classList.remove("fn__none");
         } else {
-            switchItemElement.classList.remove("fn__none");
-            if (switchElement.checked) {
-                inputItemElement.classList.remove("fn__none");
-            } else {
-                inputItemElement.classList.add("fn__none");
-            }
+            inputItemElement.classList.add("fn__none");
         }
         if ((searchElement.dataset.avId && oldValue.avID !== searchElement.dataset.avId) || oldValue.isTwoWay !== switchElement.checked || inputElement.dataset.oldValue !== inputElement.value) {
             btnElement.classList.remove("fn__none");
@@ -203,7 +197,6 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
             btnElement.classList.add("fn__none");
         }
     } else if (searchElement.dataset.avId) {
-        switchItemElement.classList.remove("fn__none");
         if (switchElement.checked) {
             inputItemElement.classList.remove("fn__none");
         } else {
@@ -361,7 +354,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (!nodeElement.contains(cellElements[0])) {
         cellElements[0] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
     }
-    const newValue:IAVCellRelationValue = {blockIDs: [], contents: []};
+    const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
     menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
         const id = item.getAttribute("data-id");
         newValue.blockIDs.push(id);

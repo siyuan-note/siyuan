@@ -6,6 +6,7 @@ import {getEventName} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {closePanel} from "../util/closePanel";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {hasClosestBlock} from "../../protyle/util/hasClosest";
 
 export class MobileOutline {
     private tree: Tree;
@@ -83,6 +84,16 @@ export class MobileOutline {
                 this.openNodes[blockId] = this.tree.getExpandIds();
             }
 
+            if (window.siyuan.mobile.editor?.protyle?.toolbar.range) {
+                const blockElement = hasClosestBlock(window.siyuan.mobile.editor.protyle.toolbar.range.startContainer);
+                if (blockElement) {
+                    const currentElement = this.element.querySelector(`[data-node-id="${blockElement.dataset.nodeId}"]`);
+                    if (currentElement) {
+                        currentElement.classList.add("b3-list-item--focus");
+                        return;
+                    }
+                }
+            }
             if (currentId) {
                 currentElement = this.element.querySelector(`[data-node-id="${currentId}"]`);
                 if (currentElement) {

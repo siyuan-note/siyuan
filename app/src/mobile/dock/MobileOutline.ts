@@ -59,11 +59,11 @@ export class MobileOutline {
 
     public update() {
         if (!window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")) {
+            const blockId = window.siyuan.mobile.editor.protyle.preview.element.querySelector(".selected")?.id;
             window.siyuan.mobile.editor.protyle.preview.render(window.siyuan.mobile.editor.protyle, (outlineData) => {
                 this.tree.updateData(outlineData);
-                const blockElement = window.siyuan.mobile.editor.protyle.preview.element.querySelector("selected")
-                if (blockElement) {
-                    this.setCurrentByPreview(blockElement);
+                if (blockId) {
+                    this.setCurrentByPreview(this.element.querySelector("#" + blockId));
                     return;
                 }
             });

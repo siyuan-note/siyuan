@@ -2018,7 +2018,7 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 }
 
 func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set) {
-	var upsertPlugins, removePlugins []string
+	upsertPlugins, removePlugins := []string{}, []string{}
 	for _, n := range upsertPluginSet.Values() {
 		upsertPlugins = append(upsertPlugins, n.(string))
 	}

@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InitFixedPortServe(host string) {
+func InitFixedPortService(host string) {
 	if util.FixedPort != util.ServerPort {
 		if util.IsPortOpen(util.FixedPort) {
 			return

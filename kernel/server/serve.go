@@ -129,8 +129,8 @@ func Serve(fastMode bool) {
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		go proxy.InitFixedPortServe(host)
-		go proxy.InitPublishServe()
+		go proxy.InitFixedPortService(host)
+		go proxy.InitPublishService()
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 

@@ -560,7 +560,22 @@ func setPublish(c *gin.Context) {
 	model.Conf.Publish = publish
 	model.Conf.Save()
 
-	if port, err := proxy.InitPublishServe(); err != nil {
+	if port, err := proxy.InitPublishService(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	} else {
+		ret.Data = map[string]any{
+			"port":    port,
+			"publish": model.Conf.Publish,
+		}
+	}
+}
+
+func getPublish(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if port, err := proxy.InitPublishService(); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 	} else {

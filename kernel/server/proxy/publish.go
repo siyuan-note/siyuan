@@ -28,27 +28,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-type Transport struct{}
+type PublishServiceTransport struct{}
 
 var (
 	Host = "0.0.0.0"
 	Port = "0"
 
 	listener  net.Listener
-	transport = Transport{}
+	transport = PublishServiceTransport{}
 	proxy     = &httputil.ReverseProxy{
 		Rewrite:   rewrite,
 		Transport: transport,
 	}
 )
 
-func InitPublishServe() (uint16, error) {
+func InitPublishService() (uint16, error) {
 	model.InitAccounts()
 
 	if listener != nil {
 		if !model.Conf.Publish.Enable {
 			// 关闭发布服务
-			closeListener()
+			closePublishListener()
 			return 0, nil
 		}
 
@@ -56,12 +56,12 @@ func InitPublishServe() (uint16, error) {
 			return 0, err
 		} else if port != model.Conf.Publish.Port {
 			// 关闭原端口的发布服务
-			if err = closeListener(); err != nil {
+			if err = closePublishListener(); err != nil {
 				return 0, err
 			}
 
 			// 重新启动新端口的发布服务
-			initServe()
+			initPublishService()
 		}
 	} else {
 		if !model.Conf.Publish.Enable {
@@ -69,19 +69,19 @@ func InitPublishServe() (uint16, error) {
 		}
 
 		// 启动新端口的发布服务
-		initServe()
+		initPublishService()
 	}
 	return util.ParsePort(Port)
 }
 
-func initServe() (err error) {
-	if err = initListener(); err == nil {
-		go startPublishReverseProxyServe()
+func initPublishService() (err error) {
+	if err = initPublishListener(); err == nil {
+		go startPublishReverseProxyService()
 	}
 	return
 }
 
-func initListener() (err error) {
+func initPublishListener() (err error) {
 	// Start new listener
 	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Port))
 	if err != nil {
@@ -97,7 +97,7 @@ func initListener() (err error) {
 	return
 }
 
-func closeListener() (err error) {
+func closePublishListener() (err error) {
 	if err = listener.Close(); err != nil {
 		logging.LogErrorf("close listener %s failed: %s", listener.Addr().String(), err)
 		return
@@ -107,7 +107,7 @@ func closeListener() (err error) {
 	}
 }
 
-func startPublishReverseProxyServe() {
+func startPublishReverseProxyService() {
 	logging.LogInfof("publish serve [%s:%s] is running", Host, Port)
 	// 服务进行时一直阻塞
 	if err := http.Serve(listener, proxy); nil != err {
@@ -124,7 +124,7 @@ func rewrite(r *httputil.ProxyRequest) {
 	// r.Out.Host = r.In.Host // if desired
 }
 
-func (Transport) RoundTrip(request *http.Request) (response *http.Response, err error) {
+func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
 	if model.Conf.Publish.Auth.Enable {
 		// Basic Auth
 		username, password, ok := request.BasicAuth()

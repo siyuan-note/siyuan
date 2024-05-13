@@ -1241,7 +1241,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 func refreshUpdated(node *ast.Node) {
 	updated := util.CurrentTimeSecondsStr()
 	node.SetIALAttr("updated", updated)
-	parents := treenode.ParentNodes(node)
+	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段
 		parent.SetIALAttr("updated", updated)
 	}
@@ -1256,7 +1256,7 @@ func createdUpdated(node *ast.Node) {
 	if updated < created {
 		updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
 	}
-	parents := treenode.ParentNodes(node)
+	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段
 		parent.SetIALAttr("updated", updated)
 		cache.PutBlockIAL(parent.ID, parse.IAL2Map(parent.KramdownIAL))

@@ -280,7 +280,7 @@ func IndexRefs() {
 			}
 
 			util.IncBootProgress(bootProgressPart, "Indexing ref "+defTree.ID)
-			sql.InsertRefsTreeQueue(defTree)
+			sql.UpdateRefsTreeQueue(defTree)
 			if 1 < i && 0 == i%64 {
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 			}

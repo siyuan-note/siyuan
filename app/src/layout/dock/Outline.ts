@@ -430,6 +430,23 @@ export class Outline extends Model {
         }
     }
 
+    public setCurrentByPreview(nodeElement: Element) {
+        if (!nodeElement) {
+            return;
+        }
+        let previousElement = nodeElement;
+        while (previousElement && !previousElement.classList.contains("b3-typography")) {
+            if (["H1", "H2", "H3", "H4", "H5", "H6"].includes(previousElement.tagName)) {
+                break;
+            } else {
+                previousElement = previousElement.previousElementSibling || previousElement.parentElement;
+            }
+        }
+        if (previousElement && previousElement.id) {
+            this.setCurrentById(previousElement.id);
+        }
+    }
+
     private setCurrentById(id: string) {
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");

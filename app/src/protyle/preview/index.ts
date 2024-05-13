@@ -19,6 +19,7 @@ import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
 import {getPadding} from "../ui/initUI";
+import {hasClosestByAttribute} from "../util/hasClosest";
 
 export class Preview {
     public element: HTMLElement;
@@ -140,6 +141,23 @@ export class Preview {
                     }
                 }
                 target = target.parentElement;
+            }
+            const nodeElement = hasClosestByAttribute(event.target as HTMLElement, "id", undefined);
+            if (nodeElement) {
+                // 用于点击后大纲定位
+                this.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                    item.classList.remove("selected");
+                });
+                nodeElement.classList.add("selected");
+                /// #if !MOBILE
+                if (protyle.model) {
+                    getAllModels().outline.forEach(item => {
+                        if (item.blockId === protyle.block.rootID) {
+                            item.setCurrentByPreview(nodeElement);
+                        }
+                    });
+                }
+                /// #endif
             }
         });
 

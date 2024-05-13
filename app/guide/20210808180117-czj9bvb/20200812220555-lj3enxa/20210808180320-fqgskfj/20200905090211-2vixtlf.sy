@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20240510235019"
+		"updated": "20240513102051"
 	},
 	"Children": [
 		{
@@ -1088,6 +1088,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "以上就是标题块，支持一级到六级。"
+				}
+			]
+		},
+		{
+			"ID": "20240513100721-6hasxsk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513100721-6hasxsk",
+				"updated": "20240513100725"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240513100725-fefiba9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513100725-fefiba9",
+				"updated": "20240513102051"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不建议在正文中使用一级标题，建议使用二级标题作为顶层标题，这样在开启了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "导出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "添加文档标题"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 后，整体的标题层级在导出时才符合正常逻辑。"
 				}
 			]
 		},

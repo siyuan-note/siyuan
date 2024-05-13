@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20240510235721"
+		"updated": "20240513102037"
 	},
 	"Children": [
 		{
@@ -1095,12 +1095,77 @@
 			"ID": "20210104091538-o0ti5xd",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091538-o0ti5xd"
+				"id": "20210104091538-o0ti5xd",
+				"updated": "20210104091538"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "The above is the heading block, which supports level one to six."
+				}
+			]
+		},
+		{
+			"ID": "20240513101855-fukkugx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513101855-fukkugx",
+				"updated": "20240513101900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240513101855-sh0lm1f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513101855-sh0lm1f",
+				"updated": "20240513102037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It is not recommended to use first-level headings in the text. It is recommended to use second-level heading as top-level headings. In this way, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add document title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, the overall heading hierarchy will comply with normal logic when exported."
 				}
 			]
 		},

@@ -19,7 +19,7 @@ import {fetchPost} from "../util/fetch";
 import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
 import {exportLayout} from "./util";
-import {commandPanel} from "../boot/globalEvent/commandPanel";
+import {commandPanel} from "../boot/globalEvent/command/panel";
 
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");

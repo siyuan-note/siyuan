@@ -72,7 +72,7 @@ import {openNewWindow} from "../../window/openNewWindow";
 import {historyKeydown} from "../../history/keydown";
 import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
-import {commandPanel, execByCommand} from "./commandPanel";
+import {commandPanel, execByCommand} from "./command/panel";
 import {filterHotkey} from "./commonHotkey";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {

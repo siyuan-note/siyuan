@@ -1,27 +1,29 @@
-import {Dialog} from "../../dialog";
-import {App} from "../../index";
-import {upDownHint} from "../../util/upDownHint";
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
-import {isMobile} from "../../util/functions";
-import {Constants} from "../../constants";
-import {Editor} from "../../editor";
+import {Dialog} from "../../../dialog";
+import {App} from "../../../index";
+import {upDownHint} from "../../../util/upDownHint";
+import {updateHotkeyTip} from "../../../protyle/util/compatibility";
+import {isMobile} from "../../../util/functions";
+import {Constants} from "../../../constants";
+import {Editor} from "../../../editor";
 /// #if MOBILE
-import {getCurrentEditor} from "../../mobile/editor";
-import {openDock} from "../../mobile/dock/util";
-import {popMenu} from "../../mobile/menu";
+import {getCurrentEditor} from "../../../mobile/editor";
+import {openDock} from "../../../mobile/dock/util";
+import {popMenu} from "../../../mobile/menu";
 /// #else
-import {closeTabByType, getActiveTab, getDockByType} from "../../layout/tabUtil";
-import {Custom} from "../../layout/dock/Custom";
-import {getAllModels} from "../../layout/getAll";
-import {Files} from "../../layout/dock/Files";
-import {Search} from "../../search";
-import {openSetting} from "../../config";
-import {Tab} from "../../layout/Tab";
+import {closeTabByType, getActiveTab, getDockByType} from "../../../layout/tabUtil";
+import {Custom} from "../../../layout/dock/Custom";
+import {getAllModels} from "../../../layout/getAll";
+import {Files} from "../../../layout/dock/Files";
+import {Search} from "../../../search";
+import {openSetting} from "../../../config";
+import {Tab} from "../../../layout/Tab";
 /// #endif
-import {openHistory} from "../../history/history";
-import {addEditorToDatabase, addFilesToDatabase} from "../../protyle/render/av/addToDatabase";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {newDailyNote} from "../../util/mount";
+import {openHistory} from "../../../history/history";
+import {addEditorToDatabase, addFilesToDatabase} from "../../../protyle/render/av/addToDatabase";
+import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
+import {newDailyNote} from "../../../util/mount";
+import {onluProtyleCommand} from "./protyle";
+import {editor as editorConfig} from "../../../config/editor";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().getRangeAt(0);
@@ -49,11 +51,14 @@ export const commandPanel = (app: App) => {
         let keys;
         /// #if MOBILE
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "config",
-            "dataHistory"];
+            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "goBack", "goForward"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
-            "closeUnmodified", "config", "dataHistory"];
+            "closeUnmodified", "config", "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "goBack",
+            "goForward", "goToEditTabNext", "goToEditTabPrev", "goToTab1", "goToTab2", "goToTab3", "goToTab4",
+            "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev"];
+
         /// #endif
         if (keys.includes(key)) {
             html += `<li class="b3-list-item" data-command="${key}">
@@ -158,58 +163,52 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
     });
 };
 
-export const execByCommand = (options: {
-    command: string,
-    app?: App,
-    previousRange?: Range,
-    protyle?: IProtyle,
-    fileLiElements?: Element[]
-}) => {
+const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
-    switch (options.command) {
+    switch (command) {
         case "fileTree":
             openDock("file");
-            return;
+            return true;
         case "outline":
         case "bookmark":
         case "tag":
         case "inbox":
-            openDock(options.command);
-            return;
+            openDock(command);
+            return true;
         case "backlinks":
             openDock("backlink");
-            return;
+            return true;
         case "config":
             popMenu();
-            return;
+            return true;
     }
     /// #else
-    switch (options.command) {
+    switch (command) {
         case "fileTree":
             getDockByType("file").toggleModel("file");
-            return;
+            return true;
         case "outline":
             getDockByType("outline").toggleModel("outline");
-            return;
+            return true;
         case "bookmark":
         case "tag":
         case "inbox":
-            getDockByType(options.command).toggleModel(options.command);
-            return;
+            getDockByType(command).toggleModel(command);
+            return true;
         case "backlinks":
             getDockByType("backlink").toggleModel("backlink");
-            return;
+            return true;
         case "graphView":
             getDockByType("graph").toggleModel("graph");
-            return;
+            return true;
         case "globalGraph":
             getDockByType("globalGraph").toggleModel("globalGraph");
-            return;
+            return true;
         case "config":
-            openSetting(options.app);
-            return;
+            openSetting(app);
+            return true;
     }
-    if (options.command === "closeUnmodified") {
+    if (command === "closeUnmodified") {
         const tab = getActiveTab(false);
         if (tab) {
             const unmodifiedTabs: Tab[] = [];
@@ -223,9 +222,9 @@ export const execByCommand = (options: {
                 closeTabByType(tab, "other", unmodifiedTabs);
             }
         }
-        return;
+        return true;
     }
-    if (options.command === "closeTab") {
+    if (command === "closeTab") {
         const activeTabElement = document.querySelector(".layout__tab--active");
         if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
             let type = "";
@@ -238,22 +237,22 @@ export const execByCommand = (options: {
             if (type) {
                 getDockByType(type)?.toggleModel(type, false, true);
             }
-            return;
+            return true;
         }
         const tab = getActiveTab(false);
         if (tab) {
             tab.parent.removeTab(tab.id);
         }
-        return;
+        return true;
     }
-    if (options.command === "closeOthers" || options.command === "closeAll") {
+    if (command === "closeOthers" || command === "closeAll") {
         const tab = getActiveTab(false);
         if (tab) {
-            closeTabByType(tab, options.command);
+            closeTabByType(tab, command);
         }
-        return;
+        return true;
     }
-    if (options.command === "closeLeft" || options.command === "closeRight") {
+    if (command === "closeLeft" || command === "closeRight") {
         const tab = getActiveTab(false);
         if (tab) {
             const leftTabs: Tab[] = [];
@@ -269,7 +268,7 @@ export const execByCommand = (options: {
                     rightTabs.push(item);
                 }
             });
-            if (options.command === "closeLeft") {
+            if (command === "closeLeft") {
                 if (leftTabs.length > 0) {
                     closeTabByType(tab, "other", leftTabs);
                 }
@@ -279,16 +278,33 @@ export const execByCommand = (options: {
                 }
             }
         }
-        return;
+        return true;
     }
     /// #endif
-    switch (options.command) {
+    switch (command) {
         case "dailyNote":
-            newDailyNote(options.app);
-            return;
+            newDailyNote(app);
+            return true;
         case "dataHistory":
-            openHistory(options.app);
-            return;
+            openHistory(app);
+            return true;
+        case "editReadonly":
+            editorConfig.setReadonly(!window.siyuan.config.editor.readOnly);
+            return true;
+    }
+
+    return false
+}
+
+export const execByCommand = (options: {
+    command: string,
+    app?: App,
+    previousRange?: Range,
+    protyle?: IProtyle,
+    fileLiElements?: Element[]
+}) => {
+    if (globalCommand(options.command, options.app)) {
+        return;
     }
 
     const isFileFocus = document.querySelector(".layout__tab--active")?.classList.contains("sy__file");
@@ -387,6 +403,16 @@ export const execByCommand = (options: {
             }
         }
     }
+
+    // only protyle
+    if (!isFileFocus && onluProtyleCommand({
+        command: options.command,
+        previousRange: range,
+        protyle
+    })) {
+        return;
+    }
+
     if (isFileFocus && !fileLiElements) {
         const dockFile = getDockByType("file");
         if (!dockFile) {
@@ -396,6 +422,7 @@ export const execByCommand = (options: {
         fileLiElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     }
 
+    // protyle and file tree
     switch (options.command) {
         case "addToDatabase":
             if (!isFileFocus) {

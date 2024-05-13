@@ -30,7 +30,7 @@ export const loadPlugins = async (app: App, names?: string[]) => {
     let css = "";
     // 为加快启动速度，不进行 await
     response.data.forEach((item: IPluginData) => {
-        if (!names || (names && !names.includes(item.name))) {
+        if (!names || (names && names.includes(item.name))) {
             loadPluginJS(app, item);
         }
         css += item.css || "" + "\n";

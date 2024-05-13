@@ -229,6 +229,10 @@ export class WYSIWYG {
                 }
             });
         }
+        /// #else
+        if (protyle.disabled) {
+            protyle.toolbar.range = getEditorRange(nodeElement);
+        }
         /// #endif
     }
 

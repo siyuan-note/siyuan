@@ -133,7 +133,7 @@ export class MobileOutline {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            this.element.scrollTop = currentElement.offsetTop - this.element.clientHeight / 2 - 30;
+            this.tree.element.scrollTop = currentElement.offsetTop - this.element.clientHeight / 2 - 30;
         }
     }
 

@@ -616,7 +616,9 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 		}
 
 		if limitSize < uint64(fi.Size()) {
-			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", humanize.IBytes(limitSize), absAsset)
+			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", absAsset, humanize.IBytes(limitSize))
+			msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
+			util.PushErrMsg(msg, 30000)
 			continue
 		}
 

@@ -4,6 +4,7 @@ import {Editor} from "../../../editor";
 /// #if MOBILE
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
+import {popSearch} from "../../../mobile/menu/search";
 /// #else
 import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
@@ -14,8 +15,8 @@ import {openSetting} from "../../../config";
 import {Tab} from "../../../layout/Tab";
 /// #endif
 import {App} from "../../../index";
-import {editor} from "../../../config/editor";
 import {Constants} from "../../../constants";
+import {setReadOnly} from "../../../config/util/setReadOnly";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -34,6 +35,9 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "config":
             popMenu();
+            return true;
+        case "globalSearch":
+            popSearch(app);
             return true;
     }
     /// #else
@@ -225,7 +229,7 @@ export const globalCommand = (command: string, app: App) => {
             openHistory(app);
             return true;
         case "editReadonly":
-            editor.setReadonly(!window.siyuan.config.editor.readOnly);
+            setReadOnly(!window.siyuan.config.editor.readOnly)
             return true;
     }
 

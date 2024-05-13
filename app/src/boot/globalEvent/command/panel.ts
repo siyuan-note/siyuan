@@ -45,7 +45,7 @@ export const commandPanel = (app: App) => {
         let keys;
         /// #if MOBILE
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "config",
-            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "goBack", "goForward"];
+            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",

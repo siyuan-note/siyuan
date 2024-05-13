@@ -5,12 +5,17 @@ import {Editor} from "../../../editor";
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
 /// #else
-import {closeTabByType, getActiveTab, getDockByType} from "../../../layout/tabUtil";
+import {openSearch} from "../../../search/spread";
+import {goBack, goForward} from "../../../util/backForward";
+import {getAllTabs} from "../../../layout/getAll";
+import {getInstanceById} from "../../../layout/util";
+import {closeTabByType, getActiveTab, getDockByType, switchTabByIndex} from "../../../layout/tabUtil";
 import {openSetting} from "../../../config";
 import {Tab} from "../../../layout/Tab";
 /// #endif
 import {App} from "../../../index";
 import {editor} from "../../../config/editor";
+import {Constants} from "../../../constants";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -56,6 +61,87 @@ export const globalCommand = (command: string, app: App) => {
         case "config":
             openSetting(app);
             return true;
+        case "globalSearch":
+            openSearch({
+                app,
+                hotkey: Constants.DIALOG_GLOBALSEARCH,
+            });
+            return true;
+        case "goBack":
+            goBack(app);
+            return true;
+        case "goForward":
+            goForward(app);
+            return true;
+        case "goToTab1":
+            switchTabByIndex(0);
+            return true;
+        case "goToTab2":
+            switchTabByIndex(1);
+            return true;
+        case "goToTab3":
+            switchTabByIndex(2);
+            return true;
+        case "goToTab4":
+            switchTabByIndex(3);
+            return true;
+        case "goToTab5":
+            switchTabByIndex(4);
+            return true;
+        case "goToTab6":
+            switchTabByIndex(5);
+            return true;
+        case "goToTab7":
+            switchTabByIndex(6);
+            return true;
+        case "goToTab8":
+            switchTabByIndex(7);
+            return true;
+        case "goToTab9":
+            switchTabByIndex(-1);
+            return true;
+        case "goToTabNext":
+            switchTabByIndex(-3);
+            return true;
+        case "goToTabPrev":
+            switchTabByIndex(-2);
+            return true;
+
+    }
+    if (command === "goToEditTabNext" || command === "goToEditTabPrev") {
+        let currentTabElement = document.querySelector(".layout__wnd--active ul.layout-tab-bar > .item--focus");
+        if (!currentTabElement) {
+            currentTabElement = document.querySelector("ul.layout-tab-bar > .item--focus");
+        }
+        if (!currentTabElement) {
+            return true;
+        }
+        const tabs = getAllTabs().sort((itemA, itemB) => {
+            return itemA.headElement.getAttribute("data-activetime") > itemB.headElement.getAttribute("data-activetime") ? -1 : 1;
+        });
+        const currentId = currentTabElement.getAttribute("data-id");
+        tabs.find((item, index) => {
+            if (currentId === item.id) {
+                let newItem: Tab;
+                if (command === "goToEditTabPrev") {
+                    if (index === 0) {
+                        newItem = tabs[tabs.length - 1]
+                    } else {
+                        newItem = tabs[index - 1]
+                    }
+                } else {
+                    if (index === tabs.length - 1) {
+                        newItem = tabs[0]
+                    } else {
+                        newItem = tabs[index + 1]
+                    }
+                }
+                const tab = getInstanceById(newItem.id) as Tab
+                tab.parent.switchTab(newItem.headElement);
+                tab.parent.showHeading();
+            }
+        });
+        return true;
     }
     if (command === "closeUnmodified") {
         const tab = getActiveTab(false);
@@ -130,6 +216,7 @@ export const globalCommand = (command: string, app: App) => {
         return true;
     }
     /// #endif
+
     switch (command) {
         case "dailyNote":
             newDailyNote(app);

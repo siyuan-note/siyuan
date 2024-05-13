@@ -20,7 +20,7 @@ import {onluProtyleCommand} from "./protyle";
 import {globalCommand} from "./global";
 
 export const commandPanel = (app: App) => {
-    const range = getSelection().getRangeAt(0);
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "80vw",
         height: isMobile() ? "80vh" : "70vh",

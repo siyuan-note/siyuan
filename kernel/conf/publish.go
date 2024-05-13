@@ -18,7 +18,7 @@ package conf
 
 type Publish struct {
 	Enable bool       `json:"enable"` // 是否启用发布服务
-	Port   uint       `json:"port"`   // 发布服务端口
+	Port   uint16     `json:"port"`   // 发布服务端口
 	Auth   *BasicAuth `json:"auth"`   // Basic 认证
 }
 

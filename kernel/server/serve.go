@@ -23,7 +23,6 @@ import (
 	"mime"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"net/http/pprof"
 	"net/url"
 	"os"
@@ -43,12 +42,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var (
 	cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
-	ServerURL   *url.URL
 )
 
 func Serve(fastMode bool) {
@@ -114,7 +113,7 @@ func Serve(fastMode bool) {
 	}
 	util.ServerPort = port
 
-	ServerURL, err = url.Parse("http://127.0.0.1:" + port)
+	util.ServerURL, err = url.Parse("http://127.0.0.1:" + port)
 	if err != nil {
 		logging.LogErrorf("parse server url failed: %s", err)
 	}
@@ -123,29 +122,17 @@ func Serve(fastMode bool) {
 	if !fastMode {
 		rewritePortJSON(pid, port)
 	}
-
 	logging.LogInfof("kernel [pid=%s] http server [%s] is booting", pid, host+":"+port)
 	util.HttpServing = true
 
+	go util.HookUILoaded()
+
 	go func() {
 		time.Sleep(1 * time.Second)
-		if util.FixedPort != port {
-			if isPortOpen(util.FixedPort) {
-				return
-			}
-
-			// 启动一个 6806 端口的反向代理服务器，这样浏览器扩展才能直接使用 127.0.0.1:6806，不用配置端口
-			proxy := httputil.NewSingleHostReverseProxy(ServerURL)
-			logging.LogInfof("reverse proxy server [%s] is booting", host+":"+util.FixedPort)
-			if proxyErr := http.ListenAndServe(host+":"+util.FixedPort, proxy); nil != proxyErr {
-				logging.LogWarnf("boot reverse proxy server [%s] failed: %s", ServerURL, proxyErr)
-			}
-			// 反代服务器启动失败不影响核心服务器启动
-		}
+		go proxy.InitFixedPortServe(host)
+		go proxy.InitPublishServe()
+		// 反代服务器启动失败不影响核心服务器启动
 	}()
-
-	go StartPublishServe()
-	go util.HookUILoaded()
 
 	if err = http.Serve(ln, ginServer.Handler()); nil != err {
 		if !fastMode {

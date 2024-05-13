@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"mime"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -341,7 +342,9 @@ func WriteWorkspacePaths(workspacePaths []string) (err error) {
 }
 
 var (
-	ServerPort     = "0" // HTTP/WebSocket 端口，0 为使用随机端口
+	ServerURL  *url.URL // 内核服务 URL
+	ServerPort = "0"    // HTTP/WebSocket 端口，0 为使用随机端口
+
 	ReadOnly       bool
 	AccessAuthCode string
 	Lang           = ""

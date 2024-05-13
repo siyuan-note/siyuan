@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package server
+package proxy
 
 import (
 	"fmt"
@@ -25,59 +25,101 @@ import (
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Transport struct{}
 
 var (
-	host = "0.0.0.0"
-	port = "0"
+	Host = "0.0.0.0"
+	Port = "0"
 
 	listener  net.Listener
 	transport = Transport{}
+	proxy     = &httputil.ReverseProxy{
+		Rewrite:   rewrite,
+		Transport: transport,
+	}
 )
 
-func StartPublishServe() {
-	var err error
+func InitPublishServe() (uint16, error) {
+	model.InitAccounts()
 
-	if !model.Conf.Publish.Enable {
-		return
-	}
-
-	// Close previous listener
 	if listener != nil {
-		if err = listener.Close(); err != nil {
-			logging.LogErrorf("close listener failed: %s", err)
+		if !model.Conf.Publish.Enable {
+			// 关闭发布服务
+			closeListener()
+			return 0, nil
 		}
-	}
 
+		if port, err := util.ParsePort(Port); err != nil {
+			return 0, err
+		} else if port != model.Conf.Publish.Port {
+			// 关闭原端口的发布服务
+			if err = closeListener(); err != nil {
+				return 0, err
+			}
+
+			// 重新启动新端口的发布服务
+			initServe()
+		}
+	} else {
+		if !model.Conf.Publish.Enable {
+			return 0, nil
+		}
+
+		// 启动新端口的发布服务
+		initServe()
+	}
+	return util.ParsePort(Port)
+}
+
+func initServe() (err error) {
+	if err = initListener(); err == nil {
+		go startPublishReverseProxyServe()
+	}
+	return
+}
+
+func initListener() (err error) {
 	// Start new listener
-	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", host, model.Conf.Publish.Port))
+	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Port))
 	if err != nil {
 		logging.LogErrorf("start listener failed: %s", err)
 		return
 	}
 
-	_, port, err = net.SplitHostPort(listener.Addr().String())
+	_, Port, err = net.SplitHostPort(listener.Addr().String())
 	if nil != err {
 		logging.LogErrorf("split host and port failed: %s", err)
+		return
 	}
+	return
+}
 
-	model.InitAccounts()
-
-	proxy := &httputil.ReverseProxy{
-		Rewrite:   rewrite,
-		Transport: transport,
-	}
-
-	logging.LogInfof("reverse proxy server [%s] is booting", host+":"+port)
-	if err = http.Serve(listener, proxy); nil != err {
-		logging.LogErrorf("boot publish serve failed: %s", err)
+func closeListener() (err error) {
+	if err = listener.Close(); err != nil {
+		logging.LogErrorf("close listener %s failed: %s", listener.Addr().String(), err)
+		return
+	} else {
+		listener = nil
+		return
 	}
 }
 
+func startPublishReverseProxyServe() {
+	logging.LogInfof("publish serve [%s:%s] is running", Host, Port)
+	// 服务进行时一直阻塞
+	if err := http.Serve(listener, proxy); nil != err {
+		if listener != nil {
+			logging.LogErrorf("boot publish serve failed: %s", err)
+		}
+	}
+	logging.LogInfof("publish serve [%s:%s] is stopped", Host, Port)
+}
+
 func rewrite(r *httputil.ProxyRequest) {
-	r.SetURL(ServerURL)
+	r.SetURL(util.ServerURL)
 	r.SetXForwarded()
 	// r.Out.Host = r.In.Host // if desired
 }

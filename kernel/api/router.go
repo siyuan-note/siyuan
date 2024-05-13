@@ -321,6 +321,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/setFlashcard", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFlashcard)
 	ginServer.Handle("POST", "/api/setting/setAI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAI)
 	ginServer.Handle("POST", "/api/setting/setBazaar", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setBazaar)
+	ginServer.Handle("POST", "/api/setting/setPublish", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPublish)
 	ginServer.Handle("POST", "/api/setting/refreshVirtualBlockRef", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshVirtualBlockRef)
 	ginServer.Handle("POST", "/api/setting/addVirtualBlockRefInclude", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addVirtualBlockRefInclude)
 	ginServer.Handle("POST", "/api/setting/addVirtualBlockRefExclude", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addVirtualBlockRefExclude)

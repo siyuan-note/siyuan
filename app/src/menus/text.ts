@@ -11,7 +11,7 @@ export const textMenu = (target: Element) => {
         click() {
             document.execCommand("copy");
         }
-    })
+    });
     menu.addItem({
         label: window.siyuan.languages.selectAll,
         icon: "iconSelect",
@@ -19,8 +19,8 @@ export const textMenu = (target: Element) => {
             if (getSelection().rangeCount === 0) {
                 return;
             }
-            getSelection().getRangeAt(0).selectNode(target)
+            getSelection().getRangeAt(0).selectNode(target);
         }
-    })
-    return menu
-}
+    });
+    return menu;
+};

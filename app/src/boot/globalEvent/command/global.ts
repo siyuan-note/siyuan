@@ -129,18 +129,18 @@ export const globalCommand = (command: string, app: App) => {
                 let newItem: Tab;
                 if (command === "goToEditTabPrev") {
                     if (index === 0) {
-                        newItem = tabs[tabs.length - 1]
+                        newItem = tabs[tabs.length - 1];
                     } else {
-                        newItem = tabs[index - 1]
+                        newItem = tabs[index - 1];
                     }
                 } else {
                     if (index === tabs.length - 1) {
-                        newItem = tabs[0]
+                        newItem = tabs[0];
                     } else {
-                        newItem = tabs[index + 1]
+                        newItem = tabs[index + 1];
                     }
                 }
-                const tab = getInstanceById(newItem.id) as Tab
+                const tab = getInstanceById(newItem.id) as Tab;
                 tab.parent.switchTab(newItem.headElement);
                 tab.parent.showHeading();
             }
@@ -229,9 +229,9 @@ export const globalCommand = (command: string, app: App) => {
             openHistory(app);
             return true;
         case "editReadonly":
-            setReadOnly(!window.siyuan.config.editor.readOnly)
+            setReadOnly(!window.siyuan.config.editor.readOnly);
             return true;
     }
 
-    return false
-}
+    return false;
+};

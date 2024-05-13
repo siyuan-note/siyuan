@@ -25,4 +25,4 @@ export const onluProtyleCommand = (options: {
         return true;
     }
     return false;
-}
+};

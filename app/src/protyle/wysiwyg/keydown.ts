@@ -49,7 +49,7 @@ import {
     getStartEndElement,
     upSelect
 } from "./commonHotkey";
-import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
+import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -473,7 +473,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle,
                 command: "enter",
                 previousRange: range,
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -484,7 +484,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle,
                 command: "enterBack",
                 previousRange: range,
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return;

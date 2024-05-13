@@ -897,6 +897,24 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	return
 }
 
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
+// HideConfSecret 隐藏设置中的秘密信息
+func HideConfSecret(c *AppConf) {
+	c.AI = &conf.AI{}
+	c.Api = &conf.API{}
+	c.Flashcard = &conf.Flashcard{}
+	c.LocalIPs = []string{}
+	c.Publish = &conf.Publish{}
+	c.Repo = &conf.Repo{}
+	c.Sync = &conf.Sync{}
+	c.System.AppDir = ""
+	c.System.ConfDir = ""
+	c.System.DataDir = ""
+	c.System.HomeDir = ""
+	c.System.Name = ""
+	c.System.NetworkProxy = &conf.NetworkProxy{}
+}
+
 func clearPortJSON() {
 	pid := fmt.Sprintf("%d", os.Getpid())
 	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")

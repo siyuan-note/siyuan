@@ -215,13 +215,19 @@ func getConf(c *gin.Context) {
 		return
 	}
 
-	// REF: https://github.com/siyuan-note/siyuan/issues/11364
-	if readonly := model.GetClaims(c, model.ClaimsKeyReadonly); readonly != nil {
-		maskedConf.ReadOnly = readonly.(bool)
-	}
-
 	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {
 		maskedConf.Sync.Stat = model.Conf.Language(53)
+	}
+
+	// REF: https://github.com/siyuan-note/siyuan/issues/11364
+	role := model.GetGinContextRole(c)
+	if model.IsReadOnlyRole(role) {
+		maskedConf.ReadOnly = true
+	}
+	if !model.IsValidRole(role, []model.Role{
+		model.RoleAdministrator,
+	}) {
+		model.HideConfSecret(maskedConf)
 	}
 
 	ret.Data = map[string]interface{}{

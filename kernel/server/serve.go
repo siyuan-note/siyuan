@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"mime"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -60,6 +61,7 @@ func Serve(fastMode bool) {
 		model.Timing,
 		model.Recover,
 		corsMiddleware(), // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
+		jwtMiddleware,    // 解析 JWT https://github.com/siyuan-note/siyuan/issues/11364
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm"})),
 	)
 
@@ -81,6 +83,7 @@ func Serve(fastMode bool) {
 	serveEmojis(ginServer)
 	serveTemplates(ginServer)
 	servePublic(ginServer)
+	serveSnippets(ginServer)
 	serveRepoDiff(ginServer)
 	api.ServeAPI(ginServer)
 
@@ -204,6 +207,32 @@ func servePublic(ginServer *gin.Engine) {
 	ginServer.Static("/public/", filepath.Join(util.DataDir, "public"))
 }
 
+func serveSnippets(ginServer *gin.Engine) {
+	ginServer.Handle("GET", "/snippets/*filepath", func(c *gin.Context) {
+		filePath := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
+		ext := filepath.Ext(filePath)
+		name := strings.TrimSuffix(filePath, ext)
+		confSnippets, err := model.LoadSnippets()
+		if nil != err {
+			logging.LogErrorf("load snippets failed: %s", err)
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		for _, s := range confSnippets {
+			if s.Name == name && ("" != ext && s.Type == ext[1:]) {
+				c.Header("Content-Type", mime.TypeByExtension(ext))
+				c.String(http.StatusOK, s.Content)
+				return
+			}
+		}
+
+		// 没有在配置文件中命中时在文件系统上查找
+		filePath = filepath.Join(util.SnippetsPath, filePath)
+		c.File(filePath)
+	})
+}
+
 func serveAppearance(ginServer *gin.Engine) {
 	ginServer.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
 	ginServer.StaticFile("manifest.json", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
@@ -305,10 +334,10 @@ func serveAppearance(ginServer *gin.Engine) {
 	siyuan.Static("/stage/", filepath.Join(util.WorkingDir, "stage"))
 	ginServer.StaticFile("service-worker.js", filepath.Join(util.WorkingDir, "stage", "service-worker.js"))
 
-	siyuan.GET("/check-auth", serveCheckAuth)
+	siyuan.GET("/check-auth", serveAuthPage)
 }
 
-func serveCheckAuth(c *gin.Context) {
+func serveAuthPage(c *gin.Context) {
 	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/auth.html"))
 	if nil != err {
 		logging.LogErrorf("load auth page failed: %s", err)
@@ -371,20 +400,20 @@ func serveCheckAuth(c *gin.Context) {
 }
 
 func serveAssets(ginServer *gin.Engine) {
-	ginServer.POST("/upload", model.CheckAuth, model.Upload)
+	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
 	ginServer.GET("/assets/*path", model.CheckAuth, func(context *gin.Context) {
 		requestPath := context.Param("path")
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
 		if nil != err {
-			context.Status(404)
+			context.Status(http.StatusNotFound)
 			return
 		}
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})
-	ginServer.GET("/history/*path", model.CheckAuth, func(context *gin.Context) {
+	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
 		return
@@ -392,7 +421,7 @@ func serveAssets(ginServer *gin.Engine) {
 }
 
 func serveRepoDiff(ginServer *gin.Engine) {
-	ginServer.GET("/repo/diff/*path", model.CheckAuth, func(context *gin.Context) {
+	ginServer.GET("/repo/diff/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		requestPath := context.Param("path")
 		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
 		http.ServeFile(context.Writer, context.Request, p)
@@ -462,7 +491,11 @@ func serveWebSocket(ginServer *gin.Engine) {
 		// REF: https://github.com/siyuan-note/siyuan/issues/11364
 		if !authOk {
 			if token := model.ParseXAuthToken(s.Request); token != nil {
-				authOk = token.Valid
+				authOk = token.Valid && model.IsValidRole(model.GetClaimRole(model.GetTokenClaims(token)), []model.Role{
+					model.RoleAdministrator,
+					model.RoleEditor,
+					model.RoleReader,
+				})
 			}
 		}
 
@@ -531,12 +564,24 @@ func serveWebSocket(ginServer *gin.Engine) {
 			s.Write(result.Bytes())
 			return
 		}
-		if util.ReadOnly && !command.IsRead() {
-			result := util.NewResult()
-			result.Code = -1
-			result.Msg = model.Conf.Language(34)
-			s.Write(result.Bytes())
-			return
+		if !command.IsRead() {
+			readonly := util.ReadOnly
+			if !readonly {
+				if token := model.ParseXAuthToken(s.Request); token != nil {
+					readonly = token.Valid && model.IsValidRole(model.GetClaimRole(model.GetTokenClaims(token)), []model.Role{
+						model.RoleReader,
+						model.RoleVisitor,
+					})
+				}
+			}
+
+			if readonly {
+				result := util.NewResult()
+				result.Code = -1
+				result.Msg = model.Conf.Language(34)
+				s.Write(result.Bytes())
+				return
+			}
 		}
 
 		end := time.Now()
@@ -578,4 +623,22 @@ func corsMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// jwtMiddleware is a middleware to check jwt token
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
+func jwtMiddleware(c *gin.Context) {
+	if token := model.ParseXAuthToken(c.Request); token != nil {
+		// c.Request.Header.Del(model.XAuthTokenKey)
+		if token.Valid {
+			claims := model.GetTokenClaims(token)
+			c.Set(model.ClaimsContextKey, claims)
+			c.Set(model.RoleContextKey, model.GetClaimRole(claims))
+			c.Next()
+			return
+		}
+	}
+	c.Set(model.RoleContextKey, model.RoleVisitor)
+	c.Next()
+	return
 }

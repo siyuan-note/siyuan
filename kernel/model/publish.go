@@ -20,7 +20,6 @@ import (
 	"crypto/rand"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/logging"
 )
@@ -34,14 +33,15 @@ type AccountsMap map[string]*Account
 type ClaimsKeyType string
 
 const (
-	XAuthTokenKey    = "X-Auth-Token"
+	XAuthTokenKey = "X-Auth-Token"
+
 	ClaimsContextKey = "claims"
 
 	iss = "siyuan-publish-reverse-proxy-server"
 	sub = "publish"
 	aud = "siyuan-kernel"
 
-	ClaimsKeyReadonly string = "readonly"
+	ClaimsKeyRole string = "role"
 )
 
 var (
@@ -84,7 +84,7 @@ func InitJWT() {
 				"aud": aud,
 				"jti": username,
 
-				ClaimsKeyReadonly: true,
+				ClaimsKeyRole: RoleReader,
 			},
 		)
 		if token, err := t.SignedString(key); err != nil {
@@ -121,11 +121,13 @@ func ParseXAuthToken(r *http.Request) *jwt.Token {
 	return nil
 }
 
-func GetClaims(c *gin.Context, key string) any {
-	if claims, exists := c.Get(ClaimsContextKey); exists {
-		value := claims.(jwt.MapClaims)[key]
-		return value
-	} else {
-		return nil
+func GetTokenClaims(token *jwt.Token) jwt.MapClaims {
+	return token.Claims.(jwt.MapClaims)
+}
+
+func GetClaimRole(claims jwt.MapClaims) Role {
+	if role := claims[ClaimsKeyRole]; role != nil {
+		return Role(role.(float64))
 	}
+	return RoleVisitor
 }

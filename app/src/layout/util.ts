@@ -169,13 +169,17 @@ const dockToJSON = (dock: Dock) => {
 };
 
 export const resetLayout = () => {
-    fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-        window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
-        setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
-        window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
-        setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
+    if (window.siyuan.config.readonly) {
         window.location.reload();
-    });
+    } else {
+        fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+            window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
+            window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
+            setStorageVal(Constants.LOCAL_DIALOGPOSITION, window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION]);
+            window.location.reload();
+        });
+    }
 };
 
 let saveCount = 0;
@@ -211,10 +215,12 @@ export const saveLayout = () => {
         if (isWindow()) {
             sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
         } else {
-            fetchPost("/api/system/setUILayout", {
-                layout: layoutJSON,
-                errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
-            });
+            if (!window.siyuan.config.readonly) {
+                fetchPost("/api/system/setUILayout", {
+                    layout: layoutJSON,
+                    errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
+                });
+            }
         }
     }
 };
@@ -250,12 +256,17 @@ export const exportLayout = (options: {
     getAllModels().editor.forEach(item => {
         saveScroll(item.editor.protyle);
     });
-    fetchPost("/api/system/setUILayout", {
-        layout: layoutJSON,
-        errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
-    }, () => {
+
+    if (window.siyuan.config.readonly) {
         options.cb();
-    });
+    } else {
+        fetchPost("/api/system/setUILayout", {
+            layout: layoutJSON,
+            errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
+        }, () => {
+            options.cb();
+        });
+    }
 };
 
 export const getAllLayout = () => {

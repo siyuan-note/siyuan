@@ -340,9 +340,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             window.siyuan.menus.menu.remove();
                             return;
                         }
-                        fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+                        if (window.siyuan.config.readonly) {
                             window.location.reload();
-                        });
+                        } else {
+                            fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+                                window.location.reload();
+                            });
+                        }
                     });
                 }
             });

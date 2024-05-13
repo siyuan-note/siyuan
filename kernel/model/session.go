@@ -152,14 +152,7 @@ func GetCaptcha(c *gin.Context) {
 }
 
 func CheckReadonly(c *gin.Context) {
-	readonly := false
-	if readonly_ := GetClaims(c, ClaimsKeyReadonly); readonly_ != nil {
-		readonly = readonly_.(bool)
-	} else {
-		readonly = util.ReadOnly
-	}
-
-	if readonly {
+	if util.ReadOnly {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)
@@ -171,13 +164,14 @@ func CheckReadonly(c *gin.Context) {
 }
 
 func CheckAuth(c *gin.Context) {
-	if token := ParseXAuthToken(c.Request); token != nil {
-		c.Request.Header.Del(XAuthTokenKey)
-		if token.Valid {
-			c.Set(ClaimsContextKey, token.Claims)
-			c.Next()
-			return
-		}
+	// 已通过 JWT 认证
+	if role := GetGinContextRole(c); IsValidRole(role, []Role{
+		RoleAdministrator,
+		RoleEditor,
+		RoleReader,
+	}) {
+		c.Next()
+		return
 	}
 
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
@@ -187,6 +181,7 @@ func CheckAuth(c *gin.Context) {
 	if "" == Conf.AccessAuthCode {
 		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
 		if util.SiyuanAccessAuthCodeBypass {
+			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
@@ -206,6 +201,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
+		c.Set(RoleContextKey, RoleAdministrator)
 		c.Next()
 		return
 	}
@@ -222,19 +218,23 @@ func CheckAuth(c *gin.Context) {
 	// 放过来自本机的某些请求
 	if localhost {
 		if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
+			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
 		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
+			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
 		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") {
+			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
 		if strings.HasPrefix(c.Request.RequestURI, "/api/sync/performSync") {
 			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()
 				return
 			}
@@ -245,6 +245,7 @@ func CheckAuth(c *gin.Context) {
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
 	if workspaceSession.AccessAuthCode == Conf.AccessAuthCode {
+		c.Set(RoleContextKey, RoleAdministrator)
 		c.Next()
 		return
 	}
@@ -264,6 +265,7 @@ func CheckAuth(c *gin.Context) {
 
 		if "" != token {
 			if Conf.Api.Token == token {
+				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()
 				return
 			}
@@ -277,6 +279,7 @@ func CheckAuth(c *gin.Context) {
 	// 通过 API token (query-params: token)
 	if token := c.Query("token"); "" != token {
 		if Conf.Api.Token == token {
+			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
@@ -316,7 +319,29 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
+	c.Set(RoleContextKey, RoleAdministrator)
 	c.Next()
+}
+
+func CheckAdminRole(c *gin.Context) {
+	if IsValidRole(GetGinContextRole(c), []Role{
+		RoleAdministrator,
+	}) {
+		c.Next()
+	} else {
+		c.AbortWithStatus(http.StatusForbidden)
+	}
+}
+
+func CheckEditRole(c *gin.Context) {
+	if IsValidRole(GetGinContextRole(c), []Role{
+		RoleAdministrator,
+		RoleEditor,
+	}) {
+		c.Next()
+	} else {
+		c.AbortWithStatusJSON(http.StatusForbidden, map[string]any{"code": -1, "msg": http.StatusText(http.StatusForbidden)})
+	}
 }
 
 var timingAPIs = map[string]int{

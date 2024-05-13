@@ -545,6 +545,7 @@ func Preview(id string) (retStdHTML string, retOutline []*Path) {
 		Conf.Export.AddTitle)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
+	addBlockIALNodes(tree, false)
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)

@@ -43,7 +43,7 @@ export const initBlockPopover = (app: App) => {
                             }
                             aElement.style.overflow = "";
                         }
-                        if (aElement.dataset.wrap == "true") {
+                        else if (aElement.dataset.wrap == "true") {
                             const textElement = aElement.querySelector(".av__celltext");
                             if (textElement.scrollHeight > textElement.clientHeight) {
                                 tip = getCellText(aElement);

@@ -2025,6 +2025,8 @@ func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set) {
 	for _, n := range removePluginNameSet.Values() {
 		removePlugins = append(removePlugins, n.(string))
 	}
+
+	logging.LogInfof("reload plugins [upserts=%v, removes=%v]", upsertPlugins, removePlugins)
 	util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
 		"upsertPlugins": upsertPlugins,
 		"removePlugins": removePlugins,

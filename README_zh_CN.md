@@ -205,14 +205,14 @@ services:
 
 </details>
 
-### unraid 部署
+### Unraid 部署
 
 <details>
-<summary>unraid 部署文档</summary>
+<summary>Unraid 部署文档</summary>
 
 #### 概述
-# 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
-# 模板填写参考下方
+##### 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
+###### 模板填写参考下方
 ```
 Web UI:6806
 Container Port:6806

@@ -1236,7 +1236,8 @@
     "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données",
     "task.reload.ui": "Interface utilisateur de rechargement de tâche",
     "task.asset.database.index.full": "Exécuter l'index de reconstruction de la base de données d'actifs",
-    "task.asset.database.index.commit": "Exécuter la validation de l'index de la base de données des actifs"
+    "task.asset.database.index.commit": "Exécuter la validation de l'index de la base de données des actifs",
+    "task.cache.virtualBlockRef": "Effectuer une référence virtuelle du cache"
   },
   "_trayMenu": {
     "showWindow": "Afficher la fenêtre principale",
@@ -1500,6 +1501,7 @@
     "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
     "244": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur",
     "245": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez utiliser [Quitter l'application] dans le panneau de droite pour quitter normalement",
-    "246": "Le titre du document ne peut pas contenir / et a été remplacé par _"
+    "246": "Le titre du document ne peut pas contenir / et a été remplacé par _",
+    "247": "Le fichier [%s] est plus grand que la limite maximale [%s] et a été ignoré pour le téléchargement vers le cloud"
   }
 }

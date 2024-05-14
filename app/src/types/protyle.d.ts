@@ -1,3 +1,5 @@
+import IUILayoutTabSearchConfigTypes = Config.IUILayoutTabSearchConfigTypes;
+
 interface ILuteNode {
     TokensStr: () => string;
     __internal_object__: {
@@ -445,6 +447,11 @@ interface IProtyle {
     app: import("../index").App,
     transactionTime: number,
     id: string,
+    query?: {
+        key: string,
+        method: number
+        types: IUILayoutTabSearchConfigTypes
+    },
     block: {
         id?: string,
         scroll?: boolean

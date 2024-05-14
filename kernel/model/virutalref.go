@@ -31,6 +31,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -99,18 +100,20 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []stri
 }
 
 func CacheVirtualBlockRefJob() {
-	virtualBlockRefCache.Del("virtual_ref")
+	if !Conf.Editor.VirtualBlockRef {
+		return
+	}
+	task.AppendTask(task.CacheVirtualBlockRef, ResetVirtualBlockRefCache)
+}
+
+func ResetVirtualBlockRefCache() {
+	virtualBlockRefCache.Clear()
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
 
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
-}
-
-func ResetVirtualBlockRefCache() {
-	virtualBlockRefCache.Clear()
-	CacheVirtualBlockRefJob()
 }
 
 func AddVirtualBlockRefInclude(keyword []string) {

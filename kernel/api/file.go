@@ -36,6 +36,21 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getUniqueFilename(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	filePath := arg["path"].(string)
+	ret.Data = map[string]interface{}{
+		"path": util.GetUniqueFilename(filePath),
+	}
+}
+
 func globalCopyFiles(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

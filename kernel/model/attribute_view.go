@@ -1603,6 +1603,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		name := strings.TrimSpace(operation.Name)
 		if "" == name {
 			name = srcAv.Name + " " + operation.Format
+			name = strings.TrimSpace(name)
 		}
 
 		destKeyValues := &av.KeyValues{
@@ -1629,10 +1630,18 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 				continue
 			}
 
-			srcKeyValues := keyValues
-			for _, srcVal := range srcKeyValues.Values {
+			for _, srcVal := range keyValues.Values {
 				for _, blockID := range srcVal.Relation.BlockIDs {
-					destVal := &av.Value{ID: ast.NewNodeID(), KeyID: destKeyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}, CreatedAt: now, UpdatedAt: now + 1000}
+					destVal := destAv.GetValue(destKeyValues.Key.ID, blockID)
+					if nil == destVal {
+						destVal = &av.Value{ID: ast.NewNodeID(), KeyID: destKeyValues.Key.ID, BlockID: blockID, Type: keyValues.Key.Type, Relation: &av.ValueRelation{}, CreatedAt: now, UpdatedAt: now + 1000}
+					} else {
+						destVal.Type = keyValues.Key.Type
+						if nil == destVal.Relation {
+							destVal.Relation = &av.ValueRelation{}
+						}
+						destVal.UpdatedAt = now
+					}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
 					destKeyValues.Values = append(destKeyValues.Values, destVal)
@@ -3227,17 +3236,23 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	// val.IsDetached 只有更新主键的时候才会传入，所以下面需要结合 isUpdatingBlockKey 来判断
 
-	if oldIsDetached { // 之前是游离行
+	if oldIsDetached {
+		// 之前是游离行
+
 		if !val.IsDetached { // 现在绑定了块
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
 		}
-	} else { // 之前绑定了块
+	} else {
+		// 之前绑定了块
+
 		if isUpdatingBlockKey { // 正在更新主键
 			if val.IsDetached { // 现在是游离行
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
-			} else { // 现在绑定了块
+			} else {
+				// 现在绑定了块
+
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)

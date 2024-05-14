@@ -18,8 +18,6 @@ package treenode
 
 import (
 	"bytes"
-	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"strings"
 	"sync"
 	"text/template"
@@ -34,7 +32,10 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/88250/vitess-sqlparser/sqlparser"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -357,17 +358,36 @@ func CountBlockNodes(node *ast.Node) (ret int) {
 	return
 }
 
-func ParentNodes(node *ast.Node) (parents []*ast.Node) {
-	const maxDepth = 256
+// ParentNodesWithHeadings 返回所有父级节点。
+// 注意:返回的父级节点包括了标题节点，并且不保证父级层次顺序。
+func ParentNodesWithHeadings(node *ast.Node) (parents []*ast.Node) {
+	const maxDepth = 255
 	i := 0
-	for n := node.Parent; nil != n; n = n.Parent {
-		i++
-		parents = append(parents, n)
-		if ast.NodeDocument == n.Type {
-			return
-		}
+	headingIDs := hashset.New()
+	for n := node; nil != n; n = n.Parent {
+		parent := n.Parent
 		if maxDepth < i {
 			logging.LogWarnf("parent nodes of node [%s] is too deep", node.ID)
+			return
+		}
+		i++
+
+		if nil == parent {
+			return
+		}
+
+		// 标题下方块编辑后刷新标题块更新时间
+		// The heading block update time is refreshed after editing the blocks under the heading https://github.com/siyuan-note/siyuan/issues/11374
+		parentHeadingLevel := 7
+		for prev := n.Previous; nil != prev; prev = prev.Previous {
+			if ast.NodeHeading == prev.Type && prev.HeadingLevel < parentHeadingLevel && !headingIDs.Contains(prev.ID) {
+				parents = append(parents, prev)
+				headingIDs.Add(prev.ID)
+			}
+		}
+
+		parents = append(parents, parent)
+		if ast.NodeDocument == parent.Type {
 			return
 		}
 	}

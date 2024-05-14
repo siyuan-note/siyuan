@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20240510235243"
+		"updated": "20240513102142"
 	},
 	"Children": [
 		{
@@ -1073,6 +1073,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "以上就是標題塊，支援一級到六級。"
+				}
+			]
+		},
+		{
+			"ID": "20240513102059-nfnc22t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513102059-nfnc22t",
+				"updated": "20240513102059"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240513102059-ttfrx4f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513102059-ttfrx4f",
+				"updated": "20240513102142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不建議在正文中使用一級標題，建議使用二級標題作為頂層標題，這樣在開啟了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增文檔標題"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後，整體的標題層級在匯出時才符合正常邏輯。"
 				}
 			]
 		},

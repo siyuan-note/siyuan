@@ -1179,6 +1179,11 @@ export const getArticle = (options: {
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
             }, getResponse => {
+                options.edit.protyle.query = {
+                    key: options.value || null,
+                    method: options.config?.method || null,
+                    types: options.config?.types || null,
+                };
                 onGet({
                     updateReadonly: true,
                     data: getResponse,

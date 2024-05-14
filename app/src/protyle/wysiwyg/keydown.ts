@@ -49,7 +49,7 @@ import {
     getStartEndElement,
     upSelect
 } from "./commonHotkey";
-import {enterBack, fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
+import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -67,6 +67,7 @@ import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
+import {onluProtyleCommand} from "../../boot/globalEvent/command/protyle";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -468,19 +469,22 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enter.custom, event)) {
-            let topNodeElement = getTopAloneElement(nodeElement);
-            if (topNodeElement.parentElement.classList.contains("li") && topNodeElement.parentElement.parentElement.classList.contains("list") &&
-                topNodeElement.nextElementSibling?.classList.contains("list") && topNodeElement.previousElementSibling.classList.contains("protyle-action")) {
-                topNodeElement = topNodeElement.parentElement;
-            }
-            zoomOut({protyle, id: topNodeElement.getAttribute("data-node-id")});
+            onluProtyleCommand({
+                protyle,
+                command: "enter",
+                previousRange: range,
+            });
             event.preventDefault();
             event.stopPropagation();
             return;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
-            enterBack(protyle, nodeElement.getAttribute("data-node-id"));
+            onluProtyleCommand({
+                protyle,
+                command: "enterBack",
+                previousRange: range,
+            });
             event.preventDefault();
             event.stopPropagation();
             return;

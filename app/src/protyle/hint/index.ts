@@ -621,6 +621,9 @@ ${genHintItemHTML(item)}
                     notebookId: protyle.notebookId,
                     useSavePath: true,
                     currentPath: protyle.path,
+                    afterCB: (createDocId, createDocTitle) => {
+                        insertHTML(`<span data-type="block-ref" data-id="${createDocId}" data-subtype="d">${createDocTitle}</span>`, protyle);
+                    }
                 });
                 return;
             } else if (value === Constants.ZWSP + 6) {
@@ -632,7 +635,7 @@ ${genHintItemHTML(item)}
                     title: window.siyuan.languages.untitled,
                     md: ""
                 }, () => {
-                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`, protyle);
+                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${window.siyuan.languages.untitled}</span>`, protyle);
                     /// #if MOBILE
                     openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
                     /// #else

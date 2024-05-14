@@ -1086,9 +1086,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, imgSrc, false, false);
     }
-    /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem(exportAsset(imgElement.getAttribute("data-src"))).element);
-    /// #endif
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,
@@ -1220,11 +1218,9 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     }
     if (linkAddress) {
         openMenu(protyle.app, linkAddress, false, true);
-        /// #if !BROWSER
         if (linkAddress?.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
         }
-        /// #endif
     }
     if (!protyle.disabled) {
         if (linkAddress?.startsWith("assets/")) {
@@ -1583,9 +1579,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]
         });
     }
-    /// #if !BROWSER
     subMenus.push(exportAsset(src));
-    /// #endif
     return subMenus;
 };
 

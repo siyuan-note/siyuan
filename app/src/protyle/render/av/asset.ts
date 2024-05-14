@@ -244,11 +244,9 @@ ${window.siyuan.languages.title}
         }
     });
     openMenu(protyle ? protyle.app : window.siyuan.ws.app, linkAddress, false, true);
-    /// #if !BROWSER
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
-    /// #endif
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.right,

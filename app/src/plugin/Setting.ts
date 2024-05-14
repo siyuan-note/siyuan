@@ -50,7 +50,7 @@ export class Setting {
             }
             const tagName = actionElement?.classList.contains("b3-switch") ? "label" : "div";
             if (typeof item.direction === "undefined") {
-                item.direction = "TEXTAREA" === actionElement.tagName ? "row" : "column";
+                item.direction = (!actionElement || "TEXTAREA" === actionElement.tagName) ? "row" : "column";
             }
             if (item.direction === "row") {
                 html = `<${tagName} class="b3-label">

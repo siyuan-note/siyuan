@@ -289,7 +289,7 @@
   "continueReview1": "復習を続ける",
   "continueReview2": "<code class='fn__code'>${count}</code> 枚のカードの復習が残っています。続けますか？",
   "whatsNewInSiYuan": "SiYuan の新機能",
-  "returnDesktop": "デスクトップに戻るにはもう一度バックを押してください",
+  "returnDesktop": "もう一度押すとデスクトップに戻ります。終了するには、右側のサイドバーパネルの[アプリケーションの終了]を使用します",
   "enterNew": "入力して作成",
   "enterNewTip": "ドキュメントが見つかりませんでした。新規ドキュメントを作成するには Enter キーを押してください",
   "searchTip1": "移動する",

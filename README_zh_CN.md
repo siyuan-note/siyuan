@@ -208,7 +208,7 @@ services:
 ### unraid 部署
 
 <details>
-<summary>Docker 部署文档</summary>
+<summary>unraid 部署文档</summary>
 
 #### 概述
 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan

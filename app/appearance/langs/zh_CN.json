@@ -289,7 +289,7 @@
   "continueReview1": "继续复习",
   "continueReview2": "还有 <code class='fn__code'>${count}</code> 张卡片待复习，是否继续？",
   "whatsNewInSiYuan": "思源笔记最新变化",
-  "returnDesktop": "再按一次返回桌面",
+  "returnDesktop": "再按一次返回桌面，如需退出请使用右侧栏面板中的 [退出应用]",
   "enterNew": "回车创建",
   "enterNewTip": "搜索结果为空，回车创建新文档",
   "searchTip1": "导航",

@@ -289,7 +289,7 @@
   "continueReview1": "Continuar revisión",
   "continueReview2": "Todavía hay tarjetas <code class='fn__code'>${count}</code> para revisar, ¿continuar?",
   "whatsNewInSiYuan": "Novedades en SiYuan",
-  "returnDesktop": "Presiona volver de nuevo al escritorio",
+  "returnDesktop": "Presione nuevamente para regresar al escritorio. Utilice [Salir de la aplicación] en el panel de la barra lateral derecha para salir normalmente de la aplicación.",
   "enterNew": "Ingresar para crear",
   "enterNewTip": "No se encontraron documentos, ingrese para crear un nuevo documento.",
   "searchTip1": "para navegar",

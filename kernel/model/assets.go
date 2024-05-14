@@ -606,6 +606,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err err
 		metaType = "4"
 	}
 
+	pushErrMsgCount := 0
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
 		fi, statErr := os.Stat(absAsset)
@@ -616,8 +617,11 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err err
 
 		if limitSize < uint64(fi.Size()) {
 			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", absAsset, humanize.IBytes(limitSize))
-			msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
-			util.PushErrMsg(msg, 30000)
+			if 3 > pushErrMsgCount {
+				msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
+				util.PushErrMsg(msg, 30000)
+			}
+			pushErrMsgCount++
 			continue
 		}
 

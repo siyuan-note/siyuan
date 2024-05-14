@@ -211,8 +211,9 @@ services:
 <summary>unraid 部署文档</summary>
 
 #### 概述
-注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
-模板填写参考下方
+# 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
+# 模板填写参考下方
+```
 Web UI:6806
 Container Port:6806
 host path:
@@ -221,6 +222,7 @@ Container Path:/siyuan/workspace
 PUID:1000
 PGID:1000
 发布参数:--workspace=/siyuan/workspace/ --accessAuthCode=******(自己设置密码)
+```
  
 ### 安装包
 

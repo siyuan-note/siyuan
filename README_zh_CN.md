@@ -216,7 +216,6 @@ services:
 ```
 Web UI:6806
 Container Port:6806
-host path:
 host path:/mnt/user/appdata/siyuan
 Container Path:/siyuan/workspace
 PUID:1000

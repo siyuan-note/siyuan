@@ -214,13 +214,14 @@ services:
 ##### 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
 ###### 模板填写参考下方
 ```
+image: b3log/siyuan
 Web UI:6806
 Container Port:6806
+Container Path:/home/siyuan
 host path:/mnt/user/appdata/siyuan
-Container Path:/siyuan/workspace
-PUID:1000
-PGID:1000
-发布参数:--workspace=/siyuan/workspace/ --accessAuthCode=******(自己设置密码)
+添加变量:PUID:1000
+添加变量:PGID:1000
+填写发布参数:--workspace=/siyuan/workspace/ --accessAuthCode=******(自己设置密码)
 ```
 
 ### 安装包

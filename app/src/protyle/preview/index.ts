@@ -56,13 +56,13 @@ export class Preview {
                     actionHtml.push('<button type="button" data-type="mobile">Mobile/Wechat</button>');
                     break;
                 case "mp-wechat":
-                    actionHtml.push('<button type="button" data-type="mp-wechat" class="b3-tooltips b3-tooltips__w" aria-label="复制到公众号"><svg><use xlink:href="#iconMp"></use></svg></button>');
+                    actionHtml.push('<button type="button" data-type="mp-wechat" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToWechatMP}"><svg><use xlink:href="#iconMp"></use></svg></button>');
                     break;
                 case "zhihu":
-                    actionHtml.push('<button type="button" data-type="zhihu" class="b3-tooltips b3-tooltips__w" aria-label="复制到知乎"><svg><use xlink:href="#iconZhihu"></use></svg></button>');
+                    actionHtml.push('<button type="button" data-type="zhihu" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToZhihu}"><svg><use xlink:href="#iconZhihu"></use></svg></button>');
                     break;
                 case "yuque":
-                    actionHtml.push('<button type="button" data-type="yuque" class="b3-tooltips b3-tooltips__w" aria-label="复制到语雀"><svg><use xlink:href="#iconYuque"></use></svg></button>');
+                    actionHtml.push('<button type="button" data-type="yuque" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToYuque}"><svg><use xlink:href="#iconYuque"></use></svg></button>');
                     break;
             }
         }

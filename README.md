@@ -34,9 +34,9 @@
 
 * [💡 Introduction](#-introduction)
 * [🔮 Features](#-features)
-* [🏗️ Architecture and Ecosystem](#%EF%B8%8F️-architecture-and-ecosystem)
+* [🏗️ Architecture and Ecosystem](#-architecture-and-ecosystem)
 * [🌟 Star History](#-star-history)
-* [🗺️ Roadmap](#️%EF%B8%8F-roadmap)
+* [🗺️ Roadmap](#️-roadmap)
 * [🚀 Download Setup](#-download-setup)
   * [App Market](#app-market)
   * [Installation Package](#installation-package)

@@ -202,6 +202,27 @@ Use NGINX reverse proxy to hide port 6806, please note:
 
 </details>
 
+### Unraid Hosting
+
+<details>
+<summary>Unraid Deployment</summary>
+
+Note: First run `chown -R 1000:1000 /mnt/user/appdata/siyuan` in the terminal
+
+Template reference:
+
+```
+Web UI: 6806
+Container Port: 6806
+Host path: /mnt/user/appdata/siyuan
+Container Path: /siyuan/workspace
+PUID: 1000
+PGID: 1000
+Publish parameters: --workspace=/siyuan/workspace/ --accessAuthCode=******(Access authorization code)
+```
+
+</details>
+
 ### Installation Package
 
 * [B3log](https://b3log.org/siyuan/en/download.html)

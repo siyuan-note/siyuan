@@ -205,6 +205,28 @@ services:
 
 </details>
 
+### Unraid 部署
+
+<details>
+<summary>Unraid 部署文档</summary>
+
+#### 概述
+
+##### 注意！首先终端运行chown -R 1000:1000 /mnt/user/appdata/siyuan
+
+###### 模板填写参考下方
+
+```
+Web UI:6806
+Container Port:6806
+Container Path:/home/siyuan
+host path:/mnt/user/appdata/siyuan
+PUID:1000
+PGID:1000
+发布参数:--accessAuthCode=******(自己配置密码)
+```
+
+
 ### 安装包
 
 * [B3log](https://b3log.org/siyuan/download.html)

@@ -3174,7 +3174,7 @@ func replaceRelationAvValues(avID, previousID, nextID string) {
 				continue
 			}
 
-			if avID != srcKeyValues.Key.Relation.AvID {
+			if nil == srcKeyValues.Key.Relation || avID != srcKeyValues.Key.Relation.AvID {
 				continue
 			}
 

@@ -2704,7 +2704,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 
 		if nil == val {
-			val = &av.Value{ID: cellID, KeyID: keyValues.Key.ID, BlockID: rowID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
+			val = &av.Value{ID: cellID, KeyID: keyID, BlockID: rowID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break
@@ -2728,6 +2728,8 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		return
 	}
 
+	key, _ := attrView.GetKey(keyID)
+
 	if av.KeyTypeNumber == val.Type {
 		if nil != val.Number && !val.Number.IsNotEmpty {
 			val.Number.Content = 0
@@ -2737,6 +2739,20 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		if nil != val.Date && !val.Date.IsNotEmpty {
 			val.Date.Content = 0
 			val.Date.FormattedContent = ""
+		}
+	} else if av.KeyTypeSelect == val.Type || av.KeyTypeMSelect == val.Type {
+		if nil != key && 0 < len(val.MSelect) {
+			// The selection options are inconsistent after pasting data into the database https://github.com/siyuan-note/siyuan/issues/11409
+			for _, valOpt := range val.MSelect {
+				if opt := key.GetOption(valOpt.Content); nil == opt {
+					// 不存在的选项新建保存
+					opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+					key.Options = append(key.Options, opt)
+				} else {
+					// 已经存在的选项颜色需要保持不变
+					valOpt.Color = opt.Color
+				}
+			}
 		}
 	}
 
@@ -2800,7 +2816,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 	val.SetUpdatedAt(now)
 
-	key, _ := attrView.GetKey(val.KeyID)
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 

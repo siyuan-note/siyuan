@@ -30,6 +30,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 	"unicode/utf8"
 
@@ -824,13 +825,13 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath, true)
+		content = NodeStaticContent(n, nil, true, indexAssetPath, true, nil)
 
 		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
 			util.PushNodeOCRQueue(fc)
 		}
-		fcontent = treenode.NodeStaticContent(fc, nil, true, false, true)
+		fcontent = NodeStaticContent(fc, nil, true, false, true, nil)
 
 		parentID = n.Parent.ID
 		if h := heading(n); nil != h { // 如果在标题块下方，则将标题块作为父节点
@@ -842,7 +843,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath, true)
+		content = NodeStaticContent(n, nil, true, indexAssetPath, true, nil)
 
 		parentID = n.Parent.ID
 		if h := heading(n); nil != h {
@@ -1460,4 +1461,21 @@ func closeDatabase() (err error) {
 	debug.FreeOSMemory()
 	runtime.GC() // 没有这句的话文件句柄不会释放，后面就无法删除文件
 	return
+}
+
+func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
+	(*templateFuncMap)["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*Block) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
+		return
+	}
+	(*templateFuncMap)["querySpans"] = func(stmt string, args ...string) (retSpans []*Span) {
+		for _, arg := range args {
+			stmt = strings.Replace(stmt, "?", arg, 1)
+		}
+		retSpans = SelectSpansRawStmt(stmt, 512)
+		return
+	}
 }

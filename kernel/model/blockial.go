@@ -66,7 +66,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	content := treenode.NodeStaticContent(node, nil, false, false, false)
+	content := sql.NodeStaticContent(node, nil, false, false, false, GetBlockAttrsWithoutWaitWriting)
 	content = gulu.Str.SubStr(content, 128)
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if nil != err {

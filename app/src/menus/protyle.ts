@@ -43,7 +43,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
-import {copyPNG, exportAsset} from "./util";
+import {copyPNGByLink, exportAsset} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {checkFold, renameTag} from "../util/noRelyPCFunction";
@@ -957,7 +957,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         accelerator: window.siyuan.config.keymap.editor.general.copyBlockRef.custom,
         icon: "iconImage",
         click() {
-            copyPNG(imgElement);
+            copyPNGByLink(imgElement.getAttribute("src"));
         }
     }).element);
     if (!protyle.disabled) {

@@ -64,7 +64,6 @@ import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {transaction} from "../../protyle/wysiwyg/transaction";
 import {quickMakeCard} from "../../card/makeCard";
-import {copyPNG} from "../../menus/util";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
 import {openNewWindow} from "../../window/openNewWindow";
@@ -74,6 +73,7 @@ import {getPlainText} from "../../protyle/util/paste";
 import {commandPanel, execByCommand} from "./command/panel";
 import {filterHotkey} from "./commonHotkey";
 import {setReadOnly} from "../../config/util/setReadOnly";
+import {copyPNGByLink} from "../../menus/util";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -500,7 +500,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             } else {
                 const selectImgElement = nodeElement.querySelector(".img--select");
                 if (selectImgElement) {
-                    copyPNG(selectImgElement.querySelector("img"));
+                    copyPNGByLink(selectImgElement.querySelector("img").getAttribute("src"));
                     return true;
                 }
                 actionElement = nodeElement;

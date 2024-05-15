@@ -1203,7 +1203,16 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, options.cellElements, target.parentElement, options.blockElement);
+                    editAssetItem({
+                        protyle: options.protyle,
+                        cellElements: options.cellElements,
+                        blockElement: options.blockElement,
+                        content: target.parentElement.dataset.content,
+                        type: target.parentElement.dataset.type as "image" | "file",
+                        name: target.parentElement.dataset.name,
+                        index: parseInt(target.parentElement.dataset.index),
+                        rect: target.parentElement.getBoundingClientRect()
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

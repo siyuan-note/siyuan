@@ -7,7 +7,7 @@ import {uploadFiles} from "../../upload";
 import {pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
-import {exportAsset} from "../../../menus/util";
+import {copyPNGByLink, exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewImage} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
@@ -15,6 +15,7 @@ import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {writeText} from "../../util/compatibility";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -174,23 +175,33 @@ export const updateAssetCell = (options: {
     }
 };
 
-export const editAssetItem = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
-    const linkAddress = target.dataset.content;
-    const type = target.dataset.type as "image" | "file";
+export const editAssetItem = (options: {
+    protyle: IProtyle,
+    cellElements: HTMLElement[],
+    blockElement: Element ,
+    content: string,
+    type: "image" | "file",
+    name: string,
+    index: number,
+    rect: DOMRect
+}) => {
+    const linkAddress =options.content;
+    const type = options.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
-        if (textElements.length < 2 || !textElements[0].value ||
-            (textElements[0].value === linkAddress && textElements[1].value === target.dataset.name)) {
+        if (!textElements[0].value ||
+            (!textElements[1] && textElements[0].value === linkAddress) ||
+            (textElements[1] && textElements[0].value === linkAddress && textElements[1].value === options.name)) {
             return;
         }
         updateAssetCell({
-            protyle,
-            cellElements,
-            blockElement,
+            protyle: options.protyle,
+            cellElements: options.cellElements,
+            blockElement: options.blockElement,
             updateValue: {
-                index: parseInt(target.dataset.index),
+                index: options.index,
                 value: {
                     content: textElements[0].value,
-                    name: textElements[1].value,
+                    name: textElements[1] ? textElements[1].value : "",
                     type
                 }
             }
@@ -211,30 +222,51 @@ ${window.siyuan.languages.title}
         });
     } else {
         menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: `${window.siyuan.languages.link}
+<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>`,
+        });
+        menu.addItem({
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
                 previewImage(linkAddress);
             }
         });
+        menu.addItem({
+            label: window.siyuan.languages.copy,
+            icon: "iconCopy",
+            click() {
+                writeText(`![](${linkAddress.replace(/%20/g, " ")})`);
+            }
+        });
+        menu.addItem({
+            label: window.siyuan.languages.copyAsPNG,
+            icon: "iconImage",
+            click() {
+                copyPNGByLink(linkAddress);
+            }
+        });
+        menu.addSeparator()
     }
     menu.addItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
             updateAssetCell({
-                protyle,
-                cellElements,
-                blockElement,
-                removeIndex: parseInt(target.dataset.index)
+                protyle: options.protyle,
+                cellElements: options.cellElements,
+                blockElement: options.blockElement,
+                removeIndex: options.index
             });
         }
     });
-    openMenu(protyle ? protyle.app : window.siyuan.ws.app, linkAddress, false, false);
+    openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, false, false);
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
-    const rect = target.getBoundingClientRect();
+    const rect = options.rect;
     menu.open({
         x: rect.right,
         y: rect.top,
@@ -242,11 +274,11 @@ ${window.siyuan.languages.title}
         h: rect.height,
     });
     const textElements = menu.element.querySelectorAll("textarea");
+    textElements[0].value = linkAddress;
+    textElements[0].focus();
+    textElements[0].select();
     if (textElements.length > 1) {
-        textElements[1].value = target.dataset.name;
-        textElements[0].value = linkAddress;
-        textElements[0].focus();
-        textElements[0].select();
+        textElements[1].value = options.name;
     }
 };
 

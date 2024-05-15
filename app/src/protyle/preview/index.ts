@@ -259,7 +259,7 @@ export class Preview {
                 id: protyle.block.rootID,
             }, (response) => {
                 writeText(response.data);
-                showMessage("已复制，可到语雀进行粘贴");
+                showMessage(`${window.siyuan.languages.pasteToYuque}`);
             });
             return;
         }
@@ -281,7 +281,7 @@ export class Preview {
         this.element.lastElementChild.remove();
         focusByRange(cloneRange);
         if (type) {
-            showMessage(`已复制，可到${type === "zhihu" ? "知乎" : "微信公众号平台"}进行粘贴`);
+            showMessage(`${type === "zhihu" ? window.siyuan.languages.pasteToZhihu : window.siyuan.languages.pasteToWechatMP}`);
         }
     }
 

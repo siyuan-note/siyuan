@@ -1182,7 +1182,7 @@
   "preview": "导出预览",
   "desktop": "桌面",
   "tablet": "平板",
-  "mobileOrWechat": "手机/微信",
+  "mobile": "移动端",
   "copyToWechatMP": "复制到公众号",
   "copyToZhihu": "复制到知乎",
   "copyToYuque": "复制到语雀",

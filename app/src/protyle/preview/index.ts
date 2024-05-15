@@ -53,7 +53,7 @@ export class Preview {
                     actionHtml.push(`<button type="button" data-type="tablet">${window.siyuan.languages.tablet}</button>`);
                     break;
                 case "mobile":
-                    actionHtml.push(`<button type="button" data-type="mobile">${window.siyuan.languages.mobileOrWechat}</button>`);
+                    actionHtml.push(`<button type="button" data-type="mobile">${window.siyuan.languages.mobile}</button>`);
                     break;
                 case "mp-wechat":
                     actionHtml.push(`<button type="button" data-type="mp-wechat" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToWechatMP}"><svg><use xlink:href="#iconMp"></use></svg></button>`);

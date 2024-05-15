@@ -1182,7 +1182,7 @@
   "preview": "プレビュー",
   "desktop": "デスクトップ",
   "tablet": "タブレット",
-  "mobileOrWechat": "ケータイ/Wechat", 
+  "mobile": "携帯端末",
   "copyToWechatMP": "Wechat MP にコピーする",
   "copyToZhihu": "Zhihu にコピーする",
   "copyToYuque": "Yuque にコピーする",

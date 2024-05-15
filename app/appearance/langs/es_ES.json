@@ -1182,7 +1182,7 @@
   "preview": "Vista previa de la exportación",
   "desktop": "Escritorio",
   "tablet": "Tablet",
-  "mobileOrWechat": "Móvil/Wechat", 
+  "mobile": "Móvil",
   "copyToWechatMP": "Copiar a Wechat MP",
   "copyToZhihu": "Copiar a Zhihu",
   "copyToYuque": "Copiar a Yuque",

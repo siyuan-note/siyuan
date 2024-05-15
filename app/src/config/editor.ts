@@ -333,16 +333,14 @@ export const editor = {
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "1024";
             }
 
-            const markdown = {
-                inlineSup: (editor.element.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
-                inlineSub: (editor.element.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
-                inlineTag: (editor.element.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,
-                inlineMath: (editor.element.querySelector("#editorMarkdownInlineMath") as HTMLInputElement).checked
-            };
-
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
-                markdown: markdown,
+                markdown:  {
+                    inlineSup: (editor.element.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
+                    inlineSub: (editor.element.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
+                    inlineTag: (editor.element.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,
+                    inlineMath: (editor.element.querySelector("#editorMarkdownInlineMath") as HTMLInputElement).checked
+                },
                 allowHTMLBLockScript: (editor.element.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked,
                 justify: (editor.element.querySelector("#justify") as HTMLInputElement).checked,
                 rtl: (editor.element.querySelector("#rtl") as HTMLInputElement).checked,

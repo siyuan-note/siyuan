@@ -34,9 +34,9 @@
 
 * [💡 Introduction](#-introduction)
 * [🔮 Features](#-features)
-* [🏗️ Architecture design and open source ecosystem](#️-architecture-design-and-open-source-ecosystem)
+* [🏗️ Architecture and Ecosystem](#%EF%B8%8F️-architecture-and-ecosystem)
 * [🌟 Star History](#-star-history)
-* [🗺️ Roadmap](#️-roadmap)
+* [🗺️ Roadmap](#️%EF%B8%8F-roadmap)
 * [🚀 Download Setup](#-download-setup)
   * [App Market](#app-market)
   * [Installation Package](#installation-package)
@@ -110,7 +110,7 @@ Most features are free, even for commercial use.
 
 Some features are only available to paid members, for more details please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).
 
-## 🏗️ Architecture design and open source ecosystem
+## 🏗️ Architecture and Ecosystem
 
 ![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
 

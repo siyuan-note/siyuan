@@ -135,7 +135,7 @@ export const updateAssetCell = (options: {
         } else {
             cellValue.mAsset = mAssetValue;
         }
-        const avID = options.blockElement.getAttribute("data-av-id")
+        const avID = options.blockElement.getAttribute("data-av-id");
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -248,7 +248,7 @@ ${window.siyuan.languages.title}
                 copyPNGByLink(linkAddress);
             }
         });
-        menu.addSeparator()
+        menu.addSeparator();
     }
     menu.addItem({
         icon: "iconTrashcan",

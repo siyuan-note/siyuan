@@ -191,7 +191,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
     <div class="fn__space"></div><div class="fn__space"></div>
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
 </div><div class="fn__hr--b"></div>`;
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 
             if (element.innerHTML) {
                 // 防止 blockElement 找不到

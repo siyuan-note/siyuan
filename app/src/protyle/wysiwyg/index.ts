@@ -1557,7 +1557,7 @@ export class WYSIWYG {
                                 index = i;
                                 return true;
                             }
-                        })
+                        });
                         editAssetItem({
                             protyle,
                             cellElements: [avCellElement],
@@ -1567,7 +1567,7 @@ export class WYSIWYG {
                             name: target.tagName === "IMG" ? "" : target.textContent,
                             index,
                             rect: target.getBoundingClientRect()
-                        })
+                        });
                         event.stopPropagation();
                         event.preventDefault();
                         return;

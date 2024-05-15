@@ -14,9 +14,9 @@ const setEditor = (modelMainElement: Element) => {
         dynamicLoadBlocks = 1024;
         (modelMainElement.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "1024";
     }
-    window.siyuan.config.editor.markdown=  {
+    window.siyuan.config.editor.markdown = {
         inlineSup: (modelMainElement.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
-            inlineSub: (modelMainElement.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
+        inlineSub: (modelMainElement.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
         inlineTag: (modelMainElement.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,
         inlineMath: (modelMainElement.querySelector("#editorMarkdownInlineMath") as HTMLInputElement).checked
     };

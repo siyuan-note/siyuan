@@ -120,6 +120,16 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 	}
 }
 
+func (k *Key) GetOption(name string) (ret *SelectOption) {
+	for _, option := range k.Options {
+		if option.Name == name {
+			ret = option
+			return
+		}
+	}
+	return
+}
+
 type Date struct {
 	AutoFillNow bool `json:"autoFillNow"` // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 }

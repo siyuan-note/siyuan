@@ -256,11 +256,11 @@ services:
 ```
 Web UI: 6806
 Container Port: 6806
+Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
-Container Path: /siyuan/workspace
 PUID: 1000
 PGID: 1000
-Publish parameters: --workspace=/siyuan/workspace/ --accessAuthCode=******（访问授权码）
+Publish parameters: --accessAuthCode=******（访问授权码）
 ```
 
 </details>

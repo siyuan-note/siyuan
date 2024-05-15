@@ -226,7 +226,6 @@ PGID:1000
 发布参数:--accessAuthCode=******(自己配置密码)
 ```
 
-
 ### 安装包
 
 * [B3log](https://b3log.org/siyuan/download.html)

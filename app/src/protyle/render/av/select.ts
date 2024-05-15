@@ -449,7 +449,8 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         cellElements.forEach((item, index) => {
             const rowElement = hasClosestByClassName(item, "av__row");
             if (rowElement) {
-                cellElements[index] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+                cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                    blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`) ) as HTMLElement;
             }
         });
     }

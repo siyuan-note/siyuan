@@ -542,7 +542,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             return;
         }
         if (!nodeElement.contains(item)) {
-            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
         }
         if (!item) {
             // 兼容新增行后台隐藏

@@ -282,6 +282,10 @@
       white-space: nowrap;
     }
 
+    &[data-block-id] > .block__icon[data-type="copy"] {
+      display: none;
+    }
+
     &.dragover__right {
       border-right-color: var(--b3-theme-primary-lighter);
     }

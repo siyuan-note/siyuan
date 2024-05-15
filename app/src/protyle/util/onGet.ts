@@ -321,13 +321,6 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
         item.setAttribute("draggable", "false");
     });
-    protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-        const headerElement = item.querySelector(".av__row--header") as HTMLElement;
-        if (headerElement) {
-            headerElement.style.transform = "";
-            (item.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
-        }
-    });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);

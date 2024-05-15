@@ -1058,7 +1058,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
                             files.push(event.dataTransfer.files[i].path);
                         }
-                        dragUpload(files, protyle, cellElement, avElement.dataset.avId);
+                        dragUpload(files, protyle, cellElement);
                     }
                 }
             }

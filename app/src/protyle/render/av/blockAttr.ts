@@ -167,14 +167,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avID: string
             avName: string
         }) => {
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
-<div class="custom-attr__avheader block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
+            let innerHTML = `<div class="custom-attr__avheader block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
     <div class="fn__flex-1"></div>
     <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
     <div class="fn__flex-1"></div>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
+                innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAttr(item.key.name)}">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
@@ -187,11 +186,17 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
     </div>
 </div>`;
             });
-            html += `<div class="fn__hr"></div>
+            innerHTML += `<div class="fn__hr"></div>
 <div class="fn__flex">
     <div class="fn__space"></div><div class="fn__space"></div>
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
-</div><div class="fn__hr--b"></div></div>`;
+</div><div class="fn__hr--b"></div>`;
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`
+
+            if (element.innerHTML) {
+                // 防止 blockElement 找不到
+                element.querySelector(`div[data-node-id="${id}"]`).innerHTML = innerHTML;
+            }
         });
         if (element.innerHTML === "") {
             let dragBlockElement: HTMLElement;
@@ -355,8 +360,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     target = target.parentElement;
                 }
             });
+            element.innerHTML = html;
         }
-        element.innerHTML = html;
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

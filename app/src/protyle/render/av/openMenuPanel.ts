@@ -137,7 +137,6 @@ export const openMenuPanel = (options: {
             } else if (options.type === "asset") {
                 bindAssetEvent({
                     protyle: options.protyle,
-                    data,
                     menuElement,
                     cellElements: options.cellElements,
                     blockElement: options.blockElement
@@ -182,6 +181,11 @@ export const openMenuPanel = (options: {
             return;
         });
         avPanelElement.addEventListener("drop", (event) => {
+            if (!window.siyuan.dragElement) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             window.siyuan.dragElement.style.opacity = "";
             const sourceElement = window.siyuan.dragElement;
             window.siyuan.dragElement = undefined;
@@ -314,7 +318,6 @@ export const openMenuPanel = (options: {
                 });
                 updateAssetCell({
                     protyle: options.protyle,
-                    data,
                     cellElements: options.cellElements,
                     replaceValue,
                     blockElement: options.blockElement
@@ -436,6 +439,10 @@ export const openMenuPanel = (options: {
         });
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
+            if (event.dataTransfer.types.includes("Files")) {
+                event.preventDefault();
+                return;
+            }
             const target = event.target as HTMLElement;
             let targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement) {
@@ -1133,7 +1140,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, data, options.cellElements, target, options.blockElement);
+                    addAssetLink(options.protyle, options.cellElements, target, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1161,7 +1168,6 @@ export const openMenuPanel = (options: {
                         }
                         updateAssetCell({
                             protyle: options.protyle,
-                            data,
                             cellElements: options.cellElements,
                             addValue: [value],
                             blockElement: options.blockElement
@@ -1197,7 +1203,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
+                    editAssetItem(options.protyle, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

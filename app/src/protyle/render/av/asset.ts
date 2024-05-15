@@ -18,7 +18,6 @@ import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
-    data: IAV,
     menuElement: HTMLElement,
     cellElements: HTMLElement[],
     blockElement: Element
@@ -41,7 +40,6 @@ export const bindAssetEvent = (options: {
             });
             updateAssetCell({
                 protyle: options.protyle,
-                data: options.data,
                 cellElements: options.cellElements,
                 addValue: value,
                 blockElement: options.blockElement
@@ -91,7 +89,6 @@ ${contentHTML}
 
 export const updateAssetCell = (options: {
     protyle: IProtyle,
-    data: IAV,
     cellElements: HTMLElement[],
     replaceValue?: IAVCellAssetValue[],
     addValue?: IAVCellAssetValue[],
@@ -107,7 +104,10 @@ export const updateAssetCell = (options: {
         if (!options.blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");
             if (rowElement) {
-                item = options.cellElements[elementIndex] = options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+                item = options.cellElements[elementIndex] =
+                    (options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                        // block attr
+                        options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             }
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
@@ -134,12 +134,13 @@ export const updateAssetCell = (options: {
         } else {
             cellValue.mAsset = mAssetValue;
         }
+        const avID = options.blockElement.getAttribute("data-av-id")
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
             keyID: colId,
             rowID,
-            avID: options.data.id,
+            avID,
             data: cellValue
         });
         cellUndoOperations.push({
@@ -147,19 +148,8 @@ export const updateAssetCell = (options: {
             id: cellValue.id,
             keyID: colId,
             rowID,
-            avID: options.data.id,
+            avID,
             data: oldValue
-        });
-        options.data.view.rows.find(row => {
-            if (row.id === rowID) {
-                row.cells.find(cell => {
-                    if (cell.id === cellValue.id) {
-                        cell.value = cellValue;
-                        return true;
-                    }
-                });
-                return true;
-            }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
             item.innerHTML = genAVValueHTML(cellValue);
@@ -173,7 +163,6 @@ export const updateAssetCell = (options: {
         menuElement.innerHTML = getAssetHTML(options.cellElements);
         bindAssetEvent({
             protyle: options.protyle,
-            data: options.data,
             menuElement,
             cellElements: options.cellElements,
             blockElement: options.blockElement
@@ -185,7 +174,7 @@ export const updateAssetCell = (options: {
     }
 };
 
-export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
+export const editAssetItem = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const linkAddress = target.dataset.content;
     const type = target.dataset.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
@@ -195,7 +184,6 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
         }
         updateAssetCell({
             protyle,
-            data,
             cellElements,
             blockElement,
             updateValue: {
@@ -236,14 +224,13 @@ ${window.siyuan.languages.title}
         click() {
             updateAssetCell({
                 protyle,
-                data,
                 cellElements,
                 blockElement,
                 removeIndex: parseInt(target.dataset.index)
             });
         }
     });
-    openMenu(protyle ? protyle.app : window.siyuan.ws.app, linkAddress, false, true);
+    openMenu(protyle ? protyle.app : window.siyuan.ws.app, linkAddress, false, false);
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
@@ -263,7 +250,7 @@ ${window.siyuan.languages.title}
     }
 };
 
-export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
+export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const menu = new Menu("av-asset-link", () => {
         const textElements = menu.element.querySelectorAll("textarea");
         if (!textElements[0].value) {
@@ -271,7 +258,6 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
         }
         updateAssetCell({
             protyle,
-            data,
             cellElements,
             blockElement,
             addValue: [{
@@ -303,7 +289,7 @@ ${window.siyuan.languages.title}
     menu.element.querySelector("textarea").focus();
 };
 
-export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement, avID: string) => {
+export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTMLElement) => {
     const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,
@@ -331,18 +317,11 @@ export const dragUpload = (files: string[], protyle: IProtyle, cellElement: HTML
                     });
                 }
             });
-            fetchPost("/api/av/renderAttributeView", {
-                id: avID,
-                pageSize: parseInt(blockElement.getAttribute("data-page-size")) || undefined,
-                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
-            }, (response) => {
-                updateAssetCell({
-                    protyle,
-                    blockElement,
-                    data: response.data as IAV,
-                    cellElements: [cellElement],
-                    addValue
-                });
+            updateAssetCell({
+                protyle,
+                blockElement,
+                cellElements: [cellElement],
+                addValue
             });
         }
     });

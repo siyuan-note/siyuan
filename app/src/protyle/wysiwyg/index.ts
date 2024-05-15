@@ -92,6 +92,7 @@ import {
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
+import {editAssetItem} from "../render/av/asset";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};

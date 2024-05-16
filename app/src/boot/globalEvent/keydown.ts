@@ -269,27 +269,23 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             return false;
         }
     }
-    let searchKey = "";
-    if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
-        searchKey = Constants.DIALOG_REPLACE;
-    } else if (matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
-        searchKey = Constants.DIALOG_SEARCH;
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
+        execByCommand({
+            command: "replace",
+            app,
+            protyle,
+            previousRange: range
+        });
+        event.preventDefault();
+        return true;
     }
-    if (!isFileFocus && searchKey) {
-        if (range && protyle.element.contains(range.startContainer)) {
-            openSearch({
-                app,
-                hotkey: searchKey,
-                key: range.toString(),
-                notebookId: protyle.notebookId,
-                searchPath: protyle.path
-            });
-        } else {
-            openSearch({
-                app,
-                hotkey: searchKey,
-            });
-        }
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
+        execByCommand({
+            command: "search",
+            app,
+            protyle,
+            previousRange: range
+        });
         event.preventDefault();
         return true;
     }
@@ -679,28 +675,23 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    let searchKey = "";
     if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
-        searchKey = Constants.DIALOG_REPLACE;
-    } else if (matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
-        searchKey = Constants.DIALOG_SEARCH;
-    }
-    if (searchKey) {
         window.siyuan.menus.menu.remove();
-        if (isFile) {
-            openSearch({
-                app,
-                hotkey: searchKey,
-                notebookId: notebookId,
-                searchPath: getDisplayName(pathString, false, true)
-            });
-        } else {
-            openSearch({
-                app,
-                hotkey: searchKey,
-                notebookId: notebookId,
-            });
-        }
+        execByCommand({
+            command: "replace",
+            app,
+            fileLiElements: liElements,
+        });
+        event.preventDefault();
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
+        window.siyuan.menus.menu.remove();
+        execByCommand({
+            command: "search",
+            app,
+            fileLiElements: liElements,
+        });
         event.preventDefault();
         return true;
     }
@@ -1605,28 +1596,27 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    let searchKey = "";
     if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
-        searchKey = Constants.DIALOG_REPLACE;
-    } else if (!hasClosestByClassName(target, "pdf__outer") && matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
-        searchKey = Constants.DIALOG_SEARCH;
-    } else if (matchHotKey(window.siyuan.config.keymap.general.globalSearch.custom, event)) {
-        searchKey = Constants.DIALOG_GLOBALSEARCH;
+        execByCommand({
+            command: "replace",
+            app,
+        });
+        event.preventDefault();
+        return;
     }
-    if (searchKey) {
-        if (getSelection().rangeCount > 0) {
-            const range = getSelection().getRangeAt(0);
-            openSearch({
-                app,
-                hotkey: searchKey,
-                key: range.toString(),
-            });
-        } else {
-            openSearch({
-                app,
-                hotkey: searchKey,
-            });
-        }
+    if (matchHotKey(window.siyuan.config.keymap.general.globalSearch.custom, event)) {
+        execByCommand({
+            command: "globalSearch",
+            app,
+        });
+        event.preventDefault();
+        return;
+    }
+    if (!hasClosestByClassName(target, "pdf__outer") && matchHotKey(window.siyuan.config.keymap.general.search.custom, event)) {
+        execByCommand({
+            command: "search",
+            app,
+        });
         event.preventDefault();
         return;
     }

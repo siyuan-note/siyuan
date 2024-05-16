@@ -393,11 +393,7 @@ export class Background {
                     /// #if !MOBILE
                     openGlobalSearch(protyle.app, `#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
                     /// #else
-                    const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
                     popSearch(protyle.app, {
-                        removed: searchOption.removed,
-                        sort: searchOption.sort,
-                        group: searchOption.group,
                         hasReplace: false,
                         method: 0,
                         hPath: "",
@@ -405,8 +401,6 @@ export class Background {
                         k: `#${target.textContent}#`,
                         r: "",
                         page: 1,
-                        types: Object.assign({}, searchOption.types),
-                        replaceTypes: Object.assign({}, searchOption.replaceTypes)
                     });
                     /// #endif
                     event.preventDefault();

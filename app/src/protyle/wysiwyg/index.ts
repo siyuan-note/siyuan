@@ -2170,11 +2170,7 @@ export class WYSIWYG {
                 openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed);
                 hideElements(["dialog"]);
                 /// #else
-                const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
                 popSearch(protyle.app, {
-                    removed: searchOption.removed,
-                    sort: searchOption.sort,
-                    group: searchOption.group,
                     hasReplace: false,
                     method: 0,
                     hPath: "",
@@ -2182,8 +2178,6 @@ export class WYSIWYG {
                     k: `#${tagElement.textContent}#`,
                     r: "",
                     page: 1,
-                    types: Object.assign({}, searchOption.types),
-                    replaceTypes: Object.assign({}, searchOption.replaceTypes)
                 });
                 /// #endif
                 return;

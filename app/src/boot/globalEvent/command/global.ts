@@ -23,6 +23,7 @@ import {Constants} from "../../../constants";
 import {setReadOnly} from "../../../config/util/setReadOnly";
 import {lockScreen} from "../../../dialog/processSystem";
 import {newFile} from "../../../util/newFile";
+import {openCard} from "../../../card/openCard";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -78,6 +79,7 @@ export const globalCommand = (command: string, app: App) => {
             openSearch({
                 app,
                 hotkey: Constants.DIALOG_GLOBALSEARCH,
+                key: (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString()
             });
             return true;
         case "goBack":
@@ -255,6 +257,9 @@ export const globalCommand = (command: string, app: App) => {
                 app,
                 useSavePath: true
             });
+            return true;
+        case "riffCard":
+            openCard(app);
             return true;
     }
 

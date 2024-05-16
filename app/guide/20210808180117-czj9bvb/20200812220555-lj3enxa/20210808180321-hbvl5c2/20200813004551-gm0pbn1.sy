@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240516234645"
+		"updated": "20240517004202"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20240516234645"
+				"updated": "20240517004202"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20240516225412"
+				"updated": "20240517004202"
 			},
 			"Children": [
 				{
@@ -1149,7 +1149,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -1194,7 +1194,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -1239,7 +1239,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -1284,7 +1284,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -2196,7 +2196,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -2241,7 +2241,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -2286,7 +2286,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置- 快捷键"
+									"TextMarkTextContent": "设置 - 快捷键"
 								},
 								{
 									"Type": "NodeText",
@@ -2304,7 +2304,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20240516234645"
+				"updated": "20240517002048"
 			},
 			"Children": [
 				{
@@ -3038,7 +3038,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20240516234645"
+				"updated": "20240517002048"
 			},
 			"Children": [
 				{
@@ -3053,7 +3053,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20240516234645"
+				"updated": "20240517002048"
 			},
 			"Children": [
 				{
@@ -7264,7 +7264,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210102174148-tq925jm",
-				"updated": "20240516230945"
+				"updated": "20240517002048"
 			},
 			"Children": [
 				{
@@ -7284,7 +7284,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210102174148-snb76bj",
-				"updated": "20240516225343"
+				"updated": "20240517002048"
 			},
 			"Children": [
 				{
@@ -7364,7 +7364,22 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": ":"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后输入文本"
+								}
+							]
 						}
 					]
 				},
@@ -8382,6 +8397,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "【】"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​"
 								}
 							]
@@ -8460,7 +8484,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20240516230945"
+				"updated": "20240517003731"
 			},
 			"Children": [
 				{
@@ -8840,7 +8864,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20240516230945"
+				"updated": "20240517003731"
 			},
 			"Children": [
 				{
@@ -8860,7 +8884,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20240516225338"
+				"updated": "20240517003731"
 			},
 			"Children": [
 				{
@@ -9080,7 +9104,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -9162,7 +9186,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20240516230945"
+				"updated": "20240517003636"
 			},
 			"Children": [
 				{
@@ -9766,7 +9790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240516222136-248xd1v",
-				"updated": "20240516230945"
+				"updated": "20240517003636"
 			},
 			"Children": [
 				{
@@ -9808,7 +9832,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20240516222214-zvxggw3",
-				"updated": "20240516222142"
+				"updated": "20240517003636"
 			},
 			"Children": [
 				{
@@ -9934,6 +9958,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘N"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​"
 								}
 							]
@@ -9965,7 +9998,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "回车/双击"
+									"TextMarkTextContent": "回车"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "双击"
 								},
 								{
 									"Type": "NodeText",
@@ -10035,7 +10077,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+./Alt点击"
+									"TextMarkTextContent": "Alt+."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt+点击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -10088,7 +10157,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230316151845-nszzteq",
-				"updated": "20230316151848"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -10981,7 +11050,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220618235609-cuv0am5",
-				"updated": "20220902200924"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -10996,7 +11065,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210708000243-4s325nw",
-				"updated": "20230503141631"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -11392,7 +11461,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105225606-ei8q9u9",
-				"updated": "20221105225609"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -11820,7 +11889,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000226-0pq4qe4",
-				"updated": "20220619000922"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -12130,7 +12199,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20221107214453"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -12444,7 +12513,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221107214439-v40c6qz",
-				"updated": "20221107220850"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -12633,7 +12702,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000529-ns8rmiz",
-				"updated": "20220619000924"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -12794,7 +12863,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000241-hjxmjgy",
-				"updated": "20220619001117"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -12991,7 +13060,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001133-tyykggw",
-				"updated": "20220902200931"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -13010,7 +13079,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220901205905-c1okxuw",
-				"updated": "20231107182102"
+				"updated": "20240517003111"
 			},
 			"Children": [
 				{
@@ -13149,7 +13218,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+图标拖拽"
+									"TextMarkTextContent": "Shift+拖拽"
 								},
 								{
 									"Type": "NodeText",
@@ -13158,7 +13227,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧图标拖拽"
+									"TextMarkTextContent": "⇧拖拽"
 								},
 								{
 									"Type": "NodeText",

@@ -74,6 +74,7 @@ import {commandPanel, execByCommand} from "./command/panel";
 import {filterHotkey} from "./commonHotkey";
 import {setReadOnly} from "../../config/util/setReadOnly";
 import {copyPNGByLink} from "../../menus/util";
+import {globalCommand} from "./command/global";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -526,17 +527,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
-        const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
-            document.querySelector("ul.layout-tab-bar > .item--focus");
-        if (element) {
-            const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
-            if (tab && tab.model instanceof Editor) {
-                tab.model.editor.protyle.wysiwyg.element.blur();
-                tab.model.editor.protyle.title.editElement.blur();
-                files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
-            }
-        }
-        dockFile.toggleModel("file", true);
+        globalCommand("selectOpen1", app);
         return;
     }
 

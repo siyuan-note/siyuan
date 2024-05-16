@@ -17,6 +17,7 @@ import {getInstanceById} from "../../../layout/util";
 import {closeTabByType, getActiveTab, getDockByType, switchTabByIndex} from "../../../layout/tabUtil";
 import {openSetting} from "../../../config";
 import {Tab} from "../../../layout/Tab";
+import {Files} from "../../../layout/dock/Files";
 /// #endif
 import {App} from "../../../index";
 import {Constants} from "../../../constants";
@@ -24,6 +25,33 @@ import {setReadOnly} from "../../../config/util/setReadOnly";
 import {lockScreen} from "../../../dialog/processSystem";
 import {newFile} from "../../../util/newFile";
 import {openCard} from "../../../card/openCard";
+import {syncGuide} from "../../../sync/syncGuide";
+
+const selectOpenTab = () => {
+    /// #if MOBILE
+    if (window.siyuan.mobile.editor?.protyle) {
+        openDock("file");
+        window.siyuan.mobile.files.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
+    }
+    /// #else
+    const dockFile = getDockByType("file");
+    if (!dockFile) {
+        return false;
+    }
+    const files = dockFile.data.file as Files;
+    const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
+        document.querySelector("ul.layout-tab-bar > .item--focus");
+    if (element) {
+        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+        if (tab && tab.model instanceof Editor) {
+            tab.model.editor.protyle.wysiwyg.element.blur();
+            tab.model.editor.protyle.title.editElement.blur();
+            files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+        }
+    }
+    dockFile.toggleModel("file", true);
+    /// #endif
+}
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -260,6 +288,12 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "riffCard":
             openCard(app);
+            return true;
+        case "selectOpen1":
+            selectOpenTab();
+            return true;
+        case "syncNow":
+            syncGuide(app);
             return true;
     }
 

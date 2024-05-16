@@ -50,22 +50,17 @@ export const commandPanel = (app: App) => {
         let keys;
         /// #if MOBILE
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
-            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch",
-            "lockScreen", "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search",
-
-            "selectOpen1",
-            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "syncNow", "tabToWindow",
-            "toggleDock", "toggleWin"];
+            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "lockScreen", "mainMenu", "move",
+            "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
             "closeUnmodified", "config", "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "goBack",
             "goForward", "goToEditTabNext", "goToEditTabPrev", "goToTab1", "goToTab2", "goToTab3", "goToTab4",
             "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
-            "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search",
+            "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
 
-            "selectOpen1",
-            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "syncNow", "tabToWindow",
+            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "tabToWindow",
             "toggleDock", "toggleWin"];
 
         /// #endif

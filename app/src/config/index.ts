@@ -13,6 +13,7 @@ import {query} from "./query";
 import {Dialog} from "../dialog";
 import {ai} from "./ai";
 import {flashcard} from "./flashcard";
+import {publish} from "./publish";
 import {App} from "../index";
 import {isHuawei} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
@@ -79,6 +80,11 @@ export const genItemPanel = (type: string, containerElement: Element, app: App) 
             query.element = containerElement;
             query.bindEvent();
             break;
+        case "publish":
+            containerElement.innerHTML = publish.genHTML();
+            publish.element = containerElement;
+            publish.bindEvent();
+            break;
         default:
             break;
     }
@@ -115,6 +121,7 @@ export const openSetting = (app: App) => {
     <li data-name="keymap" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconKeymap"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.keymap}</span></li>
     <li data-name="account" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.account}</span></li>
     <li data-name="repos" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span></li>
+    <li data-name="publish" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconLanguage"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.publish}</span></li>
     <li data-name="about" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span></li>
   </ul>
   <div class="config__tab-wrap">
@@ -131,6 +138,7 @@ export const openSetting = (app: App) => {
       <div class="config__tab-container fn__none" style="overflow: scroll" data-name="keymap"></div>
       <div class="config__tab-container config__tab-container--full fn__none" data-name="account"></div>
       <div class="config__tab-container fn__none" data-name="repos"></div>
+      <div class="config__tab-container fn__none" data-name="publish"></div>
       <div class="config__tab-container fn__none" data-name="about"></div>
       <div class="fn__hr--b"></div>
   </div>

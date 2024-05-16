@@ -98,24 +98,24 @@ func initPublishListener() (err error) {
 }
 
 func closePublishListener() (err error) {
-	if err = listener.Close(); err != nil {
-		logging.LogErrorf("close listener %s failed: %s", listener.Addr().String(), err)
-		return
-	} else {
-		listener = nil
-		return
+	listener_ := listener
+	listener = nil
+	if err = listener_.Close(); err != nil {
+		logging.LogErrorf("close listener %s failed: %s", listener_.Addr().String(), err)
+		listener = listener_
 	}
+	return
 }
 
 func startPublishReverseProxyService() {
-	logging.LogInfof("publish serve [%s:%s] is running", Host, Port)
+	logging.LogInfof("publish service [%s:%s] is running", Host, Port)
 	// 服务进行时一直阻塞
 	if err := http.Serve(listener, proxy); nil != err {
 		if listener != nil {
-			logging.LogErrorf("boot publish serve failed: %s", err)
+			logging.LogErrorf("boot publish service failed: %s", err)
 		}
 	}
-	logging.LogInfof("publish serve [%s:%s] is stopped", Host, Port)
+	logging.LogInfof("publish service [%s:%s] is stopped", Host, Port)
 }
 
 func rewrite(r *httputil.ProxyRequest) {

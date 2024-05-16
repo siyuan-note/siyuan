@@ -5,7 +5,11 @@ import {Editor} from "../../../editor";
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
 import {popSearch} from "../../../mobile/menu/search";
+import {getRecentDocs} from "../../../mobile/menu/getRecentDocs";
 /// #else
+import {workspaceMenu} from "../../../menus/workspace";
+import {isWindow} from "../../../util/functions";
+import {openRecentDocs} from "../../../business/openRecentDocs";
 import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
 import {getAllTabs} from "../../../layout/getAll";
@@ -17,6 +21,8 @@ import {Tab} from "../../../layout/Tab";
 import {App} from "../../../index";
 import {Constants} from "../../../constants";
 import {setReadOnly} from "../../../config/util/setReadOnly";
+import {lockScreen} from "../../../dialog/processSystem";
+import {newFile} from "../../../util/newFile";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -33,11 +39,14 @@ export const globalCommand = (command: string, app: App) => {
         case "backlinks":
             openDock("backlink");
             return true;
-        case "config":
+        case "mainMenu":
             popMenu();
             return true;
         case "globalSearch":
             popSearch(app);
+            return true;
+        case "recentDocs":
+            getRecentDocs(app);
             return true;
     }
     /// #else
@@ -110,7 +119,14 @@ export const globalCommand = (command: string, app: App) => {
         case "goToTabPrev":
             switchTabByIndex(-2);
             return true;
-
+        case "mainMenu":
+            if (!isWindow()) {
+                workspaceMenu(app, document.querySelector("#barWorkspace").getBoundingClientRect());
+            }
+            return true;
+        case "recentDocs":
+            openRecentDocs();
+            return true;
     }
     if (command === "goToEditTabNext" || command === "goToEditTabPrev") {
         let currentTabElement = document.querySelector(".layout__wnd--active ul.layout-tab-bar > .item--focus");
@@ -230,6 +246,15 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "editReadonly":
             setReadOnly(!window.siyuan.config.editor.readOnly);
+            return true;
+        case "lockScreen":
+            lockScreen(app);
+            return true;
+        case "newFile":
+            newFile({
+                app,
+                useSavePath: true
+            });
             return true;
     }
 

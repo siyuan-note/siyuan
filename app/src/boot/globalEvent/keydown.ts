@@ -330,25 +330,12 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
-        let range: Range;
-        let nodeElement: false | HTMLElement;
-        if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-            nodeElement = hasClosestBlock(range.startContainer);
-        }
-        if (protyle.title?.editElement.contains(range.startContainer)) {
-            movePathTo((toPath, toNotebook) => {
-                moveToPath([protyle.path], toNotebook[0], toPath[0]);
-            }, [protyle.path], range);
-        } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0) {
-                selectElements = [nodeElement];
-            }
-            movePathTo((toPath) => {
-                hintMoveBlock(toPath[0], selectElements, protyle);
-            });
-        }
+        execByCommand({
+            command: "move",
+            app,
+            protyle,
+            previousRange: range
+        });
         event.preventDefault();
         return true;
     }
@@ -671,10 +658,11 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
-        const pathes = getTopPaths(liElements);
-        movePathTo((toPath, toNotebook) => {
-            moveToPath(pathes, toNotebook[0], toPath[0]);
-        }, pathes);
+        execByCommand({
+            command: "move",
+            app,
+            fileLiElements: liElements
+        });
         event.preventDefault();
         return true;
     }

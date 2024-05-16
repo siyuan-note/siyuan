@@ -15,9 +15,11 @@ import {Files} from "../../../layout/dock/Files";
 import {Search} from "../../../search";
 /// #endif
 import {addEditorToDatabase, addFilesToDatabase} from "../../../protyle/render/av/addToDatabase";
-import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
-import {onluProtyleCommand} from "./protyle";
+import {hasClosestBlock, hasClosestByClassName} from "../../../protyle/util/hasClosest";
+import {onlyProtyleCommand} from "./protyle";
 import {globalCommand} from "./global";
+import {getTopPaths, movePathTo, moveToPath} from "../../../util/pathName";
+import {hintMoveBlock} from "../../../protyle/hint/extend";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
@@ -44,14 +46,24 @@ export const commandPanel = (app: App) => {
     Object.keys(window.siyuan.config.keymap.general).forEach((key) => {
         let keys;
         /// #if MOBILE
-        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks", "config",
-            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch"];
+        keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
+            "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch",
+            "lockScreen", "mainMenu", "move", "newFile", "recentDocs",
+
+            "replace", "riffCard", "search", "selectOpen1",
+            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "syncNow", "tabToWindow",
+            "toggleDock", "toggleWin"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
             "closeUnmodified", "config", "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "goBack",
             "goForward", "goToEditTabNext", "goToEditTabPrev", "goToTab1", "goToTab2", "goToTab3", "goToTab4",
-            "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev"];
+            "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
+            "mainMenu", "move", "newFile", "recentDocs",
+
+            "replace", "riffCard", "search", "selectOpen1",
+            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "syncNow", "tabToWindow",
+            "toggleDock", "toggleWin"];
 
         /// #endif
         if (keys.includes(key)) {
@@ -66,6 +78,7 @@ export const commandPanel = (app: App) => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item");
+            liElement.dataset.command = command.langKey;
             liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
@@ -145,7 +158,9 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
     let hasFocus = false;
     Array.from(listElement.children).forEach((element: HTMLElement) => {
         const elementValue = element.querySelector(".b3-list-item__text").textContent.toLowerCase();
-        if (inputValue.indexOf(elementValue) > -1 || elementValue.indexOf(inputValue) > -1) {
+        const command = element.dataset.command;
+        if (inputValue.indexOf(elementValue) > -1 || elementValue.indexOf(inputValue) > -1 ||
+            inputValue.indexOf(command) > -1 || command.indexOf(inputValue) > -1) {
             if (!hasFocus) {
                 element.classList.add("b3-list-item--focus");
             }
@@ -266,7 +281,7 @@ export const execByCommand = (options: {
     }
 
     // only protyle
-    if (!isFileFocus && onluProtyleCommand({
+    if (!isFileFocus && onlyProtyleCommand({
         command: options.command,
         previousRange: range,
         protyle
@@ -290,6 +305,29 @@ export const execByCommand = (options: {
                 addEditorToDatabase(protyle, range);
             } else {
                 addFilesToDatabase(fileLiElements);
+            }
+            break;
+        case "move":
+            if (!isFileFocus) {
+                const nodeElement = hasClosestBlock(range.startContainer);
+                if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement) {
+                    movePathTo((toPath, toNotebook) => {
+                        moveToPath([protyle.path], toNotebook[0], toPath[0]);
+                    }, [protyle.path], range);
+                } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
+                    let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                    if (selectElements.length === 0) {
+                        selectElements = [nodeElement];
+                    }
+                    movePathTo((toPath) => {
+                        hintMoveBlock(toPath[0], selectElements, protyle);
+                    });
+                }
+            } else {
+                const paths = getTopPaths(fileLiElements);
+                movePathTo((toPath, toNotebook) => {
+                    moveToPath(paths, toNotebook[0], toPath[0]);
+                }, paths);
             }
             break;
     }

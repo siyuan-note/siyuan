@@ -38,7 +38,7 @@ func NewPublish() *Publish {
 		Enable: false,
 		Port:   6808,
 		Auth: &BasicAuth{
-			Enable:   false,
+			Enable:   true,
 			Accounts: []*BasicAuthAccount{},
 		},
 	}

@@ -340,7 +340,19 @@ func CheckEditRole(c *gin.Context) {
 	}) {
 		c.Next()
 	} else {
-		c.AbortWithStatusJSON(http.StatusForbidden, map[string]any{"code": -1, "msg": http.StatusText(http.StatusForbidden)})
+		c.AbortWithStatus(http.StatusForbidden)
+	}
+}
+
+func CheckReadRole(c *gin.Context) {
+	if IsValidRole(GetGinContextRole(c), []Role{
+		RoleAdministrator,
+		RoleEditor,
+		RoleReader,
+	}) {
+		c.Next()
+	} else {
+		c.AbortWithStatus(http.StatusForbidden)
 	}
 }
 

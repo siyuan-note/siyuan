@@ -55,7 +55,7 @@ export const openMenuPanel = (options: {
     const avID = options.blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
-        query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value ||"",
+        query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value || "",
         pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
@@ -81,7 +81,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "filters") {
             html = getFiltersHTML(data.view);
         } else if (options.type === "select") {
-            html = getSelectHTML(data.view, options.cellElements);
+            html = getSelectHTML(data.view, options.cellElements, true);
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
@@ -1127,7 +1127,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addColOptionOrCell") {
                     if (target.querySelector(".b3-menu__checked")) {
-                        removeCellOption(options.protyle, data, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
+                        removeCellOption(options.protyle, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
                     } else {
                         addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     }
@@ -1136,7 +1136,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCellOption") {
-                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
+                    removeCellOption(options.protyle, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

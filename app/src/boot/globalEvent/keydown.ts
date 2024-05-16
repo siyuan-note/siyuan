@@ -1514,44 +1514,36 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return;
     }
-    if ((
-        matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) ||
-        matchHotKey(window.siyuan.config.keymap.general.splitMoveR.custom, event) ||
-        matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event) ||
-        matchHotKey(window.siyuan.config.keymap.general.tabToWindow.custom, event) ||
-        matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event)
-    ) && !event.repeat) {
+    if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event) && !event.repeat) {
         event.preventDefault();
-        const tab = getActiveTab(false);
-        if (tab) {
-            if (matchHotKey(window.siyuan.config.keymap.general.tabToWindow.custom, event)) {
-                openNewWindow(tab);
-            } else if (matchHotKey(window.siyuan.config.keymap.general.splitLR.custom, event)) {
-                tab.parent.split("lr").addTab(copyTab(app, tab));
-            } else if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event)) {
-                tab.parent.split("tb").addTab(copyTab(app, tab));
-            } else if (tab.parent.children.length > 1) {
-                const newWnd = tab.parent.split(matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event) ? "tb" : "lr");
-                newWnd.headersElement.append(tab.headElement);
-                newWnd.headersElement.parentElement.classList.remove("fn__none");
-                newWnd.moveTab(tab);
-                resizeTabs();
-            }
-        }
+        globalCommand("splitLR", app);
         return;
     }
-
+    if (matchHotKey(window.siyuan.config.keymap.general.splitMoveR.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("splitMoveR", app);
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.splitTB.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("splitTB", app);
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.tabToWindow.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("tabToWindow", app);
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.splitMoveB.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("splitMoveB", app);
+        return;
+    }
     if (matchHotKey(window.siyuan.config.keymap.general.stickSearch.custom, event)) {
-        if (getSelection().rangeCount > 0) {
-            const range = getSelection().getRangeAt(0);
-            openGlobalSearch(app, range.toString(), true);
-        } else {
-            openGlobalSearch(app, "", true);
-        }
+        globalCommand("stickSearch", app);
         event.preventDefault();
         return;
     }
-
     if (editKeydown(app, event)) {
         return;
     }

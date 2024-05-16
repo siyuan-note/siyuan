@@ -59,10 +59,10 @@ export const commandPanel = (app: App) => {
             "goForward", "goToEditTabNext", "goToEditTabPrev", "goToTab1", "goToTab2", "goToTab3", "goToTab4",
             "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
             "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
-
-            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "stickSearch", "tabToWindow",
-            "toggleDock", "toggleWin"];
-
+            "splitLR", "splitMoveB", "splitMoveR", "splitTB", "tabToWindow", "stickSearch", "toggleDock"];
+        /// #if !BROWSER
+        keys.push("toggleWin");
+        /// #endif
         /// #endif
         if (keys.includes(key)) {
             html += `<li class="b3-list-item" data-command="${key}">

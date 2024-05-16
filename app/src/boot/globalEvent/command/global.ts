@@ -7,6 +7,9 @@ import {popMenu} from "../../../mobile/menu";
 import {popSearch} from "../../../mobile/menu/search";
 import {getRecentDocs} from "../../../mobile/menu/getRecentDocs";
 /// #else
+import {openNewWindow} from "../../../window/openNewWindow";
+import {toggleDockBar} from "../../../layout/dock/util";
+import {openGlobalSearch} from "../../../search/util";
 import {workspaceMenu} from "../../../menus/workspace";
 import {isWindow} from "../../../util/functions";
 import {openRecentDocs} from "../../../business/openRecentDocs";
@@ -14,10 +17,20 @@ import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
 import {getAllTabs} from "../../../layout/getAll";
 import {getInstanceById} from "../../../layout/util";
-import {closeTabByType, getActiveTab, getDockByType, switchTabByIndex} from "../../../layout/tabUtil";
+import {
+    closeTabByType,
+    copyTab,
+    getActiveTab,
+    getDockByType,
+    resizeTabs,
+    switchTabByIndex
+} from "../../../layout/tabUtil";
 import {openSetting} from "../../../config";
 import {Tab} from "../../../layout/Tab";
 import {Files} from "../../../layout/dock/Files";
+/// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
 /// #endif
 import {App} from "../../../index";
 import {Constants} from "../../../constants";
@@ -51,7 +64,7 @@ const selectOpenTab = () => {
     }
     dockFile.toggleModel("file", true);
     /// #endif
-}
+};
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -110,6 +123,9 @@ export const globalCommand = (command: string, app: App) => {
                 key: (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString()
             });
             return true;
+        case "stickSearch":
+            openGlobalSearch(app, (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString(), true);
+            return true;
         case "goBack":
             goBack(app);
             return true;
@@ -156,6 +172,15 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "recentDocs":
             openRecentDocs();
+            return true;
+        case "toggleDock":
+            toggleDockBar(document.querySelector("#barDock use"));
+            return true;
+        case "toggleWin":
+            /// #if !BROWSER
+            ipcRenderer.send(Constants.SIYUAN_CMD, "hide");
+            ipcRenderer.send(Constants.SIYUAN_CMD, "minimize");
+            /// #endif
             return true;
     }
     if (command === "goToEditTabNext" || command === "goToEditTabPrev") {
@@ -262,6 +287,38 @@ export const globalCommand = (command: string, app: App) => {
                     closeTabByType(tab, "other", rightTabs);
                 }
             }
+        }
+        return true;
+    }
+    if (command === "splitLR") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            tab.parent.split("lr").addTab(copyTab(app, tab));
+        }
+        return true;
+    }
+    if (command === "splitTB") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            tab.parent.split("tb").addTab(copyTab(app, tab));
+        }
+        return true;
+    }
+    if (command === "splitMoveB" || command === "splitMoveR") {
+        const tab = getActiveTab(false);
+        if (tab && tab.parent.children.length > 1) {
+            const newWnd = tab.parent.split(command === "splitMoveB" ? "tb" : "lr");
+            newWnd.headersElement.append(tab.headElement);
+            newWnd.headersElement.parentElement.classList.remove("fn__none");
+            newWnd.moveTab(tab);
+            resizeTabs();
+        }
+        return true;
+    }
+    if (command === "tabToWindow") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            openNewWindow(tab);
         }
         return true;
     }

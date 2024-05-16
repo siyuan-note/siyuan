@@ -225,17 +225,15 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     const undoPreviousID = window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id");
                     if (previousID !== undoPreviousID && previousID !== window.siyuan.dragElement.dataset.colId) {
                         transaction(protyle, [{
-                            action: "sortAttrViewCol",
+                            action: "sortAttrViewKey",
                             avID: dragBlockElement.dataset.avId,
                             previousID,
                             id: window.siyuan.dragElement.dataset.colId,
-                            blockID: id
-                        }, {
-                            action: "sortAttrViewCol",
+                        }], [{
+                            action: "sortAttrViewKey",
                             avID: dragBlockElement.dataset.avId,
                             previousID: undoPreviousID,
                             id,
-                            blockID: id
                         }]);
                         if (isBottom) {
                             targetElement.after(window.siyuan.dragElement);

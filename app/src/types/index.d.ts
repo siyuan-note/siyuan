@@ -23,6 +23,7 @@ type TOperation =
     | "updateAttrViewColTemplate"
     | "sortAttrViewRow"
     | "sortAttrViewCol"
+    | "sortAttrViewKey"
     | "setAttrViewColPin"
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"

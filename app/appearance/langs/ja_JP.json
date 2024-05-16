@@ -482,7 +482,7 @@
   "syncConfGuide4": "今すぐ同期しますか？",
   "syncConfGuide5": "データ量が多い場合は最初の同期が遅くなる場合がありますのでしばらくお待ちください。<br>iOS/iPad で同期している間はアプリを切り替えず画面を明るく保ってください",
   "copyPlainText": "プレーンテキストとしてコピー",
-  "findInDoc": "${x} 個のドキュメントに ${y} 件の一致があります",
+  "findInDoc": "${x} ドキュメント内の ${y} ブロックと一致します",
   "jumpToParentNext": "次の親ブロックに移動",
   "jumpToParentPrev": "前の親ブロックに移動",
   "jumpToParent": "親ブロックに移動",

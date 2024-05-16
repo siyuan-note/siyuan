@@ -416,6 +416,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewFilterSort", model.CheckAuth, model.CheckReadonly, getAttributeViewFilterSort)
 	ginServer.Handle("POST", "/api/av/addAttributeViewKey", model.CheckAuth, model.CheckReadonly, addAttributeViewKey)
 	ginServer.Handle("POST", "/api/av/removeAttributeViewKey", model.CheckAuth, model.CheckReadonly, removeAttributeViewKey)
+	ginServer.Handle("POST", "/api/av/sortAttributeViewViewKey", model.CheckAuth, model.CheckReadonly, sortAttributeViewViewKey)
 	ginServer.Handle("POST", "/api/av/sortAttributeViewKey", model.CheckAuth, model.CheckReadonly, sortAttributeViewKey)
 	ginServer.Handle("POST", "/api/av/addAttributeViewValues", model.CheckAuth, model.CheckReadonly, addAttributeViewValues)
 	ginServer.Handle("POST", "/api/av/removeAttributeViewValues", model.CheckAuth, model.CheckReadonly, removeAttributeViewValues)

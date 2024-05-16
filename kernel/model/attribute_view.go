@@ -523,19 +523,14 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(44), util.EscapeHTML(renderTemplateErr.Error())), 30000)
 		}
 
-		// Attribute Panel - Database sort attributes by view column order https://github.com/siyuan-note/siyuan/issues/9319
-		viewID := attrs[av.NodeAttrView]
-		view, _ := attrView.GetCurrentView(viewID)
-		if nil != view {
-			sorts := map[string]int{}
-			for i, col := range view.Table.Columns {
-				sorts[col.ID] = i
-			}
-
-			sort.Slice(keyValues, func(i, j int) bool {
-				return sorts[keyValues[i].Key.ID] < sorts[keyValues[j].Key.ID]
-			})
+		// 字段排序
+		sorts := map[string]int{}
+		for i, k := range attrView.KeyIDs {
+			sorts[k] = i
 		}
+		sort.Slice(keyValues, func(i, j int) bool {
+			return sorts[keyValues[i].Key.ID] < sorts[keyValues[j].Key.ID]
+		})
 
 		blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
 		if 1 > len(blockIDs) {
@@ -2269,14 +2264,14 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := SortAttributeViewKey(operation.AvID, operation.BlockID, operation.ID, operation.PreviousID)
+	err := SortAttributeViewViewKey(operation.AvID, operation.BlockID, operation.ID, operation.PreviousID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func SortAttributeViewKey(avID, blockID, keyID, previousKeyID string) (err error) {
+func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err error) {
 	if keyID == previousKeyID {
 		// 拖拽到自己的右侧，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
 		return
@@ -2316,6 +2311,57 @@ func SortAttributeViewKey(avID, blockID, keyID, previousKeyID string) (err error
 		}
 		view.Table.Columns = util.InsertElem(view.Table.Columns, previousIndex, col)
 	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSortAttrViewKey(operation *Operation) (ret *TxErr) {
+	err := SortAttributeViewKey(operation.AvID, operation.ID, operation.PreviousID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
+	if keyID == previousKeyID {
+		return
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	if 1 > len(attrView.KeyIDs) {
+		for _, keyValues := range attrView.KeyValues {
+			attrView.KeyIDs = append(attrView.KeyIDs, keyValues.Key.ID)
+		}
+	}
+
+	var currentKeyID string
+	var idx, previousIndex int
+	for i, k := range attrView.KeyIDs {
+		if k == keyID {
+			currentKeyID = k
+			idx = i
+			break
+		}
+	}
+	if "" == currentKeyID {
+		return
+	}
+
+	attrView.KeyIDs = append(attrView.KeyIDs[:idx], attrView.KeyIDs[idx+1:]...)
+
+	for i, k := range attrView.KeyIDs {
+		if k == previousKeyID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.KeyIDs = util.InsertElem(attrView.KeyIDs, previousIndex, currentKeyID)
 
 	err = av.SaveAttributeView(attrView)
 	return

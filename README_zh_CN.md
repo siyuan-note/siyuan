@@ -19,6 +19,7 @@
 <a title="Last Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
 <a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
+<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Chat on Discord" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
 <br><br>
 <a href="https://www.producthunt.com/products/siyuan/reviews?utm_source=badge-product_rating&utm_medium=badge&utm_souce=badge-siyuan" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/product_rating.svg?product_id=534576&theme=light" alt="SiYuan - A&#0032;privacy&#0045;first&#0032;personal&#0032;knowledge&#0032;management&#0032;software | Product Hunt" style="width: 242px; height: 108px;" width="242" height="108" /></a>
 </p>
@@ -26,6 +27,39 @@
 <p align="center">
 <a href="README.md">English</a>
 </p>
+
+---
+
+## 目录
+
+* [💡 简介](#-简介)
+* [🔮 特性](#-特性)
+* [🏗️ 架构和生态](#️-架构和生态)
+* [🌟 星标历史](#-星标历史)
+* [🗺️ 路线图](#️-路线图)
+* [🚀 下载安装](#-下载安装)
+  * [应用市场](#应用市场)
+  * [安装包](#安装包)
+  * [Docker 部署](#docker-部署)
+  * [Unraid 部署](#unraid-部署)
+  * [内部预览版](#内部预览版)
+* [🏘️ 社区](#️-社区)
+* [🛠️ 开发指南](#️-开发指南)
+* [❓ 常见问题和解答](#-常见问题和解答)
+  * [思源是如何存储数据的？](#思源是如何存储数据的)
+  * [支持通过第三方同步盘进行数据同步吗？](#支持通过第三方同步盘进行数据同步吗)
+  * [思源是开源的吗？](#思源是开源的吗)
+  * [如何升级到新版本？](#如何升级到新版本)
+  * [删除文档有什么注意事项吗？](#删除文档有什么注意事项吗)
+  * [如何才能只换行不新起段落？](#如何才能只换行不新起段落)
+  * [有的块（比如在列表项中的段落块）找不到块标怎么办？](#有的块比如在列表项中的段落块找不到块标怎么办)
+  * [如何分享笔记？](#如何分享笔记)
+  * [数据仓库密钥遗失怎么办？](#数据仓库密钥遗失怎么办)
+  * [使用需要付费吗？](#使用需要付费吗)
+* [🙏 鸣谢](#-鸣谢)
+  * [贡献者列表](#贡献者列表)
+
+---
 
 ## 💡 简介
 
@@ -76,7 +110,7 @@
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
-## 🏗️ 架构设计和开源生态
+## 🏗️ 架构和生态
 
 ![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "思源笔记架构设计")
 
@@ -91,7 +125,7 @@
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App        | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
 | [riff](https://github.com/siyuan-note/riff)              | 间隔重复           | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
 
-## 🌟 Star History
+## 🌟 星标历史
 
 [![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
 
@@ -118,6 +152,11 @@
 桌面端：
 
 * [Microsoft Store](https://apps.microsoft.com/detail/9p7hpmxp73k4)
+
+### 安装包
+
+* [B3log](https://b3log.org/siyuan/download.html)
+* [GitHub](https://github.com/siyuan-note/siyuan/releases)
 
 ### Docker 部署
 
@@ -205,10 +244,26 @@ services:
 
 </details>
 
-### 安装包
+### Unraid 部署
 
-* [B3log](https://b3log.org/siyuan/download.html)
-* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+<details>
+<summary>Unraid 部署文档</summary>
+
+注意：首先终端运行 `chown -R 1000:1000 /mnt/user/appdata/siyuan`
+
+模板参考：
+
+```
+Web UI: 6806
+Container Port: 6806
+Container Path: /home/siyuan
+Host path: /mnt/user/appdata/siyuan
+PUID: 1000
+PGID: 1000
+Publish parameters: --accessAuthCode=******（访问授权码）
+```
+
+</details>
 
 ### 内部预览版
 
@@ -280,7 +335,7 @@ services:
 
 请使用 <kbd>Shift+Enter</kbd>。
 
-## 有的块（比如在列表项中的段落块）找不到块标怎么办？
+### 有的块（比如在列表项中的段落块）找不到块标怎么办？
 
 在列表项下的第一个子块是省略块标的。可以将光标移到这个块中，然后通过 <kbd>Ctrl+/</kbd> 触发它的块标菜单。
 

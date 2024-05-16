@@ -47,22 +47,22 @@ export class Preview {
             }
             switch (action) {
                 case "desktop":
-                    actionHtml.push('<button type="button" class="protyle-preview__action--current" data-type="desktop">Desktop</button>');
+                    actionHtml.push(`<button type="button" class="protyle-preview__action--current" data-type="desktop">${window.siyuan.languages.desktop}</button>`);
                     break;
                 case "tablet":
-                    actionHtml.push('<button type="button" data-type="tablet">Tablet</button>');
+                    actionHtml.push(`<button type="button" data-type="tablet">${window.siyuan.languages.tablet}</button>`);
                     break;
                 case "mobile":
-                    actionHtml.push('<button type="button" data-type="mobile">Mobile/Wechat</button>');
+                    actionHtml.push(`<button type="button" data-type="mobile">${window.siyuan.languages.mobile}</button>`);
                     break;
                 case "mp-wechat":
-                    actionHtml.push('<button type="button" data-type="mp-wechat" class="b3-tooltips b3-tooltips__w" aria-label="复制到公众号"><svg><use xlink:href="#iconMp"></use></svg></button>');
+                    actionHtml.push(`<button type="button" data-type="mp-wechat" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToWechatMP}"><svg><use xlink:href="#iconMp"></use></svg></button>`);
                     break;
                 case "zhihu":
-                    actionHtml.push('<button type="button" data-type="zhihu" class="b3-tooltips b3-tooltips__w" aria-label="复制到知乎"><svg><use xlink:href="#iconZhihu"></use></svg></button>');
+                    actionHtml.push(`<button type="button" data-type="zhihu" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToZhihu}"><svg><use xlink:href="#iconZhihu"></use></svg></button>`);
                     break;
                 case "yuque":
-                    actionHtml.push('<button type="button" data-type="yuque" class="b3-tooltips b3-tooltips__w" aria-label="复制到语雀"><svg><use xlink:href="#iconYuque"></use></svg></button>');
+                    actionHtml.push(`<button type="button" data-type="yuque" class="b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copyToYuque}"><svg><use xlink:href="#iconYuque"></use></svg></button>`);
                     break;
             }
         }
@@ -259,7 +259,7 @@ export class Preview {
                 id: protyle.block.rootID,
             }, (response) => {
                 writeText(response.data);
-                showMessage("已复制，可到语雀进行粘贴");
+                showMessage(`${window.siyuan.languages.pasteToYuque}`);
             });
             return;
         }
@@ -281,7 +281,7 @@ export class Preview {
         this.element.lastElementChild.remove();
         focusByRange(cloneRange);
         if (type) {
-            showMessage(`已复制，可到${type === "zhihu" ? "知乎" : "微信公众号平台"}进行粘贴`);
+            showMessage(`${type === "zhihu" ? window.siyuan.languages.pasteToZhihu : window.siyuan.languages.pasteToWechatMP}`);
         }
     }
 

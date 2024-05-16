@@ -75,7 +75,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 const lineNumber = block.parentElement.getAttribute("linenumber");
                 if (autoEnter === "true" || (autoEnter !== "false" && window.siyuan.config.editor.codeLineWrap)) {
                     block.style.setProperty("white-space", "pre-wrap");
-                    block.style.setProperty("word-break", "break-all");
+                    block.style.setProperty("word-break", "break-word");
                 } else {
                     // https://ld246.com/article/1684031600711 该属性会导致有 tab 后光标跳至末尾，目前无解
                     block.style.setProperty("white-space", "pre");
@@ -137,7 +137,7 @@ export const lineNumberRender = (block: HTMLElement) => {
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-    const isWrap = block.style.wordBreak === "break-all";
+    const isWrap = block.style.wordBreak === "break-word";
     lineList.map((line) => {
         let lineHeight = "";
         if (isWrap) {

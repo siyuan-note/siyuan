@@ -2,7 +2,7 @@ import {hasClosestBlock} from "../../../protyle/util/hasClosest";
 import {getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
 import {enterBack, zoomOut} from "../../../menus/protyle";
 
-export const onluProtyleCommand = (options: {
+export const onlyProtyleCommand = (options: {
     command: string,
     previousRange: Range,
     protyle: IProtyle,

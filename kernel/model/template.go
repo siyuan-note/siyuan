@@ -43,7 +43,7 @@ import (
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
 	tplFuncMap := util.BuiltInTemplateFuncs()
-	SQLTemplateFuncs(&tplFuncMap)
+	sql.SQLTemplateFuncs(&tplFuncMap)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
 	if nil != err {
@@ -225,7 +225,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := util.BuiltInTemplateFuncs()
-	SQLTemplateFuncs(&tplFuncMap)
+	sql.SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if nil != err {
@@ -314,7 +314,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 						return ast.WalkContinue
 					}
 
-					table, renderErr := renderAttributeViewTable(attrView, view, "")
+					table, renderErr := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 					if nil != renderErr {
 						logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
 						return ast.WalkContinue
@@ -403,22 +403,5 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 	})
 	for _, block := range blocks {
 		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
-	}
-}
-
-func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
-	(*templateFuncMap)["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*sql.Block) {
-		for _, arg := range args {
-			stmt = strings.Replace(stmt, "?", arg, 1)
-		}
-		retBlocks = sql.SelectBlocksRawStmt(stmt, 1, 512)
-		return
-	}
-	(*templateFuncMap)["querySpans"] = func(stmt string, args ...string) (retSpans []*sql.Span) {
-		for _, arg := range args {
-			stmt = strings.Replace(stmt, "?", arg, 1)
-		}
-		retSpans = sql.SelectSpansRawStmt(stmt, 512)
-		return
 	}
 }

@@ -542,7 +542,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             return;
         }
         if (!nodeElement.contains(item)) {
-            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
         }
         if (!item) {
             // 兼容新增行后台隐藏
@@ -731,8 +732,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         }
     }
 
-    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated", "lineNumber"].includes(cellValue.type) &&
-        (cellValue.type === "lineNumber" || (cellValue && cellValue[cellValue.type as "url"].content))) {
+    if ((["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+        cellValue.type === "lineNumber" ||
+        (cellValue.type === "block" && cellValue.block?.content)) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
     return text;

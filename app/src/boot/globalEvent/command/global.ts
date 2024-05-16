@@ -5,18 +5,66 @@ import {Editor} from "../../../editor";
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
 import {popSearch} from "../../../mobile/menu/search";
+import {getRecentDocs} from "../../../mobile/menu/getRecentDocs";
 /// #else
+import {openNewWindow} from "../../../window/openNewWindow";
+import {toggleDockBar} from "../../../layout/dock/util";
+import {openGlobalSearch} from "../../../search/util";
+import {workspaceMenu} from "../../../menus/workspace";
+import {isWindow} from "../../../util/functions";
+import {openRecentDocs} from "../../../business/openRecentDocs";
 import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
 import {getAllTabs} from "../../../layout/getAll";
 import {getInstanceById} from "../../../layout/util";
-import {closeTabByType, getActiveTab, getDockByType, switchTabByIndex} from "../../../layout/tabUtil";
+import {
+    closeTabByType,
+    copyTab,
+    getActiveTab,
+    getDockByType,
+    resizeTabs,
+    switchTabByIndex
+} from "../../../layout/tabUtil";
 import {openSetting} from "../../../config";
 import {Tab} from "../../../layout/Tab";
+import {Files} from "../../../layout/dock/Files";
+/// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
 /// #endif
 import {App} from "../../../index";
 import {Constants} from "../../../constants";
 import {setReadOnly} from "../../../config/util/setReadOnly";
+import {lockScreen} from "../../../dialog/processSystem";
+import {newFile} from "../../../util/newFile";
+import {openCard} from "../../../card/openCard";
+import {syncGuide} from "../../../sync/syncGuide";
+
+const selectOpenTab = () => {
+    /// #if MOBILE
+    if (window.siyuan.mobile.editor?.protyle) {
+        openDock("file");
+        window.siyuan.mobile.files.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
+    }
+    /// #else
+    const dockFile = getDockByType("file");
+    if (!dockFile) {
+        return false;
+    }
+    const files = dockFile.data.file as Files;
+    const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
+        document.querySelector("ul.layout-tab-bar > .item--focus");
+    if (element) {
+        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+        if (tab && tab.model instanceof Editor) {
+            tab.model.editor.protyle.wysiwyg.element.blur();
+            tab.model.editor.protyle.title.editElement.blur();
+            files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+        }
+    }
+    dockFile.toggleModel("file", true);
+    /// #endif
+};
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -33,11 +81,14 @@ export const globalCommand = (command: string, app: App) => {
         case "backlinks":
             openDock("backlink");
             return true;
-        case "config":
+        case "mainMenu":
             popMenu();
             return true;
         case "globalSearch":
             popSearch(app);
+            return true;
+        case "recentDocs":
+            getRecentDocs(app);
             return true;
     }
     /// #else
@@ -69,7 +120,11 @@ export const globalCommand = (command: string, app: App) => {
             openSearch({
                 app,
                 hotkey: Constants.DIALOG_GLOBALSEARCH,
+                key: (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString()
             });
+            return true;
+        case "stickSearch":
+            openGlobalSearch(app, (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString(), true);
             return true;
         case "goBack":
             goBack(app);
@@ -110,7 +165,23 @@ export const globalCommand = (command: string, app: App) => {
         case "goToTabPrev":
             switchTabByIndex(-2);
             return true;
-
+        case "mainMenu":
+            if (!isWindow()) {
+                workspaceMenu(app, document.querySelector("#barWorkspace").getBoundingClientRect());
+            }
+            return true;
+        case "recentDocs":
+            openRecentDocs();
+            return true;
+        case "toggleDock":
+            toggleDockBar(document.querySelector("#barDock use"));
+            return true;
+        case "toggleWin":
+            /// #if !BROWSER
+            ipcRenderer.send(Constants.SIYUAN_CMD, "hide");
+            ipcRenderer.send(Constants.SIYUAN_CMD, "minimize");
+            /// #endif
+            return true;
     }
     if (command === "goToEditTabNext" || command === "goToEditTabPrev") {
         let currentTabElement = document.querySelector(".layout__wnd--active ul.layout-tab-bar > .item--focus");
@@ -219,6 +290,38 @@ export const globalCommand = (command: string, app: App) => {
         }
         return true;
     }
+    if (command === "splitLR") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            tab.parent.split("lr").addTab(copyTab(app, tab));
+        }
+        return true;
+    }
+    if (command === "splitTB") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            tab.parent.split("tb").addTab(copyTab(app, tab));
+        }
+        return true;
+    }
+    if (command === "splitMoveB" || command === "splitMoveR") {
+        const tab = getActiveTab(false);
+        if (tab && tab.parent.children.length > 1) {
+            const newWnd = tab.parent.split(command === "splitMoveB" ? "tb" : "lr");
+            newWnd.headersElement.append(tab.headElement);
+            newWnd.headersElement.parentElement.classList.remove("fn__none");
+            newWnd.moveTab(tab);
+            resizeTabs();
+        }
+        return true;
+    }
+    if (command === "tabToWindow") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            openNewWindow(tab);
+        }
+        return true;
+    }
     /// #endif
 
     switch (command) {
@@ -230,6 +333,24 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "editReadonly":
             setReadOnly(!window.siyuan.config.editor.readOnly);
+            return true;
+        case "lockScreen":
+            lockScreen(app);
+            return true;
+        case "newFile":
+            newFile({
+                app,
+                useSavePath: true
+            });
+            return true;
+        case "riffCard":
+            openCard(app);
+            return true;
+        case "selectOpen1":
+            selectOpenTab();
+            return true;
+        case "syncNow":
+            syncGuide(app);
             return true;
     }
 

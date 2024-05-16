@@ -19,6 +19,7 @@
 <a title="Last Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
 <a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
+<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Chat on Discord" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
 <br><br>
 <a href="https://www.producthunt.com/products/siyuan/reviews?utm_source=badge-product_rating&utm_medium=badge&utm_souce=badge-siyuan" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/product_rating.svg?product_id=534576&theme=light" alt="SiYuan - A&#0032;privacy&#0045;first&#0032;personal&#0032;knowledge&#0032;management&#0032;software | Product Hunt" style="width: 242px; height: 108px;" width="242" height="108" /></a>
 </p>
@@ -26,6 +27,39 @@
 <p align="center">
 <a href="README_zh_CN.md">中文</a>
 </p>
+
+---
+
+## Table of Contents
+
+* [💡 Introduction](#-introduction)
+* [🔮 Features](#-features)
+* [🏗️ Architecture and Ecosystem](#-architecture-and-ecosystem)
+* [🌟 Star History](#-star-history)
+* [🗺️ Roadmap](#️-roadmap)
+* [🚀 Download Setup](#-download-setup)
+  * [App Market](#app-market)
+  * [Installation Package](#installation-package)
+  * [Docker Hosting](#docker-hosting)
+  * [Unraid Hosting](#unraid-hosting)
+  * [Insider Preview](#insider-preview)
+* [🏘️ Community](#️-community)
+* [🛠️ Development Guide](#️-development-guide)
+* [❓ FAQ](#-faq)
+  * [How does SiYuan store data?](#how-does-siyuan-store-data)
+  * [Does it support data synchronization through a third-party sync disk?](#does-it-support-data-synchronization-through-a-third-party-sync-disk)
+  * [Is SiYuan open source?](#is-siyuan-open-source)
+  * [How to upgrade to a new version?](#how-to-upgrade-to-a-new-version)
+  * [Is there any note for deleting docs?](#is-there-any-note-for-deleting-docs)
+  * [How can I just wrap and not start a new paragraph?](#how-can-i-just-wrap-and-not-start-a-new-paragraph)
+  * [What if some blocks (such as paragraph blocks in list items) cannot find the block icon?](#what-if-some-blocks-such-as-paragraph-blocks-in-list-items-cannot-find-the-block-icon)
+  * [How to share notes?](#how-to-share-notes)
+  * [What should I do if the data repo key is lost?](#what-should-i-do-if-the-data-repo-key-is-lost)
+  * [Do I need to pay for it?](#do-i-need-to-pay-for-it)
+* [🙏 Acknowledgement](#-acknowledgement)
+  * [Contributors](#contributors)
+
+---
 
 ## 💡 Introduction
 
@@ -76,7 +110,7 @@ Most features are free, even for commercial use.
 
 Some features are only available to paid members, for more details please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).
 
-## 🏗️ Architecture design and open source ecosystem
+## 🏗️ Architecture and Ecosystem
 
 ![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
 
@@ -115,6 +149,11 @@ Mobile:
 Desktop:
 
 * [Microsoft Store](https://apps.microsoft.com/detail/9p7hpmxp73k4)
+
+### Installation Package
+
+* [B3log](https://b3log.org/siyuan/en/download.html)
+* [GitHub](https://github.com/siyuan-note/siyuan/releases)
 
 ### Docker Hosting
 
@@ -202,10 +241,26 @@ Use NGINX reverse proxy to hide port 6806, please note:
 
 </details>
 
-### Installation Package
+### Unraid Hosting
 
-* [B3log](https://b3log.org/siyuan/en/download.html)
-* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+<details>
+<summary>Unraid Deployment</summary>
+
+Note: First run `chown -R 1000:1000 /mnt/user/appdata/siyuan` in the terminal
+
+Template reference:
+
+```
+Web UI: 6806
+Container Port: 6806
+Container Path: /home/siyuan
+Host path: /mnt/user/appdata/siyuan
+PUID: 1000
+PGID: 1000
+Publish parameters: --accessAuthCode=******(Access authorization code)
+```
+
+</details>
 
 ### Insider Preview
 

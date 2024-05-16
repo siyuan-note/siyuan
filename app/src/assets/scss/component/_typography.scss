@@ -609,7 +609,7 @@
 
   &-task {
     list-style: none !important;
-    word-break: break-all;
+    word-break: break-word;
     position: relative;
 
     &--done > div[data-node-id].p {

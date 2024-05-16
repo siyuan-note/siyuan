@@ -55,6 +55,7 @@ export const openMenuPanel = (options: {
     const avID = options.blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
+        query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value || "",
         pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
@@ -80,7 +81,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "filters") {
             html = getFiltersHTML(data.view);
         } else if (options.type === "select") {
-            html = getSelectHTML(data.view, options.cellElements);
+            html = getSelectHTML(data.view, options.cellElements, true);
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
@@ -137,7 +138,6 @@ export const openMenuPanel = (options: {
             } else if (options.type === "asset") {
                 bindAssetEvent({
                     protyle: options.protyle,
-                    data,
                     menuElement,
                     cellElements: options.cellElements,
                     blockElement: options.blockElement
@@ -182,6 +182,11 @@ export const openMenuPanel = (options: {
             return;
         });
         avPanelElement.addEventListener("drop", (event) => {
+            if (!window.siyuan.dragElement) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             window.siyuan.dragElement.style.opacity = "";
             const sourceElement = window.siyuan.dragElement;
             window.siyuan.dragElement = undefined;
@@ -314,7 +319,6 @@ export const openMenuPanel = (options: {
                 });
                 updateAssetCell({
                     protyle: options.protyle,
-                    data,
                     cellElements: options.cellElements,
                     replaceValue,
                     blockElement: options.blockElement
@@ -436,6 +440,10 @@ export const openMenuPanel = (options: {
         });
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
+            if (event.dataTransfer.types.includes("Files")) {
+                event.preventDefault();
+                return;
+            }
             const target = event.target as HTMLElement;
             let targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement) {
@@ -1119,7 +1127,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addColOptionOrCell") {
                     if (target.querySelector(".b3-menu__checked")) {
-                        removeCellOption(options.protyle, data, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
+                        removeCellOption(options.protyle, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
                     } else {
                         addColOptionOrCell(options.protyle, data, options.cellElements, target, menuElement, options.blockElement);
                     }
@@ -1128,12 +1136,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCellOption") {
-                    removeCellOption(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
+                    removeCellOption(options.protyle, options.cellElements, target.parentElement, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, data, options.cellElements, target, options.blockElement);
+                    addAssetLink(options.protyle, options.cellElements, target, options.blockElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1161,7 +1169,6 @@ export const openMenuPanel = (options: {
                         }
                         updateAssetCell({
                             protyle: options.protyle,
-                            data,
                             cellElements: options.cellElements,
                             addValue: [value],
                             blockElement: options.blockElement
@@ -1197,7 +1204,16 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement, options.blockElement);
+                    editAssetItem({
+                        protyle: options.protyle,
+                        cellElements: options.cellElements,
+                        blockElement: options.blockElement,
+                        content: target.parentElement.dataset.content,
+                        type: target.parentElement.dataset.type as "image" | "file",
+                        name: target.parentElement.dataset.name,
+                        index: parseInt(target.parentElement.dataset.index),
+                        rect: target.parentElement.getBoundingClientRect()
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

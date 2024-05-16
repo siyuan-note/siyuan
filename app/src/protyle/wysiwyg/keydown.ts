@@ -67,7 +67,7 @@ import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
-import {onluProtyleCommand} from "../../boot/globalEvent/command/protyle";
+import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -469,7 +469,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enter.custom, event)) {
-            onluProtyleCommand({
+            onlyProtyleCommand({
                 protyle,
                 command: "enter",
                 previousRange: range,
@@ -480,7 +480,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
-            onluProtyleCommand({
+            onlyProtyleCommand({
                 protyle,
                 command: "enterBack",
                 previousRange: range,

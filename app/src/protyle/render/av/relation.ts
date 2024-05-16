@@ -352,7 +352,8 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
         return;
     }
     if (!nodeElement.contains(cellElements[0])) {
-        cellElements[0] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
+        cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
+            nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`) ) as HTMLElement;
     }
     const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
     menuElement.querySelectorAll('[draggable="true"]').forEach(item => {

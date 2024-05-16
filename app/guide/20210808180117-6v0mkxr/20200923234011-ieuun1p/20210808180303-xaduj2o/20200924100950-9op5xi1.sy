@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20240516231005"
+		"updated": "20240516235223"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20240516231005"
+				"updated": "20240516235223"
 			},
 			"Children": [
 				{
@@ -2306,7 +2306,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20240516231005"
+				"updated": "20240516235223"
 			},
 			"Children": [
 				{
@@ -3040,7 +3040,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20240516231005"
+				"updated": "20240516235223"
 			},
 			"Children": [
 				{
@@ -3059,7 +3059,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20240516231005"
+				"updated": "20240516235223"
 			},
 			"Children": [
 				{
@@ -3079,7 +3079,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20240430215520"
+				"updated": "20240516235223"
 			},
 			"Children": [
 				{
@@ -3220,16 +3220,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click+Tag"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ / Click Tag"
 								}
 							]
 						},

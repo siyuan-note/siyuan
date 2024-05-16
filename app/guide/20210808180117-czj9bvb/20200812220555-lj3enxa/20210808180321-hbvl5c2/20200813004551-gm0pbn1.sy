@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240516230945"
+		"updated": "20240516234645"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20240516230945"
+				"updated": "20240516234645"
 			},
 			"Children": [
 				{
@@ -2141,7 +2141,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回车"
 								},
 								{
 									"Type": "NodeText",
@@ -2304,7 +2304,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20240516230945"
+				"updated": "20240516234645"
 			},
 			"Children": [
 				{
@@ -2536,7 +2536,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -2545,7 +2545,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -2608,7 +2608,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -2617,7 +2617,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -2652,7 +2652,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回车"
 								},
 								{
 									"Type": "NodeText",
@@ -3038,7 +3038,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20240516230945"
+				"updated": "20240516234645"
 			},
 			"Children": [
 				{
@@ -3053,7 +3053,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20240516230945"
+				"updated": "20240516234645"
 			},
 			"Children": [
 				{
@@ -3077,7 +3077,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20240516225348"
+				"updated": "20240516234645"
 			},
 			"Children": [
 				{
@@ -3214,16 +3214,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click+Tag"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ / 点击标签"
 								}
 							]
 						},
@@ -6136,7 +6127,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -6145,7 +6136,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								},
 								{
 									"Type": "NodeText",
@@ -8216,7 +8207,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "```Enter"
+									"TextMarkTextContent": "```回车"
 								},
 								{
 									"Type": "NodeText",
@@ -9071,7 +9062,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Enter"
+									"TextMarkTextContent": "Ctrl+回车"
 								},
 								{
 									"Type": "NodeText",
@@ -9080,7 +9071,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Enter"
+									"TextMarkTextContent": "⌘回车"
 								},
 								{
 									"Type": "NodeText",
@@ -9134,7 +9125,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Enter"
+									"TextMarkTextContent": "Alt+回车"
 								},
 								{
 									"Type": "NodeText",
@@ -9143,7 +9134,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Enter"
+									"TextMarkTextContent": "⌥回车"
 								},
 								{
 									"Type": "NodeText",
@@ -11084,7 +11075,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11119,7 +11110,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11128,7 +11119,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11163,7 +11154,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11172,7 +11163,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11207,7 +11198,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11216,7 +11207,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11540,7 +11531,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11585,7 +11576,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11594,7 +11585,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11639,7 +11630,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11648,7 +11639,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11693,7 +11684,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11702,7 +11693,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11747,7 +11738,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11792,7 +11783,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11801,7 +11792,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11919,7 +11910,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11958,7 +11949,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -11967,7 +11958,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12006,7 +11997,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12015,7 +12006,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12054,7 +12045,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12063,7 +12054,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12229,7 +12220,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12268,7 +12259,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12277,7 +12268,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12316,7 +12307,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12325,7 +12316,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12368,7 +12359,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12377,7 +12368,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12416,7 +12407,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Alt+Click"
+									"TextMarkTextContent": "Ctrl+Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12425,7 +12416,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥⌘Click"
+									"TextMarkTextContent": "⌥⌘点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12532,7 +12523,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12567,7 +12558,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12576,7 +12567,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12717,7 +12708,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								}
 							]
 						}
@@ -12744,7 +12735,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12753,7 +12744,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								}
 							]
 						}
@@ -12780,7 +12771,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12789,7 +12780,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								}
 							]
 						}
@@ -12878,7 +12869,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "点击"
 								}
 							]
 						}
@@ -12905,7 +12896,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12914,7 +12905,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘点击"
 								}
 							]
 						}
@@ -12941,7 +12932,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12950,7 +12941,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥点击"
 								}
 							]
 						}
@@ -12977,7 +12968,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+点击"
 								},
 								{
 									"Type": "NodeText",
@@ -12986,7 +12977,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧点击"
 								}
 							]
 						}

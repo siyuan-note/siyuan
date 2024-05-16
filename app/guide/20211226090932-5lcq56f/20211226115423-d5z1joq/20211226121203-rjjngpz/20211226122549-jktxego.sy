@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20240516230948"
+		"updated": "20240516235214"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20240516230948"
+				"updated": "20240516235214"
 			},
 			"Children": [
 				{
@@ -2135,7 +2135,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回車"
 								},
 								{
 									"Type": "NodeText",
@@ -2298,7 +2298,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20240516230948"
+				"updated": "20240516235214"
 			},
 			"Children": [
 				{
@@ -2530,7 +2530,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -2539,7 +2539,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -2602,7 +2602,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -2611,7 +2611,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -2646,7 +2646,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回車"
 								},
 								{
 									"Type": "NodeText",
@@ -3032,7 +3032,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20240516230948"
+				"updated": "20240516235214"
 			},
 			"Children": [
 				{
@@ -3047,7 +3047,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20240516230948"
+				"updated": "20240516235214"
 			},
 			"Children": [
 				{
@@ -3067,7 +3067,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20240516225430"
+				"updated": "20240516235214"
 			},
 			"Children": [
 				{
@@ -3208,16 +3208,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click+Tag"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ / 點擊標籤"
 								}
 							]
 						},
@@ -6153,7 +6144,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -6162,7 +6153,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -7316,7 +7307,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-8191vgw",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -8278,7 +8269,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "```Enter"
+									"TextMarkTextContent": "```回車"
 								},
 								{
 									"Type": "NodeText",
@@ -8531,7 +8522,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-wez4zj6",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -8911,7 +8902,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-td76oes",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -9133,7 +9124,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Enter"
+									"TextMarkTextContent": "Ctrl+回車"
 								},
 								{
 									"Type": "NodeText",
@@ -9142,7 +9133,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Enter"
+									"TextMarkTextContent": "⌘回車"
 								},
 								{
 									"Type": "NodeText",
@@ -9196,7 +9187,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Enter"
+									"TextMarkTextContent": "Alt+回車"
 								},
 								{
 									"Type": "NodeText",
@@ -9205,7 +9196,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Enter"
+									"TextMarkTextContent": "⌥回車"
 								},
 								{
 									"Type": "NodeText",
@@ -9227,7 +9218,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-x2dmpab",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -9831,7 +9822,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240516222525-vof6ni8",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -9845,7 +9836,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240516230318-f8qoz1n",
-				"updated": "20240516230948"
+				"updated": "20240516235055"
 			},
 			"Children": [
 				{
@@ -9859,7 +9850,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：在搜索界面使用快捷键。"
+					"Data": "​：在搜尋介面使用快捷鍵。"
 				}
 			]
 		},
@@ -10153,7 +10144,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230316183455-9nz17tt",
-				"updated": "20230316183522"
+				"updated": "20240516235032"
 			},
 			"Children": [
 				{
@@ -10167,7 +10158,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230316183459-wukct4o",
-				"updated": "20230316183522"
+				"updated": "20240516235032"
 			},
 			"Children": [
 				{
@@ -10181,7 +10172,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：使用快捷键时，焦点需在 PDF 上，否则请点击 PDF。"
+					"Data": "​：使用快速鍵時，焦點需在 PDF 上，否則請點選 PDF。"
 				}
 			]
 		},
@@ -11240,7 +11231,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11279,7 +11270,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11288,7 +11279,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11327,7 +11318,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11336,7 +11327,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11379,7 +11370,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11388,7 +11379,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11728,7 +11719,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11773,7 +11764,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11782,7 +11773,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11831,7 +11822,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11840,7 +11831,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11889,7 +11880,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11898,7 +11889,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11943,7 +11934,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11988,7 +11979,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -11997,7 +11988,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12133,7 +12124,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12182,7 +12173,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12191,7 +12182,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12240,7 +12231,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12249,7 +12240,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12294,7 +12285,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12303,7 +12294,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12486,7 +12477,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12531,7 +12522,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12540,7 +12531,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12589,7 +12580,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12598,7 +12589,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12647,7 +12638,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12656,7 +12647,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12705,7 +12696,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Alt+Click"
+									"TextMarkTextContent": "Ctrl+Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12714,7 +12705,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥⌘Click"
+									"TextMarkTextContent": "⌥⌘點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12831,7 +12822,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12870,7 +12861,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -12879,7 +12870,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13036,7 +13027,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								}
 							]
 						}
@@ -13067,7 +13058,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13076,7 +13067,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								}
 							]
 						}
@@ -13107,7 +13098,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13116,7 +13107,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								}
 							]
 						}
@@ -13217,7 +13208,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								}
 							]
 						}
@@ -13252,7 +13243,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13261,7 +13252,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Click"
+									"TextMarkTextContent": "⌘點擊"
 								}
 							]
 						}
@@ -13296,7 +13287,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+Click"
+									"TextMarkTextContent": "Alt+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13305,7 +13296,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥Click"
+									"TextMarkTextContent": "⌥點擊"
 								}
 							]
 						}
@@ -13340,7 +13331,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift+Click"
+									"TextMarkTextContent": "Shift+點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -13349,7 +13340,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧Click"
+									"TextMarkTextContent": "⇧點擊"
 								}
 							]
 						}

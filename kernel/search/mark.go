@@ -114,7 +114,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	ret = text
 
 	if reg, err := regexp.Compile(re); nil == err {
-		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + util.EscapeHTML(s) + closeMark })
+		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + s + closeMark })
 	}
 
 	// 搜索结果预览包含转义符问题 Search results preview contains escape character issue https://github.com/siyuan-note/siyuan/issues/9790

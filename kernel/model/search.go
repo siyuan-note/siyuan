@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/vitess-sqlparser/sqlparser"
@@ -1538,8 +1539,8 @@ func stringQuery(query string) string {
 
 // markReplaceSpan 用于处理搜索高亮。
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
-	text := n.Content()
 	if ast.NodeText == n.Type {
+		text := n.Content()
 		escapedText := util.EscapeHTML(text)
 		escapedKeywords := make([]string, len(keywords))
 		for i, keyword := range keywords {
@@ -1567,6 +1568,17 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 
 		if n.IsTextMarkType("inline-math") || n.IsTextMarkType("inline-memo") {
 			return false
+		}
+
+		var text string
+		if n.IsTextMarkType("code") {
+			// code 在前面的 n.
+			for i, k := range keywords {
+				keywords[i] = html.EscapeString(k)
+			}
+			text = n.TextMarkTextContent
+		} else {
+			text = n.Content()
 		}
 
 		startTag := search.GetMarkSpanStart(markSpanDataType)

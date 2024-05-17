@@ -566,7 +566,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
 </div>`;
 };
 
-export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:string) => {
+export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID: string) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     cellValue.mSelect.forEach((item: IAVCellSelectValue) => {
@@ -580,15 +580,17 @@ export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:
             }
         });
         if (!needAdd) {
+            const newColor = ((column.options?.length || 0) % 13 + 1).toString()
             column.options.push({
                 name: item.content,
-                color:(column.options?.length || 0) % 13 + 1
+                color: newColor
             });
+            item.color = newColor;
             doOperations.push({
                 action: "updateAttrViewColOptions",
                 id: column.id,
                 avID,
-                data:  column.options
+                data: column.options
             })
             undoOperations.push({
                 action: "removeAttrViewColOption",

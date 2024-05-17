@@ -13,6 +13,7 @@ import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
+import {mergeAddOption} from "./select";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -586,6 +587,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
             return;
+        }
+        if (type === "select" || type === "mSelect") {
+            const operations = mergeAddOption(columns.find(e => e.id === colId), cellValue, avID);
+            doOperations.push(...operations.doOperations);
+            undoOperations.push(...operations.undoOperations);
         }
         if (objEquals(cellValue, oldValue)) {
             return;

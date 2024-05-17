@@ -200,7 +200,15 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             childItem.setAttribute("data-node-id", Lute.NewNodeID());
         });
         item.classList.remove("protyle-wysiwyg--select");
-        nodeElements[0].after(tempElement);
+        if (tempElement.dataset.type ==="NodeHTMLBlock") {
+            const phElement  = tempElement.querySelector("protyle-html");
+            const content = phElement.getAttribute("data-content");
+            phElement.setAttribute("data-content", "");
+            nodeElements[0].after(tempElement);
+            phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(content));
+        } else {
+            nodeElements[0].after(tempElement);
+        }
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,

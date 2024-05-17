@@ -156,7 +156,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                 tableHTML += `<div class="block__icons" style="min-height: auto">
     <div class="block__icon block__icon--show" data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
     <div class="fn__space"></div>
-    <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
+    <div class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.newCol}" data-type="av-header-add" data-position="4bottom"><svg><use xlink:href="#iconAdd"></use></svg></div>
 </div>
 </div>`;
                 // body
@@ -215,7 +215,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 ${tabHTML}
             </div>
             <div class="fn__space"></div>
-            <span data-type="av-add" class="block__icon">
+            <span data-type="av-add" class="block__icon ariaLabel" data-position="8bottom" aria-label="${window.siyuan.languages.newView}">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__flex-1"></div>
@@ -245,11 +245,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-add-more" class="block__icon">
+            <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8bottom" aria-label="${window.siyuan.languages.newRow}">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.mirrorTip}">
+            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8bottom" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
         <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>

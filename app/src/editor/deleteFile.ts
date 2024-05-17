@@ -18,9 +18,13 @@ export const deleteFile = (notebookId: string, pathString: string) => {
         id: getDisplayName(pathString, true, true)
     }, (response) => {
         const fileName = escapeHtml(response.data.name);
-        let tip = `${window.siyuan.languages.confirmDelete} <b>${fileName}</b>?`;
+        let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", fileName)}
+<div class="fn__hr"></div>
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
         if (response.data.subFileCount > 0) {
-            tip = `${window.siyuan.languages.confirmDelete} <b>${fileName}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
+            tip = `${window.siyuan.languages.andSubFile.replace("${x}", fileName).replace("${y}", response.data.subFileCount)}
+<div class="fn__hr"></div>
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
         }
         confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, () => {
             fetchPost("/api/filetree/removeDoc", {
@@ -40,7 +44,9 @@ export const deleteFiles = (liElements: Element[]) => {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {
                 confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(itemNotebookId))}</b>?`, () => {
+                    `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
+<div class="fn__hr"></div>
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`, () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: itemNotebookId,
                             callback: Constants.CB_MOUNT_REMOVE
@@ -61,7 +67,9 @@ export const deleteFiles = (liElements: Element[]) => {
             return;
         }
         confirmDialog(window.siyuan.languages.deleteOpConfirm,
-            window.siyuan.languages.confirmRemoveAll.replace("${count}", paths.length), () => {
+            `${window.siyuan.languages.confirmRemoveAll.replace("${count}", paths.length)}
+<div class="fn__hr"></div>
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`, () => {
                 fetchPost("/api/filetree/removeDocs", {
                     paths
                 });

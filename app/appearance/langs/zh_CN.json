@@ -1,5 +1,7 @@
 {
-  "confirmDeleteTip": "确定删除 <b>${x}</b> 吗？<br>删除后可在 [数据历史] 中恢复，按 [设置 - 编辑器 - 历史保留天数] 保留 <code class='fn__code'>${y}</code> 天",
+  "andSubFile": "确定删除 <b>${x}</b> 及其 <b>${y}</b> 个子文档吗？",
+  "confirmDeleteTip": "确定删除 <b>${x}</b> 吗？",
+  "rollbackTip": "删除后可在 [数据历史] 中恢复，按 [设置 - 编辑器 - 历史保留天数] 保留 <code class='fn__code'>${x}</code> 天",
   "newView": "添加视图",
   "newCol": "添加列",
   "newRow": "添加条目",
@@ -686,7 +688,6 @@
   "customEmoji": "添加自定义表情",
   "customEmojiTip": "打开 <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji 文件夹</a> 放入图片后并点击刷新按钮",
   "recentEmoji": "常用表情",
-  "andSubFile": "及其 <b>x</b> 个子文档",
   "changeIcon": "修改图标",
   "addIcon": "添加图标",
   "includeSubFile": "\n包含 x 个子文档",

@@ -124,7 +124,7 @@ func Convert2Float(s string) (float64, bool) {
 	s = strings.ReplaceAll(s, ",", "")
 	buf := bytes.Buffer{}
 	for _, r := range s {
-		if unicode.IsDigit(r) || '.' == r {
+		if unicode.IsDigit(r) || '.' == r || '-' == r {
 			buf.WriteRune(r)
 		}
 	}

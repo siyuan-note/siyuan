@@ -7,6 +7,9 @@ import {getEditorRange} from "../../util/selection";
 import {Constants} from "../../../constants";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
+    if (options.protyle.disabled) {
+        return;
+    }
     const menu = new Menu("av-view");
     if (menu.isOpen) {
         return;

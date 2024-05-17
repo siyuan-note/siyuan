@@ -1,4 +1,5 @@
 {
+  "confirmDeleteTip": "Êtes-vous sûr de supprimer <b>${x}</b> ?<br>Après la suppression, il peut être restauré dans [Historique des données], conservé <code class= 'fn__code'>${y }</code> jours selon [Paramètres - Éditeur - Jours de rétention de l'historique]",
   "newView": "Ajouter une vue",
   "newCol": "Ajouter une colonne",
   "newRow": "Ajouter une entrée",

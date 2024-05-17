@@ -1,4 +1,5 @@
 {
+  "confirmDeleteTip": "確定刪除<b>${x}</b> 嗎？<br>刪除後可在 [資料歷史] 中恢復，按 [設定- 編輯器- 歷史保留天數] 保留<code class= 'fn__code'>${y}</code> 天",
   "newView": "新增視圖",
   "newCol": "新增列",
   "newRow": "新增項目",

@@ -1,4 +1,5 @@
 {
+  "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?<br>After deletion, it can be restored in [Data History], retained <code class= 'fn__code'>${y}</code> days according to [Settings - Editor - History Retention Days]",
   "newView": "Add View",
   "newCol": "Add column",
   "newRow": "Add entry",

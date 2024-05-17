@@ -278,10 +278,10 @@ const initMainWindow = () => {
             windowState.width = Math.min(defaultWidth, workArea.width);
             windowState.height = Math.min(defaultHeight, workArea.height);
         }
-        if (x > workArea.width) {
+        if (x >= workArea.width * 0.8) {
             x = 0;
         }
-        if (y > workArea.height) {
+        if (y >= workArea.height * 0.8) {
             y = 0;
         }
     }

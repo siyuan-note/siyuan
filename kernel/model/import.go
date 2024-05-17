@@ -115,12 +115,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return
 	}
 	if 1 != len(unzipRootPaths) {
-		logging.LogErrorf("invalid .sy.zip")
+		logging.LogErrorf("invalid .sy.zip [%v]", unzipRootPaths)
 		return errors.New(Conf.Language(199))
 	}
 	unzipRootPath := unzipRootPaths[0]
 	name := filepath.Base(unzipRootPath)
 	if strings.HasPrefix(name, "data-20") && len("data-20230321175442") == len(name) {
+		logging.LogErrorf("invalid .sy.zip [unzipRootPath=%s, baseName=%s]", unzipRootPath, name)
 		return errors.New(Conf.Language(199))
 	}
 

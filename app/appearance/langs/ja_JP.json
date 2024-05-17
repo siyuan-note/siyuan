@@ -1,5 +1,7 @@
 {
-  "confirmDeleteTip": "<b>${x}</b> を削除してもよろしいですか?<br>削除後は [データ履歴] で復元でき、<code class= 'fn__code'>${y}</code> は保持されます。 [設定 - エディター - 履歴の保存日数] による日数",
+  "andSubFile": "<b>${x}</b> とそのサブドキュメント <b>${y}</b> を削除してもよろしいですか?",
+  "confirmDeleteTip": "<b>${x}</b> を削除してもよろしいですか?",
+  "rollbackTip": "削除後は [データ履歴] で復元でき、<code class= 'fn__code'>${x}</code> は保持されます。 [設定 - エディター - 履歴の保存日数] による日数",
   "newView": "ビューを追加",
   "newCol": "列を追加",
   "newRow": "エントリを追加",
@@ -686,7 +688,6 @@
   "customEmoji": "絵文字を追加",
   "customEmojiTip": "<a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">絵文字フォルダ</a>に画像を入れて更新ボタンをクリックしてください",
   "recentEmoji": "よく使う絵文字",
-  "andSubFile": "およびその <b>x</b> サブドキュメント",
   "changeIcon": "アイコンを変更",
   "addIcon": "アイコンを追加",
   "includeSubFile": "\nx 個のサブドキュメントを含む",

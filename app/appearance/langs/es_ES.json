@@ -1,5 +1,7 @@
 {
-  "confirmDeleteTip": "¿Está seguro de eliminar <b>${x}</b>?<br>Después de la eliminación, se puede restaurar en [Historial de datos] y se conserva <code class= 'fn__code'>${y }</code> días según [Configuración - Editor - Días de retención del historial]",
+  "andSubFile": "¿Está seguro de que desea eliminar <b>${x}</b> y sus subdocumentos <b>${y}</b>?",
+  "confirmDeleteTip": "¿Está seguro de eliminar <b>${x}</b>?",
+  "rollbackTip": "Después de la eliminación, se puede restaurar en [Historial de datos] y se conserva <code class= 'fn__code'>${x}</code> días según [Configuración - Editor - Días de retención del historial]",
   "newView": "Agregar vista",
   "newCol": "Agregar columna",
   "newRow": "Agregar entrada",
@@ -686,7 +688,6 @@
   "customEmoji": "Añadir un emoji personalizado",
   "customEmojiTip": "Abrir <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">carpeta de emojis</a>, poner la imagen y hacer clic en el botón de actualización",
   "recentEmoji": "Emoticonos comunes",
-  "andSubFile": "y sus <b>x</b> documentos secundarios",
   "changeIcon": "Cambiar el icono",
   "addIcon": "Agregar icono",
   "includeSubFile": "\nIncluir x documentos secundarios",

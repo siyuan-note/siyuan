@@ -1,5 +1,7 @@
 {
-  "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?<br>After deletion, it can be restored in [Data History], retained <code class= 'fn__code'>${y}</code> days according to [Settings - Editor - History Retention Days]",
+  "andSubFile": "Are you sure you want to delete <b>${x}</b> and its <b>${y}</b> subdocs?",
+  "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?",
+  "rollbackTip": "After deletion, it can be restored in [Data History], retained <code class= 'fn__code'>${x}</code> days according to [Settings - Editor - History Retention Days]",
   "newView": "Add View",
   "newCol": "Add column",
   "newRow": "Add entry",
@@ -686,7 +688,6 @@
   "customEmoji": "Add custom emoji",
   "customEmojiTip": "Open <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji folder</a>, put the picture in and click the refresh button",
   "recentEmoji": "Common Emoticons",
-  "andSubFile": "and its <b>x</b> subdocs",
   "changeIcon": "Change icon",
   "addIcon": "Add icon",
   "includeSubFile": "\nInclude x subdocs",

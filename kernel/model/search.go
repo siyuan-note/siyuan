@@ -803,7 +803,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 		}
 	} else if 3 == method {
 		if nil != r && r.MatchString(string(text.Tokens)) {
-			newContent := bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
+			newContent := []byte(r.ReplaceAllString(string(text.Tokens), replacement))
 			tree := parse.Inline("", newContent, luteEngine.ParseOptions)
 			if nil == tree.Root.FirstChild {
 				return false

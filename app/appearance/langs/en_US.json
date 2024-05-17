@@ -1,5 +1,5 @@
 {
-  "andSubFile": "Are you sure you want to delete <b>${x}</b> and its <i>${y}</i> subdocs?",
+  "andSubFile": "Are you sure you want to delete <b>${x}</b> and its ${y} subdocs?",
   "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?",
   "rollbackTip": "After deletion, it can be restored in [Data History], retained <code class= 'fn__code'>${x}</code> days according to [Settings - Editor - History Retention Days]",
   "newView": "Add View",

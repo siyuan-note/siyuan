@@ -1,5 +1,5 @@
 {
-  "andSubFile": "Êtes-vous sûr de vouloir supprimer <b>${x}</b> et ses sous-documents <i>${y}</i> ?",
+  "andSubFile": "Êtes-vous sûr de vouloir supprimer <b>${x}</b> et ses sous-documents ${y} ?",
   "confirmDeleteTip": "Êtes-vous sûr de supprimer <b>${x}</b> ?",
   "rollbackTip": "Après la suppression, il peut être restauré dans [Historique des données], conservé <code class= 'fn__code'>${x}</code> jours selon [Paramètres - Éditeur - Jours de rétention de l'historique]",
   "newView": "Ajouter une vue",

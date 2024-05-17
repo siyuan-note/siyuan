@@ -63,7 +63,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
-    const avID =  blockElement.getAttribute("data-av-id")
+    const avID =  blockElement.getAttribute("data-av-id");
     cellElements.forEach((item, elementIndex) => {
         if (!blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");

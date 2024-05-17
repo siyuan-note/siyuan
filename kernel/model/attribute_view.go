@@ -41,6 +41,30 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func GetAttributeViewSelectOptions(avID string, keyID string) (ret []*av.SelectOption) {
+	ret = []*av.SelectOption{}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	key, _ := attrView.GetKey(keyID)
+	if nil == key {
+		return
+	}
+
+	if av.KeyTypeSelect != key.Type && av.KeyTypeMSelect != key.Type {
+		return
+	}
+
+	if 0 < len(key.Options) {
+		ret = key.Options
+	}
+	return ret
+}
+
 func SetDatabaseBlockView(blockID, viewID string) (err error) {
 	node, tree, err := getNodeByBlockID(nil, blockID)
 	if nil != err {

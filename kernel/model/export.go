@@ -1962,6 +1962,16 @@ func processKaTexMacros(n *ast.Node) {
 		depth := 1
 		expanded := resolveKaTexMacro(usedMacro, &macros, &keys, &depth)
 		expanded = unescapeKaTexSupportedFunctions(expanded)
+
+		idx := strings.Index(mathContent, usedMacro)
+		if idx < 0 {
+			continue
+		}
+
+		// 处理宏参数
+		fillKaTexMacrosParams(usedMacro, &mathContent, &expanded)
+
+		// 将宏展开替换到 mathContent 中
 		mathContent = strings.ReplaceAll(mathContent, usedMacro, expanded)
 	}
 	mathContent = unescapeKaTexSupportedFunctions(mathContent)

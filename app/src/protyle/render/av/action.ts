@@ -272,13 +272,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             type: "submenu",
             submenu: copySubMenu(blockId)
         });
-        menu.addItem({
-            label: window.siyuan.languages.unbindBlock,
-            icon: "iconLinkOff",
-            click() {
-                updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
-            }
-        });
     }
     if (!protyle.disabled) {
         menu.addItem({
@@ -366,6 +359,15 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space
                 }
             });
             menu.addSeparator();
+            if (keyCellElement.getAttribute("data-detached") !== "true") {
+                menu.addItem({
+                    label: window.siyuan.languages.unbindBlock,
+                    icon: "iconLinkOff",
+                    click() {
+                        updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
+                    }
+                });
+            }
         }
         menu.addItem({
             icon: "iconTrashcan",

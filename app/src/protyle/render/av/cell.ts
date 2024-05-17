@@ -537,7 +537,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             });
         }
     }
-    const isCustomAttr = !hasClosestByClassName(cellElements[0], "custom-attr");
+    const isCustomAttr = hasClosestByClassName(cellElements[0], "custom-attr");
     cellElements.forEach((item: HTMLElement, elementIndex) => {
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
@@ -588,7 +588,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
             return;
         }
-        if (type === "select" || type === "mSelect") {
+        if (columns && (type === "select" || type === "mSelect")) {
             const operations = mergeAddOption(columns.find(e => e.id === colId), cellValue, avID);
             doOperations.push(...operations.doOperations);
             undoOperations.push(...operations.undoOperations);
@@ -624,10 +624,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             rowID,
             data: oldValue
         });
-        if (!isCustomAttr) {
-            updateAttrViewCellAnimation(item, cellValue);
-        } else {
+        if (isCustomAttr) {
             item.innerHTML = genAVValueHTML(cellValue);
+        } else {
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     if (doOperations.length > 0) {

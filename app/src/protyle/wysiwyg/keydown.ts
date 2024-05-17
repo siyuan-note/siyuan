@@ -1439,17 +1439,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length === 0) {
-                selectsElement = [nodeElement];
-            }
-            duplicateBlock(selectsElement, protyle);
-            return;
-        }
-
         if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.ai.custom, event)) {
             event.preventDefault();
             event.stopPropagation();

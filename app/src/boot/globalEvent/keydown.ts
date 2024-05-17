@@ -41,9 +41,8 @@ import {unicode2Emoji} from "../../emoji";
 import {deleteFiles} from "../../editor/deleteFile";
 import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
-import {getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
+import {duplicateBlock, getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
-import {hintMoveBlock} from "../../protyle/hint/extend";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
@@ -336,6 +335,21 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+
+    if (!isFileFocus && !event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        if (selectsElement.length === 0) {
+            const nodeElement = hasClosestBlock(range.startContainer);
+            if (nodeElement) {
+                selectsElement = [nodeElement];
+            }
+        }
+        duplicateBlock(selectsElement, protyle);
+        return true;
+    }
+
     const target = event.target as HTMLElement;
     if (target.tagName !== "TABLE" && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
@@ -607,7 +621,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-
     if (matchHotKey(window.siyuan.config.keymap.general.addToDatabase.custom, event)) {
         execByCommand({
             command: "addToDatabase",
@@ -640,6 +653,15 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         } else {
             initNavigationMenu(app, liElements[0] as HTMLElement).popup({x: liRect.right - 15, y: liRect.top + 15});
         }
+        return true;
+    }
+
+    if (isFile && !event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        fetchPost("/api/filetree/duplicateDoc", {
+            id: liElements[0].getAttribute("data-node-id"),
+        });
         return true;
     }
 

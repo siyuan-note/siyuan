@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getAttributeViewSelectOptions(c *gin.Context) {
+func getAttributeViewKeysByAvID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -36,8 +36,7 @@ func getAttributeViewSelectOptions(c *gin.Context) {
 		return
 	}
 	avID := arg["avID"].(string)
-	keyID := arg["keyID"].(string)
-	ret.Data = model.GetAttributeViewSelectOptions(avID, keyID)
+	ret.Data = model.GetAttributeViewKeysByAvID(avID)
 }
 
 func getMirrorDatabaseBlocks(c *gin.Context) {

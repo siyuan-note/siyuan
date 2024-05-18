@@ -18,7 +18,10 @@ package model
 
 import (
 	"sort"
+	"strconv"
 	"strings"
+
+	"github.com/88250/gulu"
 )
 
 func extractUsedMacros(mathContent string, macrosKeys *[]string) (ret []string) {
@@ -951,4 +954,36 @@ func unescapeKaTexSupportedFunctions(macroVal string) string {
 		macroVal = strings.ReplaceAll(macroVal, "__@"+f[1:]+"@__", f)
 	}
 	return macroVal
+}
+
+func fillKaTexMacrosParams(macro string, mathContent, expanded *string) {
+	// Support KaTex macro parameters https://github.com/siyuan-note/siyuan/issues/11448
+
+	idx := strings.Index(*mathContent, macro)
+	if idx < 0 {
+		return
+	}
+
+	// 提取 mathContent 中 {} 包裹的实参，这里可能会提取到其他多余的参数，但是后面仅替换宏中的 #1, #2, ...，所以不影响
+	tmp := (*mathContent)[idx:]
+	args := map[int]string{}
+	for i, arg := range gulu.Str.SubstringsBetween(tmp, "{", "}") {
+		args[i+1] = arg
+	}
+
+	// 将宏展开中的 #1, #2, ... 替换为实参
+	// Macros accept up to nine arguments: #1, #2, etc. https://katex.org/docs/supported#macros
+	paramsCount := 0
+	for i := 0; i < len(args); i++ {
+		if strings.Contains(*expanded, "#"+strconv.Itoa(i+1)) {
+			paramsCount++
+			*expanded = strings.ReplaceAll(*expanded, "#"+strconv.Itoa(i+1), args[i+1])
+		}
+	}
+
+	// 根据参数个数将 mathContent 中的实参替换为空
+	for i := 1; i <= paramsCount; i++ {
+		tmp = strings.ReplaceAll(tmp, "{"+args[i]+"}", "")
+		*mathContent = (*mathContent)[:idx] + tmp
+	}
 }

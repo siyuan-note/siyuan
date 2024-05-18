@@ -435,6 +435,8 @@
       display: block;
       font-size: 85%;
       color: var(--b3-theme-on-surface);
+      word-break: break-word;
+      white-space: break-spaces;
     }
   }
 

@@ -45,7 +45,6 @@ import {
     alignImgLeft,
     commonHotkey,
     downSelect,
-    duplicateBlock,
     getStartEndElement,
     upSelect
 } from "./commonHotkey";
@@ -1242,7 +1241,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const id = nodeElement.getAttribute("data-node-id");
             const html = nodeElement.outerHTML;
             const editElement = getContenteditableElement(nodeElement);
-            editElement.innerHTML = "```" + window.siyuan.storage[Constants.LOCAL_CODELANG] + "\n" + editElement.textContent + "<wbr>\n```";
+            // 需要 EscapeHTMLStr https://github.com/siyuan-note/siyuan/issues/11451
+            editElement.innerHTML = "```" + window.siyuan.storage[Constants.LOCAL_CODELANG] + "\n" + Lute.EscapeHTMLStr(editElement.textContent) + "<wbr>\n```";
             const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
             nodeElement.outerHTML = newHTML;
             const newNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);

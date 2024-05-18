@@ -288,14 +288,17 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdfOptions: ipcData.pdfOptions,
                 webContentsId: ipcData.webContentsId
             });
+            const savePath = ipcData.filePaths[0];
+            let pdfFilePath  = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
+            const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
+            pdfFilePath = responseUnique.data.path;
             fetchPost("/api/export/exportHTML", {
                 id: ipcData.rootId,
                 pdf: true,
                 removeAssets: ipcData.removeAssets,
                 merge: ipcData.mergeSubdocs,
-                savePath: ipcData.filePaths[0]
+                savePath,
             }, () => {
-                const pdfFilePath = path.join(ipcData.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
                 fs.writeFileSync(pdfFilePath, pdfData);
                 ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
                 fetchPost("/api/export/processPDF", {
@@ -326,7 +329,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                                 });
                             });
                         };
-                        removePromise(path.join(ipcData.filePaths[0], "assets"));
+                        removePromise(path.join(savePath, "assets"));
                     }
                 });
             });

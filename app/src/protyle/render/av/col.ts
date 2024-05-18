@@ -13,6 +13,7 @@ import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
 import * as dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
+import {duplicateNameAddOne} from "../../../util/functions";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -29,12 +30,7 @@ export const duplicateCol = (options: {
             return true;
         }
     });
-    const nameMatch = newColData.name.match(/^(.*) \((\d+)\)$/);
-    if (nameMatch) {
-        newColData.name = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
-    } else {
-        newColData.name = `${newColData.name} (1)`;
-    }
+    newColData.name = duplicateNameAddOne(newColData.name);
     newColData.id = Lute.NewNodeID();
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     const blockId = options.blockElement.getAttribute("data-node-id");

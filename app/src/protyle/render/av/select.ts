@@ -570,6 +570,9 @@ export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     cellValue.mSelect.forEach((item: IAVCellSelectValue) => {
+        if (!column.options) {
+            column.options = [];
+        }
         const needAdd = column.options.find((option: {
             name: string,
             color: string,

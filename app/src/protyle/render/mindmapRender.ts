@@ -49,6 +49,20 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 borderWidth: 0,
                                 color: "#4285f4",
                             },
+                            emphasis: {
+                                // focus: 'self',
+                                itemStyle:{
+                                    color:"#f530a0"
+                                },
+                                label:{
+                                    color:"#f530a0",
+                                    backgroundColor:"white",
+                                    borderColor :"white",
+                                    borderWidth:3,
+                                    // textBorderWidth:1,
+                                    // textBorderColor:"green"
+                                }
+                            },
                             label: {
                                 backgroundColor: "#f6f8fa",
                                 borderColor: "#d1d5da",
@@ -58,7 +72,23 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 lineHeight: 20,
                                 offset: [-5, 0],
                                 padding: [0, 5],
-                                position: "insideRight",
+                                position: "top",
+                                align: 'left',
+                                verticalAlign: 'bottom',
+                                // overflow:'break',
+                                // textStyle:{
+                                //     width:50
+                                // }
+                            },
+                            leaves: {
+                                itemStyle:{
+                                    color:"#33f81b"
+                                },
+                                label: {
+                                    position: 'right',
+                                    verticalAlign: 'middle',
+                                    align: 'left'
+                                }
                             },
                             lineStyle: {
                                 color: "#d1d5da",

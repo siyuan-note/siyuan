@@ -48,9 +48,9 @@ Mobile #menu & .side-panel: 7
 
 .fullscreen: 8
 
- window.siyuan.zIndex: 10
+#windowControls: 9
 
-#windowControls: 999998
+window.siyuan.zIndex: 10
 
 .b3-tooltips: 1000000
 */
@@ -126,7 +126,8 @@ html {
 
   #windowControls {
     top: 0;
-    z-index: 999998;
+    // https://github.com/siyuan-note/siyuan/issues/11275#issuecomment-2112416383
+    z-index: 9;
     right: 0;
     position: relative;
     margin-left: 2px;

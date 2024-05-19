@@ -624,7 +624,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                         hideMessage(msgId);
                         return;
                     }
-                    afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
+                    afterExport(exportResponse.data.path, msgId);
                 } else {
                     onExport(exportResponse, savePath, option, removeAssets, msgId);
                 }

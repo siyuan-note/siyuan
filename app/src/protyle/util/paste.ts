@@ -104,7 +104,8 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
 
         // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
         // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符
-        clipText = clipText.replace(/\\/g, "\\\\")
+        //使用unicode编码更好地处理反斜杠
+        clipText = clipText.replace(/\\/g, "&#92;")
             .replace(/\*/g, "\\*")
             .replace(/_/g, "\\_")
             .replace(/\[/g, "\\[")

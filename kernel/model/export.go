@@ -557,12 +557,13 @@ func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	return
 }
 
-func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
+func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string, err error) {
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
 		Conf.Export.PandocBin = util.PandocBinPath
 		Conf.Save()
 		if !util.IsValidPandocBin(Conf.Export.PandocBin) {
-			return errors.New(Conf.Language(115))
+			err = errors.New(Conf.Language(115))
+			return
 		}
 	}
 
@@ -587,7 +588,8 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 		if !gulu.File.IsExist(docxTemplate) {
 			logging.LogErrorf("docx template [%s] not found", docxTemplate)
 			msg := fmt.Sprintf(Conf.Language(197), docxTemplate)
-			return errors.New(msg)
+			err = errors.New(msg)
+			return
 		}
 
 		args = append(args, "--reference-doc", docxTemplate)
@@ -600,28 +602,23 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 	if nil != err {
 		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
 		msg := fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output))
-		return errors.New(msg)
+		err = errors.New(msg)
+		return
 	}
 
-	targetPath := filepath.Join(savePath, name+".docx")
-	if gulu.File.IsExist(targetPath) {
-		// 先删除目标文件，以检查是否被占用 https://github.com/siyuan-note/siyuan/issues/8822
-		if err := os.RemoveAll(targetPath); nil != err {
-			logging.LogErrorf("export docx failed: %s", err)
-			msg := fmt.Sprintf(Conf.language(215))
-			return errors.New(msg)
-		}
-	}
-
-	if err = filelock.Copy(tmpDocxPath, targetPath); nil != err {
+	fullPath = filepath.Join(savePath, name+".docx")
+	fullPath = util.GetUniqueFilename(fullPath)
+	if err = filelock.Copy(tmpDocxPath, fullPath); nil != err {
 		logging.LogErrorf("export docx failed: %s", err)
-		return errors.New(fmt.Sprintf(Conf.Language(14), err))
+		err = errors.New(fmt.Sprintf(Conf.Language(14), err))
+		return
 	}
 
 	if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
 		if err = filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
 			logging.LogErrorf("export docx failed: %s", err)
-			return errors.New(fmt.Sprintf(Conf.Language(14), err))
+			err = errors.New(fmt.Sprintf(Conf.Language(14), err))
+			return
 		}
 	}
 	return

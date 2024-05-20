@@ -73,10 +73,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 },
                                 label:{
                                     color:"#f530a0",
-                                    backgroundColor:"white",
-                                    borderColor :"white",
-                                    borderWidth:3,
-                                    overflow:'break'
+                                    overflow:'break',
                                     // textBorderWidth:1,
                                     // textBorderColor:"green"
                                 }

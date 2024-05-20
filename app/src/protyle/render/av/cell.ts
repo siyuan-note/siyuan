@@ -119,7 +119,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             mAsset.push({
                 type: isImg ? "image" : "file",
                 content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
-                name: isImg ? "" : item.textContent
+                name: isImg ? "" : item.getAttribute("data-name")
             });
         });
         cellValue.mAsset = mAsset;
@@ -713,7 +713,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
             if (item.type === "image") {
                 text += `<img class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${item.content}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${item.content}" data-url="${item.content}">${item.name}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${item.content}" data-name="${item.name}" data-url="${item.content}">${item.name || item.content}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {

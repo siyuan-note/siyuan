@@ -74,11 +74,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		return
 	}
 
-	name := util.FilterFileName(attrView.Name)
-	if "" == name {
-		name = Conf.language(105)
-	}
-
+	name := util.FilterFileName(getAttrViewName(attrView))
 	table, err := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 	if nil != err {
 		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)

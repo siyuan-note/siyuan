@@ -588,7 +588,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:      avID,
-			AvName:    attrView.Name,
+			AvName:    getAttrViewName(attrView),
 			BlockIDs:  blockIDs,
 			KeyValues: keyValues,
 		})
@@ -3228,7 +3228,7 @@ func getAttrViewViewByBlockID(attrView *av.AttributeView, blockID string) (ret *
 }
 
 func getAttrViewName(attrView *av.AttributeView) string {
-	ret := attrView.Name
+	ret := strings.TrimSpace(attrView.Name)
 	if "" == ret {
 		ret = Conf.language(105)
 	}

@@ -630,7 +630,7 @@ func getRowBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 }
 
 func getAttrViewName(attrView *av.AttributeView) string {
-	ret := attrView.Name
+	ret := strings.TrimSpace(attrView.Name)
 	if "" == ret {
 		ret = util.Langs[util.Lang][105]
 	}

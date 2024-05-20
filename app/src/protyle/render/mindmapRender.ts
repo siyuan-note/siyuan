@@ -94,9 +94,6 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 align: 'left',
                                 verticalAlign: 'bottom',
                                 // overflow:'truncate',
-                                // textStyle:{
-                                //     width:50
-                                // }
                             },
                             leaves: {
                                 itemStyle:{

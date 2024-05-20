@@ -574,12 +574,12 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                 let link = protyle.lute.GetLinkDest(value);
                 let name = "";
                 if (html) {
-                    const tempElement = document.createElement("template")
-                    tempElement.innerHTML = html
-                    const aElement = tempElement.content.querySelector('[data-type~="a"]')
+                    const tempElement = document.createElement("template");
+                    tempElement.innerHTML = html;
+                    const aElement = tempElement.content.querySelector('[data-type~="a"]');
                     if (aElement) {
                         link = aElement.getAttribute("data-href");
-                        name = aElement.textContent
+                        name = aElement.textContent;
                     }
                 }
                 if (!link && !name) {

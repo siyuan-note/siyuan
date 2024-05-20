@@ -236,17 +236,12 @@ const isOpenAsHidden = function () {
 };
 
 const initMainWindow = () => {
-    let windowStateInitialized = true;
     // 恢复主窗体状态
     let oldWindowState = {};
     try {
         oldWindowState = JSON.parse(fs.readFileSync(windowStatePath, "utf8"));
-        if (!oldWindowState.x) {
-            windowStateInitialized = false;
-        }
     } catch (e) {
         fs.writeFileSync(windowStatePath, "{}");
-        windowStateInitialized = false;
     }
     let defaultWidth;
     let defaultHeight;
@@ -270,7 +265,7 @@ const initMainWindow = () => {
 
     writeLog("windowStat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
 
-    let resetToCenter = false
+    let resetToCenter = false;
     let x = windowState.x;
     let y = windowState.y;
     if (workArea) {

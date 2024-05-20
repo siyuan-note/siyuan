@@ -3,7 +3,6 @@ import {fetchPost} from "../../util/fetch";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {MenuItem} from "../../menus/Menu";
 import {popSearch} from "../menu/search";
-import {Constants} from "../../constants";
 import {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 

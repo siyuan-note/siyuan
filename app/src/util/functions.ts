@@ -99,4 +99,4 @@ export const duplicateNameAddOne = (name:string) => {
         name = `${name} (1)`;
     }
     return name;
-}
+};

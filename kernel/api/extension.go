@@ -121,10 +121,12 @@ func extensionCopy(c *gin.Context) {
 		uploaded[oName] = "assets/" + fName
 	}
 
-	luteEngine := util.NewStdLute()
-	md, _ := model.HTML2Markdown(dom)
+	md, withMath, _ := model.HTML2Markdown(dom)
 	md = strings.TrimSpace(md)
-
+	luteEngine := util.NewStdLute()
+	if withMath {
+		luteEngine.SetInlineMath(true)
+	}
 	var unlinks []*ast.Node
 	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -153,7 +155,8 @@ func extensionCopy(c *gin.Context) {
 
 	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	ret.Data = map[string]interface{}{
-		"md": md,
+		"md":       md,
+		"withMath": withMath,
 	}
 	ret.Msg = model.Conf.Language(72)
 }

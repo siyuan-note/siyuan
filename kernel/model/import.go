@@ -55,12 +55,21 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Markdown(htmlStr string) (markdown string, err error) {
+func HTML2Markdown(htmlStr string) (markdown string, withMath bool, err error) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
 	luteEngine := util.NewLute()
 	tree := luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeLinkDest != n.Type {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeInlineMath == n.Type {
+			withMath = true
+			return ast.WalkContinue
+		}
+
+		if ast.NodeLinkDest != n.Type {
 			return ast.WalkContinue
 		}
 

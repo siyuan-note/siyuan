@@ -52,9 +52,6 @@ export const bindAssetEvent = (options: {
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
     genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach((item, index) => {
-        if (!item.content) {
-            return;
-        }
         let contentHTML;
         if (item.type === "image") {
             contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${item.content}">
@@ -188,8 +185,7 @@ export const editAssetItem = (options: {
     const linkAddress = options.content;
     const type = options.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
-        if (!textElements[0].value ||
-            (!textElements[1] && textElements[0].value === linkAddress) ||
+        if ((!textElements[1] && textElements[0].value === linkAddress) ||
             (textElements[1] && textElements[0].value === linkAddress && textElements[1].value === options.name)) {
             return;
         }
@@ -285,7 +281,7 @@ ${window.siyuan.languages.title}
 export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const menu = new Menu("av-asset-link", () => {
         const textElements = menu.element.querySelectorAll("textarea");
-        if (!textElements[0].value) {
+        if (!textElements[0].value && !textElements[1].value) {
             return;
         }
         updateAssetCell({

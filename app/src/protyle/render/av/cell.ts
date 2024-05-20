@@ -516,7 +516,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 };
 
 export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any, cElements?: HTMLElement[],
-                                 columns?: IAVColumn[]) => {
+                                 columns?: IAVColumn[], html?: string) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -569,9 +569,27 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (type === "mAsset") {
             if (Array.isArray(value)) {
                 value = oldValue.mAsset.concat(value);
-            } else if (typeof value !== "undefined") {
-                // 不传入为删除，传入字符串不进行处理
-                return;
+            } else if (typeof value !== "undefined") { // 不传入为删除，传入字符串不进行处理
+                let link = protyle.lute.GetLinkDest(value);
+                let name = "";
+                if (html) {
+                    const tempElement = document.createElement("template")
+                    tempElement.innerHTML = html
+                    const aElement = tempElement.content.querySelector('[data-type~="a"]')
+                    if (aElement) {
+                        link = aElement.getAttribute("data-href");
+                        name = aElement.textContent
+                    }
+                }
+                if (!link && !name) {
+                    return;
+                }
+                // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
+                value = oldValue.mAsset.concat({
+                    type: "file",
+                    content: link,
+                    name
+                });
             }
         } else if (type === "mSelect") {
             // 不传入为删除

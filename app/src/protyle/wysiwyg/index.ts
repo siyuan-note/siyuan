@@ -1577,7 +1577,7 @@ export class WYSIWYG {
                             blockElement: hasClosestBlock(assetImgElement) as HTMLElement,
                             content: target.tagName === "IMG" ? target.getAttribute("src") : target.getAttribute("data-url"),
                             type: target.tagName === "IMG" ? "image" : "file",
-                            name: target.tagName === "IMG" ? "" : target.textContent,
+                            name: target.tagName === "IMG" ? "" : target.getAttribute("data-name"),
                             index,
                             rect: target.getBoundingClientRect()
                         });

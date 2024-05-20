@@ -176,9 +176,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         const rowsElement = blockElement.querySelector(".av__row--select");
 
         if (rowsElement) {
-            updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns);
+            updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns, html);
         } else if (cellsElement.length > 0) {
-            updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns);
+            updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns, html);
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {
             range.insertNode(document.createTextNode(text));
             range.collapse(false);

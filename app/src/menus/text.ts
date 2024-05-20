@@ -9,6 +9,13 @@ export const textMenu = (target: Element) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
+            if (getSelection().rangeCount === 0) {
+                return;
+            }
+            const range = getSelection().getRangeAt(0);
+            if (!range.toString()) {
+                getSelection().getRangeAt(0).selectNode(target);
+            }
             document.execCommand("copy");
         }
     });

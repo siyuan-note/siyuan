@@ -42,6 +42,21 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 let myChart =window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
                     width,
                 });
+                myChart.getZr().on('dblclick', function(params:any) {
+                    let cur_option=myChart.getOption()
+                    let width=cur_option['series'][0]['label']['width']
+                    myChart.setOption({
+                        series: [
+                            {
+                                id:"sy",
+                                label:{
+                                    overflow: (width ? "none" : "truncate"),
+                                    width: (width ? undefined : 50)
+                                }
+                            }
+                        ]
+                    })
+                });
                 myChart.setOption({
                     series: [
                         {
@@ -61,6 +76,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                     backgroundColor:"white",
                                     borderColor :"white",
                                     borderWidth:3,
+                                    overflow:'break'
                                     // textBorderWidth:1,
                                     // textBorderColor:"green"
                                 }
@@ -72,12 +88,12 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 borderWidth: 0.5,
                                 color: "#586069",
                                 lineHeight: 20,
-                                offset: [-5, 0],
+                                // offset: [-5, 0],
                                 padding: [0, 5],
                                 position: "top",
                                 align: 'left',
                                 verticalAlign: 'bottom',
-                                // overflow:'break',
+                                // overflow:'truncate',
                                 // textStyle:{
                                 //     width:50
                                 // }
@@ -106,10 +122,11 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 }
                             },
                             type: "tree",
+                            id:"sy"
                         },
                     ],
                     tooltip: {
-                        trigger: "item",
+                        trigger: "none",
                         triggerOn: "mousemove",
                     },
                     backgroundColor: "transparent",

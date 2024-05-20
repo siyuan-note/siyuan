@@ -37,13 +37,15 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
+                let _data=JSON.parse(Lute.EChartsMindmapStr(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))))
                 renderElement.style.height = e.style.height;
-                window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
+                let myChart =window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
                     width,
-                }).setOption({
+                });
+                myChart.setOption({
                     series: [
                         {
-                            data: [JSON.parse(Lute.EChartsMindmapStr(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))))],
+                            data: [_data],
                             initialTreeDepth: -1,
                             itemStyle: {
                                 borderWidth: 0,

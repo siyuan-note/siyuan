@@ -33,6 +33,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
+	github.com/gorilla/css v1.0.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/imroc/req/v3 v3.43.5
 	github.com/jinzhu/copier v0.4.0
@@ -60,6 +61,7 @@ require (
 	github.com/spf13/cast v1.6.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
+	github.com/vanng822/css v1.0.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913
 	github.com/xuri/excelize/v2 v2.8.1

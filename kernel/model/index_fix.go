@@ -24,7 +24,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -42,39 +41,35 @@ import (
 )
 
 var (
-	checkIndexPerformed = atomic.Bool{}
+	checkIndexOnce = sync.Once{}
 )
 
 // checkIndex 自动校验数据库索引，仅在数据同步执行完成后执行一次。
 func checkIndex() {
-	if checkIndexPerformed.Load() {
-		return
-	}
+	checkIndexOnce.Do(func() {
+		logging.LogInfof("start checking index...")
 
-	logging.LogInfof("start checking index...")
+		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
+		sql.WaitForWritingDatabase()
 
-	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
-	sql.WaitForWritingDatabase()
+		task.AppendTask(task.DatabaseIndexFix, resetDuplicateBlocksOnFileSys)
 
-	task.AppendTask(task.DatabaseIndexFix, resetDuplicateBlocksOnFileSys)
+		task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
+		sql.WaitForWritingDatabase()
 
-	task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
-	sql.WaitForWritingDatabase()
+		task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
+		sql.WaitForWritingDatabase()
 
-	task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
-	sql.WaitForWritingDatabase()
+		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseRefs)
 
-	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseRefs)
+		// 后面要加任务的话记得修改推送任务栏的进度 util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
 
-	// 后面要加任务的话记得修改推送任务栏的进度 util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
-
-	task.AppendTask(task.DatabaseIndexFix, func() {
-		util.PushStatusBar(Conf.Language(185))
+		task.AppendTask(task.DatabaseIndexFix, func() {
+			util.PushStatusBar(Conf.Language(185))
+		})
+		debug.FreeOSMemory()
+		logging.LogInfof("finish checking index")
 	})
-	debug.FreeOSMemory()
-	logging.LogInfof("finish checking index")
-
-	checkIndexPerformed.Store(true)
 }
 
 var autoFixLock = sync.Mutex{}

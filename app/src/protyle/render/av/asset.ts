@@ -16,6 +16,7 @@ import {fetchPost} from "../../../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
+import {escapeAttr} from "../../../util/escape";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -58,10 +59,10 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
         } else {
-            contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${item.content}" style="max-width: 360px">${item.name || item.content}</span>`;
+            contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${escapeAttr(item.content)}" style="max-width: 360px">${item.name || item.content}</span>`;
         }
 
-        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
+        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${escapeAttr(item.name)}" data-type="${item.type}" data-content="${escapeAttr(item.content)}">
 <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>

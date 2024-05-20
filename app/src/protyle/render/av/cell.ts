@@ -693,12 +693,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {
+        // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || window.siyuan.languages.untitled}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || window.siyuan.languages.untitled}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;

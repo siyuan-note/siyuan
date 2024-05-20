@@ -878,9 +878,14 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
 	luteEngine.SetProtyleMarkNetImg(false)
+
 	// 不进行安全过滤，因为导出时需要保留所有的 HTML 标签
 	// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
 	luteEngine.SetSanitize(false)
+
+	// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
+	fillThemeStyleVar(tree)
+
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return

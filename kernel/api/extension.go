@@ -123,7 +123,7 @@ func extensionCopy(c *gin.Context) {
 
 	md, withMath, _ := model.HTML2Markdown(dom)
 	md = strings.TrimSpace(md)
-	luteEngine := util.NewStdLute()
+	luteEngine := util.NewLute()
 	if withMath {
 		luteEngine.SetInlineMath(true)
 	}
@@ -152,6 +152,8 @@ func extensionCopy(c *gin.Context) {
 	for _, unlink := range unlinks {
 		unlink.Unlink()
 	}
+
+	parse.NestedInlines2FlattedSpans(tree, false)
 
 	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	ret.Data = map[string]interface{}{

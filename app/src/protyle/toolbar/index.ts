@@ -456,6 +456,11 @@ export class Toolbar {
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
+                // 在 a 元素中 ctrl+m 需继承其链接，也许不需要？没有用户反馈之前先保持现状
+                // if (type !== "a" && rangeTypes.includes("a") && nextElement.dataset.type.split(" ").includes("a") &&
+                //     nextElement.isSameNode(previousElement)) {
+                //     inlineElement.setAttribute("data-href", nextElement.getAttribute("data-href"));
+                // }
                 setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
             } else {
@@ -624,10 +629,10 @@ export class Toolbar {
                 i--;
             } else {
                 this.range.insertNode(currentNewNode);
-                // https://github.com/siyuan-note/siyuan/issues/6155
-                if (currentNewNode.nodeType !== 3 && ["code", "tag", "kbd"].includes(type)) {
-                    const previousSibling = hasPreviousSibling(currentNewNode);
-                    if (!previousSibling || previousSibling.textContent.endsWith("\n")) {
+                if (currentNewNode.nodeType === 1 && ["code", "tag", "kbd"].includes(type)) {
+                    // 添加为 span https://github.com/siyuan-note/siyuan/issues/6155
+                    const currentPreviousSibling = hasPreviousSibling(currentNewNode);
+                    if (!currentPreviousSibling || currentPreviousSibling.textContent.endsWith("\n")) {
                         currentNewNode.before(document.createTextNode(Constants.ZWSP));
                     }
                     if (!currentNewNode.textContent.startsWith(Constants.ZWSP)) {
@@ -641,6 +646,47 @@ export class Toolbar {
                         )
                     ) {
                         currentNewNode.after(document.createTextNode(Constants.ZWSP));
+                    }
+                } else if (currentNewNode.nodeType === 3 && ["code", "tag", "kbd", "clear"].includes(type)) {
+                    const currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;
+                    let previousIsCTK = false;
+                    if (currentPreviousSibling) {
+                        if (currentPreviousSibling.nodeType === 1) {
+                            const currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ");
+                            if (currentPreviousSiblingTypes.includes("code") || currentPreviousSiblingTypes.includes("tag") || currentPreviousSiblingTypes.includes("kbd")) {
+                                previousIsCTK = true;
+                            }
+                        } else if (currentPreviousSibling.textContent.endsWith(Constants.ZWSP)) {
+                            currentPreviousSibling.textContent = currentPreviousSibling.textContent.substring(0, currentPreviousSibling.textContent.length - 1);
+                        }
+                    }
+                    const currentNextSibling = hasNextSibling(currentNewNode) as HTMLElement;
+                    let nextIsCTK = false;
+                    if (currentNextSibling) {
+                        if (currentNextSibling.nodeType === 1) {
+                            const currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ");
+                            if (currentNextSiblingTypes.includes("code") || currentNextSiblingTypes.includes("tag") || currentNextSiblingTypes.includes("kbd")) {
+                                nextIsCTK = true;
+                            }
+                        } else if (currentNextSibling.textContent.startsWith(Constants.ZWSP)) {
+                            currentNextSibling.textContent = currentNextSibling.textContent.substring(1);
+                        }
+                    }
+                    if (currentNewNode) {
+                        if (previousIsCTK) {
+                            if (!currentNewNode.textContent.startsWith(Constants.ZWSP)) {
+                                currentNewNode.textContent = Constants.ZWSP + currentNewNode.textContent;
+                            }
+                        } else if (currentNewNode.textContent.startsWith(Constants.ZWSP)) {
+                            currentNewNode.textContent = currentNewNode.textContent.substring(1);
+                        }
+                        if (nextIsCTK) {
+                            if (!currentNextSibling.textContent.startsWith(Constants.ZWSP)) {
+                                currentNextSibling.textContent = Constants.ZWSP + currentNextSibling.textContent;
+                            }
+                        } else if (currentNewNode.textContent.endsWith(Constants.ZWSP)) {
+                            currentNewNode.textContent = currentNewNode.textContent.substring(0, currentNewNode.textContent.length - 1);
+                        }
                     }
                 }
                 this.range.collapse(false);
@@ -1478,7 +1524,7 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string,name:string }, index: number) => {
+                response.data.blocks.forEach((item: { path: string, content: string, name: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${item.name}
     <span class="b3-list-item__meta">${item.content}</span>

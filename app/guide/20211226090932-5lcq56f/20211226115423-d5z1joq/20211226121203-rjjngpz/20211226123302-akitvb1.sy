@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
-		"updated": "20230630112012"
+		"type": "doc",
+		"updated": "20240426184612"
 	},
 	"Children": [
 		{
@@ -71,7 +72,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 的圖片語法（本地相對路徑），則思源會將 "
+					"Data": "​ 的圖片語法（本地相對路徑），則思源會將 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -80,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 轉換為"
+					"Data": "​ 轉換為"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -100,7 +101,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 則不會轉換，因為 "
+					"Data": "​ 則不會轉換，因為 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -109,7 +110,84 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 開頭的路徑文件屬於隱藏文件，思源不會進行處理。"
+					"Data": "​ 開頭的路徑文件屬於隱藏文件，思源不會進行處理。"
+				}
+			]
+		},
+		{
+			"ID": "20240426184604-4ldk0w4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240426184604-4ldk0w4",
+				"updated": "20240426184612"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要辨識一些擴充語法（例如上標 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "^foo^"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、下標 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~foo~"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、標籤 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和公式 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$foo$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 等），請開啟"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Markdown 語法"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 相關開關。"
 				}
 			]
 		},

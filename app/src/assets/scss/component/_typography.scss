@@ -255,7 +255,7 @@
     display: inline-block !important;
     position: absolute !important;
     width: 1px !important;
-    right: 6px !important;
+    right: 7px !important;
     outline: 0 !important;
     background: 0 0 !important;
     text-decoration: initial !important;
@@ -362,8 +362,9 @@
   [data-subtype="graphviz"] {
     text-align: center;
 
-    & > [contenteditable="false"] svg {
+    [contenteditable="false"] svg {
       border-radius: var(--b3-border-radius);
+      max-width: 100%; // https://github.com/siyuan-note/siyuan/issues/11181
 
       /* 由于会覆盖颜色，先移除看看有没有副作用 https://github.com/siyuan-note/siyuan/issues/7735
       polygon {
@@ -413,6 +414,8 @@
     margin: 0 auto;
     max-width: 100%;
     user-select: none;
+    word-break: keep-all;
+    white-space: nowrap;
 
     & > span:nth-child(1),
     & > span:nth-child(3) {
@@ -432,6 +435,8 @@
       display: block;
       font-size: 85%;
       color: var(--b3-theme-on-surface);
+      word-break: break-word;
+      white-space: break-spaces;
     }
   }
 
@@ -606,7 +611,7 @@
 
   &-task {
     list-style: none !important;
-    word-break: break-all;
+    word-break: break-word;
     position: relative;
 
     &--done > div[data-node-id].p {

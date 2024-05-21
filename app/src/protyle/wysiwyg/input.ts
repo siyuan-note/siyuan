@@ -51,13 +51,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         return;
     }
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-    const wbrElement = document.createElement("wbr");
+    const wbrElement: HTMLElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     if (event && event.inputType === "deleteContentForward") {
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
         if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
-            const type = wbrNextElement.getAttribute("data-type").split(" ");
-            if (type.includes("code") || type.includes("kbd") || type.includes("tag")) {
+            const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
+            if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
                 wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
             }
         }
@@ -157,7 +157,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         log("SpinBlockDOM", html, "result", protyle.options.debugger);
         let scrollLeft: number;
         if (blockElement.classList.contains("table")) {
-            scrollLeft = getContenteditableElement(blockElement).scrollLeft;
+            scrollLeft = blockElement.firstElementChild.scrollLeft;
         }
         if (/<span data-type="backslash">.+<\/span><wbr>/.test(html)) {
             // 转义不需要添加 zwsp
@@ -223,11 +223,19 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 });
                 mathRender(realElement);
                 if (index === tempElement.content.childElementCount - 1) {
+                    // https://github.com/siyuan-note/siyuan/issues/11156
+                    const currentWbrElement = blockElement.querySelector("wbr");
+                    if (currentWbrElement && currentWbrElement.parentElement.tagName === "SPAN" && currentWbrElement.parentElement.innerHTML === "<wbr>") {
+                        const types = currentWbrElement.parentElement.getAttribute("data-type") || "";
+                        if (types.includes("sup") || types.includes("u") || types.includes("sub")) {
+                            currentWbrElement.insertAdjacentText("beforebegin", Constants.ZWSP);
+                        }
+                    }
                     focusByWbr(protyle.wysiwyg.element, range);
                     protyle.hint.render(protyle);
                     // 表格出现滚动条，输入数字会向前滚 https://github.com/siyuan-note/siyuan/issues/3650
                     if (scrollLeft > 0) {
-                        getContenteditableElement(realElement).scrollLeft = scrollLeft;
+                        blockElement.firstElementChild.scrollLeft = scrollLeft;
                     }
                 }
             }

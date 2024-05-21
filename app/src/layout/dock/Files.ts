@@ -71,7 +71,7 @@ export class Files extends Model {
                         case "create":
                         case "heading2doc":
                         case "li2doc":
-                            this.onMkdir(data.data);
+                            this.selectItem(data.data.box.id, data.data.path);
                             break;
                         case "renamenotebook":
                             this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
@@ -725,45 +725,6 @@ export class Files extends Model {
         }
     }
 
-    private onMkdir(data: {
-        box: INotebook,
-        path: string,
-    }) {
-        let targetElement = this.element.querySelector(`ul[data-url="${data.box.id}"]`);
-        let folderPath = pathPosix().dirname(data.path) + ".sy";
-        while (folderPath !== "/") {
-            targetElement = targetElement.querySelector(`li[data-path="${folderPath}"]`);
-            if (targetElement) {
-                break;
-            } else {
-                targetElement = this.element.querySelector(`ul[data-url="${data.box.id}"]`);
-                // 向上查找
-                if (folderPath === "/.sy") {
-                    folderPath = "/"; // https://github.com/siyuan-note/siyuan/issues/3895
-                } else {
-                    folderPath = pathPosix().dirname(folderPath) + ".sy";
-                }
-            }
-        }
-        if (targetElement.tagName === "UL") {
-            // 日记不存在时，创建日记需要添加文档
-            targetElement = targetElement.firstElementChild as HTMLElement;
-        }
-
-        if (targetElement) {
-            targetElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
-            targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
-            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
-            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
-                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
-            }
-            if (targetElement.nextElementSibling && targetElement.nextElementSibling.tagName === "UL") {
-                targetElement.nextElementSibling.remove();
-            }
-            this.getLeaf(targetElement, data.box.id);
-        }
-    }
-
     private onRemove(data: IWebSocketData) {
         // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
         if (data.cmd === "unmount") {
@@ -960,7 +921,9 @@ export class Files extends Model {
             // 文件展开时，刷新
             liElement.nextElementSibling.remove();
         }
-        liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+        const arrowElement = liElement.querySelector(".b3-list-item__arrow");
+        arrowElement.classList.add("b3-list-item__arrow--open");
+        arrowElement.parentElement.classList.remove("fn__hidden");
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }
@@ -1044,7 +1007,7 @@ export class Files extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = `${getDisplayName(item.name, true, true)} ${item.hSize}${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
+        const ariaLabel = `${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${(item.path.split("/").length - 2) * 18 + 40}px" 

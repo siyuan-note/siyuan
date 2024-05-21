@@ -389,17 +389,6 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 	return
 }
 
-func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
-	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertBlockRefs(tx, refs); nil != err {
-		return
-	}
-	if err = insertFileAnnotationRefs(tx, fileAnnotationRefs); nil != err {
-		return
-	}
-	return err
-}
-
 func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	refs, fileAnnotationRefs := refsFromTree(tree)

@@ -330,6 +330,8 @@ func setEditor(c *gin.Context) {
 		util.BroadcastByType("main", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 	}
 
+	util.MarkdownSettings = model.Conf.Editor.Markdown
+
 	ret.Data = model.Conf.Editor
 }
 
@@ -403,12 +405,6 @@ func setFiletree(c *gin.Context) {
 	}
 
 	fileTree.DocCreateSavePath = strings.TrimSpace(fileTree.DocCreateSavePath)
-	if "../" == fileTree.DocCreateSavePath {
-		fileTree.DocCreateSavePath = "../Untitled"
-	}
-	if "/" == fileTree.DocCreateSavePath {
-		fileTree.DocCreateSavePath = "/Untitled"
-	}
 
 	if 1 > fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 8

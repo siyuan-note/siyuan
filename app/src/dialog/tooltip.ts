@@ -30,11 +30,12 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     let top = targetRect.bottom;
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
-    if (position === "right") {
-        // block icon
+    if (position?.startsWith("right")) {
+        // block icon and background icon
         left = targetRect.right - messageElement.clientWidth;
-    } else if (position?.endsWith("bottom")) {
-        top += parseInt(position);
+    }
+    if (position?.endsWith("bottom")) {
+        top += parseInt(position.replace("right", ""));
     } else if (position === "parentE") {
         // file tree and outline、backlink
         top = parentRect.top;

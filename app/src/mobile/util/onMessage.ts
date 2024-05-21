@@ -8,7 +8,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
             case "reloadPlugin":
-                reloadPlugin(app);
+                reloadPlugin(app, data.data);
                 break;
             case "syncMergeResult":
                 reloadSync(app, data.data);

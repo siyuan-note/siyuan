@@ -26,7 +26,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");
     let enterTip = "";
     /// #if !BROWSER
-    enterTip = `<kbd>Enter/Double Click</kbd> ${window.siyuan.languages.showInFolder}`;
+    enterTip = `<kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.doubleClick}</kbd> ${window.siyuan.languages.showInFolder}`;
     /// #endif
     element.innerHTML = `<div class="block__icons">
     <span data-type="assetPrevious" class="block__icon block__icon--show ariaLabel" data-position="9bottom" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
@@ -74,7 +74,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 <div class="search__tip${isStick ? " fn__none" : ""}">
     <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
     ${enterTip}
-    <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
+    <kbd>${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.searchTip3}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
 </div>`;
     if (element.querySelector("#searchAssetList").innerHTML !== "") {

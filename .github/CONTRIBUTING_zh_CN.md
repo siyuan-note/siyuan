@@ -5,8 +5,6 @@
 * `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
 * 切换到 dev 分支 `git checkout dev`
 
-备注：`app/stage/protyle/**` 使用 git lfs 管理，正常情况下无需关注，关联 [#9253](https://github.com/siyuan-note/siyuan/issues/9253)。
-
 ## NPM 依赖
 
 安装 pnpm：`npm install -g pnpm`
@@ -18,11 +16,11 @@
 
 * macOS/Linux: 
  ```
- ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@28.2.10 -D
+ ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@28.3.1 -D
  ```
 * Windows:
     * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@28.2.10 -D`
+    * `pnpm install electron@28.3.1 -D`
 
 NPM 镜像：
 
@@ -32,7 +30,7 @@ NPM 镜像：
 
 桌面端进入 app 文件夹运行：
 
-* `pnpm install electron@28.2.10 -D`
+* `pnpm install electron@28.3.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

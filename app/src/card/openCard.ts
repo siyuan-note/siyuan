@@ -109,7 +109,7 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
             (p / q)
         </button>
         <span class="fn__space"></span>
-        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space} / Enter)</button>
+        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space} / ${window.siyuan.languages.enterKey})</button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
@@ -135,7 +135,7 @@ ${window.siyuan.config.flashcard.list ? "card__block--hideli" : ""}" data-type="
         </div>
         <div>
             <span></span>
-            <button data-type="3" aria-label="3 / l / d / ${window.siyuan.languages.space} / Enter" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
+            <button data-type="3" aria-label="3 / l / d / ${window.siyuan.languages.space} / ${window.siyuan.languages.enterKey}" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
                 <div class="card__icon">😊</div>
                 ${window.siyuan.languages.cardRatingGood} (3)
             </button>

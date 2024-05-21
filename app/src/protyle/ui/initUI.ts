@@ -10,11 +10,12 @@ import {lineNumberRender} from "../render/highlightRender";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
+    protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
     if (protyle.options.render.background) {
-        protyle.contentElement.appendChild(protyle.background.element);
+        protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
     }
     if (protyle.options.render.title) {
-        protyle.contentElement.appendChild(protyle.title.element);
+        protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
     }
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
@@ -107,8 +108,46 @@ export const setPadding = (protyle: IProtyle) => {
         };
     }
     const oldLeft = parseInt(protyle.wysiwyg.element.style.paddingLeft);
+    const padding = getPadding(protyle);
+    const left = padding.left;
+    const right = padding.right;
+    if (protyle.options.backlinkData) {
+        protyle.wysiwyg.element.style.padding = `4px ${left}px 4px ${right}px`;
+    } else {
+        protyle.wysiwyg.element.style.padding = `${padding.top}px ${left}px ${padding.bottom}px ${right}px`;
+    }
+    if (protyle.options.render.background) {
+        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${left}px`);
+    }
+    if (protyle.options.render.title) {
+        protyle.title.element.style.margin = `5px ${left}px 0 ${right}px`;
+    }
+    if (window.siyuan.config.editor.displayBookmarkIcon) {
+        const editorAttrElement = document.getElementById("editorAttr");
+        if (editorAttrElement) {
+            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
+        }
+    }
+    const oldWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");
+    const newWidth = protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight);
+    protyle.wysiwyg.element.setAttribute("data-realwidth", newWidth.toString());
+    return {
+        width: Math.abs(parseInt(oldWidth) - newWidth),
+        padding: Math.abs(oldLeft - parseInt(protyle.wysiwyg.element.style.paddingLeft))
+    };
+};
+
+export const getPadding = (protyle: IProtyle) => {
     let left = 16;
     let right = 24;
+    let bottom = 16;
+    if (protyle.options.typewriterMode) {
+        if (isMobile()) {
+            bottom = window.innerHeight / 5;
+        } else {
+            bottom = protyle.element.clientHeight / 2;
+        }
+    }
     if (!isMobile()) {
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
         if (!isFullWidth) {
@@ -128,37 +167,7 @@ export const setPadding = (protyle: IProtyle) => {
             right = 96;
         }
     }
-    let bottomHeight = "16px";
-    if (protyle.options.typewriterMode) {
-        if (isMobile()) {
-            bottomHeight = window.innerHeight / 5 + "px";
-        } else {
-            bottomHeight = protyle.element.clientHeight / 2 + "px";
-        }
-    }
-    if (protyle.options.backlinkData) {
-        protyle.wysiwyg.element.style.padding = `4px ${left}px 4px ${right}px`;
-    } else {
-        protyle.wysiwyg.element.style.padding = `16px ${left}px ${bottomHeight} ${right}px`;
-    }
-    if (protyle.options.render.background) {
-        protyle.background.element.lastElementChild.setAttribute("style", `left:${left}px`);
-        protyle.background.element.querySelector(".protyle-background__img .protyle-icons").setAttribute("style", `right:${left}px`);
-    }
-    if (protyle.options.render.title) {
-        protyle.title.element.style.margin = `16px ${left}px 0 ${right}px`;
-    }
-    if (window.siyuan.config.editor.displayBookmarkIcon) {
-        const editorAttrElement = document.getElementById("editorAttr");
-        if (editorAttrElement) {
-            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
-        }
-    }
-    const oldWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");
-    const newWidth = protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight);
-    protyle.wysiwyg.element.setAttribute("data-realwidth", newWidth.toString());
     return {
-        width: Math.abs(parseInt(oldWidth) - newWidth),
-        padding: Math.abs(oldLeft - parseInt(protyle.wysiwyg.element.style.paddingLeft))
+        left, right, bottom, top: 16
     };
 };

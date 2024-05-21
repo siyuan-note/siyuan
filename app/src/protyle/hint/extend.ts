@@ -35,7 +35,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: Constants.ZWSP + 2,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconImage"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.assets}</span></div>`,
     }, {
-        filter: ["引用块", "yinyong", "yy", "block reference"],
+        filter: ["块引用", "yinyong", "yy", "block reference"],
         value: "((",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.ref}</span><span class="b3-list-item__meta">((</span></div>`,
     }, {
@@ -51,9 +51,13 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
     }, {
-        filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
+        filter: ["文档", "wendang", "wd", "xjwd", "new doc"],
         value: Constants.ZWSP + 4,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>`,
+    }, {
+        filter: ["子文档", "ziwendang", "zwd", "xjzwd", "create sub doc"],
+        value: Constants.ZWSP + 6,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newSubDoc}</span></div>`,
     }, {
         value: "",
         html: "separator",
@@ -100,7 +104,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["代码块", "daimakuai", "dmk", "code block"],
         value: "```",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span><span class="b3-list-item__meta">\`\`\`Enter</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span><span class="b3-list-item__meta">\`\`\`${window.siyuan.languages.enterKey}</span></div>`,
     }, {
         filter: ["表格", "biaoge", "bg", "table"],
         value: `| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`,
@@ -294,8 +298,8 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         response.data.tags.forEach((item: string) => {
             const value = item.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             dataList.push({
-                value: `#${value}#`,
-                html: item,
+                value: `<span data-type="tag">${value}</span>`,
+                html: `<div class="b3-list-item__text">${item}</div>`,
             });
             if (value === response.data.k) {
                 hasKey = true;
@@ -303,8 +307,8 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         });
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
-                value: `#${response.data.k}#`,
-                html: `${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark>`,
+                value: `<span data-type="tag">${response.data.k}</span>`,
+                html: `<div class="b3-list-item__text">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div>`,
             });
             if (dataList.length > 1) {
                 dataList[1].focus = true;

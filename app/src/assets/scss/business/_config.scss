@@ -291,6 +291,12 @@
         &__readme {
           margin-top: 24px;
           position: relative;
+
+          table {
+            display: block;
+            max-width: 100%;
+            word-break: keep-all;
+          }
         }
 
         &__main {

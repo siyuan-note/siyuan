@@ -5,6 +5,7 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {isMobile} from "../../util/functions";
+import {showTooltip} from "../../dialog/tooltip";
 
 export class Scroll {
     public element: HTMLElement;
@@ -22,7 +23,7 @@ export class Scroll {
         this.parentElement.innerHTML = `<div class="b3-tooltips b3-tooltips__w protyle-scroll__up" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>
-<div class="fn__none protyle-scroll__bar b3-tooltips b3-tooltips__s" aria-label="Blocks 1/1">
+<div class="fn__none protyle-scroll__bar ariaLabel" data-position="right18bottom" aria-label="Blocks 1/1">
     <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
 </div>
 <div class="b3-tooltips b3-tooltips__w protyle-scroll__down" aria-label="${updateHotkeyTip("⌘End")}">
@@ -38,6 +39,7 @@ export class Scroll {
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
+            showTooltip(this.element.getAttribute("aria-label"), this.element);
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
@@ -74,11 +76,14 @@ export class Scroll {
                 data: getResponse,
                 protyle,
                 action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
+                afterCB: () => {
+                    showTooltip(this.element.getAttribute("aria-label"), this.element);
+                }
             });
         });
     }
 
-    public updateIndex(protyle: IProtyle, id: string, cb?:(index: number) => void) {
+    public updateIndex(protyle: IProtyle, id: string, cb?: (index: number) => void) {
         fetchPost("/api/block/getBlockIndex", {id}, (response) => {
             if (!response.data) {
                 return;

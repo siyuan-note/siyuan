@@ -1,6 +1,6 @@
-import {focusBlock, focusByWbr, getEditorRange} from "../protyle/util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getNextBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {focusByWbr, getEditorRange} from "../protyle/util/selection";
+import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -8,7 +8,8 @@ import {Constants} from "../constants";
 import {hideElements} from "../protyle/ui/hideElements";
 import {blockRender} from "../protyle/render/blockRender";
 import {fetchPost} from "../util/fetch";
-import {zoomOut} from "../menus/protyle";
+import {openFileById} from "../editor/util";
+import {openMobileFileById} from "../mobile/editor";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
@@ -74,25 +75,22 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
     return sbElement;
 };
 
-export const jumpToParentNext = (protyle: IProtyle, nodeElement: Element) => {
-    const topElement = getTopAloneElement(nodeElement);
-    if (topElement) {
-        const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement;
-        const nextElement = getNextBlock(topParentElement);
-        if (nextElement) {
-            focusBlock(nextElement);
-            scrollCenter(protyle, nextElement);
-        } else {
-            fetchPost("/api/block/getParentNextChildID", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
-                if (response.data.id) {
-                    zoomOut({
-                        protyle,
-                        id: response.data.id,
-                    });
-                }
-            });
+export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {
+    fetchPost("/api/block/getBlockSiblingID", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
+        const targetId = response.data[type];
+        if (!targetId) {
+            return;
         }
-    }
+        /// #if !MOBILE
+        openFileById({
+            app: protyle.app,
+            id: targetId,
+            action: [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]
+        });
+        /// #else
+        openMobileFileById(protyle.app, targetId, [Constants.CB_GET_FOCUS, targetId !== protyle.block.rootID && protyle.block.showAll ? Constants.CB_GET_ALL : ""]);
+        /// #endif
+    });
 };
 
 export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id?: string) => {

@@ -24,10 +24,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	util2 "github.com/siyuan-note/dejavu/util"
 	"github.com/siyuan-note/logging"
@@ -451,6 +451,7 @@ func InitBlockTree(force bool) {
 		return
 	}
 
+	loadErr := atomic.Bool{}
 	size := atomic.Int64{}
 	waitGroup := &sync.WaitGroup{}
 	p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
@@ -462,14 +463,15 @@ func InitBlockTree(force bool) {
 		f, err := os.OpenFile(p, os.O_RDONLY, 0644)
 		if nil != err {
 			logging.LogErrorf("open block tree failed: %s", err)
-			os.Exit(logging.ExitCodeFileSysErr)
+			loadErr.Store(true)
 			return
 		}
+		defer f.Close()
 
 		info, err := f.Stat()
 		if nil != err {
 			logging.LogErrorf("stat block tree failed: %s", err)
-			os.Exit(logging.ExitCodeFileSysErr)
+			loadErr.Store(true)
 			return
 		}
 		size.Add(info.Size())
@@ -477,16 +479,7 @@ func InitBlockTree(force bool) {
 		sliceData := map[string]*BlockTree{}
 		if err = msgpack.NewDecoder(f).Decode(&sliceData); nil != err {
 			logging.LogErrorf("unmarshal block tree failed: %s", err)
-			if err = os.RemoveAll(util.BlockTreePath); nil != err {
-				logging.LogErrorf("removed corrupted block tree failed: %s", err)
-			}
-			os.Exit(logging.ExitCodeFileSysErr)
-			return
-		}
-
-		if err = f.Close(); nil != err {
-			logging.LogErrorf("close block tree failed: %s", err)
-			os.Exit(logging.ExitCodeFileSysErr)
+			loadErr.Store(true)
 			return
 		}
 
@@ -505,8 +498,19 @@ func InitBlockTree(force bool) {
 	waitGroup.Wait()
 	p.Release()
 
+	if loadErr.Load() {
+		logging.LogInfof("cause block tree load error, remove block tree file")
+		if removeErr := os.RemoveAll(util.BlockTreePath); nil != removeErr {
+			logging.LogErrorf("remove block tree file failed: %s", removeErr)
+			os.Exit(logging.ExitCodeFileSysErr)
+			return
+		}
+		blockTrees = &sync.Map{}
+		return
+	}
+
 	elapsed := time.Since(start).Seconds()
-	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size.Load())), util.BlockTreePath, elapsed)
+	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(size.Load()), 2), util.BlockTreePath, elapsed)
 	return
 }
 
@@ -569,7 +573,7 @@ func SaveBlockTree(force bool) {
 
 	elapsed := time.Since(start).Seconds()
 	if 2 < elapsed {
-		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(size), util.BlockTreePath, elapsed)
+		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(size, 2), util.BlockTreePath, elapsed)
 	}
 }
 

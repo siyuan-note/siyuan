@@ -4,6 +4,8 @@ import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious} from "./remove";
+import {hasClosestByClassName} from "../util/hasClosest";
+import {setFold} from "../../menus/protyle";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
@@ -40,6 +42,37 @@ export const genListItemElement = (listItemElement: Element, offset = 0, wbr = f
         element.innerHTML = `<div data-marker="*" data-subtype="${type}" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
     }
     return element.content.firstElementChild as HTMLElement;
+};
+
+export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range) => {
+    const parentItemElement = hasClosestByClassName(nodeElement, "li");
+    if (!parentItemElement) {
+        return;
+    }
+    const lastSubItem = parentItemElement.querySelector(".list")?.lastElementChild.previousElementSibling;
+    if (!lastSubItem) {
+        return;
+    }
+    const newListElement = genListItemElement(lastSubItem, 0, true);
+    const id = newListElement.getAttribute("data-node-id");
+    lastSubItem.after(newListElement);
+
+    if (lastSubItem.parentElement.getAttribute("fold") === "1") {
+        setFold(protyle, lastSubItem.parentElement, true);
+    }
+    if (parentItemElement.getAttribute("fold") === "1") {
+        setFold(protyle, parentItemElement, true);
+    }
+    transaction(protyle, [{
+        action: "insert",
+        id,
+        data: newListElement.outerHTML,
+        previousID: lastSubItem.getAttribute("data-node-id"),
+    }], [{
+        action: "delete",
+        id,
+    }]);
+    focusByWbr(newListElement, range);
 };
 
 export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {

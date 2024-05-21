@@ -108,9 +108,16 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
         colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
+        let lineNumber = "";
+        if (getTypeByCellElement(item) === "lineNumber") {
+            const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value");
+            if (lineNumberValue) {
+                lineNumber = (parseInt(lineNumberValue) + 1).toString();
+            }
+        }
         colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 
 style="width: ${item.style.width};${item.dataset.dtype === "number" ? "text-align: right;" : ""}" 
-${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}"></span></div>`;
+${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}">${lineNumber}</span></div>`;
         if (pinIndex === index) {
             colHTML += "</div>";
         }
@@ -160,7 +167,54 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
                         }
                     });
                 }
-                if (sideRow.classList.contains("av__row")) {
+                // 当空或非空外，需要根据值进行判断
+                let isRenderValue = true;
+                if (item.operator !== "Is empty" && item.operator !== "Is not empty") {
+                    switch (item.value.type) {
+                        case "select":
+                        case "mSelect":
+                            if (!item.value.mSelect || item.value.mSelect.length === 0) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "block":
+                            if (!item.value.block || !item.value.block.content) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "number":
+                            if (!item.value.number || !item.value.number.isNotEmpty) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "date":
+                        case "created":
+                        case "updated":
+                            if (!item.value[item.value.type] || !item.value[item.value.type].isNotEmpty) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "mAsset":
+                            if (!item.value.mAsset || item.value.mAsset.length === 0) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "checkbox":
+                            if (!item.value.checkbox) {
+                                isRenderValue = false;
+                            }
+                            break;
+                        case "text":
+                        case "url":
+                        case "phone":
+                        case "email":
+                            if (!item.value[item.value.type] || !item.value[item.value.type].content) {
+                                isRenderValue = false;
+                            }
+                            break;
+                    }
+                }
+                if (sideRow.classList.contains("av__row") && isRenderValue) {
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
                     const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
@@ -181,9 +235,7 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
-    if (blockElement.querySelector(".av__title").getAttribute("contenteditable") === "false") {
-        return;
-    }
+    // 只读模式下也需固定 https://github.com/siyuan-note/siyuan/issues/11338
     const scrollRect = blockElement.querySelector(".av__scroll").getBoundingClientRect();
     const headerElement = blockElement.querySelector(".av__row--header") as HTMLElement;
     if (headerElement && (status === "top" || status === "all")) {
@@ -311,9 +363,12 @@ export const setPageSize = (options: {
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    if (rowElements.length === 0) {
+        return;
+    }
     const avID = blockElement.getAttribute("data-av-id");
     const undoOperations: IOperation[] = [];
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
     const blockIds: string[] = [];
     rowElements.forEach(item => {
         blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));

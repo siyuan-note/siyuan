@@ -170,12 +170,15 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     }
 
     if (document.querySelector(".av__panel")) {
-        const cellElements: HTMLElement[] = [];
-        protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-            if (getTypeByCellElement(item) === "mAsset") {
-                cellElements.push(item);
-            }
-        });
+        const cellElements: HTMLElement[] = [document.querySelector('.custom-attr__avvalue[data-type="mAsset"][data-active="true"]')];
+        if (!cellElements[0]) {
+            cellElements.splice(0, 1);
+            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                if (getTypeByCellElement(item) === "mAsset") {
+                    cellElements.push(item);
+                }
+            });
+        }
         if (cellElements.length > 0) {
             const blockElement = hasClosestBlock(cellElements[0]);
             if (blockElement) {

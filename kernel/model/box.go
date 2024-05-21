@@ -28,14 +28,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -73,7 +74,7 @@ func StatJob() {
 	Conf.m.Unlock()
 	Conf.Save()
 
-	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.Bytes(uint64(Conf.Stat.DataSize)), humanize.Bytes(uint64(Conf.Stat.AssetsSize)))
+	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.BytesCustomCeil(uint64(Conf.Stat.DataSize), 2), humanize.BytesCustomCeil(uint64(Conf.Stat.AssetsSize), 2))
 
 	// 桌面端检查磁盘可用空间 https://github.com/siyuan-note/siyuan/issues/6873
 	if util.ContainerStd != util.Container {
@@ -502,6 +503,13 @@ func genTreeID(tree *parse.Tree) {
 func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
+	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 

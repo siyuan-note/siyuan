@@ -57,13 +57,17 @@ func html2BlockDOM(c *gin.Context) {
 	}
 
 	dom := arg["dom"].(string)
-	markdown, err := model.HTML2Markdown(dom)
+	markdown, withMath, err := model.HTML2Markdown(dom)
 	if nil != err {
 		ret.Data = "Failed to convert"
 		return
 	}
 
 	luteEngine := util.NewLute()
+	if withMath {
+		luteEngine.SetInlineMath(true)
+	}
+
 	var unlinks []*ast.Node
 	tree := parse.Parse("", []byte(markdown), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

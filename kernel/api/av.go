@@ -27,6 +27,18 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getAttributeViewKeysByAvID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	avID := arg["avID"].(string)
+	ret.Data = model.GetAttributeViewKeysByAvID(avID)
+}
+
 func getMirrorDatabaseBlocks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -211,7 +223,7 @@ func removeAttributeViewKey(c *gin.Context) {
 	util.PushReloadAttrView(avID)
 }
 
-func sortAttributeViewKey(c *gin.Context) {
+func sortAttributeViewViewKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -228,7 +240,30 @@ func sortAttributeViewKey(c *gin.Context) {
 	keyID := arg["keyID"].(string)
 	previousKeyID := arg["previousKeyID"].(string)
 
-	err := model.SortAttributeViewKey(avID, viewID, keyID, previousKeyID)
+	err := model.SortAttributeViewViewKey(avID, viewID, keyID, previousKeyID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	util.PushReloadAttrView(avID)
+}
+
+func sortAttributeViewKey(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyID := arg["keyID"].(string)
+	previousKeyID := arg["previousKeyID"].(string)
+
+	err := model.SortAttributeViewKey(avID, keyID, previousKeyID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

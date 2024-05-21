@@ -226,7 +226,7 @@ func BuildTags() (ret *Tags) {
 	tmp := &Tags{}
 	for _, tag := range tags {
 		*tmp = append(*tmp, tag)
-		total += countTag(tag)
+		countTag(tag, &total)
 		if Conf.FileTree.MaxListCount < total {
 			util.PushMsg(fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
 			break
@@ -237,12 +237,11 @@ func BuildTags() (ret *Tags) {
 	return
 }
 
-func countTag(tag *Tag) int {
-	count := 1
+func countTag(tag *Tag, total *int) {
+	*total += 1
 	for _, child := range tag.tags {
-		count += countTag(child)
+		countTag(child, total)
 	}
-	return count + tag.Count
 }
 
 func sortTags(tags Tags) {

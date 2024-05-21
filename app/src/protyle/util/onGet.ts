@@ -18,6 +18,7 @@ import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
+import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -206,6 +207,9 @@ const setHTML = (options: {
         }
         protyle.element.removeAttribute("disabled-forever");
         setReadonlyByConfig(protyle, updateReadonly);
+        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly) {
+            updateReadonlyMethod(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
+        }
     }
 
     focusElementById(protyle, options.action, options.scrollAttr);
@@ -225,7 +229,7 @@ const setHTML = (options: {
         protyle.app.plugins.forEach(item => {
             item.eventBus.emit("loaded-protyle-dynamic", {
                 protyle,
-                positon: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+                position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
             });
         });
         return;
@@ -316,13 +320,6 @@ export const disabledProtyle = (protyle: IProtyle) => {
     });
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="true"]').forEach(item => {
         item.setAttribute("draggable", "false");
-    });
-    protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-        const headerElement = item.querySelector(".av__row--header") as HTMLElement;
-        if (headerElement) {
-            headerElement.style.transform = "";
-            (item.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
-        }
     });
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");

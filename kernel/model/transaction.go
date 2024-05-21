@@ -258,6 +258,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewRow(op)
 		case "sortAttrViewCol":
 			ret = tx.doSortAttrViewColumn(op)
+		case "sortAttrViewKey":
+			ret = tx.doSortAttrViewKey(op)
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
 		case "updateAttrViewColOptions":
@@ -1241,7 +1243,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 func refreshUpdated(node *ast.Node) {
 	updated := util.CurrentTimeSecondsStr()
 	node.SetIALAttr("updated", updated)
-	parents := treenode.ParentNodes(node)
+	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段
 		parent.SetIALAttr("updated", updated)
 	}
@@ -1256,7 +1258,7 @@ func createdUpdated(node *ast.Node) {
 	if updated < created {
 		updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
 	}
-	parents := treenode.ParentNodes(node)
+	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段
 		parent.SetIALAttr("updated", updated)
 		cache.PutBlockIAL(parent.ID, parse.IAL2Map(parent.KramdownIAL))
@@ -1378,7 +1380,7 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	return
 }
 
-// refreshDynamicRefText 用于刷新引用块的动态锚文本。
+// refreshDynamicRefText 用于刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 	changedDefs := map[string]*ast.Node{updatedDefNode.ID: updatedDefNode}
@@ -1386,7 +1388,7 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 	refreshDynamicRefTexts(changedDefs, changedTrees)
 }
 
-// refreshDynamicRefTexts 用于批量刷新引用块的动态锚文本。
+// refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
 	// 1. 更新引用的动态锚文本

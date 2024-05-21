@@ -422,6 +422,7 @@ const renderPDF = async (id: string) => {
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
             editor: { 
+              allowHTMLBLockScript: ${window.siyuan.config.editor.allowHTMLBLockScript},
               fontSize: ${window.siyuan.config.editor.fontSize},
               codeLineWrap: true,
               codeLigatures: ${window.siyuan.config.editor.codeLigatures},
@@ -557,6 +558,13 @@ const renderPDF = async (id: string) => {
         });
         setPadding();
         renderPreview(response.data);
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                const {ipcRenderer}  = require("electron");
+                ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
+                event.preventDefault();
+            }
+        })
     });
 </script></body></html>`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
@@ -616,7 +624,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                         hideMessage(msgId);
                         return;
                     }
-                    afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
+                    afterExport(exportResponse.data.path, msgId);
                 } else {
                     onExport(exportResponse, savePath, option, removeAssets, msgId);
                 }

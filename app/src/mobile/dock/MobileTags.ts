@@ -3,7 +3,6 @@ import {fetchPost} from "../../util/fetch";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {MenuItem} from "../../menus/Menu";
 import {popSearch} from "../menu/search";
-import {Constants} from "../../constants";
 import {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 
@@ -41,11 +40,7 @@ export class MobileTags {
                         return;
                     }
                 }
-                const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
                 popSearch(app, {
-                    removed: searchOption.removed,
-                    sort: searchOption.sort,
-                    group: searchOption.group,
                     hasReplace: false,
                     method: 0,
                     hPath: "",
@@ -53,8 +48,6 @@ export class MobileTags {
                     k: `#${labelName}#`,
                     r: "",
                     page: 1,
-                    types: Object.assign({}, searchOption.types),
-                    replaceTypes: Object.assign({}, searchOption.replaceTypes)
                 });
             },
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

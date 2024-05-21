@@ -54,6 +54,7 @@
     /* 提示 */
     --b3-tooltips-background: rgba(0, 0, 0, .9);
     --b3-tooltips-color: var(--b3-theme-background-light);
+    --b3-tooltips-second-color: #7d7c7a;
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
     /* av */
@@ -108,6 +109,7 @@
     --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
     --b3-color-transition: color .2s cubic-bezier(0, 0, .2, 1) 0ms;
+    --b3-background-transition: background 20ms ease-in 0s;
 
     /* 下拉菜单 */
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
@@ -172,6 +174,10 @@
     --b3-pdf-background6: #69B0F2;
     --b3-pdf-background7: #C885DA;
     --b3-pdf-dark: #212224;
+}
+
+:lang(ja_JP):root {
+  --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", sans-serif, "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */

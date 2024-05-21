@@ -40,7 +40,8 @@ type AttributeView struct {
 	Spec      int          `json:"spec"`      // 格式版本
 	ID        string       `json:"id"`        // 属性视图 ID
 	Name      string       `json:"name"`      // 属性视图名称
-	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性列值
+	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性键值
+	KeyIDs    []string     `json:"keyIDs"`    // 属性视图属性键 ID，用于排序
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
 	Views     []*View      `json:"views"`     // 视图
 }
@@ -118,6 +119,16 @@ func NewKey(id, name, icon string, keyType KeyType) *Key {
 		Type: keyType,
 		Icon: icon,
 	}
+}
+
+func (k *Key) GetOption(name string) (ret *SelectOption) {
+	for _, option := range k.Options {
+		if option.Name == name {
+			ret = option
+			return
+		}
+	}
+	return
 }
 
 type Date struct {

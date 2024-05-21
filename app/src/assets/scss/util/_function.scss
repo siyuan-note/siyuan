@@ -91,10 +91,6 @@
     }
   }
 
-  &__displayblock {
-    display: block;
-  }
-
   &__block {
     width: 100%;
   }
@@ -120,7 +116,7 @@
     width: 100%;
     bottom: 0;
     align-content: center;
-    z-index: 1;
+    z-index: 3; // 需大于 database table view
     align-items: center;
 
     &--top {

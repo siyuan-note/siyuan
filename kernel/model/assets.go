@@ -32,12 +32,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
@@ -548,11 +548,10 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
+	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if nil != err {
 		return
 	}
-	count = len(assets)
 	return
 }
 
@@ -562,7 +561,7 @@ const (
 )
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
-func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
+func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err error) {
 	var uploadAbsAssets []string
 	for _, assetPath := range assetPaths {
 		var absPath string
@@ -607,16 +606,22 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 		metaType = "4"
 	}
 
+	pushErrMsgCount := 0
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
 		fi, statErr := os.Stat(absAsset)
 		if nil != statErr {
 			logging.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
-			return statErr
+			return count, statErr
 		}
 
 		if limitSize < uint64(fi.Size()) {
-			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", humanize.IBytes(limitSize), absAsset)
+			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", absAsset, humanize.IBytes(limitSize))
+			if 3 > pushErrMsgCount {
+				msg := fmt.Sprintf(Conf.Language(247), filepath.Base(absAsset), humanize.IBytes(limitSize))
+				util.PushErrMsg(msg, 30000)
+			}
+			pushErrMsgCount++
 			continue
 		}
 
@@ -635,7 +640,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 			Post(util.GetCloudServer() + "/apis/siyuan/upload?ver=" + util.Ver)
 		if nil != reqErr {
 			logging.LogErrorf("upload assets failed: %s", reqErr)
-			return ErrFailedToConnectCloudServer
+			return count, ErrFailedToConnectCloudServer
 		}
 
 		if 401 == resp.StatusCode {
@@ -653,6 +658,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (err error) {
 		relAsset := absAsset[strings.Index(absAsset, "assets/"):]
 		completedUploadAssets = append(completedUploadAssets, relAsset)
 		logging.LogInfof("uploaded asset [%s]", relAsset)
+		count++
 	}
 	util.PushClearMsg(msgId)
 
@@ -797,7 +803,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 					return
 				}
 
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), filepath.Base(treeAbsPath)))
 				if !bytes.Contains(data, []byte(oldName)) {
 					continue
 				}

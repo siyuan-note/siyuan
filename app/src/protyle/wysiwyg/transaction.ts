@@ -49,7 +49,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
-// 用于执行操作，外加处理当前编辑器中引用块、嵌入块的更新
+// 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
 const promiseTransaction = () => {
     if (window.siyuan.transactions.length === 0) {
         return;
@@ -172,7 +172,7 @@ const promiseTransaction = () => {
                 }
                 // 当前编辑器中更新嵌入块
                 updateEmbed(protyle, operation);
-                // 更新引用块
+                // 更新块引用
                 updateRef(protyle, operation.id);
                 return;
             }
@@ -293,10 +293,25 @@ const promiseTransaction = () => {
                 //         blockRender(protyle, item);
                 //     }
                 // });
-                // 更新引用块
+                // 更新块引用
                 updateRef(protyle, operation.id);
             }
         });
+
+        // 删除仅有的折叠标题后展开内容为空
+        if (protyle.wysiwyg.element.childElementCount === 0) {
+            const newID = Lute.NewNodeID();
+            const emptyElement = genEmptyElement(false, true, newID);
+            protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
+            transaction(protyle, [{
+                action: "insert",
+                data: emptyElement.outerHTML,
+                id: newID,
+                parentID: protyle.block.parentID
+            }]);
+            // 不能撤销，否则就无限循环了
+            focusByWbr(emptyElement, range);
+        }
     });
 };
 
@@ -371,7 +386,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     // 更新 ws 嵌入块
     updateEmbed(protyle, operation);
-    // 更新 ws 引用块
+    // 更新 ws 块引用
     updateRef(protyle, operation.id);
 };
 
@@ -476,7 +491,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         } else { // updateElements 没有包含嵌入块，在悬浮层编辑嵌入块时，嵌入块也需要更新
             // 更新 ws 嵌入块
             updateEmbed(protyle, operation);
-            // 更新 ws 引用块
+            // 更新 ws 块引用
             updateRef(protyle, operation.id);
         }
         return;
@@ -733,7 +748,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 wbrElement.remove();
             }
         });
-        // 更新 ws 引用块
+        // 更新 ws 块引用
         updateRef(protyle, operation.id);
         return;
     }
@@ -750,7 +765,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
-        "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup"].includes(operation.action)) {
+        "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey"].includes(operation.action)) {
         refreshAV(protyle, operation);
         return;
     }
@@ -1032,7 +1047,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         return;
     }
     if (!protyle) {
-        // 文档书中点开属性->数据库后的变更操作
+        // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {
             session: Constants.SIYUAN_APPID,
             app: Constants.SIYUAN_APPID,

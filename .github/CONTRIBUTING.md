@@ -5,8 +5,6 @@
 * `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
 * switch to dev branch `git checkout dev`
 
-Note: `app/stage/protyle/**` is managed by git lfs, and you don't need to pay attention to it under normal circumstances, related to [#9253](https://github.com/siyuan-note/siyuan/issues/9253).
-
 ## User Interface
 
 Install pnpm: `npm install -g pnpm`
@@ -16,10 +14,10 @@ Install pnpm: `npm install -g pnpm`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@28.2.10 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@28.3.1 -D`
 * Windows:
     * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@28.2.10 -D`
+    * `pnpm install electron@28.3.1 -D`
 
 NPM mirror:
 
@@ -30,7 +28,7 @@ NPM mirror:
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@28.2.10 -D`
+* `pnpm install electron@28.3.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

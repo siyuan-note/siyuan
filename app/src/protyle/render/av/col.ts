@@ -13,6 +13,7 @@ import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
 import * as dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
+import {duplicateNameAddOne} from "../../../util/functions";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -29,12 +30,7 @@ export const duplicateCol = (options: {
             return true;
         }
     });
-    const nameMatch = newColData.name.match(/^(.*) \((\d+)\)$/);
-    if (nameMatch) {
-        newColData.name = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
-    } else {
-        newColData.name = `${newColData.name} (1)`;
-    }
+    newColData.name = duplicateNameAddOne(newColData.name);
     newColData.id = Lute.NewNodeID();
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     const blockId = options.blockElement.getAttribute("data-node-id");
@@ -149,7 +145,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label" style="padding: 4px;display: flex"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label" style="padding: 4px;display: flex"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.addAttr}"></span>
 </button>`;
         if (!colData.options) {
             colData.options = [];
@@ -175,7 +171,7 @@ export const getEditHTML = (options: {
     } else if (colData.type === "template") {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <textarea rows="${colData.template.split("\n").length}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
+    <textarea spellcheck="false" rows="${Math.min(colData.template.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
@@ -185,14 +181,14 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item fn__none">
+<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
-    <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+    <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${options.data.name} ${colData.name}">
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
@@ -301,6 +297,15 @@ export const bindEditEvent = (options: {
             options.menuElement.parentElement.remove();
         }
     });
+    nameElement.addEventListener("keyup", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        const inputElement = options.menuElement.querySelector('[data-type="colName"]') as HTMLInputElement;
+        if (inputElement) {
+            inputElement.setAttribute("placeholder", `${options.data.name} ${nameElement.value}`);
+        }
+    });
     nameElement.select();
     const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement;
     if (tplElement) {
@@ -355,6 +360,7 @@ export const bindEditEvent = (options: {
             }]);
         });
     }
+
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
     if (addOptionElement) {
         addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {

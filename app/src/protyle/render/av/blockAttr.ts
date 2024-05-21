@@ -7,6 +7,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
+import {uploadFiles} from "../../upload";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -55,7 +56,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<div class="fn__flex-1">${value.block.content}</div>`;
             break;
         case "text":
-            html = `<textarea rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
             html = `<input value="${value.number.content || ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;
@@ -166,14 +167,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avID: string
             avName: string
         }) => {
-            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">
-<div class="custom-attr__avheader block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
+            let innerHTML = `<div class="custom-attr__avheader block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
     <div class="fn__flex-1"></div>
     <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
     <div class="fn__flex-1"></div>
 </div>`;
             table.keyValues?.forEach(item => {
-                html += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
+                innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAttr(item.key.name)}">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
@@ -186,11 +186,17 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
     </div>
 </div>`;
             });
-            html += `<div class="fn__hr"></div>
+            innerHTML += `<div class="fn__hr"></div>
 <div class="fn__flex">
     <div class="fn__space"></div><div class="fn__space"></div>
     <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
-</div><div class="fn__hr--b"></div></div>`;
+</div><div class="fn__hr--b"></div>`;
+            html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
+
+            if (element.innerHTML) {
+                // 防止 blockElement 找不到
+                element.querySelector(`div[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
+            }
         });
         if (element.innerHTML === "") {
             let dragBlockElement: HTMLElement;
@@ -219,17 +225,15 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     const undoPreviousID = window.siyuan.dragElement.previousElementSibling?.getAttribute("data-col-id");
                     if (previousID !== undoPreviousID && previousID !== window.siyuan.dragElement.dataset.colId) {
                         transaction(protyle, [{
-                            action: "sortAttrViewCol",
+                            action: "sortAttrViewKey",
                             avID: dragBlockElement.dataset.avId,
                             previousID,
                             id: window.siyuan.dragElement.dataset.colId,
-                            blockID: id
-                        }, {
-                            action: "sortAttrViewCol",
+                        }], [{
+                            action: "sortAttrViewKey",
                             avID: dragBlockElement.dataset.avId,
                             previousID: undoPreviousID,
                             id,
-                            blockID: id
                         }]);
                         if (isBottom) {
                             targetElement.after(window.siyuan.dragElement);
@@ -274,6 +278,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     window.siyuan.dragElement = undefined;
                 }
             });
+            element.addEventListener("paste", (event) => {
+                const files = event.clipboardData.files;
+                if (document.querySelector(".av__panel .b3-form__upload") && files && files.length > 0) {
+                    uploadFiles(protyle, files);
+                }
+            });
             element.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 const blockElement = hasClosestBlock(target);
@@ -293,6 +303,11 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         event.preventDefault();
                         break;
                     } else if (type === "mAsset") {
+                        element.querySelectorAll('.custom-attr__avvalue[data-type="mAsset"]').forEach(item => {
+                            item.removeAttribute("data-active");
+                        });
+                        target.setAttribute("data-active", "true");
+                        target.focus();
                         popTextCell(protyle, [target], "mAsset");
                         event.stopPropagation();
                         event.preventDefault();
@@ -343,8 +358,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     target = target.parentElement;
                 }
             });
+            element.innerHTML = html;
         }
-        element.innerHTML = html;
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

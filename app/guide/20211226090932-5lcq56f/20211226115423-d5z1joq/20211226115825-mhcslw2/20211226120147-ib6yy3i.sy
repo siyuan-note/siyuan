@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
-		"updated": "20220429115701"
+		"type": "doc",
+		"updated": "20240513102142"
 	},
 	"Children": [
 		{
@@ -1076,6 +1077,70 @@
 			]
 		},
 		{
+			"ID": "20240513102059-nfnc22t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513102059-nfnc22t",
+				"updated": "20240513102059"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240513102059-ttfrx4f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513102059-ttfrx4f",
+				"updated": "20240513102142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不建議在正文中使用一級標題，建議使用二級標題作為頂層標題，這樣在開啟了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增文檔標題"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後，整體的標題層級在匯出時才符合正常邏輯。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-qntcfuy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1499,9 +1564,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115013-bsph7kh",
-				"updated": "20220429115013"
+				"updated": "20240427230731"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -1509,7 +1578,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用 HTML 塊時不會對其中的代碼進行安全過濾，請確認代碼安全後再使用，以免遭遇跨站腳本攻擊（XSS）。"
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240427230732-snprakd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427230732-snprakd",
+				"updated": "20240427230732"
+			},
+			"Children": [
+				{
+					"ID": "20240427230732-tgvmt21",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230732-tgvmt21",
+						"updated": "20240427230732"
+					},
+					"Children": [
+						{
+							"ID": "20240427230732-p75fah5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230732-p75fah5",
+								"updated": "20240427230732"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 HTML 區塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "允許執行 HTML 區塊內腳本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，但請確認程式碼安全後再開啟，以免遭遇跨站腳本攻擊（XSS）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427230732-dhlczme",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230732-dhlczme",
+						"updated": "20240427230732"
+					},
+					"Children": [
+						{
+							"ID": "20240427230732-an8u8ps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230732-an8u8ps",
+								"updated": "20240427230732"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "因為 Markdown 規範對 HTML 區塊解析規則較為複雜，建議使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 包裹 HTML 程式碼並去掉空白行"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1652,6 +1824,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510235226-7fqokpj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235226-7fqokpj",
+				"updated": "20240510235233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無序列表塊只能包含列表項塊，相鄰的無序列表塊間距較大。"
 				}
 			]
 		},
@@ -1827,6 +2013,20 @@
 			]
 		},
 		{
+			"ID": "20240510235224-yj7efu2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235224-yj7efu2",
+				"updated": "20240510235237"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有序列表塊只能包含列表項塊，相鄰的有序列表塊間距較大。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-16ew3ez",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1982,6 +2182,20 @@
 			]
 		},
 		{
+			"ID": "20240510235222-wwcw8cn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235222-wwcw8cn",
+				"updated": "20240510235243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任務列表塊只能包含列表項塊，相鄰的任務列表塊間距較大。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-ot6klof",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2057,6 +2271,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510235159-gjhzzj5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235159-gjhzzj5",
+				"updated": "20240510235159"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表項塊被包含在列表塊內，相鄰的列表項塊間距較小。"
 				}
 			]
 		},

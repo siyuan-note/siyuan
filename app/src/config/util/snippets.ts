@@ -65,7 +65,7 @@ export const openSnippets = () => {
             <div class="fn__flex-1"></div>
             <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input data-type="css" data-action="search" type="text" placeholder="Enter ${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
+                <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
             </div>
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} CSS" id="addCodeSnippetCSS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
@@ -81,7 +81,7 @@ export const openSnippets = () => {
             <div class="fn__flex-1"></div>
              <div class="b3-form__icon">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input data-type="js" data-action="search" type="text" placeholder="Enter ${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
+                <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
             </div>
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} JS" id="addCodeSnippetJS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">

@@ -14,32 +14,54 @@ declare interface INotebookConf {
         refCreateSavePath: string
         docCreateSavePath: string
         dailyNoteSavePath: string
+        refCreateSaveBox: string;
+        docCreateSaveBox: string;
         dailyNoteTemplatePath: string
     }
 }
+
+export const genNotebookOption = (id: string, notebookId?: string) => {
+    let html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
+    const helpIds: string[] = [];
+    Object.keys(Constants.HELP_PATH).forEach((key: "zh_CN") => {
+        helpIds.push(Constants.HELP_PATH[key]);
+    });
+    window.siyuan.notebooks.forEach((item) => {
+        if (helpIds.includes(item.id) || item.id === notebookId) {
+            return;
+        }
+        html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${item.name}</option>`;
+    });
+    return html;
+};
 
 export const onGetnotebookconf = (data: INotebookConf) => {
     const titleHTML = `<div class="fn__flex">${escapeHtml(data.name)}
 <div class="fn__space"></div>
 <button class="b3-button b3-button--small">${window.siyuan.languages.copy} ID</button></div>`;
     const contentHTML = `<div class="b3-dialog__content" style="background-color: var(--b3-theme-background);">
-<div class="b3-label">
+<div class="b3-label config__item">
     ${window.siyuan.languages.fileTree12}
-    <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
-    <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="docCreateSavePath" value="">
+    <span class="fn__hr"></span>
+    <div class="fn__flex">
+        <select style="min-width: 200px" class="b3-select" id="docCreateSaveBox">${genNotebookOption(data.conf.docCreateSaveBox, data.box)}</select>
+        <div class="fn__space"></div>
+        <input class="b3-text-field fn__flex-1" id="docCreateSavePath" value="">
+    </div>
 </div>
-<div class="b3-label">
+<div class="b3-label config__item">
     ${window.siyuan.languages.fileTree5}
-    <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
-    <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
+    <span class="fn__hr"></span>
+    <div class="fn__flex">
+        <select style="min-width: 200px" class="b3-select" id="refCreateSaveBox">${genNotebookOption(data.conf.refCreateSaveBox, data.box)}</select>
+        <div class="fn__space"></div>
+        <input class="b3-text-field fn__flex-1" id="refCreateSavePath" value="">
+    </div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree11}
-    <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree14}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteSavePath" value="">
@@ -81,12 +103,14 @@ const bindSettingEvent = (contentElement: Element, data: INotebookConf) => {
     refCreateSavePathElement.value = data.conf.refCreateSavePath;
     const dailyNoteTemplatePathElement = contentElement.querySelector("#dailyNoteTemplatePath") as HTMLInputElement;
     dailyNoteTemplatePathElement.value = data.conf.dailyNoteTemplatePath;
-    contentElement.querySelectorAll("input").forEach((item) => {
+    contentElement.querySelectorAll("input, select").forEach((item) => {
         item.addEventListener("change", () => {
             fetchPost("/api/notebook/setNotebookConf", {
                 notebook: data.box,
                 conf: {
                     refCreateSavePath: refCreateSavePathElement.value,
+                    refCreateSaveBox: (contentElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
+                    docCreateSaveBox: (contentElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
                     docCreateSavePath: docCreateSavePathElement.value,
                     dailyNoteSavePath: dailyNoteSavePathElement.value,
                     dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,

@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20220511190015"
+		"updated": "20240426184519"
 	},
 	"Children": [
 		{
@@ -72,7 +72,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " is encountered during import, SiYuan will convert "
+					"Data": "​ is encountered during import, SiYuan will convert "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -81,7 +81,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " into "
+					"Data": "​ into "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -101,7 +101,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", it will not be converted, because the path files starting with "
+					"Data": "​, it will not be converted, because the path files starting with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -110,7 +110,84 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " are hidden files, SiYuan will not process them."
+					"Data": "​ are hidden files, SiYuan will not process them."
+				}
+			]
+		},
+		{
+			"ID": "20240426184519-mwc558q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240426184519-mwc558q",
+				"updated": "20240426184519"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to recognize some extended syntax (such as superscript "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "^foo^"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, subscript "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~foo~"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, tag "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and formula "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$foo$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, etc.), please open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Markdown syntax"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ related switches."
 				}
 			]
 		},

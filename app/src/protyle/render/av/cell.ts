@@ -13,6 +13,8 @@ import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
+import {mergeAddOption} from "./select";
+import {escapeAttr} from "../../../util/escape";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -118,7 +120,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             mAsset.push({
                 type: isImg ? "image" : "file",
                 content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
-                name: isImg ? "" : item.textContent
+                name: isImg ? "" : item.getAttribute("data-name")
             });
         });
         cellValue.mAsset = mAsset;
@@ -147,7 +149,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             cellValue = {
                 type: colType,
                 [colType]: {
-                    content: value
+                    content: ["block", "text", "url", "phone", "email"].includes(colType) ? Lute.EscapeHTMLStr(value) : value
                 }
             };
         } else if (colType === "mSelect" || colType === "select") {
@@ -352,11 +354,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     if (["text", "email", "phone", "block", "template"].includes(type)) {
-        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "url") {
-        html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
     } else if (type === "number") {
-        html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
+        html = `<input type="number" spellcheck="false" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else {
         if (["select", "mSelect"].includes(type)) {
             openMenuPanel({protyle, blockElement, type: "select", cellElements});
@@ -514,7 +516,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any, cElements?: HTMLElement[]) => {
+export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any, cElements?: HTMLElement[],
+                                 columns?: IAVColumn[], html?: string) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -535,14 +538,15 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             });
         }
     }
-
+    const isCustomAttr = hasClosestByClassName(cellElements[0], "custom-attr");
     cellElements.forEach((item: HTMLElement, elementIndex) => {
         const rowElement = hasClosestByClassName(item, "av__row");
         if (!rowElement) {
             return;
         }
         if (!nodeElement.contains(item)) {
-            item = cellElements[elementIndex] = nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) as HTMLElement;
+            item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
         }
         if (!item) {
             // 兼容新增行后台隐藏
@@ -566,9 +570,27 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (type === "mAsset") {
             if (Array.isArray(value)) {
                 value = oldValue.mAsset.concat(value);
-            } else if (typeof value !== "undefined") {
-                // 不传入为删除，传入字符串不进行处理
-                return;
+            } else if (typeof value !== "undefined") { // 不传入为删除，传入字符串不进行处理
+                let link = protyle.lute.GetLinkDest(value);
+                let name = "";
+                if (html) {
+                    const tempElement = document.createElement("template");
+                    tempElement.innerHTML = html;
+                    const aElement = tempElement.content.querySelector('[data-type~="a"]');
+                    if (aElement) {
+                        link = aElement.getAttribute("data-href");
+                        name = aElement.textContent;
+                    }
+                }
+                if (!link && !name) {
+                    return;
+                }
+                // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
+                value = oldValue.mAsset.concat({
+                    type: "file",
+                    content: link,
+                    name
+                });
             }
         } else if (type === "mSelect") {
             // 不传入为删除
@@ -584,6 +606,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
             return;
+        }
+        if (columns && (type === "select" || type === "mSelect")) {
+            const operations = mergeAddOption(columns.find(e => e.id === colId), cellValue, avID);
+            doOperations.push(...operations.doOperations);
+            undoOperations.push(...operations.undoOperations);
         }
         if (objEquals(cellValue, oldValue)) {
             return;
@@ -616,10 +643,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             rowID,
             data: oldValue
         });
-        if (!hasClosestByClassName(cellElements[0], "custom-attr")) {
-            updateAttrViewCellAnimation(item, cellValue);
-        } else {
+        if (isCustomAttr) {
             item.innerHTML = genAVValueHTML(cellValue);
+        } else {
+            updateAttrViewCellAnimation(item, cellValue);
         }
     });
     if (doOperations.length > 0) {
@@ -667,12 +694,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {
+        // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext">${cellValue.block.content || ""}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
+            text = `<span class="av__celltext">${cellValue.block.content || ""}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
-            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || window.siyuan.languages.untitled}</span>
-<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
+            text = `<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || window.siyuan.languages.untitled}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
@@ -705,7 +731,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
             if (item.type === "image") {
                 text += `<img class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${item.content}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${item.content}" data-url="${item.content}">${item.name}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {
@@ -731,8 +757,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         }
     }
 
-    if (["text", "template", "url", "email", "phone", "number", "date", "created", "updated", "lineNumber"].includes(cellValue.type) &&
-        (cellValue.type === "lineNumber" || (cellValue && cellValue[cellValue.type as "url"].content))) {
+    if ((["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+        cellValue.type === "lineNumber" ||
+        (cellValue.type === "block" && cellValue.block?.content)) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
     return text;

@@ -28,7 +28,13 @@ import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParentNext} from "../../block/util";
+import {
+    cancelSB,
+    genEmptyElement,
+    getLangByType,
+    insertEmptyBlock,
+    jumpToParent,
+} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -47,9 +53,9 @@ import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu} from "../render/av/action";
-import {openSearchAV} from "../render/av/relation";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
+import {addEditorToDatabase} from "../render/av/addToDatabase";
 
 export class Gutter {
     public element: HTMLElement;
@@ -59,7 +65,10 @@ export class Gutter {
         if (isMac()) {
             this.gutterTip = window.siyuan.languages.gutterTip;
         } else {
-            this.gutterTip = window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
+            this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))
+                .replace("⌘↑", updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom))
+                .replace("⌥⌘A", updateHotkeyTip(window.siyuan.config.keymap.editor.general.attr.custom))
+                .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
@@ -255,6 +264,11 @@ export class Gutter {
                         data: blockElement.getAttribute("updated")
                     }]);
                     insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    if (event.altKey) {
+                        this.element.querySelectorAll("button").forEach(item => {
+                            item.dataset.rowId = srcIDs[0];
+                        });
+                    }
                     blockElement.setAttribute("updated", newUpdated);
                 } else {
                     avContextmenu(protyle, rowElement as HTMLElement, {
@@ -269,7 +283,7 @@ export class Gutter {
             }
             if (isOnlyMeta(event)) {
                 zoomOut({protyle, id});
-            } else if (event.altKey && !protyle.disabled) {
+            } else if (event.altKey) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
@@ -819,34 +833,7 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                openSearchAV("", selectsElement[0] as HTMLElement, (listItemElement) => {
-                    const srcIDs: string[] = [];
-                    const srcs: IOperationSrcs[] = [];
-                    selectsElement.forEach(item => {
-                        srcIDs.push(item.getAttribute("data-node-id"));
-                        srcs.push({
-                            id:item.getAttribute("data-node-id"),
-                            isDetached: false,
-                        });
-                    });
-                    const avID = listItemElement.dataset.avId;
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        srcs,
-                        ignoreFillFilter: true,
-                        blockID: listItemElement.dataset.blockId
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: listItemElement.dataset.blockId,
-                        data: dayjs().format("YYYYMMDDHHmmss"),
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs,
-                        avID,
-                    }]);
-                    focusByRange(range);
-                });
+                addEditorToDatabase(protyle, range);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1291,28 +1278,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
                 click: () => {
-                    openSearchAV("", nodeElement as HTMLElement, (listItemElement) => {
-                        const avID = listItemElement.dataset.avId;
-                        transaction(protyle, [{
-                            action: "insertAttrViewBlock",
-                            avID,
-                            srcs:[{
-                                id,
-                                isDetached: false
-                            }],
-                            ignoreFillFilter: true,
-                            blockID: listItemElement.dataset.blockId
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: listItemElement.dataset.blockId,
-                            data: dayjs().format("YYYYMMDDHHmmss"),
-                        }], [{
-                            action: "removeAttrViewBlock",
-                            srcIDs: [id],
-                            avID,
-                        }]);
-                        focusByRange(range);
-                    });
+                    addEditorToDatabase(protyle, range);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -1635,7 +1601,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         if (!protyle.options.backlinkData) {
             window.siyuan.menus.menu.append(new MenuItem({
-                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘Click")}`,
+                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘" + window.siyuan.languages.click)}`,
                 label: window.siyuan.languages.enter,
                 click: () => {
                     zoomOut({protyle, id});
@@ -1680,15 +1646,32 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.editor.general.jumpToParentNext.custom,
             click() {
                 hideElements(["select"], protyle);
-                jumpToParentNext(protyle, nodeElement);
+                jumpToParent(protyle, nodeElement, "next");
             }
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.jumpToParentPrev,
+            accelerator: window.siyuan.config.keymap.editor.general.jumpToParentPrev.custom,
+            click() {
+                hideElements(["select"], protyle);
+                jumpToParent(protyle, nodeElement, "previous");
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.jumpToParent,
+            accelerator: window.siyuan.config.keymap.editor.general.jumpToParent.custom,
+            click() {
+                hideElements(["select"], protyle);
+                jumpToParent(protyle, nodeElement, "parent");
+            }
+        }).element);
+
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 
         if (type !== "NodeThematicBreak") {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.fold,
-                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥Click")}`,
+                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}`,
                 click() {
                     setFold(protyle, nodeElement);
                     focusBlock(nodeElement);
@@ -1698,7 +1681,7 @@ export class Gutter {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,
                     icon: "iconAttr",
-                    accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
+                    accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧" + window.siyuan.languages.click),
                     click() {
                         openAttr(nodeElement, "bookmark", protyle);
                     }

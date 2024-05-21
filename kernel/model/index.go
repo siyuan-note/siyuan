@@ -27,11 +27,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -105,6 +106,10 @@ func listSyFiles(dir string) (ret []string) {
 
 func (box *Box) Unindex() {
 	task.AppendTask(task.DatabaseIndex, unindex, box.ID)
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
 }
 
 func unindex(boxID string) {
@@ -114,8 +119,17 @@ func unindex(boxID string) {
 }
 
 func (box *Box) Index() {
+	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
 	task.AppendTask(task.DatabaseIndex, index, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
+}
+
+func removeBoxRefs(boxID string) {
+	sql.DeleteBoxRefsQueue(boxID)
 }
 
 func index(boxID string) {
@@ -203,7 +217,7 @@ func index(boxID string) {
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
-	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.BytesCustomCeil(uint64(treeSize), 2))
 	debug.FreeOSMemory()
 	return
 }
@@ -218,8 +232,6 @@ func IndexRefs() {
 	luteEngine := util.NewLute()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		sql.DeleteBoxRefsQueue(box.ID)
-
 		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {
@@ -268,7 +280,7 @@ func IndexRefs() {
 			}
 
 			util.IncBootProgress(bootProgressPart, "Indexing ref "+defTree.ID)
-			sql.InsertRefsTreeQueue(defTree)
+			sql.UpdateRefsTreeQueue(defTree)
 			if 1 < i && 0 == i%64 {
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 			}
@@ -277,26 +289,37 @@ func IndexRefs() {
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", size, time.Now().Sub(start).Milliseconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
-
-	ResetVirtualBlockRefCache()
 }
+
+var indexEmbedBlockLock = sync.Mutex{}
 
 // IndexEmbedBlockJob 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
 func IndexEmbedBlockJob() {
-	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
-	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock, embedBlocks)
+	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
 }
 
-func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
+func autoIndexEmbedBlock() {
+	indexEmbedBlockLock.Lock()
+	defer indexEmbedBlockLock.Unlock()
+
+	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
 	for i, embedBlock := range embedBlocks {
-		md := strings.TrimSpace(embedBlock.Markdown)
-		if strings.Contains(md, "//js") {
+		markdown := strings.TrimSpace(embedBlock.Markdown)
+		markdown = strings.TrimPrefix(markdown, "{{")
+		stmt := strings.TrimSuffix(markdown, "}}")
+
+		// 嵌入块的 Markdown 内容需要反转义
+		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+
+		// 需要移除首尾的空白字符以判断是否具有 //!js 标记
+		stmt = strings.TrimSpace(stmt)
+		if strings.HasPrefix(stmt, "//!js") {
+			// https://github.com/siyuan-note/siyuan/issues/9648
 			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
 			continue
 		}
 
-		stmt := strings.TrimPrefix(md, "{{")
-		stmt = strings.TrimSuffix(stmt, "}}")
 		if !strings.Contains(strings.ToLower(stmt), "select") {
 			continue
 		}

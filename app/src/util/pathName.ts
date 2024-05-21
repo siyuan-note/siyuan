@@ -512,13 +512,12 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
             } else if (item.count && item.count > 0) {
                 countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
             }
-            fileHTML += `<li title="${getDisplayName(item.name, true, true)} ${item.hSize}${item.bookmark ? "\n" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "\n" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "\n" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "\n" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}\n${window.siyuan.languages.modifiedAt} ${item.hMtime}\n${window.siyuan.languages.createdAt} ${item.hCtime}" 
-data-box="${notebookId}" class="b3-list-item" data-path="${item.path}">
+            fileHTML += `<li data-box="${notebookId}" class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${item.path.split("/").length * 8}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER), "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDisplayName(item.name, true, true)}</span>
     ${countHTML}
 </li>`;
         });

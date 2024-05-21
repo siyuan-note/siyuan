@@ -30,13 +30,13 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
-	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -89,8 +89,8 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Bookmark = ial["bookmark"]
 	t, _ := time.ParseInLocation("20060102150405", ret.ID[:14], time.Local)
 	ret.CTime = t.Unix()
-	ret.HCtime = t.Format("2006-01-02 15:04:05")
-	ret.HSize = humanize.Bytes(ret.Size)
+	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
+	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
 
 	mTime := t
 	if updated := ial["updated"]; "" != updated {
@@ -100,7 +100,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	}
 
 	ret.Mtime = mTime.Unix()
-	ret.HMtime = util.HumanizeTime(mTime, Conf.Lang)
+	ret.HMtime = mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang)
 	return
 }
 
@@ -1138,7 +1138,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
+func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1150,6 +1150,9 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
+	if withMath {
+		luteEngine.SetInlineMath(true)
+	}
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	WaitForWritingFiles()
@@ -1666,7 +1669,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 
-	title = gulu.Str.RemoveInvisible(title)
+	title = removeInvisibleCharsInTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
@@ -1706,7 +1709,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 }
 
 func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
-	title = gulu.Str.RemoveInvisible(title)
+	title = removeInvisibleCharsInTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
@@ -1817,6 +1820,14 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	PerformTransactions(&[]*Transaction{transaction})
 	WaitForWritingFiles()
 	return
+}
+
+func removeInvisibleCharsInTitle(title string) string {
+	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
+	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
+	title = gulu.Str.RemoveInvisible(title)
+	title = strings.ReplaceAll(title, "__@ZWJ@__", string(gulu.ZWJ))
+	return title
 }
 
 func moveSorts(rootID, fromBox, toBox string) {

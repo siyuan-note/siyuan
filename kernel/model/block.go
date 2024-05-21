@@ -26,6 +26,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/open-spaced-repetition/go-fsrs"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -114,33 +115,157 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
-func GetParentNextChildID(id string) string {
+type BlockTreeInfo struct {
+	ID           string `json:"id"`
+	Type         string `json:"type"`
+	ParentID     string `json:"parentID"`
+	ParentType   string `json:"parentType"`
+	PreviousID   string `json:"previousID"`
+	PreviousType string `json:"previousType"`
+	NextID       string `json:"nextID"`
+	NextType     string `json:"nextType"`
+}
+
+func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
+	ret = map[string]*BlockTreeInfo{}
+	luteEngine := util.NewLute()
+	treeCache := map[string]*parse.Tree{}
+	for _, id := range ids {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			ret[id] = &BlockTreeInfo{ID: id}
+			continue
+		}
+
+		tree := treeCache[bt.RootID]
+		if nil == tree {
+			tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+			if nil == tree {
+				ret[id] = &BlockTreeInfo{ID: id}
+				continue
+			}
+
+			treeCache[bt.RootID] = tree
+		}
+
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			ret[id] = &BlockTreeInfo{ID: id}
+			continue
+		}
+
+		bti := &BlockTreeInfo{ID: id, Type: node.Type.String()}
+		ret[id] = bti
+		parent := treenode.ParentBlock(node)
+		if nil != parent {
+			bti.ParentID = parent.ID
+			bti.ParentType = parent.Type.String()
+		}
+		previous := treenode.PreviousBlock(node)
+		if nil != previous {
+			bti.PreviousID = previous.ID
+			bti.PreviousType = previous.Type.String()
+		}
+		next := treenode.NextBlock(node)
+		if nil != next {
+			bti.NextID = next.ID
+			bti.NextType = next.Type.String()
+		}
+	}
+	return
+}
+
+func GetBlockSiblingID(id string) (parent, previous, next string) {
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
-		return ""
+		return
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return ""
+		return
 	}
 
+	if !node.IsBlock() {
+		return
+	}
+
+	parentListCount := 0
+	var parentListItem, current *ast.Node
 	for p := node.Parent; nil != p; p = p.Parent {
-		if ast.NodeDocument == p.Type {
-			if nil != node.Next {
-				return node.Next.ID
+		if ast.NodeListItem == p.Type {
+			parentListCount++
+			if 1 < parentListCount {
+				parentListItem = p
+				break
 			}
-			return ""
+			current = p.Parent
+		}
+	}
+
+	if nil != parentListItem {
+		parent = parentListItem.ID
+
+		if parentListItem.Previous != nil {
+			previous = parentListItem.Previous.ID
+			if flb := treenode.FirstChildBlock(parentListItem.Previous); nil != flb {
+				previous = flb.ID
+			}
 		}
 
-		for f := p.Next; nil != f; f = f.Next {
-			// 遍历取下一个块级元素（比如跳过超级块 Close 节点）
-			if f.IsBlock() {
-				return f.ID
+		if parentListItem.Next != nil {
+			next = parentListItem.Next.ID
+			if flb := treenode.FirstChildBlock(parentListItem.Next); nil != flb {
+				next = flb.ID
+			}
+		}
+		return
+	}
+
+	if nil == current {
+		current = node
+	}
+
+	if nil != current.Parent && current.Parent.IsBlock() {
+		parent = current.Parent.ID
+		if flb := treenode.FirstChildBlock(current.Parent); nil != flb {
+			parent = flb.ID
+		}
+
+		if ast.NodeDocument == current.Parent.Type {
+			parent = current.Parent.ID
+
+			if nil != current.Previous && current.Previous.IsBlock() {
+				previous = current.Previous.ID
+				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != current.Next && current.Next.IsBlock() {
+				next = current.Next.ID
+				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
+					next = flb.ID
+				}
+			}
+		} else {
+			if nil != current.Parent.Previous && current.Parent.Previous.IsBlock() {
+				previous = current.Parent.Previous.ID
+				if flb := treenode.FirstChildBlock(current.Parent.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+
+			if nil != current.Parent.Next && current.Parent.Next.IsBlock() {
+				next = current.Parent.Next.ID
+				if flb := treenode.FirstChildBlock(current.Parent.Next); nil != flb {
+					next = flb.ID
+				}
 			}
 		}
 	}
-	return ""
+
+	return
 }
 
 func IsBlockFolded(id string) bool {

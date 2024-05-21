@@ -1,4 +1,5 @@
 import {fetchPost} from "../util/fetch";
+import {genNotebookOption} from "../menus/onGetnotebookconf";
 
 export const fileTree = {
     element: undefined as Element,
@@ -53,22 +54,6 @@ export const fileTree = {
 </label>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.fileTree12}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="docCreateSavePath" value="">
-</div>
-<div class="b3-label fn__flex config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.fileTree5}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
-</div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree16}
         <div class="b3-label__text">${window.siyuan.languages.fileTree17}</div>
     </div>
@@ -82,6 +67,26 @@ export const fileTree = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="maxOpenTabCount" type="number" min="1" max="32" value="${window.siyuan.config.fileTree.maxOpenTabCount}">
+</div>
+<div class="b3-label config__item">
+    ${window.siyuan.languages.fileTree12}
+    <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
+    <span class="fn__hr"></span>
+    <div class="fn__flex">
+        <select style="min-width: 200px" class="b3-select" id="docCreateSaveBox">${genNotebookOption(window.siyuan.config.fileTree.docCreateSaveBox)}</select>
+        <div class="fn__space"></div>
+        <input class="b3-text-field fn__flex-1" id="docCreateSavePath" value="">
+    </div>
+</div>
+<div class="b3-label config__item">
+    ${window.siyuan.languages.fileTree5}
+    <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
+    <span class="fn__hr"></span>
+    <div class="fn__flex">
+        <select style="min-width: 200px" class="b3-select" id="refCreateSaveBox">${genNotebookOption(window.siyuan.config.fileTree.refCreateSaveBox)}</select>
+        <div class="fn__space"></div>
+        <input class="b3-text-field fn__flex-1" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
+    </div>
 </div>`;
     },
     _send() {
@@ -100,7 +105,9 @@ export const fileTree = {
             sort: window.siyuan.config.fileTree.sort,
             alwaysSelectOpenedFile: (fileTree.element.querySelector("#alwaysSelectOpenedFile") as HTMLInputElement).checked,
             refCreateSavePath: (fileTree.element.querySelector("#refCreateSavePath") as HTMLInputElement).value,
+            refCreateSaveBox: (fileTree.element.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
             docCreateSavePath: (fileTree.element.querySelector("#docCreateSavePath") as HTMLInputElement).value,
+            docCreateSaveBox: (fileTree.element.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
             openFilesUseCurrentTab: (fileTree.element.querySelector("#openFilesUseCurrentTab") as HTMLInputElement).checked,
             closeTabsOnStart: (fileTree.element.querySelector("#closeTabsOnStart") as HTMLInputElement).checked,
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
@@ -115,7 +122,7 @@ export const fileTree = {
     bindEvent: () => {
         (fileTree.element.querySelector("#docCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.docCreateSavePath;
         (fileTree.element.querySelector("#refCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.refCreateSavePath;
-        fileTree.element.querySelectorAll("input").forEach((item) => {
+        fileTree.element.querySelectorAll("input, select").forEach((item) => {
             item.addEventListener("change", () => {
                 fileTree._send();
             });

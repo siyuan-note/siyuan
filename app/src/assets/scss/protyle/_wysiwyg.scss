@@ -326,10 +326,6 @@
         height: 100%;
       }
 
-      &:hover .protyle-action__drag {
-        display: inline-block;
-      }
-
       .protyle-action__drag {
         height: 30%;
         width: 4px;
@@ -382,10 +378,6 @@
       }
     }
 
-    & > [contenteditable="false"] > .img:hover .protyle-action__drag {
-      display: none;
-    }
-
     &.iframe {
       // https://ld246.com/article/1644827326901
       // https://github.com/siyuan-note/siyuan/issues/4172
@@ -408,10 +400,6 @@
           width: 100%;
           height: 100%;
         }
-      }
-
-      &:hover .protyle-action__drag {
-        display: inline-block;
       }
 
       .protyle-action__drag {
@@ -459,7 +447,7 @@
 
   &--hl,
   &--hl .hljs {
-    transition: var(--b3-transition);
+    transition: var(--b3-background-transition);
     background-color: var(--b3-theme-primary-lightest) !important;
   }
 
@@ -595,18 +583,28 @@
   }
 }
 
+// 在思源中，不论只读模式还是预览点击图片都可以进行预览
+.protyle .img > span:nth-child(2) {
+  cursor: pointer;
+}
+
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
   span[data-type~="tag"],
   .protyle-action__language,
-  .img > span:nth-child(2),
   .render-node {
     cursor: pointer;
   }
 
   span[data-type~="tag"]:hover {
     background-color: var(--b3-theme-surface-lighter);
+  }
+
+
+  .img:hover .protyle-action__drag,
+  .iframe:hover .protyle-action__drag {
+    display: inline-block;
   }
 
   .code-block .protyle-action {
@@ -643,7 +641,10 @@
 
   .av {
     .b3-chip[data-type="block-more"],
-    .av__row--util,
+    .av__row--util:not(.av__readonly--show),
+    .av__row--footer:not(.av__readonly--show),
+    .av__row--util .b3-button[data-type="av-add-bottom"],
+    .av__row--util svg[data-type="set-page-size"],
     .av__row--header > .block__icons,
     .av__views .fn__space,
     .av__views .block__icon:not([data-type="av-search-icon"]),
@@ -651,7 +652,7 @@
       display: none;
     }
 
-    .av__row--footer {
+    .av__row--util:not(.av__readonly--show) + .av__row--footer.av__readonly--show {
       border-top-color: transparent;
     }
 
@@ -661,6 +662,24 @@
 
     .av__row--footer:hover .av__calc:not(.av__calc--ashow) {
       opacity: 0;
+    }
+
+    .av__row--footer .av__calc:hover,
+    .av__cell--header:hover {
+      background-color: transparent;
+    }
+
+    .av__cell {
+      cursor: inherit;
+
+      &text--url,
+      &assetimg {
+        cursor: pointer;
+      }
+    }
+
+    .av__cell[data-block-id] > .block__icon[data-type="copy"] {
+      display: block;
     }
   }
 }

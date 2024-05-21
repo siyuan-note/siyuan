@@ -2,7 +2,6 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "../../util/assets";
-import {hasClosestByClassName} from "../util/hasClosest";
 
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let codeElements: NodeListOf<Element>;
@@ -76,7 +75,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 const lineNumber = block.parentElement.getAttribute("linenumber");
                 if (autoEnter === "true" || (autoEnter !== "false" && window.siyuan.config.editor.codeLineWrap)) {
                     block.style.setProperty("white-space", "pre-wrap");
-                    block.style.setProperty("word-break", "break-all");
+                    block.style.setProperty("word-break", "break-word");
                 } else {
                     // https://ld246.com/article/1684031600711 该属性会导致有 tab 后光标跳至末尾，目前无解
                     block.style.setProperty("white-space", "pre");
@@ -100,14 +99,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     block.nextElementSibling.remove();
                     if (languageElement) {
                         languageElement.style.marginLeft = "";
-                    }
-                }
-                // 搜索定位
-                const layoutElement = hasClosestByClassName(block, "search__layout", true);
-                if (layoutElement && block.parentElement.getAttribute("data-node-id") === layoutElement.querySelector("#searchList > .b3-list-item--focus")?.getAttribute("data-node-id")) {
-                    const matchElement = block.querySelector('span[data-type="search-mark"]');
-                    if (matchElement) {
-                        matchElement.scrollIntoView();
                     }
                 }
                 block.innerHTML = window.hljs.highlight(
@@ -146,7 +137,7 @@ export const lineNumberRender = (block: HTMLElement) => {
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-    const isWrap = block.style.wordBreak === "break-all";
+    const isWrap = block.style.wordBreak === "break-word";
     lineList.map((line) => {
         let lineHeight = "";
         if (isWrap) {

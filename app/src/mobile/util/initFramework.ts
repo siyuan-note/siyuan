@@ -69,10 +69,14 @@ export const initFramework = (app: App, isStart: boolean) => {
     let tag: MobileTags;
     // 不能使用 getEventName，否则点击返回会展开右侧栏
     const firstToolbarElement = sidebarElement.querySelector(".toolbar--border");
-    firstToolbarElement.addEventListener("click", (event: Event & {
-        target: Element
-    }) => {
-        const svgElement = hasTopClosestByTag(event.target, "svg");
+    firstToolbarElement.addEventListener("click", (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        let svgElement: HTMLElement;
+        if (typeof event.detail === "string") {
+            svgElement = firstToolbarElement.querySelector(`svg[data-type="sidebar-${event.detail}-tab"]`) as HTMLElement;
+        } else {
+            svgElement = hasTopClosestByTag(target, "svg") as HTMLElement;
+        }
         if (!svgElement) {
             return;
         }

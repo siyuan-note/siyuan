@@ -25,8 +25,8 @@ export const getAllEditor = () => {
     });
     models.custom.forEach(item => {
         item.editors?.forEach(eItem => {
-            editors.push(eItem)
-        })
+            editors.push(eItem);
+        });
     });
     models.backlink.forEach(item => {
         item.editors.forEach(editorItem => {

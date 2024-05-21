@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-重构你的思维
+<em>Refactor your thinking</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
@@ -19,6 +19,7 @@
 <a title="Last Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
 <a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
+<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Chat on Discord" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
 <br><br>
 <a href="https://www.producthunt.com/products/siyuan/reviews?utm_source=badge-product_rating&utm_medium=badge&utm_souce=badge-siyuan" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/product_rating.svg?product_id=534576&theme=light" alt="SiYuan - A&#0032;privacy&#0045;first&#0032;personal&#0032;knowledge&#0032;management&#0032;software | Product Hunt" style="width: 242px; height: 108px;" width="242" height="108" /></a>
 </p>
@@ -86,7 +87,7 @@
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
-## 🏗️ 架构设计和开源生态
+## 🏗️ Architecture and Ecosystem
 
 ![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "思源笔记架构设计")
 
@@ -105,16 +106,16 @@
 
 [![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
 
-## 🗺️ 路线图
+## 🗺️ Roadmap
 
-* [思源笔记开发计划和进度](https://github.com/orgs/siyuan-note/projects/1)
-* [思源笔记版本变更和公告](CHANGELOG.md)
+* [SiYuan development plan and progress](https://github.com/orgs/siyuan-note/projects/1)
+* [SiYuan changelog](CHANGELOG.md)
 
-## 🚀 下载安装
+## 🚀 Download Setup
 
-桌面端和移动端建议优先考虑通过应用市场安装，这样以后升级版本时可以一键更新。
+It is recommended to give priority to installing through the application market on the desktop and mobile, so that you can upgrade the version with one click in the future.
 
-### 应用市场
+### App Market
 
 Mobile:
 
@@ -125,34 +126,31 @@ Mobile:
 Desktop:
 
 * [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
-* [华为应用市场](https://appgallery.huawei.com/app/C105558879)
-* [小米应用商店](https://app.mi.com/details?id=org.b3log.siyuan)
-* [酷安](https://www.coolapk.com/apk/292664)
 
-### Docker 部署
+### Docker Hosting
 
 <details>
-<summary>Docker 部署文档</summary>
+<summary>Docker Deployment</summary>
 
-#### 概述
+#### Overview
 
-在服务器上伺服思源最简单的方案是通过 Docker 部署。
+The easiest way to serve SiYuan on a server is to deploy it through Docker.
 
-* 镜像名称 `b3log/siyuan`
-* [镜像地址](https://hub.docker.com/r/b3log/siyuan)
+* Image name `b3log/siyuan`
+* [Image URL](https://hub.docker.com/r/b3log/siyuan)
 
-#### 文件结构
+#### File structure
 
-整体程序位于 `/opt/siyuan/` 下，基本上就是 Electron 安装包 resources 文件夹下的结构：
+The overall program is located under `/opt/siyuan/`, which is basically the structure under the resources folder of the Electron installation package:
 
-* appearance：图标、主题、多语言
-* guide：帮助文档
-* stage：界面和静态资源
-* kernel：内核程序
+* appearance: icon, theme, languages
+* guide: user guide document
+* stage: interface and static resources
+* kernel: kernel program
 
-#### 启动入口
+#### Entrypoint
 
-构建 Docker 镜像时设置了入口：`ENTRYPOINT [ "/opt/siyuan/kernel" ]`，使用 `docker run b3log/siyuan` 并带参即可启动：
+The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan/kernel" ]`, use `docker run b3log/siyuan` with parameters to start:
 
 * `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
 * `--accessAuthCode`: Specifies the access authorization code
@@ -164,14 +162,10 @@ docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/s
 ```
 
 * `workspace_dir_host`: The workspace folder path on the host
-* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified
-  in `--workspace`
-* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your
-  data
+* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified in `--workspace`
+* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your data
 
-To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such
-as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup
-commands is:
+To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is:
 
 ```
 docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
@@ -196,200 +190,141 @@ services:
       - TZ=${TimeZone}
 ```
 
-#### 用户权限
+#### User permissions
 
-镜像中是使用默认创建的普通用户 `siyuan`（uid 1000/gid
-1000）来启动内核进程的，所以在宿主机创建工作空间文件夹时请注意设置该文件夹所属用户组：`chown -R 1000:1000 /siyuan/workspace`
-，在启动容器时需要带参数 `-u 1000:1000`。
+In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown -R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
 
-#### 隐藏端口
+#### Hidden port
 
-使用 NGINX 反向代理可以隐藏 6806 端口，请注意：
+Use NGINX reverse proxy to hide port 6806, please note:
 
-* 配置 WebSocket 反代 `/ws`
+* Configure WebSocket reverse proxy `/ws`
 
-#### 注意
+#### Note
 
-* 请务必确认挂载卷的正确性，否则容器删除后数据会丢失
-* 不要使用 URL 重写进行重定向，否则鉴权可能会有问题，建议配置反向代理
+* Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted
+* Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy
 
-#### 限制
+#### Limitations
 
-* 不支持桌面端和移动端应用连接，仅支持在浏览器上使用
-* 不支持导出 PDF、HTML 和 Word 格式
-* 不支持导入 Markdown 文件
+* Does not support desktop and mobile application connections, only supports use on browsers
+* Export to PDF, HTML and Word formats is not supported
+* Import Markdown file is not supported
 
 </details>
 
-### 安装包
+### Installation Package
 
-* [B3log](https://b3log.org/siyuan/download.html)
+* [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 
-### 内部预览版
+### Insider Preview
 
-我们会在有重大更新前发布内部预览版，请访问 [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider)。
+We release insider preview before major updates, please visit [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider).
 
-## 🏘️ 社区
+## 🏘️ Community
 
-* [中文讨论区](https://ld246.com/domain/siyuan)
-* [用户社区汇总](https://ld246.com/article/1640266171309)
+* [English Discussion Forum](https://liuyun.io)
+* [User community summary](https://liuyun.io/article/1687779743723)
 * [Awesome SiYuan](https://github.com/siyuan-note/awesome)
 
-## 🛠️ 开发指南
+## 🛠️ Development Guide
 
-见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
+See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
-## ❓ 常见问题和解答
+## ❓ FAQ
 
-### 思源是如何存储数据的？
+### How does SiYuan store data?
 
-数据保存在工作空间文件夹下，在工作空间 data 文件夹下：
+The data is saved in the workspace folder, in the workspace data folder:
 
-* `assets` 用于保存所有插入的资源文件
-* `emojis` 用于保存自定义图标表情图片
-* `snippets` 用于保存代码片段
-* `storage` 用于保存查询条件、布局和闪卡数据等
-* `templates` 用于保存模板片段
-* `widgets` 用于保存挂件
-* `plugins` 用于保存插件
-* `public` 用于保存公开的数据
-* 其余文件夹就是用户自己创建的笔记本文件夹，笔记本文件夹下 `.sy` 后缀的文件用于保存文档数据，数据格式为 JSON
+* `assets` is used to save all inserted assets
+* `emojis` is used to save emoji images
+* `snippets` is used to save code snippets
+* `storage` is used to save query conditions, layouts and flashcards, etc.
+* `templates` is used to save template snippets
+* `widgets` is used to save widgets
+* `plugins` is used to save plugins
+* `public` is used to save public data
+* The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
-### 支持通过第三方同步盘进行数据同步吗？
+### Does it support data synchronization through a third-party sync disk?
 
-不支持通过第三方同步盘进行数据同步，否则可能会导致数据损坏。
+Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted.
 
-虽然不支持第三方同步盘，但是支持对接第三方云端存储（会员特权）。
+Although it does not support third-party sync disks, it supports connect with third-party cloud storage (Member's privileges).
 
-另外，也可以考虑手动导出导入 Data 实现数据同步：
+In addition, you can also consider manually exporting and importing data to achieve data synchronization:
 
-* 桌面端：<kbd>设置</kbd> - <kbd>导出</kbd> - <kbd>导出 Data</kbd> / <kbd>导入 Data</kbd>
-* 移动端：<kbd>右侧栏</kbd> - <kbd>关于</kbd> - <kbd>导出 Data</kbd> / <kbd>导入 Data</kbd>
+* Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
+* Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
-### 思源是开源的吗？
+### Is SiYuan open source?
 
-思源笔记是完全开源的，欢迎参与贡献：
+SiYuan is completely open source, and contributions are welcome:
 
-* [界面和内核](https://github.com/siyuan-note/siyuan)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)
-* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
-* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
+* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 
-更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
+For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
-### 如何升级到新版本？
+### How to upgrade to a new version?
 
-* 如果是通过应用商店安装的，请通过应用商店更新
-* 如果是桌面端通过安装包安装的，可打开 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>自动下载更新安装包</kbd>
-  选项，这样思源会自动下载最新版安装包并提示安装
-* 如果是通过手动安装包安装的，请再次下载安装包安装
+* If installed via app store, please update via app store
+* If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
+* If it is installed by manual installation package, please download the installation package again to install
 
 You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official Download](https://b3log.org/siyuan/en/download.html) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
-**注意**：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件
+### Is there any note for deleting docs?
 
-### 删除文档有什么注意事项吗？
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate data history.
 
-文档被删除后不会出现在操作系统回收站中，而是直接删除，删除时思源会生成数据历史。
+### How can I just wrap and not start a new paragraph?
 
-### 如何才能只换行不新起段落？
+Please use <kbd>Shift+Enter</kbd>.
 
-请使用 <kbd>Shift+Enter</kbd>。
+### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
-## 有的块（比如在列表项中的段落块）找不到块标怎么办？
+The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
 
-在列表项下的第一个子块是省略块标的。可以将光标移到这个块中，然后通过 <kbd>Ctrl+/</kbd> 触发它的块标菜单。
+### How to share notes?
 
-### 如何分享笔记？
+* Share document to Liandi
+* Export and import `.sy.zip` package
+* Via network hosting
+* Export and import Markdown
+* <kbd>Export Preview</kbd> to copy to third-party online services
 
-* 分享文档到链滴
-* 导出导入 `.sy.zip` 数据包
-* 通过网络伺服
-* 导出导入 Markdown
-* <kbd>导出预览</kbd> 中复制到第三方在线服务
+### What should I do if the data repo key is lost?
 
-### 数据仓库密钥遗失怎么办？
+* If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd> retrieve
+* If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
 
-* 如果之前在多个设备上正确初始化过数据仓库密钥的话，那么该密钥在所有设备上都是相同的，可以在 <kbd>设置</kbd> - <kbd>
-  关于</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>复制密钥字符串</kbd> 找回
-* 如果之前没有正确配置（比如多个设备上密钥不一致）或者所有设备均不可用，已经无法获得密钥字符串，则可通过如下步骤重置密钥：
+  1. Manually back up the data, you can use <kbd>Export Data</kbd> or directly copy the <kbd>workspace/data/</kbd> folder on the file system
+  2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data rep key</kbd> - <kbd>Reset data repo</kbd>
+  3. Reinitialize the data repo key. After initializing the key on one device, other devices import the key
+  4. The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted
+  5. The existing cloud snapshots are no longer available and can be deleted
 
-    1. 手动备份好数据，可通过 <kbd>导出 Data</kbd> 或者直接在文件系统上复制 <kbd>工作空间/data/</kbd> 文件夹
-    2. <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>重置数据仓库</kbd>
-    3. 重新初始化数据仓库密钥，在一台设备上初始化密钥以后，其他设备导入密钥
-    4. 云端使用新的同步目录，旧的同步目录已经无法使用，可以删除
-    5. 已有的云端快照已经无法使用，可以删除
+### Do I need to pay for it?
 
-### 使用需要付费吗？
+Most features are free, even for commercial use.
 
-大部分功能是免费的，即使是在商业环境下使用。
+Member's privileges can only be used after payment, please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).
 
-会员特权需要付费后才能使用，请参考[定价](https://b3log.org/siyuan/pricing.html)。
+## 🙏 Acknowledgement
 
-如果你没有会员特权需求但又想支持开发，欢迎进行捐赠：[靠爱发电 - 链滴](https://ld246.com/sponsor)
-The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source
-code kernel/go.mod, app/package.json and project homepage.
+The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code kernel/go.mod, app/package.json and project homepage.
 
 The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️
 
 ### Contributors
 
-## 🙏 鸣谢
-
-### 贡献者列表
-
-欢迎加入我们，一起为思源贡献代码。
+Welcome to join us and contribute code to SiYuan together.
 
 <a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
+   <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
 </a>
-
-### 开源项目依赖列表
-
-思源的诞生离不开下列开源项目。
-
-* [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
-* [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`
-* [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
-* [https://github.com/gofrs/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
-* [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
-* [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
-* [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
-* [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
-* [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
-* [https://github.com/PuerkitoBio/goquery](https://github.com/PuerkitoBio/goquery) `BSD-3-Clause License`
-* [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
-* [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
-* [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
-* [https://github.com/denisbrodbeck/machineid](https://github.com/denisbrodbeck/machineid) `MIT License`
-* [https://github.com/dgraph-io/ristretto](https://github.com/dgraph-io/ristretto) `Apache-2.0 License`
-* [https://github.com/dustin/go-humanize](https://github.com/dustin/go-humanize) `MIT License`
-* [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`
-* [https://github.com/facette/natsort](https://github.com/facette/natsort) `BSD-3-Clause License`
-* [https://github.com/flopp/go-findfont](https://github.com/flopp/go-findfont) `MIT License`
-* [https://github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) `BSD-3-Clause License`
-* [https://github.com/gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) `MIT License`
-* [https://github.com/gin-contrib/cors](https://github.com/gin-contrib/cors) `MIT License`
-* [https://github.com/gin-contrib/gzip](https://github.com/gin-contrib/gzip) `MIT License`
-* [https://github.com/gin-contrib/sessions](https://github.com/gin-contrib/sessions) `MIT License`
-* [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
-* [https://github.com/go-ole/go-ole](https://github.com/go-ole/go-ole) `MIT License`
-* [https://github.com/imroc/req](https://github.com/imroc/req) `MIT License`
-* [https://github.com/jinzhu/copier](https://github.com/jinzhu/copier) `MIT License`
-* [https://github.com/mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) `MIT License`
-* [https://github.com/mitchellh/go-ps](https://github.com/mitchellh/go-ps) `MIT License`
-* [https://github.com/mssola/useragent](https://github.com/mssola/useragent) `MIT License`
-* [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
-* [https://github.com/patrickmn/go-cache](https://github.com/patrickmn/go-cache) `MIT License`
-* [https://github.com/radovskyb/watcher](https://github.com/radovskyb/watcher) `BSD-3-Clause License`
-* [https://github.com/sabhiram/go-gitignore](https://github.com/sabhiram/go-gitignore) `MIT License`
-* [https://github.com/steambap/captcha](https://github.com/steambap/captcha) `MIT License`
-* [https://github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack) `BSD-2-Clause License`
-* [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
-* [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-2.0 License`
-* [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
-* [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
-* [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
-* [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
-* [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`

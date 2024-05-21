@@ -34,13 +34,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/dustin/go-humanize"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -48,9 +49,9 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -233,7 +234,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  removeRight.ID,
 			Title:   title,
 			Path:    removeRight.Path,
-			HSize:   humanize.Bytes(uint64(removeRight.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(removeRight.Size), 2),
 			Updated: removeRight.Updated,
 		})
 	}
@@ -251,7 +252,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  addLeft.ID,
 			Title:   title,
 			Path:    addLeft.Path,
-			HSize:   humanize.Bytes(uint64(addLeft.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(addLeft.Size), 2),
 			Updated: addLeft.Updated,
 		})
 	}
@@ -269,7 +270,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateLeft.ID,
 			Title:   title,
 			Path:    updateLeft.Path,
-			HSize:   humanize.Bytes(uint64(updateLeft.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(updateLeft.Size), 2),
 			Updated: updateLeft.Updated,
 		})
 	}
@@ -287,7 +288,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateRight.ID,
 			Title:   title,
 			Path:    updateRight.Path,
-			HSize:   humanize.Bytes(uint64(updateRight.Size)),
+			HSize:   humanize.BytesCustomCeil(uint64(updateRight.Size), 2),
 			Updated: updateRight.Updated,
 		})
 	}
@@ -500,7 +501,7 @@ func PurgeCloud() (err error) {
 
 	deletedIndexes := stat.Indexes
 	deletedObjects := stat.Objects
-	deletedSize := humanize.Bytes(uint64(stat.Size))
+	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(232), deletedIndexes, deletedObjects, deletedSize)
 	util.PushMsg(msg, 5000)
 	return
@@ -523,7 +524,7 @@ func PurgeRepo() (err error) {
 
 	deletedIndexes := stat.Indexes
 	deletedObjects := stat.Objects
-	deletedSize := humanize.Bytes(uint64(stat.Size))
+	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
 	util.PushMsg(msg, 5000)
 	return
@@ -649,6 +650,10 @@ func checkoutRepo(id string) {
 
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	go func() {
+		sql.WaitForWritingDatabase()
+		ResetVirtualBlockRefCache()
+	}()
 	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
 
 	if syncEnabled {
@@ -696,7 +701,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	if nil != err {
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.Bytes(uint64(downloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.BytesCustomCeil(uint64(downloadBytes), 2))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -737,7 +742,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		err = errors.New(fmt.Sprintf(Conf.Language(84), formatRepoErrorMsg(err)))
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.Bytes(uint64(uploadBytes)))
+	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.BytesCustomCeil(uint64(uploadBytes), 2))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -1039,9 +1044,9 @@ func syncRepoDownload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1053,7 +1058,7 @@ func syncRepoDownload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1110,9 +1115,9 @@ func syncRepoUpload() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1124,7 +1129,7 @@ func syncRepoUpload() (err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1218,9 +1223,9 @@ func bootSyncRepo() (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1303,9 +1308,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			u := Conf.GetUser()
-			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			if 2 == u.UserSiYuanSubscriptionPlan {
-				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(u.UserSiYuanRepoSize)))
+				msg = fmt.Sprintf(Conf.Language(68), humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2))
 			}
 		}
 		Conf.Sync.Stat = msg
@@ -1324,7 +1329,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2))
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
@@ -1333,7 +1338,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 
 	if !exit {
 		// 首次数据同步执行完成后再执行索引订正 Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
-		checkIndex()
+		go checkIndex()
 	}
 	return
 }
@@ -1341,12 +1346,13 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
-		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)),
+		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
 		elapsed.Seconds(),
 		len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
 
 	//logSyncMergeResult(mergeResult)
 
+	var needReloadFiletree bool
 	if 0 < len(mergeResult.Conflicts) {
 		luteEngine := util.NewLute()
 		if Conf.Sync.GenerateConflictDoc {
@@ -1375,6 +1381,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				resetTree(tree, "Conflicted")
 				createTreeTx(tree)
 			}
+
+			needReloadFiletree = true
 		}
 
 		historyDir := filepath.Join(util.HistoryDir, mergeResult.Time.Format("2006-01-02-150405")+"-sync")
@@ -1401,7 +1409,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	var upserts, removes []string
 	var upsertTrees int
 	// 可能需要重新加载部分功能
-	var needReloadFlashcard, needReloadOcrTexts, needReloadFiletree, needReloadPlugin bool
+	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin bool
+	upsertPluginSet := hashset.New()
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1420,10 +1429,19 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadPlugin = true
 		}
 
+		if strings.HasPrefix(file.Path, "/plugins/") {
+			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
+				needReloadPlugin = true
+				upsertPluginSet.Add(parts[2])
+			}
+		}
+
 		if strings.HasSuffix(file.Path, ".sy") {
 			upsertTrees++
 		}
 	}
+
+	removeWidgetDirSet, removePluginSet := hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1441,6 +1459,19 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
 		}
+
+		if strings.HasPrefix(file.Path, "/plugins/") {
+			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
+				needReloadPlugin = true
+				removePluginSet.Add(parts[2])
+			}
+		}
+
+		if strings.HasPrefix(file.Path, "/widgets/") {
+			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
+				removeWidgetDirSet.Add(parts[2])
+			}
+		}
 	}
 
 	if needReloadFlashcard {
@@ -1448,24 +1479,28 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadOcrTexts {
-		LoadAssetsTexts()
+		util.LoadAssetsTexts()
 	}
 
 	if needReloadPlugin {
-		pushReloadPlugin()
+		pushReloadPlugin(upsertPluginSet, removePluginSet)
+	}
+
+	for _, widgetDir := range removeWidgetDirSet.Values() {
+		widgetDirPath := filepath.Join(util.DataDir, "widgets", widgetDir.(string))
+		gulu.File.RemoveEmptyDirs(widgetDirPath)
 	}
 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
 
-	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		FullReindex()
 		return
 	}
 
 	if needReloadFiletree {
-		util.BroadcastByType("filetree", "reloadFiletree", 0, "", nil)
+		util.PushReloadFiletree()
 	}
 
 	if exit { // 退出时同步不用推送事件
@@ -1474,11 +1509,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
 	go func() {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
-			// 移动端不推送差异详情
-			upsertRootIDs = []string{}
-		}
-
 		util.WaitForUILoaded()
 
 		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
@@ -1958,15 +1988,15 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 	hTrafficAPIGet = "-"
 	hTrafficAPIPut = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
-		s.HSize = humanize.Bytes(uint64(syncSize))
-		b.HSize = humanize.Bytes(uint64(backupSize))
-		hAssetSize = humanize.Bytes(uint64(assetSize))
-		hSize = humanize.Bytes(uint64(totalSize))
+		s.HSize = humanize.BytesCustomCeil(uint64(syncSize), 2)
+		b.HSize = humanize.BytesCustomCeil(uint64(backupSize), 2)
+		hAssetSize = humanize.BytesCustomCeil(uint64(assetSize), 2)
+		hSize = humanize.BytesCustomCeil(uint64(totalSize), 2)
 		u := Conf.GetUser()
-		hTotalSize = humanize.Bytes(uint64(u.UserSiYuanRepoSize))
-		hExchangeSize = humanize.Bytes(uint64(u.UserSiYuanPointExchangeRepoSize))
-		hTrafficUploadSize = humanize.Bytes(uint64(u.UserTrafficUpload))
-		hTrafficDownloadSize = humanize.Bytes(uint64(u.UserTrafficDownload))
+		hTotalSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2)
+		hExchangeSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanPointExchangeRepoSize), 2)
+		hTrafficUploadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficUpload), 2)
+		hTrafficDownloadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficDownload), 2)
 		hTrafficAPIGet = humanize.SIWithDigits(u.UserTrafficAPIGet, 2, "")
 		hTrafficAPIPut = humanize.SIWithDigits(u.UserTrafficAPIPut, 2, "")
 	}
@@ -1987,6 +2017,18 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 	return
 }
 
-func pushReloadPlugin() {
-	util.BroadcastByType("main", "reloadPlugin", 0, "", nil)
+func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set) {
+	upsertPlugins, removePlugins := []string{}, []string{}
+	for _, n := range upsertPluginSet.Values() {
+		upsertPlugins = append(upsertPlugins, n.(string))
+	}
+	for _, n := range removePluginNameSet.Values() {
+		removePlugins = append(removePlugins, n.(string))
+	}
+
+	logging.LogInfof("reload plugins [upserts=%v, removes=%v]", upsertPlugins, removePlugins)
+	util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
+		"upsertPlugins": upsertPlugins,
+		"removePlugins": removePlugins,
+	})
 }

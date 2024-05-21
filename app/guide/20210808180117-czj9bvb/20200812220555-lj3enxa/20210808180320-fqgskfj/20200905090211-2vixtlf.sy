@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20220429115850"
+		"updated": "20240513102051"
 	},
 	"Children": [
 		{
@@ -1092,6 +1092,70 @@
 			]
 		},
 		{
+			"ID": "20240513100721-6hasxsk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513100721-6hasxsk",
+				"updated": "20240513100725"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240513100725-fefiba9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513100725-fefiba9",
+				"updated": "20240513102051"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不建议在正文中使用一级标题，建议使用二级标题作为顶层标题，这样在开启了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "导出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "添加文档标题"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 后，整体的标题层级在导出时才符合正常逻辑。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-a6yjlte",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1537,9 +1601,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115137-qys9mvv",
-				"updated": "20220429115310"
+				"updated": "20240427230506"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -1547,7 +1615,110 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用 HTML 块时不会对其中的代码进行安全过滤，请确认代码安全后再使用，以免遭遇跨站脚本攻击（XSS）。"
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240427230507-yeaxqbs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427230507-yeaxqbs",
+				"updated": "20240427230507"
+			},
+			"Children": [
+				{
+					"ID": "20240427230507-x75u8vb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230507-x75u8vb",
+						"updated": "20240427230507"
+					},
+					"Children": [
+						{
+							"ID": "20240427230507-i73h3ru",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230507-i73h3ru",
+								"updated": "20240427230507"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 HTML 块时默认会对其中的代码进行安全过滤，如果不需要过滤，请开启 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "允许执行 HTML 块内脚本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，但请确认代码安全后再开启，以免遭遇跨站脚本攻击（XSS）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427230507-d9kna2p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427230507-d9kna2p",
+						"updated": "20240427230507"
+					},
+					"Children": [
+						{
+							"ID": "20240427230507-2qbjv6v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427230507-2qbjv6v",
+								"updated": "20240427230507"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "因为 Markdown 规范对 HTML 块解析规则较为复杂，建议使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 包裹 HTML 代码并去掉空行"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1713,10 +1884,25 @@
 			]
 		},
 		{
+			"ID": "20240510234951-58h7o7g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234951-58h7o7g",
+				"updated": "20240510235019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "无序列表块只能包含列表项块，相邻的无序列表块间距较大。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-5p4i03b",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-5p4i03b"
+				"id": "20210104090624-5p4i03b",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -1730,7 +1916,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
 				}
 			]
 		},
@@ -1880,7 +2066,8 @@
 			"ID": "20210104090624-13yo86l",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-13yo86l"
+				"id": "20210104090624-13yo86l",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -1897,6 +2084,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510234949-rphupr1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234949-rphupr1",
+				"updated": "20240510234959"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有序列表块只能包含列表项块，相邻的有序列表块间距较大。"
 				}
 			]
 		},
@@ -2078,6 +2279,20 @@
 			]
 		},
 		{
+			"ID": "20240510234858-y5tx7l9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234858-y5tx7l9",
+				"updated": "20240510234944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任务列表块只能包含列表项块，相邻的任务列表块间距较大。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-n9anlgh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2142,7 +2357,8 @@
 			"ID": "20210104090624-wcbtwum",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-wcbtwum"
+				"id": "20210104090624-wcbtwum",
+				"updated": "20210104090624"
 			},
 			"Children": [
 				{
@@ -2159,6 +2375,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20240510234715-ystlvq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510234715-ystlvq4",
+				"updated": "20240510234833"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表项块被包含在列表块内，相邻的列表项块间距较小。"
 				}
 			]
 		},

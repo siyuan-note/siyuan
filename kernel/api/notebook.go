@@ -103,11 +103,9 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	if util.ReadOnly && !model.IsUserGuide(notebook) {
-		result := util.NewResult()
-		result.Code = -1
-		result.Msg = model.Conf.Language(34)
-		result.Data = map[string]interface{}{"closeTimeout": 5000}
-		c.JSON(200, result)
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(34)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 
@@ -183,12 +181,21 @@ func openNotebook(c *gin.Context) {
 		return
 	}
 
-	if util.ReadOnly && !model.IsUserGuide(notebook) {
-		result := util.NewResult()
-		result.Code = -1
-		result.Msg = model.Conf.Language(34)
-		result.Data = map[string]interface{}{"closeTimeout": 5000}
-		c.JSON(200, result)
+	isUserGuide := model.IsUserGuide(notebook)
+	if util.ReadOnly && !isUserGuide {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(34)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	if isUserGuide && util.ContainerIOS == util.Container {
+		// iOS 端不再支持打开用户指南，请参考桌面端用户指南
+		// 用户指南中包含了付费相关内容，无法通过商店上架审核
+		// Opening the user guide is no longer supported on iOS https://github.com/siyuan-note/siyuan/issues/11492
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(215)
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
 	}
 

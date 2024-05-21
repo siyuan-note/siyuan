@@ -1484,7 +1484,7 @@
     "212": "There are some defects in the current version of cloud data sync, please upgrade to the latest version. Sorry for the inconvenience",
     "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing",
     "214": "This function needs to be signed in and purchasing [PRO Features] or [Subscription] to use",
-    "215": "TODO",
+    "215": "Please refer to the desktop user guide",
     "216": "Rebuilding asset content data index, please wait...",
     "217": "[%d/%d] Created asset content data index",
     "218": "Too many snapshots of the data repo have been detected, which slows down program startup and data sync. Please consider executing [Settings - About - Data repo purge]",

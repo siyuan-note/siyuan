@@ -1484,7 +1484,7 @@
     "212": "Il y a quelques défauts dans la version actuelle de la synchronisation des données cloud, veuillez mettre à niveau vers la dernière version. Désolé pour le désagrément",
     "213": "Échec de la vérification cloud, veuillez essayer de mettre à niveau vers la dernière version et de vous reconnecter avant de synchroniser",
     "214": "Cette fonction nécessite de vous connecter à votre compte et d'acheter des [PRO Features] ou un [Subscription] avant de pouvoir l'utiliser.",
-    "215": "TODO",
+    "215": "Veuillez vous référer au guide de l'utilisateur du bureau",
     "216": "Reconstruction de l'index des données du contenu des ressources, veuillez patienter...",
     "217": "[%d/%d] Création d'un index de données de contenu d'actif",
     "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",

@@ -16,6 +16,25 @@ import {setKey} from "../sync/syncGuide";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
+        const checkUpdateHTML = window.siyuan.config.system.isMicrosoftStore ? `<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
+        <span id="isInsider"></span>
+        <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}</div>
+    </div>
+</div>` : `<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
+        <span id="isInsider"></span>
+        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
+    </div>
+    <div class="fn__space"></div>
+    <div class="fn__flex-center fn__size200 config__item-line">
+        <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
+            <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
+        </button>
+    </div>
+</div>`;
         return `<div class="fn__flex b3-label config__item${isBrowser() || window.siyuan.config.system.isMicrosoftStore || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoLaunch}
@@ -143,19 +162,7 @@ export const about = {
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
-        <span id="isInsider"></span>
-        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
-    </div>
-    <div class="fn__space"></div>
-    <div class="fn__flex-center fn__size200 config__item-line">
-        <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
-            <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
-        </button>
-    </div>
-</div>
+${checkUpdateHTML}
 <div class="fn__flex config__item  b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}

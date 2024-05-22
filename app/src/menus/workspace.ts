@@ -432,13 +432,15 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.userGuide,
-            icon: "iconHelp",
-            click: () => {
-                mountHelp();
-            }
-        }).element);
+        if (!isIPad()) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.userGuide,
+                icon: "iconHelp",
+                click: () => {
+                    mountHelp();
+                }
+            }).element);
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.feedback,
             icon: "iconFeedback",

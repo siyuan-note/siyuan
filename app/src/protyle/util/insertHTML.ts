@@ -171,7 +171,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             }
         }
 
-        const text = protyle.lute.BlockDOM2EscapeMarkerContent(html);
+        const text = protyle.lute.BlockDOM2Content(html);
         const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));
         const rowsElement = blockElement.querySelector(".av__row--select");
 

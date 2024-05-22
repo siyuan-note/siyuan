@@ -161,22 +161,6 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				if nil != tableCell.Value && nil != tableCell.Value.Relation {
 					tableCell.Value.Relation.Contents = nil
 				}
-			case av.KeyTypeText:
-				if nil != tableCell.Value && nil != tableCell.Value.Text {
-					tableCell.Value.Text.Content = util.EscapeHTML(tableCell.Value.Text.Content)
-				}
-			case av.KeyTypeEmail:
-				if nil != tableCell.Value && nil != tableCell.Value.Email {
-					tableCell.Value.Email.Content = util.EscapeHTML(tableCell.Value.Email.Content)
-				}
-			case av.KeyTypeURL:
-				if nil != tableCell.Value && nil != tableCell.Value.URL {
-					tableCell.Value.URL.Content = util.EscapeHTML(tableCell.Value.URL.Content)
-				}
-			case av.KeyTypePhone:
-				if nil != tableCell.Value && nil != tableCell.Value.Phone {
-					tableCell.Value.Phone.Content = util.EscapeHTML(tableCell.Value.Phone.Content)
-				}
 			}
 
 			FillAttributeViewTableCellNilValue(tableCell, rowID, col.ID)

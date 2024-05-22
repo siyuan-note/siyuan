@@ -1,4 +1,5 @@
 {
+  "isMsStoreVerTip": "当前使用的版本为微软商店版，请在微软商店中检查更新",
   "andSubFile": "确定删除 <b>${x}</b> 及其 ${y} 个子文档吗？",
   "confirmDeleteTip": "确定删除 <b>${x}</b> 吗？",
   "rollbackTip": "删除后可在 [数据历史] 中恢复，按 [设置 - 编辑器 - 历史保留天数] 保留 <code class='fn__code'>${x}</code> 天",

@@ -252,6 +252,10 @@ func CheckUpdate(showMsg bool) {
 		return
 	}
 
+	if Conf.System.IsMicrosoftStore {
+		return
+	}
+
 	result, err := util.GetRhyResult(showMsg)
 	if nil != err {
 		return

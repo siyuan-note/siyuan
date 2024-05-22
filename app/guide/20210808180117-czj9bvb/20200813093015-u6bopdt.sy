@@ -863,55 +863,6 @@
 			]
 		},
 		{
-			"ID": "20201224120447-dscw9gl",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20201224120447-dscw9gl",
-				"updated": "20211009092403"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "删除文档有什么"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "事项吗？"
-				}
-			]
-		},
-		{
-			"ID": "20210323173015-i71ug1u",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210323173015-i71ug1u",
-				"updated": "20220502163327"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "文档被删除后不会出现在操作系统回收站中，而是直接删除，删除时思源会生成"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20210615211733-v6rzowm",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "数据历史"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
 			"ID": "20210106192152-d2k9itt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

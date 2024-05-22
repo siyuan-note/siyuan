@@ -6,6 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
+		"type": "doc",
 		"updated": "20230820183402"
 	},
 	"Children": [
@@ -862,55 +863,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "來獲取新版本。"
-				}
-			]
-		},
-		{
-			"ID": "20211226115356-m9gd7qb",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226115356-m9gd7qb",
-				"updated": "20211225215145"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "刪除文檔有什麽"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "事項嗎？"
-				}
-			]
-		},
-		{
-			"ID": "20211226115356-rn32tpl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226115356-rn32tpl",
-				"updated": "20220502163402"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "文檔被刪除後不會出現在作業系統回收站中，而是直接刪除，刪除時思源會生成"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226122707-8cr09co",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "資料歷史"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
 				}
 			]
 		},

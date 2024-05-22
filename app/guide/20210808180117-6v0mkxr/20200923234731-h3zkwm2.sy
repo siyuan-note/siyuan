@@ -870,55 +870,6 @@
 			]
 		},
 		{
-			"ID": "20201224120448-ygu8bzx",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20201224120448-ygu8bzx",
-				"updated": "20211009092454"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Is there any "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " for deleting docs?"
-				}
-			]
-		},
-		{
-			"ID": "20210615213114-fq2uew0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210615213114-fq2uew0",
-				"updated": "20220502163309"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20210615213222-vs5tzbd",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "data history"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
-				}
-			]
-		},
-		{
 			"ID": "20210106192438-on2fb5k",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

@@ -32,13 +32,13 @@ export const initBlockPopover = (app: App) => {
                 } else {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
-                            tip = aElement.firstElementChild.getAttribute("data-href");
+                            tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
                         }
                     }
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (aElement.scrollWidth > aElement.clientWidth + 2) {
-                            tip = getCellText(aElement);
+                            tip = Lute.EscapeHTMLStr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";
                     }

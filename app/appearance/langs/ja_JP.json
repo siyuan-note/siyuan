@@ -1,4 +1,5 @@
 {
+  "isMsStoreVerTip": "現在使用されているバージョンは Microsoft Store バージョンです。Microsoft Store で更新プログラムを確認してください",
   "andSubFile": "<b>${x}</b> とそのサブドキュメント ${y} を削除してもよろしいですか?",
   "confirmDeleteTip": "<b>${x}</b> を削除してもよろしいですか?",
   "rollbackTip": "削除後は [データ履歴] で復元でき、<code class= 'fn__code'>${x}</code> は保持されます。 [設定 - エディター - 履歴の保存日数] による日数",

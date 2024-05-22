@@ -1,4 +1,5 @@
 {
+  "isMsStoreVerTip": "La versión utilizada actualmente es la versión de Microsoft Store, verifique si hay actualizaciones en Microsoft Store",
   "andSubFile": "¿Está seguro de que desea eliminar <b>${x}</b> y sus subdocumentos ${y}?",
   "confirmDeleteTip": "¿Está seguro de eliminar <b>${x}</b>?",
   "rollbackTip": "Después de la eliminación, se puede restaurar en [Historial de datos] y se conserva <code class= 'fn__code'>${x}</code> días según [Configuración - Editor - Días de retención del historial]",

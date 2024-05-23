@@ -1,4 +1,6 @@
 {
+  "duplicateMirror": "Duplicate as a mirror",
+  "duplicateCompletely": "Duplicate completely",
   "isMsStoreVerTip": "The currently used version is the Microsoft Store version, please check for updates in the Microsoft Store",
   "andSubFile": "Are you sure you want to delete <b>${x}</b> and its ${y} subdocs?",
   "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?",

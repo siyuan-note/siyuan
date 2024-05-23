@@ -1,4 +1,6 @@
 {
+  "duplicateMirror": "複製為鏡像副本",
+  "duplicateCompletely": "複製為完整副本",
   "isMsStoreVerTip": "目前使用的版本為 Microsoft Store 版本，請在 Microsoft Store 中檢查更新",
   "andSubFile": "決定刪除 <b>${x}</b> 及其 ${y} 個子文件嗎？",
   "confirmDeleteTip": "確定刪除<b>${x}</b> 嗎？",

@@ -48,7 +48,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -300,71 +299,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			av.BatchUpsertBlockRel(avNodes)
 		}
 
-		// 如果数据库中绑定的块不在导入的文档中
-		cachedTrees, saveTrees := map[string]*parse.Tree{}, map[string]*parse.Tree{}
+		// 如果数据库中绑定的块不在导入的文档中，则需要单独更新这些绑定块的属性
+		var attrViewIDs []string
 		for _, avID := range avIDs {
-			attrView, _ := av.ParseAttributeView(avID)
-			if nil == attrView {
-				continue
-			}
-
-			blockKeyValues := attrView.GetBlockKeyValues()
-			for _, blockValue := range blockKeyValues.Values {
-				if blockValue.IsDetached {
-					continue
-				}
-				bt := treenode.GetBlockTree(blockValue.BlockID)
-				if nil == bt {
-					continue
-				}
-
-				tree := cachedTrees[bt.RootID]
-				if nil == tree {
-					tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-					if nil == tree {
-						continue
-					}
-					cachedTrees[bt.RootID] = tree
-				}
-
-				node := treenode.GetNodeInTree(tree, blockValue.BlockID)
-				if nil == node {
-					continue
-				}
-
-				attrs := parse.IAL2Map(node.KramdownIAL)
-				if "" == attrs[av.NodeAttrNameAvs] {
-					attrs[av.NodeAttrNameAvs] = avID
-				} else {
-					nodeAvIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
-					nodeAvIDs = append(nodeAvIDs, avID)
-					nodeAvIDs = gulu.Str.RemoveDuplicatedElem(nodeAvIDs)
-					attrs[av.NodeAttrNameAvs] = strings.Join(nodeAvIDs, ",")
-					saveTrees[bt.RootID] = tree
-				}
-
-				avNames := getAvNames(attrs[av.NodeAttrNameAvs])
-				if "" != avNames {
-					attrs[av.NodeAttrViewNames] = avNames
-				}
-
-				oldAttrs, setErr := setNodeAttrs0(node, attrs)
-				if nil != setErr {
-					continue
-				}
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-				pushBroadcastAttrTransactions(oldAttrs, node)
-			}
+			attrViewIDs = append(attrViewIDs, avID)
 		}
-
-		for _, saveTree := range saveTrees {
-			if treeErr := indexWriteTreeUpsertQueue(saveTree); nil != treeErr {
-				logging.LogErrorf("index write tree upsert queue failed: %s", treeErr)
-			}
-
-			avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
-			av.BatchUpsertBlockRel(avNodes)
-		}
+		updateBoundBlockAvsAttribute(attrViewIDs)
 	}
 
 	// 将关联的闪卡数据合并到默认卡包 data/storage/riff/20230218211946-2kw8jgx 中

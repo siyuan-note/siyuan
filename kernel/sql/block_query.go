@@ -812,6 +812,10 @@ func GetContainerText(container *ast.Node) string {
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
 	leaf := treenode.FirstLeafBlock(container)
+	if nil == leaf {
+		return ""
+	}
+
 	ast.Walk(leaf, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue

@@ -1210,8 +1210,9 @@ export class Gutter {
                 }
             }).element);
         }
+
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
-            label: window.siyuan.languages.copy,
+            label: type === "NodeAttributeView" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
                 if (isNotEditBlock(nodeElement)) {
@@ -1229,13 +1230,26 @@ export class Gutter {
                 focusBlock(nodeElement);
             }
         }, {
-            label: window.siyuan.languages.duplicate,
+            label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
             disabled: protyle.disabled,
             click() {
                 duplicateBlock([nodeElement], protyle);
             }
         }]);
+        if (type === "NodeAttributeView") {
+            copyMenu.push({
+                label: window.siyuan.languages.duplicateCompletely,
+                click() {
+                    fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
+                        const newBlock = document.createElement("div");
+                        newBlock.innerHTML = response.data;
+                        nodeElement.parentElement.insertBefore(newBlock, nodeElement.nextElementSibling);
+                        focusBlock(newBlock);
+                    });
+                }
+            });
+        }
         const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
         if (copyTextRefMenu) {
             copyMenu.splice(copyMenu.length - 1, 0, copyTextRefMenu);

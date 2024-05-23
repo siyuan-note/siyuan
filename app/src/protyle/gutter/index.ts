@@ -1213,6 +1213,13 @@ export class Gutter {
         }
 
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
+            label: window.siyuan.languages.copyPlainText,
+            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
+            click() {
+                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
+                focusBlock(nodeElement);
+            }
+        }, {
             label: type === "NodeAttributeView" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
@@ -1222,13 +1229,6 @@ export class Gutter {
                     focusByRange(getEditorRange(nodeElement));
                 }
                 document.execCommand("copy");
-            }
-        }, {
-            label: window.siyuan.languages.copyPlainText,
-            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
-            click() {
-                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
-                focusBlock(nodeElement);
             }
         }, {
             label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
@@ -1266,7 +1266,7 @@ export class Gutter {
         }
         const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
         if (copyTextRefMenu) {
-            copyMenu.splice(copyMenu.length - 1, 0, copyTextRefMenu);
+            copyMenu.splice(7, 0, copyTextRefMenu);
         }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,

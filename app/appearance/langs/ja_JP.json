@@ -1,4 +1,7 @@
 {
+  "copyMirror": "ミラーをコピー",
+  "duplicateMirror": "ミラーの複製",
+  "duplicateCompletely": "完全に複製します",
   "isMsStoreVerTip": "現在使用されているバージョンは Microsoft Store バージョンです。Microsoft Store で更新プログラムを確認してください",
   "andSubFile": "<b>${x}</b> とそのサブドキュメント ${y} を削除してもよろしいですか?",
   "confirmDeleteTip": "<b>${x}</b> を削除してもよろしいですか?",

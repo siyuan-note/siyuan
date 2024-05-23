@@ -56,6 +56,7 @@ import {avContextmenu} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+import {scrollCenter} from "../../util/highlightById";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1242,10 +1243,23 @@ export class Gutter {
                 label: window.siyuan.languages.duplicateCompletely,
                 click() {
                     fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
-                        const newBlock = document.createElement("div");
-                        newBlock.innerHTML = response.data;
-                        nodeElement.parentElement.insertBefore(newBlock, nodeElement.nextElementSibling);
-                        focusBlock(newBlock);
+                        const tempElement = document.createElement("template");
+                        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`)
+                        const cloneElement = tempElement.content.firstElementChild;
+                        nodeElement.after(cloneElement);
+                        avRender(cloneElement, protyle, () => {
+                            focusBlock(cloneElement);
+                        });
+                        scrollCenter(protyle);
+                        transaction(protyle, [{
+                            action: "insert",
+                            data: cloneElement.outerHTML,
+                            id: response.data.blockID,
+                            previousID: id,
+                        }], [{
+                            action: "delete",
+                            id: response.data.blockID,
+                        }]);
                     });
                 }
             });

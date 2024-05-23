@@ -229,7 +229,7 @@ export const keymap = {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             const liElement = item.parentElement;
             let matchedKeymap = false;
-            if (keymapString === "" || (liElement.querySelector(".b3-text-field") as HTMLInputElement).value.indexOf(updateHotkeyTip(keymapString)) > -1) {
+            if (keymapString === "" || liElement.querySelector(".b3-text-field").getAttribute("data-value").indexOf(keymapString) > -1) {
                 matchedKeymap = true;
             }
             if ((item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value.toLowerCase().indexOf(item.textContent.toLowerCase()) > -1 || value === "") && matchedKeymap) {
@@ -298,13 +298,13 @@ export const keymap = {
         const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
         const searchKeymapElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;
         searchElement.addEventListener("compositionend", () => {
-            keymap.search(searchElement.value, searchKeymapElement.value);
+            keymap.search(searchElement.value, searchKeymapElement.dataset.value);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            keymap.search(searchElement.value, searchKeymapElement.value);
+            keymap.search(searchElement.value, searchKeymapElement.dataset.value);
         });
         /// #if !BROWSER
         searchKeymapElement.addEventListener("focus", () => {
@@ -325,6 +325,7 @@ export const keymap = {
             setTimeout(() => {
                 this.value = updateHotkeyTip(keymapStr);
             });
+            this.dataset.keymap = keymapStr;
             keymap.search(searchElement.value, keymapStr);
         });
         keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {

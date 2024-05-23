@@ -93,6 +93,10 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 }
 
 func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
+	if nil == node {
+		return
+	}
+
 	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false, GetBlockAttrsWithoutWaitWriting)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")

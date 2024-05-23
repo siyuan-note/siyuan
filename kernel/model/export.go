@@ -2527,7 +2527,63 @@ type refAsFootnotes struct {
 func exportRefTrees(tree *parse.Tree) (ret map[string]*parse.Tree) {
 	ret = map[string]*parse.Tree{}
 	exportRefTrees0(tree, &ret)
+
+	attrViewDefTrees := map[string]*parse.Tree{}
+	exportAttributeViewRefTrees0(tree, &attrViewDefTrees)
+	for _, t := range attrViewDefTrees {
+		if nil == ret[t.ID] {
+			ret[t.ID] = t
+		}
+	}
 	return
+}
+
+func exportAttributeViewRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
+	// 导出数据库所在文档时一并导出绑定块所在文档
+	// Export the binding block docs when exporting the doc where the database is located https://github.com/siyuan-note/siyuan/issues/11486
+
+	if nil != (*retTrees)[tree.ID] {
+		return
+	}
+	(*retTrees)[tree.ID] = tree
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView == n.Type {
+			avID := n.AttributeViewID
+			if "" == avID {
+				return ast.WalkContinue
+			}
+
+			attrView, _ := av.ParseAttributeView(avID)
+			if nil == attrView {
+				return ast.WalkContinue
+			}
+
+			blockKeyValues := attrView.GetBlockKeyValues()
+			if nil == blockKeyValues {
+				return ast.WalkContinue
+			}
+
+			for _, val := range blockKeyValues.Values {
+				defBlock := treenode.GetBlockTree(val.BlockID)
+				if nil == defBlock {
+					continue
+				}
+
+				defTree, _ := LoadTreeByBlockID(defBlock.RootID)
+				if nil == defTree {
+					continue
+				}
+
+				exportAttributeViewRefTrees0(defTree, retTrees)
+			}
+		}
+		return ast.WalkContinue
+	})
 }
 
 func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {

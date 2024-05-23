@@ -41,6 +41,46 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error) {
+	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
+	oldAvPath := filepath.Join(storageAvDir, avID+".json")
+	newAvID, newBlockID = ast.NewNodeID(), ast.NewNodeID()
+
+	oldAv, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	data, err := filelock.ReadFile(oldAvPath)
+	if nil != err {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	data = bytes.ReplaceAll(data, []byte(avID), []byte(newAvID))
+	av.UpsertBlockRel(newAvID, newBlockID)
+
+	newAv := &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, newAv); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", newAvID, err)
+		return
+	}
+
+	newAv.Name = oldAv.Name + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+	data, err = gulu.JSON.MarshalJSON(newAv)
+	if nil != err {
+		logging.LogErrorf("marshal attribute view [%s] failed: %s", newAvID, err)
+		return
+	}
+
+	newAvPath := filepath.Join(storageAvDir, newAvID+".json")
+	if err = filelock.WriteFile(newAvPath, data); nil != err {
+		logging.LogErrorf("write attribute view [%s] failed: %s", newAvID, err)
+		return
+	}
+	return
+}
+
 func GetAttributeViewKeysByAvID(avID string) (ret []*av.Key) {
 	ret = []*av.Key{}
 

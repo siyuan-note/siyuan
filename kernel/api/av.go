@@ -27,6 +27,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func duplicateAttributeViewBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	avID := arg["avID"].(string)
+
+	newAvID, newBlockID, err := model.DuplicateDatabaseBlock(avID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"avID":    newAvID,
+		"blockID": newBlockID,
+	}
+}
+
 func getAttributeViewKeysByAvID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

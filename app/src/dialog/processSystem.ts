@@ -67,8 +67,13 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     const allModels = getAllModels();
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
-            reloadProtyle(item.editor.protyle, false);
-            updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
+            fetchPost("/api/block/getDocInfo", {
+                id: item.editor.protyle.block.rootID,
+            }, (response) => {
+                item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
+                reloadProtyle(item.editor.protyle, false);
+                updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
+            });
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
             delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];

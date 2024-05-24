@@ -50,7 +50,6 @@
   * [Does it support data synchronization through a third-party sync disk?](#does-it-support-data-synchronization-through-a-third-party-sync-disk)
   * [Is SiYuan open source?](#is-siyuan-open-source)
   * [How to upgrade to a new version?](#how-to-upgrade-to-a-new-version)
-  * [Is there any note for deleting docs?](#is-there-any-note-for-deleting-docs)
   * [How can I just wrap and not start a new paragraph?](#how-can-i-just-wrap-and-not-start-a-new-paragraph)
   * [What if some blocks (such as paragraph blocks in list items) cannot find the block icon?](#what-if-some-blocks-such-as-paragraph-blocks-in-list-items-cannot-find-the-block-icon)
   * [How to share notes?](#how-to-share-notes)

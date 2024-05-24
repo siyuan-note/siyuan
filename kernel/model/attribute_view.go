@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -78,6 +79,8 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		logging.LogErrorf("write attribute view [%s] failed: %s", newAvID, err)
 		return
 	}
+
+	updateBoundBlockAvsAttribute([]string{newAvID})
 	return
 }
 
@@ -3312,5 +3315,75 @@ func replaceRelationAvValues(avID, previousID, nextID string) {
 			av.SaveAttributeView(srcAv)
 			util.PushReloadAttrView(srcAvID)
 		}
+	}
+}
+
+func updateBoundBlockAvsAttribute(avIDs []string) {
+	// 更新指定 avIDs 中绑定块的 avs 属性
+
+	cachedTrees, saveTrees := map[string]*parse.Tree{}, map[string]*parse.Tree{}
+	luteEngine := util.NewLute()
+	for _, avID := range avIDs {
+		attrView, _ := av.ParseAttributeView(avID)
+		if nil == attrView {
+			continue
+		}
+
+		blockKeyValues := attrView.GetBlockKeyValues()
+		for _, blockValue := range blockKeyValues.Values {
+			if blockValue.IsDetached {
+				continue
+			}
+			bt := treenode.GetBlockTree(blockValue.BlockID)
+			if nil == bt {
+				continue
+			}
+
+			tree := cachedTrees[bt.RootID]
+			if nil == tree {
+				tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+				if nil == tree {
+					continue
+				}
+				cachedTrees[bt.RootID] = tree
+			}
+
+			node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+			if nil == node {
+				continue
+			}
+
+			attrs := parse.IAL2Map(node.KramdownIAL)
+			if "" == attrs[av.NodeAttrNameAvs] {
+				attrs[av.NodeAttrNameAvs] = avID
+			} else {
+				nodeAvIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
+				nodeAvIDs = append(nodeAvIDs, avID)
+				nodeAvIDs = gulu.Str.RemoveDuplicatedElem(nodeAvIDs)
+				attrs[av.NodeAttrNameAvs] = strings.Join(nodeAvIDs, ",")
+				saveTrees[bt.RootID] = tree
+			}
+
+			avNames := getAvNames(attrs[av.NodeAttrNameAvs])
+			if "" != avNames {
+				attrs[av.NodeAttrViewNames] = avNames
+			}
+
+			oldAttrs, setErr := setNodeAttrs0(node, attrs)
+			if nil != setErr {
+				continue
+			}
+			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+			pushBroadcastAttrTransactions(oldAttrs, node)
+		}
+	}
+
+	for _, saveTree := range saveTrees {
+		if treeErr := indexWriteTreeUpsertQueue(saveTree); nil != treeErr {
+			logging.LogErrorf("index write tree upsert queue failed: %s", treeErr)
+		}
+
+		avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
+		av.BatchUpsertBlockRel(avNodes)
 	}
 }

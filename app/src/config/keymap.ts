@@ -17,8 +17,12 @@ export const keymap = {
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
                 const keyValue = updateHotkeyTip(keymap[key].custom);
+                let keymapName = window.siyuan.languages[key];
+                if ("editor" + Constants.ZWSP + "general" === keys && key === "duplicate") {
+                    keymapName = `${window.siyuan.languages.duplicate} / ${window.siyuan.languages.duplicateMirror}`;
+                }
                 html += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
-    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+    <span class="b3-list-item__text">${keymapName}</span>
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
@@ -120,7 +124,7 @@ export const keymap = {
         <div class="fn__space"></div>
         <label class="b3-form__icon fn__block searchByKeyLabel">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconKeymap"></use></svg>
-            <input id="searchByKey" class="b3-form__icon-input b3-text-field fn__block" spellcheck="false" placeholder="${window.siyuan.languages.keymap}">
+            <input id="searchByKey" data-value="" class="b3-form__icon-input b3-text-field fn__block" spellcheck="false" placeholder="${window.siyuan.languages.keymap}">
         </label>
         <div class="fn__space"></div>
         <button id="clearSearchBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">

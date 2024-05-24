@@ -1247,6 +1247,8 @@ export class Gutter {
             copyMenu.push({
                 iconHTML: "",
                 label: window.siyuan.languages.duplicateCompletely,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicateCompletely.custom,
+                disabled: protyle.disabled,
                 click() {
                     duplicateCompletely(protyle, nodeElement as HTMLElement);
                 }

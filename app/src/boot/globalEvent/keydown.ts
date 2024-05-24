@@ -449,6 +449,15 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.duplicateCompletely.custom, event)) {
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!nodeElement || !nodeElement.classList.contains("av")) {
+            return false;
+        }
+        duplicateCompletely(protyle, nodeElement);
+        event.preventDefault();
+        return true;
+    }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
         reloadProtyle(protyle, true);
         event.preventDefault();

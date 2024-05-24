@@ -71,6 +71,7 @@ import {filterHotkey} from "./commonHotkey";
 import {setReadOnly} from "../../config/util/setReadOnly";
 import {copyPNGByLink} from "../../menus/util";
 import {globalCommand} from "./command/global";
+import {duplicateCompletely} from "../../protyle/render/av/action";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();

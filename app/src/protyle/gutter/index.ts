@@ -52,11 +52,10 @@ import {setPosition} from "../../util/setPosition";
 import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import {avContextmenu} from "../render/av/action";
+import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
-import {scrollCenter} from "../../util/highlightById";
 
 export class Gutter {
     public element: HTMLElement;
@@ -757,6 +756,7 @@ export class Gutter {
             }).element);
         }
         const copyMenu: IMenu[] = [{
+            iconHTML: "",
             label: window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
@@ -768,6 +768,7 @@ export class Gutter {
                 document.execCommand("copy");
             }
         }, {
+            iconHTML: "",
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
@@ -779,6 +780,7 @@ export class Gutter {
                 focusBlock(selectsElement[0]);
             }
         }, {
+            iconHTML: "",
             label: window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
             disabled: protyle.disabled,
@@ -1213,6 +1215,7 @@ export class Gutter {
         }
 
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
+            iconHTML: "",
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
@@ -1220,6 +1223,7 @@ export class Gutter {
                 focusBlock(nodeElement);
             }
         }, {
+            iconHTML: "",
             label: type === "NodeAttributeView" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
@@ -1231,6 +1235,7 @@ export class Gutter {
                 document.execCommand("copy");
             }
         }, {
+            iconHTML: "",
             label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
             disabled: protyle.disabled,
@@ -1240,27 +1245,10 @@ export class Gutter {
         }]);
         if (type === "NodeAttributeView") {
             copyMenu.push({
+                iconHTML: "",
                 label: window.siyuan.languages.duplicateCompletely,
                 click() {
-                    fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
-                        const tempElement = document.createElement("template");
-                        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`)
-                        const cloneElement = tempElement.content.firstElementChild;
-                        nodeElement.after(cloneElement);
-                        avRender(cloneElement, protyle, () => {
-                            focusBlock(cloneElement);
-                        });
-                        scrollCenter(protyle);
-                        transaction(protyle, [{
-                            action: "insert",
-                            data: cloneElement.outerHTML,
-                            id: response.data.blockID,
-                            previousID: id,
-                        }], [{
-                            action: "delete",
-                            id: response.data.blockID,
-                        }]);
-                    });
+                    duplicateCompletely(protyle, nodeElement as HTMLElement);
                 }
             });
         }
@@ -2008,6 +1996,7 @@ export class Gutter {
             return false;
         }
         return {
+            iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.copyText.custom,
             label: window.siyuan.languages.copyText,
             click() {

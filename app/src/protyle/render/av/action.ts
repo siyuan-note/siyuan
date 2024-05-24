@@ -19,7 +19,7 @@ import {deleteRow, insertRows, selectRow, setPageSize, updateHeader} from "./row
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
-import {focusByRange} from "../../util/selection";
+import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
@@ -31,6 +31,8 @@ import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {openSearchAV} from "./relation";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
+import {fetchPost} from "../../../util/fetch";
+import {scrollCenter} from "../../../util/highlightById";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -489,3 +491,25 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
         item.remove();
     });
 };
+
+export const duplicateCompletely = (protyle:IProtyle, nodeElement:HTMLElement) => {
+    fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`)
+        const cloneElement = tempElement.content.firstElementChild;
+        nodeElement.after(cloneElement);
+        avRender(cloneElement, protyle, () => {
+            focusBlock(cloneElement);
+        });
+        scrollCenter(protyle);
+        transaction(protyle, [{
+            action: "insert",
+            data: cloneElement.outerHTML,
+            id: response.data.blockID,
+            previousID: nodeElement.dataset.nodeId,
+        }], [{
+            action: "delete",
+            id: response.data.blockID,
+        }]);
+    });
+}

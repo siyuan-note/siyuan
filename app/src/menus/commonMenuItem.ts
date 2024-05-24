@@ -372,7 +372,7 @@ export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?:
 
 export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
     return [{
-        icon: "iconRef",
+        iconHTML: "",
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
         label: window.siyuan.languages.copyBlockRef,
         click: () => {
@@ -384,7 +384,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
             }
         }
     }, {
-        icon: "iconSQL",
+        iconHTML: "",
         label: window.siyuan.languages.copyBlockEmbed,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
         click: () => {
@@ -394,7 +394,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
             }
         }
     }, {
-        icon: "iconSiYuan",
+        iconHTML: "",
         label: window.siyuan.languages.copyProtocol,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
         click: () => {
@@ -404,6 +404,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
             }
         }
     }, {
+        iconHTML: "",
         label: window.siyuan.languages.copyProtocolInMd,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
         click: () => {
@@ -415,6 +416,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
             }
         }
     }, {
+        iconHTML: "",
         label: window.siyuan.languages.copyHPath,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
         click: () => {
@@ -425,6 +427,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
             });
         }
     }, {
+        iconHTML: "",
         label: window.siyuan.languages.copyID,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
         click: () => {

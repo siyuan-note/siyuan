@@ -71,7 +71,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
                 id: item.editor.protyle.block.rootID,
             }, (response) => {
                 item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
-                reloadProtyle(item.editor.protyle, false);
+                reloadProtyle(item.editor.protyle, false, true);
                 updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
             });
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {

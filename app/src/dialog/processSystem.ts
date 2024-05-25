@@ -399,14 +399,18 @@ export const setTitle = (title: string) => {
     const workspaceName = getWorkspaceName();
     if (title === window.siyuan.languages.siyuanNote) {
         const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        document.title = versionTitle;
+        if("linux" !== window.siyuan.config.system.os){
+            document.title = versionTitle;
+        }
         if (dragElement) {
             dragElement.textContent = versionTitle;
             dragElement.setAttribute("title", versionTitle);
         }
     } else {
         title = title || window.siyuan.languages.untitled;
-        document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
+        if("linux" !== window.siyuan.config.system.os){
+            document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
+        }
         if (!dragElement) {
             return;
         }

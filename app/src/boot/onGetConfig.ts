@@ -360,7 +360,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             }
         });
     }
-    if ("darwin" !== window.siyuan.config.system.os) {
+    if ("darwin" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
         document.body.classList.add("body--win32");
 
         // 添加窗口控件
@@ -421,6 +421,9 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             cmd: "isFullScreen",
         });
         if (isFullScreen && !isWindow()) {
+            toolbarElement.style.paddingLeft = "0";
+        }
+        if("linux" === process.platform){
             toolbarElement.style.paddingLeft = "0";
         }
     }

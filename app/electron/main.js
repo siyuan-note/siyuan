@@ -308,7 +308,7 @@ const initMainWindow = () => {
             contextIsolation: false,
             autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
-        frame: "darwin" === process.platform,
+        frame: ["darwin","linux"].includes(process.platform),
         titleBarStyle: "hidden",
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
@@ -415,6 +415,12 @@ const initMainWindow = () => {
     },];
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
+    
+    if("linux" === process.platform){
+        currentWindow.menuBarVisible = false;
+        currentWindow.setTitle(productName);
+    }
+
     // 当前页面链接使用浏览器打开
     windowNavigate(currentWindow);
     currentWindow.on("close", (event) => {
@@ -959,7 +965,7 @@ app.whenReady().then(() => {
             width: Math.floor(wndScreen.size.width * 0.8),
             height: Math.floor(wndScreen.size.height * 0.8),
             resizable: true,
-            frame: "darwin" === process.platform,
+            frame: ["darwin","linux"].includes(process.platform),
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {
@@ -990,7 +996,7 @@ app.whenReady().then(() => {
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,
-            frame: "darwin" === process.platform,
+            frame: ["darwin","linux"].includes(process.platform),
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {

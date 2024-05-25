@@ -574,6 +574,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             } else if (typeof value !== "undefined") { // 不传入为删除，传入字符串不进行处理
                 let link = protyle.lute.GetLinkDest(value);
                 let name = "";
+                let imgSrc = "";
                 if (html) {
                     const tempElement = document.createElement("template");
                     tempElement.innerHTML = html;
@@ -581,17 +582,31 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                     if (aElement) {
                         link = aElement.getAttribute("data-href");
                         name = aElement.textContent;
+                    } else {
+                        const imgElement = tempElement.content.querySelector('.img img');
+                        if (imgElement) {
+                            imgSrc = imgElement.getAttribute("data-src");
+                        }
                     }
                 }
-                if (!link && !name) {
+                if (!link && !name && !imgSrc) {
                     return;
                 }
-                // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
-                value = oldValue.mAsset.concat({
-                    type: "file",
-                    content: link,
-                    name
-                });
+                if (imgSrc) {
+                    // 支持解析 ![]() https://github.com/siyuan-note/siyuan/issues/11487
+                    value = oldValue.mAsset.concat({
+                        type: "image",
+                        content: imgSrc,
+                        name: ""
+                    });
+                } else {
+                    // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
+                    value = oldValue.mAsset.concat({
+                        type: "file",
+                        content: link,
+                        name
+                    });
+                }
             }
         } else if (type === "mSelect") {
             // 不传入为删除

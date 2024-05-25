@@ -244,7 +244,8 @@ export class Outline extends Model {
                 }
             });
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (!editor || editor.disabled || moveEvent.clientY === event.clientY && moveEvent.clientX === event.clientX) {
+                if (!editor || editor.disabled || Math.abs(moveEvent.clientY - event.clientY) < 3 &&
+                    Math.abs(moveEvent.clientX - event.clientX) < 3) {
                     return;
                 }
                 moveEvent.preventDefault();
@@ -287,6 +288,7 @@ export class Outline extends Model {
                 if (!selectItem) {
                     selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
                 }
+                let hasChange = true;
                 if (selectItem && selectItem.className.indexOf("dragover") > -1 && editor) {
                     let previousID;
                     let parentID;
@@ -308,30 +310,37 @@ export class Outline extends Model {
                             previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
                         }
                         if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
-                            return true;
+                            hasChange = false;
+                        } else {
+                            selectItem.before(item);
                         }
-                        selectItem.before(item);
                     } else if (selectItem.classList.contains("dragover__bottom")) {
                         previousID = selectItem.getAttribute("data-node-id");
-                        selectItem.after(item);
+                        if (previousID === item.previousElementSibling?.getAttribute("data-node-id")) {
+                            hasChange = false;
+                        } else {
+                            selectItem.after(item);
+                        }
                     }
-                    this.element.setAttribute("data-loading", "true");
-                    transaction(editor, [{
-                        action: "moveOutlineHeading",
-                        id: item.dataset.nodeId,
-                        previousID,
-                        parentID,
-                    }], [{
-                        action: "moveOutlineHeading",
-                        id: item.dataset.nodeId,
-                        previousID: undoPreviousID,
-                        parentID: undoParentID,
-                    }]);
-                    // https://github.com/siyuan-note/siyuan/issues/10828#issuecomment-2044099675
-                    editor.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"] [contenteditable="true"][spellcheck]').forEach(item => {
-                        item.setAttribute("contenteditable", "false");
-                    });
-                    return true;
+                    if (hasChange) {
+                        this.element.setAttribute("data-loading", "true");
+                        transaction(editor, [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.nodeId,
+                            previousID,
+                            parentID,
+                        }], [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.nodeId,
+                            previousID: undoPreviousID,
+                            parentID: undoParentID,
+                        }]);
+                        // https://github.com/siyuan-note/siyuan/issues/10828#issuecomment-2044099675
+                        editor.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"] [contenteditable="true"][spellcheck]').forEach(item => {
+                            item.setAttribute("contenteditable", "false");
+                        });
+                        return true;
+                    }
                 }
                 this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(item => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover");

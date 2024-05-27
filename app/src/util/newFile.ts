@@ -246,7 +246,10 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
     }, (idResponse) => {
         const refText = escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen));
         if (idResponse.data && idResponse.data.length > 0) {
-            insertHTML(`<span data-type="block-ref" data-id="${idResponse.data[0]}" data-subtype="d">${refText}</span>`, protyle, false, true);
+            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                type: "id",
+                color: `${idResponse.data[0]}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
+            });
         } else {
             fetchPost("/api/filetree/createDocWithMd", {
                 notebook: targetNotebookId,
@@ -254,7 +257,10 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
                 parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
                 markdown: ""
             }, response => {
-                insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${refText}</span>`, protyle, false, true);
+                protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    type: "id",
+                    color: `${response.data}${Constants.ZWSP}d${Constants.ZWSP}${refText}`
+                });
             });
         }
         hideElements(["toolbar"], protyle);

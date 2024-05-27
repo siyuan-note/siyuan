@@ -165,9 +165,17 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		}
 	}
 
-	if nil != value.Relation && KeyTypeRelation == value.Type && 0 < len(value.Relation.Contents) && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
+	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
 		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
 		// 单独处理关联类型的比较
+
+		// 处理为空和不为空
+		switch filter.Operator {
+		case FilterOperatorIsEmpty:
+			return 0 == len(value.Relation.Contents)
+		case FilterOperatorIsNotEmpty:
+			return 0 != len(value.Relation.Contents)
+		}
 
 		for _, relationValue := range value.Relation.Contents {
 			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}

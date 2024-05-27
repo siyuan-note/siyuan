@@ -583,7 +583,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                         link = aElement.getAttribute("data-href");
                         name = aElement.textContent;
                     } else {
-                        const imgElement = tempElement.content.querySelector('.img img');
+                        const imgElement = tempElement.content.querySelector(".img img");
                         if (imgElement) {
                             imgSrc = imgElement.getAttribute("data-src");
                         }

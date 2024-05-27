@@ -164,12 +164,12 @@ export const openSnippets = () => {
         dialog.element.querySelectorAll('[data-action="search"]').forEach((inputItem: HTMLInputElement) => {
             inputItem.addEventListener("input", (event: KeyboardEvent) => {
                 if (event.isComposing) {
-                    return
+                    return;
                 }
-                filterSnippet(dialog, inputItem)
+                filterSnippet(dialog, inputItem);
             });
             inputItem.addEventListener("compositionend", () => {
-                filterSnippet(dialog, inputItem)
+                filterSnippet(dialog, inputItem);
             });
         });
     });
@@ -188,7 +188,7 @@ const filterSnippet = (dialog: Dialog, inputItem: HTMLInputElement) => {
             snippetPanel.classList.add("fn__none");
         }
     });
-}
+};
 
 const genSnippet = (options: ISnippet) => {
     return `<div data-id="${options.id || ""}" data-type="${options.type}">

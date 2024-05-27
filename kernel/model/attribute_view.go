@@ -579,6 +579,10 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 						ial = GetBlockAttrsWithoutWaitWriting(block.BlockID)
 					}
 
+					if nil == kv.Values[0].Template {
+						kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, blockID, kv.Key.Type)
+					}
+
 					var renderErr error
 					kv.Values[0].Template.Content, renderErr = sql.RenderTemplateCol(ial, keyValues, kv.Key.Template)
 					if nil != renderErr {

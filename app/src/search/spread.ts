@@ -13,9 +13,14 @@ export const openSearch = async (options: {
     notebookId?: string,
     searchPath?: string
 }) => {
+    // 全局搜索中使用 ctrl+F 需继续执行 https://ld246.com/article/1716632837934
+    let globalToPath = false;
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#searchList")) {
             const lastKey = item.element.getAttribute("data-key");
+            if (lastKey === Constants.DIALOG_GLOBALSEARCH && options.hotkey === Constants.DIALOG_SEARCH) {
+                globalToPath = true;
+            }
             const replaceHeaderElement = item.element.querySelectorAll(".search__header")[1];
             if (lastKey !== options.hotkey && options.hotkey === Constants.DIALOG_REPLACE && replaceHeaderElement.classList.contains("fn__none")) {
                 replaceHeaderElement.classList.remove("fn__none");
@@ -48,7 +53,7 @@ export const openSearch = async (options: {
             return true;
         }
     });
-    if (exitDialog) {
+    if (exitDialog && !globalToPath) {
         return;
     }
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];

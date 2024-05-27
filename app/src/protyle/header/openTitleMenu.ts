@@ -22,6 +22,7 @@ import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+import {openFileById} from "../../editor/util";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -195,6 +196,21 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        /// #if !MOBILE
+        if (!protyle.model) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.openInNewTab,
+                icon: "iconLayoutRight",
+                click() {
+                    openFileById({
+                        app: protyle.app,
+                        id: protyle.block.id,
+                        action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT],
+                    });
+                }
+            }).element);
+        }
+        /// #endif
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.openByNewWindow,

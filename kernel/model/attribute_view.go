@@ -68,6 +68,15 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	}
 
 	newAv.Name = oldAv.Name + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+
+	for _, keyValues := range newAv.KeyValues {
+		if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
+			// 断开双向关联
+			keyValues.Key.Relation.IsTwoWay = false
+			keyValues.Key.Relation.BackKeyID = ""
+		}
+	}
+
 	data, err = gulu.JSON.MarshalJSON(newAv)
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", newAvID, err)

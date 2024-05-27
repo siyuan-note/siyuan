@@ -366,6 +366,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
+                action.push(Constants.CB_GET_HL);
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
@@ -397,6 +398,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
+                action.push(Constants.CB_GET_HL);
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
@@ -413,6 +415,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧" + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action) => {
+                action.push(Constants.CB_GET_HL);
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,

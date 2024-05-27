@@ -1525,6 +1525,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const id = refElement.getAttribute("data-id");
             if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
                 checkFold(id, (zoomIn, action) => {
+                    action.push(Constants.CB_GET_HL);
                     openFileById({
                         app: protyle.app,
                         id,
@@ -1551,6 +1552,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
                 checkFold(id, (zoomIn, action) => {
+                    action.push(Constants.CB_GET_HL);
                     openFileById({
                         app: protyle.app,
                         id,
@@ -1564,6 +1566,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBottom.custom, event)) {
                 checkFold(id, (zoomIn, action) => {
+                    action.push(Constants.CB_GET_HL);
                     openFileById({
                         app: protyle.app,
                         id,

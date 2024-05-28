@@ -18,10 +18,12 @@ export GO111MODULE=on
 export GOPROXY=https://goproxy.io
 export CGO_ENABLED=1
 
+echo 'Building Kernel amd64'
 export GOOS=linux
 export GOARCH=amd64
 go build --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w" .
 
+echo 'Building Kernel arm64'
 export GOARCH=arm64
 export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
 go build --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel-arm64" -ldflags "-s -w" .

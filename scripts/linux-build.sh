@@ -29,7 +29,9 @@ export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
 go build --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel-arm64" -ldflags "-s -w" .
 cd ..
 
-echo 'Building Electron App'
+echo 'Building Electron App amd64'
 cd app
 pnpm run dist-linux
+echo 'Building Electron App arm64'
+pnpm run dist-linux-arm64
 cd ..

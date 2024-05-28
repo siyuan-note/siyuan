@@ -45,7 +45,7 @@ if errorlevel 1 (
 )
 cd ..
 
-echo 'Building Electron App'
+echo 'Building Electron App amd64'
 cd app
 call pnpm run dist
 if errorlevel 1 (

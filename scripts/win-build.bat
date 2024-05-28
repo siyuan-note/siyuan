@@ -13,6 +13,7 @@ cd ..
 echo 'Cleaning Builds'
 del /S /Q /F app\build 1>nul
 del /S /Q /F app\kernel 1>nul
+del /S /Q /F app\kernel-arm64 1>nul
 
 echo 'Building Kernel'
 @REM the C compiler "gcc" is necessary https://sourceforge.net/projects/mingw-w64/files/mingw-w64/
@@ -22,22 +23,34 @@ set GOPROXY=https://goproxy.io
 set CGO_ENABLED=1
 
 cd kernel
-@REM you can use `go generate` instead (nead add something in main.go)
+@REM you can use `go mod tidy` to update kernel dependency before build
+@REM you can use `go generate` instead (need add something in main.go)
 goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource/goversioninfo.exe.manifest
 
 set GOOS=windows
 set GOARCH=amd64
-@REM you can use `go mod tidy` to update kernel dependency before build
 go build --tags fts5 -v -o "../app/kernel/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
 if errorlevel 1 (
     exit /b %errorlevel%
 )
 
+set GOARCH=arm64
+@REM if you want to build arm64, you need to install aarch64-w64-mingw32-gcc
+set CC="D:/Program Files/llvm-mingw-20240518-ucrt-x86_64/bin/aarch64-w64-mingw32-gcc.exe"
+go build --tags fts5 -v -o "../app/kernel-arm64/SiYuan-Kernel-arm64.exe" -ldflags "-s -w -H=windowsgui" .
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 cd ..
 
 echo 'Building Electron App'
 cd app
 call pnpm run dist
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
+echo 'Building Electron App arm64'
+call pnpm run dist-arm64
 if errorlevel 1 (
     exit /b %errorlevel%
 )

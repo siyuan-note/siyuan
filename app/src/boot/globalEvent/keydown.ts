@@ -334,7 +334,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (!isFileFocus && !event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+    if (!isFileFocus && !event.repeat && !protyle.disabled &&
+        matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
         event.preventDefault();
         event.stopPropagation();
         let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));

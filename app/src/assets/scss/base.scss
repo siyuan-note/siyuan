@@ -99,6 +99,7 @@ html {
   stroke: currentColor;
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 
   &--mid {
     width: 16px;

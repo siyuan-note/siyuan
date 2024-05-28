@@ -676,6 +676,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                         return true;
                     }
                 });
+                document.querySelector("wbr")?.remove();
             } else {
                 focusByWbr(protyle.wysiwyg.element, range);
             }

@@ -140,7 +140,7 @@ style="width: ${column.width || "200px"};">
 
                     if (column.type === "lineNumber") {
                         // lineNumber type 不参与计算操作
-                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" style="width: ${column.width || "200px"}">&nbsp;</div>`;
+                        calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${column.width || "200px"}">&nbsp;</div>`;
                     } else {
                         calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;

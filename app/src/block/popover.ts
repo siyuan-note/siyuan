@@ -46,7 +46,10 @@ export const initBlockPopover = (app: App) => {
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";
-                tip = href.substring(0, Constants.SIZE_TITLE) || "";
+                // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
+                if (href) {
+                    tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
+                }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
                     let assetTip = tip;

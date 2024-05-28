@@ -321,16 +321,25 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	// 根据搜索条件过滤
 	query = strings.TrimSpace(query)
 	if "" != query {
+		// 将连续空格转换为一个空格
+		query = strings.Join(strings.Fields(query), " ")
+		// 按空格分割关键字
 		keywords := strings.Split(query, " ")
+		// 使用 AND 逻辑 https://github.com/siyuan-note/siyuan/issues/11535
 		var hitRows []*av.TableRow
 		for _, row := range ret.Rows {
 			hit := false
 			for _, cell := range row.Cells {
+				allKeywordsHit := true
 				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
-						hit = true
+					if !strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
+						allKeywordsHit = false
 						break
 					}
+				}
+				if allKeywordsHit {
+					hit = true
+					break
 				}
 			}
 			if hit {

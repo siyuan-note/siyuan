@@ -2012,8 +2012,7 @@ export class Gutter {
 
     public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement, target?: Element) {
         // https://github.com/siyuan-note/siyuan/issues/4659
-        const titleElement = wysiwyg.parentElement.querySelector(".protyle-title__input");
-        if (titleElement && titleElement.getAttribute("data-render") !== "true") {
+        if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
         }
         // 防止划选时触碰图标导致 hl 无法移除

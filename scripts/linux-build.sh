@@ -26,7 +26,7 @@ go build --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w" 
 echo 'Building Kernel arm64'
 export GOARCH=arm64
 export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
-go build --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel-arm64" -ldflags "-s -w" .
+go build --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w" .
 cd ..
 
 echo 'Building Electron App amd64'

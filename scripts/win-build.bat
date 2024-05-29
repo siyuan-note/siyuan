@@ -39,7 +39,7 @@ echo 'Building Kernel arm64'
 set GOARCH=arm64
 @REM if you want to build arm64, you need to install aarch64-w64-mingw32-gcc
 set CC="D:/Program Files/llvm-mingw-20240518-ucrt-x86_64/bin/aarch64-w64-mingw32-gcc.exe"
-go build --tags fts5 -v -o "../app/kernel-arm64/SiYuan-Kernel-arm64.exe" -ldflags "-s -w -H=windowsgui" .
+go build --tags fts5 -v -o "../app/kernel-arm64/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
 if errorlevel 1 (
     exit /b %errorlevel%
 )

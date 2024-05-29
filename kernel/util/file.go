@@ -35,6 +35,28 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+func GetFilePathsByExts(dirPath string, exts []string) (ret []string) {
+	filelock.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if nil != err {
+			logging.LogErrorf("get file paths by ext failed: %s", err)
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		for _, ext := range exts {
+			if strings.HasSuffix(path, ext) {
+				ret = append(ret, path)
+				break
+			}
+		}
+		return nil
+	})
+	return
+}
+
 func GetUniqueFilename(filePath string) string {
 	if !gulu.File.IsExist(filePath) {
 		return filePath

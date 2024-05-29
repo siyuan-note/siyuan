@@ -32,7 +32,7 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
         bgFade(nodeElement);
         return nodeElement;// 仅配合前进后退使用
     }
-    if (id === protyle.block.rootID && protyle.options.render.title) {
+    if (id === protyle.block.rootID && protyle.options.render.title && protyle.title.editElement) {
         bgFade(protyle.title.editElement);
         return protyle.title.editElement;
     }

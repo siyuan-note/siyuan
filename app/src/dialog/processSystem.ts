@@ -56,7 +56,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
                 setTitle(response.data.name);
-                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === window.siyuan.languages.untitled ? "" : response.data.name;
+                window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name);
             });
         }
     }

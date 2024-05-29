@@ -16,7 +16,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
         protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--attr");
     }
     if (protyle.title) {
-        protyle.title.editElement.removeAttribute("data-render");
+        protyle.title.element.removeAttribute("data-render");
         protyle.title.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             protyle.title.element.classList.add("protyle-wysiwyg--attr");

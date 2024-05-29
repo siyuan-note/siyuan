@@ -450,7 +450,6 @@ export class Backlink extends Model {
                     backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
                     render: {
                         background: false,
-                        title: false,
                         gutter: true,
                         scroll: false,
                         breadcrumb: false,

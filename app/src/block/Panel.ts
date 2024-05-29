@@ -9,13 +9,13 @@ import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
 /// #if !MOBILE
 import {moveResize} from "../dialog/moveResize";
+import {openFileById} from "../editor/util";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {isMobile} from "../util/functions";
 import {resize} from "../protyle/util/resize";
-import {openFileById} from "../editor/util";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -120,11 +120,13 @@ export class BlockPanel {
                         openNewWindowById(this.nodeIds[0]);
                         /// #endif
                     } else if (type === "stickTab") {
+                        /// #if !BROWSER
                         openFileById({
                             app: options.app,
                             id: this.nodeIds[0],
                             action: this.editors[0].protyle.block.rootID !== this.nodeIds[0] ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT],
                         });
+                        /// #endif
                     }
                     event.preventDefault();
                     event.stopPropagation();

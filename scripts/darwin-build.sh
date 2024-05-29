@@ -18,10 +18,12 @@ export GO111MODULE=on
 export GOPROXY=https://goproxy.io
 export CGO_ENABLED=1
 
+echo 'Building Kernel amd64'
 export GOOS=darwin
 export GOARCH=amd64
 go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 
+echo 'Building Kernel arm64'
 export GOOS=darwin
 export GOARCH=arm64
 go build --tags fts5 -v -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .

@@ -233,7 +233,11 @@ func checkBlockFold(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = model.IsBlockFolded(id)
+	isFolded, isRoot := model.IsBlockFolded(id)
+	ret.Data = map[string]interface{}{
+		"isFolded": isFolded,
+		"isRoot":   isRoot,
+	}
 }
 
 func checkBlockExist(c *gin.Context) {

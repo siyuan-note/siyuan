@@ -509,7 +509,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     page: 1,
                     types: getDefaultType(),
                     replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                }, config, edit);
+                }, config, edit, true);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
                 event.stopPropagation();
                 event.preventDefault();
@@ -751,7 +751,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         page: 1,
                         types: getDefaultType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config, edit);
+                    }, config, edit, true);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 }, () => {
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -1072,7 +1072,8 @@ export const getQueryTip = (method: number) => {
     return methodTip;
 };
 
-const updateConfig = (element: Element, item: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
+const updateConfig = (element: Element, item: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
+                      edit: Protyle, clear = false) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
     if (dialogElement && dialogElement.getAttribute("data-key") === Constants.DIALOG_SEARCH) {
         // https://github.com/siyuan-note/siyuan/issues/6828
@@ -1123,7 +1124,9 @@ const updateConfig = (element: Element, item: Config.IUILayoutTabSearchConfig, c
     } else {
         searchIncludeElement.setAttribute("disabled", "disabled");
     }
-    (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
+    if (item.k || clear) {
+        (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
+    }
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(item.method));
     Object.assign(config, item);

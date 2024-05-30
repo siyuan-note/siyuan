@@ -224,7 +224,7 @@ ${checkUpdateHTML}
             });
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
-        updateElement.addEventListener("click", () => {
+        updateElement?.addEventListener("click", () => {
             if (updateElement.firstElementChild.classList.contains("fn__rotate")) {
                 return;
             }

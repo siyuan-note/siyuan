@@ -2400,12 +2400,19 @@ export class WYSIWYG {
             const imgElement = hasTopClosestByClassName(event.target, "img");
             if (!event.shiftKey && !ctrlIsPressed && imgElement) {
                 imgElement.classList.add("img--select");
-                range.setStartAfter(imgElement);
-                range.collapse(true);
-                focusByRange(range);
-                // 需等待 range 更新再次进行渲染
-                if (protyle.options.render.breadcrumb) {
-                    protyle.breadcrumb.render(protyle);
+                const nextSibling = hasNextSibling(imgElement)
+                if (nextSibling) {
+                    if (nextSibling.textContent.startsWith(Constants.ZWSP)) {
+                        range.setStart(nextSibling, 1);
+                    } else {
+                        range.setStart(nextSibling, 0);
+                    }
+                    range.collapse(true);
+                    focusByRange(range);
+                    // 需等待 range 更新再次进行渲染
+                    if (protyle.options.render.breadcrumb) {
+                        protyle.breadcrumb.render(protyle);
+                    }
                 }
                 return;
             }

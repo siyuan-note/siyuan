@@ -573,7 +573,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Click"
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",
@@ -619,7 +619,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Click"
+									"TextMarkTextContent": "Ctrl+點擊"
 								},
 								{
 									"Type": "NodeText",

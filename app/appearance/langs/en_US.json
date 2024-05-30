@@ -1289,7 +1289,7 @@
     "13": "Cannot create a file starting with .",
     "14": "Export failed: %s",
     "15": "Content block with id [%s] not found",
-    "16": "Please enter the doc name",
+    "16": "Untitled",
     "17": "The initial synchronization failed at startup. Unpredictable data overwriting may occur if you continue to operate. Please perform a synchronization first",
     "18": "Get community user account failed",
     "19": "User information has expired, please log in again",

@@ -1289,7 +1289,7 @@
     "13": "No se puede crear un archivo que empiece por .",
     "14": "Exportación fallida: %s",
     "15": "No se encontró el bloque de contenido con id [%s]",
-    "16": "Por favor, introduzca el nombre del documento",
+    "16": "Intitulado",
     "17": "La sincronización inicial falló en el arranque. Puede producirse una sobreescritura de datos imprevisible si continúa operando. Por favor, realice primero una sincronización",
     "18": "Falló la obtención de la cuenta de usuario de la comunidad",
     "19": "La información del usuario ha caducado, por favor, inicie sesión de nuevo",

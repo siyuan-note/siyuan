@@ -1289,7 +1289,7 @@
     "13": "Impossible de créer un fichier commençant par .",
     "14": "L'exportation a échoué : %s",
     "15": "Bloc de contenu avec l'identifiant [%s] introuvable",
-    "16": "Veuillez entrer le nom du fichier",
+    "16": "Sans titre",
     "17": "La synchronisation initiale a échoué au démarrage. Un écrasement imprévisible des données peut se produire si vous continuez à fonctionner. Veuillez d'abord effectuer une synchronisation.",
     "18": "Échec de la récupération du compte utilisateur communautaire",
     "19": "Les informations de l'utilisateur ont expiré, veuillez vous connecter à nouveau.",

@@ -200,3 +200,12 @@
   margin: 0 auto;
   border: 2px solid transparent;
 }
+#hiddenCopyElement,
+.hiddenCanvasElement {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  display: none;
+}

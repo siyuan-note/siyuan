@@ -198,6 +198,8 @@ class PDFPageViewBuffer {
 class PDFViewer {
   #buffer = null;
 
+  #altTextManager = null;
+
   #annotationEditorMode = AnnotationEditorType.NONE;
 
   #annotationEditorUIManager = null;
@@ -232,6 +234,7 @@ class PDFViewer {
     // }
     this.container = options.container;
     this.viewer = options.viewer || options.container.firstElementChild;
+    this.#altTextManager = options.altTextManager || null;
 
     if (
       typeof PDFJSDev === "undefined" ||
@@ -742,6 +745,8 @@ class PDFViewer {
           } else if (isValidAnnotationEditorMode(mode)) {
             this.#annotationEditorUIManager = new AnnotationEditorUIManager(
               this.container,
+              this.viewer,
+              this.#altTextManager,
               this.eventBus,
               pdfDocument?.annotationStorage
             );

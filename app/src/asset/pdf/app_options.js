@@ -279,7 +279,7 @@ const defaultOptions = {
   workerSrc: {
     /** @type {string} */
     // NOTE
-    value: `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.js?v=3.5.141`,
+    value: `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.mjs?v=3.5.141`,
     kind: OptionKind.WORKER,
   },
 };

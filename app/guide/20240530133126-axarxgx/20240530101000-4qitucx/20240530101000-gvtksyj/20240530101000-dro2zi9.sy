@@ -1,0 +1,631 @@
+{
+	"ID": "20240530101000-dro2zi9",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-5mlzvxo",
+		"id": "20240530101000-dro2zi9",
+		"title": "ドキュメントと見出しの変換",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-v8h5d6g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-8uu3hxh",
+				"id": "20240530101000-v8h5d6g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントと見出しの対応関係"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-310cqne",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5bpsdkk",
+				"id": "20240530101000-310cqne",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出しブロックとドキュメントブロックには以下のような対応関係があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3bwjg7y",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-jr7smid",
+				"id": "20240530101000-3bwjg7y",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-xrgsojx",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-wnwarde",
+						"id": "20240530101000-xrgsojx",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6swgr1w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2q1hc9o",
+								"id": "20240530101000-6swgr1w",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "各ドキュメントブロックには名前があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-y7bvbuo",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-qfoaem9",
+						"id": "20240530101000-y7bvbuo",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-pz02sna",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zeppa6b",
+								"id": "20240530101000-pz02sna",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "各見出しブロックにも名前があります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-iratqdp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zd2d6pd",
+				"id": "20240530101000-iratqdp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "したがって、ドキュメントブロックと見出しブロックは相互に変換できます。また、コンテンツブロックは ID で参照されるため、変換処理によって既存の参照関係が崩れることはありません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7z8z1w9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-g3g26mu",
+				"id": "20240530101000-7z8z1w9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントブロックから見出しブロックへの変換"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-281oxo0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-wtkhsae",
+				"id": "20240530101000-281oxo0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントツリーで見出しブロックに変換するドキュメントブロックを選択し、開かれているエディタの挿入したい位置にドラッグします。ここでは、以下の 2 つのパターンがあります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v217xcf",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-ckmc3x2",
+				"id": "20240530101000-v217xcf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-elb68dq",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-h64xxcv",
+						"id": "20240530101000-elb68dq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-a5mvc9t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-f03wbti",
+								"id": "20240530101000-a5mvc9t",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントブロックを見出しブロックの上にドロップした場合、ドキュメントブロックはその見出しブロックと同レベルの兄弟ノードとして挿入されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-osd1wd1",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-nh5mu7f",
+						"id": "20240530101000-osd1wd1",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7niucgs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lius0md",
+								"id": "20240530101000-7niucgs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントブロックを見出しブロック以外のブロックにドロップした場合、ドキュメントブロックはそのブロックが属する見出しブロックの子ノードとして挿入されます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xcjx0cr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rjt7c28",
+				"id": "20240530101000-xcjx0cr",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントブロックが見出しブロックに変換されると:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tdkgtet",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-c3feaso",
+				"id": "20240530101000-tdkgtet",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-ee7cd2h",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-oluj246",
+						"id": "20240530101000-ee7cd2h",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ioghod1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-kseko34",
+								"id": "20240530101000-ioghod1",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントの名前が見出しの名前になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vczlr01",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-nn1lptc",
+						"id": "20240530101000-vczlr01",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-eyjqz9n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-q68s6yw",
+								"id": "20240530101000-eyjqz9n",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "論理的にはドキュメントブロックはレベル 1 の見出しになり、挿入位置に応じて相対的にレベルが変更されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ex699aj",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-r78x78n",
+						"id": "20240530101000-ex699aj",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sdd4x1i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mrl6vdf",
+								"id": "20240530101000-sdd4x1i",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "元のドキュメントに含まれるの各見出しレベルも挿入位置に応じて調整されます:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-e4e3ked",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"ID": "20240530101000-4iebvov",
+								"id": "20240530101000-e4e3ked",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-5jscbil",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"ID": "20240530101000-nafa2n0",
+										"id": "20240530101000-5jscbil",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-cvxrajp",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-1ztd0k9",
+												"id": "20240530101000-cvxrajp",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "strong",
+													"TextMarkTextContent": "上記のケース 1 の場合"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ": たとえば、元のドキュメントにレベル 1、2、3 の見出しが含まれていて、挿入位置がレベル 2 の見出しの場合、ドキュメントブロックはレベル 2 の見出しブロックに変換され、元のコンテンツのレベル 1、2、3 の見出しはレベル 2、3、4 の見出しになります。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-3usvo7h",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"ID": "20240530101000-qckicse",
+										"id": "20240530101000-3usvo7h",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-2bs72le",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-e4yt3yy",
+												"id": "20240530101000-2bs72le",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "strong",
+													"TextMarkTextContent": "上記のケース 2 の場合"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ": たとえば、元のドキュメントにレベル 1、2、3 の見出しが含まれていて、挿入位置がレベル 2 の見出しの下にある段落ブロックの場合、ドキュメントブロックはレベル 3 の見出しブロックに変換され、元のコンテンツのレベル 1、2、3 の見出しはレベル 3、4、5 の見出しになります。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0zk926s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-5vxf106",
+				"id": "20240530101000-0zk926s",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出しブロックからドキュメントブロックへの変換"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-djw3n0g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ebw7ot6",
+				"id": "20240530101000-djw3n0g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタで変換したい見出しブロックを選択して、ブロックアイコンをドキュメントツリーにドラッグ＆ドロップすると、見出しブロックがドキュメントブロックに変換されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2xzw43r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-awr74ub",
+				"id": "20240530101000-2xzw43r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出しブロックがドキュメントブロックに変換されると:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k75r2el",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-2eenc2a",
+				"id": "20240530101000-k75r2el",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-88lsyky",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-uimexff",
+						"id": "20240530101000-88lsyky",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8k108mm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5ufyxvp",
+								"id": "20240530101000-8k108mm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "見出しの名前がドキュメントの名前になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ayi8ow0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-d1oulaq",
+						"id": "20240530101000-ayi8ow0",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sfftyr4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-d6kqgll",
+								"id": "20240530101000-sfftyr4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "元の見出しブロックに小見出しが含まれている場合、それらの小見出しの中で最大レベルのものが新しいドキュメントのレベル 2 の見出しになり、残りの小見出しは相対的なレベルに調整されます"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-rfnbo70",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jd7kw4r",
+								"id": "20240530101000-rfnbo70",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "たとえば、元の見出しブロックにレベル 3、4、5 の小見出しが含まれていたとすると、それらの小見出しは文書ブロックに変換された後、レベル 2、3、4 の見出しに変換されます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

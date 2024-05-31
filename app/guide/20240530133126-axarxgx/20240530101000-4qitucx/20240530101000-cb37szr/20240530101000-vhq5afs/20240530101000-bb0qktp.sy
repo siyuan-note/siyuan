@@ -1,0 +1,377 @@
+{
+	"ID": "20240530101000-bb0qktp",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-d1ym1ae",
+		"id": "20240530101000-bb0qktp",
+		"title": "ストレージ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-agajaei",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ee4xkb4",
+				"id": "20240530101000-agajaei",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドストレージの容量は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8GB"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で、以下の用途に分かれています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s6zbftf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-popdkji",
+				"id": "20240530101000-s6zbftf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-5mi0ht7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ddep41c",
+						"id": "20240530101000-5mi0ht7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gyyhjlp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-vipf9os",
+								"id": "20240530101000-gyyhjlp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "同期データ:"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 暗号化され、同期機能に提供されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-mnxodhl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-dmx9jw8",
+						"id": "20240530101000-mnxodhl",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e29cpkt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0x9ctja",
+								"id": "20240530101000-e29cpkt",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "バックアップデータ:"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 暗号化され、バックアップ機能に提供されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-6bjy90h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-h0yekv3",
+						"id": "20240530101000-6bjy90h",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-h9j3oov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ntbdhm1",
+								"id": "20240530101000-h9j3oov",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "アセット:"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " HTTPS CDN を通じて WeChat MP、Zhihu、Yuque などへ提供されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-l1ubjsw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pnw1vbg",
+				"id": "20240530101000-l1ubjsw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用状況は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウド"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ から確認できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qtljhep",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-12nw50r",
+				"id": "20240530101000-qtljhep",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エンドツーエンド暗号化"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-a9c9s6f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-vwvt173",
+				"id": "20240530101000-a9c9s6f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データ同期とデータバックアップはエンドツーエンド暗号化を経由して送受信され、クラウド上に暗号化されていないデータは一切保存されません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5guc3e3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-oam1qt2",
+				"id": "20240530101000-5guc3e3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-letxanh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-li0wpeu",
+						"id": "20240530101000-letxanh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8q4qbnr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2go2mz5",
+								"id": "20240530101000-8q4qbnr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化キーはローカルにのみ保存され、クラウドにアップロードされることはありません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-v10v89y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ffs6gw1",
+						"id": "20240530101000-v10v89y",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-27bbyos",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hm68x3h",
+								"id": "20240530101000-27bbyos",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化と復号化の処理はすべてローカルデバイス上で行われます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-cntutwd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ujnknqs",
+						"id": "20240530101000-cntutwd",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-64ozd8p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-qez0p0o",
+								"id": "20240530101000-64ozd8p",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用されている暗号化アルゴリズムは、業界で認められた安全性の高い AES GCM です"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4z590r6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-0udjd26",
+				"id": "20240530101000-4z590r6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "よくある質問"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7tvg538",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-92mv76k",
+				"id": "20240530101000-7tvg538",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "だれかが私のクラウドデータを復号化できますか？"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3lgbda9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bwnd7b5",
+				"id": "20240530101000-3lgbda9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "いいえ、できません。キーを紛失した場合は開発者を含め誰もクラウド上のデータを復元できません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nd5ifgm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-gvcka3i",
+				"id": "20240530101000-nd5ifgm",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

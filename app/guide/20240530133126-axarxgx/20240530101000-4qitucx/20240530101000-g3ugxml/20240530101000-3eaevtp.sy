@@ -1,0 +1,688 @@
+{
+	"ID": "20240530101000-3eaevtp",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-8g2uue4",
+		"icon": "1f5c3-fe0f",
+		"id": "20240530101000-3eaevtp",
+		"title": "データベース",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-u8n11jd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-ywbxxgy",
+				"id": "20240530101000-u8n11jd",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-t0nuxhl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-hm1lv77",
+				"id": "20240530101000-t0nuxhl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースはコンテンツブロックやコンテンツブロック以外のデータで構成され、テーブルビューやカンバンビュー (開発中) など、さまざまなビュー形式で表示できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-p9rd9nj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-xvvpnr1",
+				"id": "20240530101000-p9rd9nj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーブルビュー"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sa0cnr0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-czryp4c",
+				"id": "20240530101000-sa0cnr0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-mq8ub96",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-jhulje4",
+						"id": "20240530101000-mq8ub96",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ndagjdy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-p2otv2t",
+								"id": "20240530101000-ndagjdy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で作成します。デフォルトのビューはテーブルビューです"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-euf1cie",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-faoswnc",
+						"id": "20240530101000-euf1cie",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-3unlq9a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-o7eh8l4",
+								"id": "20240530101000-3unlq9a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "さまざまな種類の属性 (カラム) を追加できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-odll96w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-xerxesx",
+						"id": "20240530101000-odll96w",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-kr2fng3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jtv2oud",
+								"id": "20240530101000-kr2fng3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テーブルビューに行を追加する方法は二通りあります:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-oymkj2l",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-5vouagt",
+								"id": "20240530101000-oymkj2l",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-81v2rbl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-okcj69z",
+										"id": "20240530101000-81v2rbl",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-9byotu3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-gnvf55x",
+												"id": "20240530101000-9byotu3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "strong",
+													"TextMarkTextContent": "追加したいコンテンツブロックがすでに存在する"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ": コンテンツブロックをドラッグ＆ドロップするか、ブロックメニューの "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "データベースに追加"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ から追加します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-c92uoid",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-o1l8zj1",
+										"id": "20240530101000-c92uoid",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-3l77hc5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-3kgep4x",
+												"id": "20240530101000-3l77hc5",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "strong",
+													"TextMarkTextContent": "追加したいコンテンツブロックがまだ存在しない"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ": テーブルに行を直接追加します"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-hlubo8h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-n6j5rgd",
+						"id": "20240530101000-hlubo8h",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4p2g60a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-x2nvsxx",
+								"id": "20240530101000-4p2g60a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "必要に応じてフィルタリングと並べ替えを設定できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-rwa6w0s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-531q6zy",
+						"id": "20240530101000-rwa6w0s",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-so3xgub",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-gcndrek",
+								"id": "20240530101000-so3xgub",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同じデータベースに複数のビューを追加できます。これらは同じデータを共有しますが、フィルタリングとソートの設定はそれぞれ独立しています"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nfsvrj5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-gibuum4",
+				"id": "20240530101000-nfsvrj5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ミラーデータベース"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-26x3p6o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ux6yzwj",
+				"id": "20240530101000-26x3p6o",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースブロックをコピーして貼り付けるとミラーデータベースが形成されます。それらのデータベースブロックは同じデータベースデータを共有しており、どのデータベースブロックのデータを変更しても他のすべてのミラーに同期されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jgap8im",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-x6r9yyj",
+				"id": "20240530101000-jgap8im",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "関連付けと集計"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ug0d39v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-s7zvh31",
+				"id": "20240530101000-ug0d39v",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "2 つのデータベース間で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "関連付け"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を行うことによって、連携して管理できるようになります。たとえば、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "著者"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "書名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ という 2 つのデータベース間の関連は以下のようになります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6ho7y0p",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"ID": "20240530101000-i7st7t2",
+				"id": "20240530101000-6ho7y0p",
+				"updated": "20240530101000"
+			},
+			"AttributeViewID": "20240530133134-tcqdrt2",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240530101000-ab5ovyw",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"ID": "20240530101000-ftsbbgi",
+				"id": "20240530101000-ab5ovyw",
+				"updated": "20240530101000"
+			},
+			"AttributeViewID": "20240530133134-c2251lc",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240530101000-snvlmxi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ajd29mr",
+				"id": "20240530101000-snvlmxi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "著者データベースでは、それぞれの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "著者"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "作品"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "すべての数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で集計し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "作品数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ として表示しています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yinvvxy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-gdiaw90",
+				"id": "20240530101000-yinvvxy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qslpi11",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-3nhljhd",
+				"id": "20240530101000-qslpi11",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "テンプレートスニペット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "で紹介されている構文を使用して、同一データ内の他の属性の値にアクセスして演算や表示を行えます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-u2f2hhs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-us3xi7p",
+				"id": "20240530101000-u2f2hhs",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-5nq8p36",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-qha1of0",
+						"id": "20240530101000-5nq8p36",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-t6f8d3o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-rtjisw7",
+								"id": "20240530101000-t6f8d3o",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .属性名 }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: ビューの属性にアクセスする"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-r2jrjmt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-16zlyc3",
+						"id": "20240530101000-r2jrjmt",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-s18rpyt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lbrgudt",
+								"id": "20240530101000-s18rpyt",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \u0026quot;カスタム属性名\u0026quot; }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: コンテンツブロックのカスタム属性にアクセスする"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3cev50z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-30nwm53",
+				"id": "20240530101000-3cev50z",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "たとえば、以下の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "請求書"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ データベースの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "テンプレート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 属性は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "食事代"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "衣装代"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の合計を算出しています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-f2texj8",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"ID": "20240530101000-aw1m47o",
+				"id": "20240530101000-f2texj8",
+				"updated": "20240530101000"
+			},
+			"AttributeViewID": "20240530133134-wlxgyny",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240530101000-i4xhxb0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-v41qw7k",
+				"id": "20240530101000-i4xhxb0"
+			}
+		}
+	]
+}

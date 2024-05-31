@@ -1,0 +1,2174 @@
+{
+	"ID": "20240530101000-4qitucx",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-w9katd6",
+		"icon": "1f389",
+		"id": "20240530101000-4qitucx",
+		"title": "スタートガイド",
+		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-x3xk6o7",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"ID": "20240530101000-bw4rbw9",
+				"id": "20240530101000-x3xk6o7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20240530101000-wzoxemv",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-wuwb451",
+						"id": "20240530101000-wzoxemv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-ocvz556",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-1pmo5nw",
+								"id": "20240530101000-ocvz556",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍔 使い方"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-jrj1ipn",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-2p15cvs",
+								"id": "20240530101000-jrj1ipn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-kocadwy",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-a3cojva",
+										"id": "20240530101000-kocadwy",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-ohhb34s",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-xldcivl",
+												"id": "20240530101000-ohhb34s",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ドキュメントツリーパネルで新しいノートブックを作成し、その中に新しいドキュメントを作成します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-61u9nnt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-i6qlqe2",
+										"id": "20240530101000-61u9nnt",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-425cyzz",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-9at7uwl",
+												"id": "20240530101000-425cyzz",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "エディタで "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "/"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ と入力してファンクションメニューを呼び出します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-8v1heve",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-m0js63w",
+										"id": "20240530101000-8v1heve",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-xhkw4lc",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-a4maz62",
+												"id": "20240530101000-xhkw4lc",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-boiita2",
+													"TextMarkBlockRefSubtype": "s",
+													"TextMarkTextContent": "コンテンツブロック間を移動し"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "、"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-7yv4y5z",
+													"TextMarkBlockRefSubtype": "s",
+													"TextMarkTextContent": "ウィンドウとタブを操作します"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-gxricuc",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-8tl0lgp",
+						"id": "20240530101000-gxricuc",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-uuvmlfo",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-5cn8u0e",
+								"id": "20240530101000-uuvmlfo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍹 おすすめ情報"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-x13cm9r",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-mjsoysi",
+								"id": "20240530101000-x13cm9r",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-m9okmy9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-sbziv2l",
+										"id": "20240530101000-m9okmy9",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-lgu6tz4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-6nenlxu",
+												"id": "20240530101000-lgu6tz4",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-jp793ic",
+													"TextMarkBlockRefSubtype": "s",
+													"TextMarkTextContent": "よくある質問"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rq1kxwf",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"ID": "20240530101000-3vp53bh",
+				"id": "20240530101000-rq1kxwf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20240530101000-ysj8x0x",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-7jy74bd",
+						"id": "20240530101000-ysj8x0x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-s0rl8e9",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-c7pjzky",
+								"id": "20240530101000-s0rl8e9",
+								"name": "コミュニティ",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🏘️ 開発元"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-htcbkml",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-g56oxuj",
+								"id": "20240530101000-htcbkml",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-7ndcs8p",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-kcatb23",
+										"id": "20240530101000-7ndcs8p",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-tuoa0wf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-95xycex",
+												"id": "20240530101000-tuoa0wf",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://liuyun.io/",
+													"TextMarkTextContent": "LiuYun"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-ql2fmlt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-oql7q13",
+										"id": "20240530101000-ql2fmlt",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-ix8wfe3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-g257621",
+												"id": "20240530101000-ix8wfe3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://twitter.com/b3logos",
+													"TextMarkTextContent": "X"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-xi0tmnm",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-zwsl6rp",
+						"id": "20240530101000-xi0tmnm",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-ld390os",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-1md89fh",
+								"id": "20240530101000-ld390os",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "💌 貢献するには"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-p1ajuwk",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-00949c8",
+								"id": "20240530101000-p1ajuwk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-ub8wbbw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-wsehth8",
+										"id": "20240530101000-ub8wbbw",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-ot4xrg3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-jo6jdsi",
+												"id": "20240530101000-ot4xrg3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-hx6kozp",
+													"TextMarkBlockRefSubtype": "s",
+													"TextMarkTextContent": "オープンソース"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-r2ly64b",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-p1unw2g",
+										"id": "20240530101000-r2ly64b",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-8exyfcw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-7mhkqv4",
+												"id": "20240530101000-8exyfcw",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
+													"TextMarkTextContent": "有料プランで開発をサポート"
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3e05cn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2n1nhdd",
+				"id": "20240530101000-3e05cn2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan があなたの人生と学習を効率化して目標達成の助けとなることを願っています🙏"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-fothhu7",
+			"Type": "NodeThematicBreak",
+			"Properties": {
+				"ID": "20240530101000-dtcv93w",
+				"id": "20240530101000-fothhu7"
+			}
+		},
+		{
+			"ID": "20240530101000-2pt9z6z",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"ID": "20240530101000-c2ndafi",
+				"id": "20240530101000-2pt9z6z",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20240530101000-f4592hw",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-q26dp1a",
+						"id": "20240530101000-f4592hw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-d4s9rhz",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-70ehbm3",
+								"id": "20240530101000-d4s9rhz",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍫 コンテンツブロック"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-zxa17nk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-6rxj5wf",
+								"id": "20240530101000-zxa17nk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-6cg9mi2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で知識と思考を自在に表現するための秘訣は"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-96n5y9v",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "コンテンツブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "です。ブロック単位でアイデアを整理しながら、長文も快適に読み書きでます。"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-7chq59y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-6ltloh5",
+								"id": "20240530101000-7chq59y",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-96n5y9v",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "コンテンツブロックの紹介"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-6rsvh72",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-db90aqq",
+								"id": "20240530101000-6rsvh72",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-35bbvcx",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "コンテンツブロックの種類"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-f9lxwii",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-of6yfj9",
+								"id": "20240530101000-f9lxwii",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-uxno1yp",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "コンテンツブロックの参照"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-vewqzzk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-q1zvdk6",
+								"id": "20240530101000-vewqzzk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-boiita2",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "コンテンツブロックのナビゲーション"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-djtu457",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-u3aphwn",
+								"id": "20240530101000-djtu457",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-dro2zi9",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "ドキュメントと見出しの変換"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-lcji2oc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-9dqua1b",
+								"id": "20240530101000-lcji2oc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-1vvnhju",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "埋め込みコンテンツブロック"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-ehw2buk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mvydeex",
+								"id": "20240530101000-ehw2buk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-875snki",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "コンテンツブロックの属性"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-0so4t3e",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-3bdqr5n",
+						"id": "20240530101000-0so4t3e",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-1omqwva",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-2396llt",
+								"id": "20240530101000-1omqwva",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍱 エディタ"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-xf0nn9v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4tkne5m",
+								"id": "20240530101000-xf0nn9v",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-3qhz7br",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "書式要素"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-3av8xw4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4rhb8c2",
+								"id": "20240530101000-3av8xw4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-3ourzoa",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "タイポグラフィの最適化"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-hvzys4w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2ikvmp8",
+								"id": "20240530101000-hvzys4w",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-gcdp3gl",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "見出しとリストによるアウトライン"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-g78o8ez",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-hbklfdt",
+						"id": "20240530101000-g78o8ez",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-9k8r87v",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-9bgg6hx",
+								"id": "20240530101000-9k8r87v",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🔍 高度な検索"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-k2fux1i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-q07l6fx",
+								"id": "20240530101000-k2fux1i",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-vejnh1k",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "クエリ構文"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-h57odvc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lw6td91",
+								"id": "20240530101000-h57odvc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-58z6rjh",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "データベーステーブル"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-ckojdlq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ct1x23d",
+								"id": "20240530101000-ckojdlq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-zj4k048",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "種類によるフィルタリング"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-0wq670t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-wtbjh1j",
+								"id": "20240530101000-0wq670t",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-mrlr6e9",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "インデックスから除外"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-gcmgzza",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2utb993",
+								"id": "20240530101000-gcmgzza",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-h0cp5vx",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "検索から除外"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-0lz3d03",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-9cj9abh",
+						"id": "20240530101000-0lz3d03",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-9nw0o7t",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-vbw9iyn",
+								"id": "20240530101000-9nw0o7t",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🎨 外観のカスタマイズ"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-m5k4z19",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4o4wwuw",
+								"id": "20240530101000-m5k4z19",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-hq9sn3k",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "アイコン"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-ajtln30",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-qykxh3q",
+								"id": "20240530101000-ajtln30",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-bpj42r0",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "テーマ"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tginj70",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"ID": "20240530101000-dinz66n",
+				"id": "20240530101000-tginj70",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20240530101000-78evcnd",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-6qqhzzi",
+						"id": "20240530101000-78evcnd",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-ngnmzke",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-efbt28z",
+								"id": "20240530101000-ngnmzke",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🚌 基本操作"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-p1imbqk",
+							"Type": "NodeSuperBlock",
+							"Properties": {
+								"ID": "20240530101000-lw5b253",
+								"id": "20240530101000-p1imbqk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeSuperBlockOpenMarker"
+								},
+								{
+									"Type": "NodeSuperBlockLayoutMarker",
+									"Data": "col"
+								},
+								{
+									"ID": "20240530101000-f1se1iv",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-8r65hr1",
+										"id": "20240530101000-f1se1iv",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-at8otfw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-k1ky86u",
+												"id": "20240530101000-at8otfw",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-4p096e8",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ワークスペース"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-7uqjn6f",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-44jygvj",
+												"id": "20240530101000-7uqjn6f",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-d31i9v5",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "インポートとエクスポート"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-refez56",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-3fozwr5",
+												"id": "20240530101000-refez56",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-odye3ea",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "Web クリッピング"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-ko1qzlr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-8kln67m",
+												"id": "20240530101000-ko1qzlr",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-7yv4y5z",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ウィンドウとタブ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-j98363i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-27q4gcv",
+												"id": "20240530101000-j98363i",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-scr2p21",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "デイリーノート"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-wtxaixh",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-v1ynoef",
+												"id": "20240530101000-wtxaixh",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-xc13cm6",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ブックマークとタグ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-sagz682",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-j19kh6v",
+												"id": "20240530101000-sagz682",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-3eaevtp",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "データベース"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-5hf7z9x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-5hpyv7v",
+												"id": "20240530101000-5hf7z9x",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-5gi76ax",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ウィジェット"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-64j1hf7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-b9bdfzy",
+												"id": "20240530101000-64j1hf7",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-8m2dowc",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "プラグイン"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-0q1bs61",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-x4xb6xs",
+												"id": "20240530101000-0q1bs61",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-1m5un7l",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "アセット"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-ofezsjm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ldxps6w",
+												"id": "20240530101000-ofezsjm",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "テンプレートスニペット"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-gce8f4f",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-9qjlq8d",
+												"id": "20240530101000-gce8f4f",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-to5uvpi",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "PDF 注釈"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker"
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-h5kqbyj",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-f3fw9pe",
+										"id": "20240530101000-h5kqbyj",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-k190knk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-darbx7l",
+												"id": "20240530101000-k190knk",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-0zd9si2",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "仮想参照"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-5qe3p1k",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-qb4nwwf",
+												"id": "20240530101000-5qe3p1k",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-zprnpfi",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ハイパーリンク"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-upiseln",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-7nadfcb",
+												"id": "20240530101000-upiseln",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-txrc7z1",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "データ履歴"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-snctbzi",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-n1e08yg",
+												"id": "20240530101000-snctbzi",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-ynpmvl7",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "フラッシュカード"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-wsn7w9j",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-nrwy09q",
+												"id": "20240530101000-wsn7w9j",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-ei5t6tt",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "人工知能"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-zjf1zl3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-0fh861e",
+												"id": "20240530101000-zjf1zl3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-xsbxokr",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ショートカット"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-aez6vq8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-crq3k78",
+												"id": "20240530101000-aez6vq8",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-40hohog",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ブラウザ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-9ubgr9n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-e946rno",
+												"id": "20240530101000-9ubgr9n",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-f16hpct",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "Docker サーバー"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-2zx1u70",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-yojeozm",
+												"id": "20240530101000-2zx1u70",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-xq26o73",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "カーネルパラメータ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-6fzhgr6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-p0frewn",
+												"id": "20240530101000-6fzhgr6",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-dytmky4",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "カーネル API"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-jyl2mgp",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-t5gyh59",
+												"id": "20240530101000-jyl2mgp",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-4cqkoel",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ドキュメントの公開"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeSuperBlockCloseMarker"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-nnd4t2x",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-1nj25x6",
+						"id": "20240530101000-nnd4t2x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-m7rpuqf",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-8fw673p",
+								"id": "20240530101000-m7rpuqf",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "👑 会員特典"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-rcv375q",
+							"Type": "NodeSuperBlock",
+							"Properties": {
+								"ID": "20240530101000-ofuu4xd",
+								"id": "20240530101000-rcv375q",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeSuperBlockOpenMarker"
+								},
+								{
+									"Type": "NodeSuperBlockLayoutMarker",
+									"Data": "col"
+								},
+								{
+									"ID": "20240530101000-v1s5ifx",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-t5xhuit",
+										"id": "20240530101000-v1s5ifx",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-7dkh5wl",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-w6c6tda",
+												"id": "20240530101000-7dkh5wl",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-vhq5afs",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "クラウドサービス"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-hcz9it3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ct54bad",
+												"id": "20240530101000-hcz9it3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-bb0qktp",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "ストレージ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-v44t2f5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-1spm2a1",
+												"id": "20240530101000-v44t2f5",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-wo49zvq",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "データ同期"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-0a0l9a1",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ni8vxtp",
+												"id": "20240530101000-0a0l9a1",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-gc0tuyd",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "データバックアップ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-xsef17w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-i2o2g66",
+												"id": "20240530101000-xsef17w",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-78d5w10",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "アセットホスティング"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-7sbl6o1",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-9d8fqm7",
+												"id": "20240530101000-7sbl6o1",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-vql5s27",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "受信トレイ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-u8t9yvs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-2rprx30",
+												"id": "20240530101000-u8t9yvs",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-75auqcn",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "制限事項"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker",
+											"Properties": {
+												"updated": "20240530101000"
+											}
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-hb7bagc",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-b31k06k",
+										"id": "20240530101000-hb7bagc",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-i7zafv0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-kakny9v",
+												"id": "20240530101000-i7zafv0",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-qf0xtkd",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "有料機能"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-ae1sl81",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-1pfsqzp",
+												"id": "20240530101000-ae1sl81",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-na9sys7",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "サードパーティのクラウドストレージへの接続"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-nrg07md",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-nn0744a",
+												"id": "20240530101000-nrg07md",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-5k5d5i3",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "アセットの内容検索"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker",
+											"Properties": {
+												"updated": "20240530101000"
+											}
+										}
+									]
+								},
+								{
+									"Type": "NodeSuperBlockCloseMarker"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-j8bexdm",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"ID": "20240530101000-9ff0c88",
+						"id": "20240530101000-j8bexdm",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20240530101000-pmoomtf",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-jd994he",
+								"id": "20240530101000-pmoomtf",
+								"style": "background-color: var(--b3-font-background5);",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "📃 その他の情報"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-9gprr2j",
+							"Type": "NodeSuperBlock",
+							"Properties": {
+								"ID": "20240530101000-zas0518",
+								"id": "20240530101000-9gprr2j",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeSuperBlockOpenMarker"
+								},
+								{
+									"Type": "NodeSuperBlockLayoutMarker",
+									"Data": "col"
+								},
+								{
+									"ID": "20240530101000-47jpelc",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-9kmwz6y",
+										"id": "20240530101000-47jpelc",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-xpe5r0u",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-6bt9jqs",
+												"id": "20240530101000-xpe5r0u",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-e6z5okf",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "モバイルアプリ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-oy92h64",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-6zuvy07",
+												"id": "20240530101000-oy92h64",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-jp793ic",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "よくある質問"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-6clkgcr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-vymc8bi",
+												"id": "20240530101000-6clkgcr",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-hkgs92c",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "データセキュリティ"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-wgs0rlg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-391vqfo",
+												"id": "20240530101000-wgs0rlg",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-mpln2lp",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "用語集"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker"
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-04agguz",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"ID": "20240530101000-f7qjn5p",
+										"id": "20240530101000-04agguz",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
+										},
+										{
+											"ID": "20240530101000-1g1ejrj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-xycelzb",
+												"id": "20240530101000-1g1ejrj",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-flot1gj",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "パフォーマンスの最適化"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-31v0uxm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-qkgwrvb",
+												"id": "20240530101000-31v0uxm",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-bgv304g",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "拡張機能の開発"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-q0wv91n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-lzmjzok",
+												"id": "20240530101000-q0wv91n",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-3xv6jjr",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "プライバシーポリシーと利用規約"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-sthltc4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-0x14gmq",
+												"id": "20240530101000-sthltc4",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240530101000-znj103k",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "感謝の言葉"
+												}
+											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeSuperBlockCloseMarker"
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker",
+							"Properties": {
+								"updated": "20240530101000"
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-opujmx4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-dqf8e9i",
+				"id": "20240530101000-opujmx4"
+			}
+		}
+	]
+}

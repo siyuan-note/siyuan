@@ -62,6 +62,26 @@ func (kValues *KeyValues) GetValue(blockID string) (ret *Value) {
 	return
 }
 
+func (kValues *KeyValues) GetBlockValue() (ret *Value) {
+	for _, v := range kValues.Values {
+		if KeyTypeBlock != v.Type {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
+func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
+	for _, kv := range blockKeyValues {
+		if KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
+			ret = kv.Values[0]
+			break
+		}
+	}
+	return
+}
+
 type KeyType string
 
 const (

@@ -1,0 +1,328 @@
+{
+	"ID": "20240530101000-na9sys7",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-m49p704",
+		"id": "20240530101000-na9sys7",
+		"title": "サードパーティのクラウドストレージへの接続",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-s94en5d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-e7ivj0r",
+				"id": "20240530101000-s94en5d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウド"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウドストレージプロバイダ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ から選択と設定を行ってください。現在、以下のサービスがサポートされています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-y5kmw6j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-itl3kvt",
+				"id": "20240530101000-y5kmw6j",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-qqtgtoh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-vlan2e3",
+						"id": "20240530101000-qqtgtoh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-aic7sey",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-s1ytsva",
+								"id": "20240530101000-aic7sey",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "S3 互換オブジェクトストレージサービス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.cloudflare.com/ja-jp/developer-platform/r2/",
+									"TextMarkTextContent": "Cloudflare R2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " など"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wl4hjuf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-5i7ys4o",
+						"id": "20240530101000-wl4hjuf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6a5gjia",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y2dbhdv",
+								"id": "20240530101000-6a5gjia",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "WebDAV プロトコル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://infini-cloud.net/ja/",
+									"TextMarkTextContent": "InfiniCLOUD"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://koofr.eu/",
+									"TextMarkTextContent": "Koofr"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " など"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-a3e8fvp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-lalkzbp",
+				"id": "20240530101000-a3e8fvp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティのクラウドストレージサービスを介したデータ同期も"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-qtljhep",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "エンドツーエンド暗号化"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "されており、サービスプロバイダがデータの中身を取得することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-iattn3r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-figy85m",
+				"id": "20240530101000-iattn3r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: データ同期の可用性を確保するため以下の点に注意してください:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-d0afjje",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-9k8g4hr",
+				"id": "20240530101000-d0afjje",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cb7jqoc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hpd71e7",
+						"id": "20240530101000-cb7jqoc",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qr8u1y0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4pbg8vo",
+								"id": "20240530101000-qr8u1y0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス間のシステム時刻が一致していること (誤差は1分以内に抑えてください)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vxcim8p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-zg3lj5p",
+						"id": "20240530101000-vxcim8p",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-cncijs7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ytv8z2t",
+								"id": "20240530101000-cncijs7",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ネットワークが安定していること"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-op0dp5x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nio9fah",
+						"id": "20240530101000-op0dp5x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-3stisuy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-j0efp7w",
+								"id": "20240530101000-3stisuy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "CDN を有効にしないこと"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-adyjgng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-f541rmy",
+				"id": "20240530101000-adyjgng"
+			}
+		}
+	]
+}

@@ -1,0 +1,245 @@
+{
+	"spec": 0,
+	"ID": "20240530133134-c2251lc",
+	"name": "書名",
+	"keyValues": [
+		{
+			"key": {
+				"ID": "20240530101000-dwysfvj",
+				"name": "書名",
+				"type": "block",
+				"icon": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-9kz01lo",
+					"keyID": "20240530101000-dwysfvj",
+					"blockID": "20240530101000-3n32s4x",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707380970000,
+					"updatedAt": 1715701024936,
+					"block": {
+						"ID": "20240530101000-3n32s4x",
+						"content": "海底二万里",
+						"created": 1707384570935,
+						"updated": 1715701024936
+					}
+				},
+				{
+					"ID": "20240530101000-rjglvag",
+					"keyID": "20240530101000-dwysfvj",
+					"blockID": "20240530101000-9utmfv2",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381042000,
+					"updatedAt": 1715701031917,
+					"block": {
+						"ID": "20240530101000-9utmfv2",
+						"content": "三体",
+						"created": 1707384642526,
+						"updated": 1715701031917
+					}
+				},
+				{
+					"ID": "20240530101000-ftxdqwc",
+					"keyID": "20240530101000-dwysfvj",
+					"blockID": "20240530101000-6k25xnw",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381054000,
+					"updatedAt": 1715701038153,
+					"block": {
+						"ID": "20240530101000-6k25xnw",
+						"content": "流浪地球",
+						"created": 1707384654904,
+						"updated": 1715701038153
+					}
+				},
+				{
+					"ID": "20240530101000-tqmnj9p",
+					"keyID": "20240530101000-dwysfvj",
+					"blockID": "20240530101000-quskt1f",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1716328048409,
+					"updatedAt": 1716328048409,
+					"block": {
+						"ID": "20240530101000-quskt1f",
+						"content": "",
+						"created": 1716328048409,
+						"updated": 1716328048409
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-fxi3h2s",
+				"name": "ジャンル",
+				"type": "mSelect",
+				"icon": "",
+				"options": [
+					{
+						"name": "Science fiction",
+						"color": "1"
+					}
+				],
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-hcfpo3y",
+					"keyID": "20240530101000-fxi3h2s",
+					"blockID": "20240530101000-3n32s4x",
+					"type": "mSelect",
+					"createdAt": 1707380981000,
+					"updatedAt": 1707380981000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-d3roy1t",
+					"keyID": "20240530101000-fxi3h2s",
+					"blockID": "20240530101000-9utmfv2",
+					"type": "mSelect",
+					"createdAt": 1707381065000,
+					"updatedAt": 1707381065000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-quafxrg",
+					"keyID": "20240530101000-fxi3h2s",
+					"blockID": "20240530101000-6k25xnw",
+					"type": "mSelect",
+					"createdAt": 1707381067000,
+					"updatedAt": 1707381067000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-6666dv2",
+				"name": "著者",
+				"type": "relation",
+				"icon": "",
+				"numberFormat": "",
+				"template": "",
+				"relation": {
+					"avID": "20240530133134-tcqdrt2",
+					"isTwoWay": true,
+					"backKeyID": "20240530101000-k3lneyh"
+				}
+			},
+			"values": [
+				{
+					"ID": "20240530101000-ttoisne",
+					"keyID": "20240530101000-6666dv2",
+					"blockID": "20240530101000-3n32s4x",
+					"type": "relation",
+					"createdAt": 1707381150000,
+					"updatedAt": 1707381150000,
+					"relation": {
+						"blockIDs": [
+							"20240530101000-pfg9af0"
+						],
+						"contents": null
+					}
+				},
+				{
+					"ID": "20240530101000-shl1jrt",
+					"keyID": "20240530101000-6666dv2",
+					"blockID": "20240530101000-6k25xnw",
+					"type": "relation",
+					"createdAt": 1707381154000,
+					"updatedAt": 1707381154000,
+					"relation": {
+						"blockIDs": [
+							"20240530101000-wks9xgq"
+						],
+						"contents": null
+					}
+				},
+				{
+					"ID": "20240530101000-ps7i68w",
+					"keyID": "20240530101000-6666dv2",
+					"blockID": "20240530101000-9utmfv2",
+					"type": "relation",
+					"createdAt": 1707381155000,
+					"updatedAt": 1707381155000,
+					"relation": {
+						"blockIDs": [
+							"20240530101000-wks9xgq"
+						],
+						"contents": null
+					}
+				}
+			]
+		}
+	],
+	"keyIDs": null,
+	"viewID": "20240530101000-16mbtpr",
+	"views": [
+		{
+			"ID": "20240530101000-16mbtpr",
+			"icon": "",
+			"name": "テーブル",
+			"hideAttrViewName": false,
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"ID": "20240530101000-mhhmma3",
+				"columns": [
+					{
+						"ID": "20240530101000-dwysfvj",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "276px"
+					},
+					{
+						"ID": "20240530101000-fxi3h2s",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "183px"
+					},
+					{
+						"ID": "20240530101000-6666dv2",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					}
+				],
+				"rowIds": [
+					"20240530101000-3n32s4x",
+					"20240530101000-9utmfv2",
+					"20240530101000-6k25xnw",
+					"20240530101000-quskt1f"
+				],
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50
+			}
+		}
+	]
+}

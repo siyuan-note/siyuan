@@ -1,0 +1,165 @@
+{
+	"spec": 0,
+	"ID": "20240530133134-tcqdrt2",
+	"name": "著者",
+	"keyValues": [
+		{
+			"key": {
+				"ID": "20240530101000-dcyaa50",
+				"name": "著者",
+				"type": "block",
+				"icon": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-62vkxyv",
+					"keyID": "20240530101000-dcyaa50",
+					"blockID": "20240530101000-pfg9af0",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381102000,
+					"updatedAt": 1715701016765,
+					"block": {
+						"ID": "20240530101000-pfg9af0",
+						"content": "ジュール・ヴェルヌ",
+						"created": 1707384702050,
+						"updated": 1715701016765
+					}
+				},
+				{
+					"ID": "20240530101000-uhkh41h",
+					"keyID": "20240530101000-dcyaa50",
+					"blockID": "20240530101000-wks9xgq",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381134000,
+					"updatedAt": 1715701010038,
+					"block": {
+						"ID": "20240530101000-wks9xgq",
+						"content": "劉 慈欣",
+						"created": 1707384734844,
+						"updated": 1715701010038
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-k3lneyh",
+				"name": "作品",
+				"type": "relation",
+				"icon": "",
+				"numberFormat": "",
+				"template": "",
+				"relation": {
+					"avID": "20240530133134-c2251lc",
+					"isTwoWay": true,
+					"backKeyID": "20240530101000-6666dv2"
+				}
+			},
+			"values": [
+				{
+					"ID": "20240530101000-jyglvgf",
+					"keyID": "20240530101000-k3lneyh",
+					"blockID": "20240530101000-pfg9af0",
+					"type": "relation",
+					"createdAt": 1707381147000,
+					"updatedAt": 1707381147000,
+					"relation": {
+						"blockIDs": [
+							"20240530101000-3n32s4x"
+						],
+						"contents": null
+					}
+				},
+				{
+					"ID": "20240530101000-uz1f153",
+					"keyID": "20240530101000-k3lneyh",
+					"blockID": "20240530101000-wks9xgq",
+					"type": "relation",
+					"createdAt": 1707381150000,
+					"updatedAt": 1707381150000,
+					"relation": {
+						"blockIDs": [
+							"20240530101000-6k25xnw",
+							"20240530101000-9utmfv2"
+						],
+						"contents": null
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-m4wvodp",
+				"name": "作品数",
+				"type": "rollup",
+				"icon": "",
+				"numberFormat": "",
+				"template": "",
+				"rollup": {
+					"relationKeyID": "20240530101000-k3lneyh",
+					"keyID": "20240530101000-dwysfvj",
+					"calc": {
+						"operator": "Count all",
+						"result": null
+					}
+				}
+			}
+		}
+	],
+	"viewID": "20240530101000-7h1cj5l",
+	"views": [
+		{
+			"ID": "20240530101000-7h1cj5l",
+			"icon": "",
+			"name": "テーブル",
+			"hideAttrViewName": false,
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"ID": "20240530101000-s8xhemo",
+				"columns": [
+					{
+						"ID": "20240530101000-dcyaa50",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"ID": "20240530101000-k3lneyh",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "365px",
+						"calc": {
+							"operator": "",
+							"result": null
+						}
+					},
+					{
+						"ID": "20240530101000-m4wvodp",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "90px",
+						"calc": {
+							"operator": "",
+							"result": null
+						}
+					}
+				],
+				"rowIds": [
+					"20240530101000-pfg9af0",
+					"20240530101000-wks9xgq"
+				],
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50
+			}
+		}
+	]
+}

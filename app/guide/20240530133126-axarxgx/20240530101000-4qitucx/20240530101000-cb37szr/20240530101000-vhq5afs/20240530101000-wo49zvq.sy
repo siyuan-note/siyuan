@@ -1,0 +1,1555 @@
+{
+	"ID": "20240530101000-wo49zvq",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-tb77er3",
+		"id": "20240530101000-wo49zvq",
+		"title": "データ同期",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-qw5ujp4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-otrm2qw",
+				"id": "20240530101000-qw5ujp4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6vtiz1y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-w5it1v3",
+				"id": "20240530101000-6vtiz1y",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データ同期とは、複数のデバイス間で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダのデータを一致させることです。これには、アセットファイル、テンプレート、ウィジェット、ノートブックデータが含まれます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0goc24t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-a9tnmh8",
+				"id": "20240530101000-0goc24t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1e3aivv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-hohtqwq",
+				"id": "20240530101000-1e3aivv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-0fn4grk",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "データリポジトリキーの初期化"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "が済んでいればすでに同期設定は完了しています。初めて同期設定を行う場合は、同期ボタンをクリックして同期設定ウィザードを利用することをおすすめします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-i91y7b2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ib4zmc2",
+				"id": "20240530101000-i91y7b2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-k0qwuca",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-tgo0voe",
+						"id": "20240530101000-k0qwuca",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ouo791x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0lkjgdt",
+								"id": "20240530101000-ouo791x",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期を一時停止する場合は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウド"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウド同期を有効にする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ オプションをオフにします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-9aziyhu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ysglapz",
+						"id": "20240530101000-9aziyhu",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-00v4r4s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-201peg6",
+								"id": "20240530101000-00v4r4s",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-nvr8ti7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ファイルを無視する"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sotxylv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-gkwbso0",
+				"id": "20240530101000-sotxylv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tj09nja",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ha2h5uo",
+				"id": "20240530101000-tj09nja",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-vg416pf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lg1yq5q",
+						"id": "20240530101000-vg416pf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4tc1a28",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zl21nv3",
+								"id": "20240530101000-4tc1a28",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期を有効にする前に、同期に参加するすべてのデバイスのシステム時刻が一致していることを確認してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-v679ihj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-16g7gcd",
+						"id": "20240530101000-v679ihj",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-s7kb83y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dg237pl",
+								"id": "20240530101000-s7kb83y",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ量が多い場合に新しいデバイスで同期設定を行う際は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ でエクスポートされたデータを、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ でインポートする方法をおすすめします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-01df0kh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-sa83wf1",
+				"id": "20240530101000-01df0kh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同期モード"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lmow4gl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-frum6h7",
+				"id": "20240530101000-lmow4gl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウド"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウド同期モード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ では 3 つの同期モードがサポートされています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gox5i3i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-fjz8n5c",
+				"id": "20240530101000-gox5i3i",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-72qfx37",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-13fmrst",
+						"id": "20240530101000-72qfx37",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vs6nelh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jia08fp",
+								"id": "20240530101000-vs6nelh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-ukwsc84",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-5t62tcl",
+								"id": "20240530101000-ukwsc84",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-hjldwpq",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-6nfwn7h",
+										"id": "20240530101000-hjldwpq",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-s7h960c",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-7e6hhps",
+												"id": "20240530101000-s7h960c",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "起動時と終了時に同期され、アプリケーションの使用中は同期アルゴリズムにしたがって自動的に同期されます"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-bdxy6si",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-ajfyaib",
+										"id": "20240530101000-bdxy6si",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-4not2fm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-odw5rn5",
+												"id": "20240530101000-4not2fm",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "データのマージと上書きは同期アルゴリズムによって決定されます。下記の動作原理の説明を参照してください"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-g1djs4p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lr1nket",
+						"id": "20240530101000-g1djs4p",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-2rlx8gl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y1cluzo",
+								"id": "20240530101000-2rlx8gl",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "手動"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-st2mgso",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-li32swh",
+								"id": "20240530101000-st2mgso",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-wo5eplk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-7u01iy2",
+										"id": "20240530101000-wo5eplk",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-y7syd3q",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-30i3du4",
+												"id": "20240530101000-y7syd3q",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "起動時と終了時に一度だけ同期され、それ以外の場合は手動で同期する必要があります"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-c43f6t0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-l93vkmo",
+										"id": "20240530101000-c43f6t0",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-jknot5x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ove675v",
+												"id": "20240530101000-jknot5x",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "データのマージと上書きは同期アルゴリズムによって決定されます。下記の動作原理の説明を参照してください"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-xzn2pqv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-oxff0og",
+						"id": "20240530101000-xzn2pqv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lcp38mv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-n7wy2nf",
+								"id": "20240530101000-lcp38mv",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "完全手動同期: 起動と終了時に同期されず、同期タイミングと同期方向をすべて手動で制御します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ayipniy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-q5e6vx7",
+				"id": "20240530101000-ayipniy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動/手動モードの動作原理"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-94d6d1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ajv6bu2",
+				"id": "20240530101000-94d6d1x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan はクラウドデータスナップショットとローカルデータスナップショットを比較して必要な処理を実行します:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-t60qehm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ztbegy1",
+				"id": "20240530101000-t60qehm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-rju8v3t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-tj8g65v",
+						"id": "20240530101000-rju8v3t",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qb21j0t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-6y0278p",
+								"id": "20240530101000-qb21j0t",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "スナップショットが同じ場合は同期をスキップします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-8wnwvrn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-g6lkhbk",
+						"id": "20240530101000-8wnwvrn",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4rkhpbv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-g8a4hd4",
+								"id": "20240530101000-4rkhpbv",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "スナップショットが異なる場合は、前回の同期以降に変更されたローカルデータをクラウドにアップロードし、クラウドからの最新の変更をローカルにマージします"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-q0xdonu",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-3quvavd",
+								"id": "20240530101000-q0xdonu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-vsvbfvx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-mkkw0am",
+										"id": "20240530101000-vsvbfvx",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-37ego0j",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-vn4mc8m",
+												"id": "20240530101000-37ego0j",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "クラウドとローカルの両方の変更に競合がない場合は直接マージします"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-5dmwlq3",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-7lnae2y",
+										"id": "20240530101000-5dmwlq3",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-a04kcnp",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-zwjlslj",
+												"id": "20240530101000-a04kcnp",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ファイルの競合がある場合はローカルがクラウドを上書きし、クラウドからの競合ファイルはデータ履歴にまとめられます"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rpuhh5t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-4i6sbjt",
+				"id": "20240530101000-rpuhh5t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動同期のアルゴリズムは次のとおりです:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b3qw7ig",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-n0hjtca",
+				"id": "20240530101000-b3qw7ig",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-o8qcws7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-5mcca2s",
+						"id": "20240530101000-o8qcws7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-l4xj1ow",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4drsllw",
+								"id": "20240530101000-l4xj1ow",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データの変更後 30 秒間アイドル状態が続くとデータの比較が行われ、変更が検出されると同期が実行されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rqa32bn",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-hqypxbz",
+				"id": "20240530101000-rqa32bn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-4k3zyng",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-lljjeaw",
+						"id": "20240530101000-4k3zyng",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-q1ly6dc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-kxzlp0y",
+								"id": "20240530101000-q1ly6dc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データの変更が検出されなかった場合は、5 分、8 分、16 分、32 分...と比較間隔を徐々に長くします。データの変更が検出されると同期が実行されて 1 に戻ります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2pxbi4l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-vbzlluh",
+				"id": "20240530101000-2pxbi4l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同期モードのシナリオ例"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xdkiwt8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-50zbg4m",
+				"id": "20240530101000-xdkiwt8",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上記の動作原理から、SiYuan は複数のデバイス間でデータを同期する際は交互に行う必要があることがわかります。複数のデバイスで同時に同期しようとするとデータの競合が発生し、予期せぬ上書きが起こる可能性があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k8lwanc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-hnhjuyk",
+				"id": "20240530101000-k8lwanc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常のシナリオ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rwhhwv1",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-903yqr9",
+				"id": "20240530101000-rwhhwv1",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-myt9vth",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-r525dra",
+						"id": "20240530101000-myt9vth",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-azkr3z2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ejo1pk9",
+								"id": "20240530101000-azkr3z2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス A で編集して同期を実行すると、クラウド上のデータがデバイス A のデータで上書きされ、両者のデータが一致した状態になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-cvkts61",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-6xlvmcd",
+						"id": "20240530101000-cvkts61",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-cb9jrjx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-94ljcw4",
+								"id": "20240530101000-cb9jrjx",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス B で同期を実行すると、クラウド上のデータでデバイス B のデータが上書きされ、クラウド、デバイス A、デバイス B のデータがすべて一致した状態になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-twua02k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-0oyacia",
+						"id": "20240530101000-twua02k",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-684azxo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ttoam86",
+								"id": "20240530101000-684azxo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス B で編集して同期を実行すると、クラウド上のデータがデバイス B のデータで上書きされ、両者のデータが一致した状態になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-2f40wg3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-osaj0mr",
+						"id": "20240530101000-2f40wg3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-c7ax5sa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-m0zx96w",
+								"id": "20240530101000-c7ax5sa",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス A で同期を実行すると、クラウド上のデータでデバイス A のデータが上書きされ、クラウド、デバイス A、デバイス B のデータがすべて一致した状態になります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nd3g396",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-p4s4ojx",
+				"id": "20240530101000-nd3g396",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "このシナリオでは、デバイス A とデバイス B が交互に同期を行うことでデータ同期が常に正常に完了することが保証されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8v63pt5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-t4225fj",
+				"id": "20240530101000-8v63pt5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "競合シナリオ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-80o6mmq",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-11drhzl",
+				"id": "20240530101000-80o6mmq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-l7mb1fh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-rqbs1kq",
+						"id": "20240530101000-l7mb1fh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-3xegsr1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-j6iyvdw",
+								"id": "20240530101000-3xegsr1",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス A でファイル a を編集した後同期します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-v8y5g69",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-98dxjss",
+						"id": "20240530101000-v8y5g69",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-9ygwkl0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-neyvns1",
+								"id": "20240530101000-9ygwkl0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デバイス B でファイル a を編集した後同期します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-s4welmx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-c2phuhz",
+						"id": "20240530101000-s4welmx",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lq6e5j8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5a3rtis",
+								"id": "20240530101000-lq6e5j8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "このとき、クラウド上のファイル a はデバイス B 上のファイル a によって上書きされ、以前のデバイス A のファイル a の履歴がデバイス B に生成されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vqxael9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-swfnh4f",
+				"id": "20240530101000-vqxael9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b9usy7v",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-367d9gp",
+				"id": "20240530101000-b9usy7v",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-c9q7obp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0sjbaci",
+						"id": "20240530101000-c9q7obp",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-h8hzdf2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lqp0zwk",
+								"id": "20240530101000-h8hzdf2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "スリープやシャットダウンなどで突然ネットワークが切断された場合は自動同期が停止します。ネットワーク接続が復旧したら手動で同期ボタンをクリックして同期を再開してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-7vuijma",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-xkfm80w",
+						"id": "20240530101000-7vuijma",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zxpjv1c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-aeypsh5",
+								"id": "20240530101000-zxpjv1c",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "サードパーティの同期ソフトと SiYuan の同期機能を同時に使用しないでください。データが破損する可能性があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qa5ly1a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-y5g79kg",
+						"id": "20240530101000-qa5ly1a",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-efjn8rn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0oy5yf2",
+								"id": "20240530101000-efjn8rn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "シンボリックリンクと隠しファイルは同期されません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-11n6jg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0bxti66",
+						"id": "20240530101000-11n6jg5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tr5niom",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-1u0sqf7",
+								"id": "20240530101000-tr5niom",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動同期モード中はアプリケーションの終了前に必ずデータ同期を完了させてください (モバイルアプリをスライドして終了したり、デスクトップアプリでプロセスを強制終了したりしない)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bm1ml3x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-qb73b16",
+						"id": "20240530101000-bm1ml3x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-pp6vwso",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cyhhinm",
+								"id": "20240530101000-pp6vwso",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ同期前のデータスナップショット作成に 12 秒以上かかる場合、データリポジトリのクリーンアップを促すメッセージが表示されます。このデフォルト値を変更するには以下の 2 つの方法があります:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-63wynzi",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-imjum3b",
+								"id": "20240530101000-63wynzi",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-08f8659",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-crebw17",
+										"id": "20240530101000-08f8659",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-5smqqv3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-pw9gmsj",
+												"id": "20240530101000-5smqqv3",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "環境変数 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の値 (ミリ秒単位) を変更します (例: "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_SYNC_INDEX_TIMING=30000"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-593dl27",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-wzok3ca",
+										"id": "20240530101000-593dl27",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-xlcljcw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-8d7v8y1",
+												"id": "20240530101000-xlcljcw",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "workspace/conf/conf.json"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "repo.syncIndexTiming"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を変更します\n両方とも最小値は 12000 (12 秒) に固定されており、最大値は制限されていません。環境変数が最初に読み取られ、設定ファイルの値が上書きされます"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-y5jzeo3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-f4i0cyw",
+												"id": "20240530101000-y5jzeo3",
+												"updated": "20240530101000"
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yciuiim",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-dqca0xz",
+				"id": "20240530101000-yciuiim",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

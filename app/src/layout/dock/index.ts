@@ -9,7 +9,7 @@ import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
 import {Model} from "../Model";
-import {setPanelFocus} from "../util";
+import {saveLayout, setPanelFocus} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
@@ -62,7 +62,7 @@ export class Dock {
         }
         this.app = options.app;
         this.element = document.getElementById("dock" + options.position);
-        const dockClass = options.position === "Bottom" ? ' class="fn__flex"' : "";
+        const dockClass = options.position === "Bottom" ? ' class="fn__flex dock__items"' : ' class="dock__items"';
         this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.pin = options.data.pin;
@@ -133,6 +133,106 @@ export class Dock {
                 target = target.parentElement;
             }
         });
+
+        this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            const item = hasClosestByClassName(event.target as HTMLElement, "dock__item");
+            if (!item || !item.getAttribute("data-type")) {
+                return;
+            }
+            const documentSelf = document;
+            documentSelf.ondragstart = () => false;
+            let ghostElement: HTMLElement;
+            let selectItem: HTMLElement;
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                if (window.siyuan.config.readonly ||
+                    Math.abs(moveEvent.clientY - event.clientY) < 3 && Math.abs(moveEvent.clientX - event.clientX) < 3) {
+                    return;
+                }
+                console.log(moveEvent.clientY - event.clientY)
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                if (!ghostElement) {
+                    item.style.opacity = "0.38";
+                    item.classList.remove("b3-tooltips");
+                    ghostElement = item.cloneNode(true) as HTMLElement;
+                    ghostElement.setAttribute("data-ghost-type", "dock");
+                    this.element.append(ghostElement);
+                    ghostElement.setAttribute("data-original", JSON.stringify({
+                        position: this.position,
+                        index: item.getAttribute("data-index"),
+                        previousType: item.previousElementSibling?.getAttribute("data-type"),
+                        type: item.getAttribute("data-type"),
+                    }));
+                    ghostElement.setAttribute("id", "dragGhost");
+                    ghostElement.setAttribute("style", `background-color:var(--b3-theme-background-light);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+                }
+                if (this.position === "Bottom") {
+                    ghostElement.style.top = (moveEvent.clientY - 40) + "px";
+                    ghostElement.style.left = (moveEvent.clientX - 20) + "px";
+                } else {
+                    ghostElement.style.top = (moveEvent.clientY - 20) + "px";
+                    if (this.position === "Left") {
+                        ghostElement.style.left = (moveEvent.clientX) + "px";
+                    } else {
+                        ghostElement.style.left = (moveEvent.clientX - 40) + "px";
+                    }
+                }
+
+                const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
+                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement;
+                if (targetItem && selectItem && targetItem.isSameNode(selectItem)) {
+                    if (selectItem.classList.contains("dock__item")) {
+                        const selectRect = selectItem.getBoundingClientRect();
+                        if (selectItem.parentElement.parentElement.id === "dockBottom") {
+                            if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
+                                selectItem.before(item);
+                            } else {
+                                selectItem.after(item);
+                            }
+                        } else {
+                            if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
+                                selectItem.before(item);
+                            } else {
+                                selectItem.after(item);
+                            }
+                        }
+                    } else if (selectItem.childElementCount === 0) {
+                        selectItem.append(item)
+                    } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.classList.contains("dock__item--pin")) {
+                        selectItem.insertAdjacentElement("afterbegin", item);
+                    }
+                    return;
+                }
+                if (!targetItem || targetItem.classList.contains("dock__item--pin") || targetItem.style.position === "fixed" || targetItem.isSameNode(item)) {
+                    return;
+                }
+                selectItem = targetItem;
+            };
+
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                ghostElement?.remove();
+                if (item.classList.contains("b3-tooltips")) {
+                    return;
+                }
+                item.style.opacity = "";
+                item.classList.add("b3-tooltips");
+                let dock
+                if (item.parentElement.parentElement.id === "dockBottom") {
+                    dock = window.siyuan.layout.bottomDock;
+                } else if (item.parentElement.parentElement.id === "dockLeft") {
+                    dock = window.siyuan.layout.leftDock;
+                } else if (item.parentElement.parentElement.id === "dockRight") {
+                    dock = window.siyuan.layout.rightDock;
+                }
+                dock.add(item.parentElement.isSameNode(dock.element.firstElementChild) ? 0 : 1, item, item.previousElementSibling?.getAttribute("data-type"));
+            };
+        });
+
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
             if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu")) {
                 return;
@@ -584,7 +684,7 @@ export class Dock {
         this.showDock();
     }
 
-    public add(index: number, sourceElement: Element) {
+    public add(index: number, sourceElement: Element, previousType?:string) {
         sourceElement.setAttribute("data-height", "");
         sourceElement.setAttribute("data-width", "");
         const type = sourceElement.getAttribute("data-type");
@@ -608,17 +708,22 @@ export class Dock {
         sourceElement.classList.remove("b3-tooltips__n", "b3-tooltips__ne", "b3-tooltips__nw", "b3-tooltips__s", "b3-tooltips__se", "b3-tooltips__sw", "b3-tooltips__e", "b3-tooltips__w");
         sourceElement.classList.add(`b3-tooltips__${this.getClassDirect(index)}`);
         sourceElement.setAttribute("data-index", index.toString());
-        if (index === 0) {
-            this.element.firstElementChild.insertAdjacentElement("afterbegin", sourceElement);
+        if (previousType) {
+            this.element.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
         } else {
-            this.element.lastElementChild.insertAdjacentElement("afterbegin", sourceElement);
+            if (index === 0) {
+                this.element.firstElementChild.insertAdjacentElement("afterbegin", sourceElement);
+            } else {
+                this.element.lastElementChild.insertAdjacentElement("afterbegin", sourceElement);
+            }
         }
         this.element.classList.remove("fn__none");
         resetFloatDockSize();
         this.data[type] = true;
         if (hasActive) {
-            this.toggleModel(type, true);
+            this.toggleModel(type, true, false, false, false);
         }
+        saveLayout();
     }
 
     public remove(key: string) {

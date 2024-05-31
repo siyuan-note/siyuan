@@ -12,12 +12,39 @@ import {showMessage} from "../../dialog/message";
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     const ghostElement = document.getElementById("dragGhost");
     if (ghostElement) {
-        const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
-        startElement ? startElement.style.opacity = "" : "";
-        ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top", "dragover__bottom", "dragover");
-            item.style.opacity = "";
-        });
+        if (ghostElement.dataset.ghostType === "dock") {
+            ghostElement.parentElement.querySelectorAll(".dock__item").forEach((item: HTMLElement) => {
+                item.style.opacity = "";
+                item.classList.add("b3-tooltips");
+            });
+            const original = JSON.parse(ghostElement.getAttribute("data-original"));
+            let dock
+            if (original.position === "Left") {
+                dock = window.siyuan.layout.leftDock;
+            } else if (original.position === "Right") {
+                dock = window.siyuan.layout.rightDock;
+            } else if (original.position === "Bottom") {
+                dock = window.siyuan.layout.bottomDock;
+            }
+            const previousElement = dock.element.querySelector(`.dock__item[data-type="${original.previousType}"]`)
+            const dockElement = dock.element.querySelector(`.dock__item[data-type="${original.type}"]`)
+            if (previousElement) {
+                previousElement.after(dockElement)
+            } else {
+                if (original.index === "0") {
+                    dock.element.firstElementChild.prepend(dockElement)
+                } else {
+                    dock.element.lastElementChild.previousElementSibling.prepend(dockElement)
+                }
+            }
+        } else {
+            const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
+            startElement ? startElement.style.opacity = "" : "";
+            ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                item.style.opacity = "";
+            });
+        }
         ghostElement.remove();
     }
     if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
@@ -48,7 +75,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         window.siyuan.layout.rightDock.hideDock();
     }
 
-    const protyleElement  = hasClosestByClassName(event.target, "protyle", true);
+    const protyleElement = hasClosestByClassName(event.target, "protyle", true);
     if (protyleElement) {
         const wysiwygElement = protyleElement.querySelector(".protyle-wysiwyg");
         if (wysiwygElement.getAttribute("data-readonly") === "true" || !wysiwygElement.contains(event.target)) {

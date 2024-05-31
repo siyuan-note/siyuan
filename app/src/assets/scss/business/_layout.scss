@@ -368,6 +368,11 @@
     border-top: .5px solid var(--b3-border-color);
   }
 
+  &__items {
+    min-height: 26px;
+    min-width: 26px;
+  }
+
   svg {
     height: 14px;
     width: 14px;

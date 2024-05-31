@@ -19,10 +19,12 @@ package api
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -222,6 +224,35 @@ func openNotebook(c *gin.Context) {
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
+
+	if isUserGuide {
+		appArg := arg["app"]
+		app := ""
+		if nil != appArg {
+			app = appArg.(string)
+		}
+
+		go func() {
+			var startID string
+			i := 0
+			for ; i < 70; i++ {
+				time.Sleep(100 * time.Millisecond)
+				guideStartID := map[string]string{
+					"20210808180117-czj9bvb": "20200812220555-lj3enxa",
+					"20211226090932-5lcq56f": "20211226115423-d5z1joq",
+					"20210808180117-6v0mkxr": "20200923234011-ieuun1p",
+					"20240530133126-axarxgx": "20240530101000-4qitucx",
+				}
+				startID = guideStartID[notebook]
+				if nil != treenode.GetBlockTree(startID) {
+					util.BroadcastByTypeAndApp("main", app, "openFileById", 0, "", map[string]interface{}{
+						"id": startID,
+					})
+					break
+				}
+			}
+		}()
+	}
 }
 
 func closeNotebook(c *gin.Context) {

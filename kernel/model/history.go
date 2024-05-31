@@ -271,6 +271,11 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FullReindex()
 	IncSync()
+	go func() {
+		sql.WaitForWritingDatabase()
+		// 刷新关联的动态锚文本 https://github.com/siyuan-note/siyuan/issues/11575
+		refreshDynamicRefText(tree.Root, tree)
+	}()
 	return nil
 }
 

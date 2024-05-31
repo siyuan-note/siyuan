@@ -135,7 +135,49 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 	}
 }
 
-func addAttributeViewValues(c *gin.Context) {
+func appendAttributeViewDetachedBlocksWithValues(c *gin.Context) {
+	// Add an internal kernel API `/api/av/appendAttributeViewDetachedBlocksWithValues` https://github.com/siyuan-note/siyuan/issues/11608
+
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	var values [][]*av.Value
+	for _, blocksVals := range arg["blocksValues"].([]interface{}) {
+		vals := blocksVals.([]interface{})
+		var rowValues []*av.Value
+		for _, val := range vals {
+			data, marshalErr := gulu.JSON.MarshalJSON(val)
+			if nil != marshalErr {
+				ret.Code = -1
+				ret.Msg = marshalErr.Error()
+				return
+			}
+			value := av.Value{}
+			if unmarshalErr := gulu.JSON.UnmarshalJSON(data, &value); nil != unmarshalErr {
+				ret.Code = -1
+				ret.Msg = unmarshalErr.Error()
+				return
+			}
+			rowValues = append(rowValues, &value)
+		}
+		values = append(values, rowValues)
+	}
+
+	err := model.AppendAttributeViewDetachedBlocksWithValues(avID, values)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func addAttributeViewBlocks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -173,7 +215,7 @@ func addAttributeViewValues(c *gin.Context) {
 	util.PushReloadAttrView(avID)
 }
 
-func removeAttributeViewValues(c *gin.Context) {
+func removeAttributeViewBlocks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

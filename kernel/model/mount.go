@@ -250,29 +250,6 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	treenode.SaveBlockTree(false)
 	util.ClearPushProgress(100)
 
-	if isUserGuide {
-		go func() {
-			var startID string
-			i := 0
-			for ; i < 70; i++ {
-				time.Sleep(100 * time.Millisecond)
-				guideStartID := map[string]string{
-					"20210808180117-czj9bvb": "20200812220555-lj3enxa",
-					"20211226090932-5lcq56f": "20211226115423-d5z1joq",
-					"20210808180117-6v0mkxr": "20200923234011-ieuun1p",
-					"20240530133126-axarxgx": "20240530101000-4qitucx",
-				}
-				startID = guideStartID[boxID]
-				if nil != treenode.GetBlockTree(startID) {
-					util.BroadcastByType("main", "openFileById", 0, "", map[string]interface{}{
-						"id": startID,
-					})
-					break
-				}
-			}
-		}()
-	}
-
 	if reMountGuide {
 		return true, nil
 	}

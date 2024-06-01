@@ -151,11 +151,6 @@ jobs:
       with:
         install: p7zip mingw-w64-x86_64-lua
 
-    - name: Set up TDM-GCC
-      run: msys2 -c "bash go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/scripts/get-tdm-gcc.sh tdm https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm-1/tdm-gcc-10.3.0.exe" && echo "CC=${{ github.workspace }}/tdm/bin/gcc.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      if: "contains( matrix.config.goarch, '386')"
-      working-directory: ${{ github.workspace }}
-
     - name: Set up Go
       uses: actions/setup-go@v5
       with:

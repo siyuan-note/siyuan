@@ -25,7 +25,7 @@ go build --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w" 
 
 echo 'Building Kernel arm64'
 export GOARCH=arm64
-export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
+export CC=~/llvm-mingw-20240518-ucrt-ubuntu-20.04-x86_64/bin/aarch64-w64-mingw32-gcc
 go build --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w" .
 cd ..
 

@@ -8,9 +8,9 @@ import {setModelsHash} from "../window/setHeader";
 /// #if !MOBILE
 // @ts-ignore
 // import {webViewerLoad} from "./pdf/viewer";
-import {webViewerLoad} from "./zotero/index";
+import {webViewerLoad, webViewerPageNumberChanged} from "./zotero/index";
 // @ts-ignore
-import {webViewerPageNumberChanged} from "./pdf/app";
+// import {webViewerPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
@@ -23,6 +23,7 @@ export class Asset extends Model {
     private pdfId: number | string;
     private pdfPage: number;
     public pdfObject: any;
+    public readerObject: any;
 
     constructor(options: { app: App, tab: Tab, path: string, page?: number | string }) {
         super({app: options.app, id: options.tab.id});
@@ -74,12 +75,12 @@ export class Asset extends Model {
         /// #if !MOBILE
         if (typeof pdfId === "string") {
             this.getPdfId(() => {
-                webViewerPageNumberChanged({value: this.pdfPage, pdfInstance: this.pdfObject, id: this.pdfId});
+                webViewerPageNumberChanged({value: this.pdfPage, readerInstance: this.readerObject, id: (this.pdfId as string)});
             });
             return;
         }
         if (typeof pdfId === "number" && !isNaN(pdfId)) {
-            webViewerPageNumberChanged({value: this.pdfId, pdfInstance: this.pdfObject});
+            webViewerPageNumberChanged({value: (this.pdfId as number), readerInstance: this.readerObject});
         }
         /// #endif
     }
@@ -500,14 +501,16 @@ export class Asset extends Model {
             setTimeout(async () => {
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(async () => {
-                        this.pdfObject = await webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+                        this.readerObject = await webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                             this.element, this.pdfPage, this.pdfId);
+                        this.pdfObject = this.readerObject._primaryView._iframeWindow.PDFViewerApplication
                         observer.disconnect();
                     });
                     observer.observe(this.element, {attributeFilter: ["class"]});
                 } else {
-                    this.pdfObject = await webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+                    this.readerObject = await webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                         this.element, this.pdfPage, this.pdfId);
+                    this.pdfObject = this.readerObject._primaryView._iframeWindow.PDFViewerApplication
                 }
                 /// #if !BROWSER
                 setModelsHash();

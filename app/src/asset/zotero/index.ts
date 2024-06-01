@@ -1,3 +1,5 @@
+import { getInitAnnotations,getSelectedAnnotations } from "./anno";
+
 const {addScriptSync} = require('../../protyle/util/addScript')
 const {Constants} = require('../../constants')
 // addScriptSync(`${Constants.PROTYLE_CDN}/js/reader.js`, 'ZoteroScript')
@@ -13,25 +15,42 @@ export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:nu
         console.error("undefine reader!")
         return
     }
+	let annotations = await getInitAnnotations(file);
     let option = await createOption({
         fileName:file,
-        annotations:[],
+        annotations,
         state:{
             sidebarState: 9,
-			pageIndex:pdfPage != undefined ? pdfPage : 0
+			pageIndex:pdfPage != undefined ? pdfPage-1 : 0
         }
     })
     let reader = createReader(
         {onOpenContextMenu: (params:any) => {
-            console.log(params);
+            // console.log(params);
+			// console.log(getSelectedAnnotations(reader))
 			reader.openContextMenu(params);
 		},
 		sidebarOpen:false,
         ...option});
-	debugger;
     await waitUntilIframeLoads(reader._primaryView._iframe);
 	(window as any).reader = reader
-    return reader._primaryView._iframeWindow.PDFViewerApplication
+	return reader
+}
+
+export function webViewerPageNumberChanged(evt:{value:number, readerInstance:any,id?: string}){
+	let mouseEvent = new MouseEvent('click', {
+		bubbles: true, // 事件是否冒泡
+		cancelable: true, // 事件是否可以取消
+		view: window // 事件的视图（通常是窗口）
+	});
+	if (evt.id){
+		evt.readerInstance.setSelectedAnnotations([evt.id],false,mouseEvent)
+	}
+	else{
+		evt.readerInstance.navigate({
+			"pageNumber": evt.value
+		})
+	}
 }
 
 async function waitUntilIframeLoads(iframeElement:HTMLIFrameElement) {

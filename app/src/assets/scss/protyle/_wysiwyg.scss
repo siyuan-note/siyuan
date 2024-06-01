@@ -445,6 +445,11 @@
     background-color: var(--b3-theme-primary-lightest) !important;
   }
 
+  // https://github.com/siyuan-note/siyuan/issues/11589
+  .hljs wbr {
+    display: none;
+  }
+
   &--hl,
   &--hl .hljs {
     transition: var(--b3-background-transition);

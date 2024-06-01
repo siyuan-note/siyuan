@@ -1,0 +1,437 @@
+
+:root {
+	--viewer-container-height: 0;
+	--loading-icon-delay: 400ms;
+}
+
+body {
+	overflow: hidden;
+}
+
+@media screen and (forced-colors: active) {
+	:root {
+		--page-border: 1px solid CanvasText;
+	}
+}
+
+[data-main-rotation="90"] {
+	transform: rotate(90deg) translateY(-100%);
+}
+[data-main-rotation="180"] {
+	transform: rotate(180deg) translate(-100%, -100%);
+}
+[data-main-rotation="270"] {
+	transform: rotate(270deg) translateX(-100%);
+}
+
+.pdfViewer {
+	/* Define this variable here and not in :root to avoid to reflow all the UI
+	   when scaling (see #15929). */
+	--scale-factor: 1;
+
+	display: flex;
+	flex-direction: column;
+	align-items: safe center;
+	gap: 10px;
+	padding: 18px;
+}
+
+#outerContainer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+#mainContainer {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	min-width: 320px;
+}
+
+#viewerContainer {
+	direction: ltr;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	outline: none;
+	box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Disable scrollbars */
+/* https://stackoverflow.com/a/49278385 */
+body.portal #viewerContainer {
+	overflow-y: scroll;
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+body.portal #viewerContainer::-webkit-scrollbar { /* WebKit */
+	width: 0;
+	height: 0;
+}
+
+.pdfViewer.scrollHorizontal {
+	flex-direction: row;
+}
+
+.pdfViewer.scrollWrapped {
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: safe center;
+}
+
+.pdfViewer .spread {
+	display: flex;
+	gap: 10px;
+}
+
+.spread .page,
+.spread .dummyPage,
+.pdfViewer.scrollHorizontal .page,
+.pdfViewer.scrollWrapped .page {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.pdfViewer .page {
+	flex-shrink: 0;
+}
+
+.pdfViewer .page canvas {
+	margin: 0;
+	display: block;
+}
+
+.pdfViewer .page canvas .structTree {
+	contain: strict;
+}
+
+.pdfViewer .page canvas[hidden] {
+	display: none;
+}
+
+.pdfViewer .page canvas[zooming] {
+	width: 100%;
+	height: 100%;
+}
+
+.pdfViewer .page.loadingIcon:after {
+	position: absolute;
+	top: 0;
+	left: 0;
+	content: "";
+	width: 100%;
+	height: 100%;
+	background: url("images/loading-icon.gif") center no-repeat;
+	display: none;
+	/* Using a delay with background-image doesn't work,
+	   consequently we use the display. */
+	transition-property: display;
+	transition-delay: var(--loading-icon-delay);
+	z-index: 5;
+	contain: strict;
+}
+
+.pdfViewer .page.loading:after {
+	display: block;
+}
+
+.pdfViewer .page:not(.loading):after {
+	transition-property: none;
+	display: none;
+}
+
+.pdfViewer .page {
+	direction: ltr;
+	width: 816px;
+	height: 1056px;
+
+	position: relative;
+	overflow: hidden;
+	border: var(--page-border);
+	background-clip: content-box;
+	box-shadow: 0 0 2px 0 rgba(0,0,0,.14),0 2px 2px 0 rgba(0,0,0,.12),0 1px 3px 0 rgba(0,0,0,.12);
+}
+
+.pdfViewer .dummyPage {
+	position: relative;
+	width: 0;
+	height: var(--viewer-container-height);
+}
+
+.pdfViewer .canvasWrapper {
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+#sidebarContainer, .toolbar, .secondaryToolbar, .findbar, #overlayContainer, #fileInput {
+	display: none;
+}
+
+.toolbar {
+	display: none;
+}
+
+.annotationLayer, .annotationEditorLayer {
+	display: none;
+}
+
+#viewerContainer {
+	background-color: rgb(250, 250, 250);
+}
+
+#viewer {
+/*//margin-top: 10px;*/
+}
+
+.hidden {
+	display: none;
+}
+
+/*Print*/
+@page {
+	margin: 0;
+}
+
+#printContainer {
+	display: none;
+}
+
+@media print {
+	#root {
+		visibility: hidden;
+	}
+
+	#viewer-container {
+		display: block !important;
+	}
+
+	body {
+		background: rgba(0, 0, 0, 0) none;
+	}
+	body[data-pdfjsprinting] #outerContainer {
+		display: none;
+	}
+	body[data-pdfjsprinting] #printContainer {
+		display: block;
+	}
+	#printContainer {
+		height: 100%;
+	}
+	/* wrapper around (scaled) print canvas elements */
+	#printContainer > .printedPage {
+		page-break-after: always;
+		page-break-inside: avoid;
+
+		/* The wrapper always cover the whole page. */
+		height: 100%;
+		width: 100%;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#printContainer > .xfaPrintedPage .xfaPage {
+		position: absolute;
+	}
+
+	#printContainer > .xfaPrintedPage {
+		page-break-after: always;
+		page-break-inside: avoid;
+		width: 100%;
+		height: 100%;
+		position: relative;
+	}
+
+	#printContainer > .printedPage canvas,
+	#printContainer > .printedPage img {
+		/* The intrinsic canvas / image size will make sure that we fit the page. */
+		max-width: 100%;
+		max-height: 100%;
+
+		direction: ltr;
+		display: block;
+	}
+}
+
+.textLayer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+	opacity: 0.2;
+	line-height: 1;
+	user-select: auto;
+	-webkit-user-select: auto;
+	transform-origin: 0 0;
+	z-index: 2;
+}
+
+.textLayer :is(span, br) {
+	color: transparent;
+	position: absolute;
+	white-space: pre;
+	/*cursor: text;*/
+	transform-origin: 0% 0%;
+}
+
+.textLayer span.markedContent {
+  top: 0;
+  height: 0;
+}
+
+.textLayer .highlight {
+	margin: -1px;
+	padding: 1px;
+	background-color: rgba(180, 0, 170, 1);
+	border-radius: 4px;
+}
+
+.textLayer .highlight.appended {
+	position: initial;
+}
+
+.textLayer .highlight.begin {
+	border-radius: 4px 0 0 4px;
+}
+
+.textLayer .highlight.end {
+	border-radius: 0 4px 4px 0;
+}
+
+.textLayer .highlight.middle {
+	border-radius: 0;
+}
+
+.textLayer .highlight.selected {
+	background-color: rgba(0, 100, 0, 1);
+}
+
+::selection {
+	background: transparent;
+}
+.customAnnotationLayer ::selection {
+	background-color: Highlight;
+}
+
+.textLayer .endOfContent {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	right: 0;
+	bottom: 0;
+	z-index: -1;
+	/*cursor: default;*/
+	user-select: none;
+}
+
+.textLayer .endOfContent.active {
+	top: 0;
+}
+
+.customAnnotationLayer {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.textAnnotation {
+	position: absolute;
+}
+
+.textAnnotation {
+	background-color: transparent;
+	border: none;
+	box-sizing: border-box;
+	outline: none;
+	pointer-events: none;
+	word-break: break-word;
+	cursor: text;
+	resize: none;
+	overflow: hidden;
+}
+
+.textAnnotation:empty:before {
+	content: ' ';
+}
+
+.textAnnotation.focusable {
+	pointer-events: unset;
+}
+
+body, #viewerContainer {
+	background-color: #f2f2f2; /* --color-toolbar */
+}
+
+.pdfViewer .page {
+	background-color: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+	body:not(.disableDarkMode), body:not(.disableDarkMode) #viewerContainer {
+		background-color: #272727; /* --color-toolbar */
+	}
+
+	body:not(.disableDarkMode) canvas, body:not(.disableDarkMode) .textAnnotation {
+		filter: invert(90%) saturate(100%) hue-rotate(180deg) brightness(100%) contrast(125%)
+	}
+
+	body:not(.disableDarkMode) .pdfViewer .page {
+		background-color: #000000;
+	}
+
+	.textLayer {
+		opacity: 0.5;
+	}
+
+	.textLayer .highlight.selected {
+		background-color: #00FF00;
+	}
+
+	.textLayer .highlight {
+		background-color: #FF00F1;
+	}
+}
+
+:root[data-color-scheme=dark] body:not(.disableDarkMode),
+:root[data-color-scheme=dark] body:not(.disableDarkMode) #viewerContainer {
+	background-color: #272727;
+	/* --color-toolbar */
+}
+
+:root[data-color-scheme=dark] body:not(.disableDarkMode) canvas,
+:root[data-color-scheme=dark] body:not(.disableDarkMode) .textAnnotation {
+	filter: invert(90%) saturate(100%) hue-rotate(180deg) brightness(100%) contrast(125%)
+}
+
+:root[data-color-scheme=dark] body:not(.disableDarkMode) .pdfViewer .page {
+	background-color: #000000;
+}
+
+:root[data-color-scheme=dark] .textLayer {
+	opacity: 0.5;
+}
+
+:root[data-color-scheme=dark] .textLayer .highlight.selected {
+	background-color: #00FF00;
+}
+
+:root[data-color-scheme=dark] .textLayer .highlight {
+	background-color: #FF00F1;
+}

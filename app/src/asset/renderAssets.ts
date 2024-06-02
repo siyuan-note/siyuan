@@ -4,6 +4,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {pathPosix} from "../util/pathName";
 import * as dayjs from "dayjs";
+import { webViewerLoad } from "./zotero";
 
 export const renderAssetsPreview = (pathString: string) => {
     if (!pathString) {
@@ -23,7 +24,7 @@ export const renderAssetsPreview = (pathString: string) => {
 
 export const pdfResize = () => {
     /// #if !MOBILE
-    getAllModels().asset.forEach(item => {
+    getAllModels().asset.forEach(async(item) => {
         const pdfInstance = item.pdfObject;
         if (!pdfInstance) {
             return;
@@ -32,29 +33,15 @@ export const pdfResize = () => {
         if (!pdfDocument) {
             return;
         }
-        // https://github.com/siyuan-note/siyuan/issues/8097
-        const pdfViewerElement = item.element.querySelector("#viewerContainer");
-        if (pdfViewerElement.clientHeight === 0) {
+        if (item.readerObject._lastView._iframe.ownerDocument.defaultView){
             return;
         }
-        if (pdfViewerElement) {
-            // https://github.com/siyuan-note/siyuan/issues/6890
-            const scrollTop = pdfViewerElement.getAttribute("data-scrolltop");
-            if (scrollTop) {
-                pdfViewerElement.scrollTo(0, parseInt(scrollTop));
-                pdfViewerElement.removeAttribute("data-scrolltop");
-            }
-        }
-        const currentScaleValue = pdfViewer.currentScaleValue;
-        if (
-            currentScaleValue === "auto" ||
-            currentScaleValue === "page-fit" ||
-            currentScaleValue === "page-width"
-        ) {
-            // Note: the scale is constant for 'page-actual'.
-            pdfViewer.currentScaleValue = currentScaleValue;
-        }
-        pdfViewer.update();
+        // https://github.com/siyuan-note/siyuan/issues/8097
+        let {fileName,url} = item.readerObject._data;
+        let filePath = url+fileName;
+        item.element.innerHTML = ""
+        item.readerObject = await webViewerLoad(filePath,item.element,pdfViewer.currentPageNumber,pdfViewer.currentPageNumber)
+        item.pdfObject = item.readerObject._primaryView._iframeWindow.PDFViewerApplication
     });
     /// #endif
 };

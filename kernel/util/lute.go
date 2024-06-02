@@ -26,10 +26,10 @@ import (
 
 // MarkdownSettings 运行时 Markdown 配置。
 var MarkdownSettings = &Markdown{
-	InlineSup:  false,
-	InlineSub:  false,
-	InlineTag:  false,
-	InlineMath: false,
+	InlineSup:  true,
+	InlineSub:  true,
+	InlineTag:  true,
+	InlineMath: true,
 }
 
 type Markdown struct {

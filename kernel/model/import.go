@@ -63,6 +63,13 @@ func HTML2Markdown(htmlStr string) (markdown string, withMath bool, err error) {
 			return ast.WalkContinue
 		}
 
+		if ast.NodeText == n.Type {
+			if n.ParentIs(ast.NodeTableCell) {
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("|"), []byte("\\|"))
+			}
+		}
+
 		if ast.NodeInlineMath == n.Type {
 			withMath = true
 			return ast.WalkContinue

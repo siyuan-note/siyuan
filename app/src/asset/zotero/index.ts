@@ -1,8 +1,21 @@
-import { getInitAnnotations,getSelectedAnnotations,SaveAnnotations } from "./anno";
+import { writeText } from "../../protyle/util/compatibility";
+import { 
+	getInitAnnotations,
+	getSelectedAnnotations,
+	SaveAnnotations, 
+	genDataTransferAnnotations,
+	genNodeIDMap,
+	Annotation,
+	genClipPlantText,
+	saveAnnotationsImage
+ } from "./anno";
 
 const {addScriptSync} = require('../../protyle/util/addScript')
 const {Constants} = require('../../constants')
 // addScriptSync(`${Constants.PROTYLE_CDN}/js/reader.js`, 'ZoteroScript')
+
+type fileName = string;
+
 export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:number, annoId:string|number){
     let iframeElement = document.createElement("iframe");
     iframeElement.src = `${Constants.PROTYLE_CDN}/js/zotero/reader.html`;
@@ -11,6 +24,7 @@ export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:nu
     await waitUntilIframeLoads(iframeElement);
     let iframeWindow = iframeElement.contentWindow;
     let createReader = (iframeWindow as any).createReader;
+	let fileName = file.replace(location.origin, "").substr(1);
     if (createReader === undefined){
         console.error("undefine reader!")
         return
@@ -21,7 +35,6 @@ export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:nu
         annotations,
         state:{
             sidebarState: 9,
-			pageIndex:pdfPage != undefined ? pdfPage-1 : 0
         }
     })
     let reader = createReader({
@@ -30,19 +43,25 @@ export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:nu
 			// console.log(getSelectedAnnotations(reader))
 			reader.openContextMenu(params);
 		},
-		onSaveAnnotations:async function (annotations:any) {
-			console.log('Save annotations', annotations);
-			SaveAnnotations(reader);
+		onSaveAnnotations:async function (annotations:Annotation[]){
+			let {idMap,annotations:newAnnotations} = await genMapAndWriteClip(annotations,fileName);
+			saveAnnotationsImage(fileName,newAnnotations)
+			SaveAnnotations(reader,idMap);
 		},
 		onDeleteAnnotations: function (ids:any) {
 			console.log('Delete annotations', JSON.stringify(ids));
-			SaveAnnotations(reader);
+			SaveAnnotations(reader,{});
 		},
+		onSetDataTransferAnnotations: genDataTransferAnnotations(fileName),
 		sidebarOpen:false,
+		location:{
+			annotationID: typeof annoId === "string"?annoId:undefined,
+			pageNumber: typeof annoId === "number"? annoId:undefined
+		},
         ...option
 	});
-    await waitUntilIframeLoads(reader._primaryView._iframe);
-	(window as any).reader = reader
+	await waitUntilIframeLoads(reader._primaryView._iframe);
+	(window as any).readerInstance = reader;
 	return reader
 }
 
@@ -61,6 +80,18 @@ export function webViewerPageNumberChanged(evt:{value:number, readerInstance:any
 		})
 	}
 }
+
+
+async function genMapAndWriteClip (annotations:Annotation[],fileName:fileName) {
+		
+	let idMap = genNodeIDMap(annotations)
+	annotations = annotations.map(x=>{return {...x ,id:idMap[x.id]}})
+	console.log('Save annotations', annotations);
+	let plantText = genClipPlantText(annotations,fileName,false)
+	writeText(plantText)
+	return {idMap,annotations}
+}
+
 
 async function waitUntilIframeLoads(iframeElement:HTMLIFrameElement) {
     return new Promise((resolve, reject) => {
@@ -236,6 +267,7 @@ async function createOption(fileInfo:{filePath:string,annotations:Array<any>,sta
 	let type = 'pdf';
 	let demo = fileInfo;
 	let res = await fetch(demo.filePath);
+	let fileName = fileInfo.filePath.replace(location.origin, "").substr(1)
 	let option = {
 		type,
 		localizedStrings: strings,
@@ -243,7 +275,7 @@ async function createOption(fileInfo:{filePath:string,annotations:Array<any>,sta
 		data: {
 			buf: new Uint8Array(await res.arrayBuffer()),
 			url: new URL('/',( window.location.toString())).toString(),
-			filePath:fileInfo.filePath
+			fileName:fileName
 		},
 		// rtl: true,
 		annotations: demo.annotations,
@@ -276,9 +308,6 @@ async function createOption(fileInfo:{filePath:string,annotations:Array<any>,sta
 		},
 		onChangeSidebarWidth(width:any) {
 			console.log('Sidebar width changed', width);
-		},
-		onSetDataTransferAnnotations(dataTransfer:any, annotations:any, fromText:any) {
-			console.log('Set formatted dataTransfer annotations', dataTransfer, annotations, fromText);
 		},
 		onConfirm(title:any, text:any, confirmationButtonTitle:any) {
 			return window.confirm(text);

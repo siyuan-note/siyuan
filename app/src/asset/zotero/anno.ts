@@ -1,3 +1,4 @@
+import { Constants } from "../../constants";
 import { fetchSyncPost } from "../../util/fetch"
 
 interface OriginAnnotation {
@@ -11,7 +12,7 @@ interface OriginAnnotation {
     type: string;
 }
 
-interface Annotation {
+export interface Annotation {
     authorName: string;
     color: string;
     comment: string;
@@ -55,7 +56,6 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
     let urlPath = path.replace(location.origin, "").substr(1) + ".sya";
     let originAnnoData:any[] = [];
     let annoData:any[] = [];
-    debugger;
     let annoResponse = await fetchSyncPost(
         "/api/asset/getFileAnnotation",
         {
@@ -65,7 +65,6 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
     if (annoResponse.code !== 1){
         originAnnoData = JSON.parse(annoResponse.data.data);
         Object.entries(originAnnoData).forEach(([key, value]) => {
-            debugger;
             if (key == "zotero"){
                 annoData.push(...value)
             }
@@ -81,18 +80,35 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
             }
         })
     }
-    debugger;
     return annoData
 }
 
-export async function SaveAnnotations(reader:any) {
-    let path = reader._data.filePath.replace(location.origin, "").substr(1) + ".sya";
+export async function SaveAnnotations(reader:any,idMap:{[key: string]: string}) {
+    let path = reader._data.fileName + ".sya";
+     reader._annotationManager._annotations.forEach((anno:Annotation)=>{
+        if (anno.id.length < 10 ){
+            anno.id = idMap[anno.id]? idMap[anno.id]:Lute.NewNodeID()
+        }
+    })
     await fetchSyncPost("/api/asset/setFileAnnotation", {
         path: path,
         data: JSON.stringify({
             "zotero":reader._annotationManager._annotations
         }),
     });
+}
+
+export function genNodeIDMap(annotations:Annotation[]):{[key: string]: string}{
+    let map:{[key: string]: string} = {}
+    annotations.forEach((annotation:Annotation)=>{
+        if (annotation.id.length < 10 ){
+            map[annotation.id] = Lute.NewNodeID()
+        }
+        else{
+            map[annotation.id] = annotation.id
+        }
+    })
+    return map
 }
 
 export function getSelectedAnnotations(reader:any){
@@ -104,6 +120,55 @@ export function getSelectedAnnotations(reader:any){
     else{
         return viewer._annotations.fliter((x:any)=>viewer._selectedAnnotationIDs.includes(x.id))
     }
+}
+
+
+export function genDataTransferAnnotations(fileName:string){
+    let luteEngine = Lute.New();
+    return function onSetDataTransferAnnotations(dataTransfer:DataTransfer, annotations:Annotation[], fromText:boolean|undefined){
+
+        let plantText = genClipPlantText(annotations,fileName,fromText)
+        dataTransfer.setData('text/plain', plantText || ' ');
+        dataTransfer.setData('text/html', luteEngine.Md2BlockDOM(plantText) || ' ');
+    }
+}
+
+export function saveAnnotationsImage(fileName:string,annotations:Annotation[]){
+    annotations.forEach(async (annotation)=>{
+        if (!(annotation as ImageAnnotation).image){
+            return
+        }
+        let imageName = `${fileName}-${annotation.id}.png`
+        let response = await fetch((annotation as ImageAnnotation).image)
+        let blob = await response.blob()
+        const formData = new FormData();
+        formData.append("file[]", blob, imageName);
+        // formData.append("skipIfDuplicated", "true");
+        fetchSyncPost(Constants.UPLOAD_ADDRESS,formData)
+    })
+}
+
+export function genClipPlantText(annotations:Annotation[],fileName:string,fromText:boolean|undefined=false){
+    return annotations.map((annotation) => {
+        let formatted = '';
+        if ((annotation as any).text) {
+            let text = (annotation as any).text.trim();
+            formatted = fromText ? text : `<<${fileName}/${annotation.id} "${text}">>`;
+        }else{
+            formatted = `<<${fileName}/${annotation.id} "${fileName}">>`;
+        }
+        if((annotation as any).image){
+            formatted += `\n![](${fileName}-${annotation.id}.png)`
+        }
+        let comment = annotation.comment?.trim();
+        if (comment) {
+            if (formatted) {
+                formatted += comment.includes('\n') ? '\n' : ' ';
+            }
+            formatted += comment;
+        }
+        return formatted;
+    }).filter(x => x).join('\n\n')
 }
 
 function getSortIndex(pageIndex:number, offset:number, top:number) {

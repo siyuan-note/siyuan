@@ -17,6 +17,7 @@ extraFiles:
 linux:
   icon: "src/assets/icon.png"
   category: "Utility"
+  executableName: "siyuan"
   desktop: {
     "Name": "SiYuan",
     "Comment": "Refactor your thinking",

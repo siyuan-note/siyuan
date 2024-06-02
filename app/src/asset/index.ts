@@ -499,6 +499,7 @@ export class Asset extends Model {
     //         });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
             setTimeout(async () => {
+                this.element.style.overflow = "hidden";
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(async () => {
                         this.readerObject = await webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,

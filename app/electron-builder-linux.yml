@@ -15,13 +15,12 @@ extraFiles:
     to: "LICENSE"
 
 linux:
-  icon: "src/assets/icon.png"
+  icon: "src/assets/icon.icns"
   category: "Utility"
   executableName: "siyuan"
   desktop: {
     "Name": "SiYuan",
     "Comment": "Refactor your thinking",
-    "Icon": "src/assets/icon256.png",
     "Type": "Application",
     "Categories": "Utility;"
   }

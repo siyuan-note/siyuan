@@ -55,6 +55,7 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
     let urlPath = path.replace(location.origin, "").substr(1) + ".sya";
     let originAnnoData:any[] = [];
     let annoData:any[] = [];
+    debugger;
     let annoResponse = await fetchSyncPost(
         "/api/asset/getFileAnnotation",
         {
@@ -64,6 +65,10 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
     if (annoResponse.code !== 1){
         originAnnoData = JSON.parse(annoResponse.data.data);
         Object.entries(originAnnoData).forEach(([key, value]) => {
+            debugger;
+            if (key == "zotero"){
+                annoData.push(...value)
+            }
             switch(value.mode){
                 case "text":
                     annoData.push(translateTextAnno(key,value))
@@ -74,22 +79,21 @@ export async function getInitAnnotations(path:string) :Promise<any[]>{
                 default:
                     return
             }
-            if (key == "zotero"){
-                annoData.push(...value)
-            }
         })
     }
     debugger;
     return annoData
 }
 
-// export async function SaveAnnotations(reader:any) {
-
-//     fetchSyncPost("/api/asset/setFileAnnotation", {
-//         path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
-//         data: JSON.stringify(config),
-//     });
-// }
+export async function SaveAnnotations(reader:any) {
+    let path = reader._data.filePath.replace(location.origin, "").substr(1) + ".sya";
+    await fetchSyncPost("/api/asset/setFileAnnotation", {
+        path: path,
+        data: JSON.stringify({
+            "zotero":reader._annotationManager._annotations
+        }),
+    });
+}
 
 export function getSelectedAnnotations(reader:any){
     let viewer = reader._primaryView

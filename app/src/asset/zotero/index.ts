@@ -1,4 +1,4 @@
-import { getInitAnnotations,getSelectedAnnotations } from "./anno";
+import { getInitAnnotations,getSelectedAnnotations,SaveAnnotations } from "./anno";
 
 const {addScriptSync} = require('../../protyle/util/addScript')
 const {Constants} = require('../../constants')
@@ -17,21 +17,30 @@ export async function webViewerLoad(file:string, element:HTMLElement, pdfPage:nu
     }
 	let annotations = await getInitAnnotations(file);
     let option = await createOption({
-        fileName:file,
+        filePath:file,
         annotations,
         state:{
             sidebarState: 9,
 			pageIndex:pdfPage != undefined ? pdfPage-1 : 0
         }
     })
-    let reader = createReader(
-        {onOpenContextMenu: (params:any) => {
+    let reader = createReader({
+		onOpenContextMenu: (params:any) => {
             // console.log(params);
 			// console.log(getSelectedAnnotations(reader))
 			reader.openContextMenu(params);
 		},
+		onSaveAnnotations:async function (annotations:any) {
+			console.log('Save annotations', annotations);
+			SaveAnnotations(reader);
+		},
+		onDeleteAnnotations: function (ids:any) {
+			console.log('Delete annotations', JSON.stringify(ids));
+			SaveAnnotations(reader);
+		},
 		sidebarOpen:false,
-        ...option});
+        ...option
+	});
     await waitUntilIframeLoads(reader._primaryView._iframe);
 	(window as any).reader = reader
 	return reader
@@ -218,22 +227,23 @@ let strings = {
 };
 
 
-async function createOption(pdf:{fileName:string,annotations:Array<any>,state:any}) {
+async function createOption(fileInfo:{filePath:string,annotations:Array<any>,state:any}) {
 	if ((globalThis as any)._reader) {
 		throw new Error('Reader is already initialized');
 	}
 	let queryString = window.location.search;
 	let urlParams = new URLSearchParams(queryString);
 	let type = 'pdf';
-	let demo = pdf;
-	let res = await fetch(demo.fileName);
+	let demo = fileInfo;
+	let res = await fetch(demo.filePath);
 	let option = {
 		type,
 		localizedStrings: strings,
 		readOnly: false,
 		data: {
 			buf: new Uint8Array(await res.arrayBuffer()),
-			url: new URL('/',( window.location.toString())).toString()
+			url: new URL('/',( window.location.toString())).toString(),
+			filePath:fileInfo.filePath
 		},
 		// rtl: true,
 		annotations: demo.annotations,
@@ -248,12 +258,6 @@ async function createOption(pdf:{fileName:string,annotations:Array<any>,state:an
 		// password: 'test',
 		onAddToNote() {
 			alert('Add annotations to the current note');
-		},
-		onSaveAnnotations: async function (annotations:any) {
-			console.log('Save annotations', annotations);
-		},
-		onDeleteAnnotations: function (ids:any) {
-			console.log('Delete annotations', JSON.stringify(ids));
 		},
 		onChangeViewState: function (state:any, primary:any) {
 			console.log('Set state', state, primary);

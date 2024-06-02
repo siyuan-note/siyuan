@@ -17,6 +17,15 @@ extraFiles:
 linux:
   icon: "src/assets/icon.png"
   category: "Utility"
+  desktop: {
+    "Name": "SiYuan",
+    "Comment": "Refactor your thinking",
+    "Exec": "siyuan",
+    "Icon": "src/assets/icon.png",
+    "Terminal": "false",
+    "Type": "Application",
+    "Categories": "Utility;"
+  }
   extraResources:
     - from: "kernel-linux-arm64"
       to: "kernel"

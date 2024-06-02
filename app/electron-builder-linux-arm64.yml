@@ -25,6 +25,8 @@ linux:
       arch: "arm64"
     - target: "AppImage"
       arch: "arm64"
+    - target: "deb"
+      arch: "arm64"
 
 extraResources:
   - from: "changelogs"

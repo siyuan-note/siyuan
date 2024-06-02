@@ -23,6 +23,7 @@ linux:
   target:
     - target: "tar.gz"
     - target: "AppImage"
+    - target: "deb"
 
 extraResources:
   - from: "changelogs"

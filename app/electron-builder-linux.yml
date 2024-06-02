@@ -21,7 +21,7 @@ linux:
   desktop: {
     "Name": "SiYuan",
     "Comment": "Refactor your thinking",
-    "Icon": "src/assets/icon.png",
+    "Icon": "stage/icon.png",
     "Type": "Application",
     "Categories": "Utility;"
   }

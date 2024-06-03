@@ -146,8 +146,8 @@ export class Dock {
             const moveItem = document.createElement("span");
             moveItem.classList.add("dock__item", "fn__none");
             moveItem.style.background = "var(--b3-theme-primary-light)";
-            moveItem.innerHTML = "<svg></svg>"
-            moveItem.id = "dockMoveItem"
+            moveItem.innerHTML = "<svg></svg>";
+            moveItem.id = "dockMoveItem";
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 if (window.siyuan.config.readonly ||
                     Math.abs(moveEvent.clientY - event.clientY) < 3 && Math.abs(moveEvent.clientX - event.clientX) < 3) {
@@ -190,30 +190,30 @@ export class Dock {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.id === "dockBottom") {
                             if (moveEvent.clientX < selectRect.right && moveEvent.clientX > selectRect.right - 40) {
-                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild
+                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
                                 if (lastFirstElement && lastFirstElement.isSameNode(item)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
-                                    lastFirstElement.before(moveItem)
+                                    moveItem.classList.remove("fn__none");
+                                    lastFirstElement.before(moveItem);
                                 }
                             }
                         } else {
                             if (moveEvent.clientY < selectRect.bottom && moveEvent.clientY > selectRect.bottom - 40) {
-                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild
+                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
                                 if (lastFirstElement && lastFirstElement.isSameNode(item)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
-                                    lastFirstElement.before(moveItem)
+                                    moveItem.classList.remove("fn__none");
+                                    lastFirstElement.before(moveItem);
                                 }
                             }
                         }
                     } else if (selectItem.classList.contains("dock__item--pin")) {
                         if (item.nextElementSibling?.isSameNode(selectItem)) {
-                            moveItem.classList.add("fn__none")
+                            moveItem.classList.add("fn__none");
                         } else {
-                            moveItem.classList.remove("fn__none")
+                            moveItem.classList.remove("fn__none");
                             selectItem.before(moveItem);
                         }
                     } else if (selectItem.classList.contains("dock__item")) {
@@ -221,47 +221,47 @@ export class Dock {
                         if (selectItem.parentElement.parentElement.id === "dockBottom") {
                             if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
                                 if (item.nextElementSibling?.isSameNode(selectItem)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
+                                    moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
                                 if (item.previousElementSibling?.isSameNode(selectItem)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
+                                    moveItem.classList.remove("fn__none");
                                     selectItem.after(moveItem);
                                 }
                             }
                         } else {
                             if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
                                 if (item.nextElementSibling?.isSameNode(selectItem)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
+                                    moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
                                 if (item.previousElementSibling?.isSameNode(selectItem)) {
-                                    moveItem.classList.add("fn__none")
+                                    moveItem.classList.add("fn__none");
                                 } else {
-                                    moveItem.classList.remove("fn__none")
+                                    moveItem.classList.remove("fn__none");
                                     selectItem.after(moveItem);
                                 }
                             }
                         }
                     } else if (selectItem.childElementCount === 0) {
-                        moveItem.classList.remove("fn__none")
-                        selectItem.append(moveItem)
+                        moveItem.classList.remove("fn__none");
+                        selectItem.append(moveItem);
                     } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.id === "dockMoveItem") {
                         moveItem.classList.remove("fn__none");
                     } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.classList.contains("dock__item--pin")) {
-                        moveItem.classList.remove("fn__none")
+                        moveItem.classList.remove("fn__none");
                         selectItem.insertAdjacentElement("afterbegin", moveItem);
                     } else if (selectItem.childElementCount === 2 &&
                         selectItem.firstElementChild.id === "dockMoveItem" && selectItem.lastElementChild.classList.contains("dock__item--pin")) {
-                        moveItem.classList.remove("fn__none")
+                        moveItem.classList.remove("fn__none");
                     }
                     return;
                 }
@@ -287,7 +287,7 @@ export class Dock {
                 item.style.opacity = "";
                 item.classList.add("b3-tooltips");
                 if (!moveItem.classList.contains("fn__none")) {
-                    let dock
+                    let dock;
                     if (moveItem.parentElement.parentElement.id === "dockBottom") {
                         dock = window.siyuan.layout.bottomDock;
                     } else if (moveItem.parentElement.parentElement.id === "dockLeft") {

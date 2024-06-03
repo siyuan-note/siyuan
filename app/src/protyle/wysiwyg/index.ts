@@ -2400,7 +2400,7 @@ export class WYSIWYG {
             const imgElement = hasTopClosestByClassName(event.target, "img");
             if (!event.shiftKey && !ctrlIsPressed && imgElement) {
                 imgElement.classList.add("img--select");
-                const nextSibling = hasNextSibling(imgElement)
+                const nextSibling = hasNextSibling(imgElement);
                 if (nextSibling) {
                     if (nextSibling.textContent.startsWith(Constants.ZWSP)) {
                         range.setStart(nextSibling, 1);

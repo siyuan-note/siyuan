@@ -143,12 +143,16 @@ export class Dock {
             documentSelf.ondragstart = () => false;
             let ghostElement: HTMLElement;
             let selectItem: HTMLElement;
+            const moveItem = document.createElement("span");
+            moveItem.classList.add("dock__item", "fn__none");
+            moveItem.style.background = "var(--b3-theme-primary-light)";
+            moveItem.innerHTML = "<svg></svg>"
+            moveItem.id = "dockMoveItem"
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 if (window.siyuan.config.readonly ||
                     Math.abs(moveEvent.clientY - event.clientY) < 3 && Math.abs(moveEvent.clientX - event.clientX) < 3) {
                     return;
                 }
-                console.log(moveEvent.clientY - event.clientY)
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
                 if (!ghostElement) {
@@ -181,29 +185,66 @@ export class Dock {
                 const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
                     hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement;
                 if (targetItem && selectItem && targetItem.isSameNode(selectItem)) {
-                    if (selectItem.classList.contains("dock__item")) {
+                    if (selectItem.classList.contains("dock__item--pin")) {
+                        if (item.nextElementSibling?.isSameNode(selectItem)) {
+                            moveItem.classList.add("fn__none")
+                        } else {
+                            moveItem.classList.remove("fn__none")
+                            selectItem.before(moveItem);
+                        }
+                    } else if (selectItem.classList.contains("dock__item")) {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.parentElement.id === "dockBottom") {
                             if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
-                                selectItem.before(item);
+                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    selectItem.before(moveItem);
+                                }
                             } else {
-                                selectItem.after(item);
+                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    selectItem.after(moveItem);
+                                }
                             }
                         } else {
                             if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
-                                selectItem.before(item);
+                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    selectItem.before(moveItem);
+                                }
                             } else {
-                                selectItem.after(item);
+                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    selectItem.after(moveItem);
+                                }
                             }
                         }
                     } else if (selectItem.childElementCount === 0) {
-                        selectItem.append(item)
+                        moveItem.classList.remove("fn__none")
+                        selectItem.append(moveItem)
+                    } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.id === "dockMoveItem") {
+                        moveItem.classList.remove("fn__none");
                     } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.classList.contains("dock__item--pin")) {
-                        selectItem.insertAdjacentElement("afterbegin", item);
+                        moveItem.classList.remove("fn__none")
+                        selectItem.insertAdjacentElement("afterbegin", moveItem);
+                    } else if (selectItem.childElementCount === 2 &&
+                        selectItem.firstElementChild.id === "dockMoveItem" && selectItem.lastElementChild.classList.contains("dock__item--pin")) {
+                        moveItem.classList.remove("fn__none")
                     }
                     return;
                 }
-                if (!targetItem || targetItem.classList.contains("dock__item--pin") || targetItem.style.position === "fixed" || targetItem.isSameNode(item)) {
+                if (!targetItem || targetItem.style.position === "fixed" || targetItem.isSameNode(item) || targetItem.id === "dockMoveItem") {
+                    if (targetItem && targetItem.isSameNode(item)) {
+                        moveItem.classList.add("fn__none");
+                    }
                     return;
                 }
                 selectItem = targetItem;
@@ -221,15 +262,18 @@ export class Dock {
                 }
                 item.style.opacity = "";
                 item.classList.add("b3-tooltips");
-                let dock
-                if (item.parentElement.parentElement.id === "dockBottom") {
-                    dock = window.siyuan.layout.bottomDock;
-                } else if (item.parentElement.parentElement.id === "dockLeft") {
-                    dock = window.siyuan.layout.leftDock;
-                } else if (item.parentElement.parentElement.id === "dockRight") {
-                    dock = window.siyuan.layout.rightDock;
+                if (!moveItem.classList.contains("fn__none")) {
+                    let dock
+                    if (moveItem.parentElement.parentElement.id === "dockBottom") {
+                        dock = window.siyuan.layout.bottomDock;
+                    } else if (moveItem.parentElement.parentElement.id === "dockLeft") {
+                        dock = window.siyuan.layout.leftDock;
+                    } else if (moveItem.parentElement.parentElement.id === "dockRight") {
+                        dock = window.siyuan.layout.rightDock;
+                    }
+                    dock.add(moveItem.parentElement.isSameNode(dock.element.firstElementChild) ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
                 }
-                dock.add(item.parentElement.isSameNode(dock.element.firstElementChild) ? 0 : 1, item, item.previousElementSibling?.getAttribute("data-type"));
+                moveItem.remove();
             };
         });
 
@@ -684,7 +728,7 @@ export class Dock {
         this.showDock();
     }
 
-    public add(index: number, sourceElement: Element, previousType?:string) {
+    public add(index: number, sourceElement: Element, previousType?: string) {
         sourceElement.setAttribute("data-height", "");
         sourceElement.setAttribute("data-width", "");
         const type = sourceElement.getAttribute("data-type");

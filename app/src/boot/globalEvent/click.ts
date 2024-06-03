@@ -17,26 +17,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
                 item.style.opacity = "";
                 item.classList.add("b3-tooltips");
             });
-            const original = JSON.parse(ghostElement.getAttribute("data-original"));
-            let dock
-            if (original.position === "Left") {
-                dock = window.siyuan.layout.leftDock;
-            } else if (original.position === "Right") {
-                dock = window.siyuan.layout.rightDock;
-            } else if (original.position === "Bottom") {
-                dock = window.siyuan.layout.bottomDock;
-            }
-            const previousElement = dock.element.querySelector(`.dock__item[data-type="${original.previousType}"]`)
-            const dockElement = dock.element.querySelector(`.dock__item[data-type="${original.type}"]`)
-            if (previousElement) {
-                previousElement.after(dockElement)
-            } else {
-                if (original.index === "0") {
-                    dock.element.firstElementChild.prepend(dockElement)
-                } else {
-                    dock.element.lastElementChild.previousElementSibling.prepend(dockElement)
-                }
-            }
+            document.querySelector("#dockMoveItem")?.remove();
         } else {
             const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
             startElement ? startElement.style.opacity = "" : "";

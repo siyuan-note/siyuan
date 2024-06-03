@@ -2449,11 +2449,24 @@ func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
 		return
 	}
 
-	if 1 > len(attrView.KeyIDs) {
-		for _, keyValues := range attrView.KeyValues {
-			attrView.KeyIDs = append(attrView.KeyIDs, keyValues.Key.ID)
+	existKeyIDs := map[string]bool{}
+	for _, keyValues := range attrView.KeyValues {
+		existKeyIDs[keyValues.Key.ID] = true
+	}
+
+	for k, _ := range existKeyIDs {
+		if !gulu.Str.Contains(k, attrView.KeyIDs) {
+			attrView.KeyIDs = append(attrView.KeyIDs, k)
 		}
 	}
+
+	var tmp []string
+	for _, k := range attrView.KeyIDs {
+		if ok := existKeyIDs[k]; ok {
+			tmp = append(tmp, k)
+		}
+	}
+	attrView.KeyIDs = tmp
 
 	var currentKeyID string
 	var idx, previousIndex int

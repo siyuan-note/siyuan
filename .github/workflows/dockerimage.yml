@@ -77,4 +77,3 @@ jobs:
         if: ${{ github.event_name == 'push' || github.event.inputs.image_tag == '' }}
         run: |
           docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
-    

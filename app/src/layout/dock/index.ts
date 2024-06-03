@@ -63,7 +63,7 @@ export class Dock {
         this.app = options.app;
         this.element = document.getElementById("dock" + options.position);
         const dockClass = options.position === "Bottom" ? ' class="fn__flex dock__items"' : ' class="dock__items"';
-        this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
+        this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1 dock__item--space"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.pin = options.data.pin;
         this.data = {};
@@ -183,9 +183,33 @@ export class Dock {
                 }
 
                 const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
-                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement;
+                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement ||
+                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item--space") as HTMLElement;
                 if (targetItem && selectItem && targetItem.isSameNode(selectItem)) {
-                    if (selectItem.classList.contains("dock__item--pin")) {
+                    if (selectItem.classList.contains("dock__item--space")) {
+                        const selectRect = selectItem.getBoundingClientRect();
+                        if (selectItem.parentElement.id === "dockBottom") {
+                            if (moveEvent.clientX < selectRect.right && moveEvent.clientX > selectRect.right - 40) {
+                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild
+                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    lastFirstElement.before(moveItem)
+                                }
+                            }
+                        } else {
+                            if (moveEvent.clientY < selectRect.bottom && moveEvent.clientY > selectRect.bottom - 40) {
+                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild
+                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                    moveItem.classList.add("fn__none")
+                                } else {
+                                    moveItem.classList.remove("fn__none")
+                                    lastFirstElement.before(moveItem)
+                                }
+                            }
+                        }
+                    } else if (selectItem.classList.contains("dock__item--pin")) {
                         if (item.nextElementSibling?.isSameNode(selectItem)) {
                             moveItem.classList.add("fn__none")
                         } else {

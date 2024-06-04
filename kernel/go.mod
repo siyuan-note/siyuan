@@ -8,7 +8,7 @@ require (
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
 	github.com/88250/gulu v1.2.3-0.20240505150113-bc43bd50f866
-	github.com/88250/lute v1.7.7-0.20240603041044-7b72f654420d
+	github.com/88250/lute v1.7.7-0.20240604150814-7ae25af34031
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4

@@ -308,6 +308,7 @@ const renderPDF = async (id: string) => {
             // 强制换行 https://ld246.com/article/1679228783553
             item.parentElement.setAttribute("linewrap", "true");
             item.parentElement.style.width = "";
+            item.parentElement.style.boxSizing = "border-box";
             item.parentElement.style.width = Math.min(item.parentElement.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })

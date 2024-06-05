@@ -317,6 +317,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 
 	ret = []*SearchAttributeViewResult{}
 	keyword = strings.TrimSpace(keyword)
+	keywords := strings.Fields(keyword)
 
 	type result struct {
 		AvID      string
@@ -349,8 +350,19 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 		name, _ := av.GetAttributeViewNameByPath(filepath.Join(avDir, entry.Name()))
 		info, _ := entry.Info()
 		if "" != keyword {
-			if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
-				score := smetrics.JaroWinkler(name, keyword, 0.7, 4)
+			score := 0.0
+			hit := false
+			for _, k := range keywords {
+				if strings.Contains(strings.ToLower(name), strings.ToLower(k)) {
+					score += smetrics.JaroWinkler(name, k, 0.7, 4)
+					hit = true
+				} else {
+					hit = false
+					break
+				}
+			}
+
+			if hit {
 				a := &result{AvID: id, AvName: name, Score: score}
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()

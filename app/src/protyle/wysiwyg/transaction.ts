@@ -1,6 +1,6 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
-import {getTopAloneElement} from "./getBlock";
+import {getContenteditableElement, getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
@@ -1024,6 +1024,99 @@ export const turnsIntoTransaction = (options: {
     }
     hideElements(["gutter"], options.protyle);
 };
+
+export const turnsOneInto = async (options: {
+    protyle: IProtyle,
+    nodeElement: Element,
+    id: string,
+    type: string,
+    level?: number
+}) => {
+    if (!options.nodeElement.querySelector("wbr")) {
+        getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
+    }
+    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
+        for await(const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
+            const itemId = item.getAttribute("data-node-id");
+            item.removeAttribute("fold");
+            const response = await fetchSyncPost("/api/transactions", {
+                session: options.protyle.id,
+                app: Constants.SIYUAN_APPID,
+                transactions: [{
+                    doOperations: [{
+                        action: "unfoldHeading",
+                        id: itemId,
+                    }],
+                    undoOperations: [{
+                        action: "foldHeading",
+                        id: itemId
+                    }],
+                }]
+            });
+            options.protyle.undo.add([{
+                action: "unfoldHeading",
+                id: itemId,
+            }], [{
+                action: "foldHeading",
+                id: itemId
+            }], options.protyle);
+            item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
+        }
+    }
+    const oldHTML = options.nodeElement.outerHTML;
+    const previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
+    const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
+    // @ts-ignore
+    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    options.nodeElement.outerHTML = newHTML;
+    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = newHTML;
+        const doOperations: IOperation[] = [{
+            action: "delete",
+            id: options.id
+        }];
+        const undoOperations: IOperation[] = [];
+        let tempPreviousId = previousId;
+        Array.from(tempElement.content.children).forEach((item) => {
+            const tempId = item.getAttribute("data-node-id");
+            doOperations.push({
+                action: "insert",
+                data: item.outerHTML,
+                id: tempId,
+                previousID: tempPreviousId,
+                parentID: parentId
+            });
+            undoOperations.push({
+                action: "delete",
+                id: tempId
+            });
+            tempPreviousId = tempId;
+        });
+        undoOperations.push({
+            action: "insert",
+            data: oldHTML,
+            id: options.id,
+            previousID: previousId,
+            parentID: parentId
+        });
+        transaction(options.protyle, doOperations, undoOperations);
+    } else {
+        updateTransaction(options.protyle, options.id, newHTML, oldHTML);
+    }
+    focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
+    options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
+        if (item.textContent === "") {
+            fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
+                item.innerHTML = response.data;
+            });
+        }
+    });
+    blockRender(options.protyle, options.protyle.wysiwyg.element);
+    processRender(options.protyle.wysiwyg.element);
+    highlightRender(options.protyle.wysiwyg.element);
+    avRender(options.protyle.wysiwyg.element, options.protyle);
+}
 
 const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     if (index > 6) {

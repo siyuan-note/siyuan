@@ -31,7 +31,13 @@ import {
 import {matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
 import {fixTable} from "../util/table";
-import {turnsIntoOneTransaction, turnsIntoTransaction, updateBatchTransaction, updateTransaction} from "./transaction";
+import {
+    turnsIntoOneTransaction,
+    turnsIntoTransaction,
+    turnsOneInto,
+    updateBatchTransaction,
+    updateTransaction
+} from "./transaction";
 import {fontEvent} from "../toolbar/Font";
 import {addSubList, listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
@@ -1330,10 +1336,73 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event)) {
-            protyle.hint.splitChar = "/";
-            protyle.hint.lastIndex = -1;
-            protyle.hint.fill("* [ ] " + Lute.Caret, protyle);
+        const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list.custom, event)
+        const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event)
+        const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, event)
+        if (isMatchList || isMatchOList || isMatchCheck) {
+            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectsElement.length === 0) {
+                protyle.hint.splitChar = "/";
+                protyle.hint.lastIndex = -1;
+                protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
+            } else if (selectsElement.length === 1) {
+                const subType = selectsElement[0].dataset.subtype
+                const type = selectsElement[0].dataset.type
+                if (type === "NodeParagraph") {
+                    turnsIntoOneTransaction({
+                        protyle,
+                        selectsElement,
+                        type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                    });
+                } else if (type === "NodeList") {
+                    const id = selectsElement[0].dataset.nodeId
+                    if (subType === "o" && (isMatchList || isMatchCheck)) {
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: selectsElement[0],
+                            id,
+                            type: isMatchCheck ? "UL2TL" : "OL2UL",
+                        });
+                    } else if (subType === "t" && (isMatchList || isMatchOList)) {
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: selectsElement[0],
+                            id,
+                            type: isMatchList ? "TL2UL" : "TL2OL",
+                        });
+                    } else if (isMatchCheck || isMatchOList) {
+                        turnsOneInto({
+                            protyle,
+                            nodeElement: selectsElement[0],
+                            id,
+                            type: isMatchCheck ? "OL2TL" : "UL2OL",
+                        });
+                    }
+                }
+            } else {
+                let isList = false;
+                let isContinue = false;
+                selectsElement.find((item, index) => {
+                    if (item.classList.contains("li")) {
+                        isList = true;
+                        return true;
+                    }
+                    if (item.nextElementSibling && selectsElement[index + 1] &&
+                        item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                        isContinue = true;
+                    } else if (index !== selectsElement.length - 1) {
+                        isContinue = false;
+                        return true;
+                    }
+                });
+                if (!isList && isContinue) {
+                    turnsIntoOneTransaction({
+                        protyle,
+                        selectsElement,
+                        type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                    });
+                }
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

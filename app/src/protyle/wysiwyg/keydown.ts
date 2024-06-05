@@ -691,7 +691,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (event.key === "ArrowDown") {
-                if (nodeElement.isSameNode(protyle.wysiwyg.element.lastElementChild)) {
+                if (nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 &&
+                    nodeElement.isSameNode(protyle.wysiwyg.element.lastElementChild)) {
                     setLastNodeRange(getContenteditableElement(nodeEditableElement), range, false);
                     range.collapse(false);
                     event.stopPropagation();

@@ -617,12 +617,14 @@ export class Gutter {
                     icon: "iconList",
                     label: window.siyuan.languages.list,
                     protyle,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     selectsElement,
                     type: "Blocks2ULs"
                 }));
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2OLs"
@@ -630,6 +632,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2TLs"
@@ -970,6 +973,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconList",
                 label: window.siyuan.languages.list,
+                accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2ULs"
@@ -977,6 +981,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconOrderedList",
                 label: window.siyuan.languages["ordered-list"],
+                accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2OLs"
@@ -984,6 +989,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconCheck",
                 label: window.siyuan.languages.check,
+                accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2TLs"
@@ -1137,6 +1143,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconList",
                     label: window.siyuan.languages.list,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1145,6 +1152,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1154,6 +1162,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconList",
                     label: window.siyuan.languages.list,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1162,6 +1171,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1171,6 +1181,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1179,6 +1190,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
                     id,

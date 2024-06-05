@@ -859,7 +859,7 @@
   "insertBefore": "光标所在块前插入空块",
   "insertAfter": "光标所在块后插入空块",
   "list1": "列表",
-  "insert": "插入元素",
+  "element": "元素",
   "closeTab": "关闭当前页签",
   "keymap": "快捷键",
   "clearFontStyle": "清除样式",

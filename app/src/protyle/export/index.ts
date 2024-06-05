@@ -315,6 +315,7 @@ const renderPDF = async (id: string) => {
         Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
             item.style.width = "";
+            item.style.boxSizing = "border-box";
             item.style.width = Math.min(item.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })

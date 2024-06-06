@@ -474,6 +474,10 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     pin?: boolean,
     type?: TAVCol
 }) => {
+    // 属性面板更新列名
+    if (!cellElement) {
+        return;
+    }
     if (headerValue) {
         updateHeaderCell(cellElement, headerValue);
     } else {

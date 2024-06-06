@@ -486,10 +486,11 @@ export const focusByRange = (range: Range) => {
     selection.addRange(range);
 };
 
-export const focusBlock = (element: Element, parentElement?: HTMLElement, toStart = true) => {
+export const focusBlock = (element: Element, parentElement?: HTMLElement, toStart = true): false | Range => {
     if (!element) {
         return false;
     }
+
     // hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等，删除段落块后，光标位置矫正 https://github.com/siyuan-note/siyuan/issues/4143
     if (element.classList.contains("render-node") || element.classList.contains("iframe") || element.classList.contains("hr") || element.classList.contains("av")) {
         const range = document.createRange();
@@ -609,6 +610,11 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         return range;
     } else if (parentElement) {
         parentElement.focus();
+    } else {
+        // li 下面为 hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等时递归处理
+        if (element.classList.contains("li")) {
+            return focusBlock(element.querySelector('[data-node-id]'), parentElement, toStart);
+        }
     }
     return false;
 };

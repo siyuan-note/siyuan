@@ -39,5 +39,5 @@ lerna-debug.log*
 package-lock.json
 yarn.lock
 
-# workflows
+# Workflows
 **/__pycache__

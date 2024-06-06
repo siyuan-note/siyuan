@@ -613,7 +613,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
     } else {
         // li 下面为 hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等时递归处理
         if (element.classList.contains("li")) {
-            return focusBlock(element.querySelector('[data-node-id]'), parentElement, toStart);
+            return focusBlock(element.querySelector("[data-node-id]"), parentElement, toStart);
         }
     }
     return false;

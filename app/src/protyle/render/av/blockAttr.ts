@@ -406,4 +406,4 @@ const openEdit = (protyle: IProtyle, element:HTMLElement, event: MouseEvent) => 
         }
         target = target.parentElement;
     }
-}
+};

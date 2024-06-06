@@ -48,7 +48,6 @@ import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
-import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";

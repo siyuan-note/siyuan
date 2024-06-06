@@ -1116,7 +1116,7 @@ export const turnsOneInto = async (options: {
     processRender(options.protyle.wysiwyg.element);
     highlightRender(options.protyle.wysiwyg.element);
     avRender(options.protyle.wysiwyg.element, options.protyle);
-}
+};
 
 const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     if (index > 6) {

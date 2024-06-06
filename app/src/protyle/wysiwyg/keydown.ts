@@ -1336,9 +1336,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
-        const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list.custom, event)
-        const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event)
-        const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, event)
+        const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list.custom, event);
+        const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event);
+        const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, event);
         if (isMatchList || isMatchOList || isMatchCheck) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length === 0) {
@@ -1346,8 +1346,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle.hint.lastIndex = -1;
                 protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
             } else if (selectsElement.length === 1) {
-                const subType = selectsElement[0].dataset.subtype
-                const type = selectsElement[0].dataset.type
+                const subType = selectsElement[0].dataset.subtype;
+                const type = selectsElement[0].dataset.type;
                 if (type === "NodeParagraph") {
                     turnsIntoOneTransaction({
                         protyle,
@@ -1355,7 +1355,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
                     });
                 } else if (type === "NodeList") {
-                    const id = selectsElement[0].dataset.nodeId
+                    const id = selectsElement[0].dataset.nodeId;
                     if (subType === "o" && (isMatchList || isMatchCheck)) {
                         turnsOneInto({
                             protyle,

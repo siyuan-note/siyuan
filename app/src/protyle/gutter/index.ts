@@ -54,6 +54,7 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+import {processClonePHElement} from "../render/util";
 
 export class Gutter {
     public element: HTMLElement;
@@ -111,7 +112,7 @@ export class Gutter {
                     getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
                     ghostElement.append(embedElement);
                 } else {
-                    ghostElement.append(item.cloneNode(true));
+                    ghostElement.append(processClonePHElement(item.cloneNode(true) as Element));
                 }
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);

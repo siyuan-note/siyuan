@@ -19,6 +19,7 @@ import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
+import {processClonePHElement} from "../render/util";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -207,7 +208,7 @@ const promiseTransaction = () => {
                     if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                                item.after(updateElements[0].cloneNode(true));
+                                item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                                 hasFind = true;
                             }
                         });
@@ -216,9 +217,9 @@ const promiseTransaction = () => {
                             if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
-                                    item.firstElementChild.after(updateElements[0].cloneNode(true));
+                                    item.firstElementChild.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                                 } else {
-                                    item.prepend(updateElements[0].cloneNode(true));
+                                    item.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                                 }
                                 hasFind = true;
                             }
@@ -638,22 +639,22 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         if (operation.previousID && updateElements.length > 0) {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    item.after(updateElements[0].cloneNode(true));
+                    item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                     hasFind = true;
                 }
             });
         } else if (updateElements.length > 0) {
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
-                protyle.wysiwyg.element.prepend(updateElements[0].cloneNode(true));
+                protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                 hasFind = true;
             } else {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
                         // 列表特殊处理
                         if (item.firstElementChild?.classList.contains("protyle-action")) {
-                            item.firstElementChild.after(updateElements[0].cloneNode(true));
+                            item.firstElementChild.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                         } else {
-                            item.prepend(updateElements[0].cloneNode(true));
+                            item.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                         }
                         hasFind = true;
                     }

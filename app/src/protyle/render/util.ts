@@ -13,3 +13,11 @@ export const genIconHTML = (element?: false|HTMLElement) => {
     <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last${enable ? "" : " protyle-icon--first"}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>`;
 };
+
+export const processClonePHElement = (item:Element) => {
+    if (item.getAttribute("data-type") === "NodeHTMLBlock") {
+        const phElement = item.querySelector("protyle-html");
+        phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(phElement.getAttribute("data-content")));
+    }
+    return item;
+}

@@ -16,6 +16,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
+import {processClonePHElement} from "../render/util";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
@@ -211,15 +212,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
             tempElement.querySelector(".protyle-action--order").textContent = (orderIndex) + ".";
         }
-        if (tempElement.dataset.type === "NodeHTMLBlock") {
-            const phElement = tempElement.querySelector("protyle-html");
-            const content = phElement.getAttribute("data-content");
-            phElement.setAttribute("data-content", "");
-            nodeElements[0].after(tempElement);
-            phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(content));
-        } else {
-            nodeElements[0].after(tempElement);
-        }
+        nodeElements[0].after(processClonePHElement(tempElement));
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,

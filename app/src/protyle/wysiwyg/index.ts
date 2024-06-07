@@ -1860,9 +1860,6 @@ export class WYSIWYG {
             isComposition = false;
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                return;
-            }
             if (!blockElement) {
                 return;
             }
@@ -1896,10 +1893,6 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
-                return;
-            }
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                event.stopPropagation();
                 return;
             }
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {

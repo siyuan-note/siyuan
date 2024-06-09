@@ -1925,7 +1925,7 @@ declare namespace Config {
          * - `1`: Group by document
          */
         group: number;
-        hasReplace: any;
+        hasReplace: boolean;
         /**
          * Readable path list
          */
@@ -1961,6 +1961,7 @@ declare namespace Config {
         r: string;
         /**
          * Whether to clear the search box after removing the currently used query condition group
+         * 移除后需记录搜索内容 https://github.com/siyuan-note/siyuan/issues/7745
          */
         removed?: boolean;
         replaceTypes: IUILayoutTabSearchConfigReplaceTypes;

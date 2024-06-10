@@ -75,11 +75,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	}
 
 	name := util.FilterFileName(getAttrViewName(attrView))
-	table, err := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
-	if nil != err {
-		logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
-		return
-	}
+	table := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 
 	// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 	table.FilterRows(attrView)
@@ -2237,11 +2233,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 			return ast.WalkContinue
 		}
 
-		table, err := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
-		if nil != err {
-			logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
-			return ast.WalkContinue
-		}
+		table := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 		table.FilterRows(attrView)

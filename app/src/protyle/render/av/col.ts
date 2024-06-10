@@ -36,8 +36,8 @@ export const duplicateCol = (options: {
     const blockId = options.blockElement.getAttribute("data-node-id");
     transaction(options.protyle, [{
         action: "duplicateAttrViewKey",
-        keyID:newColData.id,
-        nextID:options.colId,
+        keyID: options.colId,
+        nextID: newColData.id,
         avID: options.data.id,
     }, {
         action: "doUpdateUpdated",

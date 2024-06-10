@@ -33,7 +33,7 @@ import (
 )
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string,
-	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (ret *av.Table, err error) {
+	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (ret *av.Table) {
 	if nil == GetBlockAttrsWithoutWaitWriting {
 		GetBlockAttrsWithoutWaitWriting = func(id string) (ret map[string]string) {
 			ret = cache.GetBlockIAL(id)
@@ -59,8 +59,21 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
-			err = getErr
-			return
+			// 找不到字段则在视图中删除
+
+			switch view.LayoutType {
+			case av.LayoutTypeTable:
+				for i, column := range view.Table.Columns {
+					if column.ID == col.ID {
+						view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+						break
+					}
+				}
+			}
+
+			logging.LogWarnf("get key [%s] failed: %s", col.ID, getErr)
+			av.SaveAttributeView(attrView)
+			continue
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
@@ -587,12 +600,7 @@ func getAttributeViewContent(avID string,
 		return
 	}
 
-	table, err := RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
-	if nil != err {
-		content = strings.TrimSpace(buf.String())
-		return
-	}
-
+	table := RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 	for _, col := range table.Columns {
 		buf.WriteString(col.Name)
 		buf.WriteByte(' ')

@@ -19,11 +19,8 @@ package av
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -641,20 +638,6 @@ func (av *AttributeView) GetBlockKey() (ret *Key) {
 			return
 		}
 	}
-	return
-}
-
-func (av *AttributeView) GetDuplicateViewName(masterViewName string) (ret string) {
-	ret = masterViewName + " (1)"
-	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
-	m := r.FindStringSubmatch(masterViewName)
-	if nil == m || 3 > len(m) {
-		return
-	}
-
-	num, _ := strconv.Atoi(m[2])
-	num++
-	ret = fmt.Sprintf("%s (%d)", m[1], num)
 	return
 }
 

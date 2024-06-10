@@ -30,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -951,7 +952,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		}
 		view.Table.Sorts = tmpSorts
 
-		viewable, err = sql.RenderAttributeViewTable(attrView, view, query, GetBlockAttrsWithoutWaitWriting)
+		viewable = sql.RenderAttributeViewTable(attrView, view, query, GetBlockAttrsWithoutWaitWriting)
 	}
 
 	viewable.FilterRows(attrView)
@@ -1500,7 +1501,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	attrView.ViewID = view.ID
 
 	view.Icon = masterView.Icon
-	view.Name = attrView.GetDuplicateViewName(masterView.Name)
+	view.Name = util.GetDuplicateName(masterView.Name)
 	view.LayoutType = masterView.LayoutType
 	view.HideAttrViewName = masterView.HideAttrViewName
 
@@ -1965,7 +1966,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
-		viewable, _ := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
+		viewable := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 		viewable.FilterRows(attrView)
 		viewable.SortRows(attrView)
 
@@ -2176,6 +2177,62 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 			return
 		}
 	}
+	return
+}
+
+func (tx *Transaction) doDuplicateAttrViewKey(operation *Operation) (ret *TxErr) {
+	err := duplicateAttributeViewKey(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func duplicateAttributeViewKey(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	key, _ := attrView.GetKey(operation.KeyID)
+	if nil == key {
+		return
+	}
+
+	if av.KeyTypeBlock == key.Type || av.KeyTypeRelation == key.Type || av.KeyTypeRollup == key.Type {
+		return
+	}
+
+	copyKey := &av.Key{}
+	if err = copier.Copy(copyKey, key); nil != err {
+		logging.LogErrorf("clone key failed: %s", err)
+	}
+	copyKey.ID = operation.NextID
+	copyKey.Name = util.GetDuplicateName(key.Name)
+
+	attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: copyKey})
+
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			for i, column := range view.Table.Columns {
+				if column.ID == key.ID {
+					view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{
+						{
+							ID:     copyKey.ID,
+							Wrap:   column.Wrap,
+							Hidden: column.Hidden,
+							Pin:    column.Pin,
+							Width:  column.Width,
+						},
+					}, view.Table.Columns[i+1:]...)...)
+					break
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
 	return
 }
 

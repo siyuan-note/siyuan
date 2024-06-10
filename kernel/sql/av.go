@@ -59,7 +59,18 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
+			switch view.LayoutType {
+			case av.LayoutTypeTable:
+				for i, column := range view.Table.Columns {
+					if column.ID == col.ID {
+						view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+						break
+					}
+				}
+			}
+
 			logging.LogWarnf("get key [%s] failed: %s", col.ID, getErr)
+			av.SaveAttributeView(attrView)
 			continue
 		}
 

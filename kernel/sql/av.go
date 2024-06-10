@@ -59,6 +59,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
+			// 找不到字段则在视图中删除
+
 			switch view.LayoutType {
 			case av.LayoutTypeTable:
 				for i, column := range view.Table.Columns {

@@ -298,6 +298,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColDate(op)
 		case "unbindAttrViewBlock":
 			ret = tx.doUnbindAttrViewBlock(op)
+		case "duplicateAttrViewKey":
+			ret = tx.doDuplicateAttrViewKey(op)
 		}
 
 		if nil != ret {

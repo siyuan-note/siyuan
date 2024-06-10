@@ -1,0 +1,676 @@
+{
+	"ID": "20240610233601-ylh1mvk",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240610233601-ylh1mvk",
+		"title": "サービスの公開",
+		"type": "doc",
+		"updated": "20240610235250"
+	},
+	"Children": [
+		{
+			"ID": "20240610233629-jjii9tu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240610233629-jjii9tu",
+				"updated": "20240610235250"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概要",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240610233629-49em84g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240610233629-49em84g",
+				"updated": "20240610233739"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan Note は、現在のワークスペースの内容を読み取り専用モードでローカルネットワークで公開することができます。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240610233629-bxuf2mx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240610233629-bxuf2mx",
+				"updated": "20240610235250"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240610233629-7d7e66r",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20240610233629-7d7e66r",
+				"updated": "20240610235250"
+			},
+			"Children": [
+				{
+					"ID": "20240610233629-jn7c5xq",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-jn7c5xq",
+						"updated": "20240610234354"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-ibn4bp6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-ibn4bp6",
+								"updated": "20240610234354"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "公開する"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ に移動して、公開サービスの設定パネルに入ります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240610233629-j8ml6bw",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-j8ml6bw",
+						"updated": "20240610234344"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-fubq5bz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-fubq5bz",
+								"updated": "20240610234344"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "サービスポート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を設定します。"
+								}
+							]
+						},
+						{
+							"ID": "20240610233629-d9q97le",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20240610233629-d9q97le",
+								"updated": "20240610233629"
+							},
+							"Children": [
+								{
+									"ID": "20240610233629-y8ynj1h",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20240610233629-y8ynj1h",
+										"updated": "20240610233629"
+									},
+									"Children": [
+										{
+											"ID": "20240610233629-fwe6fgu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240610233629-fwe6fgu",
+												"updated": "20240610233629"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "デフォルトのポート番号は ",
+													"Properties": {
+														"id": ""
+													}
+												},
+												{
+													"Type": "NodeTextMark",
+													"Properties": {
+														"id": ""
+													},
+													"TextMarkType": "code",
+													"TextMarkTextContent": "6808"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ です。",
+													"Properties": {
+														"id": ""
+													}
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240610233629-amkxqp8",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20240610233629-amkxqp8",
+										"updated": "20240610233629"
+									},
+									"Children": [
+										{
+											"ID": "20240610233629-726ai0u",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240610233629-726ai0u",
+												"updated": "20240610233629"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ポート番号を ",
+													"Properties": {
+														"id": ""
+													}
+												},
+												{
+													"Type": "NodeTextMark",
+													"Properties": {
+														"id": ""
+													},
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ に設定すると、ランダムなポートが使用されます。",
+													"Properties": {
+														"id": ""
+													}
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240610233629-c2bncke",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-c2bncke",
+						"updated": "20240610235250"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-c02853s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-c02853s",
+								"updated": "20240610233629"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開サービスにアクセス制限を設定する場合",
+									"Properties": {
+										"id": ""
+									}
+								}
+							]
+						},
+						{
+							"ID": "20240610233629-a5alsxq",
+							"Type": "NodeList",
+							"ListData": {
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20240610233629-a5alsxq",
+								"updated": "20240610235250"
+							},
+							"Children": [
+								{
+									"ID": "20240610233629-4p8jyop",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20240610233629-4p8jyop",
+										"updated": "20240610235142"
+									},
+									"Children": [
+										{
+											"ID": "20240610233629-6pki0nz",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240610233629-6pki0nz",
+												"updated": "20240610235142"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "認証アカウント"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を追加し、"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "サービスの基本認証"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ スイッチをオンにします。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240610233629-3s2kd31",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20240610233629-3s2kd31",
+										"updated": "20240610235250"
+									},
+									"Children": [
+										{
+											"ID": "20240610233629-fozs5am",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240610233629-fozs5am",
+												"updated": "20240610233721"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "この後、公開サービスはアクセスするユーザーを ",
+													"Properties": {
+														"id": ""
+													}
+												},
+												{
+													"Type": "NodeTextMark",
+													"Properties": {
+														"id": ""
+													},
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://developer.mozilla.org/ja/docs/Web/HTTP/Authentication#basic_認証方式",
+													"TextMarkTextContent": "Basic 認証方式"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " を使用して認証します。",
+													"Properties": {
+														"id": ""
+													}
+												}
+											]
+										},
+										{
+											"ID": "20240610233629-b18hlwj",
+											"Type": "NodeList",
+											"ListData": {
+												"Tight": true,
+												"BulletChar": 42,
+												"Padding": 2,
+												"Marker": "Kg==",
+												"Num": -1
+											},
+											"Properties": {
+												"id": "20240610233629-b18hlwj",
+												"updated": "20240610235250"
+											},
+											"Children": [
+												{
+													"ID": "20240610233629-4mziigo",
+													"Type": "NodeListItem",
+													"Data": "*",
+													"ListData": {
+														"Tight": true,
+														"BulletChar": 42,
+														"Padding": 2,
+														"Marker": "Kg==",
+														"Num": -1
+													},
+													"Properties": {
+														"id": "20240610233629-4mziigo",
+														"updated": "20240610235250"
+													},
+													"Children": [
+														{
+															"ID": "20240610233629-526pequ",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20240610233629-526pequ",
+																"updated": "20240610235250"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "ユーザーは、公開コンテンツを閲覧する前に、"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "kbd",
+																	"TextMarkTextContent": "認証アカウント"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ で設定したユーザー名とパスワードを正しく入力する必要があります。"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240610233629-a4d5gct",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-a4d5gct",
+						"updated": "20240610234926"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-cqspvm0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-cqspvm0",
+								"updated": "20240610234926"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "サービスを公開する"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ スイッチをオンにします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240610233629-ns08k8s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240610233629-ns08k8s",
+				"updated": "20240610235147"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240610233629-uqp9rz9",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20240610233629-uqp9rz9",
+				"updated": "20240610235147"
+			},
+			"Children": [
+				{
+					"ID": "20240610233629-jiv7u6m",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-jiv7u6m",
+						"updated": "20240610233629"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-j8ancdr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-j8ancdr",
+								"updated": "20240610233629"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開サービスを開始すると、訪問者はワークスペースの全コンテンツを閲覧できます。",
+									"Properties": {
+										"id": ""
+									}
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240610233629-10tmo1g",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20240610233629-10tmo1g",
+						"updated": "20240610235147"
+					},
+					"Children": [
+						{
+							"ID": "20240610233629-20lo5k4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240610233629-20lo5k4",
+								"updated": "20240610235147"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "サービスの基本認証"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を無効にすると、すべての訪問者はワークスペースの全コンテンツを認証なしで閲覧できます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -84,6 +84,8 @@ func Serve(fastMode bool) {
 	servePublic(ginServer)
 	serveSnippets(ginServer)
 	serveRepoDiff(ginServer)
+	serveCheckAuth(ginServer)
+	serveFixedStaticFiles(ginServer)
 	api.ServeAPI(ginServer)
 
 	var host string
@@ -221,10 +223,6 @@ func serveSnippets(ginServer *gin.Engine) {
 }
 
 func serveAppearance(ginServer *gin.Engine) {
-	ginServer.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
-	ginServer.StaticFile("manifest.json", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
-	ginServer.StaticFile("manifest.webmanifest", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
-
 	siyuan := ginServer.Group("", model.CheckAuth)
 
 	siyuan.Handle("GET", "/", func(c *gin.Context) {
@@ -319,9 +317,10 @@ func serveAppearance(ginServer *gin.Engine) {
 	})
 
 	siyuan.Static("/stage/", filepath.Join(util.WorkingDir, "stage"))
-	ginServer.StaticFile("service-worker.js", filepath.Join(util.WorkingDir, "stage", "service-worker.js"))
+}
 
-	siyuan.GET("/check-auth", serveAuthPage)
+func serveCheckAuth(ginServer *gin.Engine) {
+	ginServer.GET("/check-auth", serveAuthPage)
 }
 
 func serveAuthPage(c *gin.Context) {
@@ -628,4 +627,13 @@ func jwtMiddleware(c *gin.Context) {
 	c.Set(model.RoleContextKey, model.RoleVisitor)
 	c.Next()
 	return
+}
+
+func serveFixedStaticFiles(ginServer *gin.Engine) {
+	ginServer.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
+
+	ginServer.StaticFile("manifest.json", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
+	ginServer.StaticFile("manifest.webmanifest", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
+
+	ginServer.StaticFile("service-worker.js", filepath.Join(util.WorkingDir, "stage", "service-worker.js"))
 }

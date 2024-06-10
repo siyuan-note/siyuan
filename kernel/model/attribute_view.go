@@ -2217,7 +2217,15 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 		case av.LayoutTypeTable:
 			for i, column := range view.Table.Columns {
 				if column.ID == key.ID {
-					view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
+					view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{
+						{
+							ID:     copyKey.ID,
+							Wrap:   column.Wrap,
+							Hidden: column.Hidden,
+							Pin:    column.Pin,
+							Width:  column.Width,
+						},
+					}, view.Table.Columns[i+1:]...)...)
 					break
 				}
 			}

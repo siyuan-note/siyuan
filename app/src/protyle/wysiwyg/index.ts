@@ -1577,7 +1577,7 @@ export class WYSIWYG {
                             blockElement: hasClosestBlock(assetImgElement) as HTMLElement,
                             content: target.tagName === "IMG" ? target.getAttribute("src") : target.getAttribute("data-url"),
                             type: target.tagName === "IMG" ? "image" : "file",
-                            name: target.tagName === "IMG" ? "" : target.textContent,
+                            name: target.tagName === "IMG" ? "" : target.getAttribute("data-name"),
                             index,
                             rect: target.getBoundingClientRect()
                         });
@@ -1816,6 +1816,27 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
+            if (!blockElement) {
+                return;
+            }
+            // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
+            const range = getSelection().getRangeAt(0);
+            const inlineElement = range.startContainer.parentElement;
+            if (range.toString() === "" && inlineElement.tagName === "SPAN") {
+                const currentTypes = (inlineElement.getAttribute("data-type") || "").split(" ");
+                if (currentTypes.includes("inline-memo") || currentTypes.includes("text") ||
+                    currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") ||
+                    currentTypes.includes("a")) {
+                    const offset = getSelectionOffset(inlineElement, blockElement, range);
+                    if (offset.start === 0) {
+                        range.setStartBefore(inlineElement);
+                        range.collapse(true);
+                    } else if (offset.start === inlineElement.textContent.length) {
+                        range.setEndAfter(inlineElement);
+                        range.collapse(false);
+                    }
+                }
+            }
             paste(protyle, event);
         });
 
@@ -1839,9 +1860,6 @@ export class WYSIWYG {
             isComposition = false;
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                return;
-            }
             if (!blockElement) {
                 return;
             }
@@ -1875,10 +1893,6 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
-                return;
-            }
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                event.stopPropagation();
                 return;
             }
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
@@ -2043,7 +2057,6 @@ export class WYSIWYG {
             }
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
-            const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
             let aLink = aElement ? (aElement.getAttribute("data-href") || "") : "";
@@ -2058,6 +2071,7 @@ export class WYSIWYG {
                 }
             }
 
+            const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
             if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -2072,7 +2086,11 @@ export class WYSIWYG {
                 } else if (aElement) {
                     refBlockId = aLink.substring(16, 38);
                 }
-                checkFold(refBlockId, (zoomIn, action) => {
+                checkFold(refBlockId, (zoomIn, action, isRoot) => {
+                    // 块引用跳转后需要短暂高亮目标块 https://github.com/siyuan-note/siyuan/issues/11542
+                    if (!isRoot) {
+                        action.push(Constants.CB_GET_HL);
+                    }
                     /// #if MOBILE
                     openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     activeBlur();
@@ -2375,12 +2393,19 @@ export class WYSIWYG {
             const imgElement = hasTopClosestByClassName(event.target, "img");
             if (!event.shiftKey && !ctrlIsPressed && imgElement) {
                 imgElement.classList.add("img--select");
-                range.setStartAfter(imgElement);
-                range.collapse(true);
-                focusByRange(range);
-                // 需等待 range 更新再次进行渲染
-                if (protyle.options.render.breadcrumb) {
-                    protyle.breadcrumb.render(protyle);
+                const nextSibling = hasNextSibling(imgElement);
+                if (nextSibling) {
+                    if (nextSibling.textContent.startsWith(Constants.ZWSP)) {
+                        range.setStart(nextSibling, 1);
+                    } else {
+                        range.setStart(nextSibling, 0);
+                    }
+                    range.collapse(true);
+                    focusByRange(range);
+                    // 需等待 range 更新再次进行渲染
+                    if (protyle.options.render.breadcrumb) {
+                        protyle.breadcrumb.render(protyle);
+                    }
                 }
                 return;
             }

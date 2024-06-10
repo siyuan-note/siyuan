@@ -1,0 +1,513 @@
+{
+	"ID": "20240530101000-96n5y9v",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-h59t8rn",
+		"id": "20240530101000-96n5y9v",
+		"title": "コンテンツブロックの紹介",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-6twvrmm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-dtkix1p",
+				"id": "20240530101000-6twvrmm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックの定義"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jysl0s6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-8hhg459",
+				"id": "20240530101000-jysl0s6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "コンテンツブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​はコンテンツの単位を表し、各コンテンツブロックはグローバルに一意の ID によって識別されます。ID はプログラムによって自動的に生成され、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "202008250000-a1b2c3d"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ のように、日時と 7 つのランダムな文字で構成されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-abjdtfa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-at8899i",
+				"id": "20240530101000-abjdtfa",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックの種類"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r951ojk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-yvxmi71",
+				"id": "20240530101000-r951ojk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "最も一般的なコンテンツブロックは段落です。通常は空の行でコンテンツブロックを区切ることで段落を表現します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zacsv9a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-tgz6wto",
+				"id": "20240530101000-zacsv9a",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "実際の文章作成では、段落以外にも、見出し、リスト、テーブル、ブロック引用など、さまざまな種類のコンテンツブロックが使用されます。これらのコンテンツブロックは、視覚的な違いだけでなく、コンテンツの意味を表現する役割も担っています。たとえば、順序なしリストを見れば各項目が対等な関係であることがわかり、順序付きリストを見れば各項目に序列があることがわかります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-oo64kii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ny42ldg",
+				"id": "20240530101000-oo64kii",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックには多くの"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-35bbvcx",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "種類"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "があり、それぞれが異なる書式によって定義されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "コンテンツブロック/種類"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qqf6y4r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-7b4udkk",
+				"id": "20240530101000-qqf6y4r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックの組み合わせ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m226k80",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-wu8n3rj",
+				"id": "20240530101000-m226k80",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントは基本単位となるいくつかのコンテンツブロックの組み合わせであり、さまざまなモジュールを組み合わせることができるレゴブロックのようなものです。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: ドキュメント自体も一種のコンテンツブロックです。具体的には、ドキュメントブロック、リストブロック、"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "ブロック引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "の 3 つのコンテンツブロックは、他の種類のコンテンツブロックを含めることができるコンテナブロックです。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "コンテンツブロック/組み合わせ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m8ovgeq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zb3qw5d",
+				"id": "20240530101000-m8ovgeq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "すべてのコンテンツはコンテンツブロックで記述でき、統一された方法で"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-uxno1yp",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "コンテンツブロック同士をリンク"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "できます。SiYuan にはページという概念がないため、ユーザーはコンテンツの作成に集中できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-48s3dyy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-8pqai5f",
+				"id": "20240530101000-48s3dyy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "名前とメモ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-387o7xk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5va6t1x",
+				"id": "20240530101000-387o7xk",
+				"memo": "メモは通常短い一文です",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各コンテンツブロックには、名前、エイリアス、メモを追加できます。名前とエイリアスは主に"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-b39286y",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "逆参照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "の検索に使用され、メモはコンテンツエリアに直接書き込みにくい補足情報の記録に使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m064mpu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-vh9kuvt",
+				"id": "20240530101000-m064mpu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブックマーク、名前、エイリアス、メモ、参照数を表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ オプションを ON にすると、名前が付けられたコンテンツブロックの右上にマークが表示されます。ドキュメントブロックに名前とメモを付けてドキュメントツリーにマウスカーソルを合わせると、関連する名前とメモが表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gnopzk9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-qvn6ih2",
+				"id": "20240530101000-gnopzk9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-1vvnhju",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "埋め込みコンテンツブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を使用すると、名前とメモを検索して要約できます。以下は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "短い"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ というキーワードを含むメモを持つコンテンツブロックをリストする例です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jpeddkv",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20240530101000-jpeddkv",
+				"style": "height: 64px;",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE memo LIKE '%短い%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-194ws7l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ffge784",
+				"id": "20240530101000-194ws7l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6xacxly",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-4e1plog",
+				"id": "20240530101000-6xacxly",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-5eqvybv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-mcgoqs4",
+						"id": "20240530101000-5eqvybv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0cuivn4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-yuv23zx",
+								"id": "20240530101000-0cuivn4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックに設定できる名前はひとつだけです"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-blszy2x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0m88d44",
+						"id": "20240530101000-blszy2x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-iox7lpz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-xdbty7d",
+								"id": "20240530101000-iox7lpz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "エイリアスは複数設定でき、それぞれをカンマ ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ","
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) で区切ります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-7lsjxoq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-gzfrbze",
+						"id": "20240530101000-7lsjxoq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-v1vmapo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8817po3",
+								"id": "20240530101000-v1vmapo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "メモはプレーンテキストのみがサポートされます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2i0daz8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-wvedwub",
+				"id": "20240530101000-2i0daz8"
+			}
+		}
+	]
+}

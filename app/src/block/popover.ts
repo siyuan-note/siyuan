@@ -32,13 +32,13 @@ export const initBlockPopover = (app: App) => {
                 } else {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
-                            tip = aElement.firstElementChild.getAttribute("data-href");
+                            tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
                         }
                     }
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (aElement.scrollWidth > aElement.clientWidth + 2) {
-                            tip = getCellText(aElement);
+                            tip = Lute.EscapeHTMLStr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";
                     }
@@ -46,7 +46,10 @@ export const initBlockPopover = (app: App) => {
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";
-                tip = href.substring(0, Constants.SIZE_TITLE) || "";
+                // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
+                if (href) {
+                    tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
+                }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
                     let assetTip = tip;

@@ -16,6 +16,7 @@ import {fetchPost} from "../../../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
+import {escapeAttr} from "../../../util/escape";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -52,19 +53,16 @@ export const bindAssetEvent = (options: {
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
     genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach((item, index) => {
-        if (!item.content) {
-            return;
-        }
         let contentHTML;
         if (item.type === "image") {
             contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${item.content}">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
         } else {
-            contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${item.content}" style="max-width: 360px">${item.name}</span>`;
+            contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${escapeAttr(item.content)}" style="max-width: 360px">${item.name || item.content}</span>`;
         }
 
-        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
+        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${escapeAttr(item.name)}" data-type="${item.type}" data-content="${escapeAttr(item.content)}">
 <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
@@ -178,18 +176,17 @@ export const updateAssetCell = (options: {
 export const editAssetItem = (options: {
     protyle: IProtyle,
     cellElements: HTMLElement[],
-    blockElement: Element ,
+    blockElement: Element,
     content: string,
     type: "image" | "file",
     name: string,
     index: number,
     rect: DOMRect
 }) => {
-    const linkAddress =options.content;
+    const linkAddress = options.content;
     const type = options.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
-        if (!textElements[0].value ||
-            (!textElements[1] && textElements[0].value === linkAddress) ||
+        if ((!textElements[1] && textElements[0].value === linkAddress) ||
             (textElements[1] && textElements[0].value === linkAddress && textElements[1].value === options.name)) {
             return;
         }
@@ -285,7 +282,7 @@ ${window.siyuan.languages.title}
 export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
     const menu = new Menu("av-asset-link", () => {
         const textElements = menu.element.querySelectorAll("textarea");
-        if (!textElements[0].value) {
+        if (!textElements[0].value && !textElements[1].value) {
             return;
         }
         updateAssetCell({

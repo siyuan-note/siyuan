@@ -18,7 +18,9 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +32,20 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+func GetDuplicateName(master string) (ret string) {
+	ret = master + " (1)"
+	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
+	m := r.FindStringSubmatch(master)
+	if nil == m || 3 > len(m) {
+		return
+	}
+
+	num, _ := strconv.Atoi(m[2])
+	num++
+	ret = fmt.Sprintf("%s (%d)", m[1], num)
+	return
 }
 
 var (
@@ -124,7 +140,7 @@ func Convert2Float(s string) (float64, bool) {
 	s = strings.ReplaceAll(s, ",", "")
 	buf := bytes.Buffer{}
 	for _, r := range s {
-		if unicode.IsDigit(r) || '.' == r {
+		if unicode.IsDigit(r) || '.' == r || '-' == r {
 			buf.WriteRune(r)
 		}
 	}

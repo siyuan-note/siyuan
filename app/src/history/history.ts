@@ -471,7 +471,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
         action: [Constants.CB_GET_HISTORY],
         render: {
             background: false,
-            title: false,
             gutter: false,
             breadcrumb: false,
             breadcrumbDocName: false,

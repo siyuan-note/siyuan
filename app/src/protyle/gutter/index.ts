@@ -14,20 +14,19 @@ import {copyPlainText, isMac, isOnlyMeta, openByMobile, updateHotkeyTip, writeTe
 import {
     transaction,
     turnsIntoOneTransaction,
-    turnsIntoTransaction,
+    turnsIntoTransaction, turnsOneInto,
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
 import {removeBlock} from "../wysiwyg/remove";
-import {focusBlock, focusByRange, focusByWbr, getEditorRange} from "../util/selection";
+import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
-import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {
     cancelSB,
     genEmptyElement,
@@ -49,13 +48,13 @@ import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
-import {avRender} from "../render/av/render";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import {avContextmenu} from "../render/av/action";
+import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {Menu} from "../../plugin/Menu";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+import {processClonePHElement} from "../render/util";
 
 export class Gutter {
     public element: HTMLElement;
@@ -113,7 +112,7 @@ export class Gutter {
                     getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
                     ghostElement.append(embedElement);
                 } else {
-                    ghostElement.append(item.cloneNode(true));
+                    ghostElement.append(processClonePHElement(item.cloneNode(true) as Element));
                 }
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
@@ -449,91 +448,8 @@ export class Gutter {
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
-            async click() {
-                if (!options.nodeElement.querySelector("wbr")) {
-                    getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
-                }
-                if (options.type === "CancelList" || options.type === "CancelBlockquote") {
-                    for await(const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
-                        const itemId = item.getAttribute("data-node-id");
-                        item.removeAttribute("fold");
-                        const response = await fetchSyncPost("/api/transactions", {
-                            session: options.protyle.id,
-                            app: Constants.SIYUAN_APPID,
-                            transactions: [{
-                                doOperations: [{
-                                    action: "unfoldHeading",
-                                    id: itemId,
-                                }],
-                                undoOperations: [{
-                                    action: "foldHeading",
-                                    id: itemId
-                                }],
-                            }]
-                        });
-                        options.protyle.undo.add([{
-                            action: "unfoldHeading",
-                            id: itemId,
-                        }], [{
-                            action: "foldHeading",
-                            id: itemId
-                        }], options.protyle);
-                        item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
-                    }
-                }
-                const oldHTML = options.nodeElement.outerHTML;
-                const previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
-                const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
-                // @ts-ignore
-                const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
-                options.nodeElement.outerHTML = newHTML;
-                if (options.type === "CancelList" || options.type === "CancelBlockquote") {
-                    const tempElement = document.createElement("template");
-                    tempElement.innerHTML = newHTML;
-                    const doOperations: IOperation[] = [{
-                        action: "delete",
-                        id: options.id
-                    }];
-                    const undoOperations: IOperation[] = [];
-                    let tempPreviousId = previousId;
-                    Array.from(tempElement.content.children).forEach((item) => {
-                        const tempId = item.getAttribute("data-node-id");
-                        doOperations.push({
-                            action: "insert",
-                            data: item.outerHTML,
-                            id: tempId,
-                            previousID: tempPreviousId,
-                            parentID: parentId
-                        });
-                        undoOperations.push({
-                            action: "delete",
-                            id: tempId
-                        });
-                        tempPreviousId = tempId;
-                    });
-                    undoOperations.push({
-                        action: "insert",
-                        data: oldHTML,
-                        id: options.id,
-                        previousID: previousId,
-                        parentID: parentId
-                    });
-                    transaction(options.protyle, doOperations, undoOperations);
-                } else {
-                    updateTransaction(options.protyle, options.id, newHTML, oldHTML);
-                }
-                focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
-                options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
-                    if (item.textContent === "") {
-                        fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                            item.innerHTML = response.data;
-                        });
-                    }
-                });
-                blockRender(options.protyle, options.protyle.wysiwyg.element);
-                processRender(options.protyle.wysiwyg.element);
-                highlightRender(options.protyle.wysiwyg.element);
-                avRender(options.protyle.wysiwyg.element, options.protyle);
+            click() {
+                turnsOneInto(options);
             }
         };
     }
@@ -617,12 +533,14 @@ export class Gutter {
                     icon: "iconList",
                     label: window.siyuan.languages.list,
                     protyle,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     selectsElement,
                     type: "Blocks2ULs"
                 }));
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2OLs"
@@ -630,6 +548,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2TLs"
@@ -756,6 +675,7 @@ export class Gutter {
             }).element);
         }
         const copyMenu: IMenu[] = [{
+            iconHTML: "",
             label: window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
@@ -767,6 +687,7 @@ export class Gutter {
                 document.execCommand("copy");
             }
         }, {
+            iconHTML: "",
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
@@ -778,6 +699,7 @@ export class Gutter {
                 focusBlock(selectsElement[0]);
             }
         }, {
+            iconHTML: "",
             label: window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
             disabled: protyle.disabled,
@@ -967,6 +889,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconList",
                 label: window.siyuan.languages.list,
+                accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2ULs"
@@ -974,6 +897,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconOrderedList",
                 label: window.siyuan.languages["ordered-list"],
+                accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2OLs"
@@ -981,6 +905,7 @@ export class Gutter {
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconCheck",
                 label: window.siyuan.languages.check,
+                accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                 protyle,
                 selectsElement: [nodeElement],
                 type: "Blocks2TLs"
@@ -1134,6 +1059,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconList",
                     label: window.siyuan.languages.list,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1142,6 +1068,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1151,6 +1078,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconList",
                     label: window.siyuan.languages.list,
+                    accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1159,6 +1087,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1168,6 +1097,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
+                    accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1176,6 +1106,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsOneInto({
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
+                    accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
                     protyle,
                     nodeElement,
                     id,
@@ -1210,8 +1141,18 @@ export class Gutter {
                 }
             }).element);
         }
+
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
-            label: window.siyuan.languages.copy,
+            iconHTML: "",
+            label: window.siyuan.languages.copyPlainText,
+            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
+            click() {
+                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
+                focusBlock(nodeElement);
+            }
+        }, {
+            iconHTML: "",
+            label: type === "NodeAttributeView" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy,
             accelerator: "⌘C",
             click() {
                 if (isNotEditBlock(nodeElement)) {
@@ -1222,23 +1163,28 @@ export class Gutter {
                 document.execCommand("copy");
             }
         }, {
-            label: window.siyuan.languages.copyPlainText,
-            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
-            click() {
-                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
-                focusBlock(nodeElement);
-            }
-        }, {
-            label: window.siyuan.languages.duplicate,
+            iconHTML: "",
+            label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
             disabled: protyle.disabled,
             click() {
                 duplicateBlock([nodeElement], protyle);
             }
         }]);
+        if (type === "NodeAttributeView") {
+            copyMenu.push({
+                iconHTML: "",
+                label: window.siyuan.languages.duplicateCompletely,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicateCompletely.custom,
+                disabled: protyle.disabled,
+                click() {
+                    duplicateCompletely(protyle, nodeElement as HTMLElement);
+                }
+            });
+        }
         const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
         if (copyTextRefMenu) {
-            copyMenu.splice(copyMenu.length - 1, 0, copyTextRefMenu);
+            copyMenu.splice(7, 0, copyTextRefMenu);
         }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,
@@ -1980,6 +1926,7 @@ export class Gutter {
             return false;
         }
         return {
+            iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.copyText.custom,
             label: window.siyuan.languages.copyText,
             click() {
@@ -1993,8 +1940,7 @@ export class Gutter {
 
     public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement, target?: Element) {
         // https://github.com/siyuan-note/siyuan/issues/4659
-        const titleElement = wysiwyg.parentElement.querySelector(".protyle-title__input");
-        if (titleElement && titleElement.getAttribute("data-render") !== "true") {
+        if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
         }
         // 防止划选时触碰图标导致 hl 无法移除

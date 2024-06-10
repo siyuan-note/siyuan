@@ -54,6 +54,10 @@ const setEditor = (modelMainElement: Element) => {
 };
 
 export const initEditor = () => {
+    let fontSizeHTML = "";
+    for (let i = 9; i <= 72; i++) {
+        fontSizeHTML += `<option ${window.siyuan.config.editor.fontSize === i ? "selected" : ""} value="${i}">${i}</option>`;
+    }
     openModel({
         title: window.siyuan.languages.editor,
         icon: "iconEdit",
@@ -229,14 +233,18 @@ export const initEditor = () => {
     ${window.siyuan.languages.fontSize} 
     <span class="ft__on-surface">${window.siyuan.config.editor.fontSize}</span>
     <div class="fn__hr"></div>
-    <input id="fontSize" class="b3-slider fn__block" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
+    <select id="fontSize" class="b3-select fn__block">${fontSizeHTML}</select>
     <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.md29} 
-    <span class="ft__on-surface">${window.siyuan.config.editor.codeTabSpaces}</span>
     <div class="fn__hr"></div>
-    <input class="b3-slider fn__block" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
+    <select id="codeTabSpaces" class="b3-select fn__block">
+        <option ${window.siyuan.config.editor.codeTabSpaces === 2 ? "selected" : ""} value="2">2</option>
+        <option ${window.siyuan.config.editor.codeTabSpaces === 4 ? "selected" : ""} value="4">4</option>
+        <option ${window.siyuan.config.editor.codeTabSpaces === 6 ? "selected" : ""} value="6">6</option>
+        <option ${window.siyuan.config.editor.codeTabSpaces === 8 ? "selected" : ""} value="8">8</option>
+    </select>
     <div class="b3-label__text">${window.siyuan.languages.md30}</div>
 </div>
 <div class="b3-label">

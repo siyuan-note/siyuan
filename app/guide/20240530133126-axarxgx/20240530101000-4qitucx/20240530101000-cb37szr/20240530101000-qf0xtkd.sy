@@ -1,0 +1,207 @@
+{
+	"ID": "20240530101000-qf0xtkd",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-881ynrh",
+		"icon": "1f387",
+		"id": "20240530101000-qf0xtkd",
+		"title": "有料機能",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-yenazb2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-lteblnt",
+				"id": "20240530101000-yenazb2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有料機能には以下の内容が含まれます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sup8kqs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-nv2lerh",
+				"id": "20240530101000-sup8kqs",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-3ibsz1l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nltlcqd",
+						"id": "20240530101000-3ibsz1l",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-iwdojob",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-sgcd0tk",
+								"id": "20240530101000-iwdojob",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-na9sys7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "サードパーティのクラウドストレージへの接続"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-c4tnl35",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ff5v3e0",
+						"id": "20240530101000-c4tnl35",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7bvbdmc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-a1mnqag",
+								"id": "20240530101000-7bvbdmc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-5k5d5i3",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "アセットの内容検索"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bqhdqvr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bv0i7i2",
+				"id": "20240530101000-bqhdqvr",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有料機能を利用するには料金のお支払いが必要です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7zgnwcp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-c9mpbev",
+				"id": "20240530101000-7zgnwcp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cqc4yvw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-4iovufh",
+						"id": "20240530101000-cqc4yvw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vx800en",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-3bdzj9b",
+								"id": "20240530101000-vx800en",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/one-time-pay/siyuan",
+									"TextMarkTextContent": "英語"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-b1f8hkj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rnq6hzq",
+						"id": "20240530101000-b1f8hkj",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-rzt1cvr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-m1z43pn",
+								"id": "20240530101000-rzt1cvr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/one-time-pay/siyuan",
+									"TextMarkTextContent": "中国語"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nlkxxnq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-dx8oprp",
+				"id": "20240530101000-nlkxxnq"
+			}
+		}
+	]
+}

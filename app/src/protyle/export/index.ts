@@ -308,12 +308,14 @@ const renderPDF = async (id: string) => {
             // 强制换行 https://ld246.com/article/1679228783553
             item.parentElement.setAttribute("linewrap", "true");
             item.parentElement.style.width = "";
+            item.parentElement.style.boxSizing = "border-box";
             item.parentElement.style.width = Math.min(item.parentElement.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })
         Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
             item.style.width = "";
+            item.style.boxSizing = "border-box";
             item.style.width = Math.min(item.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })
@@ -558,6 +560,13 @@ const renderPDF = async (id: string) => {
         });
         setPadding();
         renderPreview(response.data);
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                const {ipcRenderer}  = require("electron");
+                ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
+                event.preventDefault();
+            }
+        })
     });
 </script></body></html>`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
@@ -617,7 +626,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                         hideMessage(msgId);
                         return;
                     }
-                    afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
+                    afterExport(exportResponse.data.path, msgId);
                 } else {
                     onExport(exportResponse, savePath, option, removeAssets, msgId);
                 }

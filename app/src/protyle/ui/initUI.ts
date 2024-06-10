@@ -112,15 +112,19 @@ export const setPadding = (protyle: IProtyle) => {
     const left = padding.left;
     const right = padding.right;
     if (protyle.options.backlinkData) {
-        protyle.wysiwyg.element.style.padding = `4px ${left}px 4px ${right}px`;
+        protyle.wysiwyg.element.style.padding = `4px ${right}px 4px ${left}px`;
     } else {
-        protyle.wysiwyg.element.style.padding = `${padding.top}px ${left}px ${padding.bottom}px ${right}px`;
+        protyle.wysiwyg.element.style.padding = `${padding.top}px ${right}px ${padding.bottom}px ${left}px`;
     }
     if (protyle.options.render.background) {
-        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${left}px`);
+        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${right}px`);
     }
     if (protyle.options.render.title) {
-        protyle.title.element.style.margin = `5px ${left}px 0 ${right}px`;
+        /// #if MOBILE
+        protyle.title.element.style.margin = `16px ${right}px 0 ${left}px`;
+        /// #else
+        protyle.title.element.style.margin = `5px ${right}px 0 ${left}px`;
+        /// #endif
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         const editorAttrElement = document.getElementById("editorAttr");
@@ -138,8 +142,8 @@ export const setPadding = (protyle: IProtyle) => {
 };
 
 export const getPadding = (protyle: IProtyle) => {
-    let left = 16;
-    let right = 24;
+    let right = 16;
+    let left = 24;
     let bottom = 16;
     if (protyle.options.typewriterMode) {
         if (isMobile()) {

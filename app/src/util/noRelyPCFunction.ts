@@ -12,7 +12,7 @@ export const renameTag = (labelName: string) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "92vw": "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMETAG);
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
@@ -34,11 +34,13 @@ export const getWorkspaceName = () => {
     return window.siyuan.config.system.workspaceDir.replace(/^.*[\\\/]/, "");
 };
 
-export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[]) => void) => {
+export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[], isRoot: boolean) => void) => {
     if (!id) {
         return;
     }
     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-        cb(foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+        cb(foldResponse.data.isFolded,
+            foldResponse.data.isFolded ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+            foldResponse.data.isRoot);
     });
 };

@@ -1,0 +1,51 @@
+{
+	"ID": "20240530101000-xr22qn8",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-gc1bsih",
+		"icon": "1f3a8",
+		"id": "20240530101000-xr22qn8",
+		"title": "外観のカスタマイズ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-nepwax4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-1mzvxn3",
+				"id": "20240530101000-nepwax4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-hq9sn3k",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "アイコン"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s8zmt36",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2leshjs",
+				"id": "20240530101000-s8zmt36",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-bpj42r0",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "テーマ"
+				}
+			]
+		}
+	]
+}

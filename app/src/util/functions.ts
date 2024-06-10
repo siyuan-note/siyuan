@@ -90,3 +90,13 @@ export const objEquals = (a: any, b: any): boolean => {
     if (keys.length !== Object.keys(b).length) return false;
     return keys.every(k => objEquals(a[k], b[k]));
 };
+
+export const duplicateNameAddOne = (name:string) => {
+    const nameMatch = name.match(/^(.*) \((\d+)\)$/);
+    if (nameMatch) {
+        name = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
+    } else {
+        name = `${name} (1)`;
+    }
+    return name;
+};

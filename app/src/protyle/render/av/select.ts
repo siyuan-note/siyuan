@@ -63,7 +63,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
-    const avID =  blockElement.getAttribute("data-av-id")
+    const avID = blockElement.getAttribute("data-av-id");
     cellElements.forEach((item, elementIndex) => {
         if (!blockElement.contains(item)) {
             const rowElement = hasClosestByClassName(item, "av__row");
@@ -564,4 +564,47 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
 </div>
 <div>${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;
+};
+
+export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID: string) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    cellValue.mSelect.forEach((item: IAVCellSelectValue) => {
+        if (!column.options) {
+            column.options = [];
+        }
+        const needAdd = column.options.find((option: {
+            name: string,
+            color: string,
+        }) => {
+            if (option.name === item.content) {
+                item.color = option.color;
+                return true;
+            }
+        });
+        if (!needAdd) {
+            const newColor = ((column.options?.length || 0) % 13 + 1).toString();
+            column.options.push({
+                name: item.content,
+                color: newColor
+            });
+            item.color = newColor;
+            doOperations.push({
+                action: "updateAttrViewColOptions",
+                id: column.id,
+                avID,
+                data: column.options
+            });
+            undoOperations.push({
+                action: "removeAttrViewColOption",
+                id: column.id,
+                avID,
+                data: item.content,
+            });
+        }
+    });
+    return {
+        doOperations,
+        undoOperations
+    };
 };

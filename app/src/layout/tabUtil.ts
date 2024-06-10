@@ -16,7 +16,7 @@ import {Tag} from "./dock/Tag";
 import {Search} from "../search";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {isIPad, updateHotkeyTip} from "../protyle/util/compatibility";
 import {openSearch} from "../search/spread";
 import {openRecentDocs} from "../business/openRecentDocs";
 import {openHistory} from "../history/history";
@@ -192,7 +192,7 @@ export const newCenterEmptyTab = (app: App) => {
         <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg>
         <span>${window.siyuan.languages.newNotebook}</span>
     </div>
-    <div class="b3-list-item" id="editorEmptyHelp">
+    <div class="b3-list-item${isIPad() ? " fn__none" : ""}" id="editorEmptyHelp">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg>
         <span>${window.siyuan.languages.userGuide}</span>
     </div>

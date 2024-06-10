@@ -1,6 +1,6 @@
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
-import {writeText} from "../util/compatibility";
+import {isMac, writeText} from "../util/compatibility";
 import {
     focusBlock,
     getSelectionOffset,
@@ -16,6 +16,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
+import {processClonePHElement} from "../render/util";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
@@ -94,7 +95,8 @@ export const upSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        if (getSelectionOffset(options.nodeElement, options.editorElement, options.range).start !== 0) {
+        if (isMac()  // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
+            && getSelectionOffset(options.nodeElement, options.editorElement, options.range).start !== 0) {
             const editElement = getContenteditableElement(options.nodeElement);
             if (editElement.tagName === "TABLE") {
                 const cellElement = hasClosestByMatchTag(options.range.startContainer, "TH") || hasClosestByMatchTag(options.range.startContainer, "TD") || editElement.querySelector("th, td");
@@ -139,7 +141,8 @@ export const downSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        if (getSelectionOffset(options.nodeElement, options.editorElement, options.range).end < getContenteditableElement(options.nodeElement).textContent.length) {
+        if (isMac() // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
+            && getSelectionOffset(options.nodeElement, options.editorElement, options.range).end < getContenteditableElement(options.nodeElement).textContent.length) {
             // 选中下一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
             return;
         }
@@ -186,9 +189,13 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
 };
 
 export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
-    let focusElement;
+    let focusElement: Element;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    let starIndex: number;
+    if (nodeElements[nodeElements.length - 1].getAttribute("data-subtype") === "o") {
+        starIndex = parseInt(nodeElements[nodeElements.length - 1].getAttribute("data-marker"), 10);
+    }
     nodeElements.reverse().forEach((item, index) => {
         const tempElement = item.cloneNode(true) as HTMLElement;
         if (index === 0) {
@@ -200,7 +207,12 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             childItem.setAttribute("data-node-id", Lute.NewNodeID());
         });
         item.classList.remove("protyle-wysiwyg--select");
-        nodeElements[0].after(tempElement);
+        if (typeof starIndex === "number") {
+            const orderIndex = starIndex + (nodeElements.length - index);
+            tempElement.setAttribute("data-marker", (orderIndex) + ".");
+            tempElement.querySelector(".protyle-action--order").textContent = (orderIndex) + ".";
+        }
+        nodeElements[0].after(processClonePHElement(tempElement));
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,
@@ -212,6 +224,31 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             id: newId,
         });
     });
+    if (typeof starIndex === "number") {
+        let nextElement = focusElement.nextElementSibling;
+        starIndex = starIndex + nodeElements.length;
+        while (nextElement) {
+            if (nextElement.getAttribute("data-subtype") === "o") {
+                starIndex++;
+                const id = nextElement.getAttribute("data-node-id");
+                undoOperations.push({
+                    action: "update",
+                    id,
+                    data: nextElement.outerHTML,
+                });
+                nextElement.setAttribute("data-marker", starIndex + ".");
+                nextElement.querySelector(".protyle-action--order").textContent = starIndex + ".";
+                doOperations.push({
+                    action: "update",
+                    data: nextElement.outerHTML,
+                    id,
+                });
+                nextElement = nextElement.nextElementSibling;
+            } else {
+                break;
+            }
+        }
+    }
     transaction(protyle, doOperations, undoOperations);
     focusBlock(focusElement);
     scrollCenter(protyle);

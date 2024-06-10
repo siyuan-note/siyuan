@@ -1,7 +1,7 @@
 productName: "SiYuan"
 appId: "org.b3log.siyuan"
 asar: false
-compression: "normal"
+compression: "store"
 copyright: "© 2024 Yunnan Liandi Technology Co., Ltd."
 artifactName: "siyuan-${version}-${os}.${ext}"
 extraMetadata:
@@ -15,14 +15,22 @@ extraFiles:
     to: "LICENSE"
 
 linux:
-  icon: "src/assets/icon.png"
+  icon: "src/assets/icon.icns"
   category: "Utility"
+  executableName: "siyuan"
+  desktop: {
+    "Name": "SiYuan",
+    "Comment": "Refactor your thinking",
+    "Type": "Application",
+    "Categories": "Utility;"
+  }
   extraResources:
     - from: "kernel-linux"
       to: "kernel"
   target:
     - target: "tar.gz"
     - target: "AppImage"
+    - target: "deb"
 
 extraResources:
   - from: "changelogs"

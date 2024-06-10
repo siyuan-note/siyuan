@@ -1,0 +1,749 @@
+{
+	"ID": "20240530101000-flot1gj",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-pqnkqvs",
+		"icon": "1f680",
+		"id": "20240530101000-flot1gj",
+		"title": "パフォーマンスの最適化",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-33iniao",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-rdwwuy5",
+				"id": "20240530101000-33iniao",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5lretw9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-welsm8e",
+				"id": "20240530101000-5lretw9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンピュータの性能やオペレーティングシステムが異なればパフォーマンスも異なります。さらに、データ量が増えるにつれてパフォーマンスの低下は避けられません。スムーズな動作を維持するためには、使用方法を変更したり一部の設定項目を調整したりする必要があるかもしれません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1ht2qc6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-l7shq15",
+				"id": "20240530101000-1ht2qc6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全体的なパフォーマンス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8cxvj0b",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-bls5xxg",
+				"id": "20240530101000-8cxvj0b",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-q7y9d0x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nj2xqr3",
+						"id": "20240530101000-q7y9d0x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-g44ruta",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-agxgc7j",
+								"id": "20240530101000-g44ruta",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "コンテンツブロックの数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ドキュメントツリーの展開、検索、データ書き込みなどのパフォーマンスに影響を与える可能性があります。ただし、各ブロックのサイズが大きくなければ、通常は数百万個のコンテンツブロックでも大きな影響はありません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-yy2z4sk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-5vg1g63",
+						"id": "20240530101000-yy2z4sk",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-k1tjt5v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-itwrh1g",
+								"id": "20240530101000-k1tjt5v",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "システム環境"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": オペレーティングシステムの現在の負荷が全体的なパフォーマンスに影響します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-5nssjko",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2rwzjqj",
+						"id": "20240530101000-5nssjko",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-eeg8xdm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-a4nens7",
+								"id": "20240530101000-eeg8xdm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ネットワーク環境"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ネットワークサーバを利用する場合、ネットワークの品質がリクエストの応答時間に影響を与えます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6uyjtxl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-poiidzi",
+				"id": "20240530101000-6uyjtxl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "最適化の提案:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cbfx25d",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-wywh0hr",
+				"id": "20240530101000-cbfx25d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cni7wjf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-e60zx1k",
+						"id": "20240530101000-cni7wjf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-bjcpnqr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jqtukjc",
+								"id": "20240530101000-bjcpnqr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "使用頻度の低いドキュメントやクリップは専用のノートにまとめる"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": これらのノートを普段は閉じておくことで、データベースのインデックス数が減りパフォーマンスが向上します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-i4rq9tg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-t9e6fur",
+						"id": "20240530101000-i4rq9tg",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zoubg2r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-59u8q7j",
+								"id": "20240530101000-zoubg2r",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd strong",
+									"TextMarkTextContent": "検索結果の表示件数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "を減らす"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 検索リクエストの応答時間を監視し、応答時間がしきい値を超えると、この設定項目を小さくするように促すプロンプトが表示されます"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-2kiuo2w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-s51ce29",
+								"id": "20240530101000-2kiuo2w",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "パフォーマンス監視のしきい値は、環境変数 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PERFORMANCE_TIMING"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で設定できます (ミリ秒単位)。デフォルト値は15000 (15秒) です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-b1rx3yh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-bx9iknw",
+						"id": "20240530101000-b1rx3yh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zsevmzh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dh324qg",
+								"id": "20240530101000-zsevmzh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "十分なシステムリソースを確保する"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": メモリや CPU の使用率が高すぎる場合は、不要なアプリケーションを終了してシステム設定を調整してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-9xtcdfr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-5yap68v",
+						"id": "20240530101000-9xtcdfr",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ev5s983",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-shoyfve",
+								"id": "20240530101000-ev5s983",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "SSD を使用する"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ワークスペースを SSD に配置すると全体的なパフォーマンスを効果的に向上できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-r3q228b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-u7zziem",
+						"id": "20240530101000-r3q228b",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-rl65h11",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4wk4uei",
+								"id": "20240530101000-rl65h11",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ハードウェアをアップグレードする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": これがパフォーマンスを向上させる最速の方法です"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9doivgv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-utjkzhs",
+				"id": "20240530101000-9doivgv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタのフォーマンス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s0zwc5n",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-gudv8d6",
+				"id": "20240530101000-s0zwc5n",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-61omzlw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-vhjdu1c",
+						"id": "20240530101000-61omzlw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6bghfd4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-3sss1mf",
+								"id": "20240530101000-6bghfd4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "リーフブロックのサイズ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": リーフブロックに数多くの文字が含まれている場合、エディタがフリーズすることがあります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ybc6ckx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rhgbxjx",
+						"id": "20240530101000-ybc6ckx",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-c9di4bf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ugx6o2i",
+								"id": "20240530101000-c9di4bf",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "動的にロードされるブロックの数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 数式ブロック、コードブロック、チャートブロックが数多くロードされると、エディタがフリーズすることがあります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-i1o28d1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-cd8plbx",
+						"id": "20240530101000-i1o28d1",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-mwsz4xd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dnu5l3c",
+								"id": "20240530101000-mwsz4xd",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "コードブロックの行番号"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 大量のコンテンツが含まれているコードブロックで行番号を表示すると、エディタがフリーズすることがあります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-zarkcr6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ozmjx95",
+						"id": "20240530101000-zarkcr6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4i9b3fh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cy48pvn",
+								"id": "20240530101000-4i9b3fh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "数式、画像、チャート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ドキュメントに数多くの数式、画像、チャートが含まれている場合、エディタがフリーズすることがあります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ode6qmq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-33y0dke",
+				"id": "20240530101000-ode6qmq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "最適化の提案:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1jefsa2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-a31p89i",
+				"id": "20240530101000-1jefsa2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-1bhwsgl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hc7uin5",
+						"id": "20240530101000-1bhwsgl",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vtehvyh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-px1i1m8",
+								"id": "20240530101000-vtehvyh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ソフト改行 ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd strong",
+									"TextMarkTextContent": "Shift+Enter"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": ") を多用しない"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ソフト改行は段落ブロックのサイズを大きくし、エディタの動作を遅くする可能性があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-sz3l374",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ro0yi68",
+						"id": "20240530101000-sz3l374",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ukg6f8y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-u861ijh",
+								"id": "20240530101000-ukg6f8y",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd strong",
+									"TextMarkTextContent": "動的に読み込まれるブロックの数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "を減らす"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 特に数式ブロック、コードブロック、チャートブロックが多い場合はこの数値を減らすことでパフォーマンスを改善できます。最適な値は環境によって異なるため、調整しながら判断してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-hnpa58k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-qp9rpgz",
+						"id": "20240530101000-hnpa58k",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8bqp0z2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-3yt3nig",
+								"id": "20240530101000-8bqp0z2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "フォーカス可能な要素を減らす"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 入力フィールドやドロップダウンリストなどの要素を減らすことで、レンダリングにかかる負荷を軽減できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9swho08",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ugpv1is",
+				"id": "20240530101000-9swho08"
+			}
+		}
+	]
+}

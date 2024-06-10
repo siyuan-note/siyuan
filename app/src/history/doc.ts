@@ -116,7 +116,6 @@ export const openDocHistory = (options: {
         action: [Constants.CB_GET_HISTORY],
         render: {
             background: false,
-            title: false,
             gutter: false,
             breadcrumb: false,
             breadcrumbDocName: false,

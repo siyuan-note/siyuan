@@ -424,6 +424,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             type: "submenu",
             icon: "iconCopy",
             submenu: (copySubMenu(id, false) as IMenu[]).concat([{
+                iconHTML: "",
                 label: window.siyuan.languages.duplicate,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {

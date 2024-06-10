@@ -19,11 +19,8 @@ package av
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -57,6 +54,26 @@ func (kValues *KeyValues) GetValue(blockID string) (ret *Value) {
 		if v.BlockID == blockID {
 			ret = v
 			return
+		}
+	}
+	return
+}
+
+func (kValues *KeyValues) GetBlockValue() (ret *Value) {
+	for _, v := range kValues.Values {
+		if KeyTypeBlock != v.Type {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
+func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
+	for _, kv := range blockKeyValues {
+		if KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
+			ret = kv.Values[0]
+			break
 		}
 	}
 	return
@@ -621,20 +638,6 @@ func (av *AttributeView) GetBlockKey() (ret *Key) {
 			return
 		}
 	}
-	return
-}
-
-func (av *AttributeView) GetDuplicateViewName(masterViewName string) (ret string) {
-	ret = masterViewName + " (1)"
-	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
-	m := r.FindStringSubmatch(masterViewName)
-	if nil == m || 3 > len(m) {
-		return
-	}
-
-	num, _ := strconv.Atoi(m[2])
-	num++
-	ret = fmt.Sprintf("%s (%d)", m[1], num)
 	return
 }
 

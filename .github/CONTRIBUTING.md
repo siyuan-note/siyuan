@@ -7,7 +7,7 @@
 
 ## User Interface
 
-Install pnpm: `npm install -g pnpm`
+Install pnpm: `npm install -g pnpm@9.1.1`
 
 <details>
 <summary>For China mainland</summary>

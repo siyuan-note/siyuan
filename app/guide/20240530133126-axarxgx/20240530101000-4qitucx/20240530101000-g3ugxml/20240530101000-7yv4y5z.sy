@@ -1,0 +1,117 @@
+{
+	"ID": "20240530101000-7yv4y5z",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-x8y063y",
+		"id": "20240530101000-7yv4y5z",
+		"title": "ウィンドウとタブ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-q503b1r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-i43223g",
+				"id": "20240530101000-q503b1r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は複数のウィンドウとタブをサポートしているため、ドキュメントの編集や閲覧を容易に行うことができます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-a8n082v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-9199nfv",
+				"id": "20240530101000-a8n082v",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブは上下左右の分割画面をサポートしており、開いているすべてのタブはリアルタイムで同期されます。たとえば、同じドキュメントに対して複数のタブを開いた場合、いずれかのタブを編集して保存すると、他のタブも自動的に最新のコンテンツに同期されるため、複数のタブを開く利便性を享受しながらも、古いデータによって上書きされることを防止します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2ohjfzq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-sfd4qik",
+				"id": "20240530101000-2ohjfzq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントは同期して保存されるだけでなく、保存後に生成されるレンダリングも同期されます。たとえば、コンテンツブロックのプレビューやドキュメントの関係図はリアルタイムに更新されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-l98xvyw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-wmvez4v",
+				"id": "20240530101000-l98xvyw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブは分割表示に加え、ドラッグ＆ドロップもサポートしているので、好みのレイアウトに合わせて全体のインターフェースを簡単にアレンジできます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9q4ecti",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ljt555y",
+				"id": "20240530101000-9q4ecti",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用しているデバイスの画面が小さい場合は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-40hohog",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ブラウザでの使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を検討できます。この方法では、ブラウザのインスタンスを通して全体のインターフェースの切り替えを行うことができます。また、タブを右クリックして "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウに移動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を選択するか、現在のウィンドウの外にドラッグしてリリースすることで、タブを独立したウィンドウに変換できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4w66f6g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-13igpet",
+				"id": "20240530101000-4w66f6g"
+			}
+		}
+	]
+}

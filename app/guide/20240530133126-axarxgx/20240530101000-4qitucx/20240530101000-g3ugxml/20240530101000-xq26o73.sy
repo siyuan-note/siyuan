@@ -1,0 +1,568 @@
+{
+	"ID": "20240530101000-xq26o73",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-p0tarpp",
+		"id": "20240530101000-xq26o73",
+		"title": "カーネルパラメータ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-pmhprwt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-p4a4sqs",
+				"id": "20240530101000-pmhprwt",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v0bquxf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-jnec75x",
+				"id": "20240530101000-v0bquxf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ワークスペースフォルダのパスを指定します。指定しない場合のデフォルト値は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-edwo40h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-e1xtgtc",
+				"id": "20240530101000-edwo40h",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-q9chcul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pmwrpun",
+				"id": "20240530101000-q9chcul",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カーネルの作業ディレクトリパスを指定します。指定しない場合は、カーネル実行ファイルのエントリに従って自動的に取得されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-g9td9xy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-n5daxmf",
+				"id": "20240530101000-g9td9xy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-blyuv3q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-p1wkt11",
+				"id": "20240530101000-blyuv3q",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を指定するとカーネルは読み取り専用モードで実行され、すべての書き込み操作が禁止されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0w6cfgi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-17dyrfu",
+				"id": "20240530101000-0w6cfgi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ybjiuls",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2b9ic8o",
+				"id": "20240530101000-ybjiuls",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブラウザの"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-xf6aq6t",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "アクセス認証パスワード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を指定します。設定すると "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "authCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を上書きします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1lqa2t5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-z000adh",
+				"id": "20240530101000-1lqa2t5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-c1uhj7a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-sypq8wy",
+				"id": "20240530101000-c1uhj7a",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を指定すると https と wss プロトコルを使用してサーバーが起動します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pzmi4gj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-rje9q9t",
+				"id": "20240530101000-pzmi4gj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bqisa84",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-f48ihvt",
+				"id": "20240530101000-bqisa84",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "インターフェースの言語を指定します。利用可能な値は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "en_US"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ (デフォルト)、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "es_ES"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "fr_FR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ja_JP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CHT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-au2afuj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-jc2iusi",
+				"id": "20240530101000-au2afuj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-24l0f8m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-26vvxmi",
+				"id": "20240530101000-24l0f8m",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を指定すると開発モードで起動し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を指定すると本番モードで起動します。デフォルトは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ykliek4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-tgko9uw",
+				"id": "20240530101000-ykliek4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開発モードと本番モードの主な違いは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダの位置で、開発モードでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "working directory/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用し、本番モードでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/conf/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ が使用されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ylxr8ke",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-5ekife0",
+				"id": "20240530101000-ylxr8ke",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5qzh6np",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-tt98ry3",
+				"id": "20240530101000-5qzh6np",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リッスンポートを指定します。指定しない場合は:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-oeuvnj0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-bik3kia",
+				"id": "20240530101000-oeuvnj0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-xut8uo7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-drmcg95",
+						"id": "20240530101000-xut8uo7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-28jf8f1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hnwz6eq",
+								"id": "20240530101000-28jf8f1",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "デスクトップ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ランダムなポート"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-dg6ceqz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-tdyeuw3",
+						"id": "20240530101000-dg6ceqz",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-iya0cai",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ebesosg",
+								"id": "20240530101000-iya0cai",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Docker/モバイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-j5slqbq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zce8pg5",
+				"id": "20240530101000-j5slqbq"
+			}
+		}
+	]
+}

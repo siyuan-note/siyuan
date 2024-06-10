@@ -236,17 +236,12 @@ const isOpenAsHidden = function () {
 };
 
 const initMainWindow = () => {
-    let windowStateInitialized = true;
     // 恢复主窗体状态
     let oldWindowState = {};
     try {
         oldWindowState = JSON.parse(fs.readFileSync(windowStatePath, "utf8"));
-        if (!oldWindowState.x) {
-            windowStateInitialized = false;
-        }
     } catch (e) {
         fs.writeFileSync(windowStatePath, "{}");
-        windowStateInitialized = false;
     }
     let defaultWidth;
     let defaultHeight;
@@ -268,8 +263,9 @@ const initMainWindow = () => {
         height: defaultHeight,
     }, oldWindowState);
 
-    // writeLog("windowStat [width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
+    writeLog("windowStat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
 
+    let resetToCenter = false;
     let x = windowState.x;
     let y = windowState.y;
     if (workArea) {
@@ -278,24 +274,21 @@ const initMainWindow = () => {
             windowState.width = Math.min(defaultWidth, workArea.width);
             windowState.height = Math.min(defaultHeight, workArea.height);
         }
-        if (x > workArea.width) {
-            x = 0;
-        }
-        if (y > workArea.height) {
-            y = 0;
+
+        if (x >= workArea.width * 0.8 || y >= workArea.height * 0.8) {
+            resetToCenter = true;
         }
     }
+
+    if (x < 0 || y < 0) {
+        resetToCenter = true;
+    }
+
     if (windowState.width < 493) {
         windowState.width = 493;
     }
     if (windowState.height < 376) {
         windowState.height = 376;
-    }
-    if (x < 0) {
-        x = 0;
-    }
-    if (y < 0) {
-        y = 0;
     }
 
     // 创建主窗体
@@ -321,7 +314,7 @@ const initMainWindow = () => {
     });
     remote.enable(currentWindow.webContents);
 
-    windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
+    resetToCenter ? currentWindow.center() : currentWindow.setPosition(x, y);
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     // set proxy

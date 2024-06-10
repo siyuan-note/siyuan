@@ -19,10 +19,12 @@ package api
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -103,11 +105,9 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	if util.ReadOnly && !model.IsUserGuide(notebook) {
-		result := util.NewResult()
-		result.Code = -1
-		result.Msg = model.Conf.Language(34)
-		result.Data = map[string]interface{}{"closeTimeout": 5000}
-		c.JSON(200, result)
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(34)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 
@@ -183,12 +183,21 @@ func openNotebook(c *gin.Context) {
 		return
 	}
 
-	if util.ReadOnly && !model.IsUserGuide(notebook) {
-		result := util.NewResult()
-		result.Code = -1
-		result.Msg = model.Conf.Language(34)
-		result.Data = map[string]interface{}{"closeTimeout": 5000}
-		c.JSON(200, result)
+	isUserGuide := model.IsUserGuide(notebook)
+	if util.ReadOnly && !isUserGuide {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(34)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	if isUserGuide && util.ContainerIOS == util.Container {
+		// iOS 端不再支持打开用户指南，请参考桌面端用户指南
+		// 用户指南中包含了付费相关内容，无法通过商店上架审核
+		// Opening the user guide is no longer supported on iOS https://github.com/siyuan-note/siyuan/issues/11492
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(215)
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
 	}
 
@@ -215,6 +224,35 @@ func openNotebook(c *gin.Context) {
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
+
+	if isUserGuide {
+		appArg := arg["app"]
+		app := ""
+		if nil != appArg {
+			app = appArg.(string)
+		}
+
+		go func() {
+			var startID string
+			i := 0
+			for ; i < 70; i++ {
+				time.Sleep(100 * time.Millisecond)
+				guideStartID := map[string]string{
+					"20210808180117-czj9bvb": "20200812220555-lj3enxa",
+					"20211226090932-5lcq56f": "20211226115423-d5z1joq",
+					"20210808180117-6v0mkxr": "20200923234011-ieuun1p",
+					"20240530133126-axarxgx": "20240530101000-4qitucx",
+				}
+				startID = guideStartID[notebook]
+				if nil != treenode.GetBlockTree(startID) {
+					util.BroadcastByTypeAndApp("main", app, "openFileById", 0, "", map[string]interface{}{
+						"id": startID,
+					})
+					break
+				}
+			}
+		}()
+	}
 }
 
 func closeNotebook(c *gin.Context) {

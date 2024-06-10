@@ -1138,7 +1138,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, err error) {
+func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1150,6 +1150,9 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string) (retID string, er
 
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
+	if withMath {
+		luteEngine.SetInlineMath(true)
+	}
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	WaitForWritingFiles()
@@ -1666,7 +1669,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 
-	title = gulu.Str.RemoveInvisible(title)
+	title = removeInvisibleCharsInTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
@@ -1706,7 +1709,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 }
 
 func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
-	title = gulu.Str.RemoveInvisible(title)
+	title = removeInvisibleCharsInTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
@@ -1817,6 +1820,14 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	PerformTransactions(&[]*Transaction{transaction})
 	WaitForWritingFiles()
 	return
+}
+
+func removeInvisibleCharsInTitle(title string) string {
+	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
+	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
+	title = gulu.Str.RemoveInvisible(title)
+	title = strings.ReplaceAll(title, "__@ZWJ@__", string(gulu.ZWJ))
+	return title
 }
 
 func moveSorts(rootID, fromBox, toBox string) {

@@ -19,7 +19,7 @@ import {deleteRow, insertRows, selectRow, setPageSize, updateHeader} from "./row
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
-import {focusByRange} from "../../util/selection";
+import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";
@@ -31,6 +31,8 @@ import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {openSearchAV} from "./relation";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
+import {fetchPost} from "../../../util/fetch";
+import {scrollCenter} from "../../../util/highlightById";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -272,13 +274,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             type: "submenu",
             submenu: copySubMenu(blockId)
         });
-        menu.addItem({
-            label: window.siyuan.languages.unbindBlock,
-            icon: "iconLinkOff",
-            click() {
-                updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
-            }
-        });
     }
     if (!protyle.disabled) {
         menu.addItem({
@@ -366,6 +361,15 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space
                 }
             });
             menu.addSeparator();
+            if (keyCellElement.getAttribute("data-detached") !== "true") {
+                menu.addItem({
+                    label: window.siyuan.languages.unbindBlock,
+                    icon: "iconLinkOff",
+                    click() {
+                        updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
+                    }
+                });
+            }
         }
         menu.addItem({
             icon: "iconTrashcan",
@@ -470,6 +474,10 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
     pin?: boolean,
     type?: TAVCol
 }) => {
+    // 属性面板更新列名
+    if (!cellElement) {
+        return;
+    }
     if (headerValue) {
         updateHeaderCell(cellElement, headerValue);
     } else {
@@ -485,5 +493,28 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
 export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
     blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
         item.remove();
+    });
+};
+
+export const duplicateCompletely = (protyle:IProtyle, nodeElement:HTMLElement) => {
+    fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
+        nodeElement.classList.remove("protyle-wysiwyg--select");
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+        const cloneElement = tempElement.content.firstElementChild;
+        nodeElement.after(cloneElement);
+        avRender(cloneElement, protyle, () => {
+            focusBlock(cloneElement);
+            scrollCenter(protyle);
+        });
+        transaction(protyle, [{
+            action: "insert",
+            data: cloneElement.outerHTML,
+            id: response.data.blockID,
+            previousID: nodeElement.dataset.nodeId,
+        }], [{
+            action: "delete",
+            id: response.data.blockID,
+        }]);
     });
 };

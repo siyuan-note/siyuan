@@ -12,12 +12,19 @@ import {showMessage} from "../../dialog/message";
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     const ghostElement = document.getElementById("dragGhost");
     if (ghostElement) {
-        const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
-        startElement ? startElement.style.opacity = "" : "";
-        ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top", "dragover__bottom", "dragover");
-            item.style.opacity = "";
-        });
+        if (ghostElement.dataset.ghostType === "dock") {
+            ghostElement.parentElement.querySelectorAll(".dock__item").forEach((item: HTMLElement) => {
+                item.style.opacity = "";
+            });
+            document.querySelector("#dockMoveItem")?.remove();
+        } else {
+            const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
+            startElement ? startElement.style.opacity = "" : "";
+            ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                item.style.opacity = "";
+            });
+        }
         ghostElement.remove();
     }
     if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
@@ -48,7 +55,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         window.siyuan.layout.rightDock.hideDock();
     }
 
-    const protyleElement  = hasClosestByClassName(event.target, "protyle", true);
+    const protyleElement = hasClosestByClassName(event.target, "protyle", true);
     if (protyleElement) {
         const wysiwygElement = protyleElement.querySelector(".protyle-wysiwyg");
         if (wysiwygElement.getAttribute("data-readonly") === "true" || !wysiwygElement.contains(event.target)) {

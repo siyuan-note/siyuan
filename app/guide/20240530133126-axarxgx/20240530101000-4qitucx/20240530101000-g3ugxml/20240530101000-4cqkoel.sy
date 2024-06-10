@@ -1,0 +1,504 @@
+{
+	"ID": "20240530101000-4cqkoel",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-va0bfhr",
+		"id": "20240530101000-4cqkoel",
+		"title": "ドキュメントの公開",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-ionqoxz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-imf55p1",
+				"id": "20240530101000-ionqoxz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vp4fob2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-mucipix",
+				"id": "20240530101000-vp4fob2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 形式の単一のドキュメントを "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com",
+					"TextMarkTextContent": "Liandi"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " に投稿して公開します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ta337sv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-yqjf2u6",
+				"id": "20240530101000-ta337sv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0nu3aou",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-4zayyl0",
+				"id": "20240530101000-0nu3aou",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-dmuu96j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ef4x6dv",
+						"id": "20240530101000-dmuu96j",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-3todhrv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-74053pe",
+								"id": "20240530101000-3todhrv",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Liandi のアカウントに登録して SiYuan でログインする必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-kfp6mgd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-4kifiue",
+						"id": "20240530101000-kfp6mgd",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lt35ct2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cl0dp3u",
+								"id": "20240530101000-lt35ct2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "エディタの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ メニューから "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "コミュニティに公開する"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ をクリックします"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-203ue17",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-sxvk41h",
+								"id": "20240530101000-203ue17",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-2us5h8e",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-ofen1rr",
+										"id": "20240530101000-2us5h8e",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-89trnlo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-nondce3",
+												"id": "20240530101000-89trnlo",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ドキュメントタイトルが投稿タイトルになります"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-fdi7wjm",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-9cguyqn",
+										"id": "20240530101000-fdi7wjm",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-172npip",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-51ovpnu",
+												"id": "20240530101000-172npip",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ドキュメントタグが投稿タグになります"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-xyk7100",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-9bpcdue",
+										"id": "20240530101000-xyk7100",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-99ecmvb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ldmtu78",
+												"id": "20240530101000-99ecmvb",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Markdown 形式でエクスポートされたドキュメントが投稿の内容になり、参照は脚注に変換されます"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-g5vxn95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-gbag4q9",
+						"id": "20240530101000-g5vxn95",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-w95sz7z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hzn3183",
+								"id": "20240530101000-w95sz7z",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開されると、ドキュメントに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleId"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 属性が書き込まれ、リンクされた投稿 ID を関連付けます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-axr2hjn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-80fwnwt",
+				"id": "20240530101000-axr2hjn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメント内のアセットは自動的にクラウドにアップロードされます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-81r8jdk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-dvpsld7",
+				"id": "20240530101000-81r8jdk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-seb3c7p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-73wmhqv",
+						"id": "20240530101000-seb3c7p",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-a99junn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-x2q290a",
+								"id": "20240530101000-a99junn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "無料ユーザーは 1 ファイルあたり 3MB まで"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-peu760b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lz3sitm",
+						"id": "20240530101000-peu760b",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4b55gtw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mpzl7st",
+								"id": "20240530101000-4b55gtw",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "有料ユーザーは 1 ファイルあたり 10MB まで"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-z3drf05",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-gc2qhzt",
+				"id": "20240530101000-z3drf05",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s31a99n",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-k68n555",
+				"id": "20240530101000-s31a99n",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-169edsb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-beo7pac",
+						"id": "20240530101000-169edsb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-elf7s7x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-97zktty",
+								"id": "20240530101000-elf7s7x",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントを LiuYun に公開するには"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/article/1685240430351",
+									"TextMarkTextContent": "ポイント"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "が必要です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-20anw9z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-wv1dly7",
+						"id": "20240530101000-20anw9z",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qmchkc4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-69ogdcz",
+								"id": "20240530101000-qmchkc4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドにアップロードされた公開アセットは削除できません"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-j7rc1ma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zxqk56p",
+				"id": "20240530101000-j7rc1ma"
+			}
+		}
+	]
+}

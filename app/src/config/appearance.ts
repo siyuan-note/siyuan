@@ -10,6 +10,7 @@ import {genLangOptions, genOptions} from "../util/genOptions";
 import {openSnippets} from "./util/snippets";
 import {loadAssets} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 export const appearance = {
     element: undefined as Element,
@@ -212,7 +213,9 @@ export const appearance = {
             openSnippets();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
-            resetLayout();
+            confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.appearance6, () => {
+                resetLayout();
+            });
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {

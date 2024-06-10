@@ -1,0 +1,227 @@
+{
+	"ID": "20240530101000-75auqcn",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-y6q5wbj",
+		"id": "20240530101000-75auqcn",
+		"title": "制限事項",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-gs98xjs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-sm1459q",
+				"id": "20240530101000-gs98xjs",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-1ldjmxw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-kqq8097",
+						"id": "20240530101000-1ldjmxw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-k4tmkoy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lxs2o8d",
+								"id": "20240530101000-k4tmkoy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大 7 つのクラウド同期ディレクトリを作成できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-31v7zil",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ul1eip3",
+						"id": "20240530101000-31v7zil",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6lnnawp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cid476a",
+								"id": "20240530101000-6lnnawp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大 12 個のデータスナップショットを保存できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-m0pbgr7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-luznisb",
+						"id": "20240530101000-m0pbgr7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e3qi05u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-30p2nbr",
+								"id": "20240530101000-e3qi05u",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドストレージのサイズは "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8GB"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bqjzt8r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-jht3ayk",
+						"id": "20240530101000-bqjzt8r",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-45my39a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mapz48z",
+								"id": "20240530101000-45my39a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "有料購読が終了するとクラウドストレージは完全に削除されます"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-8gw40ck",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-mz66o31",
+								"id": "20240530101000-8gw40ck",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-gombjin",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-5qlw4vg",
+										"id": "20240530101000-gombjin",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-n8i54lo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-c8p3j65",
+												"id": "20240530101000-n8i54lo",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "有効期限の 15 日前からソフトウェアを開くたびに有効期限のリマインダーがポップアップで表示され、有効期限の 2 日後にリマインダーが停止します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-xdtc36l",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-t246qmv",
+										"id": "20240530101000-xdtc36l",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-7pjypdm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-htf5ogz",
+												"id": "20240530101000-7pjypdm",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "クラウドストレージを削除してもローカルデータには影響しません"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

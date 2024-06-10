@@ -28,6 +28,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
+import {zoomOut} from "../../menus/protyle";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -520,18 +521,22 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
             const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor && editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
-                const newId = Lute.NewNodeID();
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: genEmptyElement(false, false, newId).outerHTML,
-                    parentID: editor.model.editor.protyle.block.parentID
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
+            if (editor && editor.model instanceof Editor) {
+                if (editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
+                    const newId = Lute.NewNodeID();
+                    doOperations.splice(0, 0, {
+                        action: "insert",
+                        id: newId,
+                        data: genEmptyElement(false, false, newId).outerHTML,
+                        parentID: editor.model.editor.protyle.block.parentID
+                    });
+                    undoOperations.splice(0, 0, {
+                        action: "delete",
+                        id: newId,
+                    });
+                } else {
+                    zoomOut({protyle: editor.model.editor.protyle, id: editor.model.editor.protyle.block.rootID});
+                }
             }
         }
         /// #endif
@@ -680,18 +685,23 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
             const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor && editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
-                const newId = Lute.NewNodeID();
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: genEmptyElement(false, false, newId).outerHTML,
-                    parentID: editor.model.editor.protyle.block.parentID
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
+            if (editor && editor.model instanceof Editor) {
+                if (editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
+                    const newId = Lute.NewNodeID();
+                    doOperations.splice(0, 0, {
+                        action: "insert",
+                        id: newId,
+                        data: genEmptyElement(false, false, newId).outerHTML,
+                        parentID: editor.model.editor.protyle.block.parentID
+                    });
+                    undoOperations.splice(0, 0, {
+                        action: "delete",
+                        id: newId,
+                    });
+                } else {
+                    zoomOut({protyle: editor.model.editor.protyle, id: editor.model.editor.protyle.block.rootID});
+                }
+
             }
         }
         /// #endif
@@ -880,7 +890,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 行内拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
                                     doOperations.push({

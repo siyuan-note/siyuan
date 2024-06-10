@@ -50,10 +50,7 @@
   * [Does it support data synchronization through a third-party sync disk?](#does-it-support-data-synchronization-through-a-third-party-sync-disk)
   * [Is SiYuan open source?](#is-siyuan-open-source)
   * [How to upgrade to a new version?](#how-to-upgrade-to-a-new-version)
-  * [Is there any note for deleting docs?](#is-there-any-note-for-deleting-docs)
-  * [How can I just wrap and not start a new paragraph?](#how-can-i-just-wrap-and-not-start-a-new-paragraph)
   * [What if some blocks (such as paragraph blocks in list items) cannot find the block icon?](#what-if-some-blocks-such-as-paragraph-blocks-in-list-items-cannot-find-the-block-icon)
-  * [How to share notes?](#how-to-share-notes)
   * [What should I do if the data repo key is lost?](#what-should-i-do-if-the-data-repo-key-is-lost)
   * [Do I need to pay for it?](#do-i-need-to-pay-for-it)
 * [🙏 Acknowledgement](#-acknowledgement)
@@ -322,25 +319,9 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 
 You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official Download](https://b3log.org/siyuan/en/download.html) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
-### Is there any note for deleting docs?
-
-After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate data history.
-
-### How can I just wrap and not start a new paragraph?
-
-Please use <kbd>Shift+Enter</kbd>.
-
 ### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
 The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
-
-### How to share notes?
-
-* Share document to Liandi
-* Export and import `.sy.zip` package
-* Via network hosting
-* Export and import Markdown
-* <kbd>Export Preview</kbd> to copy to third-party online services
 
 ### What should I do if the data repo key is lost?
 

@@ -255,7 +255,7 @@
     display: inline-block !important;
     position: absolute !important;
     width: 1px !important;
-    right: 6px !important;
+    right: 8px !important;
     outline: 0 !important;
     background: 0 0 !important;
     text-decoration: initial !important;
@@ -435,6 +435,8 @@
       display: block;
       font-size: 85%;
       color: var(--b3-theme-on-surface);
+      word-break: break-word;
+      white-space: break-spaces;
     }
   }
 

@@ -271,6 +271,29 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FullReindex()
 	IncSync()
+	go func() {
+		sql.WaitForWritingDatabase()
+
+		tree, _ = LoadTreeByBlockID(id)
+		if nil == tree {
+			return
+		}
+
+		// 刷新关联的动态锚文本 https://github.com/siyuan-note/siyuan/issues/11575
+		refreshDynamicRefText(tree.Root, tree)
+
+		// 刷新页签名
+		refText := getNodeRefText(tree.Root)
+		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
+		evt.Data = map[string]interface{}{
+			"box":     boxID,
+			"id":      tree.Root.ID,
+			"path":    tree.Path,
+			"title":   tree.Root.IALAttr("title"),
+			"refText": refText,
+		}
+		util.PushEvent(evt)
+	}()
 	return nil
 }
 

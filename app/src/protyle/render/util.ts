@@ -20,4 +20,4 @@ export const processClonePHElement = (item:Element) => {
         phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(phElement.getAttribute("data-content")));
     }
     return item;
-}
+};

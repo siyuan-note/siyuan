@@ -33,6 +33,7 @@ type TOperation =
     | "updateAttrViewColOption"
     | "setAttrViewName"
     | "doUpdateUpdated"
+    | "duplicateAttrViewKey"
     | "setAttrViewColIcon"
     | "setAttrViewFilters"
     | "setAttrViewSorts"

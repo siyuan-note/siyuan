@@ -240,6 +240,7 @@ export const initEditor = () => {
     ${window.siyuan.languages.md29} 
     <div class="fn__hr"></div>
     <select id="codeTabSpaces" class="b3-select fn__block">
+        <option ${window.siyuan.config.editor.codeTabSpaces === 0 ? "selected" : ""} value="0">0</option>
         <option ${window.siyuan.config.editor.codeTabSpaces === 2 ? "selected" : ""} value="2">2</option>
         <option ${window.siyuan.config.editor.codeTabSpaces === 4 ? "selected" : ""} value="4">4</option>
         <option ${window.siyuan.config.editor.codeTabSpaces === 6 ? "selected" : ""} value="6">6</option>

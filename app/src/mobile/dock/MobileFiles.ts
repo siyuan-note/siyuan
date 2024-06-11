@@ -95,6 +95,7 @@ export class MobileFiles extends Model {
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
         </span>
         <span class="b3-list-item__text">${window.siyuan.languages.closeNotebook}</span>
+        <span class="counter fn__none" style="cursor: auto"></span>
     </li>
     <ul class="fn__none fn__flex-1"></ul>
 </ul>`;
@@ -292,8 +293,10 @@ export class MobileFiles extends Model {
     public init(init = true) {
         let html = "";
         let closeHtml = "";
+        let closeCounter = 0;
         window.siyuan.notebooks.forEach((item) => {
             if (item.closed) {
+                closeCounter++;
                 closeHtml += this.genNotebook(item);
             } else {
                 html += this.genNotebook(item);
@@ -301,6 +304,13 @@ export class MobileFiles extends Model {
         });
         this.element.innerHTML = html;
         this.closeElement.lastElementChild.innerHTML = closeHtml;
+        const counterElement = this.closeElement.querySelector(".counter")
+        counterElement.textContent = closeCounter.toString()
+        if (closeCounter) {
+            counterElement.classList.remove("fn__none");
+        } else {
+            counterElement.classList.add("fn__none");
+        }
         if (!init) {
             return;
         }
@@ -407,6 +417,9 @@ export class MobileFiles extends Model {
                             }
                         });
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
+                        const counterElement = this.closeElement.querySelector(".counter");
+                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
+                        counterElement.classList.remove("fn__none")
                     }
                 }
             });
@@ -461,6 +474,11 @@ export class MobileFiles extends Model {
         const liElement = this.closeElement.querySelector(`li[data-url="${data.data.box.id}"]`) as HTMLElement;
         if (liElement) {
             liElement.remove();
+            const counterElement = this.closeElement.querySelector(".counter")
+            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString()
+            if (counterElement.textContent === "0") {
+                counterElement.classList.add("fn__none")
+            }
         }
         setNoteBook((notebooks: INotebook[]) => {
             const html = this.genNotebook(data.data.box);

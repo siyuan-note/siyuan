@@ -851,6 +851,11 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		query = trimQuery
 	}
 
+	if 1 == groupBy {
+		// 按文档分组时使用搜索设置限制 Search `Group by doc` follows the search setting limit display https://github.com/siyuan-note/siyuan/issues/11667
+		pageSize = Conf.Search.Limit
+	}
+
 	beforeLen := 36
 	var blocks []*Block
 	orderByClause := buildOrderBy(query, method, orderBy)

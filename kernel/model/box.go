@@ -429,11 +429,11 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = parse.Parse("", kramdown, luteEngine.ParseOptions)
-	genTreeID(ret)
+	normalizeTree(ret)
 	return
 }
 
-func genTreeID(tree *parse.Tree) {
+func normalizeTree(tree *parse.Tree) {
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
@@ -492,6 +492,11 @@ func genTreeID(tree *parse.Tree) {
 			n.FirstChild.Next.Tokens = bytes.TrimLeft(n.FirstChild.Next.Tokens, " ")
 			// 调整 li.p.tlim 为 li.tlim.p
 			n.InsertBefore(n.FirstChild)
+		}
+
+		if ast.NodeLinkTitle == n.Type {
+			// 避免重复转义图片标题内容 Repeat the escaped content of the image title https://github.com/siyuan-note/siyuan/issues/11681
+			n.Tokens = html.UnescapeBytes(n.Tokens)
 		}
 
 		return ast.WalkContinue

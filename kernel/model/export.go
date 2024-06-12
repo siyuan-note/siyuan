@@ -471,7 +471,12 @@ func exportData(exportFolder string) (zipPath string, err error) {
 		return
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder); nil != err {
+	zipCallback := func(filename string) {
+		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename)
+		util.PushEndlessProgress(msg)
+	}
+
+	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); nil != err {
 		logging.LogErrorf("create export data zip [%s] failed: %s", exportFolder, err)
 		return
 	}
@@ -1462,6 +1467,9 @@ func yfm(docIAL map[string]string) string {
 }
 
 func exportBoxSYZip(boxID string) (zipPath string) {
+	util.PushEndlessProgress(Conf.Language(65))
+	defer util.ClearPushProgress(100)
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		logging.LogErrorf("not found box [%s]", boxID)
@@ -1607,6 +1615,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			copiedAssets.Add(asset)
+
+			msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), asset)
+			util.PushEndlessProgress(msg)
 		}
 	}
 
@@ -1738,7 +1749,12 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		return ""
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder); nil != err {
+	zipCallback := func(filename string) {
+		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename)
+		util.PushEndlessProgress(msg)
+	}
+
+	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); nil != err {
 		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}

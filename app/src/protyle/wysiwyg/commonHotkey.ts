@@ -1,11 +1,7 @@
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
-import {
-    focusBlock,
-    getSelectionOffset,
-    setFirstNodeRange, setLastNodeRange,
-} from "../util/selection";
+import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
@@ -106,6 +102,10 @@ export const upSelect = (options: {
             // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
             if (innerText.substr(0, startIndex).indexOf("\n") === -1) {
                 setFirstNodeRange(nodeEditableElement, options.range);
+                if(!isMac()) {
+                    // windows 中 shift 向上选中三行后，最后的光标会乱跳
+                    options.event.preventDefault();
+                }
             }
             return;
         }
@@ -152,6 +152,7 @@ export const downSelect = (options: {
                 // 当为最后一个块时应选中末尾
                 setLastNodeRange(nodeEditableElement, options.range, false);
                 if (options.nodeElement.classList.contains("code-block") && isExpandDown) {
+                    // 代码块中 shift+alt 向下选中到末尾时，最后一个字符无法选中
                     options.event.preventDefault();
                 }
             }

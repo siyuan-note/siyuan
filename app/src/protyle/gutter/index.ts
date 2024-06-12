@@ -75,7 +75,7 @@ export class Gutter {
             hideTooltip();
             window.siyuan.menus.menu.remove();
             const buttonElement = event.target.parentElement;
-            let selectIds: string[] = [];
+            const selectIds: string[] = [];
             let selectElements: Element[] = [];
             let avElement: Element;
             if (buttonElement.dataset.rowId) {
@@ -90,16 +90,11 @@ export class Gutter {
                     selectElements.push(item);
                 });
             } else {
-                selectIds = [buttonElement.getAttribute("data-node-id")];
+                protyle.wysiwyg.element.querySelector(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)?.classList.add("protyle-wysiwyg--select")
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-                if (selectElements.length > 0) {
-                    selectIds = [];
-                    selectElements.forEach(item => {
-                        selectIds.push(item.getAttribute("data-node-id"));
-                    });
-                } else {
-                    selectElements = [protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`)];
-                }
+                selectElements.forEach(item => {
+                    selectIds.push(item.getAttribute("data-node-id"));
+                });
             }
 
             const ghostElement = document.createElement("div");

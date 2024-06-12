@@ -1477,7 +1477,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		}
 	}
 
-	if fromBox.Exist(fromFolder) {
+	needMoveSubDocs := fromBox.Exist(fromFolder)
+	if needMoveSubDocs {
 		// 移动子文档文件夹
 
 		newFolder := path.Join(toFolder, tree.ID)
@@ -1530,6 +1531,28 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 
 		moveTree(tree)
 		moveSorts(tree.ID, fromBox.ID, toBox.ID)
+	}
+
+	if needMoveSubDocs {
+		// 将其所有子文档的移动事件推送到前端 https://github.com/siyuan-note/siyuan/issues/11661
+		subDocsFolder := path.Join(toFolder, tree.ID)
+		syFiles := listSyFiles(path.Join(toBox.ID, subDocsFolder))
+		for _, syFile := range syFiles {
+			relPath := strings.TrimPrefix(syFile, "/"+path.Join(toBox.ID, toFolder))
+			subFromPath := path.Join(path.Dir(fromPath), relPath)
+			subToPath := path.Join(toFolder, relPath)
+
+			evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
+			evt.Data = map[string]interface{}{
+				"fromNotebook": fromBox.ID,
+				"fromPath":     subFromPath,
+				"toNotebook":   toBox.ID,
+				"toPath":       path.Dir(subToPath) + ".sy",
+				"newPath":      subToPath,
+			}
+			evt.Callback = callback
+			util.PushEvent(evt)
+		}
 	}
 
 	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)

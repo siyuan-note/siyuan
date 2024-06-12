@@ -622,7 +622,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const tdElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-            if (event.key === "ArrowDown" && nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (
+            // 需使用 innerText 否则表格内 br 无法传唤为 /n
+            if (event.key === "ArrowDown" && nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 && (
                 (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
                 (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
                 (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement))
@@ -697,7 +698,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (event.key === "ArrowDown") {
-                if (nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 &&
+                if (nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 &&
                     nodeElement.isSameNode(protyle.wysiwyg.element.lastElementChild)) {
                     setLastNodeRange(getContenteditableElement(nodeEditableElement), range, false);
                     range.collapse(false);

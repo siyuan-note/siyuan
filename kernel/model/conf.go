@@ -76,6 +76,7 @@ type AppConf struct {
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
+	Publish        *conf.Publish    `json:"publish"`        // 发布服务
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
@@ -355,6 +356,10 @@ func InitConf() {
 
 	if nil == Conf.Bazaar {
 		Conf.Bazaar = conf.NewBazaar()
+	}
+
+	if nil == Conf.Publish {
+		Conf.Publish = conf.NewPublish()
 	}
 
 	if nil == Conf.Repo {
@@ -892,6 +897,24 @@ func GetMaskedConf() (ret *AppConf, err error) {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
 	return
+}
+
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
+// HideConfSecret 隐藏设置中的秘密信息
+func HideConfSecret(c *AppConf) {
+	c.AI = &conf.AI{}
+	c.Api = &conf.API{}
+	c.Flashcard = &conf.Flashcard{}
+	c.LocalIPs = []string{}
+	c.Publish = &conf.Publish{}
+	c.Repo = &conf.Repo{}
+	c.Sync = &conf.Sync{}
+	c.System.AppDir = ""
+	c.System.ConfDir = ""
+	c.System.DataDir = ""
+	c.System.HomeDir = ""
+	c.System.Name = ""
+	c.System.NetworkProxy = &conf.NetworkProxy{}
 }
 
 func clearPortJSON() {

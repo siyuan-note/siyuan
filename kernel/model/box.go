@@ -404,12 +404,9 @@ func moveTree(tree *parse.Tree) {
 
 func (box *Box) renameSubTrees(tree *parse.Tree) {
 	subFiles := box.ListFiles(tree.Path)
-	box.moveTrees0(subFiles)
-}
 
-func (box *Box) moveTrees0(files []*FileInfo) {
 	luteEngine := util.NewLute()
-	for _, subFile := range files {
+	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}

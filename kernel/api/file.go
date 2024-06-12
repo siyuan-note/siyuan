@@ -166,11 +166,29 @@ func getFile(c *gin.Context) {
 		return
 	}
 	if info.IsDir() {
-		logging.LogErrorf("file [%s] is a directory", fileAbsPath)
+		logging.LogErrorf("path [%s] is a directory path", fileAbsPath)
 		ret.Code = http.StatusMethodNotAllowed
-		ret.Msg = "file is a directory"
+		ret.Msg = "This is a directory path"
 		c.JSON(http.StatusAccepted, ret)
 		return
+	}
+
+	// REF: https://github.com/siyuan-note/siyuan/issues/11364
+	if role := model.GetGinContextRole(c); !model.IsValidRole(role, []model.Role{
+		model.RoleAdministrator,
+	}) {
+		if relPath, err := filepath.Rel(util.ConfDir, fileAbsPath); err != nil {
+			logging.LogErrorf("Get a relative path from [%s] to [%s] failed: %s", util.ConfDir, fileAbsPath, err)
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = err.Error()
+			c.JSON(http.StatusAccepted, ret)
+			return
+		} else if relPath == "conf.json" {
+			ret.Code = http.StatusForbidden
+			ret.Msg = http.StatusText(http.StatusForbidden)
+			c.JSON(http.StatusAccepted, ret)
+			return
+		}
 	}
 
 	data, err := filelock.ReadFile(fileAbsPath)

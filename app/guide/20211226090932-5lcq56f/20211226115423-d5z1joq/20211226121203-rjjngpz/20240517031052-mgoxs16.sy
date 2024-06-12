@@ -1,0 +1,540 @@
+{
+	"ID": "20240517031052-mgoxs16",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240517031052-mgoxs16",
+		"title": "發布服務",
+		"type": "doc",
+		"updated": "20240517031115"
+	},
+	"Children": [
+		{
+			"ID": "20240517031115-pjkrctx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240517031115-pjkrctx",
+				"updated": "20240517031115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240517031116-a0xf075",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240517031116-a0xf075",
+				"updated": "20240517031116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源筆記支援以只讀模式在區域網路中發佈當前工作空間的內容。"
+				}
+			]
+		},
+		{
+			"ID": "20240517031116-ml8jd6n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240517031116-ml8jd6n",
+				"updated": "20240517031116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240517031116-5u42tlr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240517031116-5u42tlr",
+				"updated": "20240517031116"
+			},
+			"Children": [
+				{
+					"ID": "20240517031116-06mevu7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-06mevu7",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-wqo2aje",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-wqo2aje",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "發佈"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 進入發佈服務的設定面板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240517031116-dsvhebl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-dsvhebl",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-13481er",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-13481er",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設定 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "服務端口號"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20240517031116-sjbg5cn",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240517031116-sjbg5cn",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"ID": "20240517031116-z1q43ui",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240517031116-z1q43ui",
+										"updated": "20240517031116"
+									},
+									"Children": [
+										{
+											"ID": "20240517031116-ssdjmbf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240517031116-ssdjmbf",
+												"updated": "20240517031116"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "默認的端口號為 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "6808"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240517031116-jkcxgaj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240517031116-jkcxgaj",
+										"updated": "20240517031116"
+									},
+									"Children": [
+										{
+											"ID": "20240517031116-ka1wome",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240517031116-ka1wome",
+												"updated": "20240517031116"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "若端口號設定為 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 將使用隨機端口"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240517031116-ipkirs4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-ipkirs4",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-g8qr29s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-g8qr29s",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "若需要對發佈服務進行訪問控制"
+								}
+							]
+						},
+						{
+							"ID": "20240517031116-maj6mmd",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240517031116-maj6mmd",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"ID": "20240517031116-du7rttx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240517031116-du7rttx",
+										"updated": "20240517031116"
+									},
+									"Children": [
+										{
+											"ID": "20240517031116-ct3chrz",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240517031116-ct3chrz",
+												"updated": "20240517031116"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "添加 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "認證帳戶"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 並開啟 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "服務 Basic 認證"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 開關"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240517031116-dlaep2b",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240517031116-dlaep2b",
+										"updated": "20240517031116"
+									},
+									"Children": [
+										{
+											"ID": "20240517031116-3u2v8g7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240517031116-3u2v8g7",
+												"updated": "20240517031116"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "開啟後發佈服務將使用 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Authentication#basic_验证方案",
+													"TextMarkTextContent": "Basic 驗證方案"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " 對訪問者進行認證"
+												}
+											]
+										},
+										{
+											"ID": "20240517031116-qmzfje7",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20240517031116-qmzfje7",
+												"updated": "20240517031116"
+											},
+											"Children": [
+												{
+													"ID": "20240517031116-xthto7w",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20240517031116-xthto7w",
+														"updated": "20240517031116"
+													},
+													"Children": [
+														{
+															"ID": "20240517031116-kbz5qye",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20240517031116-kbz5qye",
+																"updated": "20240517031116"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "訪問者在瀏覽發佈內容前必須正確輸入 "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "kbd",
+																	"TextMarkTextContent": "認證帳戶"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ 中設定的用戶名與密碼"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240517031116-bx01v3n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-bx01v3n",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-44j60lx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-44j60lx",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "發佈服務"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 開關"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240517031116-2v0lh0m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20240517031116-2v0lh0m",
+				"updated": "20240517031116"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240517031116-lx0pe26",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240517031116-lx0pe26",
+				"updated": "20240517031116"
+			},
+			"Children": [
+				{
+					"ID": "20240517031116-kvje8ru",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-kvje8ru",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-gydcx3b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-gydcx3b",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開啟發佈服務後訪問者可以瀏覽整個工作空間的內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240517031116-ufsul2c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240517031116-ufsul2c",
+						"updated": "20240517031116"
+					},
+					"Children": [
+						{
+							"ID": "20240517031116-xyb4012",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240517031116-xyb4012",
+								"updated": "20240517031116"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關閉 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "服務 Basic 認證"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 後所有的訪問者無需認證即可瀏覽整個工作空間的內容"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

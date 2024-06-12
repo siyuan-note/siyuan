@@ -17,13 +17,14 @@
 package api
 
 import (
-	"github.com/88250/lute"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/88250/lute"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -216,6 +217,17 @@ func getConf(c *gin.Context) {
 
 	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {
 		maskedConf.Sync.Stat = model.Conf.Language(53)
+	}
+
+	// REF: https://github.com/siyuan-note/siyuan/issues/11364
+	role := model.GetGinContextRole(c)
+	if model.IsReadOnlyRole(role) {
+		maskedConf.ReadOnly = true
+	}
+	if !model.IsValidRole(role, []model.Role{
+		model.RoleAdministrator,
+	}) {
+		model.HideConfSecret(maskedConf)
 	}
 
 	ret.Data = map[string]interface{}{

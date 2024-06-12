@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20240517031304"
+		"updated": "20240612211244"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240517031304-um049u9",
-				"updated": "20240517031304"
+				"updated": "20240612211244"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240517031304-7e0kvj3",
-				"updated": "20240517031304"
+				"updated": "20240612211244"
 			},
 			"Children": [
 				{
@@ -437,12 +437,17 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240517031304-6cy4lbq",
-				"updated": "20240517031304"
+				"updated": "20240612211244"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "Note"
+					"Data": "​"
 				}
 			]
 		},
@@ -452,7 +457,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240517031304-3slh48m",
-				"updated": "20240517031305"
+				"updated": "20240612211244"
 			},
 			"Children": [
 				{

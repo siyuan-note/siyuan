@@ -308,10 +308,14 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
     if (!editElement) {
         return range;
     }
-    let lastNode = editElement.lastChild;
+    let lastNode = editElement.lastChild as Element;
     while (lastNode && lastNode.nodeType !== 3) {
+        if (lastNode.nodeType !== 3 && lastNode.tagName === "BR") {
+            // 防止单元格中 ⇧↓ 全部选中
+            return range;
+        }
         // 最后一个为多种行内元素嵌套
-        lastNode = lastNode.lastChild;
+        lastNode = lastNode.lastChild as Element;
     }
     if (!lastNode) {
         range.selectNodeContents(editElement);

@@ -851,11 +851,6 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		query = trimQuery
 	}
 
-	if 1 == groupBy {
-		// 按文档分组搜索时不进行分页 No paging when searching by document group https://github.com/siyuan-note/siyuan/issues/11667
-		pageSize = math.MaxInt
-	}
-
 	beforeLen := 36
 	var blocks []*Block
 	orderByClause := buildOrderBy(query, method, orderBy)

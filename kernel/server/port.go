@@ -18,7 +18,6 @@ package server
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -65,7 +64,7 @@ func killRunningKernel() {
 }
 
 func killByPort(port string) {
-	if !isPortOpen(port) {
+	if !util.IsPortOpen(port) {
 		return
 	}
 
@@ -85,19 +84,6 @@ func killByPort(port string) {
 	}
 	kill(pid)
 	logging.LogInfof("killed process [name=%s, pid=%s]", name, pid)
-}
-
-func isPortOpen(port string) bool {
-	timeout := time.Second
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", port), timeout)
-	if nil != err {
-		return false
-	}
-	if nil != conn {
-		conn.Close()
-		return true
-	}
-	return false
 }
 
 func kill(pid string) {

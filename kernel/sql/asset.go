@@ -18,9 +18,10 @@ package sql
 
 import (
 	"database/sql"
-	"github.com/siyuan-note/filelock"
 	"path/filepath"
 	"strings"
+
+	"github.com/siyuan-note/filelock"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"

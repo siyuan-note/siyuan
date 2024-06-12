@@ -507,9 +507,8 @@ export const exportMd = (id: string) => {
                                 });
                             });
                             return;
-                        } else if (response.code === 0) {
-                            showMessage(window.siyuan.languages.exportTplSucc);
                         }
+                        showMessage(window.siyuan.languages.exportTplSucc);
                     });
                     dialog.destroy();
                 });

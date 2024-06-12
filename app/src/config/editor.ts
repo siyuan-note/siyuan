@@ -310,12 +310,10 @@ export const editor = {
         if (fontFamilyElement.tagName === "SELECT") {
             let fontFamilyHTML = `<option value="">${window.siyuan.languages.default}</option>`;
             fetchPost("/api/system/getSysFonts", {}, (response) => {
-                if (response.code === 0) {
-                    response.data.forEach((item: string) => {
-                        fontFamilyHTML += `<option value="${item}"${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
-                    });
-                    fontFamilyElement.innerHTML = fontFamilyHTML;
-                }
+                response.data.forEach((item: string) => {
+                    fontFamilyHTML += `<option value="${item}"${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
+                });
+                fontFamilyElement.innerHTML = fontFamilyHTML;
             });
         }
         editor.element.querySelector("#clearHistory").addEventListener("click", () => {
@@ -337,7 +335,7 @@ export const editor = {
 
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
-                markdown:  {
+                markdown: {
                     inlineSup: (editor.element.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
                     inlineSub: (editor.element.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
                     inlineTag: (editor.element.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,

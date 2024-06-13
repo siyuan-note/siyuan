@@ -102,7 +102,7 @@ func LoadAssetsTexts() {
 }
 
 func SaveAssetsTexts() {
-	if !assetsTextsChanged.Load() || !TesseractEnabled {
+	if !assetsTextsChanged.Load() {
 		return
 	}
 

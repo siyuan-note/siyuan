@@ -22,7 +22,10 @@
     }
   }
 
-  p,
+  // 需显示 p 的使用范围 https://github.com/siyuan-note/siyuan/issues/11670
+  li > p,
+  & > p,
+  blockquote > p,
   [data-node-id] {
     line-height: 1.625;
     padding: 4px;

@@ -942,6 +942,10 @@ export class Files extends Model {
         const arrowElement = liElement.querySelector(".b3-list-item__arrow");
         arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
+        const emojiElement = liElement.querySelector(".b3-list-item__icon");
+        if (emojiElement.textContent === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+            emojiElement.textContent = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+        }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }

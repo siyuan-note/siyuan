@@ -198,7 +198,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			var linkDestStr, ocrText string
 			if nil != linkDest {
 				linkDestStr = linkDest.TokensStr()
-				ocrText = util.GetAssetText(linkDestStr, false)
+				ocrText = util.OcrAsset(linkDestStr, false)
 			}
 
 			linkText := n.ChildByType(ast.NodeLinkText)

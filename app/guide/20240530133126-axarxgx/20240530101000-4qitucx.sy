@@ -9,7 +9,7 @@
 		"title": "スタートガイド",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240612234804"
 	},
 	"Children": [
 		{
@@ -1091,7 +1091,7 @@
 			"Properties": {
 				"ID": "20240530101000-dinz66n",
 				"id": "20240530101000-tginj70",
-				"updated": "20240530101000"
+				"updated": "20240612234804"
 			},
 			"Children": [
 				{
@@ -1107,7 +1107,7 @@
 					"Properties": {
 						"ID": "20240530101000-6qqhzzi",
 						"id": "20240530101000-78evcnd",
-						"updated": "20240530101000"
+						"updated": "20240612234804"
 					},
 					"Children": [
 						{
@@ -1125,7 +1125,7 @@
 								"ID": "20240530101000-efbt28z",
 								"id": "20240530101000-ngnmzke",
 								"style": "background-color: var(--b3-font-background5);",
-								"updated": "20240530101000"
+								"updated": "20240612234804"
 							},
 							"Children": [
 								{
@@ -1140,7 +1140,7 @@
 							"Properties": {
 								"ID": "20240530101000-lw5b253",
 								"id": "20240530101000-p1imbqk",
-								"updated": "20240530101000"
+								"updated": "20240612234804"
 							},
 							"Children": [
 								{
@@ -1393,7 +1393,7 @@
 									"Properties": {
 										"ID": "20240530101000-f3fw9pe",
 										"id": "20240530101000-h5kqbyj",
-										"updated": "20240530101000"
+										"updated": "20240612234804"
 									},
 									"Children": [
 										{
@@ -1587,7 +1587,6 @@
 											"ID": "20240530101000-jyl2mgp",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-t5gyh59",
 												"id": "20240530101000-jyl2mgp",
 												"updated": "20240530101000"
 											},
@@ -1598,6 +1597,23 @@
 													"TextMarkBlockRefID": "20240530101000-4cqkoel",
 													"TextMarkBlockRefSubtype": "d",
 													"TextMarkTextContent": "ドキュメントの公開"
+												}
+											]
+										},
+										{
+											"ID": "20240612234804-ocwljxv",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240612234804-ocwljxv",
+												"updated": "20240612234804"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240610233601-ylh1mvk",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "サービスを公開"
 												}
 											]
 										},

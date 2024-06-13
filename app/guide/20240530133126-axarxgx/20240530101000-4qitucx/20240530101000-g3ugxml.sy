@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240612234753"
 	},
 	"Children": [
 		{
@@ -422,6 +422,23 @@
 					"TextMarkBlockRefID": "20240530101000-4cqkoel",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "ドキュメントの公開"
+				}
+			]
+		},
+		{
+			"ID": "20240612234752-ut9yarx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240612234752-ut9yarx",
+				"updated": "20240612234753"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240610233601-ylh1mvk",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "サービスを公開"
 				}
 			]
 		}

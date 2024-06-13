@@ -267,6 +267,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/renameAsset", model.CheckAuth, model.CheckReadonly, renameAsset)
 	ginServer.Handle("POST", "/api/asset/getImageOCRText", model.CheckAuth, model.CheckReadonly, getImageOCRText)
 	ginServer.Handle("POST", "/api/asset/setImageOCRText", model.CheckAuth, model.CheckReadonly, setImageOCRText)
+	ginServer.Handle("POST", "/api/asset/ocr", model.CheckAuth, model.CheckReadonly, ocr)
 	ginServer.Handle("POST", "/api/asset/fullReindexAssetContent", model.CheckAuth, model.CheckReadonly, fullReindexAssetContent)
 	ginServer.Handle("POST", "/api/asset/statAsset", model.CheckAuth, statAsset)
 

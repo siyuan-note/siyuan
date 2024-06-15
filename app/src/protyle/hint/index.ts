@@ -321,6 +321,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
             beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
             rootID: source === "av" ? "" : protyle.block.rootID,
+            isDatabase: source === "av",
         }, (response) => {
             let searchHTML = "";
             if (response.data.newDoc) {

@@ -105,7 +105,7 @@ export class Wnd {
         this.headersElement.parentElement.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
-                if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
+                if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new" && !window.siyuan.config.readonly) {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
                     newFile({
                         app,

@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20240610233601-ylh1mvk",
-		"title": "サービスの公開",
+		"title": "サービスを公開",
 		"type": "doc",
-		"updated": "20240610235250"
+		"updated": "20240613000000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240610233629-jjii9tu",
-				"updated": "20240610235250"
+				"updated": "20240613000000"
 			},
 			"Children": [
 				{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240610233629-bxuf2mx",
-				"updated": "20240610235250"
+				"updated": "20240613000000"
 			},
 			"Children": [
 				{
@@ -77,7 +77,7 @@
 			},
 			"Properties": {
 				"id": "20240610233629-7d7e66r",
-				"updated": "20240610235250"
+				"updated": "20240613000000"
 			},
 			"Children": [
 				{
@@ -509,7 +509,7 @@
 					},
 					"Properties": {
 						"id": "20240610233629-a4d5gct",
-						"updated": "20240610234926"
+						"updated": "20240613000000"
 					},
 					"Children": [
 						{
@@ -517,7 +517,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240610233629-cqspvm0",
-								"updated": "20240610234926"
+								"updated": "20240613000000"
 							},
 							"Children": [
 								{
@@ -527,7 +527,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "サービスを公開する"
+									"TextMarkTextContent": "サービスを公開"
 								},
 								{
 									"Type": "NodeText",

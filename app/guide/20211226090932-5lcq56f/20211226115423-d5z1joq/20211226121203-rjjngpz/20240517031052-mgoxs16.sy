@@ -6,7 +6,7 @@
 		"id": "20240517031052-mgoxs16",
 		"title": "發布服務",
 		"type": "doc",
-		"updated": "20240517031115"
+		"updated": "20240612234858"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240517031115-pjkrctx",
-				"updated": "20240517031115"
+				"updated": "20240612234858"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240517031116-ml8jd6n",
-				"updated": "20240517031116"
+				"updated": "20240612234858"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240517031116-5u42tlr",
-				"updated": "20240517031116"
+				"updated": "20240612234858"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20240517031116-06mevu7",
-						"updated": "20240517031116"
+						"updated": "20240612234858"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240517031116-wqo2aje",
-								"updated": "20240517031116"
+								"updated": "20240612234858"
 							},
 							"Children": [
 								{
@@ -89,7 +89,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
+									"TextMarkTextContent": "設置"
 								},
 								{
 									"Type": "NodeText",

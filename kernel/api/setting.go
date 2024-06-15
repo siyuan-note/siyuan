@@ -590,6 +590,10 @@ func getCloudUser(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	if !model.IsAdminRoleContext(c) {
+		return
+	}
+
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
 		return

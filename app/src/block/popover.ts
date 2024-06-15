@@ -70,7 +70,12 @@ export const initBlockPopover = (app: App) => {
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
-                showTooltip(decodeURIComponent(tip), aElement);
+                try {
+                    showTooltip(decodeURIComponent(tip), aElement);
+                } catch (e) {
+                    // https://ld246.com/article/1718235737991
+                    showTooltip(tip, aElement);
+                }
                 event.stopPropagation();
             } else {
                 hideTooltip();

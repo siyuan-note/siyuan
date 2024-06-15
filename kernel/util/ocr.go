@@ -102,7 +102,7 @@ func LoadAssetsTexts() {
 }
 
 func SaveAssetsTexts() {
-	if !assetsTextsChanged.Load() || !TesseractEnabled {
+	if !assetsTextsChanged.Load() {
 		return
 	}
 
@@ -149,7 +149,7 @@ func ExistsAssetText(asset string) (ret bool) {
 	return
 }
 
-func GetAssetText(asset string, force bool) (ret string) {
+func OcrAsset(asset string, force bool) (ret string) {
 	if !force {
 		assetsTextsLock.Lock()
 		ret = assetsTexts[asset]
@@ -167,6 +167,12 @@ func GetAssetText(asset string, force bool) (ret string) {
 	if "" != ret {
 		assetsTextsChanged.Store(true)
 	}
+	return
+}
+
+// https://github.com/siyuan-note/siyuan/pull/11708
+func GetAssetText(asset string) (ret string) {
+	ret = assetsTexts[asset]
 	return
 }
 

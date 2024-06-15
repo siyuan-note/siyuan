@@ -1,11 +1,7 @@
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
-import {
-    focusBlock,
-    getSelectionOffset,
-    setFirstNodeRange,
-} from "../util/selection";
+import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
@@ -95,21 +91,23 @@ export const upSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        if (isMac()  // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
-            && getSelectionOffset(options.nodeElement, options.editorElement, options.range).start !== 0) {
-            const editElement = getContenteditableElement(options.nodeElement);
-            if (editElement.tagName === "TABLE") {
-                const cellElement = hasClosestByMatchTag(options.range.startContainer, "TH") || hasClosestByMatchTag(options.range.startContainer, "TD") || editElement.querySelector("th, td");
-                if (getSelectionOffset(cellElement, cellElement, options.range).start !== 0) {
-                    setFirstNodeRange(cellElement, options.range);
-                    options.event.stopPropagation();
+        const tdElement = hasClosestByMatchTag(options.range.startContainer, "TD") || hasClosestByMatchTag(options.range.startContainer, "TH");
+        const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
+        const startIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).start
+        const innerText = nodeEditableElement.innerText;
+        const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, options.event)
+        if (!isMac() && isExpandUp) {
+            // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
+        } else if (startIndex > 0) {
+            // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
+            if (innerText.substr(0, startIndex).indexOf("\n") === -1) {
+                setFirstNodeRange(nodeEditableElement, options.range);
+                if(!isMac()) {
+                    // windows 中 shift 向上选中三行后，最后的光标会乱跳
                     options.event.preventDefault();
-                    return;
                 }
-            } else {
-                // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
-                return;
             }
+            return;
         }
     }
     options.range.collapse(true);
@@ -141,9 +139,23 @@ export const downSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        if (isMac() // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
-            && getSelectionOffset(options.nodeElement, options.editorElement, options.range).end < getContenteditableElement(options.nodeElement).textContent.length) {
+        const tdElement = hasClosestByMatchTag(options.range.startContainer, "TD") || hasClosestByMatchTag(options.range.startContainer, "TH");
+        const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
+        const endIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).end
+        const innerText = nodeEditableElement.innerText;
+        const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown.custom, options.event)
+        if (!isMac() && isExpandDown) {
+            // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
+        } else if (endIndex < innerText.length) {
             // 选中下一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
+            if (!options.nodeElement.nextElementSibling && innerText.trimRight().substr(endIndex).indexOf("\n") === -1) {
+                // 当为最后一个块时应选中末尾
+                setLastNodeRange(nodeEditableElement, options.range, false);
+                if (options.nodeElement.classList.contains("code-block") && isExpandDown) {
+                    // 代码块中 shift+alt 向下选中到末尾时，最后一个字符无法选中
+                    options.event.preventDefault();
+                }
+            }
             return;
         }
     }

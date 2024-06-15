@@ -402,6 +402,7 @@
     display: flex;
     border-radius: var(--b3-border-radius);
     margin: 7px;
+    cursor: pointer;
 
     &--pin {
       opacity: 0;

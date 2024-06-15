@@ -966,7 +966,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	if nil == ret {
 		return
 	}
-	genTreeID(ret)
+	normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return

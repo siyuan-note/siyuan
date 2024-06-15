@@ -6,6 +6,7 @@ import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
+import {hasPreviousSibling} from "../wysiwyg/getBlock";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -463,14 +464,14 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         const startContainer = range.startContainer as HTMLElement;
         let previousBrElement;
         if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
-            previousBrElement = (startContainer.childNodes[Math.max(0, range.startOffset - 1)] as HTMLElement)?.previousElementSibling;
+            previousBrElement = (startContainer.childNodes[Math.min(range.startOffset, startContainer.childNodes.length - 1)] as HTMLElement);
         } else if (startContainer.parentElement.tagName === "SPAN") {
             previousBrElement = startContainer.parentElement.previousElementSibling;
         } else {
             previousBrElement = startContainer.previousElementSibling;
         }
         while (previousBrElement) {
-            if (previousBrElement.tagName === "BR") {
+            if (previousBrElement.tagName === "BR" && hasPreviousSibling(previousBrElement)) {
                 return false;
             }
             previousBrElement = previousBrElement.previousElementSibling;

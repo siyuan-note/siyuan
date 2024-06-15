@@ -47,7 +47,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkProxy)
 	ginServer.Handle("POST", "/api/system/setWorkspaceDir", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setWorkspaceDir)
-	ginServer.Handle("POST", "/api/system/getWorkspaces", model.CheckAuth, model.CheckAdminRole, getWorkspaces)
+	ginServer.Handle("POST", "/api/system/getWorkspaces", model.CheckAuth, getWorkspaces)
 	ginServer.Handle("POST", "/api/system/getMobileWorkspaces", model.CheckAuth, model.CheckAdminRole, getMobileWorkspaces)
 	ginServer.Handle("POST", "/api/system/checkWorkspaceDir", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, checkWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/createWorkspaceDir", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createWorkspaceDir)

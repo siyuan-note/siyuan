@@ -45,7 +45,7 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
 
 export const getDocByScroll = (options: {
     protyle: IProtyle,
-    scrollAttr: IScrollAttr,
+    scrollAttr?: IScrollAttr,
     mergedOptions?: IOptions,
     cb?: () => void
     focus?: boolean,
@@ -61,7 +61,7 @@ export const getDocByScroll = (options: {
             actions = [Constants.CB_GET_UNUNDO];
         }
     }
-    if (options.scrollAttr.zoomInId) {
+    if (options.scrollAttr?.zoomInId) {
         fetchPost("/api/filetree/getDoc", {
             id: options.scrollAttr.zoomInId,
             size: Constants.SIZE_GET_MAX,
@@ -100,9 +100,9 @@ export const getDocByScroll = (options: {
         return;
     }
     fetchPost("/api/filetree/getDoc", {
-        id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
-        startID: options.scrollAttr.startId,
-        endID: options.scrollAttr.endId,
+        id: options.scrollAttr?.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr?.startId,
+        startID: options.scrollAttr?.startId,
+        endID: options.scrollAttr?.endId,
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,

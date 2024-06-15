@@ -519,6 +519,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/11726
+        if ((event.key === "Home" || event.key === "End") && !event.shiftKey && !event.altKey && isNotCtrl(event)) {
+            hideElements(["hint"], protyle);
+        }
         // 向上/下滚动一屏
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
             if (event.key === "PageUp") {

@@ -357,6 +357,7 @@ export const openMenuPanel = (options: {
                     avID,
                     data: oldData,
                 }]);
+                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
                 if (options.cellElements) {
                     menuElement.innerHTML = getSelectHTML(data.view, options.cellElements);
                     bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
@@ -369,6 +370,7 @@ export const openMenuPanel = (options: {
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
                 }
+                menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
                 return;
             }
             if (targetElement.getAttribute("data-type") === "setRelationCell") {

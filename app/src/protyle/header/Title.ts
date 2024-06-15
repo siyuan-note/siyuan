@@ -103,13 +103,17 @@ export class Title {
                 return;
             }
             if (event.key === "ArrowDown") {
-                const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
-                // https://github.com/siyuan-note/siyuan/issues/4923
-                if (noContainerElement) {
-                    focusBlock(noContainerElement, protyle.wysiwyg.element);
+                const rects = getSelection().getRangeAt(0).getClientRects()
+                // https://github.com/siyuan-note/siyuan/issues/11729
+                if (this.editElement.getBoundingClientRect().bottom - rects[rects.length - 1].bottom < 25) {
+                    const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
+                    // https://github.com/siyuan-note/siyuan/issues/4923
+                    if (noContainerElement) {
+                        focusBlock(noContainerElement, protyle.wysiwyg.element);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
-                event.preventDefault();
-                event.stopPropagation();
             } else if (event.key === "Enter") {
                 const newId = Lute.NewNodeID();
                 const newElement = genEmptyElement(false, true, newId);

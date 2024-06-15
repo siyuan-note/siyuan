@@ -1932,62 +1932,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
-	var unlinks []*ast.Node
 
 	// 解析查询嵌入节点
-	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockQueryEmbed != n.Type {
-			return ast.WalkContinue
-		}
-
-		var defMd string
-		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
-		stmt = html.UnescapeString(stmt)
-		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-		embedBlocks := searchEmbedBlock(n.ID, stmt, nil, 0, false)
-		if 1 > len(embedBlocks) {
-			return ast.WalkContinue
-		}
-
-		defMdBuf := bytes.Buffer{}
-		for _, def := range embedBlocks {
-			defMdBuf.WriteString(renderBlockMarkdownR(def.Block.ID))
-			defMdBuf.WriteString("\n\n")
-		}
-		defMd = defMdBuf.String()
-
-		buf := &bytes.Buffer{}
-		lines := strings.Split(defMd, "\n")
-		for i, line := range lines {
-			if 0 == blockEmbedMode { // 原始文本
-				buf.WriteString(line)
-			} else { // Blockquote
-				buf.WriteString("> " + line)
-			}
-			if i < len(lines)-1 {
-				buf.WriteString("\n")
-			}
-		}
-		buf.WriteString("\n\n")
-
-		refTree := parse.Parse("", buf.Bytes(), luteEngine.ParseOptions)
-		var children []*ast.Node
-		for c := refTree.Root.FirstChild; nil != c; c = c.Next {
-			children = append(children, c)
-		}
-		for _, c := range children {
-			if ast.NodeDocument == c.Type {
-				continue
-			}
-			n.InsertBefore(c)
-		}
-		unlinks = append(unlinks, n)
-		return ast.WalkSkipChildren
-	})
-	for _, n := range unlinks {
-		n.Unlink()
-	}
-	unlinks = nil
+	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{})
 
 	// 收集引用转脚注
 	var refFootnotes []*refAsFootnotes
@@ -1998,6 +1945,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 		collectFootnotesDefs(ret.ID, &refFootnotes, &treeCache, &depth)
 	}
 
+	var unlinks []*ast.Node
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -2393,7 +2341,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 					stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 					sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 					for _, b := range sqlBlocks {
-						subNodes := renderBlockMarkdownR0(b.ID, &rendered)
+						subNodes := renderBlockMarkdownR(b.ID, &rendered)
 						for _, subNode := range subNodes {
 							if ast.NodeListItem == subNode.Type {
 								parentList := &ast.Node{Type: ast.NodeList, ListData: &ast.ListData{Typ: subNode.ListData.Typ}}

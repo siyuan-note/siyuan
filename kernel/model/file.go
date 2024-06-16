@@ -1640,13 +1640,19 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
-	// 刷新文档关联的数据库 https://github.com/siyuan-note/siyuan/issues/11731
 	allRemoveRootIDs := []string{tree.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	for _, rootID := range allRemoveRootIDs {
-		if removeTree, _ := LoadTreeByBlockID(rootID); nil != removeTree {
-			syncDelete2AttributeView(removeTree.Root)
+		removeTree, _ := LoadTreeByBlockID(rootID)
+		if nil == removeTree {
+			continue
 		}
+
+		// 刷新文档关联的数据库 https://github.com/siyuan-note/siyuan/issues/11731
+		syncDelete2AttributeView(removeTree.Root)
+
+		// 解绑数据库关联
+		removeAvBlockRel(removeTree.Root)
 	}
 
 	if existChildren {

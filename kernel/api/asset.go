@@ -137,13 +137,11 @@ func ocr(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	force := false
-	if forceArg := arg["force"]; nil != forceArg {
-		force = forceArg.(bool)
-	}
 
+	ocrJSON := util.OcrAsset(path)
 	ret.Data = map[string]interface{}{
-		"text": util.OcrAsset(path, force),
+		"text":    util.GetOcrJsonText(ocrJSON),
+		"ocrJSON": ocrJSON,
 	}
 }
 

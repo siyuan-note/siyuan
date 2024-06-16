@@ -252,7 +252,7 @@ func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
 		if text, ok := dataMap["text"]; ok {
 			// 确保 text 是字符串类型
 			if textStr, ok := text.(string); ok {
-				ret += textStr
+				ret += " " + textStr
 			}
 		}
 	}

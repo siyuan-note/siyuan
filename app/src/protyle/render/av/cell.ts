@@ -15,6 +15,7 @@ import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAttr} from "../../../util/escape";
+import {electronUndo} from "../../undo";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -433,6 +434,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
+                return;
+            }
+            if (electronUndo(event)) {
                 return;
             }
             if (event.key === "Escape" || event.key === "Tab" ||

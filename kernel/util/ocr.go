@@ -246,17 +246,19 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 }
 
 // 提取并连接所有 text 字段的函数
-func GetOcrJsonText(jsonData []map[string]interface{}) (textString string) {
+func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
 	for _, dataMap := range jsonData {
 		// 检查 text 字段是否存在
 		if text, ok := dataMap["text"]; ok {
 			// 确保 text 是字符串类型
 			if textStr, ok := text.(string); ok {
-				textString += textStr
+				ret += textStr
 			}
 		}
 	}
-	return textString
+	ret = gulu.Str.RemoveInvisible(ret)
+	ret = RemoveRedundantSpace(ret)
+	return ret
 }
 
 var tesseractInited = atomic.Bool{}

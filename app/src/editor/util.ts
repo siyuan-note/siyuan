@@ -187,18 +187,20 @@ export const openFile = async (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    let hasMatch = false;
-    const optionsClone = Object.assign({}, options);
-    delete optionsClone.app;    // 防止 JSON.stringify 时产生递归
-    hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-        cmd: Constants.SIYUAN_OPEN_FILE,
-        options: JSON.stringify(optionsClone),
-    });
-    if (hasMatch) {
-        if (options.afterOpen) {
-            options.afterOpen();
+    if (!options.position) {
+        let hasMatch = false;
+        const optionsClone = Object.assign({}, options);
+        delete optionsClone.app;    // 防止 JSON.stringify 时产生递归
+        hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: Constants.SIYUAN_OPEN_FILE,
+            options: JSON.stringify(optionsClone),
+        });
+        if (hasMatch) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
+            return;
         }
-        return;
     }
     /// #endif
 

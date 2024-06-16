@@ -43,6 +43,8 @@ export const initBlockPopover = (app: App) => {
                         aElement.style.overflow = "";
                     }
                 }
+            } else if (aElement.classList.contains("av__celltext--url")) {
+                tip = `<span style="word-break: break-all">${tip}</span><br>${aElement.getAttribute("data-name")}`;
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";

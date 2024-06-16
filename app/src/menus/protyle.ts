@@ -1019,7 +1019,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     fetchPost("/api/asset/getImageOCRText", {
                         path: imgElement.getAttribute("src")
                     }, (response) => {
-                        element.querySelector("textarea").value = response.data.text;
+                        const textarea =element.querySelector("textarea")
+                        textarea.value = response.data.text;
+                        textarea.dataset.ocrText = response.data.text;
                     });
                 }
             }, {
@@ -1031,11 +1033,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     fetchPost("/api/asset/ocr", {
                         path: imgElement.getAttribute("src"),
                         force: true
-                    }, (response) => {
-                        fetchPost("/api/asset/setImageOCRText", {
-                            path: imgElement.getAttribute("src"),
-                            text: response.data.text
-                        });
                     });
                 }
             }],
@@ -1119,6 +1116,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
         textElements[0].focus();
         window.siyuan.menus.menu.removeCB = () => {
+            const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
+            if (ocrElement && ocrElement.dataset.ocrText !== ocrElement.value) {
+                fetchPost("/api/asset/setImageOCRText", {
+                    path: imgElement.getAttribute("src"),
+                    text: ocrElement.value
+                });
+            }
             imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, html);

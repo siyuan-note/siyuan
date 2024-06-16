@@ -33,7 +33,7 @@ func autoOCRAssets() {
 	assets := getUnOCRAssetsAbsPaths()
 	if 0 < len(assets) {
 		for i, assetAbsPath := range assets {
-			text := util.Tesseract(assetAbsPath)
+			text := util.GetOcrJsonText(util.Tesseract(assetAbsPath))
 			p := strings.TrimPrefix(assetAbsPath, assetsPath)
 			p = "assets" + filepath.ToSlash(p)
 			util.SetAssetText(p, text)

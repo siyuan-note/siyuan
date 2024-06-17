@@ -20,6 +20,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
+            hasClosestByClassName(event.target, "av__calc--ashow") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
@@ -45,6 +46,8 @@ export const initBlockPopover = (app: App) => {
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
                 tip = `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><br>${aElement.getAttribute("data-name")}`;
+            } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
+                tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";

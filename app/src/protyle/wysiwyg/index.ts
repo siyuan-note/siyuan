@@ -426,12 +426,7 @@ export class WYSIWYG {
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25);
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        const cellElement = item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement;
-                        if (cellElement.previousElementSibling) {
-                            cellElement.style.width = newWidth + "px";
-                        } else {
-                            cellElement.style.width = newWidth + 24 + "px";
-                        }
+                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth + "px";
                     });
                     stickyRow(nodeElement, contentRect, "bottom");
                 };

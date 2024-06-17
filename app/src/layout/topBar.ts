@@ -309,8 +309,8 @@ const openPlugin = (app: App, target: Element) => {
                 openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
             }
         });
+        menu.addSeparator();
     }
-    menu.addSeparator();
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
         // @ts-ignore

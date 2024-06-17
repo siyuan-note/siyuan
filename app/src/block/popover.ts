@@ -44,7 +44,7 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
-                tip = `<span style="word-break: break-all">${tip}</span><br>${aElement.getAttribute("data-name")}`;
+                tip = `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><br>${aElement.getAttribute("data-name")}`;
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";

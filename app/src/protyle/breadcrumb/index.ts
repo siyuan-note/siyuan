@@ -568,7 +568,9 @@ ${padHTML}
         /// #if !MOBILE
         let range: Range;
         let blockElement: Element;
-        if (nodeElement) {
+        if (nodeElement &&
+            !nodeElement.classList.contains("list")   // 列表 id 不会返回数据，因此不进行处理 https://github.com/siyuan-note/siyuan/issues/11685
+        ) {
             blockElement = nodeElement;
         } else if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);

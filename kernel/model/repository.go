@@ -634,6 +634,8 @@ func checkoutRepo(id string) {
 	WaitForWritingFiles()
 	CloseWatchAssets()
 	defer WatchAssets()
+	CloseWatchEmojis()
+	defer WatchEmojis()
 
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled

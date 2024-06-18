@@ -73,7 +73,6 @@ func watchEmojis() {
 				}
 				logging.LogErrorf("watch emojis failed: %s", err)
 			case <-timer.C:
-				//logging.LogInfof("emojis changed: %s", lastEvent)
 				util.PushReloadEmojiConf()
 			}
 		}

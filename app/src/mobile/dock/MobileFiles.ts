@@ -304,8 +304,8 @@ export class MobileFiles extends Model {
         });
         this.element.innerHTML = html;
         this.closeElement.lastElementChild.innerHTML = closeHtml;
-        const counterElement = this.closeElement.querySelector(".counter")
-        counterElement.textContent = closeCounter.toString()
+        const counterElement = this.closeElement.querySelector(".counter");
+        counterElement.textContent = closeCounter.toString();
         if (closeCounter) {
             counterElement.classList.remove("fn__none");
         } else {
@@ -419,7 +419,7 @@ export class MobileFiles extends Model {
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
                         const counterElement = this.closeElement.querySelector(".counter");
                         counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
-                        counterElement.classList.remove("fn__none")
+                        counterElement.classList.remove("fn__none");
                     }
                 }
             });
@@ -474,10 +474,10 @@ export class MobileFiles extends Model {
         const liElement = this.closeElement.querySelector(`li[data-url="${data.data.box.id}"]`) as HTMLElement;
         if (liElement) {
             liElement.remove();
-            const counterElement = this.closeElement.querySelector(".counter")
-            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString()
+            const counterElement = this.closeElement.querySelector(".counter");
+            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
             if (counterElement.textContent === "0") {
-                counterElement.classList.add("fn__none")
+                counterElement.classList.add("fn__none");
             }
         }
         setNoteBook((notebooks: INotebook[]) => {

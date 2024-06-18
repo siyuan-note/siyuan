@@ -1019,7 +1019,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     fetchPost("/api/asset/getImageOCRText", {
                         path: imgElement.getAttribute("src")
                     }, (response) => {
-                        const textarea =element.querySelector("textarea")
+                        const textarea =element.querySelector("textarea");
                         textarea.value = response.data.text;
                         textarea.dataset.ocrText = response.data.text;
                     });

@@ -90,7 +90,7 @@ export class Gutter {
                     selectElements.push(item);
                 });
             } else {
-                protyle.wysiwyg.element.querySelector(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)?.classList.add("protyle-wysiwyg--select")
+                protyle.wysiwyg.element.querySelector(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)?.classList.add("protyle-wysiwyg--select");
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 selectElements.forEach(item => {
                     selectIds.push(item.getAttribute("data-node-id"));

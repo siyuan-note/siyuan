@@ -210,4 +210,4 @@ export const publish = {
             }</ul>`;
         }
     },
-}
+};

@@ -428,7 +428,7 @@ export const keymap = {
                         keys[1] = "headings";
                     }
                     let hasConflict = false;
-                    const isAssistKey = ["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1))
+                    const isAssistKey = ["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1));
                     if (isAssistKey ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape"].includes(keymapStr) ||
                         // 跳转到下/上一个编辑页签不能包含 ctrl， 否则不能监听到 keyup

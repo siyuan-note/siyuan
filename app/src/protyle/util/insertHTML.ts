@@ -338,9 +338,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     }
     let lastElement: Element;
-    let insertBefore = false
+    let insertBefore = false;
     if (!range.toString() && insertByCursor) {
-        const positon = getSelectionOffset(blockElement, protyle.wysiwyg.element, range)
+        const positon = getSelectionOffset(blockElement, protyle.wysiwyg.element, range);
         if (positon.start === 0 && editableElement.textContent !== "") {
             insertBefore = true;
         }

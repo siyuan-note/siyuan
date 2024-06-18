@@ -93,9 +93,9 @@ export const upSelect = (options: {
     } else {
         const tdElement = hasClosestByMatchTag(options.range.startContainer, "TD") || hasClosestByMatchTag(options.range.startContainer, "TH");
         const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
-        const startIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).start
+        const startIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).start;
         const innerText = nodeEditableElement.innerText;
-        const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, options.event)
+        const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, options.event);
         if (!isMac() && isExpandUp) {
             // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (startIndex > 0) {
@@ -141,9 +141,9 @@ export const downSelect = (options: {
     } else {
         const tdElement = hasClosestByMatchTag(options.range.startContainer, "TD") || hasClosestByMatchTag(options.range.startContainer, "TH");
         const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
-        const endIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).end
+        const endIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).end;
         const innerText = nodeEditableElement.innerText;
-        const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown.custom, options.event)
+        const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown.custom, options.event);
         if (!isMac() && isExpandDown) {
             // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (endIndex < innerText.length) {

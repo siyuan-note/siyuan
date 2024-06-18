@@ -52,15 +52,7 @@ func watchEmojis() {
 				}
 
 				//logging.LogInfof("emojis changed: %s", event)
-				if watcher.Write == event.Op {
-					IncSync()
-				}
-
-				if watcher.Remove == event.Op {
-					util.PushReloadEmojiConf()
-				} else {
-					util.PushReloadEmojiConf()
-				}
+				util.PushReloadEmojiConf()
 			case err, ok := <-emojisWatcher.Error:
 				if !ok {
 					return

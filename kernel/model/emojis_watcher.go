@@ -56,28 +56,17 @@ func watchEmojis() {
 	go func() {
 		defer logging.Recover()
 
-		var (
-			timer     *time.Timer
-			lastEvent fsnotify.Event
-		)
-		timer = time.NewTimer(100 * time.Millisecond)
+		timer := time.NewTimer(100 * time.Millisecond)
 		<-timer.C // timer should be expired at first
 
 		for {
 			select {
-			case event, ok := <-emojisWatcher.Events:
+			case _, ok := <-emojisWatcher.Events:
 				if !ok {
 					return
 				}
 
-				lastEvent = event
 				timer.Reset(time.Millisecond * 100)
-
-				if lastEvent.Op&fsnotify.Rename == fsnotify.Rename || lastEvent.Op&fsnotify.Write == fsnotify.Write {
-					util.PushReloadEmojiConf()
-				} else if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					util.PushReloadEmojiConf()
-				}
 			case err, ok := <-emojisWatcher.Errors:
 				if !ok {
 					return
@@ -85,11 +74,7 @@ func watchEmojis() {
 				logging.LogErrorf("watch emojis failed: %s", err)
 			case <-timer.C:
 				//logging.LogInfof("emojis changed: %s", lastEvent)
-				if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					util.PushReloadEmojiConf()
-				} else {
-					util.PushReloadEmojiConf()
-				}
+				util.PushReloadEmojiConf()
 			}
 		}
 	}()

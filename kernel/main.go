@@ -53,5 +53,6 @@ func main() {
 	go util.CheckFileSysStatus()
 
 	model.WatchAssets()
+	model.WatchEmojis()
 	model.HandleSignal()
 }

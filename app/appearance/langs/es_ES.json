@@ -703,7 +703,7 @@
   "closeNotebook": "Cuadernos de notas cerrados",
   "widget": "Widget",
   "customEmoji": "Añadir un emoji personalizado",
-  "customEmojiTip": "Abrir <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">carpeta de emojis</a>, poner la imagen y hacer clic en el botón de actualización",
+  "customEmojiTip": "Coloca las imágenes en la carpeta de emojis y usa carpetas para clasificarlas",
   "recentEmoji": "Emoticonos comunes",
   "changeIcon": "Cambiar el icono",
   "addIcon": "Agregar icono",

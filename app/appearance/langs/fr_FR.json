@@ -703,7 +703,7 @@
   "closeNotebook": "Carnets fermés",
   "widget": "Widget",
   "customEmoji": "Ajouter un emoji personnalisé",
-  "customEmojiTip": "Ouvrir <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji folder</a>, insérez l'image et cliquez sur le bouton d'actualisation",
+  "customEmojiTip": "Mettez les images dans le dossier emojis et utilisez des dossiers pour les classer",
   "recentEmoji": "Emoticônes courantes",
   "changeIcon": "Changer l'icône",
   "addIcon": "Ajouter une icône",

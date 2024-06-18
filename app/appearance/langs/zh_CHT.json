@@ -703,7 +703,7 @@
   "closeNotebook": "已關閉的筆記本",
   "widget": "小工具",
   "customEmoji": "新增自訂表情",
-  "customEmojiTip": "打開 <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji 資料夾</a> 放入圖片後並點擊重新整理按鈕",
+  "customEmojiTip": "將圖片放入 emojis 資料夾中，可使用資料夾進行分類",
   "recentEmoji": "常用表情",
   "changeIcon": "修改圖示",
   "addIcon": "新增圖示",

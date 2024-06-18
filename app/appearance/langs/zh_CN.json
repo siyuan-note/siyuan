@@ -703,7 +703,7 @@
   "closeNotebook": "已关闭的笔记本",
   "widget": "挂件",
   "customEmoji": "添加自定义表情",
-  "customEmojiTip": "打开 <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji 文件夹</a> 放入图片后并点击刷新按钮",
+  "customEmojiTip": "将图片放入 emojis 文件夹中，可使用文件夹进行分类",
   "recentEmoji": "常用表情",
   "changeIcon": "修改图标",
   "addIcon": "添加图标",

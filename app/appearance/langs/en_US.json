@@ -703,7 +703,7 @@
   "closeNotebook": "Closed notebooks",
   "widget": "Widget",
   "customEmoji": "Add custom emoji",
-  "customEmojiTip": "Open <a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">Emoji folder</a>, put the picture in and click the refresh button",
+  "customEmojiTip": "Put the images into the emojis folder, and use folders to classify them",
   "recentEmoji": "Common Emoticons",
   "changeIcon": "Change icon",
   "addIcon": "Add icon",

@@ -703,7 +703,7 @@
   "closeNotebook": "閉じたノートブック",
   "widget": "ウィジェット",
   "customEmoji": "絵文字を追加",
-  "customEmojiTip": "<a href=\"javascript:void(0)\" id=\"appearanceOpenEmoji\">絵文字フォルダ</a>に画像を入れて更新ボタンをクリックしてください",
+  "customEmojiTip": "画像を絵文字フォルダに入れて、フォルダを使用して分類します",
   "recentEmoji": "よく使う絵文字",
   "changeIcon": "アイコンを変更",
   "addIcon": "アイコンを追加",

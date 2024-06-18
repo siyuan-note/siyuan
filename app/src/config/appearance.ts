@@ -103,9 +103,9 @@ export const appearance = {
         <div class="b3-label__text">${window.siyuan.languages.customEmojiTip}</div>
     </div>
     <span class="fn__space"></span>
-    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceRefresh">
-        <svg><use xlink:href="#iconRefresh"></use></svg>
-        ${window.siyuan.languages.refresh}
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceOpenEmoji">
+        <svg><use xlink:href="#iconFolder"></use></svg>
+        ${window.siyuan.languages.showInFolder}
     </button>
 </div>
 <div class="b3-label fn__flex config__item">
@@ -226,14 +226,6 @@ export const appearance = {
         });
         appearance.element.querySelector("#appearanceOpenEmoji").addEventListener("click", () => {
             shell.openPath(path.join(window.siyuan.config.system.dataDir, "emojis"));
-        });
-        appearance.element.querySelector("#appearanceRefresh").addEventListener("click", () => {
-            exportLayout({
-                cb() {
-                    window.location.reload();
-                },
-                errorExit: false,
-            });
         });
         /// #endif
         appearance.element.querySelectorAll("select").forEach(item => {

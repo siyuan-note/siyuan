@@ -46,7 +46,7 @@ func watchEmojis() {
 	go func() {
 		for {
 			select {
-			case event, ok := <-emojisWatcher.Event:
+			case _, ok := <-emojisWatcher.Event:
 				if !ok {
 					return
 				}

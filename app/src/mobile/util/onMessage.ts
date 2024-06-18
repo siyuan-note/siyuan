@@ -3,12 +3,18 @@ import {processSync, progressLoading, progressStatus, reloadSync, transactionErr
 import {Constants} from "../../constants";
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
+import {fetchPost} from "../../util/fetch";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
             case "reloadPlugin":
                 reloadPlugin(app, data.data);
+                break;
+            case "reloadEmojiConf":
+                fetchPost("/api/system/getEmojiConf", {}, response => {
+                    window.siyuan.emojis = response.data as IEmoji[];
+                });
                 break;
             case "syncMergeResult":
                 reloadSync(app, data.data);

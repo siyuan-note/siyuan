@@ -10,6 +10,8 @@ import {App} from "../index";
 import {Layout} from "../layout";
 import {Wnd} from "../layout/Wnd";
 import {getAllWnds} from "../layout/getAll";
+import {Asset} from "../asset";
+import {writeText} from "../protyle/util/compatibility";
 
 const closeMenu = (tab: Tab) => {
     const unmodifiedTabs: Tab[] = [];
@@ -190,6 +192,14 @@ export const initTabMenu = (app: App, tab: Tab) => {
             icon: "iconCopy",
             type: "submenu",
             submenu: copySubMenu(rootId, false)
+        }).element);
+    } else if (model && model instanceof Asset) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy,
+            icon: "iconCopy",
+            click() {
+                writeText(`[${model.parent.title}](${model.path})`);
+            }
         }).element);
     }
     if (tab.headElement.classList.contains("item--pin")) {

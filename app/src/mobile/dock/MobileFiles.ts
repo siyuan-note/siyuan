@@ -197,7 +197,7 @@ export class MobileFiles extends Model {
                                 newFile({
                                     app,
                                     notebookId,
-                                    currentPath:pathString,
+                                    currentPath: pathString,
                                     useSavePath: false
                                 });
                             } else if (type === "more-root") {
@@ -444,7 +444,9 @@ export class MobileFiles extends Model {
                     if (parentElement) {
                         const iconElement = parentElement.querySelector("svg");
                         iconElement.classList.remove("b3-list-item__arrow--open");
-                        iconElement.parentElement.classList.add("fn__hidden");
+                        if (parentElement.dataset.type !== "navigation-root") {
+                            iconElement.parentElement.classList.add("fn__hidden");
+                        }
                         const emojiElement = iconElement.parentElement.nextElementSibling;
                         if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
                             emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);

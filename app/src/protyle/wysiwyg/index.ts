@@ -724,10 +724,6 @@ export class WYSIWYG {
                 return;
             }
 
-            // https://ld246.com/article/1681778773806
-            if (["IMG", "VIDEO", "AUDIO"].includes(target.tagName)) {
-                return;
-            }
             // 多选节点
             let x = event.clientX;
             if (event.clientX > mostRight) {
@@ -744,6 +740,7 @@ export class WYSIWYG {
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
+            const contentRect = protyle.contentElement.getBoundingClientRect();
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select
@@ -805,6 +802,14 @@ export class WYSIWYG {
                         moveCellElement = moveTarget;
                     }
                     return;
+                }
+                // 在包含 img， video， audio 的元素上划选后无法上下滚动 https://ld246.com/article/1681778773806
+                // 在包含 img， video， audio 的元素上拖拽无法划选 https://github.com/siyuan-note/siyuan/issues/11763
+                if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+                    protyle.contentElement.scroll({
+                        top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
+                        behavior: "smooth"
+                    });
                 }
                 protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar

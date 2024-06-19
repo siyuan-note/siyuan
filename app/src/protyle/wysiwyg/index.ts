@@ -408,7 +408,7 @@ export class WYSIWYG {
             const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - (parseInt(protyle.wysiwyg.element.style.paddingLeft) || 24) - (parseInt(protyle.wysiwyg.element.style.paddingRight) || 16)) - 2;
             const mostBottom = rect.bottom;
             const y = event.clientY;
-
+            const contentRect = protyle.contentElement.getBoundingClientRect();
             // av col resize
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
                 const nodeElement = hasClosestBlock(target);
@@ -422,7 +422,6 @@ export class WYSIWYG {
                 const dragColId = dragElement.getAttribute("data-col-id");
                 let newWidth: number;
                 const scrollElement = nodeElement.querySelector(".av__scroll");
-                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25);
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
@@ -550,7 +549,6 @@ export class WYSIWYG {
                 let lastCellElement: HTMLElement;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
-                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
                     if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
@@ -740,7 +738,7 @@ export class WYSIWYG {
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
-            const contentRect = protyle.contentElement.getBoundingClientRect();
+            const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img")
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select
@@ -805,11 +803,13 @@ export class WYSIWYG {
                 }
                 // 在包含 img， video， audio 的元素上划选后无法上下滚动 https://ld246.com/article/1681778773806
                 // 在包含 img， video， audio 的元素上拖拽无法划选 https://github.com/siyuan-note/siyuan/issues/11763
-                if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
-                    protyle.contentElement.scroll({
-                        top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
-                        behavior: "smooth"
-                    });
+                if (needScroll) {
+                    if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+                        protyle.contentElement.scroll({
+                            top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
+                            behavior: "smooth"
+                        });
+                    }
                 }
                 protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar

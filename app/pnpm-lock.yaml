@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.2
-        version: 2.1.2(electron@28.3.3)
+        version: 2.1.2(electron@31.0.1)
     devDependencies:
       '@types/node':
         specifier: ^18.13.0
@@ -34,8 +34,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.5
       electron:
-        specifier: 28.3.3
-        version: 28.3.3
+        specifier: 31.0.1
+        version: 31.0.1
       electron-builder:
         specifier: 24.9.1
         version: 24.9.1
@@ -371,6 +371,9 @@ packages:
 
   '@types/node@18.13.0':
     resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
+
+  '@types/node@20.14.5':
+    resolution: {integrity: sha512-aoRR+fJkZT2l0aGOJhuA8frnCSoNX6W7U2mpNq63+BxBIj5BQFt8rHy627kijCmm63ijdSdwvGgpUsU6MBsZZA==}
 
   '@types/plist@3.0.2':
     resolution: {integrity: sha512-ULqvZNGMv0zRFvqn8/4LSPtnmN4MfhlPNtJCTpKuIIxGVGZ2rYWzFXrvEBoh9CVyqSE7D6YFRJ1hydLHI6kbWw==}
@@ -922,8 +925,8 @@ packages:
   electron-to-chromium@1.4.186:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
 
-  electron@28.3.3:
-    resolution: {integrity: sha512-ObKMLSPNhomtCOBAxFS8P2DW/4umkh72ouZUlUKzXGtYuPzgr1SYhskhFWgzAsPtUzhL2CzyV2sfbHcEW4CXqw==}
+  electron@31.0.1:
+    resolution: {integrity: sha512-2eBcp4iqLkTsml6mMq+iqrS5u3kJ/2mpOLP7Mj7lo0uNK3OyfNqRS9z1ArsHjBF2/HV250Te/O9nKrwQRTX/+g==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2056,6 +2059,9 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
 
+  undici-types@5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
+
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
@@ -2243,9 +2249,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/remote@2.1.2(electron@28.3.3)':
+  '@electron/remote@2.1.2(electron@31.0.1)':
     dependencies:
-      electron: 28.3.3
+      electron: 31.0.1
 
   '@electron/universal@1.4.1':
     dependencies:
@@ -2453,6 +2459,10 @@ snapshots:
   '@types/ms@0.7.31': {}
 
   '@types/node@18.13.0': {}
+
+  '@types/node@20.14.5':
+    dependencies:
+      undici-types: 5.26.5
 
   '@types/plist@3.0.2':
     dependencies:
@@ -3132,10 +3142,10 @@ snapshots:
 
   electron-to-chromium@1.4.186: {}
 
-  electron@28.3.3:
+  electron@31.0.1:
     dependencies:
       '@electron/get': 2.0.2
-      '@types/node': 18.13.0
+      '@types/node': 20.14.5
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -4276,6 +4286,8 @@ snapshots:
   type-fest@0.20.2: {}
 
   typescript@4.7.4: {}
+
+  undici-types@5.26.5: {}
 
   universalify@0.1.2: {}
 

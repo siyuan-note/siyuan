@@ -1464,11 +1464,11 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             if (label === window.siyuan.languages.default) {
-                const isCenter = assetElement.style.display === "block";
+                const isCenter = assetElement.style.display === "block" || assetElement.style.minWidth;
                 assetElement.removeAttribute("style");
                 imgElement.removeAttribute("style");
                 if (isCenter) {
-                    assetElement.style.display = "block";
+                    assetElement.style.minWidth = "calc(100% - 0.1em)";
                 }
             } else {
                 assetElement.style.width = label;

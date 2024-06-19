@@ -1487,6 +1487,8 @@ func exportBoxSYZip(boxID string) (zipPath string) {
 }
 
 func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (zipPath string) {
+	defer util.ClearPushProgress(100)
+
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
 	if strings.HasSuffix(name, "..") {

@@ -101,11 +101,11 @@
       padding: 0 4px;
       color: var(--b3-theme-on-surface-light);
       transition: var(--b3-transition);
+      border-radius: var(--b3-border-radius);
 
       &--hl:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
-        border-radius: var(--b3-border-radius);
       }
     }
 
@@ -128,11 +128,11 @@
       height: 22px;
       padding: 0 4px;
       flex-shrink: 0;
+      border-radius: var(--b3-border-radius);
 
       &:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
-        border-radius: var(--b3-border-radius);
       }
     }
 

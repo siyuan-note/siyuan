@@ -365,6 +365,7 @@
     border: 0;
     margin: 1px;
     overflow: hidden;
+    border-radius: var(--b3-border-radius);
 
     img, svg {
       height: 24px;
@@ -375,7 +376,6 @@
     &--current,
     &:hover {
       background: var(--b3-list-hover);
-      border-radius: var(--b3-border-radius);
     }
   }
 

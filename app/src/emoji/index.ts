@@ -53,7 +53,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
             if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji.description_ja_jp : emoji.description}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;
@@ -83,28 +83,16 @@ export const lazyLoadEmojiImg = (element: Element) => {
 
 export const filterEmoji = (key = "", max?: number) => {
     let html = "";
-    const recentEmojis: {
-        unicode: string,
-        description: string,
-        description_zh_cn: string,
-        description_ja_jp: string,
-        keywords: string
-    }[] = [];
+    const recentEmojis: IEmojiItem[] = [];
     if (key) {
         html = `<div class="emojis__title">${window.siyuan.languages.emoji}</div><div class="emojis__content">`;
     }
     let maxCount = 0;
     let keyHTML = "";
-    const customStore: {
-        unicode: string,
-        description: string,
-        description_zh_cn: string,
-        description_ja_jp: string,
-        keywords: string
-    }[] = [];
+    const customStore: IEmojiItem[] = [];
     window.siyuan.emojis.forEach((category, index) => {
         if (!key) {
-            html += `<div class="emojis__title" data-type="${index + 1}">${window.siyuan.config.lang === "zh_CN" ? category.title_zh_cn : window.siyuan.config.lang === "ja_JP" ? category.title_ja_jp : category.title}</div><div style="min-height:${index === 0 ? "28px" : "336px"}" class="emojis__content"${index > 1 ? ' data-index="' + index + '"' : ""}>`;
+            html += `<div class="emojis__title" data-type="${index + 1}">${getEmojiTitle(index)}</div><div style="min-height:${index === 0 ? "28px" : "336px"}" class="emojis__content"${index > 1 ? ' data-index="' + index + '"' : ""}>`;
         }
         if (category.items.length === 0 && index === 0 && !key) {
             html += `<div style="margin-left: 4px">${window.siyuan.languages.setEmojiTip}</div>`;
@@ -113,17 +101,26 @@ export const filterEmoji = (key = "", max?: number) => {
         category.items.forEach(emoji => {
             if (key) {
                 if (window.siyuan.config.editor.emoji.includes(emoji.unicode) &&
-                    (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+                    (unicode2Emoji(emoji.unicode) === key ||
+                        emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                        emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                        emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                        emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1)
+                ) {
                     recentEmojis.push(emoji);
                 }
                 if (max && maxCount > max) {
                     return;
                 }
-                if (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1) {
+                if (unicode2Emoji(emoji.unicode) === key ||
+                    emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                    emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                    emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1 ||
+                    emoji.description_ja_jp.toLowerCase().indexOf(key.toLowerCase()) > -1) {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
-                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji.description_ja_jp : emoji.description}">
+                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     }
                     maxCount++;
@@ -133,7 +130,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     recentEmojis.push(emoji);
                 }
                 if (index < 2) {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji.description_ja_jp : emoji.description}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                 }
             }
@@ -158,7 +155,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
             }
             return 0;
         }).forEach(item => {
-            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? item.description_ja_jp : item.description}">
+            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(item)}">
 ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         });
         html = html + keyHTML + "</div>";
@@ -169,7 +166,7 @@ ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
             const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
-                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji[0].description_ja_jp : emoji[0].description}">
+                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji[0])}">
 ${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
 </button>`;
             }
@@ -200,20 +197,13 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         window.siyuan.menus.menu.removeScrollEvent();
     }
 
-  const getEmojiTitle = (emojiIndex: number) => {
-      const lang = window.siyuan.config.lang;
-      const titleKey = lang === "zh_CN" ? "title_zh_cn" : lang === "ja_JP" ? "title_ja_jp" : "title";
-      return window.siyuan.emojis[emojiIndex][titleKey];
-  };
-
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "360px",
         height: "50vh",
-        content: `
-<div class="emojis">
+        content: `<div class="emojis">
     <div class="fn__flex">
         <span class="fn__space"></span>
         <label class="b3-form__icon fn__flex-1" style="overflow:initial;">
@@ -241,7 +231,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             ["1f6a9", getEmojiTitle(8)],
         ].map(([unicode, title], index) =>
             `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
-        ).join('')}
+        ).join("")}
     </div>
 </div>`
     });
@@ -412,7 +402,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 if (index) {
                     let html = "";
                     window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji.description_ja_jp : emoji.description}">
+                        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                     });
                     titleElement.nextElementSibling.innerHTML = html;
@@ -518,4 +508,25 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     if (icon !== "iconFile") {
         setNoteBook();
     }
+};
+
+export const getEmojiDesc = (emoji: IEmojiItem) => {
+    if (window.siyuan.config.lang === "zh_CN") {
+        return emoji.description_zh_cn;
+    }
+    if (window.siyuan.config.lang === "ja_JP") {
+        return emoji.description_ja_jp;
+    }
+    return emoji.description;
+}
+
+
+export const getEmojiTitle = (index: number) => {
+    if (window.siyuan.config.lang === "zh_CN") {
+        return window.siyuan.emojis[index].title_zh_cn;
+    }
+    if (window.siyuan.config.lang === "ja_JP") {
+        return window.siyuan.emojis[index].title_ja_jp;
+    }
+    return window.siyuan.emojis[index].title;
 };

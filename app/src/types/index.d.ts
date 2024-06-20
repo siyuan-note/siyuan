@@ -319,18 +319,20 @@ interface IBackStack {
     zoomId?: string
 }
 
+interface IEmojiItem {
+    unicode: string,
+    description: string,
+    description_zh_cn: string,
+    description_ja_jp: string,
+    keywords: string
+}
+
 interface IEmoji {
     id: string,
     title: string,
     title_zh_cn: string,
     title_ja_jp: string,
-    items: {
-        unicode: string,
-        description: string,
-        description_zh_cn: string,
-        description_ja_jp: string,
-        keywords: string
-    }[]
+    items: IEmojiItem[]
 }
 
 interface INotebook {

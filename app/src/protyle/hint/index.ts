@@ -20,7 +20,15 @@ import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
-import {addEmoji, filterEmoji, lazyLoadEmoji, lazyLoadEmojiImg, unicode2Emoji} from "../../emoji";
+import {
+    addEmoji,
+    filterEmoji,
+    getEmojiDesc,
+    getEmojiTitle,
+    lazyLoadEmoji,
+    lazyLoadEmojiImg,
+    unicode2Emoji
+} from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {uploadFiles} from "../upload";
 /// #if !MOBILE
@@ -72,7 +80,7 @@ export class Hint {
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : window.siyuan.config.lang === "ja_JP" ? emoji.description_ja_jp : emoji.description}">
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;
@@ -348,12 +356,6 @@ ${genHintItemHTML(item)}
             return;
         }
 
-        const getEmojiTitle = (emojiIndex: number) => {
-            const lang = window.siyuan.config.lang;
-            const titleKey = lang === "zh_CN" ? "title_zh_cn" : lang === "ja_JP" ? "title_ja_jp" : "title";
-            return window.siyuan.emojis[emojiIndex][titleKey];
-        };
-
         const panelElement = this.element.querySelector(".emojis__panel");
         if (panelElement) {
             panelElement.innerHTML = filterEmoji(value, 256);
@@ -368,6 +370,7 @@ ${genHintItemHTML(item)}
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     ${[
+          ["2b50", window.siyuan.languages.recentEmoji],
           ["1f527", getEmojiTitle(0)],
           ["1f60d", getEmojiTitle(1)],
           ["1f433", getEmojiTitle(2)],
@@ -378,9 +381,7 @@ ${genHintItemHTML(item)}
           ["267e-fe0f", getEmojiTitle(7)],
           ["1f6a9", getEmojiTitle(8)],
     ].map(([unicode, title], index) =>
-        `<button data-type="${index + 1}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(
-              unicode,
-        )}</button>`
+        `<button data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
     ).join("")}
 </div>
 </div>`;

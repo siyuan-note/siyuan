@@ -760,6 +760,11 @@ export class Files extends Model {
                 const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
                 if (removeElement) {
                     removeElement.remove();
+                    const counterElement = this.closeElement.querySelector(".counter");
+                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
+                    if (counterElement.textContent === "0")  {
+                        counterElement.classList.add("fn__none");
+                    }
                 }
             }
             return;

@@ -153,13 +153,24 @@ export class WYSIWYG {
 
     // text block-ref file-annotation-ref a 结尾处打字应为普通文本
     private escapeInline(protyle: IProtyle, range: Range, event: InputEvent) {
-        if (!event.data) {
+        if (!event.data && event.inputType !== "insertLineBreak") {
             return;
         }
+
         const inputData = event.data;
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
         const currentTypes = protyle.toolbar.getCurrentType();
+
+        // https://github.com/siyuan-note/siyuan/issues/11766
+        if (event.inputType === "insertLineBreak") {
+            if (currentTypes.length > 0 && range.toString() === "" && inlineElement.tagName === "SPAN" &&
+                inlineElement.textContent.startsWith("\n") &&
+                range.startContainer.previousSibling && range.startContainer.previousSibling.textContent === "\n") {
+                inlineElement.before(range.startContainer.previousSibling);
+            }
+            return;
+        }
 
         let dataLength = inputData.length;
         if (inputData === "<" || inputData === ">") {
@@ -167,7 +178,8 @@ export class WYSIWYG {
             dataLength = 4;
         }
         // https://github.com/siyuan-note/siyuan/issues/5924
-        if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length && inlineElement.tagName === "SPAN" &&
+        if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length &&
+            inlineElement.tagName === "SPAN" &&
             inlineElement.textContent.replace(Constants.ZWSP, "") !== inputData &&
             inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length &&
             !hasPreviousSibling(range.startContainer) && !hasPreviousSibling(inlineElement)) {

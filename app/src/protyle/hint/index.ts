@@ -41,6 +41,7 @@ import {isMobile} from "../../util/functions";
 import {isIPhone, isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
+import {updateAttrViewCellAnimation} from "../render/av/action";
 
 export class Hint {
     public timeId: number;
@@ -370,19 +371,19 @@ ${genHintItemHTML(item)}
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     ${[
-          ["2b50", window.siyuan.languages.recentEmoji],
-          ["1f527", getEmojiTitle(0)],
-          ["1f60d", getEmojiTitle(1)],
-          ["1f433", getEmojiTitle(2)],
-          ["1f96a", getEmojiTitle(3)],
-          ["1f3a8", getEmojiTitle(4)],
-          ["1f3dd-fe0f", getEmojiTitle(5)],
-          ["1f52e", getEmojiTitle(6)],
-          ["267e-fe0f", getEmojiTitle(7)],
-          ["1f6a9", getEmojiTitle(8)],
-    ].map(([unicode, title], index) =>
-        `<button data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
-    ).join("")}
+                ["2b50", window.siyuan.languages.recentEmoji],
+                ["1f527", getEmojiTitle(0)],
+                ["1f60d", getEmojiTitle(1)],
+                ["1f433", getEmojiTitle(2)],
+                ["1f96a", getEmojiTitle(3)],
+                ["1f3a8", getEmojiTitle(4)],
+                ["1f3dd-fe0f", getEmojiTitle(5)],
+                ["1f52e", getEmojiTitle(6)],
+                ["267e-fe0f", getEmojiTitle(7)],
+                ["1f6a9", getEmojiTitle(8)],
+            ].map(([unicode, title], index) =>
+                `<button data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
+            ).join("")}
 </div>
 </div>`;
             lazyLoadEmoji(this.element);
@@ -456,6 +457,12 @@ ${genHintItemHTML(item)}
                         }]);
                     });
                 });
+                updateAttrViewCellAnimation(cellElement, {
+                    type: "block",
+                    id: newID,
+                    isDetached: false,
+                    block: {content: realFileName}
+                });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
                 rowElement.dataset.id = sourceId;
@@ -472,6 +479,12 @@ ${genHintItemHTML(item)}
                     nextID: previousID,
                     isDetached: true,
                 }]);
+                updateAttrViewCellAnimation(cellElement, {
+                    type: "block",
+                    id: sourceId,
+                    isDetached: false,
+                    block: {content: tempElement.textContent}
+                });
             }
             return;
         }

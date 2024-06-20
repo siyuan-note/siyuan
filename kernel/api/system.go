@@ -117,6 +117,7 @@ func getEmojiConf(c *gin.Context) {
 		"id":          "custom",
 		"title":       "Custom",
 		"title_zh_cn": "自定义",
+		"title_ja_jp": "カスタム",
 	}
 	items := []map[string]interface{}{}
 	custom["items"] = items
@@ -173,6 +174,7 @@ func addCustomEmoji(name string, items *[]map[string]interface{}) {
 		"unicode":           name,
 		"description":       nameWithoutExt,
 		"description_zh_cn": nameWithoutExt,
+		"description_ja_jp": nameWithoutExt,
 		"keywords":          nameWithoutExt,
 	}
 	*items = append(*items, emoji)

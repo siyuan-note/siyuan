@@ -459,9 +459,8 @@ ${genHintItemHTML(item)}
                 });
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
-                    id: newID,
                     isDetached: false,
-                    block: {content: realFileName}
+                    block: {content: realFileName, id: newID}
                 });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
@@ -481,9 +480,8 @@ ${genHintItemHTML(item)}
                 }]);
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
-                    id: sourceId,
                     isDetached: false,
-                    block: {content: tempElement.textContent}
+                    block: {content: tempElement.textContent, id: sourceId}
                 });
             }
             return;

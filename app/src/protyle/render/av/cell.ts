@@ -701,6 +701,8 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
         }
         if (value.isDetached) {
             cellElement.setAttribute("data-detached", "true");
+        } else {
+            cellElement.removeAttribute("data-detached");
         }
     }
 };

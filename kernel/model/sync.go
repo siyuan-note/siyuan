@@ -352,7 +352,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 		if nil != err0 {
 			continue
 		}
-		treenode.IndexBlockTree(tree)
+		treenode.UpsertBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 
 		bts := treenode.GetBlockTreesByRootID(tree.ID)

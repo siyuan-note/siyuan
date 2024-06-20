@@ -1378,7 +1378,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 
 func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	tx.trees[tree.ID] = tree
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	return
 }
 

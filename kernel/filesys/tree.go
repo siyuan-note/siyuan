@@ -88,7 +88,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
 				} else {
 					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
-					treenode.IndexBlockTree(parentTree)
+					treenode.UpsertBlockTree(parentTree)
 				}
 			} else {
 				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
@@ -137,7 +137,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		newP := treenode.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.IndexBlockTree(tree)
+		treenode.UpsertBlockTree(tree)
 	}
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)

@@ -209,7 +209,7 @@ var (
 	DBPath             string        // SQLite 数据库文件路径
 	HistoryDBPath      string        // SQLite 历史数据库文件路径
 	AssetContentDBPath string        // SQLite 资源文件内容数据库文件路径
-	BlockTreePath      string        // 区块树文件路径
+	BlockTreeDBPath    string        // 区块树数据库文件路径
 	AppearancePath     string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath         string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath          string        // 配置目录下的外观目录下的 icons/ 路径
@@ -287,7 +287,7 @@ func initWorkspaceDir(workspaceArg string) {
 	DBPath = filepath.Join(TempDir, DBName)
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	AssetContentDBPath = filepath.Join(TempDir, "asset_content.db")
-	BlockTreePath = filepath.Join(TempDir, "blocktree")
+	BlockTreeDBPath = filepath.Join(TempDir, "blocktree.db")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
 }
 

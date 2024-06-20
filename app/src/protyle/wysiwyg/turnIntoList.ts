@@ -4,7 +4,8 @@ import * as dayjs from "dayjs";
 
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
     if (type !== "NodeCodeBlock" &&
-        blockElement.parentElement.getAttribute("data-subtype") !== "t" &&
+        // 任务列表首块不需要再更新为任务列表
+        !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
         (
             ["[ ]", "[x]", "[X]", "【 】", "【x】", "【X】"].includes(editElement.innerHTML.substring(0, 3)) ||
             ["[]", "【】"].includes(editElement.innerHTML.substring(0, 2))

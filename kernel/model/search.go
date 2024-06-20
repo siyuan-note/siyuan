@@ -400,11 +400,12 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 
 	if !isDatabase {
 		// 如果非数据库中搜索块引，则不允许新建重名文档
-		// 如果是数据库中搜索绑定块，则允许新建重名文档 https://github.com/siyuan-note/siyuan/issues/11713
 		if block := treenode.GetBlockTree(id); nil != block {
 			p := path.Join(block.HPath, keyword)
 			newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
 		}
+	} else { // 如果是数据库中搜索绑定块，则允许新建重名文档 https://github.com/siyuan-note/siyuan/issues/11713
+		newDoc = true
 	}
 
 	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378

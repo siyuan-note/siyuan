@@ -688,6 +688,10 @@ func RemoveUnusedAssets() (ret []string) {
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); filelock.IsExist(p) {
+			if filelock.IsHidden(p) {
+				continue
+			}
+
 			if err = filelock.Copy(p, historyPath); nil != err {
 				return
 			}

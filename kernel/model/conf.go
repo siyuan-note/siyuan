@@ -627,7 +627,6 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	Conf.Close()
 	sql.CloseDatabase()
-	treenode.SaveBlockTree(false)
 	util.SaveAssetsTexts()
 	clearWorkspaceTemp()
 	clearCorruptedNotebooks()
@@ -818,34 +817,13 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
-	initialized := false
-	if 1 > treenode.CountBlocks() {
-		if gulu.File.IsExist(util.BlockTreePath) {
-			util.IncBootProgress(20, Conf.Language(91))
-			go func() {
-				for i := 0; i < 40; i++ {
-					util.RandomSleep(50, 100)
-					util.IncBootProgress(1, Conf.Language(91))
-				}
-			}()
-
-			treenode.InitBlockTree(false)
-			initialized = true
-		}
-	} else { // 大于 1 的话说明在同步阶段已经加载过了
-		initialized = true
-	}
-
+	initialized := 0 < treenode.CountBlocks()
 	for _, box := range Conf.GetOpenedBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {
 			index(box.ID)
 		}
-	}
-
-	if !initialized {
-		treenode.SaveBlockTree(true)
 	}
 
 	var dbSize string
@@ -982,7 +960,8 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块数数据
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")

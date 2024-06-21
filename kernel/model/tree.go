@@ -274,7 +274,7 @@ func searchTreeInFilesystem(rootID string) {
 		return
 	}
 
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	logging.LogInfof("reindexed tree by filesystem [rootID=%s]", rootID)
 }

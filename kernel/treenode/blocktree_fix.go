@@ -18,7 +18,7 @@ package treenode
 
 import (
 	"github.com/88250/gulu"
-	"time"
+	"github.com/siyuan-note/logging"
 )
 
 func ClearRedundantBlockTrees(boxID string, paths []string) {
@@ -35,17 +35,21 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 	}
 
 	btPathsMap := map[string]bool{}
-	blockTrees.Range(func(key, value interface{}) bool {
-		slice := value.(*btSlice)
-		slice.m.Lock()
-		for _, b := range slice.data {
-			if b.BoxID == boxID {
-				btPathsMap[b.Path] = true
-			}
+	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
+	rows, err := db.Query(sqlStmt, boxID)
+	if nil != err {
+		logging.LogErrorf("query block tree failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var path string
+		if err = rows.Scan(&path); nil != err {
+			logging.LogErrorf("scan block tree failed: %s", err)
+			return
 		}
-		slice.m.Unlock()
-		return true
-	})
+		btPathsMap[path] = true
+	}
 
 	for p, _ := range btPathsMap {
 		if !pathsMap[p] {
@@ -57,18 +61,11 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 }
 
 func removeBlockTreesByPath(boxID, path string) {
-	blockTrees.Range(func(key, value interface{}) bool {
-		slice := value.(*btSlice)
-		slice.m.Lock()
-		for _, b := range slice.data {
-			if b.Path == path && b.BoxID == boxID {
-				delete(slice.data, b.ID)
-				slice.changed = time.Now()
-			}
-		}
-		slice.m.Unlock()
-		return true
-	})
+	sqlStmt := "DELETE FROM blocktrees WHERE box_id = ? AND path = ?"
+	_, err := db.Exec(sqlStmt, boxID, path)
+	if nil != err {
+		logging.LogErrorf("delete block tree failed: %s", err)
+	}
 }
 
 func GetNotExistPaths(boxID string, paths []string) (ret []string) {
@@ -78,17 +75,21 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 	}
 
 	btPathsMap := map[string]bool{}
-	blockTrees.Range(func(key, value interface{}) bool {
-		slice := value.(*btSlice)
-		slice.m.Lock()
-		for _, b := range slice.data {
-			if b.BoxID == boxID {
-				btPathsMap[b.Path] = true
-			}
+	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
+	rows, err := db.Query(sqlStmt, boxID)
+	if nil != err {
+		logging.LogErrorf("query block tree failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var path string
+		if err = rows.Scan(&path); nil != err {
+			logging.LogErrorf("scan block tree failed: %s", err)
+			return
 		}
-		slice.m.Unlock()
-		return true
-	})
+		btPathsMap[path] = true
+	}
 
 	for p, _ := range pathsMap {
 		if !btPathsMap[p] {
@@ -101,16 +102,20 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 
 func GetRootUpdated() (ret map[string]string) {
 	ret = map[string]string{}
-	blockTrees.Range(func(key, value interface{}) bool {
-		slice := value.(*btSlice)
-		slice.m.Lock()
-		for _, b := range slice.data {
-			if b.RootID == b.ID {
-				ret[b.RootID] = b.Updated
-			}
+	sqlStmt := "SELECT root_id, updated FROM blocktrees WHERE root_id = id AND type = 'd'"
+	rows, err := db.Query(sqlStmt)
+	if nil != err {
+		logging.LogErrorf("query block tree failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var rootID, updated string
+		if err = rows.Scan(&rootID, &updated); nil != err {
+			logging.LogErrorf("scan block tree failed: %s", err)
+			return
 		}
-		slice.m.Unlock()
-		return true
-	})
+		ret[rootID] = updated
+	}
 	return
 }

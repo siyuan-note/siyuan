@@ -825,7 +825,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 					continue
 				}
 
-				treenode.IndexBlockTree(tree)
+				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))

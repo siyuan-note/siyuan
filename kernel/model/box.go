@@ -531,7 +531,6 @@ func fullReindex() {
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)
 	}
-	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 	debug.FreeOSMemory()
 }

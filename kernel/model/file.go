@@ -1086,7 +1086,7 @@ func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
 }
 
 func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	return writeTreeUpsertQueue(tree)
 }
 
@@ -1095,7 +1095,7 @@ func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 		return
 	}
 	sql.RenameTreeQueue(tree)
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	return
 }
 

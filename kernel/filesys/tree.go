@@ -36,6 +36,23 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
+	ret = map[string]*parse.Tree{}
+	bts := treenode.GetBlockTrees(ids)
+	luteEngine := util.NewLute()
+	for id, bt := range bts {
+		if nil == ret[id] {
+			tree, err := LoadTree(bt.BoxID, bt.Path, luteEngine)
+			if nil != err {
+				logging.LogErrorf("load tree [%s] failed: %s", bt.Path, err)
+				continue
+			}
+			ret[id] = tree
+		}
+	}
+	return
+}
+
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)

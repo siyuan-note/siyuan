@@ -6,6 +6,7 @@ import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
+import {isTouchDevice} from "../util/functions";
 
 let popoverTargetElement: HTMLElement;
 export const initBlockPopover = (app: App) => {
@@ -138,7 +139,7 @@ export const initBlockPopover = (app: App) => {
 
 const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     // pad 端点击后 event.target 不会更新。
-    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const target = isTouchDevice() ? document.elementFromPoint(event.clientX, event.clientY) : event.target as HTMLElement
     if (!target) {
         return false;
     }

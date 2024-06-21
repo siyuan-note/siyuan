@@ -23,6 +23,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 
@@ -301,6 +302,26 @@ func ExistBlockTree(id string) bool {
 		return false
 	}
 	return 0 < count
+}
+
+func GetBlockTrees(ids []string) (ret map[string]*BlockTree) {
+	ret = map[string]*BlockTree{}
+	sqlStmt := "SELECT * FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
+	rows, err := db.Query(sqlStmt)
+	if nil != err {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var block BlockTree
+		if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); nil != err {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret[block.ID] = &block
+	}
+	return
 }
 
 func GetBlockTree(id string) (ret *BlockTree) {

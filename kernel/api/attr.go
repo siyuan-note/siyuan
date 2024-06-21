@@ -33,6 +33,24 @@ func getBookmarkLabels(c *gin.Context) {
 	ret.Data = model.BookmarkLabels()
 }
 
+func batchGetBlockAttrs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	ids := arg["ids"].([]interface{})
+	var idList []string
+	for _, id := range ids {
+		idList = append(idList, id.(string))
+	}
+
+	ret.Data = model.BatchGetBlockAttrs(idList)
+}
+
 func getBlockAttrs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

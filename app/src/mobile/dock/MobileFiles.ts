@@ -14,6 +14,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
+import {refreshFileTree} from "../../dialog/processSystem";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -113,7 +114,7 @@ export class MobileFiles extends Model {
                         Array.from(this.element.children).forEach(item => {
                             notebooks.push(item.getAttribute("data-url"));
                         });
-                        fetchPost("/api/filetree/refreshFiletree", {}, () => {
+                        refreshFileTree(() => {
                             target.removeAttribute("disabled");
                             this.init(false);
                         });

@@ -19,6 +19,7 @@ import {openFileById} from "../../editor/util";
 import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
+import {refreshFileTree} from "../../dialog/processSystem";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -1074,7 +1075,7 @@ aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");
-                    fetchPost("/api/filetree/refreshFiletree", {}, () => {
+                    refreshFileTree(() => {
                         this.element.removeAttribute("disabled");
                         this.init(false);
                     });

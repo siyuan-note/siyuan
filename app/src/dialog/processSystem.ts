@@ -278,10 +278,20 @@ export const transactionError = () => {
         /// #endif
     });
     btnsElement[1].addEventListener("click", () => {
-        fetchPost("/api/filetree/refreshFiletree", {});
+        refreshFileTree();
         dialog.destroy();
     });
 };
+
+export const refreshFileTree = (cb?:() => void) => {
+    window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
+    setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
+    fetchPost("/api/filetree/refreshFiletree", {}, () => {
+        if (cb) {
+            cb()
+        }
+    });
+}
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {

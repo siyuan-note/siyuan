@@ -204,7 +204,7 @@ func CountBlocks() (ret int) {
 
 func GetBlockTreeRootByPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
+	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ? AND type = 'd'"
 	err := db.QueryRow(sqlStmt, boxID, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if nil != err {
 		ret = nil

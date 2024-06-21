@@ -535,7 +535,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	tree, _ := LoadTreeByBlockID(id)
-	tree = exportTree(tree, false, false,
+	tree = exportTree(tree, false, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -640,7 +640,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	tree = exportTree(tree, true, false,
+	tree = exportTree(tree, true, false, !docx,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -790,7 +790,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
-	tree = exportTree(tree, true, keepFold,
+	tree = exportTree(tree, true, keepFold, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -1837,7 +1837,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 	blockRefTextLeft, blockRefTextRight string,
 	addTitle bool,
 	defBlockIDs []string) (ret string) {
-	tree = exportTree(tree, false, false,
+	tree = exportTree(tree, false, false, true,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
@@ -1926,7 +1926,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 	return
 }
 
-func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
+func exportTree(tree *parse.Tree, wysiwyg, keepFold, pdfPageNum bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
@@ -1975,7 +1975,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 					return ast.WalkSkipChildren
 				}
 
-				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode)
+				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode, pdfPageNum)
 				unlinks = append(unlinks, n)
 				return status
 			} else if n.IsTextMarkType("tag") {
@@ -2551,7 +2551,7 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 	})
 }
 
-func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int) ast.WalkStatus {
+func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int, pdfPageNum bool) ast.WalkStatus {
 	p := refID[:strings.LastIndex(refID, "/")]
 	absPath, err := GetAssetAbsPath(p)
 	if nil != err {
@@ -2591,7 +2591,11 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	}
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(p + "?p=" + pageStr)})
+	dest := p
+	if pdfPageNum {
+		dest += "?p=" + pageStr
+	}
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(dest)})
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 	n.InsertBefore(fileAnnotationRefLink)
 	return ast.WalkSkipChildren

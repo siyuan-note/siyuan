@@ -557,11 +557,16 @@ func (box *Box) UpdateHistoryGenerated() {
 
 func getBoxesByPaths(paths []string) (ret map[string]*Box) {
 	ret = map[string]*Box{}
+	var ids []string
 	for _, p := range paths {
-		id := strings.TrimSuffix(path.Base(p), ".sy")
-		bt := treenode.GetBlockTree(id)
+		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
+	}
+
+	bts := treenode.GetBlockTrees(ids)
+	for _, id := range ids {
+		bt := bts[id]
 		if nil != bt {
-			ret[p] = Conf.Box(bt.BoxID)
+			ret[bt.Path] = Conf.Box(bt.BoxID)
 		}
 	}
 	return

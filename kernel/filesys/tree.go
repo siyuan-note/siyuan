@@ -37,18 +37,20 @@ import (
 )
 
 func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
-	ret = map[string]*parse.Tree{}
+	ret, tmpCache := map[string]*parse.Tree{}, map[string]*parse.Tree{}
 	bts := treenode.GetBlockTrees(ids)
 	luteEngine := util.NewLute()
 	for id, bt := range bts {
-		if nil == ret[id] {
-			tree, err := LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil != err {
-				logging.LogErrorf("load tree [%s] failed: %s", bt.Path, err)
+		tree := tmpCache[bt.RootID]
+		if nil == tree {
+			tree, _ = LoadTree(bt.BoxID, bt.Path, luteEngine)
+			if nil == tree {
+				logging.LogWarnf("load tree [%s] failed: %s", id, bt.Path)
 				continue
 			}
-			ret[id] = tree
+			tmpCache[bt.RootID] = tree
 		}
+		ret[id] = tree
 	}
 	return
 }

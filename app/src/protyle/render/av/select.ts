@@ -566,7 +566,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
     });
 
     return `<div class="b3-menu__items">
-<div class="b3-chips">
+<div class="b3-chips" style="max-width: 50vw">
     ${selectedHTML}
     <input>
 </div>

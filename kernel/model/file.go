@@ -465,21 +465,11 @@ func contentStat(content string, luteEngine *lute.Lute) (ret *util.BlockStatResu
 
 func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 	ret = &util.BlockStatResult{}
-	trees := map[string]*parse.Tree{} // 缓存
-	luteEngine := util.NewLute()
+	trees := filesys.LoadTrees(ids)
 	for _, id := range ids {
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
-			continue
-		}
-
-		tree := trees[bt.RootID]
+		tree := trees[id]
 		if nil == tree {
-			tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil == tree {
-				continue
-			}
-			trees[bt.RootID] = tree
+			continue
 		}
 
 		node := treenode.GetNodeInTree(tree, id)

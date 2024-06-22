@@ -292,20 +292,7 @@ func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 	WaitForWritingFiles()
 
 	ret = map[string]map[string]string{}
-	trees := map[string]*parse.Tree{}
-	bts := treenode.GetBlockTrees(ids)
-	luteEngine := util.NewLute()
-	for id, bt := range bts {
-		if nil == trees[id] {
-			tree, err := filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil != err {
-				logging.LogErrorf("load tree [%s] failed: %s", bt.Path, err)
-				continue
-			}
-			trees[id] = tree
-		}
-	}
-
+	trees := filesys.LoadTrees(ids)
 	for _, id := range ids {
 		tree := trees[id]
 		if nil == tree {

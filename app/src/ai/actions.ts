@@ -165,8 +165,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         focusByRange(protyle.toolbar.range);
     });
     let customHTML = "";
-    window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }) => {
-        customHTML += `<div data-action="${item.memo || item.name}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
+    window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }, index: number) => {
+        customHTML += `<div data-action="${item.memo || item.name}" data-index="${index}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     <span data-type="edit" class="b3-list-item__action"><svg><use xlink:href="#iconEdit"></use></svg></span>
 </div>`;
@@ -251,7 +251,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 let target = event.target as HTMLElement;
                 while (target && !target.isSameNode(element)) {
                     if (target.classList.contains("b3-list-item__action")) {
-                        editDialog(target.previousElementSibling.textContent, target.parentElement.getAttribute("aria-label"));
+                        const subItem = window.siyuan.storage[Constants.LOCAL_AI][target.parentElement.dataset.index]
+                        editDialog(subItem.name, subItem.memo);
                         menu.close();
                         event.stopPropagation();
                         event.preventDefault();

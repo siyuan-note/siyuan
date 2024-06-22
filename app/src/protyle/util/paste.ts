@@ -125,7 +125,8 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
             .replace(/\^/g, "\\^")
             .replace(/\|/g, "\\|")
             .replace(/\./g, "\\.");
-        pasteText(protyle, clipText, nodeElement);
+        // 转义文本不能使用 DOM 结构 https://github.com/siyuan-note/siyuan/issues/11778
+        pasteText(protyle, clipText, nodeElement, false);
     } catch (e) {
         console.log(e);
     }
@@ -178,7 +179,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     }
 };
 
-export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
+export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置
@@ -197,7 +198,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
             }
         }
     }
-    insertHTML(protyle.lute.Md2BlockDOM(textPlain), protyle, false, false, true);
+    insertHTML(toBlockDOM ? protyle.lute.Md2BlockDOM(textPlain) : textPlain, protyle, false, false, true);
 
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);

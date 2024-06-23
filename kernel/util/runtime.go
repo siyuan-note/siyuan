@@ -291,7 +291,8 @@ func isKnownCloudDrivePath(workspaceAbsPath string) bool {
 	workspaceAbsPathLower := strings.ToLower(workspaceAbsPath)
 	return strings.Contains(workspaceAbsPathLower, "onedrive") || strings.Contains(workspaceAbsPathLower, "dropbox") ||
 		strings.Contains(workspaceAbsPathLower, "google drive") || strings.Contains(workspaceAbsPathLower, "pcloud") ||
-		strings.Contains(workspaceAbsPathLower, "坚果云")
+		strings.Contains(workspaceAbsPathLower, "坚果云") ||
+		strings.Contains(workspaceAbsPathLower, "天翼云")
 }
 
 func isICloudPath(workspaceAbsPath string) (ret bool) {

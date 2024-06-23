@@ -55,56 +55,59 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 }
 
 func getNewVerInstallPkgPath() string {
-	if skipNewVerInstallPkg() {
-		return ""
-	}
+    return ""
+	// if skipNewVerInstallPkg() {
+	// 	return ""
+	// }
 
-	downloadPkgURLs, checksum, err := getUpdatePkg()
-	if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
-		return ""
-	}
+	// downloadPkgURLs, checksum, err := getUpdatePkg()
+	// if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
+	// 	return ""
+	// }
 
-	pkg := path.Base(downloadPkgURLs[0])
-	ret := filepath.Join(util.TempDir, "install", pkg)
-	localChecksum, _ := sha256Hash(ret)
-	if checksum != localChecksum {
-		return ""
-	}
-	return ret
+	// pkg := path.Base(downloadPkgURLs[0])
+	// ret := filepath.Join(util.TempDir, "install", pkg)
+	// localChecksum, _ := sha256Hash(ret)
+	// if checksum != localChecksum {
+	// 	return ""
+	// }
+	// return ret
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}
 
 func checkDownloadInstallPkg() {
-	defer logging.Recover()
+    // ignore auto update
+    return
+	// defer logging.Recover()
 
-	if skipNewVerInstallPkg() {
-		return
-	}
+	// if skipNewVerInstallPkg() {
+	// 	return
+	// }
 
-	if !checkDownloadInstallPkgLock.TryLock() {
-		return
-	}
-	defer checkDownloadInstallPkgLock.Unlock()
+	// if !checkDownloadInstallPkgLock.TryLock() {
+	// 	return
+	// }
+	// defer checkDownloadInstallPkgLock.Unlock()
 
-	downloadPkgURLs, checksum, err := getUpdatePkg()
-	if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
-		return
-	}
+	// downloadPkgURLs, checksum, err := getUpdatePkg()
+	// if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
+	// 	return
+	// }
 
-	msgId := util.PushMsg(Conf.Language(103), 1000*7)
-	succ := false
-	for _, downloadPkgURL := range downloadPkgURLs {
-		err = downloadInstallPkg(downloadPkgURL, checksum)
-		if nil == err {
-			succ = true
-			break
+	// msgId := util.PushMsg(Conf.Language(103), 1000*7)
+	// succ := false
+	// for _, downloadPkgURL := range downloadPkgURLs {
+	// 	err = downloadInstallPkg(downloadPkgURL, checksum)
+	// 	if nil == err {
+	// 		succ = true
+	// 		break
 
-		}
-	}
-	if !succ {
-		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
-	}
+	// 	}
+	// }
+	// if !succ {
+	// 	util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
+	// }
 }
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
@@ -135,10 +138,16 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
 
-	b3logURL := "https://release.b3log.org/siyuan/" + pkg
-	liuyunURL := "https://release.liuyun.io/siyuan/" + pkg
-	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
+	// b3logURL := "https://release.b3log.org/siyuan/" + pkg
+	// liuyunURL := "https://release.liuyun.io/siyuan/" + pkg
+	// githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
+	b3logURL := "https://127.0.0.1/siyuan/" + pkg
+	liuyunURL := "https://127.0.0.1/siyuan/" + pkg
+	githubURL := "https://127.0.0.1/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
+
 	ghproxyURL := "https://mirror.ghproxy.com/" + githubURL
+
+
 	if util.IsChinaCloud() {
 		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
 		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)

@@ -17,7 +17,6 @@
 package model
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -332,6 +331,7 @@ func refreshAnnouncement() {
 
 func RefreshUser(token string) {
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
+    Conf.SetUser(loadUserFromConf())
 	if "" == token {
 		if "" != Conf.UserData {
 			Conf.SetUser(loadUserFromConf())
@@ -391,17 +391,30 @@ Net:
 }
 
 func loadUserFromConf() *conf.User {
-	if "" == Conf.UserData {
-		return nil
-	}
 
-	data := util.AESDecrypt(Conf.UserData)
-	data, _ = hex.DecodeString(string(data))
-	user := &conf.User{}
-	if err := gulu.JSON.UnmarshalJSON(data, &user); nil == err {
-		return user
-	}
-	return nil
+    // var dec = util.AESDecrypt("0b3a434622d756db12ac9d0f035924bcd44c6aabb6017433bea4976a8e4d6d97d063c8e213e703c9adebedb7cb668508fb6b01203c4b69a3e30fb938b37c2e13dc07e5800419c13f4a598218972b0d49d6e7349a6259fcd686769591a6699350160969c9968967a546403c366ac24b946fc235235d5916d29c4336c5c17ac0269cd9237254b2d78ab2f5fadfd235dde3d5331224c7e192939944d9e56ead9c9e1d225bb43a5268f415ba7d70795c6a90dbffb2d2b1aeb9647cadb35b0ae982cfc862078966955db1a58ea28a416b713024a662496ca91763da1401149f02d23820f2c31867bd533813113f2c1442d9667237e75d7d33a8518b40a851a9d181457ca362fc2c680fc2161f40f69fcf058f7b2081c45f262b5c8585f19ee5198c75e0ae088e3175e03b3dcf66d3bef902919ae723fe7be8b68a54fbc6eecd7f51eda3dc7f935f4e7ebb5b85c3787f818ec51adf320305718c4570de9b82c19f7f84df08a77c3adb384cc65b9e5d5bd675a6e1a1381f304e8c99bbe72ab4374f183574860e4279e50e8ca7486aa27760fefd8f0a4a2b2be95a301d5571c812afa02125180f9a9870b42d54fb675bd8e0daf8e2715705625d7d6d160a9a329ac1a18df598945f48fc5b582fac3ce3f845e84727ee322a4745a3d9072824db4c7c72411622070674ce1fdfba0166dd9b61d89d95dcca2127cf58ca2e9ad8f6a7c67789e32c6639e2e33ee9c0526783a2f4a31544e2f56b474cf0516d031b491e7eea270738875d321eb75aa2b76721772ea728e6788d86590c26737faa4d4e8411e5a58378078e3c0035bbc42fe54251975def077751cde9bc28d373b70cd2a4f1bc5ff1ea3288529ca70a1133c2450445b7981f4441699358aab8440273ad2a62c4f85706b686fff325e5dfbc31dbfd3c09a34662aa400f7abe63267f0da8290f1555ba78840d72b222f1a9f8538e4377d500bb463eab92eb4302008174fc2d1bf560e11bd8548763dd1a882b2e9627c94e1b76f1ce2379026a3931753a1b19e0c56fcf02388954d49528e682880eb328a98acf02569e0a00db3dcf6e28307def9a51c44ad5bc318c3d6a66f4b633a2c6aaca000d704e3af74041096e189595937641319cd557f5efad026365904f71b72530bde252dcbcde868e3c7437ecd4a173e1b8aeb8a1b7b42a9234566ae5099e6eed7e63873ececc35f9031250cdf2d24654324280e371e90de0b41d44681be8172c2846ff42a04f4f450f8e9b70c58c716ac03060193950f88a123f44457a072a2c464c5babcb35a5719682c6371e4a231cdf1aae5edff09342a5a1b56ed4d0b3b5acff99ed1b81e139c29acac996f8f0a798fa2483cd560c5345bba85e279ed4f3f781d7e3d17665b0a5635f91a82fdb30edfa57faf50670417bdcd2f2a154cb07f81bbf3e3c818ac7798f277ecf23a4c35da691842cb671c6a00708479d8804808ea7a4e62e2cbed1dfa7c289bbea75fc843d5a286c54a536fe2130bfbfbb685c82c2f1e68dc58b465d307ab5ab557733e162d0c87c34b85fdade77f516daa2e27d2cca43f2b171ac1946eff1778a1ea62c47f7b358216e6b0aa45b3cafced0147e0899b037f029d824891708628e37e00")
+    // fmt.Println(dec)
+    userStr := `{"userId":"1719061610038","userName":"realneo","userAvatarURL":"https://assets.b3logfile.com/avatar/1719061610038.png?imageView2/1/w/256/h/256/interlace/0/q/100","userHomeBImgURL":"","userIntro":"","userNickname":"","userCreateTime":"20240622 21:06:50","userSiYuanProExpireTime":-1,"userToken":"b1d0d1ad98acdd5d7d846d4359048a923f932962125e7ad0c9db814d5942879467b648f693d6a11336bcaa8b1bee42090ae1061a025b6f16d8afdc6baac0c1129f62ce384f54ec3360273c1f53642adebbfd8d37a5170806c144c59ee5044cc88dd6e440a06e8853cfdf59e8a45800ec8b5e8bd41105485f1487839127608f94ed7fe815944a37852dd7a501050b20406a145b7f233259ca64051fb209eb0c988e2c8d1cef2fa81ae3991e267f9b3a8ae73983e05a43575e4431f814449b3e2b990f0182ec8d7fad6e834efa68396f913fc52221695f3125e772d5f907eb382e1da1b902feab17c7d10bf64ecd567f81","userTokenExpireTime":"7275693060","userSiYuanRepoSize":0,"userSiYuanPointExchangeRepoSize":0,"userSiYuanAssetSize":0,"userTrafficUpload":0,"userTrafficDownload":0,"userTrafficAPIGet":0,"userTrafficAPIPut":0,"userTrafficTime":0,"userSiYuanSubscriptionPlan":0,"userSiYuanSubscriptionStatus":0,"userSiYuanSubscriptionType":1,"userSiYuanOneTimePayStatus":1}`
+    user := &conf.User{}
+    gulu.JSON.UnmarshalJSON([]byte(userStr), &user)
+    // {1719061610038 realneo https://assets.b3logfile.com/avatar/1719061610038.png?imageView2/1/w/256/h/256/interlace/0/q/100  []   20240622 21:06:50 -1 b1d0d1ad98acdd5d7d846d4359048a923f932962125e7ad0c9db814d5942879467b648f693d6a11336bcaa8b1bee42090ae1061a025b6f16d8afdc6baac0c1129f62ce384f54ec3360273c1f53642adebbfd8d37a5170806c144c59ee5044cc88dd6e440a06e8853cfdf59e8a45800ec8b5e8bd41105485f1487839127608f94ed7fe815944a37852dd7a501050b20406a145b7f233259ca64051fb209eb0c988e2c8d1cef2fa81ae3991e267f9b3a8ae73983e05a43575e4431f814449b3e2b990f0182ec8d7fad6e834efa68396f913fc52221695f3125e772d5f907eb382e1da1b902feab17c7d10bf64ecd567f81 7275693060 0 0 0 0 0 0 0 0 0 0 1 1}
+    // gulu.JSON.UnmarshalJSON(dec, user)
+    // user.UserCreateTime = "1719061610038"
+    // user.UserId
+    fmt.Print("inject user success")
+    return user
+    // return user1
+	// if "" == Conf.UserData {
+	// 	return nil
+	// }
+	// data := util.AESDecrypt(Conf.UserData)
+	// data, _ = hex.DecodeString(string(data))
+	// user := &conf.User{}
+	// if err := gulu.JSON.UnmarshalJSON(data, &user); nil == err {
+	// 	return user
+	// }
+
+	// return nil
 }
 
 func RemoveCloudShorthands(ids []string) (err error) {

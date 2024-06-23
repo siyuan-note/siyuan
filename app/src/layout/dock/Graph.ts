@@ -322,6 +322,12 @@ export class Graph extends Model {
                         this.searchGraph(false, undefined, true);
                     } else if (dataType === "fullscreen") {
                         fullscreen(this.element, target);
+                        const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]')
+                        if (this.element.className.includes("fullscreen")) {
+                            minElement.classList.add("fn__none")
+                        } else {
+                            minElement.classList.remove("fn__none")
+                        }
                     }
                     break;
                 } else if (target.classList.contains("graph__svg")) {

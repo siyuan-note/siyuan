@@ -451,9 +451,12 @@ export class Dock {
     }
 
     public hideDock(reset = false) {
-        if (!reset && (this.layout.element.style.opacity === "0" || this.pin) ||
-            this.layout.element.querySelector(".fullscreen")    // 关系图全屏不应该退出
-        ) {
+        if (!reset && (this.layout.element.style.opacity === "0" || this.pin)) {
+            return;
+        }
+        // 关系图全屏不应该退出 & https://github.com/siyuan-note/siyuan/issues/11775
+        const fullscreenElement = this.layout.element.querySelector(".fullscreen")
+        if (fullscreenElement && fullscreenElement.clientHeight > 0) {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/7504

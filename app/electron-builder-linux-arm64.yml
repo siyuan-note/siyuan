@@ -64,5 +64,3 @@ extraResources:
   - from: "src/assets/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"
-  - from: "pandoc/pandoc-linux-amd64.zip"
-    to: "pandoc.zip"

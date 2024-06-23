@@ -87,7 +87,7 @@ export class Dock {
             }
         }
         if (!showDock) {
-            this.element.firstElementChild.innerHTML = `<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(0)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
+            this.element.firstElementChild.innerHTML = `<span class="dock__item dock__item--pin ariaLabel" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
     <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
 </span>`;
             this.element.classList.add("fn__none");
@@ -157,7 +157,6 @@ export class Dock {
                 moveEvent.stopPropagation();
                 if (!ghostElement) {
                     item.style.opacity = "0.38";
-                    item.classList.remove("b3-tooltips");
                     ghostElement = item.cloneNode(true) as HTMLElement;
                     ghostElement.setAttribute("data-ghost-type", "dock");
                     this.element.append(ghostElement);
@@ -281,11 +280,10 @@ export class Dock {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 ghostElement?.remove();
-                if (item.classList.contains("b3-tooltips")) {
+                if (item.style.opacity !== "0.38") {
                     return;
                 }
                 item.style.opacity = "";
-                item.classList.add("b3-tooltips");
                 if (!moveItem.classList.contains("fn__none")) {
                     let dock;
                     if (moveItem.parentElement.parentElement.id === "dockBottom") {
@@ -453,9 +451,12 @@ export class Dock {
     }
 
     public hideDock(reset = false) {
-        if (!reset && (this.layout.element.style.opacity === "0" || this.pin) ||
-            this.layout.element.querySelector(".fullscreen")    // 关系图全屏不应该退出
-        ) {
+        if (!reset && (this.layout.element.style.opacity === "0" || this.pin)) {
+            return;
+        }
+        // 关系图全屏不应该退出 & https://github.com/siyuan-note/siyuan/issues/11775
+        const fullscreenElement = this.layout.element.querySelector(".fullscreen")
+        if (fullscreenElement && fullscreenElement.clientHeight > 0) {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/7504
@@ -773,8 +774,6 @@ export class Dock {
         delete sourceDock.data[type];
 
         // 目标处理
-        sourceElement.classList.remove("b3-tooltips__n", "b3-tooltips__ne", "b3-tooltips__nw", "b3-tooltips__s", "b3-tooltips__se", "b3-tooltips__sw", "b3-tooltips__e", "b3-tooltips__w");
-        sourceElement.classList.add(`b3-tooltips__${this.getClassDirect(index)}`);
         sourceElement.setAttribute("data-index", index.toString());
         if (previousType) {
             this.element.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
@@ -802,23 +801,6 @@ export class Dock {
             custom.parent.parent.removeTab(custom.parent.id);
         }
         delete this.data[key];
-    }
-
-    private getClassDirect(index: number) {
-        let direct = "e";
-        switch (this.position) {
-            case "Right":
-                direct = "w";
-                break;
-            case "Bottom":
-                if (index === 0) {
-                    direct = "ne";
-                } else {
-                    direct = "nw";
-                }
-                break;
-        }
-        return direct;
     }
 
     public setSize() {
@@ -860,7 +842,7 @@ export class Dock {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {
                 return;
             }
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeyLangId="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}">
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeyLangId="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;
@@ -873,7 +855,7 @@ export class Dock {
                     this.element.firstElementChild.lastElementChild.insertAdjacentHTML("beforebegin", html);
                 }
             } else {
-                this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
+                this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin ariaLabel" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
     <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
 </span>`;
             }

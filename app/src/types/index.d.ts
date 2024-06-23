@@ -33,6 +33,7 @@ type TOperation =
     | "updateAttrViewColOption"
     | "setAttrViewName"
     | "doUpdateUpdated"
+    | "duplicateAttrViewKey"
     | "setAttrViewColIcon"
     | "setAttrViewFilters"
     | "setAttrViewSorts"
@@ -259,44 +260,6 @@ interface ISearchAssetOption {
     k: string,
 }
 
-interface ISearchOption {
-    page: number
-    removed?: boolean  // 移除后需记录搜索内容 https://github.com/siyuan-note/siyuan/issues/7745
-    name?: string
-    sort: number,  //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
-    group: number,  // 0：不分组，1：按文档分组
-    hasReplace: boolean,
-    method: number //  0：文本，1：查询语法，2：SQL，3：正则表达式
-    hPath: string
-    idPath: string[]
-    k: string
-    r: string
-    types: ISearchType,
-    replaceTypes: {
-        [key: string]: boolean;
-    },
-}
-
-interface ISearchType {
-    audioBlock: boolean
-    videoBlock: boolean
-    iframeBlock: boolean
-    widgetBlock: boolean
-    mathBlock: boolean
-    table: boolean
-    blockquote: boolean
-    superBlock: boolean
-    paragraph: boolean
-    document: boolean
-    heading: boolean
-    list: boolean
-    listItem: boolean
-    codeBlock: boolean
-    htmlBlock: boolean
-    embedBlock: boolean
-    databaseBlock: boolean
-}
-
 interface ITextOption {
     color?: string,
     type: string
@@ -356,16 +319,20 @@ interface IBackStack {
     zoomId?: string
 }
 
+interface IEmojiItem {
+    unicode: string,
+    description: string,
+    description_zh_cn: string,
+    description_ja_jp: string,
+    keywords: string
+}
+
 interface IEmoji {
     id: string,
     title: string,
     title_zh_cn: string,
-    items: {
-        unicode: string,
-        description: string,
-        description_zh_cn: string,
-        keywords: string
-    }[]
+    title_ja_jp: string,
+    items: IEmojiItem[]
 }
 
 interface INotebook {

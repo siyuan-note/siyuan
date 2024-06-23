@@ -15,6 +15,7 @@ import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAttr} from "../../../util/escape";
+import {electronUndo} from "../../undo";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -435,6 +436,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (event.isComposing) {
                 return;
             }
+            if (electronUndo(event)) {
+                return;
+            }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValueByInput(protyle, type, blockElement, cellElements);
@@ -697,6 +701,8 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
         }
         if (value.isDetached) {
             cellElement.setAttribute("data-detached", "true");
+        } else {
+            cellElement.removeAttribute("data-detached");
         }
     }
 };

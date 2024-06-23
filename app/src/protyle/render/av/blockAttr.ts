@@ -285,78 +285,10 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 }
             });
             element.addEventListener("click", (event) => {
-                let target = event.target as HTMLElement;
-                const blockElement = hasClosestBlock(target);
-                if (!blockElement) {
-                    return;
-                }
-                while (target && !element.isSameNode(target)) {
-                    const type = target.getAttribute("data-type");
-                    if (type === "date") {
-                        popTextCell(protyle, [target], "date");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "select" || type === "mSelect") {
-                        popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "mAsset") {
-                        element.querySelectorAll('.custom-attr__avvalue[data-type="mAsset"]').forEach(item => {
-                            item.removeAttribute("data-active");
-                        });
-                        target.setAttribute("data-active", "true");
-                        target.focus();
-                        popTextCell(protyle, [target], "mAsset");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "checkbox") {
-                        popTextCell(protyle, [target], "checkbox");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "relation") {
-                        popTextCell(protyle, [target], "relation");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "template") {
-                        popTextCell(protyle, [target], "template");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "rollup") {
-                        popTextCell(protyle, [target], "rollup");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "addColumn") {
-                        const rowElements = blockElement.querySelectorAll(".av__row");
-                        const addMenu = addCol(protyle, blockElement, rowElements[rowElements.length - 1].getAttribute("data-col-id"));
-                        const addRect = target.getBoundingClientRect();
-                        addMenu.open({
-                            x: addRect.left,
-                            y: addRect.bottom,
-                            h: addRect.height
-                        });
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    } else if (type === "editCol") {
-                        openMenuPanel({
-                            protyle,
-                            blockElement,
-                            type: "edit",
-                            colId: target.parentElement.dataset.colId
-                        });
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    }
-                    target = target.parentElement;
-                }
+                openEdit(protyle, element, event);
+            });
+            element.addEventListener("contextmenu", (event) => {
+                openEdit(protyle, element, event);
             });
             element.innerHTML = html;
         }
@@ -399,4 +331,79 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             cb(element);
         }
     });
+};
+
+const openEdit = (protyle: IProtyle, element:HTMLElement, event: MouseEvent) => {
+    let target = event.target as HTMLElement;
+    const blockElement = hasClosestBlock(target);
+    if (!blockElement) {
+        return;
+    }
+    while (target && !element.isSameNode(target)) {
+        const type = target.getAttribute("data-type");
+        if (type === "date") {
+            popTextCell(protyle, [target], "date");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "select" || type === "mSelect") {
+            popTextCell(protyle, [target], target.getAttribute("data-type") as TAVCol);
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "mAsset") {
+            element.querySelectorAll('.custom-attr__avvalue[data-type="mAsset"]').forEach(item => {
+                item.removeAttribute("data-active");
+            });
+            target.setAttribute("data-active", "true");
+            target.focus();
+            popTextCell(protyle, [target], "mAsset");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "checkbox") {
+            popTextCell(protyle, [target], "checkbox");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "relation") {
+            popTextCell(protyle, [target], "relation");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "template") {
+            popTextCell(protyle, [target], "template");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "rollup") {
+            popTextCell(protyle, [target], "rollup");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "addColumn") {
+            const rowElements = blockElement.querySelectorAll(".av__row");
+            const addMenu = addCol(protyle, blockElement, rowElements[rowElements.length - 1].getAttribute("data-col-id"));
+            const addRect = target.getBoundingClientRect();
+            addMenu.open({
+                x: addRect.left,
+                y: addRect.bottom,
+                h: addRect.height
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "editCol") {
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "edit",
+                colId: target.parentElement.dataset.colId
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        }
+        target = target.parentElement;
+    }
 };

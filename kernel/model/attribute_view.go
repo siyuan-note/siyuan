@@ -30,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -317,6 +318,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 
 	ret = []*SearchAttributeViewResult{}
 	keyword = strings.TrimSpace(keyword)
+	keywords := strings.Fields(keyword)
 
 	type result struct {
 		AvID      string
@@ -349,8 +351,19 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 		name, _ := av.GetAttributeViewNameByPath(filepath.Join(avDir, entry.Name()))
 		info, _ := entry.Info()
 		if "" != keyword {
-			if strings.Contains(strings.ToLower(name), strings.ToLower(keyword)) {
-				score := smetrics.JaroWinkler(name, keyword, 0.7, 4)
+			score := 0.0
+			hit := false
+			for _, k := range keywords {
+				if strings.Contains(strings.ToLower(name), strings.ToLower(k)) {
+					score += smetrics.JaroWinkler(name, k, 0.7, 4)
+					hit = true
+				} else {
+					hit = false
+					break
+				}
+			}
+
+			if hit {
 				a := &result{AvID: id, AvName: name, Score: score}
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()
@@ -391,20 +404,9 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 	}
 	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
 
-	trees := map[string]*parse.Tree{}
+	trees := filesys.LoadTrees(blockIDs)
 	for _, blockID := range blockIDs {
-		bt := treenode.GetBlockTree(blockID)
-		if nil == bt {
-			continue
-		}
-
-		tree := trees[bt.RootID]
-		if nil == tree {
-			tree, _ = LoadTreeByBlockID(blockID)
-			if nil != tree {
-				trees[bt.RootID] = tree
-			}
-		}
+		tree := trees[blockID]
 		if nil == tree {
 			continue
 		}
@@ -939,7 +941,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		}
 		view.Table.Sorts = tmpSorts
 
-		viewable, err = sql.RenderAttributeViewTable(attrView, view, query, GetBlockAttrsWithoutWaitWriting)
+		viewable = sql.RenderAttributeViewTable(attrView, view, query, GetBlockAttrsWithoutWaitWriting)
 	}
 
 	viewable.FilterRows(attrView)
@@ -1415,10 +1417,10 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 }
 
 func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) {
-	mirrorBlocks := treenode.GetMirrorAttrViewBlockIDs(avID)
+	mirrorBlockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
 	mirrorBlockTree := map[string]*parse.Tree{}
-	treeMap := map[string]*parse.Tree{}
-	for _, mirrorBlock := range mirrorBlocks {
+	treeCache := map[string]*parse.Tree{}
+	for _, mirrorBlock := range mirrorBlockIDs {
 		bt := treenode.GetBlockTree(mirrorBlock)
 		if nil == bt {
 			logging.LogErrorf("get block tree by block ID [%s] failed", mirrorBlock)
@@ -1432,22 +1434,22 @@ func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) 
 				logging.LogErrorf("load tree by block ID [%s] failed", mirrorBlock)
 				continue
 			}
-			treeMap[tree.ID] = tree
+			treeCache[tree.ID] = tree
 			mirrorBlockTree[mirrorBlock] = tree
 		}
 	}
 
-	for _, mirrorBlock := range mirrorBlocks {
-		tree := mirrorBlockTree[mirrorBlock]
-		node := treenode.GetNodeInTree(tree, mirrorBlock)
+	for _, mirrorBlockID := range mirrorBlockIDs {
+		tree := mirrorBlockTree[mirrorBlockID]
+		node := treenode.GetNodeInTree(tree, mirrorBlockID)
 		if nil == node {
-			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlock)
+			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlockID)
 			continue
 		}
 		nodes = append(nodes, node)
 	}
 
-	for _, tree := range treeMap {
+	for _, tree := range treeCache {
 		trees = append(trees, tree)
 	}
 	return
@@ -1488,7 +1490,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	attrView.ViewID = view.ID
 
 	view.Icon = masterView.Icon
-	view.Name = attrView.GetDuplicateViewName(masterView.Name)
+	view.Name = util.GetDuplicateName(masterView.Name)
 	view.LayoutType = masterView.LayoutType
 	view.HideAttrViewName = masterView.HideAttrViewName
 
@@ -1689,21 +1691,21 @@ func getAvNames(avIDs string) (ret string) {
 
 func getAttrViewBoundNodes(attrView *av.AttributeView) (ret []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
-	treeMap := map[string]*parse.Tree{}
+	treeCache := map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
 		if blockKeyValue.IsDetached {
 			continue
 		}
 
 		var tree *parse.Tree
-		tree = treeMap[blockKeyValue.BlockID]
+		tree = treeCache[blockKeyValue.BlockID]
 		if nil == tree {
 			tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
 		}
 		if nil == tree {
 			continue
 		}
-		treeMap[blockKeyValue.BlockID] = tree
+		treeCache[blockKeyValue.BlockID] = tree
 
 		node := treenode.GetNodeInTree(tree, blockKeyValue.BlockID)
 		if nil == node {
@@ -1953,7 +1955,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
-		viewable, _ := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
+		viewable := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 		viewable.FilterRows(attrView)
 		viewable.SortRows(attrView)
 
@@ -2164,6 +2166,62 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 			return
 		}
 	}
+	return
+}
+
+func (tx *Transaction) doDuplicateAttrViewKey(operation *Operation) (ret *TxErr) {
+	err := duplicateAttributeViewKey(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func duplicateAttributeViewKey(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	key, _ := attrView.GetKey(operation.KeyID)
+	if nil == key {
+		return
+	}
+
+	if av.KeyTypeBlock == key.Type || av.KeyTypeRelation == key.Type || av.KeyTypeRollup == key.Type {
+		return
+	}
+
+	copyKey := &av.Key{}
+	if err = copier.Copy(copyKey, key); nil != err {
+		logging.LogErrorf("clone key failed: %s", err)
+	}
+	copyKey.ID = operation.NextID
+	copyKey.Name = util.GetDuplicateName(key.Name)
+
+	attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: copyKey})
+
+	for _, view := range attrView.Views {
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			for i, column := range view.Table.Columns {
+				if column.ID == key.ID {
+					view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{
+						{
+							ID:     copyKey.ID,
+							Wrap:   column.Wrap,
+							Hidden: column.Hidden,
+							Pin:    column.Pin,
+							Width:  column.Width,
+						},
+					}, view.Table.Columns[i+1:]...)...)
+					break
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
 	return
 }
 

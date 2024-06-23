@@ -404,12 +404,9 @@ func moveTree(tree *parse.Tree) {
 
 func (box *Box) renameSubTrees(tree *parse.Tree) {
 	subFiles := box.ListFiles(tree.Path)
-	box.moveTrees0(subFiles)
-}
 
-func (box *Box) moveTrees0(files []*FileInfo) {
 	luteEngine := util.NewLute()
-	for _, subFile := range files {
+	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
@@ -429,11 +426,11 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = parse.Parse("", kramdown, luteEngine.ParseOptions)
-	genTreeID(ret)
+	normalizeTree(ret)
 	return
 }
 
-func genTreeID(tree *parse.Tree) {
+func normalizeTree(tree *parse.Tree) {
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
@@ -494,6 +491,11 @@ func genTreeID(tree *parse.Tree) {
 			n.InsertBefore(n.FirstChild)
 		}
 
+		if ast.NodeLinkTitle == n.Type {
+			// 避免重复转义图片标题内容 Repeat the escaped content of the image title https://github.com/siyuan-note/siyuan/issues/11681
+			n.Tokens = html.UnescapeBytes(n.Tokens)
+		}
+
 		return ast.WalkContinue
 	})
 	tree.Root.KramdownIAL = parse.Tokens2IAL(tree.Root.LastChild.Tokens)
@@ -529,7 +531,6 @@ func fullReindex() {
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)
 	}
-	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 	debug.FreeOSMemory()
 }
@@ -556,11 +557,16 @@ func (box *Box) UpdateHistoryGenerated() {
 
 func getBoxesByPaths(paths []string) (ret map[string]*Box) {
 	ret = map[string]*Box{}
+	var ids []string
 	for _, p := range paths {
-		id := strings.TrimSuffix(path.Base(p), ".sy")
-		bt := treenode.GetBlockTree(id)
+		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
+	}
+
+	bts := treenode.GetBlockTrees(ids)
+	for _, id := range ids {
+		bt := bts[id]
 		if nil != bt {
-			ret[p] = Conf.Box(bt.BoxID)
+			ret[bt.Path] = Conf.Box(bt.BoxID)
 		}
 	}
 	return

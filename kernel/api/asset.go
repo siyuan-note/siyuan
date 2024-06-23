@@ -107,13 +107,9 @@ func getImageOCRText(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	force := false
-	if forceArg := arg["force"]; nil != forceArg {
-		force = forceArg.(bool)
-	}
 
 	ret.Data = map[string]interface{}{
-		"text": util.GetAssetText(path, force),
+		"text": util.GetAssetText(path),
 	}
 }
 
@@ -129,6 +125,24 @@ func setImageOCRText(c *gin.Context) {
 	path := arg["path"].(string)
 	text := arg["text"].(string)
 	util.SetAssetText(path, text)
+}
+
+func ocr(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+
+	ocrJSON := util.OcrAsset(path)
+	ret.Data = map[string]interface{}{
+		"text":    util.GetOcrJsonText(ocrJSON),
+		"ocrJSON": ocrJSON,
+	}
 }
 
 func renameAsset(c *gin.Context) {

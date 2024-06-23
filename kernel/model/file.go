@@ -465,21 +465,11 @@ func contentStat(content string, luteEngine *lute.Lute) (ret *util.BlockStatResu
 
 func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 	ret = &util.BlockStatResult{}
-	trees := map[string]*parse.Tree{} // 缓存
-	luteEngine := util.NewLute()
+	trees := filesys.LoadTrees(ids)
 	for _, id := range ids {
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
-			continue
-		}
-
-		tree := trees[bt.RootID]
+		tree := trees[id]
 		if nil == tree {
-			tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil == tree {
-				continue
-			}
-			trees[bt.RootID] = tree
+			continue
 		}
 
 		node := treenode.GetNodeInTree(tree, id)
@@ -1086,7 +1076,7 @@ func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
 }
 
 func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	return writeTreeUpsertQueue(tree)
 }
 
@@ -1095,7 +1085,7 @@ func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 		return
 	}
 	sql.RenameTreeQueue(tree)
-	treenode.IndexBlockTree(tree)
+	treenode.UpsertBlockTree(tree)
 	return
 }
 
@@ -1477,7 +1467,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		}
 	}
 
-	if fromBox.Exist(fromFolder) {
+	needMoveSubDocs := fromBox.Exist(fromFolder)
+	if needMoveSubDocs {
 		// 移动子文档文件夹
 
 		newFolder := path.Join(toFolder, tree.ID)
@@ -1530,6 +1521,28 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 
 		moveTree(tree)
 		moveSorts(tree.ID, fromBox.ID, toBox.ID)
+	}
+
+	if needMoveSubDocs {
+		// 将其所有子文档的移动事件推送到前端 https://github.com/siyuan-note/siyuan/issues/11661
+		subDocsFolder := path.Join(toFolder, tree.ID)
+		syFiles := listSyFiles(path.Join(toBox.ID, subDocsFolder))
+		for _, syFile := range syFiles {
+			relPath := strings.TrimPrefix(syFile, "/"+path.Join(toBox.ID, toFolder))
+			subFromPath := path.Join(path.Dir(fromPath), relPath)
+			subToPath := path.Join(toFolder, relPath)
+
+			evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
+			evt.Data = map[string]interface{}{
+				"fromNotebook": fromBox.ID,
+				"fromPath":     subFromPath,
+				"toNotebook":   toBox.ID,
+				"toPath":       path.Dir(subToPath) + ".sy",
+				"newPath":      subToPath,
+			}
+			evt.Callback = callback
+			util.PushEvent(evt)
+		}
 	}
 
 	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
@@ -1616,6 +1629,21 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 		}
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+
+	allRemoveRootIDs := []string{tree.ID}
+	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
+	for _, rootID := range allRemoveRootIDs {
+		removeTree, _ := LoadTreeByBlockID(rootID)
+		if nil == removeTree {
+			continue
+		}
+
+		// 刷新文档关联的数据库 https://github.com/siyuan-note/siyuan/issues/11731
+		syncDelete2AttributeView(removeTree.Root)
+
+		// 解绑数据库关联
+		removeAvBlockRel(removeTree.Root)
+	}
 
 	if existChildren {
 		if err = box.Remove(childrenDir); nil != err {

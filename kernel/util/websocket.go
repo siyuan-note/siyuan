@@ -266,6 +266,10 @@ func PushProtyleLoading(rootID, msg string) {
 	BroadcastByType("protyle", "addLoading", 0, msg, rootID)
 }
 
+func PushReloadEmojiConf() {
+	BroadcastByType("main", "reloadEmojiConf", 0, "", nil)
+}
+
 func PushDownloadProgress(id string, percent float32) {
 	evt := NewCmdResult("downloadProgress", 0, PushModeBroadcast)
 	evt.Data = map[string]interface{}{

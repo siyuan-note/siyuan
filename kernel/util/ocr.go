@@ -102,7 +102,7 @@ func LoadAssetsTexts() {
 }
 
 func SaveAssetsTexts() {
-	if !assetsTextsChanged.Load() || !TesseractEnabled {
+	if !assetsTextsChanged.Load() {
 		return
 	}
 
@@ -149,24 +149,24 @@ func ExistsAssetText(asset string) (ret bool) {
 	return
 }
 
-func GetAssetText(asset string, force bool) (ret string) {
-	if !force {
-		assetsTextsLock.Lock()
-		ret = assetsTexts[asset]
-		assetsTextsLock.Unlock()
-		return
-	}
-
+func OcrAsset(asset string) (ret []map[string]interface{}) {
 	assetsPath := GetDataAssetsAbsPath()
 	assetAbsPath := strings.TrimPrefix(asset, "assets")
 	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
 	ret = Tesseract(assetAbsPath)
 	assetsTextsLock.Lock()
-	assetsTexts[asset] = ret
+	ocrText := GetOcrJsonText(ret)
+	assetsTexts[asset] = ocrText
 	assetsTextsLock.Unlock()
-	if "" != ret {
+	if "" != ocrText {
 		assetsTextsChanged.Store(true)
 	}
+	return
+}
+
+// https://github.com/siyuan-note/siyuan/pull/11708
+func GetAssetText(asset string) (ret string) {
+	ret = assetsTexts[asset]
 	return
 }
 
@@ -178,9 +178,9 @@ func IsTesseractExtractable(p string) bool {
 // tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
 var tesseractOCRLock = sync.Mutex{}
 
-func Tesseract(imgAbsPath string) string {
+func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	if ContainerStd != Container || !TesseractEnabled {
-		return ""
+		return
 	}
 
 	defer logging.Recover()
@@ -188,16 +188,16 @@ func Tesseract(imgAbsPath string) string {
 	defer tesseractOCRLock.Unlock()
 
 	if !IsTesseractExtractable(imgAbsPath) {
-		return ""
+		return
 	}
 
 	info, err := os.Stat(imgAbsPath)
 	if nil != err {
-		return ""
+		return
 	}
 
 	if TesseractMaxSize < uint64(info.Size()) {
-		return ""
+		return
 	}
 
 	defer logging.Recover()
@@ -205,24 +205,59 @@ func Tesseract(imgAbsPath string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"))
+	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"), "tsv")
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
 		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
-		return ""
+		return
 	}
 
 	if nil != err {
 		logging.LogWarnf("tesseract [path=%s, size=%d] failed: %s", imgAbsPath, info.Size(), err)
-		return ""
+		return
 	}
 
-	ret := string(output)
+	tsv := string(output)
+
+	// 按行分割 TSV 数据
+	lines := strings.Split(tsv, "\r\n")
+
+	// 解析 TSV 数据 跳过标题行，从第二行开始处理
+	for _, line := range lines[1:] {
+		if line == "" {
+			continue // 跳过空行
+		}
+		// 分割每列数据
+		fields := strings.Split(line, "\t")
+		// 将字段名和字段值映射到一个 map 中
+		dataMap := make(map[string]interface{})
+		for i, header := range strings.Split(lines[0], "\t") {
+			dataMap[header] = fields[i]
+		}
+		ret = append(ret, dataMap)
+	}
+
+	tsv = gulu.Str.RemoveInvisible(tsv)
+	tsv = RemoveRedundantSpace(tsv)
+	msg := fmt.Sprintf("OCR [%s] [%s]", html.EscapeString(info.Name()), html.EscapeString(GetOcrJsonText(ret)))
+	PushStatusBar(msg)
+	return
+}
+
+// 提取并连接所有 text 字段的函数
+func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
+	for _, dataMap := range jsonData {
+		// 检查 text 字段是否存在
+		if text, ok := dataMap["text"]; ok {
+			// 确保 text 是字符串类型
+			if textStr, ok := text.(string); ok {
+				ret += " " + textStr
+			}
+		}
+	}
 	ret = gulu.Str.RemoveInvisible(ret)
 	ret = RemoveRedundantSpace(ret)
-	msg := fmt.Sprintf("OCR [%s] [%s]", html.EscapeString(info.Name()), html.EscapeString(ret))
-	PushStatusBar(msg)
 	return ret
 }
 

@@ -159,7 +159,7 @@ export const keymap = {
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.insert}</span>
+                <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.element}</span>
             </div>
             <div class="fn__none b3-list__panel">${keymap._genItem(window.siyuan.config.keymap.editor.insert, "editor" + Constants.ZWSP + "insert")}</div>
             <div class="b3-list-item b3-list-item--narrow toggle">
@@ -428,12 +428,15 @@ export const keymap = {
                         keys[1] = "headings";
                     }
                     let hasConflict = false;
-                    if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
+                    const isAssistKey = ["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1));
+                    if (isAssistKey ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⌃D", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape"].includes(keymapStr) ||
                         // 跳转到下/上一个编辑页签不能包含 ctrl， 否则不能监听到 keyup
                         (isMac() && keys[0] === "general" && ["goToEditTabNext", "goToEditTabPrev"].includes(keys[1]) && keymapStr.includes("⌘"))
                     ) {
-                        showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`);
+                        if (!isAssistKey) {
+                            showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`);
+                        }
                         hasConflict = true;
                     }
                     Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {

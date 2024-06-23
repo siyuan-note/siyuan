@@ -498,7 +498,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 			Content:          content,
 			Content2:         content2,
 			HasEndDate:       false,
-			IsNotTime:        true,
+			IsNotTime:        isNotTime,
 			FormattedContent: formatted,
 		}
 		return
@@ -535,7 +535,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 		IsNotEmpty:       true,
 		IsNotEmpty2:      !content2Time.IsZero(),
 		HasEndDate:       hasEndDate,
-		IsNotTime:        true,
+		IsNotTime:        isNotTime,
 		FormattedContent: formatted,
 	}
 	return

@@ -314,11 +314,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 						return ast.WalkContinue
 					}
 
-					table, renderErr := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
-					if nil != renderErr {
-						logging.LogErrorf("render attribute view [%s] table failed: %s", n.AttributeViewID, renderErr)
-						return ast.WalkContinue
-					}
+					table := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 
 					var aligns []int
 					for range table.Columns {

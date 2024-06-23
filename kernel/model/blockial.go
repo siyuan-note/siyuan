@@ -30,6 +30,7 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -287,6 +288,23 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	return
 }
 
+func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
+	WaitForWritingFiles()
+
+	ret = map[string]map[string]string{}
+	trees := filesys.LoadTrees(ids)
+	for _, id := range ids {
+		tree := trees[id]
+		if nil == tree {
+			continue
+		}
+
+		ret[id] = getBlockAttrs0(id, tree)
+		cache.PutBlockIAL(id, ret[id])
+	}
+	return
+}
+
 func GetBlockAttrs(id string) (ret map[string]string) {
 	ret = map[string]string{}
 	if cached := cache.GetBlockIAL(id); nil != cached {
@@ -296,20 +314,7 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 
 	WaitForWritingFiles()
 
-	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		logging.LogWarnf("block [%s] not found", id)
-		return
-	}
-
-	for _, kv := range node.KramdownIAL {
-		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
-	}
+	ret = getBlockAttrs(id)
 	cache.PutBlockIAL(id, ret)
 	return
 }
@@ -321,11 +326,25 @@ func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
 		return
 	}
 
+	ret = getBlockAttrs(id)
+	cache.PutBlockIAL(id, ret)
+	return
+}
+
+func getBlockAttrs(id string) (ret map[string]string) {
+	ret = map[string]string{}
+
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
 		return
 	}
 
+	ret = getBlockAttrs0(id, tree)
+	return
+}
+
+func getBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
+	ret = map[string]string{}
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		logging.LogWarnf("block [%s] not found", id)
@@ -335,6 +354,5 @@ func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
 	for _, kv := range node.KramdownIAL {
 		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
 	}
-	cache.PutBlockIAL(id, ret)
 	return
 }

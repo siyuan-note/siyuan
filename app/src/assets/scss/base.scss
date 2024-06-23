@@ -84,9 +84,9 @@ html {
     min-width: 32px;
     height: 100%;
     box-sizing: border-box;
+    border-radius: var(--b3-border-radius-b);
 
     &:hover {
-      border-radius: var(--b3-border-radius-b);
       background-color: var(--b3-theme-surface-light);
     }
   }

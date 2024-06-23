@@ -87,7 +87,7 @@
     font-weight: bold;
 
     &:empty::after {
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-surface-light);
       content: attr(data-tip);
     }
   }

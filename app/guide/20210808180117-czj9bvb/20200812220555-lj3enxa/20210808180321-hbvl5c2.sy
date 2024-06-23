@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20240507235859"
+		"updated": "20240612234642"
 	},
 	"Children": [
 		{
@@ -398,6 +398,23 @@
 					"TextMarkBlockRefID": "20230104144904-39br4c6",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "分享文档"
+				}
+			]
+		},
+		{
+			"ID": "20240612234640-ocrdto3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240612234640-ocrdto3",
+				"updated": "20240612234642"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240517031028-xqinazo",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "发布服务"
 				}
 			]
 		}

@@ -1017,10 +1017,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 bind(element) {
                     element.style.maxWidth = "none";
                     fetchPost("/api/asset/getImageOCRText", {
-                        path: imgElement.getAttribute("src"),
-                        force: false
+                        path: imgElement.getAttribute("src")
                     }, (response) => {
-                        element.querySelector("textarea").value = response.data.text;
+                        const textarea =element.querySelector("textarea");
+                        textarea.value = response.data.text;
+                        textarea.dataset.ocrText = response.data.text;
                     });
                 }
             }, {
@@ -1029,7 +1030,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 iconHTML: "",
                 label: window.siyuan.languages.reOCR,
                 click() {
-                    fetchPost("/api/asset/getImageOCRText", {
+                    fetchPost("/api/asset/ocr", {
                         path: imgElement.getAttribute("src"),
                         force: true
                     });
@@ -1115,11 +1116,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
         textElements[0].focus();
         window.siyuan.menus.menu.removeCB = () => {
-            const ocrElemennt = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
-            if (ocrElemennt) {
+            const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
+            if (ocrElement && ocrElement.dataset.ocrText !== ocrElement.value) {
                 fetchPost("/api/asset/setImageOCRText", {
                     path: imgElement.getAttribute("src"),
-                    text: ocrElemennt.value
+                    text: ocrElement.value
                 });
             }
             imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
@@ -1463,11 +1464,11 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             if (label === window.siyuan.languages.default) {
-                const isCenter = assetElement.style.display === "block";
+                const isCenter = assetElement.style.display === "block" || assetElement.style.minWidth;
                 assetElement.removeAttribute("style");
                 imgElement.removeAttribute("style");
                 if (isCenter) {
-                    assetElement.style.display = "block";
+                    assetElement.style.minWidth = "calc(100% - 0.1em)";
                 }
             } else {
                 assetElement.style.width = label;

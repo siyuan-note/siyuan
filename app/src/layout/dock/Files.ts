@@ -19,6 +19,7 @@ import {openFileById} from "../../editor/util";
 import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
+import {refreshFileTree} from "../../dialog/processSystem";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -108,6 +109,7 @@ export class Files extends Model {
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
         </span>
         <span class="b3-list-item__text">${window.siyuan.languages.closeNotebook}</span>
+        <span class="counter fn__none" style="cursor: auto"></span>
     </li>
     <ul class="fn__none fn__flex-1"></ul>
 </ul>`;
@@ -704,8 +706,10 @@ export class Files extends Model {
     public init(init = true) {
         let html = "";
         let closeHtml = "";
+        let closeCounter = 0;
         window.siyuan.notebooks.forEach((item) => {
             if (item.closed) {
+                closeCounter++;
                 closeHtml += this.genNotebook(item);
             } else {
                 html += this.genNotebook(item);
@@ -713,6 +717,13 @@ export class Files extends Model {
         });
         this.element.innerHTML = html;
         this.closeElement.lastElementChild.innerHTML = closeHtml;
+        const counterElement = this.closeElement.querySelector(".counter");
+        counterElement.textContent = closeCounter.toString();
+        if (closeCounter) {
+            counterElement.classList.remove("fn__none");
+        } else {
+            counterElement.classList.add("fn__none");
+        }
         if (!init) {
             return;
         }
@@ -740,6 +751,9 @@ export class Files extends Model {
                             }
                         });
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
+                        const counterElement = this.closeElement.querySelector(".counter");
+                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
+                        counterElement.classList.remove("fn__none");
                     }
                 }
             });
@@ -747,6 +761,11 @@ export class Files extends Model {
                 const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
                 if (removeElement) {
                     removeElement.remove();
+                    const counterElement = this.closeElement.querySelector(".counter");
+                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
+                    if (counterElement.textContent === "0")  {
+                        counterElement.classList.add("fn__none");
+                    }
                 }
             }
             return;
@@ -764,7 +783,9 @@ export class Files extends Model {
                     if (parentElement) {
                         const iconElement = parentElement.querySelector("svg");
                         iconElement.classList.remove("b3-list-item__arrow--open");
-                        iconElement.parentElement.classList.add("fn__hidden");
+                        if (parentElement.dataset.type !== "navigation-root") {
+                            iconElement.parentElement.classList.add("fn__hidden");
+                        }
                         const emojiElement = iconElement.parentElement.nextElementSibling;
                         if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
                             emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
@@ -784,6 +805,11 @@ export class Files extends Model {
         }
         const liElement = this.closeElement.querySelector(`li[data-url="${data.data.box.id}"]`) as HTMLElement;
         if (liElement) {
+            const counterElement = this.closeElement.querySelector(".counter");
+            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
+            if (counterElement.textContent === "0") {
+                counterElement.classList.add("fn__none");
+            }
             liElement.remove();
         }
         setNoteBook((notebooks: INotebook[]) => {
@@ -924,6 +950,10 @@ export class Files extends Model {
         const arrowElement = liElement.querySelector(".b3-list-item__arrow");
         arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
+        const emojiElement = liElement.querySelector(".b3-list-item__icon");
+        if (emojiElement.textContent === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+            emojiElement.textContent = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+        }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }
@@ -1045,7 +1075,7 @@ aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");
-                    fetchPost("/api/filetree/refreshFiletree", {}, () => {
+                    refreshFileTree(() => {
                         this.element.removeAttribute("disabled");
                         this.init(false);
                     });

@@ -3,7 +3,7 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasClosestByMatchTag,
+    hasClosestByMatchTag, hasTopClosestByAttribute,
     hasTopClosestByClassName,
 } from "../util/hasClosest";
 import {
@@ -138,14 +138,14 @@ export class WYSIWYG {
         const ialKeys = Object.keys(ial);
         for (let i = 0; i < this.element.attributes.length; i++) {
             const oldKey = this.element.attributes[i].nodeName;
-            if (!["type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth"].includes(oldKey) &&
+            if (!["type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly"].includes(oldKey) &&
                 !ialKeys.includes(oldKey)) {
                 this.element.removeAttribute(oldKey);
                 i--;
             }
         }
         ialKeys.forEach((key: string) => {
-            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth"].includes(key)) {
+            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly"].includes(key)) {
                 this.element.setAttribute(key, ial[key]);
             }
         });
@@ -153,13 +153,24 @@ export class WYSIWYG {
 
     // text block-ref file-annotation-ref a 结尾处打字应为普通文本
     private escapeInline(protyle: IProtyle, range: Range, event: InputEvent) {
-        if (!event.data) {
+        if (!event.data && event.inputType !== "insertLineBreak") {
             return;
         }
+
         const inputData = event.data;
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
         const currentTypes = protyle.toolbar.getCurrentType();
+
+        // https://github.com/siyuan-note/siyuan/issues/11766
+        if (event.inputType === "insertLineBreak") {
+            if (currentTypes.length > 0 && range.toString() === "" && inlineElement.tagName === "SPAN" &&
+                inlineElement.textContent.startsWith("\n") &&
+                range.startContainer.previousSibling && range.startContainer.previousSibling.textContent === "\n") {
+                inlineElement.before(range.startContainer.previousSibling);
+            }
+            return;
+        }
 
         let dataLength = inputData.length;
         if (inputData === "<" || inputData === ">") {
@@ -167,7 +178,8 @@ export class WYSIWYG {
             dataLength = 4;
         }
         // https://github.com/siyuan-note/siyuan/issues/5924
-        if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length && inlineElement.tagName === "SPAN" &&
+        if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length &&
+            inlineElement.tagName === "SPAN" &&
             inlineElement.textContent.replace(Constants.ZWSP, "") !== inputData &&
             inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length &&
             !hasPreviousSibling(range.startContainer) && !hasPreviousSibling(inlineElement)) {
@@ -408,7 +420,7 @@ export class WYSIWYG {
             const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - (parseInt(protyle.wysiwyg.element.style.paddingLeft) || 24) - (parseInt(protyle.wysiwyg.element.style.paddingRight) || 16)) - 2;
             const mostBottom = rect.bottom;
             const y = event.clientY;
-
+            const contentRect = protyle.contentElement.getBoundingClientRect();
             // av col resize
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
                 const nodeElement = hasClosestBlock(target);
@@ -422,16 +434,10 @@ export class WYSIWYG {
                 const dragColId = dragElement.getAttribute("data-col-id");
                 let newWidth: number;
                 const scrollElement = nodeElement.querySelector(".av__scroll");
-                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = Math.max(oldWidth + (moveEvent.clientX - event.clientX), 25);
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
-                        const cellElement = item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement;
-                        if (cellElement.previousElementSibling) {
-                            cellElement.style.width = newWidth + "px";
-                        } else {
-                            cellElement.style.width = newWidth + 24 + "px";
-                        }
+                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth + "px";
                     });
                     stickyRow(nodeElement, contentRect, "bottom");
                 };
@@ -555,7 +561,6 @@ export class WYSIWYG {
                 let lastCellElement: HTMLElement;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
-                const contentRect = protyle.contentElement.getBoundingClientRect();
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
                     if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
@@ -635,7 +640,7 @@ export class WYSIWYG {
                         dragElement.parentElement.parentElement.style.width = "";
                     }
                     if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
-                        if ((dragElement.tagName === "IMG" && dragElement.parentElement.parentElement.style.display !== "block") || !isCenter) {
+                        if ((dragElement.tagName === "IMG" && !dragElement.parentElement.parentElement.style.minWidth) || !isCenter) {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x)) + "px";
                         } else {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * 2) + "px";
@@ -729,10 +734,6 @@ export class WYSIWYG {
                 return;
             }
 
-            // https://ld246.com/article/1681778773806
-            if (["IMG", "VIDEO", "AUDIO"].includes(target.tagName)) {
-                return;
-            }
             // 多选节点
             let x = event.clientX;
             if (event.clientX > mostRight) {
@@ -749,6 +750,7 @@ export class WYSIWYG {
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
+            const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img")
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select
@@ -810,6 +812,16 @@ export class WYSIWYG {
                         moveCellElement = moveTarget;
                     }
                     return;
+                }
+                // 在包含 img， video， audio 的元素上划选后无法上下滚动 https://ld246.com/article/1681778773806
+                // 在包含 img， video， audio 的元素上拖拽无法划选 https://github.com/siyuan-note/siyuan/issues/11763
+                if (needScroll) {
+                    if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
+                        protyle.contentElement.scroll({
+                            top: protyle.contentElement.scrollTop + (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
+                            behavior: "smooth"
+                        });
+                    }
                 }
                 protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar
@@ -1315,7 +1327,11 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-
+            // https://github.com/siyuan-note/siyuan/issues/11793
+            const embedElement = hasTopClosestByAttribute(nodeElement.parentElement, "data-type", "NodeBlockQueryEmbed");
+            if (embedElement) {
+                nodeElement = embedElement;
+            }
             event.stopPropagation();
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
@@ -1860,9 +1876,6 @@ export class WYSIWYG {
             isComposition = false;
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                return;
-            }
             if (!blockElement) {
                 return;
             }
@@ -1896,10 +1909,6 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
-                return;
-            }
-            if (blockElement && blockElement.getAttribute("data-type") === "NodeHTMLBlock") {
-                event.stopPropagation();
                 return;
             }
             if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {

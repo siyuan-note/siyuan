@@ -109,7 +109,7 @@
     height: 6px;
     width: 100%;
     position: relative;
-    z-index: 2;
+    z-index: 4; // 需大于 #sidebarContainer https://github.com/siyuan-note/siyuan/issues/11759
 
     &:hover:after {
       background-color: var(--b3-scroll-color);
@@ -402,6 +402,7 @@
     display: flex;
     border-radius: var(--b3-border-radius);
     margin: 7px;
+    cursor: pointer;
 
     &--pin {
       opacity: 0;

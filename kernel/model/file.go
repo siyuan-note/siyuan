@@ -872,7 +872,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
 
-	SetRecentDocByTree(tree)
+	go setRecentDocByTree(tree)
 	return
 }
 

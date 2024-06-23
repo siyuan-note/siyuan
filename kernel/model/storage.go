@@ -63,17 +63,13 @@ func RemoveRecentDoc(ids []string) {
 	return
 }
 
-func SetRecentDocByTree(tree *parse.Tree) {
+func setRecentDocByTree(tree *parse.Tree) {
 	recentDoc := &RecentDoc{
 		RootID: tree.Root.ID,
 		Icon:   tree.Root.IALAttr("icon"),
 		Title:  tree.Root.IALAttr("title"),
 	}
 
-	SetRecentDoc(recentDoc)
-}
-
-func SetRecentDoc(doc *RecentDoc) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -83,13 +79,13 @@ func SetRecentDoc(doc *RecentDoc) (err error) {
 	}
 
 	for i, c := range recentDocs {
-		if c.RootID == doc.RootID {
+		if c.RootID == recentDoc.RootID {
 			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
 			break
 		}
 	}
 
-	recentDocs = append([]*RecentDoc{doc}, recentDocs...)
+	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	if 32 < len(recentDocs) {
 		recentDocs = recentDocs[:32]
 	}

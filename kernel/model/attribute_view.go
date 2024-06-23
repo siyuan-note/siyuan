@@ -199,7 +199,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 			switch view.LayoutType {
 			case av.LayoutTypeTable:
 				if !kv.IsDetached {
-					if nil == treenode.GetBlockTree(kv.BlockID) {
+					if !treenode.ExistBlockTree(kv.BlockID) {
 						break
 					}
 				}

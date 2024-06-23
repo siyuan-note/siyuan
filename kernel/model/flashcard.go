@@ -1085,7 +1085,7 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 			continue
 		}
 
-		if nil == treenode.GetBlockTree(c.BlockID()) {
+		if !treenode.ExistBlockTree(c.BlockID()) {
 			continue
 		}
 

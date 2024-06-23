@@ -304,6 +304,30 @@ func ExistBlockTree(id string) bool {
 	return 0 < count
 }
 
+func ExistBlockTrees(ids []string) (ret map[string]bool) {
+	ret = map[string]bool{}
+	for _, id := range ids {
+		ret[id] = false
+	}
+
+	sqlStmt := "SELECT id FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
+	rows, err := db.Query(sqlStmt)
+	if nil != err {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); nil != err {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret[id] = true
+	}
+	return
+}
+
 func GetBlockTrees(ids []string) (ret map[string]*BlockTree) {
 	ret = map[string]*BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"

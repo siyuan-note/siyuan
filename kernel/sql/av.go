@@ -111,6 +111,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 
 	// 过滤掉不存在的行
 	var notFound []string
+	var toCheckBlockIDs []string
 	for blockID, keyValues := range rows {
 		blockValue := getRowBlockValue(keyValues)
 		if nil == blockValue {
@@ -127,7 +128,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			continue
 		}
 
-		if nil == treenode.GetBlockTree(blockID) {
+		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
+	}
+	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
+	for blockID, exist := range checkRet {
+		if !exist {
 			notFound = append(notFound, blockID)
 		}
 	}

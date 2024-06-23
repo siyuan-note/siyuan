@@ -244,7 +244,7 @@ func openNotebook(c *gin.Context) {
 					"20240530133126-axarxgx": "20240530101000-4qitucx",
 				}
 				startID = guideStartID[notebook]
-				if nil != treenode.GetBlockTree(startID) {
+				if treenode.ExistBlockTree(startID) {
 					util.BroadcastByTypeAndApp("main", app, "openFileById", 0, "", map[string]interface{}{
 						"id": startID,
 					})

@@ -3,7 +3,7 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasClosestByMatchTag,
+    hasClosestByMatchTag, hasTopClosestByAttribute,
     hasTopClosestByClassName,
 } from "../util/hasClosest";
 import {
@@ -1327,7 +1327,11 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-
+            // https://github.com/siyuan-note/siyuan/issues/11793
+            const embedElement = hasTopClosestByAttribute(nodeElement.parentElement, "data-type", "NodeBlockQueryEmbed");
+            if (embedElement) {
+                nodeElement = embedElement;
+            }
             event.stopPropagation();
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");

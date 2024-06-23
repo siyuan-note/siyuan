@@ -256,7 +256,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     } else if (protyle.title && protyle.title.editElement &&
                         (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" || protyle.contentElement.scrollTop === 0)) {
-                        protyle.title.editElement.focus();
+                        const titleRange = setLastNodeRange(protyle.title.editElement, range, false);
+                        titleRange.collapse(false);
+                        focusByRange(titleRange);
+                        event.stopPropagation();
+                        event.preventDefault();
                     } else if (protyle.contentElement.scrollTop !== 0) {
                         protyle.contentElement.scrollTop = 0;
                         protyle.scroll.lastScrollTop = 8;
@@ -650,7 +654,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
-                            protyle.title.editElement.focus();
+                            const titleRange = setLastNodeRange(protyle.title.editElement, range, false);
+                            titleRange.collapse(false);
+                            focusByRange(titleRange);
+                            event.stopPropagation();
+                            event.preventDefault();
                         } else {
                             protyle.contentElement.scrollTop = 0;
                             protyle.scroll.lastScrollTop = 8;

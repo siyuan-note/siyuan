@@ -1528,7 +1528,7 @@
     "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
     "240": "L'en-tête du glisser-déposer actuel se trouve dans le bloc conteneur et l'opération de glisser-déposer ne peut pas être effectuée",
     "241": "Le glisser vers son sous-titre n'est pas pris en charge",
-    "242": "Le bloc de liaison existe déjà dans la base de données actuelle",
+    "242": "TODO",
     "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
     "244": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur",
     "245": "Il ne s'est pas terminé normalement après la dernière utilisation. Il est recommandé d'exécuter [Doc Tree - Reconstruire l'index]. À l'avenir, veuillez utiliser [Quitter l'application] dans le panneau de droite pour quitter normalement",

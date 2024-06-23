@@ -2826,16 +2826,23 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	}
 
 	var node *ast.Node
+	var tree *parse.Tree
 	if !operation.IsDetached {
-		node, _, _ = getNodeByBlockID(tx, operation.NextID)
+		node, tree, _ = getNodeByBlockID(tx, operation.NextID)
 	}
 
-	// 检查是否已经存在绑定块
-	// Improve database primary key binding block https://github.com/siyuan-note/siyuan/issues/10945
+	now := util.CurrentTimeMillis()
+	// 检查是否已经存在绑定块，如果存在的话则重新绑定
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
 			if value.BlockID == operation.NextID {
-				util.PushMsg(Conf.language(242), 3000)
+				if !operation.IsDetached {
+					bindBlockAv0(tx, operation.AvID, node, tree)
+					value.IsDetached = false
+					value.Block.Content = getNodeRefText(node)
+					value.UpdatedAt = now
+					err = av.SaveAttributeView(attrView)
+				}
 				return
 			}
 		}

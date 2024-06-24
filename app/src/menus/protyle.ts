@@ -1019,7 +1019,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     fetchPost("/api/asset/getImageOCRText", {
                         path: imgElement.getAttribute("src")
                     }, (response) => {
-                        const textarea =element.querySelector("textarea");
+                        const textarea = element.querySelector("textarea");
                         textarea.value = response.data.text;
                         textarea.dataset.ocrText = response.data.text;
                     });
@@ -1278,6 +1278,19 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 html = nodeElement.outerHTML;
             }
         }).element);
+    }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.copy,
+        icon: "iconCopy",
+        click() {
+            let title = linkElement.dataset.title;
+            if (title) {
+                title = ` "${title}"`;
+            }
+            writeText(`[${linkElement.textContent.replace(Constants.ZWSP, "")}](${linkElement.dataset.href}${title})`);
+        }
+    }).element);
+    if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.remove,

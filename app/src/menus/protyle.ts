@@ -1283,7 +1283,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            let title = linkElement.dataset.title;
+            let title = linkElement.dataset.title || "";
             if (title) {
                 title = ` "${title}"`;
             }

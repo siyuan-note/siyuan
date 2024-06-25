@@ -743,11 +743,31 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     if (nodeElement.classList.contains("table") && !protyle.disabled) {
         const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
         if (cellElement) {
+            const tableMenus = tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range);
+            if (tableMenus.insertMenus.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    type: "separator",
+                }).element);
+                tableMenus.insertMenus.forEach((menuItem) => {
+                    window.siyuan.menus.menu.append(new MenuItem(menuItem).element);
+                });
+            }
+            if (tableMenus.removeMenus.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    type: "separator",
+                }).element);
+                tableMenus.removeMenus.forEach((menuItem) => {
+                    window.siyuan.menus.menu.append(new MenuItem(menuItem).element);
+                });
+            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                type: "separator",
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "submenu",
-                icon: "iconTable",
-                label: window.siyuan.languages.table,
-                submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range) as IMenu[]
+                icon: "iconMore",
+                label: window.siyuan.languages.more,
+                submenu: tableMenus.otherMenus.concat(tableMenus.other2Menus)
             }).element);
         }
     }
@@ -1607,10 +1627,10 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
 };
 
 export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range) => {
-    const menus: IMenu[] = [];
+    const otherMenus: IMenu[] = [];
     const colIndex = getColIndex(cellElement);
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {
-        menus.push({
+        otherMenus.push({
             label: window.siyuan.languages.cancelMerged,
             click: () => {
                 const oldHTML = nodeElement.outerHTML;
@@ -1660,7 +1680,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     }
     const thMatchElement = nodeElement.querySelectorAll("col")[colIndex];
     if (thMatchElement.style.width || thMatchElement.style.minWidth) {
-        menus.push({
+        otherMenus.push({
             label: window.siyuan.languages.useDefaultWidth,
             click: () => {
                 const html = nodeElement.outerHTML;
@@ -1671,7 +1691,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     const isPinHead = nodeElement.getAttribute("custom-pinthead");
-    menus.push({
+    otherMenus.push({
         icon: isPinHead ? "iconUnpin" : "iconPin",
         label: isPinHead ? window.siyuan.languages.unpinTableHead : window.siyuan.languages.pinTableHead,
         click: () => {
@@ -1684,8 +1704,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         }
     });
-    menus.push({type: "separator"});
-    menus.push({
+    otherMenus.push({type: "separator"});
+    otherMenus.push({
         icon: "iconAlignLeft",
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         label: window.siyuan.languages.alignLeft,
@@ -1693,7 +1713,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             setTableAlign(protyle, [cellElement], nodeElement, "left", range);
         }
     });
-    menus.push({
+    otherMenus.push({
         icon: "iconAlignCenter",
         label: window.siyuan.languages.alignCenter,
         accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
@@ -1701,7 +1721,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             setTableAlign(protyle, [cellElement], nodeElement, "center", range);
         }
     });
-    menus.push({
+    otherMenus.push({
         icon: "iconAlignRight",
         label: window.siyuan.languages.alignRight,
         accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
@@ -1709,6 +1729,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             setTableAlign(protyle, [cellElement], nodeElement, "right", range);
         }
     });
+    const menus: IMenu[] = [];
+    menus.push(...otherMenus)
     menus.push({
         type: "separator"
     });
@@ -1784,7 +1806,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             return true;
         }
     });
-    menus.push({
+    const insertMenus = []
+    insertMenus.push({
         icon: "iconBefore",
         label: window.siyuan.languages.insertRowAbove,
         accelerator: window.siyuan.config.keymap.editor.table.insertRowAbove.custom,
@@ -1793,7 +1816,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         }
     });
     if (!nextHasNone || (nextHasNone && !nextHasRowSpan && nextHasColSpan)) {
-        menus.push({
+        insertMenus.push({
             icon: "iconAfter",
             label: window.siyuan.languages.insertRowBelow,
             accelerator: window.siyuan.config.keymap.editor.table.insertRowBelow.custom,
@@ -1803,7 +1826,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     if (colIsPure || previousColIsPure) {
-        menus.push({
+        insertMenus.push({
             icon: "iconInsertLeft",
             label: window.siyuan.languages.insertColumnLeft,
             accelerator: window.siyuan.config.keymap.editor.table.insertColumnLeft.custom,
@@ -1813,7 +1836,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     if (colIsPure || nextColIsPure) {
-        menus.push({
+        insertMenus.push({
             icon: "iconInsertRight",
             label: window.siyuan.languages.insertColumnRight,
             accelerator: window.siyuan.config.keymap.editor.table.insertColumnRight.custom,
@@ -1822,6 +1845,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
+    menus.push(...insertMenus)
+    const other2Menus: IMenu[] = []
     if (((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
             (!previousHasNone || (previousHasNone && !previousHasRowSpan && previousHasColSpan))) ||
         ((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
@@ -1829,14 +1854,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         (colIsPure && previousColIsPure) ||
         (colIsPure && nextColIsPure)
     ) {
-        menus.push({
+        other2Menus.push({
             type: "separator"
         });
     }
 
     if ((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
         (!previousHasNone || (previousHasNone && !previousHasRowSpan && previousHasColSpan))) {
-        menus.push({
+        other2Menus.push({
             icon: "iconUp",
             label: window.siyuan.languages.moveToUp,
             accelerator: window.siyuan.config.keymap.editor.table.moveToUp.custom,
@@ -1847,7 +1872,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     }
     if ((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
         (!nextHasNone || (nextHasNone && !nextHasRowSpan && nextHasColSpan))) {
-        menus.push({
+        other2Menus.push({
             icon: "iconDown",
             label: window.siyuan.languages.moveToDown,
             accelerator: window.siyuan.config.keymap.editor.table.moveToDown.custom,
@@ -1857,7 +1882,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     if (colIsPure && previousColIsPure) {
-        menus.push({
+        other2Menus.push({
             icon: "iconLeft",
             label: window.siyuan.languages.moveToLeft,
             accelerator: window.siyuan.config.keymap.editor.table.moveToLeft.custom,
@@ -1867,7 +1892,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     if (colIsPure && nextColIsPure) {
-        menus.push({
+        other2Menus.push({
             icon: "iconRight",
             label: window.siyuan.languages.moveToRight,
             accelerator: window.siyuan.config.keymap.editor.table.moveToRight.custom,
@@ -1876,15 +1901,17 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
+    menus.push(...other2Menus);
     if ((cellElement.parentElement.parentElement.tagName !== "THEAD" &&
         ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) || colIsPure) {
         menus.push({
             type: "separator"
         });
     }
+    const removeMenus = []
     if (cellElement.parentElement.parentElement.tagName !== "THEAD" &&
         ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) {
-        menus.push({
+        removeMenus.push({
             icon: "iconDeleteRow",
             label: window.siyuan.languages["delete-row"],
             accelerator: window.siyuan.config.keymap.editor.table["delete-row"].custom,
@@ -1894,7 +1921,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     if (colIsPure) {
-        menus.push({
+        removeMenus.push({
             icon: "iconDeleteColumn",
             label: window.siyuan.languages["delete-column"],
             accelerator: window.siyuan.config.keymap.editor.table["delete-column"].custom,
@@ -1903,7 +1930,8 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    return menus;
+    menus.push(...removeMenus);
+    return {menus, removeMenus, insertMenus, otherMenus, other2Menus};
 };
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean, isRemove?: boolean) => {

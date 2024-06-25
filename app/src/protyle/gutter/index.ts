@@ -1360,7 +1360,7 @@ export class Gutter {
                     type: "submenu",
                     icon: "iconTable",
                     label: window.siyuan.languages.table,
-                    submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range) as IMenu[]
+                    submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range).menus as IMenu[]
                 }).element);
             }
         } else if (type === "NodeAttributeView" && !protyle.disabled) {

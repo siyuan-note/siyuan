@@ -246,8 +246,24 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     // 设置 bq 和代码块光标
     // 需放在列表处理后 https://github.com/siyuan-note/siyuan/issues/11606
     if (["NodeCodeBlock", "NodeTable", "NodeAttributeView"].includes(blockType)) {
-        if (blockElement.previousElementSibling) {
-            focusBlock(blockElement.previousElementSibling, undefined, false);
+        const previousElement = getPreviousBlock(blockElement)
+        if (previousElement) {
+            if (previousElement.classList.contains("p") && getContenteditableElement(previousElement).textContent === "") {
+                const ppElement = getPreviousBlock(previousElement)
+                transaction(protyle, [{
+                    action: "delete",
+                    id: previousElement.getAttribute("data-node-id"),
+                }], [{
+                    action: "insert",
+                    data: previousElement.outerHTML,
+                    id: previousElement.getAttribute("data-node-id"),
+                    parentID: protyle.block.parentID,
+                    previousID: ppElement ? ppElement.getAttribute("data-node-id") : undefined
+                }]);
+                previousElement.remove();
+            } else {
+                focusBlock(previousElement, undefined, false);
+            }
         }
         return;
     }

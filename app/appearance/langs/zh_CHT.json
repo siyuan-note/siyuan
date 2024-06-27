@@ -1,4 +1,5 @@
 {
+  "emptyPlaceholder": "寫點什麼，或按下 ' / ' 查看指令",
   "publish": "發布",
   "publishService": "發布服務",
   "publishServiceNotStarted": "發布服務未啟動",

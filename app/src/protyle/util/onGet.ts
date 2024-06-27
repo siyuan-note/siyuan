@@ -19,6 +19,7 @@ import {avRender} from "../render/av/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -180,6 +181,15 @@ const setHTML = (options: {
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }
+    // https://github.com/siyuan-note/siyuan/issues/10528
+    if (!protyle.block.showAll && protyle.wysiwyg.element.childElementCount === 1 && protyle.wysiwyg.element.firstElementChild.classList.contains("p")) {
+        const editElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);
+        if (editElement && editElement.textContent === "") {
+            editElement.classList.add("protyle-wysiwyg--empty");
+            editElement.setAttribute("placeholder", window.siyuan.languages.emptyPlaceholder);
+        }
+    }
+
     if (options.action.includes(Constants.CB_GET_BACKLINK)) {
         foldPassiveType(options.expand, protyle.wysiwyg.element);
     }

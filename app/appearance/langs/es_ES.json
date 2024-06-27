@@ -1,4 +1,5 @@
 {
+  "emptyPlaceholder": "Escribe algo, ' / ' para los comandos",
   "publish": "Publicar",
   "publishService": "Publicar servicio",
   "publishServiceNotStarted": "Servicio de publicación no iniciado",

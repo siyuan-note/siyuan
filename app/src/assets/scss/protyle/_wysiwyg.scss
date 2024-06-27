@@ -5,6 +5,11 @@
   user-select: auto;
   overflow-x: clip;
 
+  &--empty:empty:before {
+    color: var(--b3-empty-color);
+    content: attr(placeholder);
+  }
+
   .protyle-breadcrumb__bar {
     font-size: 14px;
   }

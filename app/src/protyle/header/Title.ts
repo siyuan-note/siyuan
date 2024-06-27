@@ -16,7 +16,7 @@ import {isMac, readText, writeText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {openFileById} from "../../editor/util";
 import {setTitle} from "../../dialog/processSystem";
-import {getNoContainerElement} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {code160to32} from "../util/code160to32";
 import {genEmptyElement} from "../../block/util";
@@ -115,19 +115,25 @@ export class Title {
                     event.stopPropagation();
                 }
             } else if (event.key === "Enter") {
-                const newId = Lute.NewNodeID();
-                const newElement = genEmptyElement(false, true, newId);
-                protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
-                focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
-                transaction(protyle, [{
-                    action: "insert",
-                    data: newElement.outerHTML,
-                    id: newId,
-                    parentID: protyle.block.parentID
-                }], [{
-                    action: "delete",
-                    id: newId,
-                }]);
+                const editElment = getContenteditableElement(protyle.wysiwyg.element.firstElementChild)
+                if (editElment && editElment.textContent === "") {
+                    // 配合提示文本使用，避免提示文本挤压到第二个块中
+                    focusBlock(protyle.wysiwyg.element.firstElementChild, protyle.wysiwyg.element);
+                } else {
+                    const newId = Lute.NewNodeID();
+                    const newElement = genEmptyElement(false, true, newId);
+                    protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
+                    focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
+                    transaction(protyle, [{
+                        action: "insert",
+                        data: newElement.outerHTML,
+                        id: newId,
+                        parentID: protyle.block.parentID
+                    }], [{
+                        action: "delete",
+                        id: newId,
+                    }]);
+                }
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {

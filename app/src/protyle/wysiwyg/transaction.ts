@@ -1165,7 +1165,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {
         if (item.action === "insert") {
-            protyle.observerLoad.disconnect()
+            protyle.observerLoad?.disconnect()
             return true;
         }
     })

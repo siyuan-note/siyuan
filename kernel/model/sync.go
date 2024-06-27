@@ -259,12 +259,6 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if isSyncing.Load() {
-		logging.LogWarnf("sync is in progress")
-		planSyncAfter(fixSyncInterval)
-		return false
-	}
-
 	if 7 < autoSyncErrCount && !byHand {
 		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)

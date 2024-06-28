@@ -81,21 +81,6 @@ const promiseTransaction = () => {
             document.getElementById("toolbarSync").classList.remove("fn__none");
         }
         /// #endif
-        if (response.data[0].doOperations[0].action === "setAttrs") {
-            const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
-            if (gutterFoldElement) {
-                gutterFoldElement.removeAttribute("disabled");
-            }
-            // 仅在 alt+click 箭头折叠时才会触发
-            protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                if (item.querySelector(`[data-node-id="${response.data[0].doOperations[0].id}"]`)) {
-                    item.removeAttribute("data-render");
-                    blockRender(protyle, item);
-                }
-            });
-            return;
-        }
-
         let range: Range;
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
@@ -1127,7 +1112,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             protyle.undo.add(doOperations, undoOperations, protyle);
         }
     }
-    if (doOperations.length === 1 && doOperations[0].action === "unfoldHeading") {
+    // 加速折叠 https://github.com/siyuan-note/siyuan/issues/11828
+    if (doOperations.length === 1 && (
+        doOperations[0].action === "unfoldHeading" ||
+        (doOperations[0].action === "setAttrs" && doOperations[0].data.startsWith('{"fold":'))
+    )) {
         fetchPost("/api/transactions", {
             session: protyle.id,
             app: Constants.SIYUAN_APPID,
@@ -1139,7 +1128,18 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             response.data[0].doOperations.forEach((operation: IOperation) => {
                 if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
                     processFold(operation, protyle);
-                    return;
+                } else if (operation.action === "setAttrs") {
+                    const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
+                    if (gutterFoldElement) {
+                        gutterFoldElement.removeAttribute("disabled");
+                    }
+                    // 仅在 alt+click 箭头折叠时才会触发
+                    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                        if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+                            item.removeAttribute("data-render");
+                            blockRender(protyle, item);
+                        }
+                    });
                 }
             });
         })

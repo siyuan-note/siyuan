@@ -1078,7 +1078,7 @@
   "export6": "导出时关于 PDF 标注引出处锚文本的处理方式",
   "export7": "文件名 - 页码 - 锚文本",
   "export8": "仅锚文本",
-  "export9": "锚点哈希（仅支持导出笔记本）",
+  "export9": "锚点哈希",
   "graphConfig2": "引用块次数过滤",
   "selectOpen": "始终定位打开的文档",
   "selectOpen1": "定位打开的文档",

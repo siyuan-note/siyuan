@@ -1078,7 +1078,7 @@
   "export6": "About the handling of anchor text in PDF annotations when exporting",
   "export7": "File Name - Page Number - Anchor Text",
   "export8": "Just anchor text",
-  "export9": "Anchor hash (only for exporting Notebook)",
+  "export9": "Anchor hash",
   "graphConfig2": "Reference Count filter",
   "selectOpen": "Always Select Opened Doc",
   "selectOpen1": "Select Opened Doc",

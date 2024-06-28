@@ -2618,16 +2618,15 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 	}
 
 	exportRefMode := Conf.Export.BlockRefMode
-	if !exportNotebook && 5 == exportRefMode {
-		// 非笔记本导出不支持锚点哈希，将其切换为锚文本块链
-		exportRefMode = 2
-	}
-
 	var defBlockIDs []string
-	if exportNotebook && 5 == exportRefMode {
-		// Add a Ref export mode `Anchor hash` for notebook Markdown exporting https://github.com/siyuan-note/siyuan/issues/10265
-		// 导出笔记本时导出锚点哈希，这里先记录下所有定义块的 ID
+	if 5 == exportRefMode {
+		// 导出锚点哈希，这里先记录下所有定义块的 ID
+		walked := map[string]bool{}
 		for _, p := range docPaths {
+			if walked[p] {
+				continue
+			}
+
 			docIAL := box.docIAL(p)
 			if nil == docIAL {
 				continue
@@ -2638,18 +2637,25 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 				continue
 			}
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering {
+				if !entering || !treenode.IsBlockRef(n) {
 					return ast.WalkContinue
 				}
 
-				if treenode.IsBlockRef(n) {
-					defID, _, _ := treenode.GetBlockRef(n)
+				defID, _, _ := treenode.GetBlockRef(n)
+				if defBt := treenode.GetBlockTree(defID); nil != defBt {
+					docPaths = append(docPaths, defBt.Path)
+					docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
+
 					defBlockIDs = append(defBlockIDs, defID)
+					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+
+					walked[defBt.Path] = true
 				}
 				return ast.WalkContinue
 			})
 		}
 		defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+		docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
 	}
 
 	luteEngine := util.NewLute()

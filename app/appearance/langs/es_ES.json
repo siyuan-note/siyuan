@@ -135,7 +135,6 @@
   "percentChecked": "Porcentaje comprobado",
   "percentUnchecked": "Porcentaje no marcado",
   "checkbox": "Casilla de verificación",
-  "copyInline": "Copiar elemento en línea",
   "unsplit": "Desdividir",
   "unsplitAll": "Desdividir Todo",
   "resetCardTip": "¿Estás seguro de restablecer ${x} tarjetas?",

@@ -135,7 +135,6 @@
   "percentChecked": "チェック済みの割合",
   "percentUnchecked": "未チェックの割合",
   "checkbox": "チェックボックス",
-  "copyInline": "インライン要素をコピー",
   "unsplit": "分割解除",
   "unsplitAll": "すべての分割解除",
   "resetCardTip": "${x} 枚のフラッシュカードをリセットしてもよろしいですか？",

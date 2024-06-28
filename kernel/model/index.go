@@ -429,4 +429,14 @@ func subscribeSQLEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
+
+	eventbus.Subscribe(eventbus.EvtSQLIndexChanged, func() {
+		Conf.DataIndexState = 1
+		Conf.Save()
+	})
+
+	eventbus.Subscribe(eventbus.EvtSQLIndexFlushed, func() {
+		Conf.DataIndexState = 0
+		Conf.Save()
+	})
 }

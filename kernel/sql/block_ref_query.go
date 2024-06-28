@@ -17,6 +17,7 @@
 package sql
 
 import (
+	"bytes"
 	"database/sql"
 	"sort"
 	"strings"
@@ -352,10 +353,20 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []
 	return
 }
 
-func QueryRefsRecent(onlyDoc bool) (ret []*Ref) {
+func QueryRefsRecent(onlyDoc bool, ignoreLines []string) (ret []*Ref) {
 	stmt := "SELECT * FROM refs AS r"
 	if onlyDoc {
 		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.type = 'd' AND b.id = r.def_block_id"
+	}
+	stmt += " WHERE 1 = 1"
+	if 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		notLike := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			notLike.WriteString(" AND ")
+			notLike.WriteString(line)
+		}
+		stmt += notLike.String()
 	}
 	stmt += " GROUP BY r.def_block_id ORDER BY r.id DESC LIMIT 32"
 	rows, err := query(stmt)

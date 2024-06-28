@@ -180,9 +180,16 @@ func QueryBlockAliases(rootID string) (ret []string) {
 	return
 }
 
-func queryNames() (ret []string) {
+func queryNames(searchIgnoreLines []string) (ret []string) {
 	ret = []string{}
-	sqlStmt := "SELECT name FROM blocks WHERE name != '' LIMIT ?"
+	sqlStmt := "SELECT name FROM blocks WHERE name != ''"
+	buf := bytes.Buffer{}
+	for _, line := range searchIgnoreLines {
+		buf.WriteString(" AND ")
+		buf.WriteString(line)
+	}
+	sqlStmt += buf.String()
+	sqlStmt += " LIMIT ?"
 	rows, err := query(sqlStmt, 10240)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -213,9 +220,16 @@ func queryNames() (ret []string) {
 	return
 }
 
-func queryAliases() (ret []string) {
+func queryAliases(searchIgnoreLines []string) (ret []string) {
 	ret = []string{}
-	sqlStmt := "SELECT alias FROM blocks WHERE alias != '' LIMIT ?"
+	sqlStmt := "SELECT alias FROM blocks WHERE alias != ''"
+	buf := bytes.Buffer{}
+	for _, line := range searchIgnoreLines {
+		buf.WriteString(" AND ")
+		buf.WriteString(line)
+	}
+	sqlStmt += buf.String()
+	sqlStmt += " LIMIT ?"
 	rows, err := query(sqlStmt, 10240)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -274,9 +288,15 @@ func queryDocIDsByTitle(title string, excludeIDs []string) (ret []string) {
 	return
 }
 
-func queryDocTitles() (ret []string) {
+func queryDocTitles(searchIgnoreLines []string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT content FROM blocks WHERE type = 'd'"
+	buf := bytes.Buffer{}
+	for _, line := range searchIgnoreLines {
+		buf.WriteString(" AND ")
+		buf.WriteString(line)
+	}
+	sqlStmt += buf.String()
 	rows, err := query(sqlStmt)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

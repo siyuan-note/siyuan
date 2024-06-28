@@ -112,7 +112,9 @@ func ResetVirtualBlockRefCache() {
 		return
 	}
 
-	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
+	searchIgnoreLines := getSearchIgnoreLines()
+	refSearchIgnoreLines := getRefSearchIgnoreLines()
+	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
 }
 

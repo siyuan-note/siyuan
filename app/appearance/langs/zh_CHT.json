@@ -1078,7 +1078,7 @@
   "export6": "導出時關於 PDF 標註引出處錨文字的處理方式",
   "export7": "文件名 - 頁碼 - 錨文字",
   "export8": "僅錨文字",
-  "export9": "錨點哈希（僅支援導出筆記本）",
+  "export9": "錨點哈希",
   "graphConfig2": "引用塊次數過濾",
   "selectOpen": "定位打開的文檔",
   "selectOpen1": "定位打開的文檔",

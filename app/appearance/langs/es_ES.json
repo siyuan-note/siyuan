@@ -1078,7 +1078,7 @@
   "export6": "Sobre el manejo del texto ancla en las anotaciones PDF al exportar",
   "export7": "Nombre de archivo - Número de página - Texto ancla",
   "export8": "Sólo texto ancla",
-  "export9": "Hash de anclaje (sólo para exportar Notebook)",
+  "export9": "Hash de anclaje",
   "graphConfig2": "Filtro de recuento de referencias",
   "selectOpen": "Seleccionar siempre el documento abierto",
   "selectOpen1": "Seleccionar documento abierto",

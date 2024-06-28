@@ -386,11 +386,7 @@ func Timing(c *gin.Context) {
 }
 
 func Recover(c *gin.Context) {
-	defer func() {
-		logging.Recover()
-		c.Status(http.StatusInternalServerError)
-	}()
-
+	defer logging.Recover()
 	c.Next()
 }
 

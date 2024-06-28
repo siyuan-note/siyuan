@@ -1078,7 +1078,7 @@
   "export6": "À propos de la gestion du texte d'ancrage dans les annotations PDF lors de l'exportation",
   "export7": "Nom de fichier - Numéro de page - Texte d'ancrage",
   "export8": "Anchor text only",
-  "export9": "Hash d'ancrage (uniquement pour l'exportation de Notebook)",
+  "export9": "Hash d'ancrage",
   "graphConfig2": "Filtre de compte de blocs de référence",
   "selectOpen": "Localisez toujours les documents ouverts",
   "selectOpen1": "Localiser les documents ouverts",

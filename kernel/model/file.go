@@ -1312,11 +1312,11 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	}
 
 	box := Conf.Box(tree.Box)
-	var boxName string
-	if nil != box {
-		boxName = box.Name
+	if nil == box {
+		err = ErrBoxNotFound
+		return
 	}
-	hPath = boxName + tree.HPath
+	hPath = box.Name + tree.HPath
 	return
 }
 

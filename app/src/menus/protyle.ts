@@ -57,6 +57,7 @@ import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";
 import {Menu} from "../plugin/Menu";
 import {getFirstBlock} from "../protyle/wysiwyg/getBlock";
+import {popSearch} from "../mobile/menu/search";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -1451,16 +1452,35 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-    /// #if !MOBILE
+
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.search,
         accelerator: window.siyuan.languages.click,
         icon: "iconSearch",
         click() {
+            /// #if !MOBILE
             openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false);
+            /// #else
+            popSearch(protyle.app, {
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: `#${tagElement.textContent}#`,
+                r: "",
+                page: 1,
+            });
+            /// #endif
         }
     }).element);
-    /// #endif
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.rename,
+        icon: "iconEdit",
+        click() {
+            renameTag(tagElement.textContent.replace(Constants.ZWSP, ""));
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
         icon: "iconRefresh",
@@ -1471,10 +1491,24 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.rename,
-        icon: "iconEdit",
+        label: window.siyuan.languages.copy,
+        icon: "iconCopy",
         click() {
-            renameTag(tagElement.textContent.replace(Constants.ZWSP, ""));
+            writeText(protyle.lute.BlockDOM2StdMd(tagElement.outerHTML));
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.cut,
+        icon: "iconCut",
+        click() {
+            writeText(protyle.lute.BlockDOM2StdMd(tagElement.outerHTML));
+
+            const oldHTML = nodeElement.outerHTML;
+            tagElement.insertAdjacentHTML("afterend", "<wbr>");
+            tagElement.remove();
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({

@@ -1547,6 +1547,55 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 
+export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
+    window.siyuan.menus.menu.remove();
+    const nodeElement = hasClosestBlock(element);
+    if (!nodeElement) {
+        return;
+    }
+    const id = nodeElement.getAttribute("data-node-id");
+    const html = nodeElement.outerHTML;
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.copy,
+        icon: "iconCopy",
+        click() {
+            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
+        }
+    }).element);
+    if (!protyle.disabled) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconCut",
+            label: window.siyuan.languages.cut,
+            click() {
+                writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
+
+                element.insertAdjacentHTML("afterend", "<wbr>");
+                element.remove();
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                focusByWbr(nodeElement, protyle.toolbar.range);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.remove,
+            click() {
+                element.insertAdjacentHTML("afterend", "<wbr>");
+                element.remove();
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                focusByWbr(nodeElement, protyle.toolbar.range);
+            }
+        }).element);
+    }
+    const rect = element.getBoundingClientRect();
+    window.siyuan.menus.menu.popup({
+        x: rect.left,
+        y: rect.top + 26,
+        h: 26
+    });
+}
+
 const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, html: string) => {
     return {
         iconHTML: "",

@@ -23,7 +23,7 @@ import {
     contentMenu,
     enterBack,
     fileAnnotationRefMenu,
-    imgMenu,
+    imgMenu, inlineMathMenu,
     linkMenu,
     refMenu,
     setFold,
@@ -1673,6 +1673,11 @@ export class WYSIWYG {
                     }
                     return false;
                 }
+            }
+            const inlineMathElement = hasClosestByAttribute(target, "data-type", "inline-math");
+            if (inlineMathElement) {
+                inlineMathMenu(protyle, inlineMathElement);
+                return false;
             }
             if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {

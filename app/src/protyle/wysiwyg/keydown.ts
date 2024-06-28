@@ -54,7 +54,7 @@ import {
     getStartEndElement,
     upSelect
 } from "./commonHotkey";
-import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
+import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -594,14 +594,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         previousSibling.nodeType !== 3 &&
                         previousSibling.getAttribute("data-type")?.indexOf("inline-math") > -1
                     ) {
-                        protyle.toolbar.showRender(protyle, previousSibling);
+                        inlineMathMenu(protyle, previousSibling);
                         return;
                     } else if (!previousSibling &&
                         range.startContainer.parentElement.previousSibling &&
                         range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
                         range.startContainer.parentElement.previousElementSibling.getAttribute("data-type")?.indexOf("inline-math") > -1
                     ) {
-                        protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
+                        inlineMathMenu(protyle, range.startContainer.parentElement.previousElementSibling);
                         return;
                     }
                 }

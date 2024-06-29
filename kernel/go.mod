@@ -32,7 +32,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-ole/go-ole v1.3.0
 	github.com/goccy/go-json v0.10.3
-	github.com/gofrs/flock v0.9.0
+	github.com/gofrs/flock v0.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
@@ -55,7 +55,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20240626145351-e4f9b0821aaf
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
-	github.com/siyuan-note/filelock v0.0.0-20240505150405-3de3a406d257
+	github.com/siyuan-note/filelock v0.0.0-20240629145917-7545564cf0a4
 	github.com/siyuan-note/httpclient v0.0.0-20240626145026-29585d45a51c
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240502024535-718add51db67
@@ -85,7 +85,7 @@ require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.54.9 // indirect
+	github.com/aws/aws-sdk-go v1.54.11 // indirect
 	github.com/bytedance/sonic v1.11.9 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

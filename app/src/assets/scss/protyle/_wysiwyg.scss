@@ -200,6 +200,7 @@
       border-bottom: 1px solid;
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
+      cursor: pointer;  // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
     }
 
     span[data-type~="a"] {
@@ -601,7 +602,6 @@
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
-  span[data-type~="tag"],
   .protyle-action__language,
   .render-node {
     cursor: pointer;

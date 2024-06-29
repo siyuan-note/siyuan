@@ -150,7 +150,9 @@ export const downSelect = (options: {
             // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (endIndex < innerText.length) {
             // 选中下一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
-            if (!getNextBlock(options.nodeElement) && innerText.trimRight().substr(endIndex).indexOf("\n") === -1) {
+            if (!getNextBlock(options.nodeElement) && innerText.trimRight().substr(endIndex).indexOf("\n") === -1 &&
+                // 当最后一行太长自然换行的情况
+                nodeEditableElement.getBoundingClientRect().bottom - options.range.getBoundingClientRect().bottom - parseInt(getComputedStyle(nodeEditableElement).paddingBottom) < 14) {
                 // 当为最后一个块时应选中末尾
                 setLastNodeRange(nodeEditableElement, options.range, false);
                 if (options.nodeElement.classList.contains("code-block") && isExpandDown) {

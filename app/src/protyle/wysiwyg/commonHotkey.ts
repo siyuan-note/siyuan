@@ -2,7 +2,7 @@ import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
 import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
-import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
+import {getContenteditableElement, getNextBlock} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
@@ -100,9 +100,11 @@ export const upSelect = (options: {
             // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (startIndex > 0) {
             // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
-            if (innerText.substr(0, startIndex).indexOf("\n") === -1) {
+            if (innerText.substr(0, startIndex).indexOf("\n") === -1 &&
+                // 当第一行太长自然换行的情况
+                options.range.getBoundingClientRect().top - nodeEditableElement.getBoundingClientRect().top - parseInt(getComputedStyle(nodeEditableElement).paddingTop) < 14) {
                 setFirstNodeRange(nodeEditableElement, options.range);
-                if(!isMac()) {
+                if (!isMac()) {
                     // windows 中 shift 向上选中三行后，最后的光标会乱跳
                     options.event.preventDefault();
                 }
@@ -148,7 +150,7 @@ export const downSelect = (options: {
             // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (endIndex < innerText.length) {
             // 选中下一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
-            if (!options.nodeElement.nextElementSibling && innerText.trimRight().substr(endIndex).indexOf("\n") === -1) {
+            if (!getNextBlock(options.nodeElement) && innerText.trimRight().substr(endIndex).indexOf("\n") === -1) {
                 // 当为最后一个块时应选中末尾
                 setLastNodeRange(nodeEditableElement, options.range, false);
                 if (options.nodeElement.classList.contains("code-block") && isExpandDown) {

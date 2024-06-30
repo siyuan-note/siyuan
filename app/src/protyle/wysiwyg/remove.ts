@@ -243,10 +243,10 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
+    const previousElement = getPreviousBlock(blockElement) as HTMLElement;
     // 设置 bq 和代码块光标
     // 需放在列表处理后 https://github.com/siyuan-note/siyuan/issues/11606
     if (["NodeCodeBlock", "NodeTable", "NodeAttributeView"].includes(blockType)) {
-        const previousElement = getPreviousBlock(blockElement)
         if (previousElement) {
             if (previousElement.classList.contains("p") && getContenteditableElement(previousElement).textContent === "") {
                 // 空块向后删除时移除改块 https://github.com/siyuan-note/siyuan/issues/11732
@@ -258,7 +258,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     action: "insert",
                     data: previousElement.outerHTML,
                     id: previousElement.getAttribute("data-node-id"),
-                    parentID: protyle.block.parentID,
+                    parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID,
                     previousID: ppElement ? ppElement.getAttribute("data-node-id") : undefined
                 }]);
                 previousElement.remove();
@@ -281,7 +281,6 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         return;
     }
 
-    const previousElement = getPreviousBlock(blockElement) as HTMLElement;
     if (!previousElement) {
         if (protyle.wysiwyg.element.childElementCount > 1 && getContenteditableElement(blockElement).textContent === "") {
             focusBlock(protyle.wysiwyg.element.firstElementChild.nextElementSibling);

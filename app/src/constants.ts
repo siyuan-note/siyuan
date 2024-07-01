@@ -65,6 +65,7 @@ export abstract class Constants {
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
 
     // size
+    public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
     public static readonly SIZE_SCROLL_TB: number = 24;
     public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 64;

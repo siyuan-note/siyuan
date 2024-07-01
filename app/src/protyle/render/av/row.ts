@@ -6,6 +6,7 @@ import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell, re
 import {fetchPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
+import {Constants} from "../../../constants";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -349,6 +350,20 @@ export const setPageSize = (options: {
             updatePageSize({
                 currentPageSize,
                 newPageSize: "100",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
+        checked: currentPageSize === Constants.SIZE_DATABASE_MAZ_SIZE.toString(),
+        label: window.siyuan.languages.all,
+        click() {
+            updatePageSize({
+                currentPageSize,
+                newPageSize: Constants.SIZE_DATABASE_MAZ_SIZE.toString(),
                 protyle: options.protyle,
                 avID: options.avID,
                 nodeElement: options.nodeElement

@@ -188,7 +188,7 @@ export const getViewHTML = (data: IAVTable) => {
 <button class="b3-menu__item" data-type="set-page-size" data-size="${data.pageSize}">
     <svg class="b3-menu__icon"></svg>
     <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
-    <span class="b3-menu__accelerator">${data.pageSize}</span>
+    <span class="b3-menu__accelerator">${data.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : data.pageSize}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <label class="b3-menu__item">

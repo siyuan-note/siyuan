@@ -393,8 +393,18 @@ func serveAssets(ginServer *gin.Engine) {
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
 		if nil != err {
-			context.Status(http.StatusNotFound)
-			return
+			if strings.Contains(strings.TrimPrefix(requestPath, "/"), "/") {
+				// 再使用编码过的路径解析一次 https://github.com/siyuan-note/siyuan/issues/11823
+				dest := url.PathEscape(strings.TrimPrefix(requestPath, "/"))
+				dest = strings.ReplaceAll(dest, ":", "%3A")
+				relativePath = path.Join("assets", dest)
+				p, err = model.GetAssetAbsPath(relativePath)
+			}
+
+			if nil != err {
+				context.Status(http.StatusNotFound)
+				return
+			}
 		}
 		http.ServeFile(context.Writer, context.Request, p)
 		return

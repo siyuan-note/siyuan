@@ -310,10 +310,12 @@ export const editor = {
         if (fontFamilyElement.tagName === "SELECT") {
             let fontFamilyHTML = `<option value="">${window.siyuan.languages.default}</option>`;
             fetchPost("/api/system/getSysFonts", {}, (response) => {
-                response.data.forEach((item: string) => {
-                    fontFamilyHTML += `<option value="${item}"${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
-                });
-                fontFamilyElement.innerHTML = fontFamilyHTML;
+                if (response.code === 0) {
+                    response.data.forEach((item: string) => {
+                        fontFamilyHTML += `<option value="${item}"${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
+                    });
+                    fontFamilyElement.innerHTML = fontFamilyHTML;
+                }
             });
         }
         editor.element.querySelector("#clearHistory").addEventListener("click", () => {

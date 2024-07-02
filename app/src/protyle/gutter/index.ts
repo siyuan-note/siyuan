@@ -1651,6 +1651,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.wechatReminder,
                 icon: "iconMp",
+                disabled: window.siyuan.config.readonly,
                 click() {
                     openWechatNotify(nodeElement);
                 }
@@ -1662,6 +1663,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 icon: "iconRiffCard",
+                disabled: window.siyuan.config.readonly,
                 click() {
                     quickMakeCard(protyle, [nodeElement]);
                 }

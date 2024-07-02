@@ -440,6 +440,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.userGuide,
                 icon: "iconHelp",
+                disabled: window.siyuan.config.readonly,
                 click: () => {
                     mountHelp();
                 }

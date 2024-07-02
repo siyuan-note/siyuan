@@ -112,6 +112,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.wechatReminder,
             icon: "iconMp",
+            disabled: window.siyuan.config.readonly,
             click() {
                 openFileWechatNotify(protyle);
             }
@@ -120,6 +121,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             iconHTML: "",
             label: window.siyuan.languages.spaceRepetition,
             accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
+            disabled: window.siyuan.config.readonly,
             click: () => {
                 fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
                     openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
@@ -128,6 +130,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         }, {
             iconHTML: "",
             label: window.siyuan.languages.manage,
+            disabled: window.siyuan.config.readonly,
             click: () => {
                 fetchPost("/api/filetree/getHPathByID", {
                     id: protyle.block.rootID
@@ -139,6 +142,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             iconHTML: "",
             label: window.siyuan.languages.quickMakeCard,
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+            disabled: window.siyuan.config.readonly,
             click: () => {
                 let titleElement = protyle.title?.element;
                 if (!titleElement) {
@@ -153,6 +157,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             riffCardMenu.push({
                 iconHTML: "",
                 label: window.siyuan.languages.addToDeck,
+                disabled: window.siyuan.config.readonly,
                 click: () => {
                     makeCard(protyle.app, [protyle.block.rootID]);
                 }
@@ -163,6 +168,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             type: "submenu",
             icon: "iconRiffCard",
             submenu: riffCardMenu,
+            disabled: window.siyuan.config.readonly,
         }).element);
 
         window.siyuan.menus.menu.append(new MenuItem({

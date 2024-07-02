@@ -720,18 +720,8 @@ export class Gutter {
             accelerator: "⌘X",
             icon: "iconCut",
             click: () => {
-                if (isNotEditBlock(selectsElement[0])) {
-                    let html = "";
-                    selectsElement.forEach(item => {
-                        html += removeEmbed(item);
-                    });
-                    writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-                    protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "remove");
-                } else {
-                    focusByRange(getEditorRange(selectsElement[0]));
-                    document.execCommand("cut");
-                }
+                focusBlock(selectsElement[0]);
+                document.execCommand("cut");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1193,14 +1183,8 @@ export class Gutter {
                 accelerator: "⌘X",
                 icon: "iconCut",
                 click: () => {
-                    if (isNotEditBlock(nodeElement)) {
-                        writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
-                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "remove");
-                        protyle.breadcrumb?.hide();
-                    } else {
-                        focusByRange(getEditorRange(nodeElement));
-                        document.execCommand("cut");
-                    }
+                    focusBlock(nodeElement);
+                    document.execCommand("cut");
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

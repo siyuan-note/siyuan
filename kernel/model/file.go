@@ -1638,11 +1638,8 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 			continue
 		}
 
-		// 刷新文档关联的数据库 https://github.com/siyuan-note/siyuan/issues/11731
 		syncDelete2AttributeView(removeTree.Root)
-
-		// 解绑数据库关联
-		removeAvBlockRel(removeTree.Root)
+		syncDelete2Block(removeTree.Root)
 	}
 
 	if existChildren {

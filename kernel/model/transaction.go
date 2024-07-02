@@ -798,11 +798,11 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	syncDelete2AttributeView(node)
-	removeAvBlockRel(node)
+	syncDelete2Block(node)
 	return
 }
 
-func removeAvBlockRel(node *ast.Node) {
+func syncDelete2Block(node *ast.Node) {
 	var avIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {

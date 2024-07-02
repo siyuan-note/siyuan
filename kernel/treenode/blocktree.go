@@ -146,7 +146,7 @@ func removeDatabaseFile() (err error) {
 
 func GetBlockTreesByType(typ string) (ret []*BlockTree) {
 	sqlStmt := "SELECT * FROM blocktrees WHERE type = ?"
-	rows, err := db.Query(sqlStmt)
+	rows, err := db.Query(sqlStmt, typ)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

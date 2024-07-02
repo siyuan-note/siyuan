@@ -44,28 +44,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func IsFoldHeading(transactions *[]*Transaction) bool {
-	for _, tx := range *transactions {
-		for _, op := range tx.DoOperations {
-			if "foldHeading" == op.Action {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func IsUnfoldHeading(transactions *[]*Transaction) bool {
-	for _, tx := range *transactions {
-		for _, op := range tx.DoOperations {
-			if "unfoldHeading" == op.Action {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 	for _, tx := range *transactions {
 		for _, op := range tx.DoOperations {
@@ -797,13 +775,17 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	syncDelete2AttributeView(node)
-	removeAvBlockRel(node)
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		WaitForWritingFiles()
+		syncDelete2AttributeView(node)
+		syncDelete2Block(node)
+	}()
 	return
 }
 
-func removeAvBlockRel(node *ast.Node) {
-	var avIDs []string
+func syncDelete2Block(node *ast.Node) {
+	var changedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -812,13 +794,39 @@ func removeAvBlockRel(node *ast.Node) {
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
 			if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
-				avIDs = append(avIDs, avID)
+				changedAvIDs = append(changedAvIDs, avID)
+			}
+
+			attrView, err := av.ParseAttributeView(avID)
+			if nil != err {
+				return ast.WalkContinue
+			}
+
+			trees, nodes := getAttrViewBoundNodes(attrView)
+			for _, toChangNode := range nodes {
+				avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
+				if "" != avs {
+					avIDs := strings.Split(avs, ",")
+					avIDs = gulu.Str.RemoveElem(avIDs, avID)
+					if 1 > len(avIDs) {
+						toChangNode.RemoveIALAttr(av.NodeAttrNameAvs)
+					} else {
+						toChangNode.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
+					}
+				}
+				avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
+				oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
+				toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
+				pushBroadcastAttrTransactions(oldAttrs, toChangNode)
+			}
+			for _, tree := range trees {
+				indexWriteTreeUpsertQueue(tree)
 			}
 		}
 		return ast.WalkContinue
 	})
-	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-	for _, avID := range avIDs {
+	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
+	for _, avID := range changedAvIDs {
 		util.PushReloadAttrView(avID)
 	}
 }
@@ -1318,9 +1326,6 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
-	if nil != err {
-		return
-	}
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.luteEngine = util.NewLute()

@@ -1652,7 +1652,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
 
-	nodes := getAttrViewBoundNodes(attrView)
+	_, nodes := getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
@@ -1689,7 +1689,7 @@ func getAvNames(avIDs string) (ret string) {
 	return
 }
 
-func getAttrViewBoundNodes(attrView *av.AttributeView) (ret []*ast.Node) {
+func getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
 	treeCache := map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
@@ -1712,7 +1712,10 @@ func getAttrViewBoundNodes(attrView *av.AttributeView) (ret []*ast.Node) {
 			continue
 		}
 
-		ret = append(ret, node)
+		nodes = append(nodes, node)
+	}
+	for _, tree := range treeCache {
+		trees = append(trees, tree)
 	}
 	return
 }

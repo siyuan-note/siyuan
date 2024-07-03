@@ -813,7 +813,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
                     if (position.end === editElement.textContent.length ||
                         // 软换行后删除 https://github.com/siyuan-note/siyuan/issues/11118
-                        (position.end === editElement.textContent.length - 1 && editElement.textContent.endsWith("\n"))) {
+                        (position.end === editElement.textContent.length - 1 && editElement.textContent.endsWith("\n")) ||
+                        // 图片后无内容删除 https://github.com/siyuan-note/siyuan/issues/11868
+                        (position.end === editElement.textContent.length - 1 && editElement.textContent.endsWith(Constants.ZWSP))) {
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
                             const nextRange = focusBlock(nextElement);

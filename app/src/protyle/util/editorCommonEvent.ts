@@ -988,6 +988,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), event.ctrlKey);
                         }
                     }
+
+                    // https://github.com/siyuan-note/siyuan/issues/10528#issuecomment-2205165824
+                    editorElement.querySelectorAll(".protyle-wysiwyg--empty").forEach(item => {
+                        item.classList.remove("protyle-wysiwyg--empty");
+                    });
+
                     // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
                     sourceElements.forEach(item => {
                         if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {

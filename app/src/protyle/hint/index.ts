@@ -955,8 +955,7 @@ ${genHintItemHTML(item)}
         }
         if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
             hideElements(["hint"], protyle);
-            event.preventDefault();
-            event.stopPropagation();
+            // 不需要 preventDefault https://github.com/siyuan-note/siyuan/issues/11846
             return true;
         }
         return false;

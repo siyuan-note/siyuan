@@ -53,6 +53,9 @@ func statAsset(c *gin.Context) {
 
 	} else if strings.HasPrefix(path, "file://") {
 		p = strings.TrimPrefix(path, "file://")
+		if strings.Contains(p, ":") {
+			p = strings.TrimPrefix(p, "/")
+		}
 	} else {
 		ret.Code = 1
 		return

@@ -125,6 +125,10 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 					// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
 					u = unescaped
 				}
+				if strings.Contains(u, ":") {
+					u = strings.TrimPrefix(u, "/")
+				}
+
 				if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
 					return ast.WalkSkipChildren
 				}
@@ -299,6 +303,10 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 				// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
 				u = unescaped
 			}
+			if strings.Contains(u, ":") {
+				u = strings.TrimPrefix(u, "/")
+			}
+
 			if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
 				return ast.WalkContinue
 			}

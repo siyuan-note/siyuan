@@ -21,6 +21,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -659,13 +660,24 @@ func (av *AttributeView) ShallowClone() (ret *AttributeView) {
 		return nil
 	}
 
+	var oldKeyIDs []string
 	keyIDMap := map[string]string{}
 	for _, kv := range ret.KeyValues {
 		newID := ast.NewNodeID()
 		keyIDMap[kv.Key.ID] = newID
+		oldKeyIDs = append(oldKeyIDs, kv.Key.ID)
 		kv.Key.ID = newID
 		kv.Values = []*Value{}
 	}
+
+	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
+	sorts := map[string]int{}
+	for i, k := range ret.KeyIDs {
+		sorts[k] = i
+	}
+	sort.Slice(oldKeyIDs, func(i, j int) bool {
+		return sorts[oldKeyIDs[i]] < sorts[oldKeyIDs[j]]
+	})
 
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
@@ -683,6 +695,12 @@ func (av *AttributeView) ShallowClone() (ret *AttributeView) {
 		}
 	}
 	ret.ViewID = ret.Views[0].ID
+
+	ret.KeyIDs = nil
+	for _, oldKeyID := range oldKeyIDs {
+		newKeyID := keyIDMap[oldKeyID]
+		ret.KeyIDs = append(ret.KeyIDs, newKeyID)
+	}
 	return
 }
 

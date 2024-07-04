@@ -75,7 +75,7 @@ export class Gutter {
             hideTooltip();
             window.siyuan.menus.menu.remove();
             const buttonElement = event.target.parentElement;
-            const selectIds: string[] = [];
+            let selectIds: string[] = [];
             let selectElements: Element[] = [];
             let avElement: Element;
             if (buttonElement.dataset.rowId) {
@@ -90,11 +90,27 @@ export class Gutter {
                     selectElements.push(item);
                 });
             } else {
-                protyle.wysiwyg.element.querySelector(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)?.classList.add("protyle-wysiwyg--select");
+                const gutterId = buttonElement.getAttribute("data-node-id")
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-                selectElements.forEach(item => {
-                    selectIds.push(item.getAttribute("data-node-id"));
-                });
+                let selectedIncludeGutter = false;
+                selectElements.forEach((item => {
+                    const itemId = item.getAttribute("data-node-id")
+                    if (itemId === gutterId) {
+                        selectedIncludeGutter = true
+                    }
+                    selectIds.push(itemId);
+                }))
+                if (!selectedIncludeGutter) {
+                    const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`)
+                    if (gutterNodeElement) {
+                        selectElements.forEach((item => {
+                           item.classList.remove("protyle-wysiwyg--select")
+                        }));
+                        gutterNodeElement.classList.add("protyle-wysiwyg--select")
+                        selectElements = [gutterNodeElement]
+                        selectIds = [gutterId];
+                    }
+                }
             }
 
             const ghostElement = document.createElement("div");

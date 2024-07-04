@@ -200,7 +200,7 @@
       border-bottom: 1px solid;
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
-      cursor: pointer;  // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
+      cursor: pointer; // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
     }
 
     span[data-type~="a"] {
@@ -637,7 +637,10 @@
   }
 
   .render-node .img:hover .protyle-icons,
-  .render-node .render-node:hover > .protyle-icons {
+  .render-node .render-node:hover > .protyle-icons,
+  // https://github.com/siyuan-note/siyuan/issues/11879
+  .protyle-wysiwyg__embed .img:hover .protyle-action__drag,
+  .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
     display: none;
   }
 }

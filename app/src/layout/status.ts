@@ -68,6 +68,7 @@ export const initStatus = (isWindow = false) => {
                     window.siyuan.menus.menu.append(new MenuItem({
                         label: window.siyuan.languages.userGuide,
                         icon: "iconHelp",
+                        disabled: window.siyuan.config.readonly,
                         click: () => {
                             mountHelp();
                         }

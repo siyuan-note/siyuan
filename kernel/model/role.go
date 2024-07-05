@@ -54,7 +54,3 @@ func GetGinContextRole(c *gin.Context) Role {
 		return RoleVisitor
 	}
 }
-
-func IsAdminRoleContext(c *gin.Context) bool {
-	return GetGinContextRole(c) == RoleAdministrator
-}

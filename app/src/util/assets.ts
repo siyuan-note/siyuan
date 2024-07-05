@@ -150,8 +150,10 @@ export const initAssets = () => {
                     return;
                 }
             }
-            window.siyuan.config.appearance = response.data.appearance;
-            loadAssets(response.data.appearance);
+            if (response.code === 0) {
+                window.siyuan.config.appearance = response.data.appearance;
+                loadAssets(response.data.appearance);
+            }
         });
     });
 };

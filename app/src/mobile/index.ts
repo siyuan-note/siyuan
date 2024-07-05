@@ -37,9 +37,10 @@ class App {
         if (!window.webkit?.messageHandlers && !window.JSAndroid) {
             registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         }
+        addBaseURL();
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-        addBaseURL();
+
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
@@ -89,30 +90,7 @@ class App {
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             window.siyuan.config = confResponse.data.conf;
             correctHotkey(siyuanApp);
-            await loadPlugins(this);
-            getLocalStorage(() => {
-                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
-                    window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus(this);
-                    document.title = window.siyuan.languages.siyuanNote;
-                    bootSync();
-                    loadAssets(confResponse.data.conf.appearance);
-                    initMessage();
-                    initAssets();
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                        window.siyuan.user = userResponse.data;
-                        fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
-                            window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            setNoteBook(() => {
-                                initFramework(this, confResponse.data.start);
-                                initRightMenu(this);
-                                openChangelog();
-                            });
-                        });
-                    });
-                    addGA();
-                });
-            });
+
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", (event) => {
@@ -140,6 +118,51 @@ class App {
                     }
                 }
             });
+
+            const promises = [
+                loadPlugins(this),
+                new Promise<void>(resolve => getLocalStorage(resolve)),
+                new Promise<void>(resolve => fetchGet(
+                    `/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`,
+                    (lauguages: IObject) => {
+                        window.siyuan.languages = lauguages;
+                        resolve();
+                    },
+                )),
+                new Promise<void>(resolve => {
+                    fetchPost("/api/setting/getEmojiConf", {}, emojiResponse => {
+                        window.siyuan.emojis = emojiResponse.data as IEmoji[];
+                        resolve();
+                    });
+                }),
+            ];
+
+            if (!window.siyuan.config.readonly) {
+                promises.push(new Promise<void>(resolve => {
+                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                        window.siyuan.user = userResponse.data;
+                        resolve();
+                    });
+                }));
+            }
+
+            await Promise.all(promises);
+
+            if (!window.siyuan.config.readonly) {
+                bootSync();
+            }
+
+            window.siyuan.menus = new Menus(this);
+            document.title = window.siyuan.languages.siyuanNote;
+            loadAssets(confResponse.data.conf.appearance);
+            initMessage();
+            initAssets();
+            setNoteBook(() => {
+                initFramework(this, confResponse.data.start);
+                initRightMenu(this);
+                openChangelog();
+            });
+            addGA();
         });
     }
 }

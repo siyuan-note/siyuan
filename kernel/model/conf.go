@@ -361,6 +361,9 @@ func InitConf() {
 	if nil == Conf.Publish {
 		Conf.Publish = conf.NewPublish()
 	}
+	if Conf.OpenHelp && Conf.Publish.Enable {
+		Conf.OpenHelp = false
+	}
 
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()

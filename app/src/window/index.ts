@@ -28,9 +28,6 @@ class App {
 
     constructor() {
         addBaseURL();
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
             zIndex: 10,
@@ -146,35 +143,22 @@ class App {
             }),
         };
         fetchPost("/api/system/getConf", {}, async (response) => {
+            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
-
-            const promises = [
-                loadPlugins(this),
-                new Promise<void>(resolve => getLocalStorage(resolve)),
-                new Promise<void>(resolve => fetchGet(
-                    `/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`,
-                    (lauguages: IObject) => {
-                        window.siyuan.languages = lauguages;
-                        resolve();
-                    },
-                )),
-            ];
-
-            if (!window.siyuan.config.readonly) {
-                promises.push(new Promise<void>(resolve => {
+            await loadPlugins(this);
+            getLocalStorage(() => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
+                    window.siyuan.languages = lauguages;
+                    window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        resolve();
+                        init(this);
+                        setTitle(window.siyuan.languages.siyuanNote);
+                        initMessage();
                     });
-                }));
-            }
-
-            await Promise.all(promises);
-
-            window.siyuan.menus = new Menus(this);
-            init(this);
-            setTitle(window.siyuan.languages.siyuanNote);
-            initMessage();
+                });
+            });
         });
         setNoteBook();
         initBlockPopover(this);

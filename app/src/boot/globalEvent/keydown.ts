@@ -287,7 +287,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !window.siyuan.config.readonly) {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             quickMakeCard(protyle, [protyle.title.element]);
         } else {
@@ -316,7 +316,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
             openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         });
@@ -593,7 +593,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     const pathString = liElements[0].getAttribute("data-path");
     const isFile = liElements[0].getAttribute("data-type") === "navigation-file";
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
         if (isFile) {
             const id = liElements[0].getAttribute("data-node-id");
             fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {

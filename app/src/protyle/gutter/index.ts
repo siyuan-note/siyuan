@@ -104,7 +104,7 @@ export class Gutter {
                     const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`)
                     if (gutterNodeElement) {
                         selectElements.forEach((item => {
-                           item.classList.remove("protyle-wysiwyg--select")
+                            item.classList.remove("protyle-wysiwyg--select")
                         }));
                         gutterNodeElement.classList.add("protyle-wysiwyg--select")
                         selectElements = [gutterNodeElement]
@@ -797,20 +797,21 @@ export class Gutter {
         }
         this.genAlign(selectsElement, protyle);
         this.genWidths(selectsElement, protyle);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.quickMakeCard,
-            accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-            iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
-            icon: "iconRiffCard",
-            click() {
-                quickMakeCard(protyle, selectsElement);
-            }
-        }).element);
-        if (window.siyuan.config.flashcard.deck) {
+        if (!window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.quickMakeCard,
+                accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+                iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
+                icon: "iconRiffCard",
+                click() {
+                    quickMakeCard(protyle, selectsElement);
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.addToDeck,
                 icon: "iconRiffCard",
+                ignore: !window.siyuan.config.flashcard.deck,
                 click() {
                     const ids: string[] = [];
                     selectsElement.forEach(item => {
@@ -1667,32 +1668,30 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.wechatReminder,
                 icon: "iconMp",
-                disabled: window.siyuan.config.readonly,
+                ignore: window.siyuan.config.readonly,
                 click() {
                     openWechatNotify(nodeElement);
                 }
             }).element);
         }
-        if (type !== "NodeThematicBreak") {
+        if (type !== "NodeThematicBreak" && !window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 icon: "iconRiffCard",
-                disabled: window.siyuan.config.readonly,
                 click() {
                     quickMakeCard(protyle, [nodeElement]);
                 }
             }).element);
-            if (window.siyuan.config.flashcard.deck) {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.addToDeck,
-                    icon: "iconRiffCard",
-                    click() {
-                        makeCard(protyle.app, [id]);
-                    }
-                }).element);
-            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.addToDeck,
+                ignore: !window.siyuan.config.flashcard.deck,
+                icon: "iconRiffCard",
+                click() {
+                    makeCard(protyle.app, [id]);
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
 

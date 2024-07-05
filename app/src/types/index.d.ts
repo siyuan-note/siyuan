@@ -702,6 +702,7 @@ interface IMenu {
     bind?: (element: HTMLElement) => void
     index?: number
     element?: HTMLElement
+    ignore?: boolean
 }
 
 interface IBazaarItem {

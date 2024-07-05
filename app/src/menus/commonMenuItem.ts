@@ -448,7 +448,6 @@ export const exportMd = (id: string) => {
             label: window.siyuan.languages.template,
             iconClass: "ft__error",
             icon: "iconMarkdown",
-            disabled: window.siyuan.config.readonly,
             click: async () => {
                 const result = await fetchSyncPost("/api/block/getRefText", {id: id});
 
@@ -508,9 +507,8 @@ export const exportMd = (id: string) => {
                                 });
                             });
                             return;
-                        } else if (response.code === 0) {
-                            showMessage(window.siyuan.languages.exportTplSucc);
                         }
+                        showMessage(window.siyuan.languages.exportTplSucc);
                     });
                     dialog.destroy();
                 });

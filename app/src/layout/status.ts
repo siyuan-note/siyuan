@@ -4,7 +4,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
 /// #if !BROWSER
-import { ipcRenderer } from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 /// #endif
 import {MenuItem} from "../menus/Menu";
@@ -64,16 +64,14 @@ export const initStatus = (isWindow = false) => {
                 }
                 window.siyuan.menus.menu.remove();
                 window.siyuan.menus.menu.element.setAttribute("data-name", "statusHelp");
-                if (!isIPad()) {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.userGuide,
-                        icon: "iconHelp",
-                        disabled: window.siyuan.config.readonly,
-                        click: () => {
-                            mountHelp();
-                        }
-                    }).element);
-                }
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.userGuide,
+                    icon: "iconHelp",
+                    ignore: isIPad() || window.siyuan.config.readonly,
+                    click: () => {
+                        mountHelp();
+                    }
+                }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.feedback,
                     icon: "iconFeedback",
@@ -198,7 +196,7 @@ export const renderStatusbarCounter = (stat: {
     imageCount: number,
     refCount: number
 }) => {
-    if(!stat) {
+    if (!stat) {
         return;
     }
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>

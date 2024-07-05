@@ -38,8 +38,6 @@ export class App {
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         /// #endif
         addBaseURL();
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript"),
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript"),
 
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
@@ -160,40 +158,24 @@ export class App {
         };
 
         fetchPost("/api/system/getConf", {}, async (response) => {
+            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
-
-            const promises = [
-                loadPlugins(this),
-                new Promise<void>(resolve => getLocalStorage(resolve)),
-                new Promise<void>(resolve => fetchGet(
-                    `/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`,
-                    (lauguages: IObject) => {
-                        window.siyuan.languages = lauguages;
-                        resolve();
-                    },
-                )),
-            ];
-
-            if (!window.siyuan.config.readonly) {
-                promises.push(new Promise<void>(resolve => {
+            await loadPlugins(this);
+            getLocalStorage(() => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
+                    window.siyuan.languages = lauguages;
+                    window.siyuan.menus = new Menus(this);
+                    bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        resolve();
+                        onGetConfig(response.data.start, this);
+                        account.onSetaccount();
+                        setTitle(window.siyuan.languages.siyuanNote);
+                        initMessage();
                     });
-                }));
-            }
-
-            await Promise.all(promises);
-
-            if (!window.siyuan.config.readonly) {
-                bootSync();
-            }
-
-            window.siyuan.menus = new Menus(this);
-            onGetConfig(response.data.start, this);
-            account.onSetaccount();
-            setTitle(window.siyuan.languages.siyuanNote);
-            initMessage();
+                });
+            });
         });
         setNoteBook();
         initBlockPopover(this);

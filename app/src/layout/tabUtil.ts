@@ -192,7 +192,7 @@ export const newCenterEmptyTab = (app: App) => {
         <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg>
         <span>${window.siyuan.languages.newNotebook}</span>
     </div>
-    <div class="b3-list-item${isIPad() ? " fn__none" : ""}" id="editorEmptyHelp">
+    <div class="b3-list-item${(isIPad() || window.siyuan.config.readonly) ? " fn__none" : ""}" id="editorEmptyHelp">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg>
         <span>${window.siyuan.languages.userGuide}</span>
     </div>

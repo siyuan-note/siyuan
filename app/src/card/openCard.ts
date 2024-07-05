@@ -672,6 +672,9 @@ const emitEvent = (app: App, card: ICard, type: string) => {
 };
 
 export const openCard = (app: App) => {
+    if (window.siyuan.config.readonly) {
+        return
+    }
     fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
         openCardByData(app, cardsResponse.data, "all");
     });

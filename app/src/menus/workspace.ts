@@ -391,25 +391,27 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     submenu
                 }).element);
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.riffCard,
-                type: "submenu",
-                icon: "iconRiffCard",
-                submenu: [{
-                    iconHTML: "",
-                    label: window.siyuan.languages.spaceRepetition,
-                    accelerator: window.siyuan.config.keymap.general.riffCard.custom,
-                    click: () => {
-                        openCard(app);
-                    }
-                }, {
-                    iconHTML: "",
-                    label: window.siyuan.languages.manage,
-                    click: () => {
-                        viewCards(app, "", window.siyuan.languages.all, "");
-                    }
-                }],
-            }).element);
+            if (!window.siyuan.config.readonly) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.riffCard,
+                    type: "submenu",
+                    icon: "iconRiffCard",
+                    submenu: [{
+                        iconHTML: "",
+                        label: window.siyuan.languages.spaceRepetition,
+                        accelerator: window.siyuan.config.keymap.general.riffCard.custom,
+                        click: () => {
+                            openCard(app);
+                        }
+                    }, {
+                        iconHTML: "",
+                        label: window.siyuan.languages.manage,
+                        click: () => {
+                            viewCards(app, "", window.siyuan.languages.all, "");
+                        }
+                    }],
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.recentDocs,
                 icon: "iconFile",
@@ -436,16 +438,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        if (!isIPad()) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.userGuide,
-                icon: "iconHelp",
-                disabled: window.siyuan.config.readonly,
-                click: () => {
-                    mountHelp();
-                }
-            }).element);
-        }
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.userGuide,
+            icon: "iconHelp",
+            ignore: isIPad() || window.siyuan.config.readonly,
+            click: () => {
+                mountHelp();
+            }
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.feedback,
             icon: "iconFeedback",

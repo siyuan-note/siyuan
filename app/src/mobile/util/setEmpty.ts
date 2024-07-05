@@ -32,7 +32,7 @@ export const setEmpty = (app: App) => {
 <div class="b3-list-item" id="emptyNewNotebook${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
-<div class="b3-list-item${isIPhone() ? " fn__none" : ""}" id="emptyHelp">
+<div class="b3-list-item${(isIPhone() || window.siyuan.config.readonly) ? " fn__none" : ""}" id="emptyHelp">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.userGuide}</span>
 </div>`;
     emptyElement.addEventListener("click", (event) => {

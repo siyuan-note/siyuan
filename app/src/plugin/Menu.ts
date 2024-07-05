@@ -34,7 +34,10 @@ export class Menu {
         return this.menu.addItem(option);
     }
 
-    addSeparator(index?: number) {
+    addSeparator(index?: number, ignore = false) {
+        if (ignore) {
+            return;
+        }
         if (this.isOpen) {
             return;
         }

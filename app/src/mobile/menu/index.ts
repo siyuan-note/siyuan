@@ -112,7 +112,7 @@ export const initRightMenu = (app: App) => {
         <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
     </div>
     <div class="b3-menu__separator"></div>
-    <div class="b3-menu__item${isIPhone() ? " fn__none" : ""}" id="menuHelp">
+    <div class="b3-menu__item${(isIPhone() || window.siyuan.config.readonly) ? " fn__none" : ""}" id="menuHelp">
         <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.userGuide}</span>
     </div>
     <a class="b3-menu__item" href="${"zh_CN" === window.siyuan.config.lang || "zh_CHT" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://liuyun.io/article/1686530886208"}" target="_blank">

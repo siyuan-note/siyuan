@@ -232,7 +232,7 @@ declare class Lute {
 
     public SetFootnotes(enable: boolean): void;
 
-    public SetLinkRef(enalbe: boolean): void;
+    public SetLinkRef(enable: boolean): void;
 
     public SetEmojiSite(emojiSite: string): void;
 

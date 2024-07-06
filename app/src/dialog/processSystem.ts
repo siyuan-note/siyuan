@@ -295,10 +295,10 @@ export const refreshFileTree = (cb?: () => void) => {
     setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
     fetchPost("/api/filetree/refreshFiletree", {}, () => {
         if (cb) {
-            cb()
+            cb();
         }
     });
-}
+};
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {

@@ -251,7 +251,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         if (previousElement) {
             if (previousElement.classList.contains("p") && getContenteditableElement(previousElement).textContent === "") {
                 // 空块向后删除时移除改块 https://github.com/siyuan-note/siyuan/issues/11732
-                const ppElement = getPreviousBlock(previousElement)
+                const ppElement = getPreviousBlock(previousElement);
                 transaction(protyle, [{
                     action: "delete",
                     id: previousElement.getAttribute("data-node-id"),

@@ -23,7 +23,6 @@ import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
-import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
@@ -90,24 +89,24 @@ export class Gutter {
                     selectElements.push(item);
                 });
             } else {
-                const gutterId = buttonElement.getAttribute("data-node-id")
+                const gutterId = buttonElement.getAttribute("data-node-id");
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let selectedIncludeGutter = false;
                 selectElements.forEach((item => {
-                    const itemId = item.getAttribute("data-node-id")
+                    const itemId = item.getAttribute("data-node-id");
                     if (itemId === gutterId) {
-                        selectedIncludeGutter = true
+                        selectedIncludeGutter = true;
                     }
                     selectIds.push(itemId);
-                }))
+                }));
                 if (!selectedIncludeGutter) {
-                    const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`)
+                    const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`);
                     if (gutterNodeElement) {
                         selectElements.forEach((item => {
-                            item.classList.remove("protyle-wysiwyg--select")
+                            item.classList.remove("protyle-wysiwyg--select");
                         }));
-                        gutterNodeElement.classList.add("protyle-wysiwyg--select")
-                        selectElements = [gutterNodeElement]
+                        gutterNodeElement.classList.add("protyle-wysiwyg--select");
+                        selectElements = [gutterNodeElement];
                         selectIds = [gutterId];
                     }
                 }

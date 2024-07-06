@@ -1182,7 +1182,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // h1 - h6 hotkey
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.paragraph.custom, event)) {
-            const selectsElement = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
+            const selectsElement = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length === 0) {
                 selectsElement.push(nodeElement);
             }

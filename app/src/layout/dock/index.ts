@@ -455,7 +455,7 @@ export class Dock {
             return;
         }
         // 关系图全屏不应该退出 & https://github.com/siyuan-note/siyuan/issues/11775
-        const fullscreenElement = this.layout.element.querySelector(".fullscreen")
+        const fullscreenElement = this.layout.element.querySelector(".fullscreen");
         if (fullscreenElement && fullscreenElement.clientHeight > 0) {
             return;
         }

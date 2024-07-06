@@ -379,7 +379,7 @@ export class Outline extends Model {
             if ((item.action === "update" || item.action === "insert") &&
                 (item.data.indexOf('data-type="NodeHeading"') > -1 || item.data.indexOf(`<div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"><wbr></div>`) > -1)) {
                 needReload = true;
-                return true
+                return true;
             } else if (item.action === "delete" || item.action === "move") {
                 needReload = true;
                 return true;

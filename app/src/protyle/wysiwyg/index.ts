@@ -750,7 +750,7 @@ export class WYSIWYG {
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
-            const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img")
+            const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img");
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select

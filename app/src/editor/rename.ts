@@ -139,10 +139,10 @@ export const renameAsset = (assetPath: string) => {
                 if (item.path === assetPath) {
                     item.parent.updateTitle(getDisplayName(response.data.newPath));
                 }
-            })
+            });
             getAllEditor().forEach(item => {
                 item.reload(false);
-            })
+            });
         });
     });
 };

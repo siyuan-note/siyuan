@@ -518,7 +518,7 @@ export const getEmojiDesc = (emoji: IEmojiItem) => {
         return emoji.description_ja_jp;
     }
     return emoji.description;
-}
+};
 
 
 export const getEmojiTitle = (index: number) => {

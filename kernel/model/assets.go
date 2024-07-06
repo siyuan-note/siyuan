@@ -762,7 +762,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	return
 }
 
-func RenameAsset(oldPath, newName string) (err error) {
+func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
@@ -781,7 +781,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 	}
 
 	newName = util.AssetName(newName + filepath.Ext(oldPath))
-	newPath := "assets/" + newName
+	newPath = "assets/" + newName
 	if err = filelock.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
@@ -842,7 +842,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 	}
 
 	IncSync()
-	util.ReloadUI()
 	return
 }
 

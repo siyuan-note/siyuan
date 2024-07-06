@@ -137,12 +137,14 @@ export const renameAsset = (assetPath: string) => {
         fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: inputElement.value}, (response) => {
             getAllModels().asset.forEach(item => {
                 if (item.path === assetPath) {
+                    item.path = response.data.newPath;
                     item.parent.updateTitle(getDisplayName(response.data.newPath));
                 }
             });
             getAllEditor().forEach(item => {
                 item.reload(false);
             });
+            dialog.destroy();
         });
     });
 };

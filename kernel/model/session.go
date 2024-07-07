@@ -324,9 +324,7 @@ func CheckAuth(c *gin.Context) {
 }
 
 func CheckAdminRole(c *gin.Context) {
-	if IsValidRole(GetGinContextRole(c), []Role{
-		RoleAdministrator,
-	}) {
+	if IsAdminRoleContext(c) {
 		c.Next()
 	} else {
 		c.AbortWithStatus(http.StatusForbidden)

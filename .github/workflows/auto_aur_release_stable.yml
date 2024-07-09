@@ -73,7 +73,7 @@ jobs:
           EOF
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.1
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
         with:
           pkgname: siyuan_stable
           pkgbuild: ./PKGBUILD
@@ -81,4 +81,4 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: Update AUR package
-          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
+          ssh_keyscan_types: rsa,ecdsa,ed25519

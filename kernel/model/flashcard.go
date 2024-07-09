@@ -1078,18 +1078,24 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 	var retNew, retOld []riff.Card
 
 	dues := deck.Dues()
-
-	var tmp []riff.Card
+	toChecks := map[string]riff.Card{}
 	for _, c := range dues {
 		if 0 < len(blockIDs) && !gulu.Str.Contains(c.BlockID(), blockIDs) {
 			continue
 		}
 
-		if !treenode.ExistBlockTree(c.BlockID()) {
-			continue
+		toChecks[c.BlockID()] = c
+	}
+	var toCheckBlockIDs []string
+	var tmp []riff.Card
+	for bID, _ := range toChecks {
+		toCheckBlockIDs = append(toCheckBlockIDs, bID)
+	}
+	checkResult := treenode.ExistBlockTrees(toCheckBlockIDs)
+	for bID, exists := range checkResult {
+		if exists {
+			tmp = append(tmp, toChecks[bID])
 		}
-
-		tmp = append(tmp, c)
 	}
 	dues = tmp
 

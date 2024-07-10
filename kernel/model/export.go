@@ -2243,26 +2243,29 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 						}
 					} else if av.KeyTypeMAsset == cell.Value.Type {
 						if nil != cell.Value.MAsset {
-							buf := &bytes.Buffer{}
 							for _, a := range cell.Value.MAsset {
 								if av.AssetTypeImage == a.Type {
-									buf.WriteString("![")
-									buf.WriteString(a.Name)
-									buf.WriteString("](")
-									buf.WriteString(a.Content)
-									buf.WriteString(") ")
+									img := &ast.Node{Type: ast.NodeImage}
+									img.AppendChild(&ast.Node{Type: ast.NodeBang})
+									img.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+									img.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(a.Name)})
+									img.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+									img.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+									img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
+									img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+									mdTableCell.AppendChild(img)
 								} else if av.AssetTypeFile == a.Type {
-									buf.WriteString("[")
-									buf.WriteString(a.Name)
-									buf.WriteString("](")
-									buf.WriteString(a.Content)
-									buf.WriteString(") ")
-								} else {
-									buf.WriteString(a.Content)
-									buf.WriteString(" ")
+									file := &ast.Node{Type: ast.NodeLink}
+									file.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+									file.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(a.Name)})
+									file.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+									file.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+									file.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
+									file.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+									mdTableCell.AppendChild(file)
 								}
 							}
-							val = strings.TrimSpace(buf.String())
+							continue
 						}
 					} else if av.KeyTypeLineNumber == cell.Value.Type {
 						val = strconv.Itoa(rowNum)

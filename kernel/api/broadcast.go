@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -42,11 +43,11 @@ broadcast create a broadcast channel WebSocket connection
 
 @param
 
-	query.channel: channel name
+- query.channel: channel name
 
 @example
 
-	ws://localhost:6806/ws/broadcast?channel=test
+	URL: "ws://localhost:6806/ws/broadcast?channel=test"
 */
 func broadcast(c *gin.Context) {
 	var (
@@ -54,39 +55,71 @@ func broadcast(c *gin.Context) {
 		broadcastChannel *melody.Melody
 	)
 
-	if _broadcastChannel, exist := BroadcastChannels.Load(channel); exist {
+	_broadcastChannel, exist := BroadcastChannels.Load(channel)
+	if exist {
 		// channel exists, use it
 		broadcastChannel = _broadcastChannel.(*melody.Melody)
-		subscribe(c, broadcastChannel, channel)
-	} else {
-		// channel not found, create a new one
-		broadcastChannel := melody.New()
-		broadcastChannel.Config.MaxMessageSize = 1024 * 1024 * 128 // 128 MiB
-		BroadcastChannels.Store(channel, broadcastChannel)
-		subscribe(c, broadcastChannel, channel)
+		if broadcastChannel.IsClosed() {
+			BroadcastChannels.Delete(channel)
+		} else {
+			subscribe(c, broadcastChannel, channel)
+			return
+		}
+	}
+	initialize(c, channel)
+}
 
-		// broadcast string message to other session
-		broadcastChannel.HandleMessage(func(s *melody.Session, msg []byte) {
-			broadcastChannel.BroadcastOthers(msg, s)
-		})
+// initialize initializes an broadcast session set
+func initialize(c *gin.Context, channel string) {
+	// channel not found, create a new one
+	broadcastChannel := melody.New()
+	broadcastChannel.Config.MaxMessageSize = 1024 * 1024 * 128 // 128 MiB
 
-		// broadcast binary message to other session
-		broadcastChannel.HandleMessageBinary(func(s *melody.Session, msg []byte) {
-			broadcastChannel.BroadcastBinaryOthers(msg, s)
-		})
+	// broadcast string message to other session
+	broadcastChannel.HandleMessage(func(s *melody.Session, msg []byte) {
+		broadcastChannel.BroadcastOthers(msg, s)
+	})
 
-		// recycling
-		broadcastChannel.HandleClose(func(s *melody.Session, status int, reason string) error {
-			channel := s.Keys["channel"].(string)
-			logging.LogInfof("close broadcast session in channel [%s] with status code %d: %s", channel, status, reason)
+	// broadcast binary message to other session
+	broadcastChannel.HandleMessageBinary(func(s *melody.Session, msg []byte) {
+		broadcastChannel.BroadcastBinaryOthers(msg, s)
+	})
 
-			count := broadcastChannel.Len()
-			if count == 0 {
-				BroadcastChannels.Delete(channel)
-				logging.LogInfof("dispose broadcast channel [%s]", channel)
+	// recycling
+	broadcastChannel.HandleClose(func(s *melody.Session, status int, reason string) error {
+		channel := s.Keys["channel"].(string)
+		logging.LogInfof("close broadcast session in channel [%s] with status code %d: %s", channel, status, reason)
+
+		count := broadcastChannel.Len()
+		if count == 0 {
+			BroadcastChannels.Delete(channel)
+			broadcastChannel.Close()
+			logging.LogInfof("dispose broadcast channel [%s]", channel)
+		}
+		return nil
+	})
+
+	for {
+		// Melody Initialization is an asynchronous process, so we need to wait for it to complete
+		if broadcastChannel.IsClosed() {
+			time.Sleep(1 * time.Nanosecond)
+		} else {
+			_broadcastChannel, loaded := BroadcastChannels.LoadOrStore(channel, broadcastChannel)
+			__broadcastChannel := _broadcastChannel.(*melody.Melody)
+			if loaded {
+				// channel exists
+				if __broadcastChannel.IsClosed() {
+					// channel is closed, replace it
+					BroadcastChannels.Store(channel, broadcastChannel)
+					__broadcastChannel = broadcastChannel
+				} else {
+					// channel is open, close the new one
+					broadcastChannel.Close()
+				}
 			}
-			return nil
-		})
+			subscribe(c, __broadcastChannel, channel)
+			break
+		}
 	}
 }
 
